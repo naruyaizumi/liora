@@ -1,0 +1,77 @@
+{
+  "name": "kayoko",
+  "version": "3.7.0",
+  "description": "Kayoko – Modern WhatsApp MD Bot. Copyright © 2024–2025 Naruya Izumi.",
+  "main": "index.js",
+  "type": "module",
+  "directories": {
+    "lib": "lib",
+    "plugins": "plugins"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Naruya Izumi",
+    "email": "sexystyle088@gmail.com",
+    "url": "https://github.com/naruyaizumi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naruyaizumi/liora.git"
+  },
+  "bugs": {
+    "url": "https://github.com/naruyaizumi/liora/issues"
+  },
+  "homepage": "https://github.com/naruyaizumi/liora#readme",
+  "keywords": [
+    "whatsapp",
+    "liora",
+    "bot"
+  ],
+  "funding": [
+    {
+      "type": "ko-fi",
+      "url": "https://ko-fi.com/naruyaizumi"
+    },
+    {
+      "type": "trakteer",
+      "url": "https://trakteer.id/naruyaizumi"
+    },
+    {
+      "type": "saweria",
+      "url": "https://saweria.co/naruyaizumi"
+    }
+  ],
+  "dependencies": {
+    "awesome-phonenumber": "^7.5.0",
+    "baileys": "github:Itsukichann/Baileys",
+    "canvas": "^3.1.2",
+    "chalk": "^5.4.1",
+    "cheerio": "^1.1.0",
+    "chess.js": "^1.4.0",
+    "day-canvas": "^10.0.5",
+    "emoji-unicode": "^2.0.2",
+    "file-type": "^21.0.0",
+    "https-proxy-agent": "^7.0.6",
+    "lowdb": "^7.0.1",
+    "mathjs": "^14.5.2",
+    "moment-timezone": "^0.6.0",
+    "node-cron": "^4.2.0",
+    "node-webpmux": "^3.2.1",
+    "pdf-lib": "^1.17.1",
+    "pino": "^9.7.0",
+    "sharp": "^0.34.2",
+    "similarity": "^1.2.1",
+    "ssh2": "^1.16.0",
+    "syntax-error": "^1.4.0",
+    "wa-sticker-js": "^1.0.7",
+    "ws": "^8.18.3",
+    "yargs": "^18.0.0",
+    "yt-search": "^2.13.1"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
