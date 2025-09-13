@@ -1,4 +1,4 @@
-name: ESLint
+name: 🍱 ESLint
 
 on:
   push:
@@ -12,14 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: 🔧 Setup Node.js
+      - name: 🍙 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24.x
           cache: 'yarn'
 
-      - name: 📦 Install Dependencies
+      - name: 🍜 Install Dependencies
         run: yarn install
 
-      - name: 🔍 Run ESLint
+      - name: 🍡 Run ESLint
         run: yarn eslint .
