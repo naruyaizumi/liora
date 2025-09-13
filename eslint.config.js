@@ -1,5 +1,7 @@
 export default [
   {
-    files: ["**/*.js"]
+    files: ["**/*.js"],
+    languageOptions: { ecmaVersion: "latest" },
+    rules: {}
   }
 ]
