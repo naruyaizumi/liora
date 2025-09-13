@@ -186,7 +186,9 @@ return ''
 }
 }
 
-let file = global.__filename(import.meta.url)
+let file = fileURLToPath(import.meta.url)
 watchFile(file, () => {
-console.log(chalk.cyan.bold("⚡ Update 'config.js' terdeteksi!"))
+unwatchFile(file)
+console.log(chalk.cyan("Update 'config.js'"))
+import(`${file}?update=${Date.now()}`)
 })
