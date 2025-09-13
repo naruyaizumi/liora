@@ -1,4 +1,4 @@
-name: Node.js CI
+name: 🍱 Node.js CI
 
 on:
   push:
@@ -15,20 +15,29 @@ jobs:
         node-version: [22.x, 23.x, 24.x]
 
     steps:
-      - name: 📥 Checkout Repository
+      - name: 🍙 Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 🔧 Setup Node.js ${{ matrix.node-version }}
+      - name: 🍜 Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
 
-      - name: 📦 Install Dependencies
+      - name: 🍡 Install Dependencies
         run: yarn install
 
-      - name: 🔍 Audit Dependencies
+      - name: 🍰 Audit Dependencies
         run: yarn audit || true
 
-      - name: 🧪 Run Tests
+      - name: 🍵 Check Unused Dependencies (depcheck)
+        run: npx depcheck || true
+
+      - name: 🍩 Check Outdated Dependencies (npm-check)
+        run: npx npm-check || true
+
+      - name: 🍕 Check for Updates (npm-check-updates)
+        run: npx npm-check-updates || true
+
+      - name: 🍧 Run Tests
         run: yarn test
