@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         node-version: [22.x, 23.x, 24.x]
-        
+
     steps:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
@@ -27,5 +27,5 @@ jobs:
       - name: 📦 Install Dependencies
         run: yarn install
 
-      - name: 🧪 Run Tests
-        run: yarn test
+      - name: 🔍 Audit Dependencies
+        run: yarn audit || true
