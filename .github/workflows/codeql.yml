@@ -10,7 +10,7 @@ on:
 
 jobs:
   analyze:
-    name: 🍜 Analyze JavaScript/TypeScript
+    name: 🍜 Analyze JavaScript
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,7 +28,7 @@ jobs:
       - name: 🍰 Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: javascript-typescript
+          languages: javascript
           queries: security-extended,security-and-quality
 
       - name: 🍔 Perform CodeQL Analysis
