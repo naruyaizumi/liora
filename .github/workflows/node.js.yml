@@ -29,3 +29,6 @@ jobs:
 
       - name: 🔍 Audit Dependencies
         run: yarn audit || true
+
+      - name: 🧪 Run Tests
+        run: yarn test
