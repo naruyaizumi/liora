@@ -11,4 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npx eslint . --ext .js
+
+      - name: 📦 Install Dependencies
+        run: yarn install
+
+      - name: 🔍 Run ESLint
+        run: npx eslint .
