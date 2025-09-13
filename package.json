@@ -9,7 +9,9 @@
     "plugins": "plugins"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "node test.js",
+    "test2": "nodemon index.js"
   },
   "license": "Apache-2.0",
   "author": {
