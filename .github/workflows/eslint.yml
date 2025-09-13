@@ -1,21 +1,14 @@
-export default {
-  env: {
-    browser: false,
-    es2021: true,
-    node: true
-  },
-  extends: [
-    "eslint:recommended"
-  ],
-  parserOptions: {
-    ecmaVersion: "latest",
-    sourceType: "module"
-  },
-  rules: {
-    semi: ["error", "never"],
-    quotes: ["error", "single"],
-    indent: ["error", 0],
-    "no-unused-vars": "warn",
-    "no-undef": "error"
-  }
-}
+name: ESLint
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npx eslint . --ext .js
