@@ -35,6 +35,13 @@
 
 We take security seriously. If you find any vulnerabilities, please report them responsibly by reading our full policy in [SECURITY.md](SECURITY.md).
 
+## 📌 Changelog
+
+This project follows [Semantic Versioning](https://semver.org/) to manage releases.  
+All new features, improvements, bug fixes, and deprecated changes are documented in detail.  
+
+You can track the full history of updates in [CHANGELOG.md](CHANGELOG.md).
+
 # ✨ Liora – WhatsApp MD Script
 
 🔐 **Secure. Modular. API-Powered.**
