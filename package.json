@@ -1,6 +1,6 @@
 {
   "name": "kayoko",
-  "version": "3.7.0",
+  "version": "3.7.1",
   "description": "Kayoko – Modern WhatsApp MD Bot. Copyright © 2024–2025 Naruya Izumi.",
   "main": "index.js",
   "type": "module",
@@ -72,11 +72,5 @@
   },
   "engines": {
     "node": ">=22.0.0"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.35.0",
-    "@eslint/json": "^0.13.2",
-    "eslint": "^9.35.0",
-    "globals": "^16.4.0"
   }
 }
