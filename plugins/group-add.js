@@ -1,23 +1,48 @@
-
-let handler = async (m, { conn, args, usedPrefix, command }) => {
-let numbers = args.filter(arg => arg.match(/^\d+$/)).map(num => num.replace(/[^0-9]/g, '') + '@s.whatsapp.net')
-if (!numbers.length) return m.reply(`🍡 *Contoh penggunaan: ${usedPrefix + command} 628xxxx 628xxxx*`)
-try {
-let res = await conn.groupParticipantsUpdate(m.chat, numbers, 'add')
-let success = res.filter(r => r.status === '200')
-let failed = res.filter(r => r.status !== '200')
-let msg = `🍓 *Tambah anggota selesai!*\n`
-if (success.length) msg += `🧁 Berhasil: ${success.map(u => '@' + u.jid.split('@')[0]).join(', ')}\n`
-if (failed.length) {
-let code = await conn.groupInviteCode(m.chat)
-msg += `🍩 Gagal: ${failed.map(u => '@' + u.jid.split('@')[0]).join(', ')}\n`
-msg += `🎟️ *Link invite: https://chat.whatsapp.com/${code}*`
+let handler = async (m, { conn, args, usedPrefix, command, participants }) => {
+let targets = []
+const getRealJid = (jid) => {
+if (jid.endsWith('@lid')) {
+let p = participants.find(u => u.lid === jid)
+return p?.id || jid
 }
-m.reply(msg.trim(), null, { mentions: numbers })
+return jid
+}
+for (let arg of args) {
+if (/^\d{5,}$/.test(arg)) {
+let jid = arg.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
+targets.push(getRealJid(jid))
+}
+}
+targets = [...new Set(targets)]
+if (!targets.length)
+return m.reply(`🍡 *Contoh penggunaan: ${usedPrefix + command} 628xxxx 628xxxx*`)
+let msg = `🍓 *Tambah anggota selesai!*\n`
+let inviteCode = await conn.groupInviteCode(m.chat)
+for (let target of targets) {
+try {
+let res = await conn.groupParticipantsUpdate(m.chat, [target], 'add')
+if (res[0]?.status === '200') {
+msg += `🧁 *Berhasil:* @${target.split('@')[0]}\n`
+} else {
+await conn.sendMessage(target, {
+groupInvite: {
+jid: m.chat,
+name: (await conn.groupMetadata(m.chat)).subject,
+caption: '📨 *Please join my WhatsApp group!*',
+code: inviteCode,
+expiration: 86400
+}
+})
+msg += `🍬 *Undangan terkirim ke:* @${target.split('@')[0]} *(akun private)*\n`
+}
 } catch (e) {
 console.error(e)
-m.reply('🍩 *Yahh gagal nambahin anggota... mungkin ada yang private atau nomornya salah~*')
+msg += `🍩 *Gagal:* @${target.split('@')[0]}\n`
 }
+await delay(1500)
+}
+
+m.reply(msg.trim(), null, { mentions: targets })
 }
 
 handler.help = ['add']
@@ -28,3 +53,5 @@ handler.botAdmin = true
 handler.admin = true
 
 export default handler
+
+const delay = ms => new Promise(res => setTimeout(res, ms))
