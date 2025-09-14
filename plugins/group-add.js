@@ -1,23 +1,17 @@
-let handler = async (m, { conn, args, usedPrefix, command, participants }) => {
+let handler = async (m, { conn, args, usedPrefix, command }) => {
 let targets = []
-const getRealJid = (jid) => {
-if (jid.endsWith('@lid')) {
-let p = participants.find(u => u.lid === jid)
-return p?.id || jid
-}
-return jid
-}
 for (let arg of args) {
 if (/^\d{5,}$/.test(arg)) {
 let jid = arg.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
-targets.push(getRealJid(jid))
+targets.push(jid)
 }
 }
 targets = [...new Set(targets)]
 if (!targets.length)
-return m.reply(`🍡 *Contoh penggunaan: ${usedPrefix + command} 628xxxx 628xxxx*`)
+return m.reply(`🍡 *Contoh penggunaan:* ${usedPrefix + command} 628xxxx 628xxxx`)
 let msg = `🍓 *Tambah anggota selesai!*\n`
 let inviteCode = await conn.groupInviteCode(m.chat)
+let groupMeta = await conn.groupMetadata(m.chat)
 for (let target of targets) {
 try {
 let res = await conn.groupParticipantsUpdate(m.chat, [target], 'add')
@@ -27,7 +21,7 @@ msg += `🧁 *Berhasil:* @${target.split('@')[0]}\n`
 await conn.sendMessage(target, {
 groupInvite: {
 jid: m.chat,
-name: (await conn.groupMetadata(m.chat)).subject,
+name: groupMeta.subject,
 caption: '📨 *Please join my WhatsApp group!*',
 code: inviteCode,
 expiration: 86400
@@ -41,7 +35,6 @@ msg += `🍩 *Gagal:* @${target.split('@')[0]}\n`
 }
 await delay(1500)
 }
-
 m.reply(msg.trim(), null, { mentions: targets })
 }
 

@@ -1,19 +1,12 @@
 let handler = async (m, { conn, text, usedPrefix, command, participants }) => {
 let targets = []
-const getRealJid = (jid) => {
-if (jid.endsWith('@lid')) {
-let p = participants.find(u => u.lid === jid)
-return p?.id || jid
-}
-return jid
-}
-if (m.mentionedJid.length) targets.push(...m.mentionedJid.map(j => getRealJid(j)))
-if (m.quoted && m.quoted.sender) targets.push(getRealJid(m.quoted.sender))
+if (m.mentionedJid.length) targets.push(...m.mentionedJid)
+if (m.quoted && m.quoted.sender) targets.push(m.quoted.sender)
 if (text) {
 for (let num of text.split(/\s+/)) {
 if (/^\d{5,}$/.test(num)) {
 let jid = num.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
-targets.push(getRealJid(jid))
+targets.push(jid)
 }
 }
 }
