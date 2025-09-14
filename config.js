@@ -42,7 +42,6 @@ logo: "https://",
     /*============= PAIRING =============*/
 pairingNumber: '123456',
 pairingAuth: true,
-multiAuth: true,
     /*============== API ==============*/
 APIs: {
 lol: 'https://api.lolhuman.xyz',
