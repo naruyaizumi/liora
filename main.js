@@ -5,24 +5,20 @@ import { createRequire } from "module"
 import path, { join } from 'path'
 import { fileURLToPath, pathToFileURL } from 'url'
 import { platform } from 'process'
-import fs from 'fs/promises'
-import { readdirSync, statSync, unlinkSync, existsSync, readFileSync, watch } from 'fs'
+import { readdirSync, unlinkSync, existsSync, readFileSync, watch } from 'fs'
 import yargs from 'yargs'
-import { spawn, execSync } from 'child_process'
 import syntaxerror from 'syntax-error'
 import chalk from 'chalk'
-import readline from 'readline'
 import P from 'pino'
-import { tmpdir } from 'os'
 import { format } from 'util'
 import { makeWASocket, protoType, serialize } from './lib/simple.js'
 import { JSONFilePreset } from 'lowdb/node'
 import { EventEmitter } from 'events'
-import os from 'os'
 import pkg from 'baileys'
-const { DisconnectReason, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, Browsers, useMultiFileAuthState, useSingleFileAuthState } = pkg
+const { DisconnectReason, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, Browsers, useMultiFileAuthState } = pkg
 EventEmitter.defaultMaxListeners = 0
 const pairingAuth = global.config.pairingAuth
+const pairingNumber = global.config.pairingNumber
 
 protoType()
 serialize()
@@ -44,9 +40,9 @@ global.API = (name, path = '/', query = {}, apikeyqueryname) => (name in global.
 global.timestamp = {
 start: new Date()
 }
-const __dirname = global.__dirname(import.meta.url)
+const ROOT = global.__dirname(import.meta.url)
 global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse())
-const db = await JSONFilePreset(path.join(__dirname, 'database.json'), {
+const db = await JSONFilePreset(path.join(ROOT, 'database.json'), {
 users: {},
 chats: {},
 stats: {},
@@ -60,41 +56,16 @@ await db.read()
 
 await loadDatabase()
 
-const question = (text) => {
-const rl = readline.createInterface({
-input: process.stdin,
-output: process.stdout
-})
-return new Promise((resolve) => {
-rl.question(text, (answer) => {
-rl.close()
-resolve(answer.trim())
-})
-})
-}
-
-async function loadAuthState() {
-let state, saveCreds
-if (global.config.multiAuth) {
-console.log('\n✨ Load Session from: MultiFile')
-;({ state, saveCreds } = await useMultiFileAuthState('./auth'))
-} else {
-console.log('\n✨ Load Session from: SingleFile')
-;({ state, saveCreds } = await useSingleFileAuthState('./auth.json'))
-}
-return { state, saveCreds }
-}
-
 async function IZUMI() {
-const { state, saveCreds } = await loadAuthState()
+const { state, saveCreds } = await useMultiFileAuthState('./auth')
 const { version: baileysVersion } = await fetchLatestBaileysVersion()
 console.log(chalk.cyan.bold(`
 ╭────────────────────────────────────╮
-│ 📡 Koneksi berhasil! 📡
+│ 📡  Baileys Initialization 📡
 │ ─────────────────────────────────
-│ 📡  Baileys : v${baileysVersion.join('.')}
-│ 📅  Tanggal : ${new Date().toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
-│ 🌐  Sistem : ${process.platform} CPU: ${process.arch}
+│ 📡  Baileys Version : v${baileysVersion.join('.')}
+│ 📅  Date : ${new Date().toLocaleDateString('en-US', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+│ 🌐  System : ${process.platform} CPU: ${process.arch}
 ╰────────────────────────────────────╯
 `))
 const connectionOptions = {
@@ -102,7 +73,6 @@ version: baileysVersion,
 logger: P({ level: 'silent' }),
 printQRInTerminal: !pairingAuth,
 browser: Browsers.ubuntu('Safari'),
-markOnlineOnConnect: true,
 emitOwnEvents: true,
 auth: {
 creds: state.creds,
@@ -116,22 +86,20 @@ global.conn = makeWASocket(connectionOptions)
 conn.isInit = false
 if (pairingAuth && !conn.authState.creds.registered) {
 setTimeout(async () => {
-let number = global.config.pairingNumber
-let code = await conn.requestPairingCode(number, conn.Pairing)
+let code = await conn.requestPairingCode(pairingNumber, conn.Pairing)
 code = code?.match(/.{1,4}/g)?.join("-") || code
 console.log(chalk.cyan.bold(`
 ╭────────────────────────────────────╮
-│ 🎉  Kode Pairing Siap Digunakan!  🎉
+│ 🎉  Pairing Code Ready to Use!  🎉
 │ ─────────────────────────────────
-│ 📲  Nomor kamu : ${chalk.white.bold(number)}
-│ 📄  Kode Pairing : ${chalk.white.bold(code)}
-│ 🕒  ${chalk.white.bold(new Date().toLocaleString())}
+│ 📲  Your Number    : ${chalk.white.bold(pairingNumber)}
+│ 📄  Pairing Code  : ${chalk.white.bold(code)}
+│ 🕒  Generated At  : ${chalk.white.bold(new Date().toLocaleString('en-US'))}
 ╰────────────────────────────────────╯
 `))
 }, 3000)
 }
 
-if (!opts['test']) {
 setInterval(async () => {
 if (global.db.data) await global.db.write().catch(console.error)
 }, 10 * 1000)
@@ -144,7 +112,6 @@ await resetSahamPrice()
 }, { scheduled: true, timezone: "Asia/Jakarta" })
 cron.schedule('0 */6 * * *', async () => {
 await Backup()
-await checkGrowGarden()
 await resetVolumeSaham()
 await resetVolumeCrypto()
 await clearTmp()
@@ -158,50 +125,35 @@ await OtakuNews()
 await checkSewa()
 await checkPremium()
 }, { scheduled: true, timezone: "Asia/Jakarta" })
-}
 
 async function connectionUpdate(update) {
-const { receivedPendingNotifications, connection, lastDisconnect, isOnline, isNewLogin } = update
-if (isNewLogin) conn.isInit = true
+const { connection, lastDisconnect } = update
 if (connection === 'connecting') {
-console.log(chalk.yellow.bold(`🚀  Mengaktifkan, Mohon tunggu sebentar`))
+console.log('🍜 Connecting...')
 }
-if (connection === "open") {
-console.log(chalk.cyan.bold(`⚡  Tersambung!  berhasil diaktifkan.`))
-}
-if (isOnline === false) {
-console.log(chalk.redBright.bold(`🔴  Status: Terputus!`))
-console.log(chalk.red.bold(`❌  Koneksi ke WhatsApp telah hilang.`))
-console.log(chalk.red.bold(`🚀  Mencoba menyambungkan kembali`))
-}
-if (receivedPendingNotifications) {
-console.log(chalk.cyan.bold(`📩  Status: Menunggu Pesan Baru`))
+if (connection === 'open') {
+console.log('🍕 Connected')
 }
 if (connection === 'close') {
-console.log(chalk.redBright.bold(`⚠️  Koneksi Terputus!`))
-console.log(chalk.red.bold(`📡  Mencoba Menyambung Ulang`))
-}
-global.timestamp.connect = new Date
-if (lastDisconnect && lastDisconnect.error) {
-const { statusCode } = lastDisconnect.error.output || {}
-if (statusCode !== DisconnectReason.loggedOut) {
+console.log('🍩 Disconnected, trying to reconnect...')
+if (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut) {
 await global.reloadHandler(true)
-console.log(chalk.redBright.bold(`🔌 Connecting`))
 }
 }
 if (global.db.data == null) await global.loadDatabase()
 }
+
 process.on('uncaughtException', console.error)
 let isInit = true
 let handler = await import('./handler.js')
-global.reloadHandler = async function (restatConn) {
+global.reloadHandler = async function (restartConn) {
 try {
 const Handler = await import(`./handler.js?update=${Date.now()}`).catch(console.error)
 if (Object.keys(Handler || {}).length) handler = Handler
 } catch (e) {
 console.error(e)
 }
-if (restatConn) {
+if (restartConn) {
 const oldChats = global.conn.chats
 try {
 global.conn.ws.close()
@@ -237,7 +189,7 @@ conn.ev.on('creds.update', conn.credsUpdate)
 isInit = false
 return true
 }
-const pluginFolder = global.__dirname(join(__dirname, './plugins/index'))
+const pluginFolder = global.__dirname(join(ROOT, './plugins/index'))
 const pluginFilter = filename => /\.js$/.test(filename)
 global.plugins = {}
 async function filesInit() {
@@ -257,12 +209,12 @@ global.reload = async (_ev, filename) => {
 if (pluginFilter(filename)) {
 let dir = global.__filename(join(pluginFolder, filename), true)
 if (filename in global.plugins) {
-if (existsSync(dir)) conn.logger.info(`🍃 Memuat ulang plugin '${filename}'`)
+if (existsSync(dir)) conn.logger.info(`🍃 Reloading plugin '${filename}'`)
 else {
-conn.logger.warn(`⚠️ Plugin '${filename}' telah dihapus`)
+conn.logger.warn(`⚠️ Plugin '${filename}' has been removed`)
 return delete global.plugins[filename]
 }
-} else conn.logger.info(`📢 Memuat plugin baru: '${filename}'`)
+} else conn.logger.info(`📢 Loading new plugin: '${filename}'`)
 let err = syntaxerror(readFileSync(dir), filename, {
 sourceType: 'module',
 allowAwaitOutsideFunction: true
@@ -280,7 +232,7 @@ try {
 const module = (await import(`${global.__filename(dir)}?update=${Date.now()}`))
 global.plugins[filename] = module.default || module
 } catch (e) {
-conn.logger.error(`❌ Terjadi kesalahan saat memuat plugin '${filename}'\n${format(e)}`)
+conn.logger.error(`❌ Error while loading plugin '${filename}'\n${format(e)}`)
 } finally {
 global.plugins = Object.fromEntries(Object.entries(global.plugins).sort(([a], [b]) => a.localeCompare(b)))
 }
