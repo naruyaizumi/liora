@@ -1,0 +1,41 @@
+name: 🍜 njsscan Security Scan
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 6 * * 0'
+
+permissions:
+  contents: read
+
+jobs:
+  njsscan:
+    runs-on: ubuntu-latest
+    name: 🍣 njsscan Code Scanning
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+    steps:
+      - name: 🍙 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🍤 Run njsscan
+        id: njsscan
+        uses: ajinabraham/njsscan-action@7237412fdd36af517e2745077cedbf9d6900d711
+        with:
+          args: > 
+            . --sarif --output results.sarif 
+            --recursive
+            --exit-warning
+            --exit-medium
+            --exit-high
+
+      - name: 🍰 Upload njsscan report
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
