@@ -4,184 +4,273 @@
 
 ![WhatsApp BOT](https://files.cloudkuimages.guru/images/HFiLkuUz.jpg)
 
-<!-- Project Badge -->
+<!-- Project & Social Badges -->
 <p align="center">
+  <!-- License -->
   <a href="https://www.apache.org/licenses/LICENSE-2.0">
-    <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"/>
+    <img src="https://img.shields.io/badge/License-Apache%202.0-0A66C2?style=for-the-badge&logo=apache&logoColor=white" alt="License"/>
   </a>
+  
+  <!-- Node.js Versions -->
   <a href="https://nodejs.org/en">
-    <img src="https://img.shields.io/badge/Node.js-v22%2B-brightgreen?logo=node.js" alt="Node.js"/>
+    <img src="https://img.shields.io/badge/Node.js-v22%20|%2023%20|%2024-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js"/>
   </a>
+
+  <!-- JavaScript ESM -->
+  <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">
+    <img src="https://img.shields.io/badge/JavaScript-ESM-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript"/>
+  </a>
+  
+  <!-- ESLint -->
+  <a href="https://eslint.org/">
+    <img src="https://img.shields.io/badge/ESLint-Linting-4B32C3?style=for-the-badge&logo=eslint&logoColor=white" alt="ESLint"/>
+  </a>
+
+  <!-- CodeQL -->
+  <a href="https://codeql.github.com/">
+    <img src="https://img.shields.io/badge/CodeQL-Analysis-2B2F77?style=for-the-badge&logo=github&logoColor=white" alt="CodeQL"/>
+  </a>
+
+  <!-- WhatsApp Channel -->
   <a href="https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03">
-    <img src="https://img.shields.io/badge/WhatsApp-Channel-brightgreen?logo=whatsapp" alt="WhatsApp Channel"/>
+    <img src="https://img.shields.io/badge/WhatsApp-Channel-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp Channel"/>
+  </a>
+
+  <!-- NPM -->
+  <a href="https://www.npmjs.com/">
+    <img src="https://img.shields.io/badge/NPM-Package-CB3837?style=for-the-badge&logo=npm&logoColor=white" alt="NPM"/>
+  </a>
+
+  <!-- Linux -->
+  <a href="https://www.linux.org/">
+    <img src="https://img.shields.io/badge/Linux-Server-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux"/>
+  </a>
+
+  <!-- Discord (Community Link) -->
+  <a href="https://discord.gg/Ujphasn5">
+    <img src="https://img.shields.io/badge/Discord-Community-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"/>
+  </a>
+
+  <!-- Instagram -->
+  <a href="https://instagram.com/naruyaizumi">
+    <img src="https://img.shields.io/badge/Instagram-@naruyaizumi-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram"/>
+  </a>
+
+  <!-- TikTok -->
+  <a href="https://tiktok.com/@naruyaizumi">
+    <img src="https://img.shields.io/badge/TikTok-@naruyaizumi-000000?style=for-the-badge&logo=tiktok&logoColor=white" alt="TikTok"/>
+  </a>
+
+  <!-- Telegram -->
+  <a href="https://t.me/naruyaizumi">
+    <img src="https://img.shields.io/badge/Telegram-@naruyaizumi-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram"/>
+  </a>
+
+  <!-- Spotify Playlist -->
+  <a href="https://open.spotify.com/playlist/0j68uRJvay44fmcTnbJGPS?si=_1SyqT43T52i2QybhZyhAQ" target="_blank">
+    <img src="https://img.shields.io/badge/Spotify-Izumi's%20Playlist-1DB954?style=for-the-badge&logo=spotify&logoColor=white" alt="Spotify Playlist" />
   </a>
 </p>
+
+---
+
+<!-- GitHub Stats -->
+<img src="https://github-readme-stats.vercel.app/api?username=naruyaizumi&show_icons=true&theme=tokyonight&hide_border=true&bg_color=0D1117" alt="GitHub stats" />
+<img src="https://github-readme-streak-stats.herokuapp.com/?user=naruyaizumi&theme=tokyonight&hide_border=true&background=0D1117" alt="GitHub streak" />
+
+<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=naruyaizumi&layout=compact&theme=tokyonight&hide_border=true&bg_color=0D1117" alt="Top languages" />
+
+<!-- GitHub Trophies -->
+<img src="https://github-profile-trophy.vercel.app/?username=naruyaizumi&theme=tokyonight&no-frame=true&margin-w=10&column=7" alt="GitHub Trophies" />
+
+<!-- Activity Graph -->
+<img src="https://github-readme-activity-graph.vercel.app/graph?username=naruyaizumi&theme=tokyo-night&bg_color=0D1117&hide_border=true" alt="GitHub Activity Graph" />
+
 </div>
 
 ## 📋 Table of Contents
 
-- [📖 Description](#-liora--whatsapp-md-script)
-- [📂 Key Features](#-key-features)
-- [🔥 Popular Features](#-popular-features)
-- [⚙️ Technical Details](#-technical-details)
-- [📞 Contact & Information](#-contact--information)
-- [🧱 Project Structure](#-project-structure)
-- [💝 Thanks & Credits](#-thanks--credits)
-- [📜 License](#-license)
-- [💖 Support](#-support)
-- [🌸 Arigatou Ne~](#-arigatou-ne)
+| No. | Section |
+|-----|---------|
+| 1. | [![Description](https://img.shields.io/badge/📖-Description-blue?style=for-the-badge)](#-liora--whatsapp-md-script) |
+| 2. | [![Key Features](https://img.shields.io/badge/📂-Key_Features-green?style=for-the-badge)](#-key-features) |
+| 3. | [![Popular Features](https://img.shields.io/badge/🔥-Popular-orange?style=for-the-badge)](#-popular-features) |
+| 4. | [![Technical Details](https://img.shields.io/badge/⚙️-Technical-purple?style=for-the-badge)](#-technical-details) |
+| 5. | [![Contact](https://img.shields.io/badge/📞-Contact-grey?style=for-the-badge)](#-contact--information) |
+| 6. | [![Project Structure](https://img.shields.io/badge/🧱-Structure-yellow?style=for-the-badge)](#-project-structure) |
+| 7. | [![Thanks](https://img.shields.io/badge/💝-Thanks-pink?style=for-the-badge)](#-thanks--credits) |
+| 8. | [![License](https://img.shields.io/badge/📜-License-0A66C2?style=for-the-badge)](#-license) |
+| 9. | [![Support](https://img.shields.io/badge/💖-Support-red?style=for-the-badge)](#-support) |
+| 10. | [![Arigatou](https://img.shields.io/badge/🌸-Arigatou-ff69b4?style=for-the-badge)](#-arigatou-ne) |
 
 ## 🛡️ Security Policy
 
-We take security seriously. If you find any vulnerabilities, please report them responsibly by reading our full policy in [SECURITY.md](SECURITY.md).
+[![Security](https://img.shields.io/badge/Report-Security_Issue-red?style=for-the-badge&logo=github&logoColor=white)](SECURITY.md)
+
+We take security seriously.  
+If you discover a vulnerability or bug, please report it **responsibly** through our [Security Policy](SECURITY.md) instead of posting it publicly.
 
 ## 📌 Changelog
 
+[![Keep a Changelog](https://img.shields.io/badge/Keep%20a-Changelog-%230A66C2?style=for-the-badge&logo=none)](https://keepachangelog.com/)
+[![Semantic Versioning](https://img.shields.io/badge/SemVer-2.0.0-blue?style=for-the-badge&logo=semver&logoColor=white)](https://semver.org/)
+[![GitHub release](https://img.shields.io/github/v/release/naruyaizumi/liora?style=for-the-badge&logo=github)](https://github.com/naruyaizumi/liora/releases)
+
 This project follows [Semantic Versioning](https://semver.org/) to manage releases.  
-All new features, improvements, bug fixes, and deprecated changes are documented in detail.  
+All new features, improvements, bug fixes, and deprecated changes are documented in detail in [CHANGELOG.md](CHANGELOG.md).
 
-You can track the full history of updates in [CHANGELOG.md](CHANGELOG.md).
+---
 
-# ✨ Liora – WhatsApp MD Script
+# ✨ Liora – WhatsApp BOT MD Script
 
-🔐 **Secure. Modular. API-Powered.**
-💡 Designed for developers, resellers, and advanced WhatsApp bot users who want stability, speed, and a clean code structure.
+⚡ **Fast. Modular. API-Powered.**  
+🌍 **Open-Source. Flexible. Developer-Friendly.**  
+🔧 **Clean Code. Easy to Extend. Community-Driven.**
+
+Liora is a WhatsApp Multi-Device bot script built for everyone — from curious learners to professional developers.  
+It provides a **solid foundation** with a modular architecture, making it easy to customize, extend, and scale.  
+
+Designed with performance and clarity in mind, Liora empowers you to build bots that are:  
+- 🚀 **Lightweight & Fast** → optimized for speed and stability  
+- 🧩 **Modular & Extensible** → add or remove features with ease  
+- 📡 **API-Ready** → connect with external services or your own logic  
+- 💡 **Developer-Friendly** → clean structure, well-documented, and open for contributions  
+
+Whether you want to **experiment, learn, or deploy a production bot**, Liora is here as your reliable starting point.
 
 ## 📁 Key Features
 
-- **Full Source** — No encrypted or locked parts.
-- **Modular** — Each feature is standalone and easy to modify.
-- **Lightweight** — The size is approximately ±400MB, including dependencies.
-- **Modern JavaScript** — Uses standard ES Modules (ESM).
-- **Node.js v22+** — Compatible with Node.js version 22 and above.
-- **Minimal Dependencies** — Optimized for deployment on low-spec VPS.
-- **Easy Deployment** — Compatible with PM2 and Pterodactyl-based environments.
-
+- 🔓 **Full Open Source** — 100% transparent, no obfuscation or locked code.  
+- 🧩 **Modular Architecture** — every feature is standalone, simple to add, remove, or customize.  
+- ⚡ **Lightweight Build** — only ~400MB with dependencies, optimized for performance.  
+- 📜 **Modern JavaScript (ESM)** — clean codebase with ES Modules for clarity and compatibility.  
+- 🟢 **Node.js v22+ Ready** — built to run on the latest Node.js (22, 23, 24).  
+- 📦 **Minimal Dependencies** — deploy smoothly even on low-spec VPS.  
+- 🚀 **Easy Deployment** — works seamlessly with PM2, Pterodactyl, or your favorite process manager.
 
 ## 🎯 Popular Features
 
-- Multi-platform media downloader.
-- Interactive formats.
-- AI tools.
-- Group moderation.
-- Community fun.
-- Server tools.
+- 🎥 **Media Downloader** — fetch videos, audio, and files from multiple platforms.  
+- 💬 **Interactive Commands** — menus, buttons, and reactions for better UX.  
+- 🤖 **AI Integrations** — connect with AI tools for smarter automation.  
+- 🛡️ **Group Moderation** — tools for admins to manage communities easily.  
+- 🎉 **Fun & Community Tools** — games, memes, and social interactions.  
+- 🖥️ **Server Utilities** — system info, monitoring, and useful admin commands.
 
 ## 🔍 Technical Details
 
-| Info        | Value                     |
-|-------------|---------------------------|
-| Script Name | `Liora`          |
-| Framework   | `@itsukichan/baileys`     |
-| Runtime     | `Node.js v24.x.x`         |
-| License     | Apache License 2.0        |
-
-## 🔗 Contact & Information
-
-- 🌐 **Link Bio**: [naruyaizumi](https://linkbio.co/naruyaizumi)
-
-For technical questions, bug reports, or feedback, you can contact us directly via WhatsApp or Instagram DM.
-
-We also have an active community group and an official updates channel 💌✨
+| Info            | Value                              |
+|-----------------|------------------------------------|
+| Script Name     | `Liora`                            |
+| Framework       | [`@itsukichann/baileys`](https://github.com/Itsukichann/Baileys) |
+| Language        | JavaScript (ES Modules)            |
+| Runtime         | Node.js v22 / v23 / v24            |
+| Package Manager | npm / yarn / pnpm                  |
+| License         | Apache License 2.0                 |
 
 ## 📁 Project Structure
 
-This is the main directory structure of **Liora** and its description:
+This is the main directory structure of **Liora** with updated descriptions:
 
-| Location / File           | Description                                                                  |
-|---------------------------|------------------------------------------------------------------------------|
-| `lib/`                    | A collection of internal libraries: leveling, converter, logs, game tools, etc. |
-| `plugins/`                | The directory for all bot commands/plugins (~800+ plugins)                   |
-| `src/`                    | Additional assets such as images and fonts for media features                |
-| `tmp/`                    | A folder for temporary media buffer storage                                  |
-| `config.js`               | The main bot configuration (prefix, session name, etc.)                      |
-| `database.json`           | A local JSON-based database file                                             |
-| `handler.js`              | The main handler for loading plugins and message routing                     |
-| `index.js`                | The main entry point, typically for PM2 starters                             |
-| `LICENSE`                 | The project license (Apache 2.0 / Proprietary)                               |
-| `main.js`                 | The initial boot file loaded before the handler                              |
-| `package.json`            | Project metadata and a list of dependencies                                  |
+| Location / File       | Description |
+|-----------------------|-------------|
+| `.github/workflows/`  | GitHub Actions workflows for CI/CD (e.g. CodeQL, tests, etc). |
+| `json/`               | Local JSON data storage (used like a local fetch API). |
+| `lib/`                | Utilities and helper functions (converter, logs, leveling, tools, etc). |
+| `plugins/`            | All bot features/commands are stored here (~800+ plugins). |
+| `src/`                | Static assets such as fonts and template papers for the writing feature. |
+| `tmp/`                | Temporary media buffer storage. |
+| `config.js`           | Main bot configuration (prefix, session name, API keys, etc). |
+| `handler.js`          | Core handler: initializes database, processes plugins, auto-reload, and defines global variables. |
+| `main.js`             | Startup script: initializes bot and connects to Baileys. |
+| `index.js`            | Parent process: spawns `main.js` as child process, useful for restarts/reloads. |
+| `test.js`             | Test file for workflows and CI. |
+| `package.json`        | Project metadata and dependencies. |
+| `LICENSE`             | Project license (Apache 2.0). |
+| `README.md`           | Project documentation. |
+| `SECURITY.md`         | Security policy and vulnerability disclosure guidelines. |
+| `CHANGELOG.md`        | Version history and updates log. |
 
 ## 💝 Thanks & Credits
 
-The following parties have been instrumental in the development and continuity of this project:
+We sincerely thank the following parties who have been instrumental in the development and continuity of **Liora**:
 
-### 🧩 Partnership & Ownership
+### 🧩 Authors & Contributors
+<p align="center">
+  <a href="https://linkbio.co/naruyaizumi"><img src="https://img.shields.io/badge/Author-Naruya%20Izumi-0A66C2?style=for-the-badge&logo=github&logoColor=white" /></a>
+  <a href="https://wa.me/6281398961382"><img src="https://img.shields.io/badge/Co--Author-SXZnightmar-FF4500?style=for-the-badge&logo=whatsapp&logoColor=white" /></a>
+  <a href="https://wa.me/6289665362039"><img src="https://img.shields.io/badge/Co--Author-Ryo%20Akira-32CD32?style=for-the-badge&logo=whatsapp&logoColor=white" /></a>
+</p>
 
-- 🧑‍💻 **Author**: 𝑵𝒂𝒓𝒖𝒚𝒂 𝑰𝒛𝒖𝒎𝒊 — [Social Media](https://linkbio.co/naruyaizumi)  
-- 🧠 **Co-Author**: 𝑺𝑿𝒁𝒏𝒊𝒈𝒉𝒕𝒎𝒂𝒓 — [WhatsApp](https://wa.me/6281398961382)
-- 🧠 **Co-Author**: 𝑹𝒚𝒐 𝑨𝒌𝒊𝒓𝒂 — [WhatsApp](https://wa.me/6289665362039)
-
-### 📦 Library & Framework
-
-- 🧩 [`@itsukichan/baileys`](https://www.npmjs.com/package/@itsukichan/baileys)
-  The main foundation for real-time communication based on the WhatsApp Web API (a modified version).
-
-- 💡 **Base Source: `RyHar`**
-  The initial modular structure and logical approach that became the bot's foundation.
-
-- ❤️ **Open Source Dependencies**
-  Thank you to all open-source communities & contributors on GitHub 🌐
+### 📦 Libraries & Frameworks
+- 🧩 [`@itsukichann/baileys`](https://github.com/Itsukichann/Baileys) — main foundation for WhatsApp Web API.  
+- 💡 **Base Source: `RyHar`** — inspiration for modular structure and logic.  
+- ❤️ **Open Source Dependencies** — to all GitHub contributors and communities 🌐.  
 
 ### 🌐 Public API Providers
+- 🔐 [BetaBotz API](https://api.betabotz.eu.org)  
+- 🐾 [Nekolabs API](https://nekolabs.my.id)  
+- 🌈 [CloudKuImages](https://cloudkuimages.guru)  
+- 🎯 [LolHuman API](https://api.lolhuman.xyz)  
+- 📚 and many other public API providers.  
 
-- 🔐 [BetaBotz API](https://api.betabotz.eu.org)
-- 🐾 [Nekolabs API](https://nekolabs.my.id)
-- 🌈 [CloudKuImages](https://cloudkuimages.guru)
-- 🎯 [LolHuman API](https://api.lolhuman.xyz)
-- 📚 and various other public API providers...
-
-### 🤖 AI Assistant Integration
-
-- 🤖 OpenAI ChatGPT
-- 🌟 Google Gemini AI
-
-Used in the debugging, refactoring, and performance optimization processes of the bot.
+### 🤖 AI Assistance
+<p align="center">
+  <img src="https://img.shields.io/badge/OpenAI-ChatGPT-412991?style=for-the-badge&logo=openai&logoColor=white" />
+  <img src="https://img.shields.io/badge/Google-Gemini-4285F4?style=for-the-badge&logo=google&logoColor=white" />
+  <img src="https://img.shields.io/badge/GitHub-Copilot-181717?style=for-the-badge&logo=github&logoColor=white" />
+  <img src="https://img.shields.io/badge/Blackbox%20AI-000000?style=for-the-badge&logo=github&logoColor=white" />
+</p>
 
 ### 🛡️ Environment & Deployment
+| Category          | Tools / Platforms |
+|-------------------|-------------------|
+| **Runtime**       | Node.js v22 / v23 / v24 |
+| **Language**      | JavaScript (ESM) |
+| **Package Manager** | npm / pnpm / yarn |
+| **Process Manager** | PM2 / Pterodactyl |
+| **VPS**           | Hostinger, DigitalOcean, etc. |
 
-- 🛠️ Runtime: Node.js v24.x.x
-- 📦 Package Manager: `pnpm` / `npm`
-- ☁️ VPS: Hostinger, DigitalOcean, etc.
-- 🧳 File Transfer: Termius (SFTP)
-- 🔧 Process Manager: PM2
-
-### ❤️ Personal Acknowledgement
-
-A huge thank you to:
-
-- 🙏 God Almighty — for all the ease and strength during the development process.
-- 👪 Parents — for their unwavering moral support and encouragement.
-- 🌍 All users, buyers, and the developer community — for their trust and contributions to the project's journey.
-
+### ❤️ Personal Acknowledgements
+- 🙏 God Almighty — for all blessings and guidance.  
+- 👪 Parents & Family — for moral support and encouragement.  
+- 🌍 Community & Users — for trust, feedback, and continuous contributions.
+  
 ## 📜 License
 
-This project is licensed under the **Apache License 2.0**.
+This project is licensed under the **Apache License 2.0** — see the [LICENSE](LICENSE) file for details.  
 
-You are permitted to use, modify, and distribute this project —
-**as long as proper credit is given** to all contributors and original authors listed above.
-
-Unauthorized resale, rebranding, or claim of ownership without permission
-is strictly **prohibited** and may result in legal action.
+Please remember to give proper **credit to contributors** and **do not rebrand or resell** this project as your own.
 
 ## 💖 Support
-If you find this project helpful, you can support me here:
 
-[<img src="https://www.ko-fi.com/img/githubbutton_sm.svg" height="35" alt="Ko-fi" >](https://ko-fi.com/naruyaizumi)
+If you find this project helpful, consider supporting me here:  
 
-* [Trakteer](https://trakteer.id/naruyaizumi)
-* [Saweria](https://saweria.co/naruyaizumi)
+<p align="center">
+  <a href="https://ko-fi.com/naruyaizumi">
+    <img src="https://img.shields.io/badge/Ko--fi-Support-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white" />
+  </a>
+  <a href="https://trakteer.id/naruyaizumi">
+    <img src="https://img.shields.io/badge/Trakteer-Donate-E31E24?style=for-the-badge&logo=buymeacoffee&logoColor=white" />
+  </a>
+  <a href="https://saweria.co/naruyaizumi">
+    <img src="https://img.shields.io/badge/Saweria-Donate-FF9E0F?style=for-the-badge&logo=githubsponsors&logoColor=white" />
+  </a>
+</p>
 
 _Your support is greatly appreciated and helps me continue my work. Thank you!_ ❤️
 
 ## 🌸 Arigatou ne~!
 
-You've reached the end of the documentation~
-Hopefully, all the features and functions you've read about can be useful for your project~
-If anything is still confusing, feel free to join the WhatsApp group to ask questions~ 🫶🏻✨
+You've reached the end of the documentation ✨  
+Hopefully everything you've read here can be useful for your projects and experiments 🫶🏻  
 
-> 📖 This documentation was written out of boredom, coding enthusiasm, and a reminder to not forget to eat 🍓
+If something is still unclear, feel free to connect through our community and socials 💬  
 
-📬 Developer Contact: [WhatsApp](https://wa.me/31629155460) • [Instagram](https://instagram.com/naruyaizumi)
+> 📖 This documentation was written out of **coding enthusiasm**, **open-source spirit**, and as a gentle reminder: *don’t forget to eat* 🍓  
 
-✨ Powered by: `IZUMI` 🦄
+---
+
+<p align="center">
+  ✨ Powered by <b>IZUMI</b> 🦄
+</p>
