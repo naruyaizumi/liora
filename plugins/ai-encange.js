@@ -50,7 +50,17 @@ type: 1
 break
 case "process_completed":
 if (msg.success) {
-const resultUrl = `https://oss-global.pixnova.ai/${msg.output.result[0]}`
+// Validate the result file name to prevent SSRF/path traversal
+const resultFile = msg.output.result[0];
+if (
+  typeof resultFile !== "string" ||
+  !/^[a-zA-Z0-9_\-]+\.(png|jpg|jpeg)$/i.test(resultFile)
+) {
+  m.reply('💢 *Gagal memproses gambar: respons server AI tidak valid.*')
+  ws.close()
+  return
+}
+const resultUrl = `https://oss-global.pixnova.ai/${resultFile}`
 const resultRes = await fetch(resultUrl)
 const resultBuffer = Buffer.from(await resultRes.arrayBuffer())
 await conn.sendMessage(m.chat, {
