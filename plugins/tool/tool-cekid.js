@@ -1,17 +1,24 @@
 let handler = async (m, { conn, args }) => {
 let text = args[0]
-if (!text || !text.includes('whatsapp.com')) return m.reply('🍰 *Masukkan link grup atau saluran WhatsApp dulu ya~*')
-let isGroup = text.includes("chat.whatsapp.com")
-let isChannel = text.includes("whatsapp.com/channel/")
-let id, name
+if (!text) return m.reply('🍰 *Masukkan link grup atau saluran WhatsApp dulu ya~*')
+let url
+try {
+url = new URL(text)
+} catch {
+return m.reply('🍰 *Masukkan link grup atau saluran WhatsApp yang valid ya~*')
+}
+
+let isGroup = (url.hostname === "chat.whatsapp.com") && url.pathname.match(/^\/[A-Za-z0-9]{20,}$/)
+let isChannel = (url.hostname === "whatsapp.com") && url.pathname.startsWith("/channel/")
+let id, name, code
 try {
 if (isGroup) {
-let code = text.split("chat.whatsapp.com/")[1]
+code = url.pathname.replace(/^\/+/, '')
 let res = await conn.groupGetInviteInfo(code)
 id = res.id
 name = res.subject
 } else if (isChannel) {
-let code = text.split("whatsapp.com/channel/")[1].split('?')[0]
+code = url.pathname.split('/channel/')[1]?.split('/')[0]
 let res = await conn.newsletterMetadata('invite', code, 'GUEST')
 id = res.id
 name = res.name
