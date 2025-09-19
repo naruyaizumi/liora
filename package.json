@@ -30,5 +30,10 @@
     "wa-sticker-js": "^1.0.7",
     "yargs": "^18.0.0",
     "yt-search": "^2.13.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "eslint": "^9.35.0",
+    "globals": "^16.4.0"
   }
 }
