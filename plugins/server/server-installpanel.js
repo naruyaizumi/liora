@@ -32,8 +32,14 @@ handler.mods = true
 export default handler
 
 function generatePassword(length = 4) {
-const chars = "0123456789"
-return Array.from(crypto.randomBytes(length))
-.map(byte => chars[byte % chars.length])
-.join("")
+    const chars = "0123456789";
+    const charsLen = chars.length;
+    let password = "";
+    while (password.length < length) {
+        const byte = crypto.randomBytes(1)[0];
+        // Only accept bytes less than (256 - 256 % charsLen) to avoid modulo bias
+        if (byte >= Math.floor(256 / charsLen) * charsLen) continue;
+        password += chars[byte % charsLen];
+    }
+    return password;
 }
