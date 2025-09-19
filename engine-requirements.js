@@ -1,4 +1,4 @@
-import { execSync, exec } from "child_process"
+import { spawn, execSync } from "child_process"
 import process from "process"
 import chalk from "chalk"
 import "./config.js"
@@ -15,23 +15,23 @@ return false
 const nodeVersion = process.versions.node
 const major = parseInt(nodeVersion.split(".")[0])
 const nodeOk = major >= 22
-const ffmpegOk = checkCommand("ffmpeg", "FFmpeg")
-const convertOk = checkCommand("convert", "ImageMagick")
+const ffmpegOk = checkCommand("ffmpeg")
+const convertOk = checkCommand("convert")
 const pairingOk = !!global.config?.pairingNumber
 console.log(chalk.cyan.bold(`
-╭────────────────────────────────╮
+╭───────────────────────────────╮
 │ 🍩 IZUMI BOT ENGINE CHECKER 🍓
-│ ───────────────────────────────
-│ 🍰 Node.js     : ${nodeOk ? "OK v" + nodeVersion : "FAILED (" + nodeVersion + ")"}
-│ 🍬 FFmpeg      : ${ffmpegOk ? "OK" : "FAILED"}
-│ 🍪 ImageMagick : ${convertOk ? "OK" : "FAILED"}
-│ 🎀 Pairing Num : ${pairingOk ? global.config.pairingNumber : "FAILED"}
-╰────────────────────────────────╯
+│ ──────────────────────────────
+│ 🍰 Node.js     : ${nodeOk ? chalk.green("OK v" + nodeVersion) : chalk.red("FAILED (" + nodeVersion + ")")}
+│ 🍬 FFmpeg      : ${ffmpegOk ? chalk.green("OK") : chalk.red("FAILED")}
+│ 🍪 ImageMagick : ${convertOk ? chalk.green("OK") : chalk.red("FAILED")}
+│ 🎀 Pairing Num : ${pairingOk ? chalk.green(global.config.pairingNumber) : chalk.red("FAILED")}
+╰───────────────────────────────╯
 `))
 if (!nodeOk || !ffmpegOk || !convertOk || !pairingOk) {
 process.exit(1)
 }
-exec("node index.js", (err, stdout, stderr) => {
-if (err) console.error(`Error: ${stderr}`)
-else console.log(stdout)
+const child = spawn("node", ["index.js"], { stdio: "inherit" })
+child.on("close", (code) => {
+console.log(chalk.yellow(`⚠️ Process exited with code ${code}`))
 })
