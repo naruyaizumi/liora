@@ -1,0 +1,34 @@
+{
+  "name": "liora",
+  "version": "4.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "start": "node ./engine-requirements.js",
+    "test": "node test.js"
+  },
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Naruya Izumi",
+    "email": "sexystyle088@gmail.com",
+    "url": "https://linkbio.co/naruyaizumi"
+  },
+  "dependencies": {
+    "awesome-phonenumber": "^7.5.0",
+    "baileys": "github:naruyaizumi/baileys",
+    "chalk": "^5.6.2",
+    "cheerio": "^1.1.2",
+    "file-type": "^21.0.0",
+    "lowdb": "^7.0.1",
+    "node-cron": "^4.2.1",
+    "node-webpmux": "^3.2.1",
+    "pino": "^9.10.0",
+    "ssh2": "^1.17.0",
+    "syntax-error": "^1.4.0",
+    "wa-sticker-js": "^1.0.7",
+    "yargs": "^18.0.0",
+    "yt-search": "^2.13.1"
+  }
+}
