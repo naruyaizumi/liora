@@ -88,20 +88,23 @@
 
 </div>
 
+---
+
 ## 📋 Table of Contents
 
-| No. | Section |
-|-----|---------|
-| 1. | [![Description](https://img.shields.io/badge/📖-Description-blue?style=for-the-badge)](#-liora--whatsapp-md-script) |
-| 2. | [![Key Features](https://img.shields.io/badge/📂-Key_Features-green?style=for-the-badge)](#-key-features) |
-| 3. | [![Popular Features](https://img.shields.io/badge/🔥-Popular-orange?style=for-the-badge)](#-popular-features) |
-| 4. | [![Technical Details](https://img.shields.io/badge/⚙️-Technical-purple?style=for-the-badge)](#-technical-details) |
-| 5. | [![Contact](https://img.shields.io/badge/📞-Contact-grey?style=for-the-badge)](#-contact--information) |
-| 6. | [![Project Structure](https://img.shields.io/badge/🧱-Structure-yellow?style=for-the-badge)](#-project-structure) |
-| 7. | [![Thanks](https://img.shields.io/badge/💝-Thanks-pink?style=for-the-badge)](#-thanks--credits) |
-| 8. | [![License](https://img.shields.io/badge/📜-License-0A66C2?style=for-the-badge)](#-license) |
-| 9. | [![Support](https://img.shields.io/badge/💖-Support-red?style=for-the-badge)](#-support) |
-| 10. | [![Arigatou](https://img.shields.io/badge/🌸-Arigatou-ff69b4?style=for-the-badge)](#-arigatou-ne) |
+| No. | Section | Description |
+|-----|----------|-------------|
+| 1. | [![Description](https://img.shields.io/badge/📖-Description-blue?style=for-the-badge)](#-liora--whatsapp-md-script) | General overview of the project |
+| 2. | [![Key Features](https://img.shields.io/badge/📂-Key_Features-green?style=for-the-badge)](#-key-features) | Core features included in the bot |
+| 3. | [![Popular Features](https://img.shields.io/badge/🔥-Popular-orange?style=for-the-badge)](#-popular-features) | Frequently used features loved by users |
+| 4. | [![Technical Details](https://img.shields.io/badge/⚙️-Technical-purple?style=for-the-badge)](#-technical-details) | Node.js version, dependencies, and setup details |
+| 5. | [![Contact](https://img.shields.io/badge/📞-Contact-9cf?style=for-the-badge)](#-contact--information) | How to reach the developers/maintainers |
+| 6. | [![Project Structure](https://img.shields.io/badge/🧱-Structure-yellow?style=for-the-badge)](#-project-structure) | Explanation of folders and files in the repo |
+| 7. | [![API Key & Whitelist IP](https://img.shields.io/badge/🔐-API_Whitelist-lightblue?style=for-the-badge)](#-setting-api-key--whitelist-ip---betabotz) | Guide for securing API access with whitelisted IPs |
+| 8. | [![Thanks](https://img.shields.io/badge/💝-Thanks-pink?style=for-the-badge)](#-thanks--credits) | Acknowledgements and contributors |
+| 9. | [![License](https://img.shields.io/badge/📜-License-0A66C2?style=for-the-badge)](#-license) | License information (Apache, MIT, etc.) |
+| 10. | [![Support](https://img.shields.io/badge/💖-Support-red?style=for-the-badge)](#-support) | Ways to support the project |
+| 11. | [![Arigatou](https://img.shields.io/badge/🌸-Arigatou-ff69b4?style=for-the-badge)](#-arigatou-ne) | Gratitude and final words |
 
 ## 🛡️ Security Policy
 
@@ -189,6 +192,73 @@ This is the main directory structure of **Liora** with updated descriptions:
 | `README.md`           | Project documentation. |
 | `SECURITY.md`         | Security policy and vulnerability disclosure guidelines. |
 | `CHANGELOG.md`        | Version history and updates log. |
+
+## 🔐 Setting API Key & Whitelist IP - BetaBotz
+
+📌 **Getting Started:**
+1. Visit: [api.betabotz.eu.org](https://api.betabotz.eu.org)  
+2. Log in to your account (Use your registered phone number + email)
+
+### 🔑 Obtain Your API Key
+
+1. Go to the **Profile** menu  
+2. Copy the `Apikey` value — Example: `liora`
+
+### 🌐 Whitelist IP (Required for API Access)
+
+To enable IP address protection so only specific IPs can access your API, follow these 5 simple steps:
+
+---
+
+### 🧭 Step 1 – Go to Dashboard
+![1](https://files.catbox.moe/l0j028.jpg)  
+Log in to your account at [Betabotz Dashboard](https://betabotz.eu.org), then click the **profile icon** in the top-right corner.
+
+---
+
+### 🧭 Step 2 – Open Settings
+![2](https://files.catbox.moe/8rgwhf.jpg)  
+Scroll down, find the **Settings** section, then click the **Choose an option** dropdown.
+
+---
+
+### 🧭 Step 3 – Select “Whitelist IP”
+![3](https://files.catbox.moe/o7y7xk.jpg)  
+From the available options, select **Whitelist IP** (located at the bottom).
+
+---
+
+### 🧭 Step 4 – Enter Your IP Address
+![4](https://files.catbox.moe/j5rj89.jpg)  
+Fill in the field with your VPS IP address. The format must be valid, for example: `192.168.1.1`.  
+📌 *You can add up to 5 IP addresses.*
+
+---
+
+### 🧭 Step 5 – Click "Add to Whitelist"
+![5](https://files.catbox.moe/qfddyc.jpg)  
+Once filled in, click the green **Add to Whitelist** button.  
+If successful, you will see this notification:  
+> ✅ *IP successfully added to whitelist*
+
+---
+
+### ✨ Tips:
+- Check your VPS IP with: `curl ifconfig.me`  
+- Maximum allowed: **5 IP addresses**  
+- To add more than 5 IPs, please contact the BetaBotz admin.  
+- IPv4 format example: `103.145.13.42`  
+- If your server uses **IPv6**, use the format:  
+  `2401:db00:3020:xxxx:xxxx:xxxx:xxxx:xxxx`
+
+#### Detect your VPS IP:
+```bash
+# Get IPv4
+curl -s ipv4.icanhazip.com
+
+# Get IPv6
+curl -s ipv6.icanhazip.com
+```
 
 ## 💝 Thanks & Credits
 
