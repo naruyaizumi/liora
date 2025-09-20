@@ -1,5 +1,6 @@
 import { execSync } from 'child_process'
 import os from 'os'
+import fs from 'fs'
 
 function formatSize(bytes) {
 if (!bytes || isNaN(bytes)) return '0 B'
@@ -55,7 +56,7 @@ return { model, cores }
 
 function getRAMInfo() {
 try {
-let meminfo = execSync('cat /proc/meminfo').toString().split('\n').reduce((acc, line) => {
+let meminfo = fs.readFileSync('/proc/meminfo').toString().split('\n').reduce((acc, line) => {
 let [key, value] = line.split(':')
 if (key && value) acc[key.trim()] = parseInt(value.trim())
 return acc
