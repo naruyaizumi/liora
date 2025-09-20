@@ -3,7 +3,7 @@ if (!args[0]) return m.reply(`🍜 *Masukkan URL TikTok yang valid!*\n🍣 *Cont
 const rawUrl = args[0]
 const isTikTok = /^https?:\/\/(www\.)?(vm\.|vt\.|m\.)?tiktok\.com\/.+/i.test(rawUrl)
 if (!isTikTok) return m.reply("🍩 *URL tidak valid! Harap masukkan link TikTok yang benar.*")
-const url = /^https?:\/\/vm\.tiktok\.com/.test(rawUrl) ? await resolveTikTokUrl(rawUrl) : rawUrl
+const url = /^https?:\/\/vm\.tiktok\.com(\/|$)/.test(rawUrl) ? await resolveTikTokUrl(rawUrl) : rawUrl
 try {
 await global.loading(m, conn)
 const cekSlide = await fetch(global.API("btz", "/api/download/ttslide", { url }, "apikey"))
