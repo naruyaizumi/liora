@@ -1,7 +1,14 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
 if (!args[0]) return m.reply(`🍔 *Masukkan link video Xvideos untuk diunduh!*\n\n🍱 *Contoh: ${usedPrefix + command} https://www.xvideos.com/...*\n\n⚠️ *WARNING: This feature contains 18+ NSFW content*`)
 let url = args[0]
-if (!url.includes("xvideos.com")) return m.reply("🍟 *Link tidak valid!*")
+let hostname
+try {
+    hostname = new URL(url).hostname
+} catch {
+    return m.reply("🍟 *Link tidak valid!*")
+}
+// Only allow xvideos.com or its subdomains
+if (!(hostname === "xvideos.com" || hostname.endsWith(".xvideos.com"))) return m.reply("🍟 *Link tidak valid!*")
 await global.loading(m, conn)
 try {
 let apiUrl = global.API("btz", "/api/download/xvideosdl", { url }, "apikey")
