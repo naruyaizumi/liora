@@ -35,7 +35,7 @@ return { botUptime, vpsUptime }
 
 function getOSPrettyName() {
 try {
-let lines = execSync('cat /etc/os-release').toString().split('\n')
+let lines = fs.readFileSync('/etc/os-release').toString().split('\n')
 let info = lines.reduce((acc, line) => {
 let [key, val] = line.split('=')
 if (key && val) acc[key.trim()] = val.replace(/"/g, '')
