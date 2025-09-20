@@ -1,6 +1,13 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
 if (!args[0]) return m.reply(`🍱 *Please provide a valid XNXX video link!*\n\n🍜 *Example:*\n${usedPrefix + command} https://www.xnxx.com/video-xxxx`)
-if (!args[0].includes("xnxx.com")) return m.reply("🍟 *Invalid link! Please enter a valid XNXX link.*")
+let allowedHosts = [ "xnxx.com", "www.xnxx.com" ];
+let host;
+try {
+  host = (new URL(args[0])).hostname;
+} catch {
+  return m.reply("🍟 *Invalid link! Please enter a valid XNXX link.*");
+}
+if (!allowedHosts.includes(host)) return m.reply("🍟 *Invalid link! Please enter a valid XNXX link.*");
 await global.loading(m, conn)
 try {
 // TODO: API is still under maintenance, replace logic below once it's fixed
