@@ -1,0 +1,57 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# npm
+package-lock.json
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# yarn
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.yarn-integrity
+
+# pnpm
+pnpm-lock.yaml
+.pnpm-debug.log
+.pnpm-store/
+.pnpm-workspace.yaml
+
+# turbo / nx
+.turbo/
+nx.json
+project.json
+
+# testing
+coverage/
+*.lcov
+
+# production
+dist/
+build/
+out/
+*.log
+
+# misc
+.DS_Store
+Thumbs.db
+.env
+.env.local
+.env.*.local
+
+# vscode / editor
+.vscode/
+.idea/
+*.swp
+
+# project specific
+auth/
+database.json
+
+# env
+.env
