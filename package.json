@@ -1,6 +1,6 @@
 {
     "name": "liora",
-    "version": "4.0.1",
+    "version": "4.0.2",
     "type": "module",
     "engines": {
         "node": ">=22.0.0"
@@ -31,6 +31,7 @@
         "pino": "^9.11.0",
         "ssh2": "^1.17.0",
         "syntax-error": "^1.4.0",
+        "unzipper": "^0.12.3",
         "wa-sticker-js": "^1.0.7",
         "yargs": "^18.0.0",
         "yt-search": "^2.13.1"
