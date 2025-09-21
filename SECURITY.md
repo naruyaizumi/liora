@@ -6,8 +6,8 @@ We are committed to maintaining the security of this project by providing regula
 
 | Version |     Supported      |
 | :------ | :----------------: |
-| 3.7.x   | :white_check_mark: |
-| < 3.7   |        :x:         |
+| 4.0.x   | :white_check_mark: |
+| < 3.x   |        :x:         |
 
 ## Reporting a Vulnerability
 
