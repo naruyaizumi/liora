@@ -1,14 +1,13 @@
 import { execSync } from "child_process"
 
 let handler = async (m, { conn, args }) => {
-  let msg = args.join(" ") || `[!] AUTO PUSH: 🍧 Sinkronisasi otomatis ~ Liora`
+  let msg = args.join(" ") || `AUTO PUSH: 🍧 Sinkronisasi otomatis ~ Liora`
   try {
     if (!global.config?.PAT_TOKEN) {
       return m.reply("🍩 *PAT_TOKEN belum diatur di global.config!* 💔")
     }
     let remoteUrl = `https://x-access-token:${global.config.PAT_TOKEN}@github.com/naruyaizumi/liora.git`
     execSync(`git remote set-url origin ${remoteUrl}`)
-    execSync("git update-index --skip-worktree .env || true")
     execSync("git add -A")
     try {
       execSync(`git commit -m "${msg}"`)
@@ -23,7 +22,7 @@ let handler = async (m, { conn, args }) => {
       contextInfo: {
         externalAdReply: {
           title: "Push Sukses! 🍫",
-          body: msg,
+          body: global.config.author,
           thumbnailUrl: "https://files.cloudkuimages.guru/images/7ad6423e2075.jpg",
           sourceUrl: global.config.website,
           mediaType: 1,
