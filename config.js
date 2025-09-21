@@ -23,7 +23,7 @@
 import "dotenv/config";
 
 global.config = {
-    # ===== DEVELOPER MODE =====
+    /*========== DEVELOPER MODE ==========*/
     DEVELOPER: process.env.IS_IZUMI === "true"
 
     /*============== STAFF ==============*/
