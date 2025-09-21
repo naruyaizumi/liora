@@ -13,7 +13,7 @@ let handler = async (m, { conn, args }) => {
     try { execSync(`git commit -m \"${msg}\"`) } catch {
     return m.reply("🍰 *Tidak ada perubahan file untuk di-commit* ✨")
     }
-    execSync("git push origin main --force", { stdio: "inherit" })
+    execSync("git push -f origin main", { stdio: "inherit" })
 
     let user = os.userInfo().username
     await conn.sendMessage(m.chat, {
