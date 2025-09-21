@@ -8,16 +8,22 @@ let handler = async (m, { conn, args }) => {
       return m.reply("🍩 *PAT_TOKEN belum diatur di global.config!* 💔")
     }
     let remoteUrl = `https://x-access-token:${global.config.PAT_TOKEN}@github.com/naruyaizumi/liora.git`
+    execSync(`git remote set-url origin ${remoteUrl}`)
     execSync("git add -A")
-    execSync(`git commit -m "${msg}" || echo 'skip'`)
-    execSync("git push origin main")
-
+    try {
+      execSync(`git commit -m "${msg}"`)
+    } catch (e) {
+      return m.reply("🍰 *Tidak ada perubahan file untuk di-commit* ✨")
+    }
+    execSync("git push origin main", { stdio: "inherit" })
+    execSync("git remote set-url origin https://github.com/naruyaizumi/liora.git")
+    
     let user = os.userInfo().username
     await conn.sendMessage(m.chat, {
-      text: `🍬 *Push manis ke GitHub sukses!*\n🩷 *Commit: ${msg}*\n🧁 *User: ${user}*\n🍦 Semua sudah rapi* 💖`,
+      text: `🍬 *Push manis ke GitHub sukses!*\n🧁 *Commit: ${msg}*\n🍦 *User: ${user}*`,
       contextInfo: {
         externalAdReply: {
-          title: "Push Sukses! 🍫",
+          title: "Push Sukses! 🍡",
           body: msg,
           thumbnailUrl: "https://files.cloudkuimages.guru/images/7ad6423e2075.jpg",
           sourceUrl: global.config.website,
@@ -26,6 +32,7 @@ let handler = async (m, { conn, args }) => {
         }
       }
     }, { quoted: m })
+
   } catch (err) {
     await m.reply(`🍫 *Push gagal:* \n\`\`\`${err.message}\`\`\``)
   }
