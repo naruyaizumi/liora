@@ -23,6 +23,9 @@
 import "dotenv/config";
 
 global.config = {
+    # ===== DEVELOPER MODE =====
+    DEVELOPER: process.env.IS_IZUMI === "true"
+
     /*============== STAFF ==============*/
     owner: [
         ["6283143663697", "𝑵𝒂𝒓𝒖𝒚𝒂 𝑰𝒛𝒖𝒎𝒊", true],
