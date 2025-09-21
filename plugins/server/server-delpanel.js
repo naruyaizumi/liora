@@ -1,4 +1,4 @@
-import { deletePanelUser } from "../lib/server.js";
+import { deletePanelUser } from "../../lib/server.js";
 
 let handler = async (m, { args, conn }) => {
     const userId = args[0];

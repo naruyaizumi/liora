@@ -1,12 +1,12 @@
 {
     "name": "liora",
-    "version": "4.0.0",
+    "version": "4.0.1",
     "type": "module",
     "engines": {
         "node": ">=22.0.0"
     },
     "scripts": {
-        "start": "node ./engine-requirements.js",
+        "start": "node index.js",
         "test": "node test.js",
         "lint": "eslint .",
         "prettier": "prettier --check .",

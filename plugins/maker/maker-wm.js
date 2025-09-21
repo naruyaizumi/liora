@@ -1,4 +1,4 @@
-import { sticker, addExif, mp4ToWebp } from "../lib/sticker.js";
+import { sticker, addExif, mp4ToWebp } from "../../lib/sticker.js";
 
 let handler = async (m, { conn, text }) => {
     let q = m.quoted ? m.quoted : m;

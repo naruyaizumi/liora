@@ -1,34 +1,3 @@
-## Version 3.7.0 — 2025-09-13
-
-### `Added`
-
-- Officially appears in the next update release cycle.
-
-### `Removed`
-
-- Deprecated features have been removed as they are no longer functional.
-
-### `Fixed`
-
-- Improved reliability for **message sending**.
-- Corrected issues with **LID mentions**.
-- Resolved several **API-related bugs** to ensure better stability.
-
-## Version 3.7.1 — 2025-09-14 (Patch Update)
-
-### `Added`
-
-- _(No new features in this patch update)._
-
-### `Removed`
-
-- Several non-essential features have been removed to simplify the project.
-
-### `Fixed`
-
-- Improved stability of **exec commands (1–3)**.
-- Corrected functionality of **add, kick, promote, and demote** group management commands.
-
 ## Version 4.0.0 — 2025-09-19 (Major Update)
 
 ### `Added`
@@ -75,3 +44,15 @@
 - Fixed `ERR_INVALID_ARG_TYPE` issues.
 - Optimized **broadcast** & **hidetag** with better filtering logic.
 - Dependency optimizations & bug fixes.
+
+## Version 4.0.1 — 2025-09-21 (Patch Update)
+
+### `Added`
+- Automatic **self-update system** (auto check & pull updates).
+
+### `Removed`
+- _(No features removed in this patch update)._
+
+### `Fixed`
+- Improved **MP3 handling**.
+- Fixed **PTT (Push-to-Talk / voice notes)** reliability.

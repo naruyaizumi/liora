@@ -1,4 +1,4 @@
-import { sticker } from "../lib/sticker.js";
+import { sticker } from "../../lib/sticker.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     try {
