@@ -45,7 +45,7 @@
 - Optimized **broadcast** & **hidetag** with better filtering logic.
 - Dependency optimizations & bug fixes.
 
-## Version 4.0.1 — 2025-09-21 (Patch Update)
+## Version 4.0.3 — 2025-09-21 (Patch Update)
 
 ### `Added`
 - Automatic **self-update system** (auto check & pull updates).
