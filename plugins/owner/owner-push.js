@@ -15,7 +15,7 @@ let handler = async (m, { conn, args }) => {
       return m.reply("🍰 *Tidak ada perubahan file untuk di-commit* ✨")
     }
 
-    execSync("git push origin main", { stdio: "inherit" })
+    execSync("git push -f origin main", { stdio: "inherit" })
 
     await conn.sendMessage(m.chat, {
       text: `🍬 *Push ke GitHub sukses!* 🎀\n🩷 *Commit:${msg}*`,
