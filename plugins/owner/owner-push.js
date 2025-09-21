@@ -1,8 +1,7 @@
 import { execSync } from "child_process"
-import os from "os"
 
 let handler = async (m, { conn, args }) => {
-  let msg = args.join(" ") || `[!] AUTO PUSH: 🍧 Sinkronisasi otomatis berhasil dijalankan ~ Liora`
+  let msg = args.join(" ") || `AUTO PUSH: 🍧 Liora Bot`
   try {
     if (!global.config?.PAT_TOKEN) {
       return m.reply("🍩 *PAT_TOKEN belum diatur di global.config!* 💔")
@@ -15,9 +14,8 @@ let handler = async (m, { conn, args }) => {
     }
     execSync("git push -f origin main", { stdio: "inherit" })
 
-    let user = os.userInfo().username
     await conn.sendMessage(m.chat, {
-      text: `🍬 *Push ke GitHub sukses!* 🎀\n🩷 *Commit: ${msg}*\n🧁 *User: ${user}*`,
+      text: `🍬 *Push ke GitHub sukses!* 🎀\n🩷 *Commit: ${msg}*`,
       contextInfo: {
         externalAdReply: {
           title: "Push Sukses! 🍫",
