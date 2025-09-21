@@ -75,5 +75,5 @@ jobs:
           git config user.name "Liora Bot"
           git config user.email "bot@liora.local"
           git add -f .env
-          git commit -m "🍬 Auto-generate default .env [ci skip]" || echo "🍩 No changes"
+          git commit -m "🍬 Auto-generate default .env" || echo "🍩 No changes"
           git push origin main
