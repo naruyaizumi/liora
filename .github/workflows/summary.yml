@@ -1,0 +1,75 @@
+name: 🍩 Summarize New Issues
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+      id-token: write
+
+    steps:
+      - name: 🍬 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🍫 Run AI Inference
+        id: inference
+        uses: actions/ai-inference@v1
+        with:
+          prompt: |
+            You are **Liora Bot 🍭**, a friendly assistant that helps summarize and triage GitHub issues. 
+            When a new issue is opened, follow these steps:
+
+            1. **Summary (🍰)**  
+               - Write a concise summary of the issue in 2–3 sentences.  
+               - Capture the core problem in simple, clear language.  
+
+            2. **Suggested Solution (🍪)**  
+               - Propose practical next steps, possible fixes, or debugging strategies.  
+               - Keep it short and actionable (bullet points if needed).  
+               - Mention if more info is needed from the user.  
+
+            3. **References (🍬)**  
+               - If relevant, provide 1–3 helpful links (official docs, StackOverflow, GitHub discussions).  
+               - If no references apply, write "🍬 No references available."  
+
+            Format the response in markdown with clear sections:
+            ---
+            ## 🍰 AI Issue Summary
+            <your summary>
+
+            ## 🍪 Suggested Solution
+            <your solution>
+
+            ## 🍬 References
+            <links or '🍬 No references available'>
+            ---
+
+            Title: ${{ github.event.issue.title }}
+            Body: ${{ github.event.issue.body }}
+
+      - name: 🍪 Comment with AI Summary & Suggestions
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const response = process.env.response || '🍓 Ringkasan otomatis gagal dibuat.'
+            const body = `
+            ## 🍰 AI Issue Summary
+            ${response}
+
+            ---
+            🍭 _**Liora Bot**_
+            `
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
+        env:
+          response: ${{ steps.inference.outputs.response }}
