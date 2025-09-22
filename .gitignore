@@ -4,10 +4,10 @@ node_modules/
 .pnp.js
 
 # npm
-package-lock.json
 npm-debug.log
-yarn-debug.log
+package-lock.json
 yarn-error.log
+yarn-debug.log
 
 # yarn
 .yarn/cache
@@ -15,6 +15,7 @@ yarn-error.log
 .yarn/build-state.yml
 .yarn/install-state.gz
 .yarn-integrity
+yarn.lock
 
 # pnpm
 pnpm-lock.yaml
@@ -40,8 +41,9 @@ out/
 # misc
 .DS_Store
 Thumbs.db
+
+# env files
 .env
-.env.local
 .env.*.local
 
 # vscode / editor
@@ -53,5 +55,10 @@ Thumbs.db
 auth/
 database.json
 
-# env
-.env
+# prettier
+.prettierignore
+.prettierrc
+.prettierrc.json
+
+# workflows
+.github/
