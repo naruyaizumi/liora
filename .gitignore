@@ -5,7 +5,6 @@ node_modules/
 
 # npm
 npm-debug.log
-package-lock.json
 yarn-error.log
 yarn-debug.log
 
@@ -15,7 +14,6 @@ yarn-debug.log
 .yarn/build-state.yml
 .yarn/install-state.gz
 .yarn-integrity
-yarn.lock
 
 # pnpm
 pnpm-lock.yaml
