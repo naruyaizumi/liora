@@ -1,43 +1,65 @@
 # Security Policy
 
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/naruyaizumi/liora?style=for-the-badge&color=ff4dd2&label=Latest%20Release)
+
+We are committed to keeping **Liora WhatsApp Bot** safe and reliable.  
+Thank you for helping us protect the project and its users.
+
+---
+
 ## Supported Versions
 
-We are committed to maintaining the security of this project by providing regular security updates for the following supported versions.
+| Version   | Supported        |
+| :-------- | :--------------: |
+| Latest    | Fully Supported |
+| Previous  | Limited Fixes  |
+| Older     | Unsupported    |
 
-| Version |     Supported      |
-| :------ | :----------------: |
-| 4.0.x   | :white_check_mark: |
-| < 3.x   |        :x:         |
+---
 
 ## Reporting a Vulnerability
 
-We sincerely appreciate your efforts in keeping this project secure. If you discover a security vulnerability, we urge you to report it to us privately and responsibly before any public disclosure.
+If you discover a vulnerability, **please report it privately**.  
+Do not disclose it publicly until a patch has been released.
 
-### How to Report a Vulnerability
+**Contact**  
+- Email: `sexystyle088@gmail.com`  
+- WhatsApp: [+31 6 29155460](https://wa.me/31629155460)  
 
-To report a security issue, please send an email or a WhatsApp message to our dedicated security contact.
+When reporting, please include:  
+- Clear description of the issue  
+- Steps to reproduce (PoC if possible)  
+- Bot version you are using  
+- Relevant logs, screenshots, or snippets  
 
-- **Email:** sexystyle088@gmail.com
-- **WhatsApp:** [+31 6 29155460](https://wa.me/31629155460)
+---
 
-In your report, please provide as much detail as possible, including:
+## Safe Harbor
 
-- A clear, concise description of the vulnerability.
-- Step-by-step instructions or a proof-of-concept (PoC) to reproduce the issue.
-- The version of the bot you are using.
-- Any relevant logs, screenshots, or code snippets.
+We appreciate security researchers who report responsibly.  
+As long as you follow these guidelines, we consider your actions within safe harbor:
 
-### Our Response Policy
+- Do not exploit more than necessary to prove the issue  
+- Do not impact other users or production data  
+- Report directly and privately to us  
+- Allow reasonable time for us to fix before disclosure  
 
-Upon receiving a report, our team will follow these steps:
+You will be **credited** in release notes unless you request anonymity.
 
-1.  **Acknowledge Receipt:** We will send a confirmation within **24-48 hours** that your report has been received.
-2.  **Assessment:** We will verify the vulnerability and its potential impact.
-3.  **Remediation:** If the vulnerability is confirmed, we will work to develop a fix as quickly as possible.
-4.  **Notification:** We will inform you once the fix has been released and provide details on how it was addressed.
+---
 
-We will publicly credit the reporter after the fix is released, unless you prefer to remain anonymous.
+## Out of Scope
 
-**Please do not disclose the vulnerability publicly until a patch has been released.**
+The following are **not considered vulnerabilities**:
 
-Thank you for your cooperation in helping us keep this project safe and secure.
+- User-side misconfiguration (e.g., wrong `.env` setup)
+- Errors caused by outdated dependencies not used in production
+- Denial of Service (DoS) via spam/flooding
+- Social engineering or phishing attempts against maintainers
+- Issues already publicly known or documented
+
+---
+
+> [!CAUTION]  
+> Please **do not disclose vulnerabilities publicly** until a patch is released.  
+> This ensures safety and stability for all users.
