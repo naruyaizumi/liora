@@ -3,11 +3,6 @@ import { execSync } from "child_process"
 let handler = async (m, { conn, args }) => {
   let msg = args.join(" ") || `AUTO PUSH: 🍧 Sinkronisasi otomatis ~ Liora`
   try {
-    if (!global.config?.PAT_TOKEN) {
-      return m.reply("🍩 *PAT_TOKEN belum diatur di global.config!* 💔")
-    }
-    let remoteUrl = `https://x-access-token:${global.config.PAT_TOKEN}@github.com/naruyaizumi/liora.git`
-    execSync(`git remote set-url origin ${remoteUrl}`)
     execSync("git add -A")
     execSync(`git config user.name "🩷 Liora Bot"`)
     execSync(`git config user.email "liora@bot"`)
@@ -17,10 +12,10 @@ let handler = async (m, { conn, args }) => {
       return m.reply("🍰 *Tidak ada perubahan file untuk di-commit* ✨")
     }
 
-    execSync("git push -f origin main", { stdio: "inherit" })
+    execSync("git push origin main", { stdio: "inherit" })
 
     await conn.sendMessage(m.chat, {
-      text: `🍬 *Push ke GitHub sukses!* 🎀\n🩷 *Commit:${msg}*`,
+      text: `🍬 *Push ke GitHub sukses!* 🎀\n🩷 *Commit: ${msg}*`,
       contextInfo: {
         externalAdReply: {
           title: "Push Sukses! 🍫",
