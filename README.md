@@ -1,4 +1,6 @@
-# <div align='center'>Liora – WhatsApp Bot</div>
+![header](https://capsule-render.vercel.app/api?type=waving&color=0:FF4DD2,100:4A90E2&height=250&section=header&text=Liora%20WhatsApp%20Bot&fontSize=55&fontAlignY=35&animation=twinkling&fontColor=ffffff)
+
+[![Typing SVG](https://readme-typing-svg.herokuapp.com?size=25&duration=3500&pause=1000&color=F781D8&center=true&vCenter=true&width=800&lines=⚡+Fast.+Modular.+API-Powered.;🌍+Open-Source.+Flexible.+Developer-Friendly.;🔧+Clean+Code.+Easy+to+Extend.+Community-Driven.)](https://github.com/naruyaizumi/liora)
 
 <div align='center'>
 
@@ -106,12 +108,59 @@
 | 10. | [![Support](https://img.shields.io/badge/💖-Support-red?style=for-the-badge)](#-support)                                                             | Ways to support the project                        |
 | 11. | [![Arigatou](https://img.shields.io/badge/🌸-Arigatou-ff69b4?style=for-the-badge)](#-arigatou-ne)                                                    | Gratitude and final words                          |
 
-## 🛡️ Security Policy
+## 🛡️ Security & Bug Reports
 
-[![Security](https://img.shields.io/badge/Report-Security_Issue-red?style=for-the-badge&logo=github&logoColor=white)](SECURITY.md)
+[![Report Security Issue](https://img.shields.io/badge/Report-Security_Issue-red?style=for-the-badge&logo=github&logoColor=white)](SECURITY.md)
+[![Report Bug](https://img.shields.io/badge/Report-Bug-orange?style=for-the-badge&logo=github&logoColor=white)](../../issues/new/choose)
 
-We take security seriously.  
-If you discover a vulnerability or bug, please report it **responsibly** through our [Security Policy](SECURITY.md) instead of posting it publicly.
+We take security, stability, and the comfort of contributors very seriously.  
+If you discover a **vulnerability** or a **bug**, please report it responsibly through the following:
+
+- 🔐 **Security Issues:** Follow the [Security Policy](SECURITY.md)  
+- 🐞 **Bug Reports:** Choose an issue template:  
+  - [🍩 Bug Report (Bahasa Indonesia)](../../issues/new?template=bug-report-id.md)  
+  - [🍬 Bug Report (English)](../../issues/new?template=bug-report-us.md)  
+
+---
+
+> [!CAUTION]  
+> ⚠️ Please **do not disclose vulnerabilities or bugs publicly** without reporting them first.  
+> Instead, use the provided issue templates to submit detailed reports.  
+> This ensures the **safety, comfort, and trust** of all users. ✨  
+
+---
+
+> [!IMPORTANT]  
+> ❗ **Commercial usage is not allowed.**  
+> Do not attempt to **sell, rebrand, or monetize** this source code.  
+> This repository is built for **learning, collaboration, and contribution purposes only.**  
+> Respect the open-source spirit so the community can grow together.  
+
+---
+
+> [!TIP]  
+> 💡 Best practices for users & developers:  
+> - Always keep your personal `.env` file **private** and never commit it.  
+> - The `.env` included in this repository is only an **example template** for reference.  
+> - Regularly **update** your local version of this project (`git pull origin main`) to stay synced.  
+> - When reporting bugs, include **logs, screenshots, or exact error messages** to help us trace issues faster.  
+
+---
+
+> [!WARNING]  
+> 🚫 **Credit removal or alteration is strictly prohibited.**  
+> Please keep author credits intact in all visible places (README, config, about commands, etc.).  
+> Credits are not just names — they represent respect to contributors who made this project possible.  
+
+---
+
+> [!DANGER]  
+> 🔥 Unauthorized redistribution or publishing modified versions without proper credit may lead to:  
+> - Permanent bans from contributing to this repository.  
+> - Your forked project being **reported for license violations**.  
+> - Removal of access to related resources or communities connected to this project.  
+>   
+> Keep it sweet 🍬, respect the rules, and everyone wins. ❤️
 
 ## 📌 Changelog
 
@@ -355,3 +404,5 @@ If something is still unclear, feel free to connect through our community and so
 <p align="center">
   ✨ Powered by <b>IZUMI</b> 🦄
 </p>
+
+![footer](https://capsule-render.vercel.app/api?type=waving&color=0:4A90E2,100:FF4DD2&height=150&section=footer)
