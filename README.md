@@ -148,19 +148,19 @@ If you discover a **vulnerability** or a **bug**, please report it responsibly t
 ---
 
 > [!WARNING]  
-> 🚫 **Credit removal or alteration is strictly prohibited.**  
-> Please keep author credits intact in all visible places (README, config, about commands, etc.).  
-> Credits are not just names — they represent respect to contributors who made this project possible.  
+> 🚫 **Credit removal, modification, or selling this source code is strictly prohibited.**  
+>   
+> 🔖 You must **keep all author credits intact** in visible places such as:  
+> - README.md  
+> - Configuration files  
+> - Bot commands (`about`, `info`, etc.)  
+>   
+> 💸 **Selling, monetizing, or redistributing this source code for personal gain is not allowed.**  
+> This project is open-source and meant for learning, collaboration, and community growth — not exploitation.  
+>   
+> ❤️ Remember: Credits are not just names. They represent *respect, recognition, and appreciation* to contributors who made this project possible.
 
 ---
-
-> [!DANGER]  
-> 🔥 Unauthorized redistribution or publishing modified versions without proper credit may lead to:  
-> - Permanent bans from contributing to this repository.  
-> - Your forked project being **reported for license violations**.  
-> - Removal of access to related resources or communities connected to this project.  
->   
-> Keep it sweet 🍬, respect the rules, and everyone wins. ❤️
 
 ## 📌 Changelog
 
@@ -173,11 +173,7 @@ All new features, improvements, bug fixes, and deprecated changes are documented
 
 ---
 
-# ✨ Liora – WhatsApp BOT MD Script
-
-⚡ **Fast. Modular. API-Powered.**  
-🌍 **Open-Source. Flexible. Developer-Friendly.**  
-🔧 **Clean Code. Easy to Extend. Community-Driven.**
+# ✨ Liora – WhatsApp BOT Script
 
 Liora is a WhatsApp Multi-Device bot script built for everyone — from curious learners to professional developers.  
 It provides a **solid foundation** with a modular architecture, making it easy to customize, extend, and scale.
