@@ -105,11 +105,31 @@
 ---
 
 <!-- GitHub Stats -->
-<img src="https://github-readme-stats.vercel.app/api?username=naruyaizumi&show_icons=true&hide_border=true&bg_color=0D1117&title_color=FFC0CB&text_color=FFE4E1&icon_color=FFB6C1" alt="GitHub stats" />
+<h3 align="center" style="color:#FFC0CB;">
+  <img src="https://img.icons8.com/fluency/48/combo-chart.png" width="22" />
+  GitHub Stats
+</h3>
+<p align="center">
+  <img loading="lazy" width="396" src="https://github-readme-stats.vercel.app/api?username=naruyaizumi&show_icons=true&hide_border=true&bg_color=0D1117&title_color=FFC0CB&text_color=FFE4E1&icon_color=FFB6C1" alt="GitHub stats" />
+</p>
 
-<img src="https://github-readme-streak-stats.herokuapp.com/?user=naruyaizumi&hide_border=true&background=0D1117&ring=FFC0CB&fire=FFB6C1&currStreakLabel=FFE4E1&sideLabels=FFC0CB&dates=FFE4E1&stroke=FFB6C1" alt="GitHub streak" />
+<!-- GitHub Streak -->
+<h3 align="center" style="color:#FFC0CB;">
+  <img src="https://img.icons8.com/color/48/fire-element.png" width="22" />
+  GitHub Streak
+</h3>
+<p align="center">
+  <img loading="lazy" width="396" src="https://streak-stats.demolab.com?user=naruyaizumi&hide_border=true&background=0D1117&ring=FFC0CB&fire=FFB6C1&currStreakNum=FFFFFF&sideNums=FFFFFF&currStreakLabel=FFC0CB&sideLabels=FFC0CB&dates=FFE4E1" alt="GitHub streak" />
+</p>
 
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=naruyaizumi&layout=compact&hide_border=true&bg_color=0D1117&title_color=FFC0CB&text_color=FFE4E1&icon_color=FFB6C1" alt="Top languages" />
+<!-- Top Languages -->
+<h3 align="center" style="color:#FFC0CB;">
+  <img src="https://img.icons8.com/color/48/code-file.png" width="22" />
+  Top Languages
+</h3>
+<p align="center">
+  <img loading="lazy" width="396" src="https://github-readme-stats.vercel.app/api/top-langs/?username=naruyaizumi&layout=compact&hide_border=true&bg_color=0D1117&title_color=FFC0CB&text_color=FFE4E1&icon_color=FFB6C1" alt="Top languages" />
+</p>
 
 <!-- GitHub Trophies -->
 <img src="https://github-profile-trophy.vercel.app/?username=naruyaizumi&theme=juicyfresh&no-frame=true&margin-w=10&column=7" alt="GitHub Trophies" />
@@ -123,19 +143,19 @@
 
 ## 📋 Table of Contents
 
-| No. | Section                                                                                                                                              | Description                                        |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| 1.  | [![Description](https://img.shields.io/badge/📖-Description-blue?style=for-the-badge)](#-liora--whatsapp-md-script)                                  | General overview of the project                    |
-| 2.  | [![Key Features](https://img.shields.io/badge/📂-Key_Features-green?style=for-the-badge)](#-key-features)                                            | Core features included in the bot                  |
-| 3.  | [![Popular Features](https://img.shields.io/badge/🔥-Popular-orange?style=for-the-badge)](#-popular-features)                                        | Frequently used features loved by users            |
-| 4.  | [![Technical Details](https://img.shields.io/badge/⚙️-Technical-purple?style=for-the-badge)](#-technical-details)                                    | Node.js version, dependencies, and setup details   |
-| 5.  | [![Contact](https://img.shields.io/badge/📞-Contact-9cf?style=for-the-badge)](#-contact--information)                                                | How to reach the developers/maintainers            |
-| 6.  | [![Project Structure](https://img.shields.io/badge/🧱-Structure-yellow?style=for-the-badge)](#-project-structure)                                    | Explanation of folders and files in the repo       |
-| 7.  | [![API Key & Whitelist IP](https://img.shields.io/badge/🔐-API_Whitelist-lightblue?style=for-the-badge)](#-setting-api-key--whitelist-ip---betabotz) | Guide for securing API access with whitelisted IPs |
-| 8.  | [![Thanks](https://img.shields.io/badge/💝-Thanks-pink?style=for-the-badge)](#-thanks--credits)                                                      | Acknowledgements and contributors                  |
-| 9.  | [![License](https://img.shields.io/badge/📜-License-0A66C2?style=for-the-badge)](#-license)                                                          | License information (Apache, MIT, etc.)            |
-| 10. | [![Support](https://img.shields.io/badge/💖-Support-red?style=for-the-badge)](#-support)                                                             | Ways to support the project                        |
-| 11. | [![Arigatou](https://img.shields.io/badge/🌸-Arigatou-ff69b4?style=for-the-badge)](#-arigatou-ne)                                                    | Gratitude and final words                          |
+| No. | Section | Description |
+| --- | ------- | ----------- |
+| 1.  | [![Description](https://img.shields.io/badge/📖-Description-FFC0CB?style=for-the-badge)](#-liora--whatsapp-md-script) | General overview of the project |
+| 2.  | [![Key Features](https://img.shields.io/badge/📂-Key_Features-FFC0CB?style=for-the-badge)](#-key-features) | Core features included in the bot |
+| 3.  | [![Popular Features](https://img.shields.io/badge/🔥-Popular-FFC0CB?style=for-the-badge)](#-popular-features) | Frequently used features loved by users |
+| 4.  | [![Technical Details](https://img.shields.io/badge/⚙️-Technical-FFC0CB?style=for-the-badge)](#-technical-details) | Node.js version, dependencies, and setup details |
+| 5.  | [![Contact](https://img.shields.io/badge/📞-Contact-FFC0CB?style=for-the-badge)](#-contact--information) | How to reach the developers/maintainers |
+| 6.  | [![Project Structure](https://img.shields.io/badge/🧱-Structure-FFC0CB?style=for-the-badge)](#-project-structure) | Explanation of folders and files in the repo |
+| 7.  | [![API Key & Whitelist IP](https://img.shields.io/badge/🔐-API_Whitelist-FFC0CB?style=for-the-badge)](#-setting-api-key--whitelist-ip---betabotz) | Guide for securing API access with whitelisted IPs |
+| 8.  | [![Thanks](https://img.shields.io/badge/💝-Thanks-FFC0CB?style=for-the-badge)](#-thanks--credits) | Acknowledgements and contributors |
+| 9.  | [![License](https://img.shields.io/badge/📜-License-FFC0CB?style=for-the-badge)](#-license) | License information |
+| 10. | [![Support](https://img.shields.io/badge/💖-Support-FFC0CB?style=for-the-badge)](#-support) | Ways to support the project |
+| 11. | [![Arigatou](https://img.shields.io/badge/🌸-Arigatou-FFC0CB?style=for-the-badge)](#-arigatou-ne) | Gratitude and final words |
 
 ## 🛡️ Security & Bug Reports
 
@@ -431,4 +451,4 @@ If something is still unclear, feel free to connect through our community and so
   ✨ Powered by <b>IZUMI</b> 🦄
 </p>
 
-![footer](https://capsule-render.vercel.app/api?type=waving&color=0:4A90E2,100:FF4DD2&height=150&section=footer)
+![footer](https://capsule-render.vercel.app/api?type=waving&color=0:FFC0CB,50:FFE4E1,100:E6E6FA&height=150&section=footer)
