@@ -63,8 +63,7 @@ global.config = {
         password: process.env.VPS_PASSWORD,
     },
     token: process.env.DIGITALOCEAN_TOKEN,
-    PAT_TOKEN: process.env.PAT_TOKEN,
-
+    
     /*============= SUBDOMAIN =============*/
     Subdo: {
         "naruyaizumi.site": {
