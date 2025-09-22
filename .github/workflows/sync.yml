@@ -1,0 +1,43 @@
+name: 🍡 Sync README to Profile 🍩
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - README.md
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🍙 Checkout Liora repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🍩 Clone Profile Repo
+        run: |
+          git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/naruyaizumi/naruyaizumi.git profile-repo
+
+      - name: 🍰 Ensure README exists in Profile
+        run: |
+          if [ ! -f profile-repo/README.md ]; then
+            echo "⚠️ README.md not found in profile repo, copying from liora..."
+            cp README.md profile-repo/README.md
+          else
+            echo "📥 README.md already exists, syncing with latest from liora..."
+            cp README.md profile-repo/README.md
+          fi
+
+      - name: 🍬 Commit & Push to Profile Repo
+        run: |
+          cd profile-repo
+          git config user.name "🍡 Liora Bot"
+          git config user.email "bot@liora.local"
+          git add README.md || true
+          git commit -m "🍰 Sync README from Liora Repo" || echo "✨ No changes to commit"
+          git push origin main
