@@ -115,7 +115,9 @@ let handler = async (m, { text, conn, usedPrefix, command }) => {
     );
     try {
       unlinkSync(finalInfo.filePath);
-    } catch {}
+    } catch {
+        // ignore
+    }
   } catch (e) {
     m.reply(
       `❌ *Terjadi kesalahan saat fetch!*\n📄 *Error:* \`\`\`${e.message}\`\`\``
