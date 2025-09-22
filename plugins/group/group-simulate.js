@@ -43,12 +43,11 @@ let handler = async (m, { conn, usedPrefix, command, args: [event], text }) => {
                 m
             );
     }
-    if (act)
-        return conn.participantsUpdate({
-            id: m.chat,
-            participants: part,
-            action: act,
-        });
+    return conn.participantsUpdate({
+        id: m.chat,
+        participants: part,
+        action: act,
+    });
 };
 
 handler.help = ["simulate"];

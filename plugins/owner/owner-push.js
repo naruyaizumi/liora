@@ -9,6 +9,8 @@ let handler = async (m, { conn, args }) => {
     let remoteUrl = `https://x-access-token:${global.config.PAT_TOKEN}@github.com/naruyaizumi/liora.git`
     execSync(`git remote set-url origin ${remoteUrl}`)
     execSync("git add -A")
+    execSync(`git config user.name "🩷 Liora Bot"`)
+    execSync(`git config user.email "liora@bot"`)
     try {
       execSync(`git commit -m "${msg}"`)
     } catch {
