@@ -69,11 +69,17 @@ jobs:
           CF_APIKEY=yourapikey
           EOF
 
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
+
       - name: 🧁 Commit & Push default .env
         if: steps.check_env.outputs.exists == 'false'
         run: |
-          git config user.name "Liora Bot"
-          git config user.email "bot@liora.local"
+          git config user.name "naruyaizumi"
+          git config user.email "sexystyle088@gmail.com"
           git add -f .env
           git commit -m "🍬 Auto-generate default .env" || echo "🍩 No changes"
           git push origin main
