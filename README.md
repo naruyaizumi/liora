@@ -4,7 +4,7 @@
 
 <div align='center'>
 
-![WhatsApp BOT](https://files.cloudkuimages.guru/images/HFiLkuUz.jpg)
+![Liora BOT](https://files.cloudkuimages.guru/images/HFiLkuUz.jpg)
 
 <!-- Project & Social Badges -->
 <p align="center">
