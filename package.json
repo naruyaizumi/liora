@@ -20,7 +20,7 @@
     },
     "dependencies": {
         "awesome-phonenumber": "^7.5.0",
-        "baileys": "github:naruyaizumi/baileys",
+        "baileys": "github:Itsukichann/Baileys",
         "chalk": "^5.6.2",
         "cheerio": "^1.1.2",
         "dotenv": "^17.2.2",
