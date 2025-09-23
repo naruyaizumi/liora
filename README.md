@@ -371,15 +371,16 @@ We sincerely thank the following parties who have been instrumental in the devel
 ### 🧩 Project Roles
 
 <p align="center">
-  <a href="https://linkbio.co/naruyaizumi"><img src="https://img.shields.io/badge/Founder%20%26%20Owner-Naruya%20Izumi-0A66C2?style=for-the-badge&logo=github&logoColor=white" /></a><br/>
-  <a href="https://wa.me/6281398961382"><img src="https://img.shields.io/badge/Partner%20%26%20Contributor-SXZnightmar-FF4500?style=for-the-badge&logo=whatsapp&logoColor=white" /></a>
-  <a href="https://wa.me/6289665362039"><img src="https://img.shields.io/badge/Partner%20%26%20Contributor-Ryo%20Akira-32CD32?style=for-the-badge&logo=whatsapp&logoColor=white" /></a>
+  <a href="https://linkbio.co/naruyaizumi"><img src="https://img.shields.io/badge/Founder-Naruya%20Izumi-0A66C2?style=for-the-badge&logo=github&logoColor=white" /></a><br/>
+  <a href="https://wa.me/6281398961382"><img src="https://img.shields.io/badge/Owner-SXZnightmar-FF4500?style=for-the-badge&logo=whatsapp&logoColor=white" /></a><br/>
+  <a href="https://wa.me/6285167849436"><img src="https://img.shields.io/badge/Developer-Ashaa-FF69B4?style=for-the-badge&logo=whatsapp&logoColor=white" /></a><br/>
+  <a href="https://wa.me/6287831816747"><img src="https://img.shields.io/badge/Developer-Alfi%20Dev-32CD32?style=for-the-badge&logo=whatsapp&logoColor=white" /></a><br/>
+  <a href="https://wa.me/6281239621820"><img src="https://img.shields.io/badge/Developer-Zhan%20Dev-1E90FF?style=for-the-badge&logo=whatsapp&logoColor=white" /></a>
 </p>
 
 ### 📦 Libraries & Frameworks
 
 - 🧩 [`@itsukichann/baileys`](https://github.com/Itsukichann/Baileys) — main foundation for WhatsApp Web API.  
-  _(Currently using a forked and optimized version maintained by [naruyaizumi](https://github.com/naruyaizumi/baileys))_
 - ❤️ **Open Source Dependencies** — to all GitHub contributors and communities 🌐.
 
 ### 🌐 Public API Providers

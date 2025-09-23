@@ -1,25 +1,26 @@
-let handler = async (m, {
-    conn
-}) => {
+let handler = async (m, { conn }) => {
     try {
-        await global.loading(m, conn)
-        let response = await fetch("https://cloudku.us.kg/api/murotal/random/surah")
-        if (!response.ok) return m.reply("🍩 *Gagal menghubungi API! Coba lagi nanti ya~*")
-        let json = await response.json()
-        if (!json.status || json.status !== "success" || !json.result)
-            return m.reply("🍫 *Gagal memproses permintaan!* Coba lagi ya~")
+        await global.loading(m, conn);
 
-        let {
+        const response = await fetch("https://cloudku.us.kg/api/murotal/random/surah");
+        if (!response.ok) {
+            return m.reply("🍩 *Gagal menghubungi API! Coba lagi nanti ya~*");
+        }
+
+        const json = await response.json();
+        if (!json.status || json.status !== "success" || !json.result) {
+            return m.reply("🍫 *Gagal memproses permintaan!* Coba lagi ya~");
+        }
+
+        const {
             audio_url,
             name_en,
             name_id,
-            name_long,
             number,
             number_of_verses,
             revelation_id,
-            tafsir,
-            translation_id
-        } = json.result
+            translation_id,
+        } = json.result;
 
         await conn.sendFile(m.chat, audio_url, `${name_en}.mp3`, null, m, true, {
             mimetype: "audio/mpeg",
@@ -29,22 +30,22 @@ let handler = async (m, {
                     title: `🍯 Surah ${name_en} (${name_id})`,
                     body: `🍬 Nomor: ${number} | Ayat: ${number_of_verses} | Turun: ${revelation_id} | Arti: ${translation_id}`,
                     mediaType: 1,
-                    thumbnailUrl: "https://files.cloudkuimages.guru/images/e63c51e0ec8b.jpg",
+                    thumbnailUrl: "https://files.cloudkuimages.guru/images/dedfa0695b71.jpg",
                     renderLargerThumbnail: true,
-                    sourceUrl: "https://quran.com/" + number
-                }
-            }
-        })
+                    sourceUrl: "https://quran.com/" + number,
+                },
+            },
+        });
     } catch (e) {
-        console.error(e)
-        return m.reply("🍩 *Terjadi kesalahan saat memproses permintaan!*")
+        console.error(e);
+        return m.reply("🍩 *Terjadi kesalahan saat memproses permintaan!*");
     } finally {
-        await global.loading(m, conn, true)
+        await global.loading(m, conn, true);
     }
-}
+};
 
-handler.help = ["randomsurah"]
-handler.tags = ["islamic"]
-handler.command = /^(randomsurah|surahacak)$/i
+handler.help = ["randomsurah"];
+handler.tags = ["islam"];
+handler.command = /^(randomsurah|surahacak)$/i;
 
-export default handler
+export default handler;
