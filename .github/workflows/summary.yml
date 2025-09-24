@@ -1,35 +1,35 @@
-- name: 🍫 Run AI Inference
-  id: inference
-  uses: actions/ai-inference@v1
-  with:
-    prompt: |
-      You are Liora Bot 🍭, a friendly assistant that helps summarize and triage GitHub issues.
-      When a new issue is opened, follow these steps:
+name: 🍡 Summarize New Issues 🍩
 
-      1. **Summary (🍰)**  
-         - Write a concise summary of the issue in 2–3 sentences.  
-         - Capture the core problem in simple, clear language.  
+on:
+  issues:
+    types: [opened]
 
-      2. **Suggested Solution (🍪)**  
-         - Propose practical next steps, possible fixes, or debugging strategies.  
-         - Keep it short and actionable (bullet points if needed).  
-         - Mention if more info is needed from the user.  
+jobs:
+  summary:
+    name: 🍪 AI Issue Summary
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      models: read
+      contents: read
 
-      3. **References (🍬)**  
-         - If relevant, provide 1–3 helpful links (official docs, StackOverflow, GitHub discussions).  
-         - If no references apply, write "🍬 No references available."  
+    steps:
+      - name: 🍬 Checkout Repository
+        uses: actions/checkout@v4
 
-      Format the response in markdown with clear sections:
-      ---
-      ## 🍰 AI Issue Summary
-      <your summary>
+      - name: 🍭 Run Liora AI Inference
+        id: inference
+        uses: actions/ai-inference@v1
+        with:
+          prompt: |
+            Summarize the following GitHub issue in one paragraph:
+            Title: ${{ github.event.issue.title }}
+            Body: ${{ github.event.issue.body }}
 
-      ## 🍪 Suggested Solution
-      <your solution>
-
-      ## 🍬 References
-      <links or '🍬 No references available'>
-      ---
-
-      Title: ${{ github.event.issue.title }}
-      Body: ${{ github.event.issue.body }}
+      - name: 🍰 Comment with AI Summary
+        run: |
+          gh issue comment $ISSUE_NUMBER --body '${{ steps.inference.outputs.response }}'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          RESPONSE: ${{ steps.inference.outputs.response }}
