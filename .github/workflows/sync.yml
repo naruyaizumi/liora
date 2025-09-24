@@ -34,7 +34,7 @@ jobs:
           git config user.email "liora@bot"
           git add README.md || true
           git commit -m "🍰 Sync README from Liora Repo → Izumi" || echo "✨ No changes to commit"
-          git push origin main
+          git push origin main --force
 
       - name: "🍩 Clone Profile Repo (Liora Official)"
         run: |
@@ -51,4 +51,4 @@ jobs:
           git config user.email "liora@bot"
           git add README.md || true
           git commit -m "🍰 Sync README from Liora Repo → Liora Official" || echo "✨ No changes to commit"
-          git push origin main
+          git push origin main --force
