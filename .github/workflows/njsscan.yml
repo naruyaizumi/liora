@@ -25,10 +25,14 @@ jobs:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 🚨 Run nodejsscan
-        uses: ajinabraham/njsscan-action@master
-        with:
-          args: ". --sarif --output results.sarif"
+      - name: 📦 Install njsscan
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install njsscan
+
+      - name: 🚨 Run njsscan
+        run: |
+          njsscan . --sarif --output results.sarif || true
 
       - name: 📤 Upload njsscan SARIF Report
         uses: github/codeql-action/upload-sarif@v3
