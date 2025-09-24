@@ -12,7 +12,7 @@ let handler = async (m, { text, usedPrefix, command }) => {
             .replace(/%/g, "/100")
             .replace(/π|pi/gi, "Math.PI")
             .replace(/\be\b/gi, "Math.E");
-        if (!/^[0-9+\-*/().\sMathPIE*]+$/.test(expr)) {
+        if (!/^[0-9+\-*/().\sMathPIE]+$/.test(expr)) {
             return m.reply(
                 `🍩 *Ekspresi mengandung karakter ilegal!*\n\n*Coba contoh valid:*\n*${usedPrefix + command} (10+5)%*`
             );
