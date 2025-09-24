@@ -1,4 +1,4 @@
-name: 🍡 Sync README to Profile 🍩
+name: 🍡 Sync README to Profiles 🍩
 
 on:
   push:
@@ -19,24 +19,30 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 🍩 Clone Profile Repo
+      - name: 🍩 Clone Izumi Profile Repo
         run: |
-          git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/naruyaizumi/naruyaizumi.git profile-repo
+          git clone https://x-access-token:${{ secrets.PAT_IZUMI }}@github.com/naruyaizumi/naruyaizumi.git izumi-profile
 
-      - name: 🍰 Copy README.md (or fallback if missing)
+      - name: 🍬 Commit & Push to Izumi Profile
         run: |
-          if [ -f README.md ]; then
-            echo "📥 Found README.md in liora, syncing..."
-            cp README.md profile-repo/README.md
-          else
-            echo "⚠️ No README.md found in liora, keeping existing profile README"
-          fi
-
-      - name: 🍬 Commit & Push to Profile Repo
-        run: |
-          cd profile-repo
+          cp README.md izumi-profile/README.md
+          cd izumi-profile
           git config user.name "🍡 Liora Bot"
-          git config user.email "bot@liora.local"
+          git config user.email "liora.bot.official@gmail.com"
           git add README.md || true
-          git commit -m "🍰 Sync README from Liora Repo" || echo "✨ No changes to commit"
+          git commit -m "🍰 Sync README from Liora Repo → Izumi Profile" || echo "✨ No changes to commit"
+          git push origin main
+
+      - name: 🍩 Clone Liora Profile Repo
+        run: |
+          git clone https://x-access-token:${{ secrets.PAT_LIORA }}@github.com/liora-official/liora-official.git liora-profile
+
+      - name: 🍬 Commit & Push to Liora Profile
+        run: |
+          cp README.md liora-profile/README.md
+          cd liora-profile
+          git config user.name "🍡 Liora Bot"
+          git config user.email "liora.bot.official@gmail.com"
+          git add README.md || true
+          git commit -m "🍰 Sync README from Liora Repo → Liora Profile" || echo "✨ No changes to commit"
           git push origin main
