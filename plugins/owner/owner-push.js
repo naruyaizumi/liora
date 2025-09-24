@@ -13,36 +13,25 @@ let handler = async (m, { conn, args }) => {
     } catch {
       return m.reply("🍰 *Tidak ada perubahan untuk di-commit* ✨")
     }
+
     execSync("git push origin main", { stdio: "inherit" })
-    let rawLogs = execSync(
-      `git log --pretty=format:"%h|%an|%ad|%s" --date=iso`,
-      { encoding: "utf-8" }
-    ).trim().split("\n")
-    let parsedLogs = rawLogs.map(line => {
-      let [hash, author, date, message] = line.split("|")
-      return [
-        `🔖 *Commit: ${hash}*`,
-        `👤 *Author: ${author}*`,
-        `🕒 *Date: ${date}*`,
-        `📝 *Message: ${message}*`
-      ].join("\n")
-    }).join("\n\n━━━━━━━━━━━━━━━━━━━\n\n")
-    let fileStats = execSync("git show --stat --oneline -1", { encoding: "utf-8" })
+    
+    let diffStat = execSync("git show --stat --oneline -1", { encoding: "utf-8" })
       .split("\n")
-      .filter(line => line.includes("|") && !line.startsWith(" "))
+      .filter(line => line && (line.includes("|") || line.includes("changed")))
+
+    let fileChanges = diffStat
+      .filter(line => line.includes("|"))
       .map(line => "📄 *" + line.trim())
       .join("*\n")
 
-    let totalStats = execSync("git show --stat --oneline -1", { encoding: "utf-8" })
-      .split("\n")
-      .find(line => line.includes("changed"))
+    let summary = diffStat.find(line => line.includes("changed"))
 
     await conn.sendMessage(m.chat, {
-      text: 
+      text:
         `🍬 *Push ke GitHub sukses!* 🎀\n\n` +
-        `📚 *Commit History:*\n\n${parsedLogs}\n\n` +
-        `📂 *File berubah (terakhir):*\n${fileStats || "*(tidak ada perubahan)*"}\n\n` +
-        `📊 *Summary:*\n${totalStats || "*(tidak ada)*"}\n`,
+        `📂 *Status Perubahan:*\n${fileChanges || "*(tidak ada perubahan)*"}\n\n` +
+        `📊 *Summary:*\n*${summary || "(tidak ada)"}*\n`,
       contextInfo: {
         externalAdReply: {
           title: "Push Sukses! 🍫",
