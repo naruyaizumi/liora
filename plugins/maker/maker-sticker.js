@@ -37,8 +37,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                 false,
                 args[0],
                 global.config.stickpack,
-                global.config.stickauth,
-                20
+                global.config.stickauth
             );
             await conn.sendFile(m.chat, stiker, "sticker.webp", "", m);
         }
