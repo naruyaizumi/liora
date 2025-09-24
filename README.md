@@ -105,28 +105,28 @@
 ---
 
 <!-- GitHub Stats -->
-<h3 align="center" style="color:#FFC0CB;">
+<span align="center" style="color:#FFC0CB;">
   <img src="https://img.icons8.com/fluency/48/combo-chart.png" width="22" />
   GitHub Stats
-</h3>
+</span>
 <p align="center">
   <img loading="lazy" width="396" src="https://github-readme-stats.vercel.app/api?username=naruyaizumi&show_icons=true&hide_border=true&bg_color=0D1117&title_color=FFC0CB&text_color=FFE4E1&icon_color=FFB6C1" alt="GitHub stats" />
 </p>
 
 <!-- GitHub Streak -->
-<h3 align="center" style="color:#FFC0CB;">
+<span align="center" style="color:#FFC0CB;">
   <img src="https://img.icons8.com/color/48/fire-element.png" width="22" />
   GitHub Streak
-</h3>
+</span>
 <p align="center">
   <img loading="lazy" width="396" src="https://streak-stats.demolab.com?user=naruyaizumi&hide_border=true&background=0D1117&ring=FFC0CB&fire=FFB6C1&currStreakNum=FFFFFF&sideNums=FFFFFF&currStreakLabel=FFC0CB&sideLabels=FFC0CB&dates=FFE4E1" alt="GitHub streak" />
 </p>
 
 <!-- Top Languages -->
-<h3 align="center" style="color:#FFC0CB;">
+<span align="center" style="color:#FFC0CB;">
   <img src="https://img.icons8.com/color/48/code-file.png" width="22" />
   Top Languages
-</h3>
+</span>
 <p align="center">
   <img loading="lazy" width="396" src="https://github-readme-stats.vercel.app/api/top-langs/?username=naruyaizumi&layout=compact&hide_border=true&bg_color=0D1117&title_color=FFC0CB&text_color=FFE4E1&icon_color=FFB6C1" alt="Top languages" />
 </p>
@@ -143,10 +143,10 @@
 
 <details>
   <summary>
-    <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+    <span style="display:inline; color:#FFC0CB; font-weight:bold;">
       <img src="https://img.icons8.com/color/48/shield.png" width="22" style="vertical-align:middle;"/>
       Security & Bug Reports
-    </h3>
+    </span>
   </summary>
 
   <p align="center">
@@ -244,10 +244,10 @@
 
 <details>
   <summary>
-    <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+    <span style="display:inline; color:#FFC0CB; font-weight:bold;">
       <img src="https://img.icons8.com/color/48/timeline-week.png" width="22" style="vertical-align:middle;"/>
       Changelog
-    </h3>
+    </span>
   </summary>
 
   <p align="center">
@@ -313,10 +313,10 @@ Whether you want to <b>experiment, learn, or deploy a production bot</b>, Liora 
 
 <details open>
   <summary>
-    <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+    <span style="display:inline; color:#FFC0CB; font-weight:bold;">
       <img src="https://img.icons8.com/color/48/folder-invoices--v1.png" width="22" style="vertical-align:middle;"/>
       Key Features
-    </h3>
+    </span>
   </summary>
 
   <ul>
@@ -354,10 +354,10 @@ Whether you want to <b>experiment, learn, or deploy a production bot</b>, Liora 
 
 <details open>
   <summary>
-    <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+    <span style="display:inline; color:#FFC0CB; font-weight:bold;">
       <img src="https://img.icons8.com/color/48/goal.png" width="22" style="vertical-align:middle;"/>
       Popular Features
-    </h3>
+    </span>
   </summary>
 
   <ul>
@@ -387,10 +387,10 @@ Whether you want to <b>experiment, learn, or deploy a production bot</b>, Liora 
 
 <details>
   <summary>
-    <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+    <span style="display:inline; color:#FFC0CB; font-weight:bold;">
       <img src="https://img.icons8.com/color/48/maintenance.png" width="22" style="vertical-align:middle;"/>
       Technical Details
-    </h3>
+    </span>
   </summary>
 
   <table>
@@ -424,10 +424,10 @@ Whether you want to <b>experiment, learn, or deploy a production bot</b>, Liora 
 
 <details open>
   <summary>
-    <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+    <span style="display:inline; color:#FFC0CB; font-weight:bold;">
       <img src="https://img.icons8.com/color/48/key-security.png" width="22" style="vertical-align:middle;"/>
       Setting API Key & Whitelist IP – BetaBotz
-    </h3>
+    </span>
   </summary>
 
   <p><b>
@@ -558,10 +558,10 @@ Whether you want to <b>experiment, learn, or deploy a production bot</b>, Liora 
 
   <details>
     <summary>
-    <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+    <span style="display:inline; color:#FFC0CB; font-weight:bold;">
         <img src="https://img.icons8.com/color/48/conference-call.png" width="22" style="vertical-align:middle;"/>
         Project Roles
-    </h3>
+    </span>
     </summary>
 
     <p align="center">
@@ -594,10 +594,10 @@ Whether you want to <b>experiment, learn, or deploy a production bot</b>, Liora 
 
   <details>
     <summary>
-      <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+      <span style="display:inline; color:#FFC0CB; font-weight:bold;">
         <img src="https://img.icons8.com/color/48/source-code.png" width="22" style="vertical-align:middle;"/>
         Libraries & Frameworks
-      </h3>
+      </span>
     </summary>
 
     <ul>
@@ -608,10 +608,10 @@ Whether you want to <b>experiment, learn, or deploy a production bot</b>, Liora 
 
   <details>
     <summary>
-      <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+      <span style="display:inline; color:#FFC0CB; font-weight:bold;">
         <img src="https://img.icons8.com/color/48/cloud.png" width="22" style="vertical-align:middle;"/>
         Public API Providers
-      </h3>
+      </span>
     </summary>
 
     <ul>
@@ -622,10 +622,10 @@ Whether you want to <b>experiment, learn, or deploy a production bot</b>, Liora 
 
   <details>
     <summary>
-      <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+      <span style="display:inline; color:#FFC0CB; font-weight:bold;">
         <img src="https://img.icons8.com/color/48/artificial-intelligence.png" width="22" style="vertical-align:middle;"/>
         AI Assistance
-      </h3>
+      </span>
     </summary>
 
     <p align="center">
@@ -637,10 +637,10 @@ Whether you want to <b>experiment, learn, or deploy a production bot</b>, Liora 
 
   <details>
     <summary>
-      <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+      <span style="display:inline; color:#FFC0CB; font-weight:bold;">
         <img src="https://img.icons8.com/color/48/server.png" width="22" style="vertical-align:middle;"/>
         Environment & Deployment
-      </h3>
+      </span>
     </summary>
 
   | Category            | Tools / Platforms             |
@@ -655,10 +655,10 @@ Whether you want to <b>experiment, learn, or deploy a production bot</b>, Liora 
 
   <details>
     <summary>
-      <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+      <span style="display:inline; color:#FFC0CB; font-weight:bold;">
         <img src="https://img.icons8.com/color/48/handshake.png" width="22" style="vertical-align:middle;"/>
         Personal Acknowledgements
-      </h3>
+      </span>
     </summary>
 
     <ul>
