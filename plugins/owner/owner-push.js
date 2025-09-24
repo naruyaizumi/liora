@@ -15,15 +15,25 @@ let handler = async (m, { conn, args }) => {
     }
 
     execSync("git push origin main", { stdio: "inherit" })
-    
+
     let diffStat = execSync("git show --stat --oneline -1", { encoding: "utf-8" })
       .split("\n")
-      .filter(line => line && (line.includes("|") || line.includes("changed")))
+      .filter(line => line)
 
     let fileChanges = diffStat
       .filter(line => line.includes("|"))
-      .map(line => "📄 *" + line.trim())
-      .join("*\n")
+      .map(line => {
+        let parts = line.trim().split("|")
+        let file = parts[0].trim()
+        let stats = parts[1]
+          .replace(/insertions?\(\+\)/, "")
+          .replace(/deletions?\(-\)/, "")
+          .trim()
+        let added = (stats.match(/\+/g) || []).length
+        let removed = (stats.match(/-/g) || []).length
+        return `📄 *${file} +${added} -${removed}*`
+      })
+      .join("\n")
 
     let summary = diffStat.find(line => line.includes("changed"))
 
@@ -31,7 +41,7 @@ let handler = async (m, { conn, args }) => {
       text:
         `🍬 *Push ke GitHub sukses!* 🎀\n\n` +
         `📂 *Status Perubahan:*\n${fileChanges || "*(tidak ada perubahan)*"}\n\n` +
-        `📊 *Summary:*\n*${summary || "(tidak ada)"}*\n`,
+        `📊 *Summary:*\n*${summary || "(tidak ada)"}*`,
       contextInfo: {
         externalAdReply: {
           title: "Push Sukses! 🍫",
