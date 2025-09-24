@@ -1,4 +1,4 @@
-import { execSync } from "child_process"
+import { execSync } from "child_process";
 
 let handler = async (m, { conn, args }) => {
   let msg = args.join(" ") || `Liora: 🍧 Sinkronisasi otomatis ~`
@@ -6,61 +6,34 @@ let handler = async (m, { conn, args }) => {
   try {
     execSync(`git config user.name "🩷 Liora Bot"`)
     execSync(`git config user.email "liora@bot"`)
-
-    let stashed = false
-    try {
-      execSync("git stash push -u -m 'AUTO STASH sebelum pull'", { stdio: "ignore" })
-      stashed = true
-    } catch {
-      // ignore
-    }
-
-    let pullOutput = ""
-    try {
-      pullOutput = execSync("git pull --no-rebase --no-edit origin main", { encoding: "utf-8" })
-    } catch (e) {
-      return m.reply(
-        `🍫 *Gagal melakukan pull dari GitHub (mungkin ada conflict parah):*\n\`\`\`${e.message}\`\`\`\n\n` +
-        `⚠️ *Silakan resolve conflict manual sebelum push lagi.*`
-      )
-    }
-
-    if (!/Already up to date/i.test(pullOutput)) {
-      let changedFiles = execSync("git diff --name-only HEAD@{1} HEAD", { encoding: "utf-8" })
-        .trim()
-        .split("\n")
-        .filter(Boolean)
-
-      let commitLogs = execSync("git log HEAD@{1}..HEAD --oneline -n 5", { encoding: "utf-8" })
-        .trim()
-
-      await conn.sendMessage(m.chat, {
-        text:
-          `🍓 *Ada update baru dari GitHub!*\n\n` +
-          `📂 *File berubah:*\n${changedFiles.map(f => "- " + f).join("\n") || "(tidak ada)"}\n\n` +
-          `📝 *Commit:*\n${commitLogs || "(tidak ada)"}`
-      }, { quoted: m })
-    }
-
-    if (stashed) {
-      try {
-        execSync("git stash pop", { stdio: "inherit" })
-      } catch {
-        execSync("git stash drop", { stdio: "ignore" })
-      }
-    }
-
     try {
       execSync("git add -A")
-      execSync(`git commit -m "${msg}"`)
+      execSync(`git commit -m "${msg}"`, { stdio: "ignore" })
     } catch {
-      return m.reply("🍰 *Tidak ada perubahan lokal untuk di-commit* ✨")
+      return m.reply("🍰 *Tidak ada perubahan untuk di-commit* ✨")
     }
 
     execSync("git push origin main", { stdio: "inherit" })
+    let lastCommit = execSync(
+      `git log -1 --pretty=format:"🔖 *Commit: %h*\n👤 *Author: %an*\n🕒 *Date: %ad*\n📝 *Message: %s" --date=iso*`,
+      { encoding: "utf-8" }
+    )
+    
+    let fileStats = execSync("git show --stat --oneline -1", { encoding: "utf-8" })
+      .split("\n")
+      .filter(line => line.includes("|") && !line.startsWith(" "))
+      .map(line => "📄 *" + line.trim())
+      .join("*\n")
+    let totalStats = execSync("git show --stat --oneline -1", { encoding: "utf-8" })
+      .split("\n")
+      .find(line => line.includes("changed"))
 
     await conn.sendMessage(m.chat, {
-      text: `🍬 *Push ke GitHub sukses!* 🎀\n🩷 *Commit: ${msg}*`,
+      text:
+        `🍬 *Push ke GitHub sukses!* 🎀\n\n` +
+        `${lastCommit}\n\n` +
+        `📂 *File berubah:*\n${fileStats || "(tidak ada perubahan)"}\n\n` +
+        `📊 *Summary:*\n${totalStats || "(tidak ada)"}\n`,
       contextInfo: {
         externalAdReply: {
           title: "Push Sukses! 🍫",

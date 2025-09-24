@@ -1,62 +1,6 @@
-# dependencies
+# ignore
 node_modules/
-.pnp
-.pnp.js
-
-# npm
-npm-debug.log
-yarn-error.log
-yarn-debug.log
-
-# yarn
-.yarn/cache
-.yarn/unplugged
-.yarn/build-state.yml
-.yarn/install-state.gz
-.yarn-integrity
-
-# pnpm
-pnpm-lock.yaml
-.pnpm-debug.log
-.pnpm-store/
-.pnpm-workspace.yaml
-
-# turbo / nx
-.turbo/
-nx.json
-project.json
-
-# testing
-coverage/
-*.lcov
-
-# production
-dist/
-build/
-out/
-*.log
-
-# misc
-.DS_Store
-Thumbs.db
-
-# env files
-.env
-.env.*.local
-
-# vscode / editor
-.vscode/
-.idea/
-*.swp
-
-# project specific
 auth/
+tmp/
 database.json
-
-# prettier
-.prettierignore
-.prettierrc
-.prettierrc.json
-
-# workflows
-.github/
+.env

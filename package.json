@@ -29,6 +29,7 @@
         "node-cron": "^4.2.1",
         "node-webpmux": "^3.2.1",
         "pino": "^9.11.0",
+        "sharp": "^0.34.4",
         "ssh2": "^1.17.0",
         "syntax-error": "^1.4.0",
         "wa-sticker-js": "^1.0.7",
