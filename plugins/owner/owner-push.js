@@ -5,7 +5,7 @@ let handler = async (m, { conn, args }) => {
 
   try {
     execSync(`git config user.name "🩷 Liora Bot"`)
-    execSync(`git config user.email "liora@bot"`)
+    execSync(`git config user.email "liora.bot.official@gmail.com"`)
 
     try {
       execSync("git add -A")
@@ -34,14 +34,14 @@ let handler = async (m, { conn, args }) => {
         return `📄 *${file} +${added} -${removed}*`
       })
       .join("\n")
-
-    let summary = diffStat.find(line => line.includes("changed"))
+      
+      let summary = diffStat.find(line => line.includes("changed"))?.trim() || "(tidak ada)"
 
     await conn.sendMessage(m.chat, {
       text:
         `🍬 *Push ke GitHub sukses!* 🎀\n\n` +
         `📂 *Status Perubahan:*\n${fileChanges || "*(tidak ada perubahan)*"}\n\n` +
-        `📊 *Summary:*\n*${summary || "(tidak ada)"}*`,
+        `📊 *Summary:*\n*${summary}*`,
       contextInfo: {
         externalAdReply: {
           title: "Push Sukses! 🍫",
