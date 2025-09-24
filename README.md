@@ -226,7 +226,7 @@
 
 </details>
 
-<details open>
+<details>
   <summary>
     <span style="display:inline; color:#FF69B4; font-weight:bold;">
      ✨ Liora – WhatsApp BOT Script
@@ -273,7 +273,7 @@
   </p>
 </details>
 
-<details open>
+<details>
   <summary>
     <span style="display:inline; color:#FFC0CB; font-weight:bold;">
       📁 Key Features
@@ -313,7 +313,7 @@
 
 </details>
 
-<details open>
+<details>
   <summary>
     <span style="display:inline; color:#FFC0CB; font-weight:bold;">
      🎯 Popular Features
@@ -379,7 +379,7 @@
   </table>
 </details>
 
-<details open>
+<details>
   <summary>
     <span style="color:#FFC0CB; font-weight:bold;">
       🔐 Setting API Key & Whitelist IP – BetaBotz
@@ -448,7 +448,7 @@
   </details>
 </details>
 
-<details open>
+<details>
   <summary><span style="color:#FFC0CB; font-weight:bold;">💝 Thanks & Credits</span></summary>
 
   We sincerely thank the following parties who have been instrumental in the development and continuity of **Liora**:
@@ -573,7 +573,7 @@
 
 </details>
 
-<details open>
+<details>
   <summary>
     <span style="color:#FFC0CB; font-weight:bold;">
       📜 License
@@ -593,7 +593,7 @@
   </blockquote>
 </details>
 
-<details open>
+<details>
   <summary>
     <span style="color:#FFC0CB; font-weight:bold;">
       💖 Support
@@ -621,7 +621,7 @@
   </p>
 </details>
 
-<details open>
+<details>
   <summary>
     <span style="display:inline; color:#FFC0CB; font-weight:bold;">
       🌸 Arigatou ne~!
