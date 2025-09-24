@@ -144,7 +144,7 @@
 <details>
   <summary>
     <span style="display:inline; color:#FFC0CB; font-weight:bold;">
-      Security & Bug Reports
+      🛡️ Security & Bug Reports
     </span>
   </summary>
 
@@ -161,18 +161,14 @@
   If you discover a **vulnerability** or a **bug**, please report it responsibly through the following:
 
   <details>
-    <summary>
-      <b><span style="color:#FFC0CB;">Security Issues</span></b>
-    </summary>
+    <summary><b><span style="color:#FFC0CB;">Security Issues</span></b></summary>
     <a href="SECURITY.md">
       <img src="https://img.shields.io/badge/Security-Policy-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Security Policy"/>
     </a>
   </details>
 
   <details>
-    <summary>
-      <b><span style="color:#FFC0CB;">Bug Reports</span></b>
-    </summary>
+    <summary><b><span style="color:#FFC0CB;">Bug Reports</span></b></summary>
     <a href="../../issues/new?template=bug-report-id.md">
       <img src="https://img.shields.io/badge/Bug_Report-ID-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Bug Report ID"/>
     </a>  
@@ -180,59 +176,33 @@
       <img src="https://img.shields.io/badge/Bug_Report-EN-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Bug Report EN"/>
     </a>
   </details>
-
-  <details>
-    <summary>
-      <b><span style="color:#FFC0CB;">Caution</span></b>
-    </summary>
-    
-    > [!CAUTION]  
-    > <img src="https://img.icons8.com/color/24/error--v1.png" width="18" style="vertical-align:middle;"/>  
-    > Please **do not disclose vulnerabilities or bugs publicly** without reporting them first.  
-    > Instead, use the provided issue templates to submit detailed reports.  
-    > This ensures the **safety, comfort, and trust** of all users.
-  </details>
-
-  <details>
-    <summary>
-      <b><span style="color:#FFC0CB;">Tips</span></b>
-    </summary>
-    
-    > [!TIP]  
-    > <img src="https://img.icons8.com/color/24/idea.png" width="18" style="vertical-align:middle;"/>  
-    > Best practices for users & developers:  
-    > - Always keep your personal `.env` file **private** and never commit it.  
-    > - The `.env` included in this repository is only an **example template**.  
-    > - Regularly **update** your local version (`git pull origin main`) to stay synced.  
-    > - When reporting bugs, include **logs, screenshots, or exact error messages** to help us trace issues faster.
-  </details>
-
-  <details>
-    <summary>
-      <b><span style="color:#FFC0CB;">Warning</span></b>
-    </summary>
-    
-    > [!WARNING]  
-    > <img src="https://img.icons8.com/color/24/high-priority.png" width="18" style="vertical-align:middle;"/>  
-    > **Credit removal, modification, or selling this source code is strictly prohibited.**  
-    >   
-    > You must **keep all author credits intact** in visible places such as:  
-    > - README.md  
-    > - Configuration files  
-    > - Bot commands (`about`, `info`, etc.)  
-    >   
-    > **Selling, monetizing, or redistributing this source code for personal gain is not allowed.**  
-    > This project is open-source and meant for learning, collaboration, and community growth — not exploitation.  
-    >   
-    > Remember: Credits are not just names. They represent *respect, recognition, and appreciation* to contributors who made this project possible.  
-  </details>
-
 </details>
+
+---
+
+> [!CAUTION]  
+> ⚠️ Please **do not disclose vulnerabilities or bugs publicly** without reporting them first.  
+> Use the provided issue templates to submit detailed reports.  
+> This ensures the **safety, comfort, and trust** of all users.
+
+> [!TIP]  
+> 💡 Best practices for users & developers:  
+> - Always keep your personal `.env` file **private**.  
+> - The `.env` here is only a **template**.  
+> - Regularly run `git pull origin main` to stay synced.  
+> - When reporting bugs, include **logs, screenshots, or exact error messages**.
+
+> [!WARNING]  
+> 🚨 **Credit removal, modification, or selling this source code is strictly prohibited.**  
+> - Keep all author credits intact (README, configs, bot commands).  
+> - Selling/redistributing for personal gain is not allowed.  
+>   
+> Credits = *respect, recognition, and appreciation* to contributors.
 
 <details>
   <summary>
     <span style="display:inline; color:#FFC0CB; font-weight:bold;">
-      Changelog
+      📌 Changelog
     </span>
   </summary>
 
@@ -259,7 +229,7 @@
 <details open>
   <summary>
     <span style="display:inline; color:#FF69B4; font-weight:bold;">
-      Liora – WhatsApp BOT Script
+     ✨ Liora – WhatsApp BOT Script
     </span>
   </summary>
 
@@ -306,7 +276,7 @@
 <details open>
   <summary>
     <span style="display:inline; color:#FFC0CB; font-weight:bold;">
-      Key Features
+      📁 Key Features
     </span>
   </summary>
 
@@ -346,7 +316,7 @@
 <details open>
   <summary>
     <span style="display:inline; color:#FFC0CB; font-weight:bold;">
-      Popular Features
+     🎯 Popular Features
     </span>
   </summary>
 
@@ -377,7 +347,7 @@
 <details>
   <summary>
     <span style="display:inline; color:#FFC0CB; font-weight:bold;">
-      Technical Details
+      🔍 Technical Details
     </span>
   </summary>
 
@@ -412,7 +382,7 @@
 <details open>
   <summary>
     <span style="color:#FFC0CB; font-weight:bold;">
-      Setting API Key & Whitelist IP – BetaBotz
+      🔐 Setting API Key & Whitelist IP – BetaBotz
     </span>
   </summary>
 
@@ -479,7 +449,7 @@
 </details>
 
 <details open>
-  <summary><span style="color:#FFC0CB; font-weight:bold;">Thanks & Credits</span></summary>
+  <summary><span style="color:#FFC0CB; font-weight:bold;">💝 Thanks & Credits</span></summary>
 
   We sincerely thank the following parties who have been instrumental in the development and continuity of **Liora**:
 
@@ -519,7 +489,6 @@
       <a href="https://www.npmjs.com/package/cheerio">
         <img src="https://img.shields.io/badge/cheerio-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
       </a>
-      <br/>
       <a href="https://www.npmjs.com/package/dotenv">
         <img src="https://img.shields.io/badge/dotenv-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
       </a>
@@ -529,7 +498,6 @@
       <a href="https://www.npmjs.com/package/lowdb">
         <img src="https://img.shields.io/badge/lowdb-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
       </a>
-      <br/>
       <a href="https://www.npmjs.com/package/node-cron">
         <img src="https://img.shields.io/badge/node--cron-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
       </a>
@@ -539,7 +507,6 @@
       <a href="https://www.npmjs.com/package/pino">
         <img src="https://img.shields.io/badge/pino-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
       </a>
-      <br/>
       <a href="https://www.npmjs.com/package/ssh2">
         <img src="https://img.shields.io/badge/ssh2-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
       </a>
@@ -549,7 +516,6 @@
       <a href="https://www.npmjs.com/package/wa-sticker-js">
         <img src="https://img.shields.io/badge/wa--sticker--js-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
       </a>
-      <br/>
       <a href="https://www.npmjs.com/package/yargs">
         <img src="https://img.shields.io/badge/yargs-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
       </a>
@@ -610,7 +576,7 @@
 <details open>
   <summary>
     <span style="color:#FFC0CB; font-weight:bold;">
-      License
+      📜 License
     </span>
   </summary>
 
@@ -630,7 +596,7 @@
 <details open>
   <summary>
     <span style="color:#FFC0CB; font-weight:bold;">
-      Support
+      💖 Support
     </span>
   </summary>
 
@@ -658,7 +624,7 @@
 <details open>
   <summary>
     <span style="display:inline; color:#FFC0CB; font-weight:bold;">
-      Arigatou ne~!
+      🌸 Arigatou ne~!
     </span>
   </summary>
 
