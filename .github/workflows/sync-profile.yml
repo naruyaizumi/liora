@@ -23,7 +23,7 @@ jobs:
         run: |
           git clone https://x-access-token:${{ secrets.PAT_IZUMI }}@github.com/naruyaizumi/naruyaizumi.git izumi-profile
 
-      - name: 🍬 Commit & Push to Izumi Profile
+      - name: 🍬 Commit & Force Push to Izumi Profile
         run: |
           cp README.md izumi-profile/README.md
           cd izumi-profile
@@ -31,18 +31,4 @@ jobs:
           git config user.email "liora.bot.official@gmail.com"
           git add README.md || true
           git commit -m "🍰 Sync README from Liora Repo → Izumi Profile" || echo "✨ No changes to commit"
-          git push origin main
-
-      - name: 🍩 Clone Liora Profile Repo
-        run: |
-          git clone https://x-access-token:${{ secrets.PAT_LIORA }}@github.com/liora-official/liora-official.git liora-profile
-
-      - name: 🍬 Commit & Push to Liora Profile
-        run: |
-          cp README.md liora-profile/README.md
-          cd liora-profile
-          git config user.name "🍡 Liora Bot"
-          git config user.email "liora.bot.official@gmail.com"
-          git add README.md || true
-          git commit -m "🍰 Sync README from Liora Repo → Liora Profile" || echo "✨ No changes to commit"
-          git push origin main
+          git push origin main --force
