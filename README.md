@@ -141,315 +141,628 @@
 
 ---
 
-## 📋 Table of Contents
+<details>
+  <summary>
+    <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+      <img src="https://img.icons8.com/color/48/shield.png" width="22" style="vertical-align:middle;"/>
+      Security & Bug Reports
+    </h3>
+  </summary>
 
-| No. | Section | Description |
-| --- | ------- | ----------- |
-| 1.  | [![Description](https://img.shields.io/badge/📖-Description-FFC0CB?style=for-the-badge)](#-liora--whatsapp-md-script) | General overview of the project |
-| 2.  | [![Key Features](https://img.shields.io/badge/📂-Key_Features-FFC0CB?style=for-the-badge)](#-key-features) | Core features included in the bot |
-| 3.  | [![Popular Features](https://img.shields.io/badge/🔥-Popular-FFC0CB?style=for-the-badge)](#-popular-features) | Frequently used features loved by users |
-| 4.  | [![Technical Details](https://img.shields.io/badge/⚙️-Technical-FFC0CB?style=for-the-badge)](#-technical-details) | Node.js version, dependencies, and setup details |
-| 5.  | [![Contact](https://img.shields.io/badge/📞-Contact-FFC0CB?style=for-the-badge)](#-contact--information) | How to reach the developers/maintainers |
-| 6.  | [![Project Structure](https://img.shields.io/badge/🧱-Structure-FFC0CB?style=for-the-badge)](#-project-structure) | Explanation of folders and files in the repo |
-| 7.  | [![API Key & Whitelist IP](https://img.shields.io/badge/🔐-API_Whitelist-FFC0CB?style=for-the-badge)](#-setting-api-key--whitelist-ip---betabotz) | Guide for securing API access with whitelisted IPs |
-| 8.  | [![Thanks](https://img.shields.io/badge/💝-Thanks-FFC0CB?style=for-the-badge)](#-thanks--credits) | Acknowledgements and contributors |
-| 9.  | [![License](https://img.shields.io/badge/📜-License-FFC0CB?style=for-the-badge)](#-license) | License information |
-| 10. | [![Support](https://img.shields.io/badge/💖-Support-FFC0CB?style=for-the-badge)](#-support) | Ways to support the project |
-| 11. | [![Arigatou](https://img.shields.io/badge/🌸-Arigatou-FFC0CB?style=for-the-badge)](#-arigatou-ne) | Gratitude and final words |
+  <p align="center">
+    <a href="SECURITY.md">
+      <img src="https://img.shields.io/badge/Report-Security_Issue-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Report Security Issue"/>
+    </a>
+    <a href="../../issues/new/choose">
+      <img src="https://img.shields.io/badge/Report-Bug-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Report Bug"/>
+    </a>
+  </p>
 
-## 🛡️ Security & Bug Reports
+  We take security, stability, and the comfort of contributors very seriously.  
+  If you discover a **vulnerability** or a **bug**, please report it responsibly through the following:
 
-[![Report Security Issue](https://img.shields.io/badge/Report-Security_Issue-red?style=for-the-badge&logo=github&logoColor=white)](SECURITY.md)
-[![Report Bug](https://img.shields.io/badge/Report-Bug-orange?style=for-the-badge&logo=github&logoColor=white)](../../issues/new/choose)
+  <details>
+    <summary>
+      <b><span style="color:#FFC0CB;">
+        <img src="https://img.icons8.com/color/48/lock-2.png" width="20" style="vertical-align:middle;"/>
+        Security Issues
+      </span></b>
+    </summary>
+    <a href="SECURITY.md">
+      <img src="https://img.shields.io/badge/Security-Policy-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Security Policy"/>
+    </a>
+  </details>
 
-We take security, stability, and the comfort of contributors very seriously.  
-If you discover a **vulnerability** or a **bug**, please report it responsibly through the following:
+  <details>
+    <summary>
+      <b><span style="color:#FFC0CB;">
+        <img src="https://img.icons8.com/color/48/bug.png" width="20" style="vertical-align:middle;"/>
+        Bug Reports
+      </span></b>
+    </summary>
+    <a href="../../issues/new?template=bug-report-id.md">
+      <img src="https://img.shields.io/badge/Bug_Report-ID-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Bug Report ID"/>
+    </a>  
+    <a href="../../issues/new?template=bug-report-us.md">
+      <img src="https://img.shields.io/badge/Bug_Report-EN-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Bug Report EN"/>
+    </a>
+  </details>
 
-- 🔐 **Security Issues:** Follow the [Security Policy](SECURITY.md)  
-- 🐞 **Bug Reports:** Choose an issue template:  
-  - [🍩 Bug Report (Bahasa Indonesia)](../../issues/new?template=bug-report-id.md)  
-  - [🍬 Bug Report (English)](../../issues/new?template=bug-report-us.md)  
+  <details>
+    <summary>
+      <b><span style="color:#FFC0CB;">
+        <img src="https://img.icons8.com/color/48/error--v1.png" width="20" style="vertical-align:middle;"/>
+        Caution
+      </span></b>
+    </summary>
+    
+    > [!CAUTION]  
+    > Please **do not disclose vulnerabilities or bugs publicly** without reporting them first.  
+    > Instead, use the provided issue templates to submit detailed reports.  
+    > This ensures the **safety, comfort, and trust** of all users.
+  </details>
+
+  <details>
+    <summary>
+      <b><span style="color:#FFC0CB;">
+        <img src="https://img.icons8.com/color/48/idea.png" width="20" style="vertical-align:middle;"/>
+        Tips
+      </span></b>
+    </summary>
+    
+    > [!TIP]  
+    > Best practices for users & developers:  
+    > - Always keep your personal `.env` file **private** and never commit it.  
+    > - The `.env` included in this repository is only an **example template**.  
+    > - Regularly **update** your local version (`git pull origin main`) to stay synced.  
+    > - When reporting bugs, include **logs, screenshots, or exact error messages** to help us trace issues faster.
+  </details>
+
+  <details>
+    <summary>
+      <b><span style="color:#FFC0CB;">
+        <img src="https://img.icons8.com/color/48/high-priority.png" width="20" style="vertical-align:middle;"/>
+        Warning
+      </span></b>
+    </summary>
+    
+    > [!WARNING]  
+    > **Credit removal, modification, or selling this source code is strictly prohibited.**  
+    >   
+    > 🔖 You must **keep all author credits intact** in visible places such as:  
+    > - README.md  
+    > - Configuration files  
+    > - Bot commands (`about`, `info`, etc.)  
+    >   
+    > 💸 **Selling, monetizing, or redistributing this source code for personal gain is not allowed.**  
+    > This project is open-source and meant for learning, collaboration, and community growth — not exploitation.  
+    >   
+    > ❤️ Remember: Credits are not just names. They represent *respect, recognition, and appreciation* to contributors who made this project possible.  
+  </details>
+
+</details>
+
+<details>
+  <summary>
+    <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+      <img src="https://img.icons8.com/color/48/timeline-week.png" width="22" style="vertical-align:middle;"/>
+      Changelog
+    </h3>
+  </summary>
+
+  <p align="center">
+    <a href="https://keepachangelog.com/">
+      <img src="https://img.shields.io/badge/Keep_a-Changelog-FFC0CB?style=for-the-badge&logo=none&labelColor=2F2F2F" alt="Keep a Changelog"/>
+    </a>
+    <a href="https://semver.org/">
+      <img src="https://img.shields.io/badge/SemVer-2.0.0-FFC0CB?style=for-the-badge&logo=semver&logoColor=white&labelColor=2F2F2F" alt="Semantic Versioning"/>
+    </a>
+    <a href="https://github.com/naruyaizumi/liora/releases">
+      <img src="https://img.shields.io/github/v/release/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="GitHub Releases"/>
+    </a>
+  </p>
+
+  This project follows 
+  <a href="https://semver.org/"><b>Semantic Versioning</b></a> 
+  to manage releases.  
+  All new features, improvements, bug fixes, and deprecated changes are documented in detail in 
+  <a href="CHANGELOG.md"><b>CHANGELOG.md</b></a>.
+
+</details>
+
+<!-- Import Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500&family=Pacifico&display=swap" rel="stylesheet">
+
+<h1 align="center" style="font-family: 'Pacifico', cursive; color:#FF69B4; font-size:38px;">
+  <img src="https://readme-typing-svg.herokuapp.com?size=32&duration=3500&color=FFC0CB&center=true&vCenter=true&width=600&lines=✨+Liora+–+WhatsApp+BOT+Script" alt="Typing SVG" />
+</h1>
+
+<p align="center" style="font-family: 'Fira Code', monospace; font-size:16px; color:#eaeaea;">
+  Liora is a WhatsApp Multi-Device bot script built for everyone — from curious learners to professional developers.  
+  It provides a <b>solid foundation</b> with a modular architecture, making it easy to customize, extend, and scale.
+</p>
 
 ---
 
-> [!CAUTION]  
-> ⚠️ Please **do not disclose vulnerabilities or bugs publicly** without reporting them first.  
-> Instead, use the provided issue templates to submit detailed reports.  
-> This ensures the **safety, comfort, and trust** of all users. ✨  
-
----
-
-> [!IMPORTANT]  
-> ❗ **Commercial usage is not allowed.**  
-> Do not attempt to **sell, rebrand, or monetize** this source code.  
-> This repository is built for **learning, collaboration, and contribution purposes only.**  
-> Respect the open-source spirit so the community can grow together.  
-
----
-
-> [!TIP]  
-> 💡 Best practices for users & developers:  
-> - Always keep your personal `.env` file **private** and never commit it.  
-> - The `.env` included in this repository is only an **example template** for reference.  
-> - Regularly **update** your local version of this project (`git pull origin main`) to stay synced.  
-> - When reporting bugs, include **logs, screenshots, or exact error messages** to help us trace issues faster.  
-
----
-
-> [!WARNING]  
-> 🚫 **Credit removal, modification, or selling this source code is strictly prohibited.**  
->   
-> 🔖 You must **keep all author credits intact** in visible places such as:  
-> - README.md  
-> - Configuration files  
-> - Bot commands (`about`, `info`, etc.)  
->   
-> 💸 **Selling, monetizing, or redistributing this source code for personal gain is not allowed.**  
-> This project is open-source and meant for learning, collaboration, and community growth — not exploitation.  
->   
-> ❤️ Remember: Credits are not just names. They represent *respect, recognition, and appreciation* to contributors who made this project possible.
-
----
-
-## 📌 Changelog
-
-[![Keep a Changelog](https://img.shields.io/badge/Keep%20a-Changelog-%230A66C2?style=for-the-badge&logo=none)](https://keepachangelog.com/)
-[![Semantic Versioning](https://img.shields.io/badge/SemVer-2.0.0-blue?style=for-the-badge&logo=semver&logoColor=white)](https://semver.org/)
-[![GitHub release](https://img.shields.io/github/v/release/naruyaizumi/liora?style=for-the-badge&logo=github)](https://github.com/naruyaizumi/liora/releases)
-
-This project follows [Semantic Versioning](https://semver.org/) to manage releases.  
-All new features, improvements, bug fixes, and deprecated changes are documented in detail in [CHANGELOG.md](CHANGELOG.md).
-
----
-
-# ✨ Liora – WhatsApp BOT Script
-
-Liora is a WhatsApp Multi-Device bot script built for everyone — from curious learners to professional developers.  
-It provides a **solid foundation** with a modular architecture, making it easy to customize, extend, and scale.
-
+<p style="font-family: 'Fira Code', monospace; font-size:15px; color:#d1d1d1;">
 Designed with performance and clarity in mind, Liora empowers you to build bots that are:
-
-- 🚀 **Lightweight & Fast** → optimized for speed and stability
-- 🧩 **Modular & Extensible** → add or remove features with ease
-- 📡 **API-Ready** → connect with external services or your own logic
-- 💡 **Developer-Friendly** → clean structure, well-documented, and open for contributions
-
-Whether you want to **experiment, learn, or deploy a production bot**, Liora is here as your reliable starting point.
-
-## 📁 Key Features
-
-- 🔓 **Full Open Source** — 100% transparent, no obfuscation or locked code.
-- 🧩 **Modular Architecture** — every feature is standalone, simple to add, remove, or customize.
-- ⚡ **Lightweight Build** — only ~200MB with dependencies, optimized for performance.
-- 📜 **Modern JavaScript (ESM)** — clean codebase with ES Modules for clarity and compatibility.
-- 🟢 **Node.js v22+ Ready** — built to run on the latest Node.js (22, 23, 24).
-- 📦 **Minimal Dependencies** — deploy smoothly even on low-spec VPS.
-- 🚀 **Easy Deployment** — works seamlessly with PM2, Pterodactyl, or your favorite process manager.
-
-## 🎯 Popular Features
-
-- 🎥 **Media Downloader** — fetch videos, audio, and files from multiple platforms.
-- 💬 **Interactive Commands** — menus, buttons, and reactions for better UX.
-- 🤖 **AI Integrations** — connect with AI tools for smarter automation.
-- 🛡️ **Group Moderation** — tools for admins to manage communities easily.
-- 🖥️ **Server Utilities** — system info, monitoring, and useful admin commands.
-
-## 🔍 Technical Details
-
-| Info            | Value                                                            |
-| --------------- | ---------------------------------------------------------------- |
-| Script Name     | `Liora`                                                          |
-| Framework       | [`@itsukichann/baileys`](https://github.com/Itsukichann/Baileys) |
-| Language        | JavaScript (ES Modules)                                          |
-| Runtime         | Node.js v22 / v23 / v24                                          |
-| Package Manager | npm / yarn / pnpm                                                |
-| License         | Apache License 2.0                                               |
-
-## 📁 Project Structure
-
-This is the main directory structure of **Liora** with updated descriptions:
-
-| Location / File      | Description                                                                                       |
-| -------------------- | ------------------------------------------------------------------------------------------------- |
-| `.github/workflows/` | GitHub Actions workflows for CI/CD (e.g. CodeQL, tests, etc).                                     |
-| `lib/`               | Utilities and helper functions (converter, logs, leveling, tools, etc).                           |
-| `plugins/`           | All bot features/commands are stored here (~800+ plugins).                                        |
-| `src/`               | Static assets such as fonts and template papers for the writing feature.                          |
-| `tmp/`               | Temporary media buffer storage.                                                                   |
-| `config.js`          | Main bot configuration (prefix, session name, API keys, etc).                                     |
-| `global.js`          | Global definitions and constants for bot runtime.                                                 |
-| `handler.js`         | Core handler: initializes database, processes plugins, auto-reload, and defines global variables. |
-| `main.js`            | Startup script: initializes bot and connects to Baileys.                                          |
-| `index.js`           | Parent process: spawns `main.js` as child process, useful for restarts/reloads.                   |
-| `test.js`            | Test file for workflows and CI.                                                                   |
-| `package.json`       | Project metadata and dependencies.                                                                |
-| `LICENSE`            | Project license (Apache 2.0).                                                                     |
-| `README.md`          | Project documentation.                                                                            |
-| `SECURITY.md`        | Security policy and vulnerability disclosure guidelines.                                          |
-| `CHANGELOG.md`       | Version history and updates log.                                                                  |
-
-## 🔐 Setting API Key & Whitelist IP - BetaBotz
-
-📌 **Getting Started:**
-
-1. Visit: [api.betabotz.eu.org](https://api.betabotz.eu.org)
-2. Log in to your account (Use your registered phone number + email)
-
-### 🔑 Obtain Your API Key
-
-1. Go to the **Profile** menu
-2. Copy the `Apikey` value — Example: `liora`
-
-### 🌐 Whitelist IP (Required for API Access)
-
-To enable IP address protection so only specific IPs can access your API, follow these 5 simple steps:
-
----
-
-### 🧭 Step 1 – Go to Dashboard
-
-![1](https://files.catbox.moe/l0j028.jpg)  
-Log in to your account at [Betabotz Dashboard](https://betabotz.eu.org), then click the **profile icon** in the top-right corner.
-
----
-
-### 🧭 Step 2 – Open Settings
-
-![2](https://files.catbox.moe/8rgwhf.jpg)  
-Scroll down, find the **Settings** section, then click the **Choose an option** dropdown.
-
----
-
-### 🧭 Step 3 – Select “Whitelist IP”
-
-![3](https://files.catbox.moe/o7y7xk.jpg)  
-From the available options, select **Whitelist IP** (located at the bottom).
-
----
-
-### 🧭 Step 4 – Enter Your IP Address
-
-![4](https://files.catbox.moe/j5rj89.jpg)  
-Fill in the field with your VPS IP address. The format must be valid, for example: `192.168.1.1`.  
-📌 _You can add up to 5 IP addresses._
-
----
-
-### 🧭 Step 5 – Click "Add to Whitelist"
-
-![5](https://files.catbox.moe/qfddyc.jpg)  
-Once filled in, click the green **Add to Whitelist** button.  
-If successful, you will see this notification:
-
-> ✅ _IP successfully added to whitelist_
-
----
-
-### ✨ Tips:
-
-- Check your VPS IP with: `curl ifconfig.me`
-- Maximum allowed: **5 IP addresses**
-- To add more than 5 IPs, please contact the BetaBotz admin.
-- IPv4 format example: `103.145.13.42`
-- If your server uses **IPv6**, use the format:  
-  `2401:db00:3020:xxxx:xxxx:xxxx:xxxx:xxxx`
-
-#### Detect your VPS IP:
-
-```bash
-# Get IPv4
-curl -s ipv4.icanhazip.com
-
-# Get IPv6
-curl -s ipv6.icanhazip.com
-```
-
-## 💝 Thanks & Credits
-
-We sincerely thank the following parties who have been instrumental in the development and continuity of **Liora**:
-
-### 🧩 Project Roles
-
-<p align="center">
-  <a href="https://linkbio.co/naruyaizumi"><img src="https://img.shields.io/badge/Founder-Naruya%20Izumi-0A66C2?style=for-the-badge&logo=github&logoColor=white" /></a><br/>
-  <a href="https://wa.me/6281398961382"><img src="https://img.shields.io/badge/Owner-SXZnightmar-FF4500?style=for-the-badge&logo=whatsapp&logoColor=white" /></a><br/>
-  <a href="https://wa.me/6285167849436"><img src="https://img.shields.io/badge/Developer-Ashaa-FF69B4?style=for-the-badge&logo=whatsapp&logoColor=white" /></a><br/>
-  <a href="https://wa.me/6287831816747"><img src="https://img.shields.io/badge/Developer-Alfi%20Dev-32CD32?style=for-the-badge&logo=whatsapp&logoColor=white" /></a><br/>
-  <a href="https://wa.me/6281239621820"><img src="https://img.shields.io/badge/Developer-Zhan%20Dev-1E90FF?style=for-the-badge&logo=whatsapp&logoColor=white" /></a>
 </p>
 
-### 📦 Libraries & Frameworks
+<ul style="font-family: 'Fira Code', monospace; font-size:15px; color:#f5f5f5; list-style:none;">
+  <li>
+    <img src="https://img.icons8.com/color/24/rocket--v1.png" width="20" style="vertical-align:middle;"/>
+    <b>Lightweight & Fast</b> → optimized for speed and stability
+  </li>
+  <li>
+    <img src="https://img.icons8.com/color/24/puzzle.png" width="20" style="vertical-align:middle;"/>
+    <b>Modular & Extensible</b> → add or remove features with ease
+  </li>
+  <li>
+    <img src="https://img.icons8.com/color/24/satellite.png" width="20" style="vertical-align:middle;"/>
+    <b>API-Ready</b> → connect with external services or your own logic
+  </li>
+  <li>
+    <img src="https://img.icons8.com/color/24/idea.png" width="20" style="vertical-align:middle;"/>
+    <b>Developer-Friendly</b> → clean structure, well-documented, and open for contributions
+  </li>
+</ul>
 
-- 🧩 [`@itsukichann/baileys`](https://github.com/Itsukichann/Baileys) — main foundation for WhatsApp Web API.  
-- ❤️ **Open Source Dependencies** — to all GitHub contributors and communities 🌐.
-
-### 🌐 Public API Providers
-
-- 🔐 [BetaBotz API](https://api.betabotz.eu.org)
-- 🌈 [CloudKuImages](https://cloudkuimages.guru)
-
-### 🤖 AI Assistance
-
-<p align="center">
-  <img src="https://img.shields.io/badge/OpenAI-ChatGPT-412991?style=for-the-badge&logo=openai&logoColor=white" />
-  <img src="https://img.shields.io/badge/Google-Gemini-4285F4?style=for-the-badge&logo=google&logoColor=white" />
-  <img src="https://img.shields.io/badge/GitHub-Copilot-181717?style=for-the-badge&logo=github&logoColor=white" />
+<p style="font-family: 'Fira Code', monospace; font-size:15px; color:#eaeaea;">
+Whether you want to <b>experiment, learn, or deploy a production bot</b>, Liora is here as your reliable starting point.
 </p>
 
-### 🛡️ Environment & Deployment
+<details open>
+  <summary>
+    <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+      <img src="https://img.icons8.com/color/48/folder-invoices--v1.png" width="22" style="vertical-align:middle;"/>
+      Key Features
+    </h3>
+  </summary>
 
-| Category            | Tools / Platforms             |
-| ------------------- | ----------------------------- |
-| **Runtime**         | Node.js v22 / v23 / v24       |
-| **Language**        | JavaScript (ESM)              |
-| **Package Manager** | npm / yarn / pnpm             |
-| **Process Manager** | PM2 / Pterodactyl             |
-| **VPS**             | Hostinger, DigitalOcean, etc. |
+  <ul>
+    <li>
+      <img src="https://img.icons8.com/color/48/unlock-2.png" width="20" style="vertical-align:middle;"/>
+      <b>Full Open Source</b> — 100% transparent, no obfuscation or locked code.
+    </li>
+    <li>
+      <img src="https://img.icons8.com/color/48/puzzle.png" width="20" style="vertical-align:middle;"/>
+      <b>Modular Architecture</b> — every feature is standalone, simple to add, remove, or customize.
+    </li>
+    <li>
+      <img src="https://img.icons8.com/color/48/lightning-bolt.png" width="20" style="vertical-align:middle;"/>
+      <b>Lightweight Build</b> — only ~200MB with dependencies, optimized for performance.
+    </li>
+    <li>
+      <img src="https://img.icons8.com/color/48/document.png" width="20" style="vertical-align:middle;"/>
+      <b>Modern JavaScript (ESM)</b> — clean codebase with ES Modules for clarity and compatibility.
+    </li>
+    <li>
+      <img src="https://img.icons8.com/color/48/nodejs.png" width="20" style="vertical-align:middle;"/>
+      <b>Node.js v22+ Ready</b> — built to run on the latest Node.js (22, 23, 24).
+    </li>
+    <li>
+      <img src="https://img.icons8.com/color/48/package.png" width="20" style="vertical-align:middle;"/>
+      <b>Minimal Dependencies</b> — deploy smoothly even on low-spec VPS.
+    </li>
+    <li>
+      <img src="https://img.icons8.com/color/48/rocket.png" width="20" style="vertical-align:middle;"/>
+      <b>Easy Deployment</b> — works seamlessly with PM2, Pterodactyl, or your favorite process manager.
+    </li>
+  </ul>
 
-### ❤️ Personal Acknowledgements
+</details>
 
-- 🙏 God Almighty — for all blessings and guidance.
-- 👪 Parents & Family — for moral support and encouragement.
-- 🌍 Community & Users — for trust, feedback, and continuous contributions.
+<details open>
+  <summary>
+    <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+      <img src="https://img.icons8.com/color/48/goal.png" width="22" style="vertical-align:middle;"/>
+      Popular Features
+    </h3>
+  </summary>
 
-# 📜 License
+  <ul>
+    <li>
+      <img src="https://img.icons8.com/color/48/video.png" width="20" style="vertical-align:middle;"/>
+      <b>Media Downloader</b> — fetch videos, audio, and files from multiple platforms.
+    </li>
+    <li>
+      <img src="https://img.icons8.com/color/48/speech-bubble-with-dots.png" width="20" style="vertical-align:middle;"/>
+      <b>Interactive Commands</b> — menus, buttons, and reactions for better UX.
+    </li>
+    <li>
+      <img src="https://img.icons8.com/color/48/artificial-intelligence.png" width="20" style="vertical-align:middle;"/>
+      <b>AI Integrations</b> — connect with AI tools for smarter automation.
+    </li>
+    <li>
+      <img src="https://img.icons8.com/color/48/security-configuration.png" width="20" style="vertical-align:middle;"/>
+      <b>Group Moderation</b> — tools for admins to manage communities easily.
+    </li>
+    <li>
+      <img src="https://img.icons8.com/color/48/server.png" width="20" style="vertical-align:middle;"/>
+      <b>Server Utilities</b> — system info, monitoring, and useful admin commands.
+    </li>
+  </ul>
 
-This project is licensed under the **[Apache License 2.0](https://opensource.org/licenses/Apache-2.0)** — see the [LICENSE](LICENSE) file for details.  
-(OSI Approved License)
+</details>
 
-Please remember to give proper **credit to contributors** and **do not rebrand or resell** this project as your own.
+<details>
+  <summary>
+    <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+      <img src="https://img.icons8.com/color/48/maintenance.png" width="22" style="vertical-align:middle;"/>
+      Technical Details
+    </h3>
+  </summary>
 
-## 💖 Support
+  <table>
+    <tr>
+      <td><b>Script Name</b></td>
+      <td><img src="https://img.shields.io/badge/Liora-FFC0CB?style=for-the-badge&labelColor=2F2F2F"/></td>
+    </tr>
+    <tr>
+      <td><b>Framework</b></td>
+      <td><img src="https://img.shields.io/badge/@itsukichann%2Fbaileys-FFC0CB?style=for-the-badge&labelColor=2F2F2F"/></td>
+    </tr>
+    <tr>
+      <td><b>Language</b></td>
+      <td><img src="https://img.shields.io/badge/JavaScript%20(ESM)-FFC0CB?style=for-the-badge&logo=javascript&logoColor=white&labelColor=2F2F2F"/></td>
+    </tr>
+    <tr>
+      <td><b>Runtime</b></td>
+      <td><img src="https://img.shields.io/badge/Node.js%20v22%2F23%2F24-FFC0CB?style=for-the-badge&logo=node.js&logoColor=white&labelColor=2F2F2F"/></td>
+    </tr>
+    <tr>
+      <td><b>Package Manager</b></td>
+      <td><img src="https://img.shields.io/badge/npm%20%7C%20yarn%20%7C%20pnpm-FFC0CB?style=for-the-badge&logo=npm&logoColor=white&labelColor=2F2F2F"/></td>
+    </tr>
+    <tr>
+      <td><b>License</b></td>
+      <td><img src="https://img.shields.io/badge/Apache%202.0-FFC0CB?style=for-the-badge&logo=apache&logoColor=white&labelColor=2F2F2F"/></td>
+    </tr>
+  </table>
 
-If you find this project helpful, consider supporting me here:
+</details>
 
-<p align="center">
-  <a href="https://ko-fi.com/naruyaizumi">
-    <img src="https://img.shields.io/badge/Ko--fi-Support-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white" />
-  </a>
-  <a href="https://trakteer.id/naruyaizumi">
-    <img src="https://img.shields.io/badge/Trakteer-Donate-E31E24?style=for-the-badge&logo=buymeacoffee&logoColor=white" />
-  </a>
-  <a href="https://saweria.co/naruyaizumi">
-    <img src="https://img.shields.io/badge/Saweria-Donate-FF9E0F?style=for-the-badge&logo=githubsponsors&logoColor=white" />
-  </a>
-</p>
+<details open>
+  <summary>
+    <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+      <img src="https://img.icons8.com/color/48/key-security.png" width="22" style="vertical-align:middle;"/>
+      Setting API Key & Whitelist IP – BetaBotz
+    </h3>
+  </summary>
 
-_Your support is greatly appreciated and helps me continue my work. Thank you!_ ❤️
+  <p><b>
+    <img src="https://img.icons8.com/color/24/info.png" width="18" style="vertical-align:middle;"/> Getting Started:
+  </b></p>
 
-## 🌸 Arigatou ne~!
+  1. Visit: <a href="https://api.betabotz.eu.org">api.betabotz.eu.org</a>  
+  2. Log in to your account (Use your registered phone number + email)
 
-You've reached the end of the documentation ✨  
-Hopefully everything you've read here can be useful for your projects and experiments 🫶🏻
+  <details>
+    <summary>
+      <b><span style="color:#FFC0CB;">
+        <img src="https://img.icons8.com/color/48/api-settings.png" width="20" style="vertical-align:middle;"/>
+        Obtain Your API Key
+      </span></b>
+    </summary>
+    
+    1. Go to the <b>Profile</b> menu  
+    2. Copy the <code>Apikey</code> value — Example: <code>liora</code>
+  </details>
 
-If something is still unclear, feel free to connect through our community and socials 💬
+  <details>
+    <summary>
+      <b><span style="color:#FFC0CB;">
+        <img src="https://img.icons8.com/color/48/domain.png" width="20" style="vertical-align:middle;"/>
+        Whitelist IP (Required for API Access)
+      </span></b>
+    </summary>
 
-> 📖 This documentation was written out of **coding enthusiasm**, **open-source spirit**, and as a gentle reminder: _don’t forget to eat_ 🍓
+   To enable IP address protection so only specific IPs can access your API, follow these steps:
 
----
+   <details>
+     <summary><b><span style="color:#FFC0CB;">
+       <img src="https://img.icons8.com/color/48/dashboard-layout.png" width="18" style="vertical-align:middle;"/>
+       Step 1 – Go to Dashboard
+     </span></b></summary>
+     
+     ![1](https://files.catbox.moe/l0j028.jpg)  
+     Log in to your account at <a href="https://betabotz.eu.org">Betabotz Dashboard</a>,  
+     then click the <b>profile icon</b> in the top-right corner.
+   </details>
 
-<p align="center">
-  ✨ Powered by <b>IZUMI</b> 🦄
-</p>
+   <details>
+     <summary><b><span style="color:#FFC0CB;">
+       <img src="https://img.icons8.com/color/48/settings.png" width="18" style="vertical-align:middle;"/>
+       Step 2 – Open Settings
+     </span></b></summary>
+     
+     ![2](https://files.catbox.moe/8rgwhf.jpg)  
+     Scroll down, find the <b>Settings</b> section, then click the <b>Choose an option</b> dropdown.
+   </details>
+
+   <details>
+     <summary><b><span style="color:#FFC0CB;">
+       <img src="https://img.icons8.com/color/48/firewall.png" width="18" style="vertical-align:middle;"/>
+       Step 3 – Select “Whitelist IP”
+     </span></b></summary>
+     
+     ![3](https://files.catbox.moe/o7y7xk.jpg)  
+     From the available options, select <b>Whitelist IP</b> (located at the bottom).
+   </details>
+
+   <details>
+     <summary><b><span style="color:#FFC0CB;">
+       <img src="https://img.icons8.com/color/48/ip-address.png" width="18" style="vertical-align:middle;"/>
+       Step 4 – Enter Your IP Address
+     </span></b></summary>
+     
+     ![4](https://files.catbox.moe/j5rj89.jpg)  
+     Fill in the field with your VPS IP address. The format must be valid, for example: <code>192.168.1.1</code>.  
+     You can add up to 5 IP addresses.
+   </details>
+
+   <details>
+     <summary><b><span style="color:#FFC0CB;">
+       <img src="https://img.icons8.com/color/48/ok.png" width="18" style="vertical-align:middle;"/>
+       Step 5 – Click "Add to Whitelist"
+     </span></b></summary>
+     
+     ![5](https://files.catbox.moe/qfddyc.jpg)  
+     Once filled in, click the green <b>Add to Whitelist</b> button.  
+     If successful, you will see this notification:
+
+     <blockquote>
+       <img src="https://img.icons8.com/color/24/ok.png" width="18" style="vertical-align:middle;"/> <i>IP successfully added to whitelist</i>
+     </blockquote>
+   </details>
+
+  </details>
+
+  <details>
+    <summary>
+      <b><span style="color:#FFC0CB;">
+        <img src="https://img.icons8.com/color/48/idea.png" width="20" style="vertical-align:middle;"/>
+        Tips
+      </span></b>
+    </summary>
+
+    <ul>
+      <li><img src="https://img.icons8.com/color/24/ip-address.png" width="18"/> Check your VPS IP with: <code>curl ifconfig.me</code></li>
+      <li><img src="https://img.icons8.com/color/24/numbers.png" width="18"/> Maximum allowed: <b>5 IP addresses</b></li>
+      <li><img src="https://img.icons8.com/color/24/help.png" width="18"/> To add more than 5 IPs, contact the BetaBotz admin.</li>
+      <li><img src="https://img.icons8.com/color/24/ip-address.png" width="18"/> IPv4 example: <code>103.145.13.42</code></li>
+      <li><img src="https://img.icons8.com/color/24/ip-address.png" width="18"/> IPv6 format: <code>2401:db00:3020:xxxx:xxxx:xxxx:xxxx:xxxx</code></li>
+    </ul>
+
+    #### Detect your VPS IP:
+    ```bash
+    # Get IPv4
+    curl -s ipv4.icanhazip.com
+
+    # Get IPv6
+    curl -s ipv6.icanhazip.com
+    ```
+  </details>
+
+</details>
+
+<details open>
+  <summary>
+    <h2 style="display:inline; color:#FFC0CB; font-weight:bold;">
+      <img src="https://img.icons8.com/color/48/thank-you.png" width="26" style="vertical-align:middle;"/>
+      Thanks & Credits
+    </h2>
+  </summary>
+
+  <p>We sincerely thank the following parties who have been instrumental in the development and continuity of <b>Liora</b>:</p>
+
+  <details>
+    <summary>
+    <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+        <img src="https://img.icons8.com/color/48/conference-call.png" width="22" style="vertical-align:middle;"/>
+        Project Roles
+    </h3>
+    </summary>
+
+    <p align="center">
+      <!-- Founder (Animated Gradient Text) -->
+      <span style="font-size:1.3em; font-weight:bold; background: linear-gradient(90deg, #ff69b4, #ff1493, #ff69b4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: slide 3s linear infinite;">
+        🌸 Founder: <a href="https://linkbio.co/naruyaizumi" style="text-decoration:none; color:inherit;">Naruya Izumi</a>
+      </span>
+      <br/>
+
+      <!-- Owner (Animated Glow) -->
+      <span style="font-size:1.2em; font-weight:bold; color:#FF4500; text-shadow: 0 0 5px #FF6347, 0 0 10px #FF4500, 0 0 20px #FF6347;">
+        🔥 Owner: <a href="https://wa.me/6281398961382" style="text-decoration:none; color:inherit;">SXZnightmar</a>
+      </span>
+      <br/>
+
+      <!-- Developers (Static but styled) -->
+      <span style="font-weight:bold; color:#FF69B4;">
+        💻 Developer: <a href="https://wa.me/6285167849436" style="text-decoration:none; color:inherit;">Ashaa</a>
+      </span>
+      <br/>
+      <span style="font-weight:bold; color:#32CD32;">
+        💻 Developer: <a href="https://wa.me/6287831816747" style="text-decoration:none; color:inherit;">Alfi Dev</a>
+      </span>
+      <br/>
+      <span style="font-weight:bold; color:#1E90FF;">
+        💻 Developer: <a href="https://wa.me/6281239621820" style="text-decoration:none; color:inherit;">Zhan Dev</a>
+      </span>
+    </p>
+  </details>
+
+  <details>
+    <summary>
+      <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+        <img src="https://img.icons8.com/color/48/source-code.png" width="22" style="vertical-align:middle;"/>
+        Libraries & Frameworks
+      </h3>
+    </summary>
+
+    <ul>
+      <li><a href="https://github.com/Itsukichann/Baileys"><b>@itsukichann/baileys</b></a> — main foundation for WhatsApp Web API</li>
+      <li><b>Open Source Dependencies</b> — thanks to all GitHub contributors & communities</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>
+      <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+        <img src="https://img.icons8.com/color/48/cloud.png" width="22" style="vertical-align:middle;"/>
+        Public API Providers
+      </h3>
+    </summary>
+
+    <ul>
+      <li><a href="https://api.betabotz.eu.org"><b>BetaBotz API</b></a></li>
+      <li><a href="https://cloudkuimages.guru"><b>CloudKuImages</b></a></li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>
+      <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+        <img src="https://img.icons8.com/color/48/artificial-intelligence.png" width="22" style="vertical-align:middle;"/>
+        AI Assistance
+      </h3>
+    </summary>
+
+    <p align="center">
+      <img src="https://img.shields.io/badge/OpenAI-ChatGPT-412991?style=for-the-badge&logo=openai&logoColor=white" />
+      <img src="https://img.shields.io/badge/Google-Gemini-4285F4?style=for-the-badge&logo=google&logoColor=white" />
+      <img src="https://img.shields.io/badge/GitHub-Copilot-181717?style=for-the-badge&logo=github&logoColor=white" />
+    </p>
+  </details>
+
+  <details>
+    <summary>
+      <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+        <img src="https://img.icons8.com/color/48/server.png" width="22" style="vertical-align:middle;"/>
+        Environment & Deployment
+      </h3>
+    </summary>
+
+  | Category            | Tools / Platforms             |
+  | ------------------- | ----------------------------- |
+  | **Runtime**         | Node.js v22 / v23 / v24       |
+  | **Language**        | JavaScript (ESM)              |
+  | **Package Manager** | npm / yarn / pnpm             |
+  | **Process Manager** | PM2 / Pterodactyl             |
+  | **VPS**             | Hostinger, DigitalOcean, etc. |
+
+  </details>
+
+  <details>
+    <summary>
+      <h3 style="display:inline; color:#FFC0CB; font-weight:bold;">
+        <img src="https://img.icons8.com/color/48/handshake.png" width="22" style="vertical-align:middle;"/>
+        Personal Acknowledgements
+      </h3>
+    </summary>
+
+    <ul>
+      <li><b>God Almighty</b> — for all blessings and guidance</li>
+      <li><b>Parents & Family</b> — for moral support and encouragement</li>
+      <li><b>Community & Users</b> — for trust, feedback, and contributions</li>
+    </ul>
+  </details>
+
+</details>
+
+<details open>
+  <summary>
+    <h2 style="display:inline; color:#FFC0CB; font-weight:bold;">
+      <img src="https://img.icons8.com/color/48/agreement.png" width="26" style="vertical-align:middle;"/>
+      License
+    </h2>
+  </summary>
+
+  <p align="center">
+    <!-- SVG Typing Animation (Live) -->
+    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=500&color=FF69B4&center=true&vCenter=true&width=500&lines=Apache+License+2.0;Open+Source+Initiative+Approved" alt="Typing Animation"/>
+  </p>
+
+  <p style="font-family: 'Fira Code', monospace; font-size: 15px; color:#eaeaea;">
+    This project is licensed under the 
+    <b><a href="https://opensource.org/licenses/Apache-2.0" style="color:#FF69B4;">Apache License 2.0</a></b> — 
+    see the <a href="LICENSE" style="color:#FF69B4;">LICENSE</a> file for details.  
+    (OSI Approved License)
+  </p>
+
+  <blockquote style="font-family: 'Fira Code', monospace; color:#d1d1d1;">
+    Please remember to give proper <b>credit to contributors</b>  
+    and <b>do not rebrand or resell</b> this project as your own.
+  </blockquote>
+</details>
+
+<details open>
+  <summary>
+    <h2 style="display:inline; color:#FFC0CB; font-weight:bold;">
+      <img src="https://img.icons8.com/color/48/like--v1.png" width="26" style="vertical-align:middle;"/>
+      Support
+    </h2>
+  </summary>
+
+  <p align="center" style="margin-top:15px;">
+
+    <!-- Ko-fi -->
+    <a href="https://ko-fi.com/naruyaizumi" target="_blank" style="margin: 0 10px;">
+      <img src="https://storage.ko-fi.com/cdn/kofi3.png?v=3" width="180" alt="Support me on Ko-fi"/>
+    </a>
+
+    <!-- Trakteer -->
+    <a href="https://trakteer.id/naruyaizumi" target="_blank" style="margin: 0 10px;">
+      <img src="https://trakteer.id/images/mix/navbar-logo-lite.png" width="160" alt="Dukung saya di Trakteer"/>
+    </a>
+
+    <!-- Saweria -->
+    <a href="https://saweria.co/naruyaizumi" target="_blank" style="margin: 0 10px;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Saweria_logo.png" width="160" alt="Donasi via Saweria"/>
+    </a>
+
+  </p>
+
+  <p align="center">
+    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=FF69B4&center=true&vCenter=true&width=500&lines=Your+support+keeps+this+project+alive!;Thank+you+for+helping+me+grow" alt="Support Typing Animation"/>
+  </p>
+</details>
+
+<details open>
+  <summary>
+    <h2 style="display:inline; color:#FF69B4; font-weight:bold;">
+      <img src="https://img.icons8.com/color/48/sakura.png" width="26" style="vertical-align:middle;"/>
+      Arigatou ne~!
+    </h2>
+  </summary>
+
+  <p align="center">
+    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=1000&color=FF69B4&center=true&vCenter=true&width=700&lines=You've+reached+the+end+of+the+documentation!;Thanks+for+reading+and+supporting+Liora!;Keep+coding,+keep+smiling,+stay+awesome" alt="Typing Animation"/>
+  </p>
+
+  <p align="center">
+    <img src="https://svg-banners.vercel.app/api?type=glitch&text1=Thank%20You&width=800&height=120" alt="Glitch Banner"/>
+  </p>
+
+  <p align="center" style="font-size:16px; color:#eaeaea;">
+    Hopefully everything you've read here can be useful for your projects and experiments.  
+    If something is still unclear, feel free to connect through our community and socials 
+    <img src="https://img.icons8.com/color/24/speech-bubble.png" width="20" style="vertical-align:middle;"/>
+  </p>
+
+  <blockquote align="center" style="font-size:15px; color:#d1d1d1;">
+    <img src="https://img.icons8.com/color/24/book.png" width="20" style="vertical-align:middle;"/> 
+    This documentation was written out of <b>coding enthusiasm</b>,  
+    <b>open-source spirit</b>, and as a gentle reminder:  
+    <i>don’t forget to eat <img src="https://img.icons8.com/color/24/strawberry.png" width="20" style="vertical-align:middle;"/></i>
+  </blockquote>
+
+  <hr/>
+
+  <p align="center">
+    <img src="https://svg-banners.vercel.app/api?type=rainbow&text1=Powered%20by%20IZUMI&width=800&height=120" alt="Rainbow Banner"/>
+    <br/>
+  </p>
+</details>
 
 ![footer](https://capsule-render.vercel.app/api?type=waving&color=0:FFC0CB,50:FFE4E1,100:E6E6FA&height=150&section=footer)
