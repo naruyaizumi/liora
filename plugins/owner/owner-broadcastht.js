@@ -14,7 +14,6 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   const totalGroups = allGroups.length
   const groups = []
   let muted = 0
-
   for (const jid of allGroups) {
     const chatDb = global.db.data.chats[jid] || {}
     if (chatDb.mute) {
