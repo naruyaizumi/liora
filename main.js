@@ -72,9 +72,15 @@ async function IZUMI() {
             );
         }, 3000);
     }
-    setInterval(async () => {
-        if (global.db.data) await global.db.write().catch(console.error);
-    }, 10 * 1000);
+    setInterval(() => {
+        if (global.db?.data) {
+            try {
+                global.db.write();
+            } catch (err) {
+                console.error(err);
+                }
+            }
+        }, 5 * 1000);
     let isInit = true;
     let handler = await import("./handler.js");
     global.reloadHandler = async function (restartConn) {

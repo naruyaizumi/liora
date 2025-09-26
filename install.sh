@@ -76,10 +76,10 @@ fi
 export NVM_DIR
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-# Install and use Node.js v24
-log "Installing Node.js v24..."
-nvm install 24
-nvm use 24
+# Install and use Node.js v22
+log "Installing Node.js v22..."
+nvm install 22
+nvm use 22
 
 # Clone and setup project
 log "Cloning Liora repository..."
