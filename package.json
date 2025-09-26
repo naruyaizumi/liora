@@ -21,11 +21,11 @@
     "dependencies": {
         "awesome-phonenumber": "^7.5.0",
         "baileys": "github:Itsukichann/Baileys",
+        "better-sqlite3": "^12.4.1",
         "chalk": "^5.6.2",
         "cheerio": "^1.1.2",
         "dotenv": "^17.2.2",
         "file-type": "^21.0.0",
-        "lowdb": "^7.0.1",
         "node-cron": "^4.2.1",
         "node-webpmux": "^3.2.1",
         "pino": "^9.11.0",
