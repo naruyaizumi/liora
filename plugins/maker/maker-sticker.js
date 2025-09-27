@@ -18,10 +18,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       if (!media) return m.reply("🍩 *Gagal download media!*")
       file = await conn.getFile(media, true)
     }
-    
-    if (file.data && file.data.length > 1024 * 1024) {
-    return m.reply(`🍓 *File terlalu besar! Maksimal 1 MB* 🧁`)
-    }
 
     let buff = await sticker(file, {
       packName: global.config.stickpack || "",
