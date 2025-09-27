@@ -9,21 +9,27 @@ let handler = async (m, { conn }) => {
         q = m.quoted.msg || m.quoted;
         mime = q.mimetype || "";
     }
+
     if (!mime || !/image\/(jpe?g|png|webp)/.test(mime)) {
         return m.reply("🍓 *Kirim/reply gambar yang ingin dicek resolusinya!*");
     }
+
     try {
-        let file = await conn.downloadM(q, "image", false);
-        if (!file || !file.length) return m.reply("🍩 *Gagal mengunduh media!*");
-        let { width, height } = await sharp(file).metadata();
+        let buffer = await q.download?.().catch(() => null);
+        if (!buffer || !buffer.length) {
+            return m.reply("🍩 *Gagal mengunduh media!*");
+        }
+
+        let { width, height } = await sharp(buffer).metadata();
         let result = `
 🍬 *CEK RESOLUSI GAMBAR* 🍬
 ━━━━━━━━━━━━━━━━━━━
 🧁 *Ukuran: ${width} × ${height} px*
-🍦 *Ukuran file: ${(file.length / 1024).toFixed(2)} KB*
+🍦 *Ukuran file: ${(buffer.length / 1024).toFixed(2)} KB*
 ━━━━━━━━━━━━━━━━━━━
 `.trim();
-        await conn.sendFile(m.chat, file, "", result, m);
+
+        await conn.sendFile(m.chat, buffer, "", result, m);
     } catch (e) {
         console.error(e);
         m.reply(`🍡 *Gagal membaca resolusi gambar.*\n\n${e.message}`);

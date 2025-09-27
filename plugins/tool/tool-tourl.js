@@ -3,28 +3,37 @@ import { uploader } from "../../lib/uploader.js";
 let handler = async (m, { conn }) => {
     try {
         await global.loading(m, conn);
+
         let q = m.quoted ? m.quoted : m;
-        let mime = (q.msg || q).mimetype || "";
+        let msg = q.msg || q;
+        let mime = msg.mimetype || "";
         if (!mime) {
             await global.loading(m, conn, true);
             return m.reply(`🍡 *Balas pesan yang berisi file atau media ya sayang~*`);
         }
-        let media = await q.download().catch(() => null);
-        if (!media) {
+
+        let buffer = await q.download?.().catch(() => null);
+        if (!buffer || !buffer.length) {
             await global.loading(m, conn, true);
             return m.reply(`🍩 *Gagal mengunduh media-nya yaa~*`);
         }
-        let uploadedUrl = await uploader(media).catch(() => null);
+
+        let uploadedUrl = await uploader(buffer).catch(() => null);
         if (!uploadedUrl) {
             await global.loading(m, conn, true);
-            return m.reply(`🧁 *Gagal mengunggah file ke server. Coba lagi nanti yaa~*`);
+            return m.reply(`🧁 *Gagal mengunggah file ke Catbox.moe. Coba lagi nanti yaa~*`);
         }
+
         let resultText = `
 🍓 *File berhasil diunggah!*
 ━━━━━━━━━━━━━━━━━━━
-🍡 *Cloudku Uploader: ${uploadedUrl}*
-🍩 *Ukuran File: ${(media.length / 1024).toFixed(2)} KB*
+🍡 *Catbox.moe Uploader:*
+*${uploadedUrl}*
+
+🍩 *Ukuran File: ${(buffer.length / 1024).toFixed(2)} KB*
+━━━━━━━━━━━━━━━━━━━
 `.trim();
+
         await conn.sendMessage(
             m.chat,
             {
@@ -36,6 +45,14 @@ let handler = async (m, { conn }) => {
                         buttonParamsJson: JSON.stringify({
                             display_text: `🍰 Salin Link`,
                             copy_code: uploadedUrl,
+                        }),
+                    },
+                    {
+                        name: "cta_url",
+                        buttonParamsJson: JSON.stringify({
+                            display_text: "📂 Buka File",
+                            url: uploadedUrl,
+                            merchant_url: uploadedUrl,
                         }),
                     },
                 ],

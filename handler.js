@@ -580,23 +580,20 @@ export async function participantsUpdate({ id, participants, action }) {
                     .replace("@subject", await this.getName(id))
                     .replace("@desc", groupMetadata.desc?.toString() || "unknown")
                     .replace("@user", userTag);
-                let memberCount = groupMetadata.participants.length;
                 msgOptions = {
                     image: { url: pp },
                     caption: text.trim(),
-                    title: "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗗𝗮𝘁𝗮𝗻𝗴 𝗞𝗮𝗸",
-                    footer: `Kamu adalah member ke-${memberCount}.`,
-                    interactiveButtons: [
-                        {
-                            name: "quick_reply",
-                            buttonParamsJson: JSON.stringify({
-                                display_text: "🌥️ Intro Sekarang",
-                                id: ".intro",
-                            }),
+                    contextInfo: {
+                        mentionedJid: [user],
+                        externalAdReply: {
+                            title: "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗗𝗮𝘁𝗮𝗻𝗴 𝗞𝗮𝗸",
+                            body: `Kamu adalah member ke-${groupMetadata.participants.length}.`,
+                            thumbnailUrl: pp,
+                            sourceUrl: global.config.group || "",
+                            mediaType: 1,
+                            renderLargerThumbnail: true,
                         },
-                    ],
-                    mentions: [user],
-                    hasMediaAttachment: false,
+                    },
                 };
                 break;
             }
@@ -606,24 +603,20 @@ export async function participantsUpdate({ id, participants, action }) {
                     .replace("@subject", await this.getName(id))
                     .replace("@desc", groupMetadata.desc?.toString() || "unknown")
                     .replace("@user", userTag);
-                let memberCount = groupMetadata.participants.length;
                 msgOptions = {
                     image: { url: pp },
                     caption: text.trim(),
-                    title: "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗧𝗶𝗻𝗴𝗴𝗮𝗹 𝗞𝗮𝗸",
-                    footer: `Kini grup berisi ${memberCount} anggota.`,
-                    interactiveButtons: [
-                        {
-                            name: "cta_url",
-                            buttonParamsJson: JSON.stringify({
-                                display_text: `${name} 💔`,
-                                url: `https://wa.me/${user.replace("@s.whatsapp.net", "")}`,
-                                merchant_url: `https://wa.me/${user.replace("@s.whatsapp.net", "")}`,
-                            }),
+                    contextInfo: {
+                        mentionedJid: [user],
+                        externalAdReply: {
+                            title: "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗧𝗶𝗻𝗴𝗴𝗮𝗹 𝗞𝗮𝗸",
+                            body: `Kini grup berisi ${groupMetadata.participants.length} anggota.`,
+                            thumbnailUrl: pp,
+                            sourceUrl: `https://wa.me/${user.replace("@s.whatsapp.net", "")}`,
+                            mediaType: 1,
+                            renderLargerThumbnail: true,
                         },
-                    ],
-                    mentions: [user],
-                    hasMediaAttachment: false,
+                    },
                 };
                 break;
             }

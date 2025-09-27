@@ -41,4 +41,4 @@ handler.command = /^s(tic?ker)?(gif)?$/i;
 
 export default handler;
 
-const isUrl = (text) => /^https?:\/\/.+\.(jpe?g|png|gif|mp4|webm)$/i.test(text);
+const isUrl = (text) => /^https?:\/\/.+\.(jpe?g|png|gif|mp4)$/i.test(text);
