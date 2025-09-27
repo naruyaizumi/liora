@@ -75,10 +75,9 @@ class data {
         }
     }
     write() {
-        sqlite.prepare("INSERT OR REPLACE INTO store (key, value) VALUES (?, ?)").run(
-            "db",
-            JSON.stringify(this.data)
-        );
+        sqlite
+            .prepare("INSERT OR REPLACE INTO store (key, value) VALUES (?, ?)")
+            .run("db", JSON.stringify(this.data));
     }
 }
 

@@ -1,40 +1,40 @@
 name: 🍧 njsscan SARIF
 
 on:
-  push:
-    branches: 
-      - main
-  pull_request:
-    branches: 
-      - main
-  schedule:
-    - cron: '0 22 * * *'
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+    schedule:
+        - cron: "0 22 * * *"
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  njsscan:
-    runs-on: ubuntu-latest
-    name: 🔍 Run njsscan
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-    steps:
-      - name: 📥 Checkout Repository
-        uses: actions/checkout@v4
+    njsscan:
+        runs-on: ubuntu-latest
+        name: 🔍 Run njsscan
+        permissions:
+            contents: read
+            security-events: write
+            actions: read
+        steps:
+            - name: 📥 Checkout Repository
+              uses: actions/checkout@v4
 
-      - name: 📦 Install njsscan
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install njsscan
+            - name: 📦 Install njsscan
+              run: |
+                  python3 -m pip install --upgrade pip
+                  pip install njsscan
 
-      - name: 🚨 Run njsscan
-        run: |
-          njsscan . --sarif --output results.sarif || true
+            - name: 🚨 Run njsscan
+              run: |
+                  njsscan . --sarif --output results.sarif || true
 
-      - name: 📤 Upload njsscan SARIF Report
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: results.sarif
+            - name: 📤 Upload njsscan SARIF Report
+              uses: github/codeql-action/upload-sarif@v3
+              with:
+                  sarif_file: results.sarif

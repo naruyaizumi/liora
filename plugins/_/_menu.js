@@ -146,7 +146,7 @@ END:VCARD`;
             return await conn.sendMessage(
                 m.chat,
                 {
-                    document: { url: 'https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg' },
+                    document: { url: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg" },
                     mimetype: "application/pdf",
                     fileName: `🌸 ${global.config.watermark}`,
                     fileLength: 0,
@@ -159,7 +159,7 @@ END:VCARD`;
                             title: global.config.author,
                             body: subtitle,
                             mediaType: 1,
-                            thumbnailUrl: 'https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg',
+                            thumbnailUrl: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg",
                             sourceUrl: global.config.website,
                             renderLargerThumbnail: true,
                         },
@@ -276,7 +276,7 @@ END:VCARD`;
         await conn.sendMessage(
             m.chat,
             {
-                document: { url: 'https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg' },
+                document: { url: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg" },
                 mimetype: "application/pdf",
                 fileName: `🌸 ${global.config.watermark}.pdf`,
                 fileLength: 0,
@@ -289,7 +289,7 @@ END:VCARD`;
                         title: global.config.author,
                         body: subtitle,
                         mediaType: 1,
-                        thumbnailUrl: 'https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg',
+                        thumbnailUrl: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg",
                         sourceUrl: global.config.website,
                         renderLargerThumbnail: true,
                     },

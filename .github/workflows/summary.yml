@@ -1,35 +1,35 @@
 name: 🍡 Summarize New Issues 🍩
 
 on:
-  issues:
-    types: [opened]
+    issues:
+        types: [opened]
 
 jobs:
-  summary:
-    name: 🍪 AI Issue Summary
-    runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      models: read
-      contents: read
+    summary:
+        name: 🍪 AI Issue Summary
+        runs-on: ubuntu-latest
+        permissions:
+            issues: write
+            models: read
+            contents: read
 
-    steps:
-      - name: 🍬 Checkout Repository
-        uses: actions/checkout@v4
+        steps:
+            - name: 🍬 Checkout Repository
+              uses: actions/checkout@v4
 
-      - name: 🍭 Run Liora AI Inference
-        id: inference
-        uses: actions/ai-inference@v1
-        with:
-          prompt: |
-            Summarize the following GitHub issue in one paragraph:
-            Title: ${{ github.event.issue.title }}
-            Body: ${{ github.event.issue.body }}
+            - name: 🍭 Run Liora AI Inference
+              id: inference
+              uses: actions/ai-inference@v1
+              with:
+                  prompt: |
+                      Summarize the following GitHub issue in one paragraph:
+                      Title: ${{ github.event.issue.title }}
+                      Body: ${{ github.event.issue.body }}
 
-      - name: 🍰 Comment with AI Summary
-        run: |
-          gh issue comment $ISSUE_NUMBER --body '${{ steps.inference.outputs.response }}'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          RESPONSE: ${{ steps.inference.outputs.response }}
+            - name: 🍰 Comment with AI Summary
+              run: |
+                  gh issue comment $ISSUE_NUMBER --body '${{ steps.inference.outputs.response }}'
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  ISSUE_NUMBER: ${{ github.event.issue.number }}
+                  RESPONSE: ${{ steps.inference.outputs.response }}

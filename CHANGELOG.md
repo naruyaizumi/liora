@@ -50,27 +50,31 @@
 ## Version 4.0.3 — 2025-09-21 (Patch Update)
 
 ### `Added`
+
 - Automatic **self-update system** (auto check & pull updates).
 
 ### `Removed`
+
 - _(No features removed in this patch update)._
 
 ### `Fixed`
+
 - Improved **MP3 handling**.
 - Fixed **PTT (Push-to-Talk / voice notes)** reliability.
-
 
 ---
 
 ## Version 4.1.0 — (Minor Update)
 
 ### `Added`
+
 - **cekreso** command.
 - **resize** image handler.
 - **SQLite database** (replacing lowdb).
 - **Native cron (C++ based)** for scheduling.
 
 ### `Removed`
+
 - Tag owner (command cleanup).
 - Lowdb (migrated to SQLite).
 - Node-cron (migrated to native C++).
@@ -78,6 +82,7 @@
 - Exif module (replaced by custom logic).
 
 ### `Fixed`
+
 - Uploader stability.
 - Security in fetch requests.
 - Import path resolution.

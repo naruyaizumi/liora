@@ -1,50 +1,50 @@
 name: 🚀 Auto Release
 
 on:
-  push:
-    branches: ["main"]
+    push:
+        branches: ["main"]
 
 permissions:
-  contents: write   # penting! biar bisa create release
+    contents: write # penting! biar bisa create release
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - name: 📥 Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
-      - name: 🧐 Check version vs latest tag
-        id: check_version
-        run: |
-          NEW_VERSION=$(jq -r .version package.json)
-          echo "New version: $NEW_VERSION"
+            - name: 🧐 Check version vs latest tag
+              id: check_version
+              run: |
+                  NEW_VERSION=$(jq -r .version package.json)
+                  echo "New version: $NEW_VERSION"
 
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          OLD_VERSION=${LAST_TAG#v}
-          echo "Last tag: $LAST_TAG"
-          echo "Old version: $OLD_VERSION"
+                  LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+                  OLD_VERSION=${LAST_TAG#v}
+                  echo "Last tag: $LAST_TAG"
+                  echo "Old version: $OLD_VERSION"
 
-          if [ "$NEW_VERSION" != "$OLD_VERSION" ]; then
-            echo "version_changed=true" >> $GITHUB_OUTPUT
-            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-            echo "update_type=Auto" >> $GITHUB_OUTPUT
-          else
-            echo "version_changed=false" >> $GITHUB_OUTPUT
-          fi
+                  if [ "$NEW_VERSION" != "$OLD_VERSION" ]; then
+                    echo "version_changed=true" >> $GITHUB_OUTPUT
+                    echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+                    echo "update_type=Auto" >> $GITHUB_OUTPUT
+                  else
+                    echo "version_changed=false" >> $GITHUB_OUTPUT
+                  fi
 
-      - name: 🚀 Create GitHub Release
-        if: steps.check_version.outputs.version_changed == 'true'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.check_version.outputs.version }}
-          name: Release v${{ steps.check_version.outputs.version }}
-          body: |
-            🎉 Automatic release for version **v${{ steps.check_version.outputs.version }}**  
-            🔖 Update type: **${{ steps.check_version.outputs.update_type }}**  
+            - name: 🚀 Create GitHub Release
+              if: steps.check_version.outputs.version_changed == 'true'
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: v${{ steps.check_version.outputs.version }}
+                  name: Release v${{ steps.check_version.outputs.version }}
+                  body: |
+                      🎉 Automatic release for version **v${{ steps.check_version.outputs.version }}**  
+                      🔖 Update type: **${{ steps.check_version.outputs.update_type }}**  
 
-            📄 For full details, check the [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)  
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                      📄 For full details, check the [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

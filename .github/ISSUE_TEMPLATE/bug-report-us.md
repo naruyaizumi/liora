@@ -7,13 +7,16 @@ assignees: []
 ---
 
 ## 🍰 Bug Description
+
 Explain in detail the bug you encountered.  
-Example: *"Bot crashes when sending a photo message."*
+Example: _"Bot crashes when sending a photo message."_
 
 ---
 
 ## 🍡 Steps to Reproduce
+
 Steps to reproduce the bug:
+
 1. Run the command ...
 2. Send a file ...
 3. Bug appears with error ...
@@ -21,14 +24,18 @@ Steps to reproduce the bug:
 ---
 
 ## 🧁 Screenshot / Logs
+
 Please attach proof:
+
 - 📸 Screenshot of the error
 - 📜 Terminal/log output (copy paste directly)
 
 ---
 
 ## 🍬 User Environment
+
 Fill with your setup info:
+
 - 🖥️ **OS**: (e.g., Ubuntu 24, Windows 11, Termux)
 - 🟢 **Node.js**: (e.g., v22.x)
 - 🍓 **Liora Version**: (e.g., v1.2.3)
@@ -37,11 +44,13 @@ Fill with your setup info:
 ---
 
 ## 🍦 Expected Behavior
+
 What should have happened?  
-Example: *"Bot should reply with a sticker, not crash."*
+Example: _"Bot should reply with a sticker, not crash."_
 
 ---
 
 ## 🍪 Additional Notes
+
 Any other details that might be useful.  
-Example: *"This only happens when pairing with a secondary number."*
+Example: _"This only happens when pairing with a secondary number."_

@@ -1,34 +1,34 @@
 name: 🍡 Sync README to Profiles 🍩
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - README.md
+    push:
+        branches:
+            - main
+        paths:
+            - README.md
 
 permissions:
-  contents: write
+    contents: write
 
 jobs:
-  sync:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 🍙 Checkout Liora repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    sync:
+        runs-on: ubuntu-latest
+        steps:
+            - name: 🍙 Checkout Liora repo
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
-      - name: 🍩 Clone Izumi Profile Repo
-        run: |
-          git clone https://x-access-token:${{ secrets.PAT_IZUMI }}@github.com/naruyaizumi/naruyaizumi.git izumi-profile
+            - name: 🍩 Clone Izumi Profile Repo
+              run: |
+                  git clone https://x-access-token:${{ secrets.PAT_IZUMI }}@github.com/naruyaizumi/naruyaizumi.git izumi-profile
 
-      - name: 🍬 Commit & Force Push to Izumi Profile
-        run: |
-          cp README.md izumi-profile/README.md
-          cd izumi-profile
-          git config user.name "🍡 Liora Bot"
-          git config user.email "liora.bot.official@gmail.com"
-          git add README.md || true
-          git commit -m "🍰 Sync README from Liora Repo → Izumi Profile" || echo "✨ No changes to commit"
-          git push origin main --force
+            - name: 🍬 Commit & Force Push to Izumi Profile
+              run: |
+                  cp README.md izumi-profile/README.md
+                  cd izumi-profile
+                  git config user.name "🍡 Liora Bot"
+                  git config user.email "liora.bot.official@gmail.com"
+                  git add README.md || true
+                  git commit -m "🍰 Sync README from Liora Repo → Izumi Profile" || echo "✨ No changes to commit"
+                  git push origin main --force

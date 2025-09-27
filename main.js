@@ -73,17 +73,21 @@ async function IZUMI() {
             );
         }, 3000);
     }
-    
-    schedule("autosave", async () => {
+
+    schedule(
+        "autosave",
+        async () => {
             if (global.db?.data) {
                 try {
-                    global.db.write()
+                    global.db.write();
                 } catch (e) {
-                    console.error("DB autosave gagal:", e)
-                        }
-                    }
-            }, { intervalSeconds: 5 })
-    
+                    console.error("DB autosave gagal:", e);
+                }
+            }
+        },
+        { intervalSeconds: 5 }
+    );
+
     let isInit = true;
     let handler = await import("./handler.js");
     global.reloadHandler = async function (restartConn) {

@@ -485,8 +485,7 @@ ${text}
                                         title: "💥 Plugin Error Detected!",
                                         body: "📄 Lihat log error di atas",
                                         mediaType: 1,
-                                        thumbnailUrl:
-                                            "",
+                                        thumbnailUrl: "",
                                         renderLargerThumbnail: true,
                                     },
                                 },
