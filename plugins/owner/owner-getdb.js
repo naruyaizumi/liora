@@ -1,6 +1,6 @@
 import fs from "fs";
 let handler = async (m, { conn }) => {
-    let sesi = await fs.readFileSync("./database.json");
+    let sesi = await fs.readFileSync("./database.db");
     return await conn.sendMessage(
         m.chat,
         { document: sesi, mimetype: "application/x-sqlite3", fileName: "database.db" },
