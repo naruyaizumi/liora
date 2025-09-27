@@ -3,7 +3,7 @@ let handler = async (m, { conn }) => {
     let sesi = await fs.readFileSync("./database.json");
     return await conn.sendMessage(
         m.chat,
-        { document: sesi, mimetype: "application/json", fileName: "database.json" },
+        { document: sesi, mimetype: "application/x-sqlite3", fileName: "database.db" },
         { quoted: m }
     );
 };
