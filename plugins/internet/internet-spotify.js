@@ -33,7 +33,7 @@ let handler = async (m, { conn, args, usedPrefix }) => {
         await conn.sendMessage(
             m.chat,
             {
-                image: { url: "https://files.cloudkuimages.guru/images/SlT70NDi.jpg" },
+                image: { url: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg" },
                 caption: `🍛 *Ditemukan ${json.result.data.length} hasil pencarian:*\n\n🍡 *Silakan pilih lagu dari daftar di bawah ini untuk diunduh.*`,
                 footer: "🍩 Tekan tombol di bawah untuk melihat pilihan.",
                 title: "🍱 Spotify Downloader",

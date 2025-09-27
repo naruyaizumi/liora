@@ -13,7 +13,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         await global.loading(m, conn);
         let avatar = await conn
             .profilePictureUrl(q.sender, "image")
-            .catch((_) => "https://cloudkuimages.guru/uploads/images/cJuqy1o2.jpg"); // eslint-disable-line no-unused-vars
+            .catch((_) => "https://i.ibb.co.com/WY9SCc2/150fa8800b0a0d5633abc1d1c4db3d87.jpg"); // eslint-disable-line no-unused-vars
         if (!/image\/(jpe?g|png)|opus|webp/i.test(mime)) {
             let req = await fakechat(txt, q.name || m.pushName || "User", avatar, false, true);
             let stiker = await sticker(

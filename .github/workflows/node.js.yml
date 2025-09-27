@@ -31,7 +31,7 @@ jobs:
               run: yarn audit || true
 
             - name: 🍵 Check Unused Dependencies (depcheck)
-              run: npx depcheck || true
+              run: npx depcheck --ignores=node-addon-api || true
 
             - name: 🍩 Check Outdated Dependencies (npm-check)
               run: npx npm-check || true

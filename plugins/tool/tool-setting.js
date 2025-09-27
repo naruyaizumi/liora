@@ -104,8 +104,7 @@ let handler = async (m, { conn, isOwner, isAdmin, args, usedPrefix, command }) =
         return conn.sendMessage(
             m.chat,
             {
-                image: { url: "https://files.cloudkuimages.guru/images/2z60n7aV.jpg" },
-                caption: "🍽️ *Silakan pilih fitur yang ingin kamu aktifkan/nonaktifkan:*",
+                text: "🍽️ *Silakan pilih fitur yang ingin kamu aktifkan/nonaktifkan:*",
                 footer: "*Interactive Settings Menu* 🍱",
                 title: "🍱 Bot Settings Menu",
                 interactiveButtons: buttons,

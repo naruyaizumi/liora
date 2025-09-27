@@ -12,7 +12,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
     await conn.sendMessage(
         m.chat,
         {
-            image: { url: "https://files.cloudkuimages.guru/images/JqeFvP45.jpg" },
+            image: { url: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg" },
             caption: `🍱 *Hasil pencarian Aptoide untuk: ${text}*`,
             footer: "📦 Aptoide Downloader",
             title: "🍜 Pilih aplikasi yang ingin diunduh",

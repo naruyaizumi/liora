@@ -71,22 +71,6 @@ let handler = async (m, { conn, usedPrefix, command, isOwner, isMods, isPrems, a
               : isPrems
                 ? "💖 Ptemium User"
                 : "🍬 Free User";
-        if (!global._imageIndex) global._imageIndex = 0;
-        let imageList = [
-            "https://cloudkuimages.guru/uploads/images/BEtWe2PL.jpg",
-            "https://cloudkuimages.guru/uploads/images/luUB5CFd.jpg",
-            "https://cloudkuimages.guru/uploads/images/AJ0vCNdS.jpg",
-            "https://cloudkuimages.guru/uploads/images/NnXbWf3T.jpg",
-            "https://cloudkuimages.guru/uploads/images/MJCVh29a.jpg",
-            "https://cloudkuimages.guru/uploads/images/E7U3vuhc.jpg",
-            "https://cloudkuimages.guru/uploads/images/G1HOQXsi.jpg",
-            "https://cloudkuimages.guru/uploads/images/tGMXCRNO.jpg",
-            "https://cloudkuimages.guru/uploads/images/YrqmiNRZ.jpg",
-            "https://cloudkuimages.guru/uploads/images/cBjwWlK9.jpg",
-            "https://cloudkuimages.guru/uploads/images/zUe9nkQD.jpg",
-        ];
-        let image = imageList[global._imageIndex % imageList.length];
-        global._imageIndex++;
         let vcard = `BEGIN:VCARD
 VERSION:3.0
 N:;ttname;;;
@@ -144,7 +128,7 @@ END:VCARD`;
 🧁 *Name: ${conn.user.name}*
 🍒 *Version: ${Version}*
 🍡 *Mode Bot: ${mode}*
-🍩 *Database: ${bytesToMB(fs.readFileSync("./database.json").byteLength)} Mb*
+🍩 *Database: ${bytesToMB(fs.readFileSync("./database.db").byteLength)} Mb*
 🍧 *Uptime: ${uptime}*
 🍮 *Machine Uptime: ${muptime}*
 🍫 *Command Today: ${commandToday}*
@@ -162,7 +146,7 @@ END:VCARD`;
             return await conn.sendMessage(
                 m.chat,
                 {
-                    document: { url: image },
+                    document: { url: 'https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg' },
                     mimetype: "application/pdf",
                     fileName: `🌸 ${global.config.watermark}`,
                     fileLength: 0,
@@ -175,7 +159,7 @@ END:VCARD`;
                             title: global.config.author,
                             body: subtitle,
                             mediaType: 1,
-                            thumbnailUrl: image,
+                            thumbnailUrl: 'https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg',
                             sourceUrl: global.config.website,
                             renderLargerThumbnail: true,
                         },
@@ -292,7 +276,7 @@ END:VCARD`;
         await conn.sendMessage(
             m.chat,
             {
-                document: { url: image },
+                document: { url: 'https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg' },
                 mimetype: "application/pdf",
                 fileName: `🌸 ${global.config.watermark}.pdf`,
                 fileLength: 0,
@@ -305,7 +289,7 @@ END:VCARD`;
                         title: global.config.author,
                         body: subtitle,
                         mediaType: 1,
-                        thumbnailUrl: image,
+                        thumbnailUrl: 'https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg',
                         sourceUrl: global.config.website,
                         renderLargerThumbnail: true,
                     },

@@ -93,7 +93,7 @@ messageText += `\n━━━━━━━━━━━━━━━━━━━\n`
 }
 messageText += `🌐 *Page : ${pageInput}/${totalPages}*
 🍪 *Total Users : ${totalItems}*`
-const thumbnailUrl = "https://files.cloudkuimages.guru/images/f72078e553a2.jpg"
+const thumbnailUrl = "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg"
 const externalAdReply = {
 title: "🍩 𝙇𝙄𝙎𝙏 𝙐𝙎𝙀𝙍𝙎 & 𝙎𝙀𝙍𝙑𝙀𝙍𝙎",
 body: new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" }),

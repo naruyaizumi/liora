@@ -1,7 +1,7 @@
 let handler = async (m, { conn, participants, groupMetadata }) => {
     let pp = await conn
         .profilePictureUrl(m.chat, "image")
-        .catch((_) => "https://cloudkuimages.guru/uploads/images/pg5XDGVr.jpg"); // eslint-disable-line no-unused-vars
+        .catch((_) => "https://i.ibb.co.com/WY9SCc2/150fa8800b0a0d5633abc1d1c4db3d87.jpg"); // eslint-disable-line no-unused-vars
     const { subject } = groupMetadata;
     const groupAdmins = participants.filter((p) => p.admin);
     const mentionJids = groupAdmins.map((p) => p.id);

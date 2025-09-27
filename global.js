@@ -3,7 +3,7 @@ import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { platform } from "process";
 import yargs from "yargs";
-import { JSONFilePreset } from "lowdb/node";
+import Database from "better-sqlite3";
 
 global.__filename = function filename(pathURL = import.meta.url, rmPrefix = platform !== "win32") {
     return rmPrefix
@@ -42,22 +42,50 @@ global.API = (name, path = "/", query = {}, apikeyqueryname) =>
         : "");
 
 global.timestamp = { start: new Date() };
-
 global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse());
 
-const ROOT = global.__dirname(import.meta.url);
-const db = await JSONFilePreset(path.join(ROOT, "./database.json"), {
-    users: {},
-    chats: {},
-    stats: {},
-    settings: {},
-    bots: {},
-});
+const dbPath = path.join(global.__dirname(import.meta.url), "database.db");
+const sqlite = new Database(dbPath);
+
+sqlite.exec(`
+CREATE TABLE IF NOT EXISTS store (
+  key TEXT PRIMARY KEY,
+  value TEXT
+);
+`);
+
+class data {
+    constructor() {
+        this.data = {
+            users: {},
+            chats: {},
+            stats: {},
+            settings: {},
+            bots: {},
+        };
+    }
+    read() {
+        const row = sqlite.prepare("SELECT value FROM store WHERE key = ?").get("db");
+        if (row) {
+            try {
+                this.data = JSON.parse(row.value);
+            } catch (e) {
+                console.error("❌ DB parse error:", e);
+            }
+        }
+    }
+    write() {
+        sqlite.prepare("INSERT OR REPLACE INTO store (key, value) VALUES (?, ?)").run(
+            "db",
+            JSON.stringify(this.data)
+        );
+    }
+}
+
+const db = new data();
+db.read();
 global.db = db;
-global.loadDatabase = async function () {
-    await db.read();
-};
-await global.loadDatabase();
+global.loadDatabase = () => db.read();
 
 global.loading = async (m, conn, back = false) => {
     if (!back) {
@@ -89,7 +117,7 @@ global.dfail = (type, m, conn) => {
                         title: "🍡 AKSES DITOLAK",
                         body: global.config.watermark,
                         mediaType: 1,
-                        thumbnailUrl: "https://cloudkuimages.guru/uploads/images/WNLivXmV.jpg",
+                        thumbnailUrl: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg",
                         renderLargerThumbnail: true,
                     },
                 },

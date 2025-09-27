@@ -4,6 +4,7 @@ process.on("unhandledRejection", console.error);
 import "./config.js";
 import "./global.js";
 import { naruyaizumi, protoType, serialize } from "./lib/simple.js";
+import { schedule } from "./lib/cron.js";
 import {
     fetchLatestBaileysVersion,
     makeCacheableSignalKeyStore,
@@ -72,9 +73,16 @@ async function IZUMI() {
             );
         }, 3000);
     }
-    setInterval(async () => {
-        if (global.db.data) await global.db.write().catch(console.error);
-    }, 10 * 1000);
+    schedule("autosave", async () => {
+            if (global.db?.data) {
+        try {
+            global.db.write()
+        } catch (e) {
+            console.error("DB autosave gagal:", e)
+            }
+        }
+    }, { intervalSeconds: 30 })
+
     let isInit = true;
     let handler = await import("./handler.js");
     global.reloadHandler = async function (restartConn) {

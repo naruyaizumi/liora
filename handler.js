@@ -337,7 +337,7 @@ export async function handler(chatUpdate) {
                                 body: global.config.watermark,
                                 mediaType: 1,
                                 thumbnailUrl:
-                                    "https://files.cloudkuimages.guru/images/s35pERld.jpg",
+                                    "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg",
                                 renderLargerThumbnail: true,
                             },
                         },
@@ -383,7 +383,7 @@ export async function handler(chatUpdate) {
                                         body: global.config.watermark,
                                         mediaType: 1,
                                         thumbnailUrl:
-                                            "https://files.cloudkuimages.guru/images/geNCoIsW.jpg",
+                                            "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg",
                                         renderLargerThumbnail: true,
                                     },
                                 },
@@ -486,7 +486,7 @@ ${text}
                                         body: "📄 Lihat log error di atas",
                                         mediaType: 1,
                                         thumbnailUrl:
-                                            "https://files.cloudkuimages.guru/images/DqOJlT4iNQJP.jpg",
+                                            "",
                                         renderLargerThumbnail: true,
                                     },
                                 },
@@ -569,7 +569,7 @@ export async function participantsUpdate({ id, participants, action }) {
     for (let user of participants) {
         let name = await this.getName(user);
         let pp = await this.profilePictureUrl(user, "image").catch(
-            (_) => "https://cloudkuimages.guru/uploads/images/pg5XDGVr.jpg"
+            (_) => "https://i.ibb.co.com/WY9SCc2/150fa8800b0a0d5633abc1d1c4db3d87.jpg"
         );
         let userTag = "@" + user.split("@")[0];
         let text = "";
