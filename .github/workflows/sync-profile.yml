@@ -21,7 +21,7 @@ jobs:
 
             - name: 🍩 Clone Izumi Profile Repo
               run: |
-                  git clone https://x-access-token:${{ secrets.PAT_IZUMI }}@github.com/naruyaizumi/naruyaizumi.git izumi-profile
+                  git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/naruyaizumi/naruyaizumi.git izumi-profile
 
             - name: 🍬 Commit & Force Push to Izumi Profile
               run: |
