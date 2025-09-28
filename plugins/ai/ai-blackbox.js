@@ -10,10 +10,21 @@ let handler = async (m, { conn, text }) => {
         let json = await response.json();
         if (!json.message)
             return m.reply("🍰 *Gagal mendapatkan jawaban dari Blackbox AI. Coba lagi nanti!*");
+
         await conn.sendMessage(
             m.chat,
             {
                 text: `🍡 *Blackbox AI:*\n\n${json.message}`,
+                contextInfo: {
+                    externalAdReply: {
+                        title: "Blackbox AI",
+                        body: "Jawaban dari Blackbox",
+                        thumbnailUrl: "https://qu.ax/NcTqw.jpg",
+                        sourceUrl: "https://www.blackbox.ai/",
+                        mediaType: 1,
+                        renderLargerThumbnail: true
+                    }
+                }
             },
             { quoted: m }
         );
@@ -28,6 +39,5 @@ let handler = async (m, { conn, text }) => {
 handler.help = ["blackbox"];
 handler.tags = ["ai"];
 handler.command = /^(blackbox|blackboxai)$/i;
-handler.premium = true;
 
 export default handler;

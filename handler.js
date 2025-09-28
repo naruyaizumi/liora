@@ -562,58 +562,60 @@ ${text}
 }
 
 export async function participantsUpdate({ id, participants, action }) {
-    if (this.isInit) return
-    let chat = global.db.data.chats[id] || {}
-    if (!chat.detect) return
-
-    let groupMetadata = await this.groupMetadata(id) || (this.chats[id] || {}).metadata
-
-    for (let user of participants) {
-        let name = await this.getName(user)
-        let pp = await this.profilePictureUrl(user, 'image').catch(
-            _ => 'https://qu.ax/jVZhH.jpg'
-        )
-        let userTag = '@' + user.split('@')[0]
-        let text = ''
-        let title = ''
-        let body = ''
-
+    if (this.isInit) return;
+    const chat = global.db.data.chats[id] || {};
+    if (!chat.detect) return;
+    
+    const metadata = (await this.groupMetadata(id)) || (this.chats[id] || {}).metadata;
+    const subject = await this.getName(id);
+    const descText =
+        typeof metadata?.desc === 'string' ?
+        metadata.desc :
+        (metadata?.desc?.toString?.() || 'unknown');
+    
+    for (const user of participants) {
+        const userTag = '@' + user.split('@')[0];
+        
+        let baseText = '';
         switch (action) {
             case 'add':
-                text = chat.sWelcome || this.welcome || 'Welcome, @user'
-                title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗗𝗮𝘁𝗮𝗻𝗴 𝗞𝗮𝗸"
-                body = `Kamu adalah member ke-${groupMetadata.participants.length}.`
-                break
-
+                baseText = chat.sWelcome || this.welcome || 'Welcome, @user';
+                break;
             case 'remove':
-                text = chat.sBye || this.bye || 'Bye @user'
-                title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗧𝗶𝗻𝗴𝗴𝗮𝗹 𝗞𝗮𝗸"
-                body = `Kini grup berisi ${groupMetadata.participants.length} anggota.`
-                break
-
+                baseText = chat.sBye || this.bye || 'Bye @user';
+                break;
             case 'promote':
-                text = chat.sPromote || this.promote || '@user telah menjadi admin!'
-                title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗣𝗿𝗼𝗺𝗼𝘁𝗲"
-                body = global.config.watermark
-                break
-
+                baseText = chat.sPromote || this.promote || '@user telah menjadi admin!';
+                break;
             case 'demote':
-                text = chat.sDemote || this.demote || '@user bukan admin lagi.'
-                title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗗𝗲𝗺𝗼𝘁𝗲"
-                body = global.config.watermark
-                break
+                baseText = chat.sDemote || this.demote || '@user bukan admin lagi.';
+                break;
+            default:
+                baseText = '@user';
         }
-
-        text = text
-            .replace('@subject', await this.getName(id))
-            .replace('@desc', groupMetadata.desc?.toString() || 'unknown')
+        
+        const text = baseText
+            .replace('@subject', subject)
+            .replace('@desc', descText)
             .replace('@user', userTag)
-
-        await this.sendMessage(id, {
-            image: { url: pp },
-            caption: text.trim(),
-            mentions: [user]
-        })
+            .trim();
+            
+        let ppUrl = await this.profilePictureUrl(user, 'image').catch(() => null);
+        if (!ppUrl) ppUrl = 'https://qu.ax/jVZhH.jpg';
+        
+        let ppBuffer = null;
+        try {
+            const r = await fetch(ppUrl);
+            if (r.ok) ppBuffer = Buffer.from(await r.arrayBuffer());
+        } catch {}
+        
+        const msg = {
+            caption: text,
+            mentions: [user],
+        };
+        msg.image = ppBuffer ? ppBuffer : { url: ppUrl };
+        
+        await this.sendMessage(id, msg);
     }
 }
 
