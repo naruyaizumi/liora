@@ -1,4 +1,4 @@
-import { uploader } from "../../lib/uploader.js";
+import { uploader, uploader2, uploader3 } from "../../lib/uploader.js";
 
 let handler = async (m, { conn }) => {
     try {
@@ -18,44 +18,61 @@ let handler = async (m, { conn }) => {
             return m.reply(`🍩 *Gagal mengunduh media-nya yaa~*`);
         }
 
-        let uploadedUrl = await uploader(buffer).catch(() => null);
-        if (!uploadedUrl) {
+        let catbox = await uploader(buffer).catch(() => null);
+        let uguu = await uploader2(buffer).catch(() => null);
+        let quax = await uploader3(buffer).catch(() => null);
+
+        if (!catbox && !uguu && !quax) {
             await global.loading(m, conn, true);
-            return m.reply(`🧁 *Gagal mengunggah file ke Catbox.moe. Coba lagi nanti yaa~*`);
+            return m.reply(`🧁 *Gagal mengunggah file ke semua server. Coba lagi nanti yaa~*`);
         }
 
         let resultText = `
 🍓 *File berhasil diunggah!*
 ━━━━━━━━━━━━━━━━━━━
-🍡 *Catbox.moe Uploader:*
-*${uploadedUrl}*
-
-🍩 *Ukuran File: ${(buffer.length / 1024).toFixed(2)} KB*
+${catbox ? `🍡 *Catbox.moe: ${catbox}*` : ""}
+${uguu ? `🍪 *Uguu.se: ${uguu}*` : ""}
+${quax ? `🍰 *Qu.ax: ${quax}*\n` : ""}
+━━━━━━━━━━━━━━━━━━━
+🍦 *Ukuran File: ${(buffer.length / 1024).toFixed(2)} KB*
 ━━━━━━━━━━━━━━━━━━━
 `.trim();
+
+        let buttons = [];
+        if (catbox) {
+            buttons.push({
+                name: "cta_copy",
+                buttonParamsJson: JSON.stringify({
+                    display_text: `🍡 Salin Catbox`,
+                    copy_code: catbox,
+                }),
+            });
+        }
+        if (uguu) {
+            buttons.push({
+                name: "cta_copy",
+                buttonParamsJson: JSON.stringify({
+                    display_text: `🍪 Salin Uguu`,
+                    copy_code: uguu,
+                }),
+            });
+        }
+        if (quax) {
+            buttons.push({
+                name: "cta_copy",
+                buttonParamsJson: JSON.stringify({
+                    display_text: `🍰 Salin Qu.ax`,
+                    copy_code: quax,
+                }),
+            });
+        }
 
         await conn.sendMessage(
             m.chat,
             {
                 text: resultText,
                 footer: global.config.watermark,
-                interactiveButtons: [
-                    {
-                        name: "cta_copy",
-                        buttonParamsJson: JSON.stringify({
-                            display_text: `🍰 Salin Link`,
-                            copy_code: uploadedUrl,
-                        }),
-                    },
-                    {
-                        name: "cta_url",
-                        buttonParamsJson: JSON.stringify({
-                            display_text: "📂 Buka File",
-                            url: uploadedUrl,
-                            merchant_url: uploadedUrl,
-                        }),
-                    },
-                ],
+                interactiveButtons: buttons,
                 hasMediaAttachment: false,
             },
             { quoted: m }

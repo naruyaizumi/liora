@@ -1,4 +1,4 @@
-import { uploader } from "../../lib/uploader.js";
+import { uploader3 } from "../../lib/uploader.js";
 import { sticker } from "../../lib/sticker.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -17,14 +17,14 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         }
 
         let media = await q.download();
-        let up = await uploader(media).catch(() => null);
+        let up = await uploader3(media).catch(() => null);
         if (!up) return m.reply("⚠️ *Gagal mengunggah ke server. Coba lagi nanti yaa!*");
 
         let [top, bottom] = args.join(" ").split("|");
         top = encodeURIComponent(top || "_");
         bottom = encodeURIComponent(bottom || "_");
 
-        let apiUrl = `https://api.memegen.link/images/custom/${top}/${bottom}.png?background=${up}`;
+        let apiUrl = `https://api.memegen.link/images/custom/${top}/${bottom}.png?background=${encodeURIComponent(up)}`;
         let buffer = Buffer.from(await (await fetch(apiUrl)).arrayBuffer());
         let file = await conn.getFile(buffer, true);
         let stickerImage = await sticker(file, {

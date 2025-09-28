@@ -5,7 +5,7 @@ let handler = async (m, { conn, args }) => {
         await global.loading(m, conn);
         let teks = args.join` `;
         let buffer = await writeOnPaper({
-            imageUrl: "https://i.ibb.co.com/DDQqwvYY/magernulis1.jpg",
+            imageUrl: "https://files.catbox.moe/8j4d2s.jpg",
             text: teks,
             color: "blue",
         });
