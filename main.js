@@ -11,14 +11,11 @@ import {
     Browsers,
     useMultiFileAuthState,
 } from "baileys";
-import { EventEmitter } from "events";
 import { readdirSync, statSync } from "fs";
 import { join } from "path";
 import chalk from "chalk";
 import P from "pino";
 import { initReload, initCron, connectionUpdateHandler } from "./lib/connection.js";
-
-EventEmitter.defaultMaxListeners = 0;
 
 const pairingAuth = global.config.pairingAuth;
 const pairingNumber = global.config.pairingNumber;

@@ -4,7 +4,12 @@ import {
     uploader3,
     uploader4,
     uploader5,
-    uploader6
+    uploader6,
+    uploader7,
+    uploader8,
+    uploader9,
+    uploader10,
+    uploader11
 } from "../../lib/uploader.js";
 
 const uploaders = {
@@ -14,6 +19,11 @@ const uploaders = {
     4: { name: "🌸 Put.icu", fn: uploader4 },
     5: { name: "🍫 Tmpfiles", fn: uploader5 },
     6: { name: "🧋 Betabotz", fn: uploader6 },
+    7: { name: "🍵 Yupra CDN", fn: uploader7 },
+    8: { name: "🍧 Elrayy TODO..", fn: uploader8 },
+    9: { name: "🍮 Abella TODO..", fn: uploader9 },
+    10: { name: "🍩 YPNK TODO..", fn: uploader10 },
+    11: { name: "🧁 CloudkuImages", fn: uploader11 },
 };
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
