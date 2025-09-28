@@ -12,7 +12,7 @@ let handler = async (m, { conn, text }) => {
         let lid = cek.lid;
         let pp = await conn
             .profilePictureUrl(userJid, "image")
-            .catch(() => "https://i.ibb.co.com/WY9SCc2/150fa8800b0a0d5633abc1d1c4db3d87.jpg");
+            .catch(() => "https://qu.ax/jVZhH.jpg");
         let statusRes = await conn.fetchStatus(userJid).catch(() => null);
         let about = statusRes?.[0]?.status?.status || "Tidak tersedia";
         let lastUpdate = statusRes?.[0]?.status?.setAt

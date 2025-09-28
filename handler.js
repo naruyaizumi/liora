@@ -6,6 +6,8 @@ import { format } from "util";
 import { fileURLToPath } from "url";
 import path, { join } from "path";
 import { unwatchFile, watchFile } from "fs";
+import pkg from "canvafy";
+const { WelcomeLeave } = pkg;
 import chalk from "chalk";
 import printMessage from "./lib/print.js";
 
@@ -457,7 +459,7 @@ export async function handler(chatUpdate) {
                     m.error = e;
                     console.error(e);
                     if (e && setting.noerror) {
-                        m.reply("[SYSTEM ERROR] A critical failure has occurred.");
+                        m.reply("🍩 *Upss... ada sedikit error sistem nih~* 🍓");
                     } else if (e) {
                         let text = format(e);
                         for (let key of Object.values(global.config.APIKeys))
@@ -485,7 +487,7 @@ ${text}
                                         title: "💥 Plugin Error Detected!",
                                         body: "📄 Lihat log error di atas",
                                         mediaType: 1,
-                                        thumbnailUrl: "",
+                                        thumbnailUrl: "https://files.catbox.moe/xfgvse.jpg",
                                         renderLargerThumbnail: true,
                                     },
                                 },
@@ -560,116 +562,58 @@ ${text}
 }
 
 export async function participantsUpdate({ id, participants, action }) {
-    if (global.db.data.settings[this.user.jid]?.self) return;
-    if (this.isInit) return;
-    let chat = global.db.data.chats[id] || {};
-    if (!chat.detect) return;
-    let groupMetadata = (await this.groupMetadata(id)) || (conn.chats[id] || {}).metadata;
+    if (this.isInit) return
+    let chat = global.db.data.chats[id] || {}
+    if (!chat.detect) return
+
+    let groupMetadata = await this.groupMetadata(id) || (this.chats[id] || {}).metadata
+
     for (let user of participants) {
-        let name = await this.getName(user);
-        let pp = await this.profilePictureUrl(user, "image").catch(
-            (_) => "https://i.ibb.co.com/WY9SCc2/150fa8800b0a0d5633abc1d1c4db3d87.jpg"
-        );
-        let userTag = "@" + user.split("@")[0];
-        let text = "";
-        let msgOptions = {};
+        let name = await this.getName(user)
+        let pp = await this.profilePictureUrl(user, 'image').catch(
+            _ => 'https://qu.ax/jVZhH.jpg'
+        )
+        let userTag = '@' + user.split('@')[0]
+        let text = ''
+        let title = ''
+        let body = ''
+
         switch (action) {
-            case "add": {
-                text = chat.sWelcome || this.welcome || conn.welcome || "Welcome, @user";
-                text = text
-                    .replace("@subject", await this.getName(id))
-                    .replace("@desc", groupMetadata.desc?.toString() || "unknown")
-                    .replace("@user", userTag);
-                msgOptions = {
-                    image: { url: pp },
-                    caption: text.trim(),
-                    contextInfo: {
-                        mentionedJid: [user],
-                        externalAdReply: {
-                            title: "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗗𝗮𝘁𝗮𝗻𝗴 𝗞𝗮𝗸",
-                            body: `Kamu adalah member ke-${groupMetadata.participants.length}.`,
-                            thumbnailUrl: pp,
-                            sourceUrl: global.config.group || "",
-                            mediaType: 1,
-                            renderLargerThumbnail: true,
-                        },
-                    },
-                };
-                break;
-            }
-            case "remove": {
-                text = chat.sBye || this.bye || conn.bye || "Bye @user";
-                text = text
-                    .replace("@subject", await this.getName(id))
-                    .replace("@desc", groupMetadata.desc?.toString() || "unknown")
-                    .replace("@user", userTag);
-                msgOptions = {
-                    image: { url: pp },
-                    caption: text.trim(),
-                    contextInfo: {
-                        mentionedJid: [user],
-                        externalAdReply: {
-                            title: "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗧𝗶𝗻𝗴𝗴𝗮𝗹 𝗞𝗮𝗸",
-                            body: `Kini grup berisi ${groupMetadata.participants.length} anggota.`,
-                            thumbnailUrl: pp,
-                            sourceUrl: `https://wa.me/${user.replace("@s.whatsapp.net", "")}`,
-                            mediaType: 1,
-                            renderLargerThumbnail: true,
-                        },
-                    },
-                };
-                break;
-            }
-            case "promote": {
-                text =
-                    chat.sPromote ||
-                    this.promote ||
-                    conn.promote ||
-                    "@user has been promoted as admin!";
-                text = text
-                    .replace("@subject", await this.getName(id))
-                    .replace("@desc", groupMetadata.desc?.toString() || "unknown")
-                    .replace("@user", userTag);
-                msgOptions = {
-                    text: text.trim(),
-                    contextInfo: {
-                        mentionedJid: [user],
-                        externalAdReply: {
-                            title: "˚ ༘✦ ִֶ 𓂃⊹ 𝗣𝗿𝗼𝗺𝗼𝘁𝗲",
-                            body: global.config.watermark,
-                            thumbnailUrl: pp,
-                            sourceUrl: global.config.group || "",
-                            mediaType: 1,
-                            renderLargerThumbnail: true,
-                        },
-                    },
-                };
-                break;
-            }
-            case "demote": {
-                text = chat.sDemote || this.demote || conn.demote || "@user is no longer an admin.";
-                text = text
-                    .replace("@subject", await this.getName(id))
-                    .replace("@desc", groupMetadata.desc?.toString() || "unknown")
-                    .replace("@user", userTag);
-                msgOptions = {
-                    text: text.trim(),
-                    contextInfo: {
-                        mentionedJid: [user],
-                        externalAdReply: {
-                            title: "˚ ༘✦ ִֶ 𓂃⊹ 𝗗𝗲𝗺𝗼𝘁𝗲",
-                            body: global.config.watermark,
-                            thumbnailUrl: pp,
-                            sourceUrl: global.config.group || "",
-                            mediaType: 1,
-                            renderLargerThumbnail: true,
-                        },
-                    },
-                };
-                break;
-            }
+            case 'add':
+                text = chat.sWelcome || this.welcome || 'Welcome, @user'
+                title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗗𝗮𝘁𝗮𝗻𝗴 𝗞𝗮𝗸"
+                body = `Kamu adalah member ke-${groupMetadata.participants.length}.`
+                break
+
+            case 'remove':
+                text = chat.sBye || this.bye || 'Bye @user'
+                title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗧𝗶𝗻𝗴𝗴𝗮𝗹 𝗞𝗮𝗸"
+                body = `Kini grup berisi ${groupMetadata.participants.length} anggota.`
+                break
+
+            case 'promote':
+                text = chat.sPromote || this.promote || '@user telah menjadi admin!'
+                title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗣𝗿𝗼𝗺𝗼𝘁𝗲"
+                body = global.config.watermark
+                break
+
+            case 'demote':
+                text = chat.sDemote || this.demote || '@user bukan admin lagi.'
+                title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗗𝗲𝗺𝗼𝘁𝗲"
+                body = global.config.watermark
+                break
         }
-        await this.sendMessage(id, msgOptions);
+
+        text = text
+            .replace('@subject', await this.getName(id))
+            .replace('@desc', groupMetadata.desc?.toString() || 'unknown')
+            .replace('@user', userTag)
+
+        await this.sendMessage(id, {
+            image: { url: pp },
+            caption: text.trim(),
+            mentions: [user]
+        })
     }
 }
 
