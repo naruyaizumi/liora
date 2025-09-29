@@ -25,7 +25,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
                 image: { url },
                 caption: textResult,
                 footer: global.config.watermark,
-                interactiveButtons: [
+                interactive: [
                     {
                         name: "cta_copy",
                         buttonParamsJson: JSON.stringify({

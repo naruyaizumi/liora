@@ -28,7 +28,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 caption: `🍰 *Ditemukan ${results.length} hasil pencarian YouTube!* 🍡\n🍓 *Silahkan pilih Video/Audio yang kamu mau~*`,
                 footer: "🍛 YouTube Search",
                 title: "🍤 Pilih Hasil",
-                interactiveButtons: [
+                interactive: [
                     {
                         name: "single_select",
                         buttonParamsJson: JSON.stringify({

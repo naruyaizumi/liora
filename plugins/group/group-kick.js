@@ -1,47 +1,28 @@
-let handler = async (m, { conn, args, usedPrefix, command }) => {
-    let targets = [];
-    
-    if (m.mentionedJid && m.mentionedJid.length) {
-        targets.push(...m.mentionedJid);
-    }
-    
-    for (let arg of args) {
-        if (/^\d{5,}$/.test(arg)) {
-            let jid = arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net";
-            targets.push(jid);
-        }
-    }
+let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
+let targets = []
+if (m.mentionedJid.length) targets.push(...m.mentionedJid)
+if (m.quoted && m.quoted.sender) targets.push(m.quoted.sender)
+for (let arg of args) {
+if (/^\d{5,}$/.test(arg)) targets.push(arg.replace(/[^0-9]/g, '') + '@s.whatsapp.net')
+}
+targets = [...new Set(targets)].filter(v => v !== m.sender && participants.some(p => p.id === v))
+if (!targets.length) return m.reply(`🍩 *Tag atau reply anggota yang ingin dikeluarkan ya sayang~*\n*Contoh: ${usedPrefix + command} @628xx*`)
+for (let target of targets) {
+await conn.groupParticipantsUpdate(m.chat, [target], 'remove')
+if (/^dor$/i.test(command)) {
+await m.reply(`🔫 *DORRR!!!* 🍬 *Target berhasil dikeluarkan ya sayang~*`)
+}
+await delay(1500)
+}
+}
 
-    targets = [...new Set(targets)];
+handler.help = ['kick']
+handler.tags = ['group']
+handler.command = /^(kick|k|dor)$/i
+handler.group = true
+handler.botAdmin = true
+handler.admin = true
 
-    if (!targets.length)
-        return m.reply(`🍡 *Contoh penggunaan: ${usedPrefix + command} 628xxxx*`);
-
-    let msg = `🍓 *Hapus anggota selesai!*\n`;
-    for (let target of targets) {
-        try {
-            let res = await conn.groupParticipantsUpdate(m.chat, [target], "remove");
-            if (res[0]?.status === "200") {
-                msg += `🧁 *Berhasil dikeluarkan:* @${target.split("@")[0]}\n`;
-            } else {
-                msg += `🍩 *Gagal mengeluarkan:* @${target.split("@")[0]}\n`;
-            }
-        } catch (e) {
-            console.error(e);
-            msg += `🍩 *Error mengeluarkan:* @${target.split("@")[0]}\n`;
-        }
-        await delay(1500);
-    }
-    m.reply(msg.trim(), null, { mentions: targets });
-};
-
-handler.help = ["kick"];
-handler.tags = ["group"];
-handler.command = /^(kick|remove|k)$/i;
-handler.group = true;
-handler.botAdmin = true;
-handler.admin = true;
-
-export default handler;
+export default handler
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
