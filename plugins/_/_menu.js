@@ -143,25 +143,25 @@ END:VCARD`;
             };
         });
         if (teks == "404") {
-            return await conn.sendMessage(
-                m.chat,
-                {
-                    document: { url: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg" },
-                    mimetype: "application/pdf",
-                    fileName: `🌸 ${global.config.watermark}`,
-                    fileLength: 0,
-                    pageCount: 0,
-                    caption: listCmd,
-                    footer: global.config.author,
-                    title: wish(),
-                    contextInfo: {
-                        externalAdReply: {
-                            title: global.config.author,
-                            body: subtitle,
-                            mediaType: 1,
-                            thumbnailUrl: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg",
-                            sourceUrl: global.config.website,
-                            renderLargerThumbnail: true,
+    return await conn.sendMessage(
+        m.chat,
+        {
+            document: fs.readFileSync("../../src/liorathum.jpg"), // file lokal
+            mimetype: "application/pdf",
+            fileName: `🌸 ${global.config.watermark}`,
+            fileLength: 0,
+            pageCount: 0,
+            caption: listCmd,
+            footer: global.config.author,
+            title: wish(),
+            contextInfo: {
+                externalAdReply: {
+                    title: global.config.author,
+                    body: subtitle,
+                    mediaType: 1,
+                    thumbnail: fs.readFileSync("../../src/liorathumb.jpg"),
+                    sourceUrl: global.config.website,
+                    renderLargerThumbnail: true,
                         },
                     },
                     interactiveButtons: [
