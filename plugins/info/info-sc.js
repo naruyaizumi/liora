@@ -26,7 +26,7 @@ END:VCARD`;
     await conn.sendMessage(
         m.chat,
         {
-            image: fs.readFileSync("../../src/liorathum.jpg"),
+            image: fs.readFileSync("../../src/liorathumb.jpg"),
             caption:
                 "🍙 *Project Script Izumi* 🍙\n" +
                 "📂 *Repository: Source code resmi Liora*\n" +
