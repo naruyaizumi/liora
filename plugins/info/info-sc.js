@@ -1,3 +1,5 @@
+import fs from "fs";
+
 let handler = async (m, { conn }) => {
     let vcard = `BEGIN:VCARD
 VERSION:3.0
@@ -6,6 +8,7 @@ FN:ttname
 item1.TEL;waid=13135550002:+1 (313) 555-0002
 item1.X-ABLabel:Ponsel
 END:VCARD`;
+
     let qkontak = {
         key: {
             fromMe: false,
@@ -23,7 +26,7 @@ END:VCARD`;
     await conn.sendMessage(
         m.chat,
         {
-            image: { url: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg" },
+            image: fs.readFileSync("../../src/liorathum.jpg"),
             caption:
                 "🍙 *Project Script Izumi* 🍙\n" +
                 "📂 *Repository: Source code resmi Liora*\n" +
