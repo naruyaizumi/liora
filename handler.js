@@ -6,8 +6,6 @@ import { format } from "util";
 import { fileURLToPath } from "url";
 import path, { join } from "path";
 import { unwatchFile, watchFile } from "fs";
-import pkg from "canvafy";
-const { WelcomeLeave } = pkg;
 import chalk from "chalk";
 import printMessage from "./lib/print.js";
 
@@ -26,8 +24,6 @@ export async function handler(chatUpdate) {
             let user = global.db.data.users[m.sender];
             if (typeof user !== "object") global.db.data.users[m.sender] = {};
             if (user) {
-                if (!isNumber(user.chat)) user.chat = 0;
-                if (!isNumber(user.chatTotal)) user.chatTotal = 0;
                 if (!isNumber(user.lastseen)) user.lastseen = 0;
                 if (!("banned" in user)) user.banned = false;
                 if (!isNumber(user.bannedTime)) user.bannedTime = 0;
@@ -35,12 +31,8 @@ export async function handler(chatUpdate) {
                 if (!isNumber(user.commandTotal)) user.commandTotal = 0;
                 if (!isNumber(user.commandLimit)) user.commandLimit = 1000;
                 if (!isNumber(user.cmdLimitMsg)) user.cmdLimitMsg = 0;
-                if (!("premium" in user)) user.premium = false;
-                if (!isNumber(user.premiumTime)) user.premiumTime = 0;
             } else
                 global.db.data.users[m.sender] = {
-                    chat: 0,
-                    chatTotal: 0,
                     lastseen: 0,
                     banned: false,
                     bannedTime: 0,
@@ -48,8 +40,6 @@ export async function handler(chatUpdate) {
                     commandTotal: 0,
                     commandLimit: 1000,
                     cmdLimitMsg: 0,
-                    premium: false,
-                    premiumTime: 0,
                 };
             let chat = global.db.data.chats[m.chat];
             if (typeof chat !== "object") global.db.data.chats[m.chat] = {};
@@ -63,8 +53,6 @@ export async function handler(chatUpdate) {
                 if (!("sBye" in chat)) chat.sBye = "";
                 if (!("sPromote" in chat)) chat.sPromote = "";
                 if (!("sDemote" in chat)) chat.sDemote = "";
-                if (!("otakuNews" in chat)) chat.otakuNews = false;
-                if (!("otakuNow" in chat)) chat.otakuNow = "";
                 if (!("antidelete" in chat)) chat.antidelete = false;
                 if (!("antiLinks" in chat)) chat.antiLinks = false;
                 if (!("antitagsw" in chat)) chat.antitagsw = false;
@@ -89,8 +77,6 @@ export async function handler(chatUpdate) {
                     sBye: "",
                     sPromote: "",
                     sDemote: "",
-                    otakuNews: false,
-                    otakuNow: "",
                     antidelete: false,
                     antiLinks: false,
                     antitagsw: false,
@@ -113,7 +99,6 @@ export async function handler(chatUpdate) {
                 if (!("autoread" in settings)) settings.autoread = false;
                 if (!("composing" in settings)) settings.composing = false;
                 if (!("restrict" in settings)) settings.restrict = false;
-                if (!("backup" in settings)) settings.backup = false;
                 if (!("cleartmp" in settings)) settings.cleartmp = true;
                 if (!("anticall" in settings)) settings.anticall = false;
                 if (!("adReply" in settings)) settings.adReply = false;
@@ -126,7 +111,6 @@ export async function handler(chatUpdate) {
                     autoread: false,
                     composing: false,
                     restrict: false,
-                    backup: false,
                     cleartmp: true,
                     anticall: false,
                     adReply: false,
@@ -138,20 +122,16 @@ export async function handler(chatUpdate) {
             if (bot) {
                 if (!("users" in bot)) bot.users = {};
                 if (!("gempaDateTime" in bot)) bot.gempaDateTime = "";
-                if (!("otakuNow" in bot)) bot.otakuNow = "";
             } else
                 global.db.data.bots = {
                     users: {},
                     gempaDateTime: "",
-                    otakuNow: "",
                 };
             let member = global.db.data.chats[m.chat].member[m.sender];
             if (typeof member !== "object") global.db.data.chats[m.chat].member[m.sender] = {};
             if (member) {
                 if (!("blacklist" in member)) member.blacklist = false;
                 if (!isNumber(member.blacklistTime)) member.blacklistTime = 0;
-                if (!isNumber(member.chat)) member.chat = 0;
-                if (!isNumber(member.chatTotal)) member.chatTotal = 0;
                 if (!isNumber(member.command)) member.command = 0;
                 if (!isNumber(member.commandTotal)) member.commandTotal = 0;
                 if (!isNumber(member.lastseen)) member.lastseen = 0;
@@ -159,8 +139,6 @@ export async function handler(chatUpdate) {
                 global.db.data.chats[m.chat].member[m.sender] = {
                     blacklist: false,
                     blacklistTime: 0,
-                    chat: 0,
-                    chatTotal: 0,
                     command: 0,
                     commandTotal: 0,
                     lastseen: 0,
@@ -181,7 +159,6 @@ export async function handler(chatUpdate) {
                     .filter(([number, _, isDeveloper]) => number && !isDeveloper)
                     .map(([number]) => number.replace(/[^0-9]/g, "") + "@s.whatsapp.net"),
             ].includes(m.sender);
-        const isPrems = isOwner || new Date() - global.db.data.users[m.sender].premiumTime < 0;
         const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
         if (global.db.data.settings[this.user.jid]?.queque && m.text && !(isMods || isOwner)) {
             let queque = this.msgqueque;
@@ -339,7 +316,7 @@ export async function handler(chatUpdate) {
                                 body: global.config.watermark,
                                 mediaType: 1,
                                 thumbnailUrl:
-                                    "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg",
+                                    "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
                                 renderLargerThumbnail: true,
                             },
                         },
@@ -385,7 +362,7 @@ export async function handler(chatUpdate) {
                                         body: global.config.watermark,
                                         mediaType: 1,
                                         thumbnailUrl:
-                                            "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg",
+                                            "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
                                         renderLargerThumbnail: true,
                                     },
                                 },

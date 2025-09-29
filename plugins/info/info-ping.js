@@ -157,7 +157,7 @@ ${diskBar}
                 externalAdReply: {
                     title: "🍙 Status Sistem Real-Time",
                     body: "🍣 Monitoring otomatis oleh bot 🍵",
-                    thumbnailUrl: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg",
+                    thumbnailUrl: "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
                     mediaType: 1,
                     renderLargerThumbnail: true,
                 },

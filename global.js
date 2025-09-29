@@ -116,7 +116,7 @@ global.dfail = (type, m, conn) => {
                         title: "🍡 AKSES DITOLAK",
                         body: global.config.watermark,
                         mediaType: 1,
-                        thumbnailUrl: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg",
+                        thumbnailUrl: "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
                         renderLargerThumbnail: true,
                     },
                 },

@@ -23,7 +23,7 @@ END:VCARD`;
     await conn.sendMessage(
         m.chat,
         {
-            image: { url: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg" },
+            image: { url: "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg" },
             caption:
                 "🍙 *Project Script Izumi* 🍙\n" +
                 "📂 *Repository: Source code resmi Liora*\n" +
