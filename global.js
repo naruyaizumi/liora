@@ -98,8 +98,6 @@ global.dfail = (type, m, conn) => {
     let msg = {
         owner: "✨ *Maaf, fitur ini hanya bisa digunakan oleh pemilikku. Silakan tanyakan langsung kepada dia.*",
         mods: "⚙️ *Fitur ini khusus untuk moderator. Jika membutuhkan bantuan, silakan hubungi moderator utama.*",
-        premium:
-            "💎 *Maaf, fitur ini hanya untuk pengguna premium. Kamu bisa mempertimbangkan untuk meningkatkan aksesmu.*",
         group: "🌐 *Perintah ini hanya bisa digunakan di dalam grup. Coba gunakan di grup lain, ya.*",
         admin: "🛡️ *Hanya admin grup yang dapat menggunakan perintah ini.*",
         botAdmin:

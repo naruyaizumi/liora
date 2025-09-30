@@ -10,18 +10,17 @@ const defaultMenu = {
 
 🍓 *I N F O  C O M M A N D* 🍓
 ────────────────────────
-*🅟 = Premium*
 *🅐 = Admin*
 *🅓 = Developer*
 *🅞 = Owner*
 `.trimStart(),
     header: `*%category*
 ────────────────────────`,
-    body: `*%cmd* %isPremium %isAdmin %isMods %isOwner`,
+    body: `*%cmd* %isAdmin %isMods %isOwner`,
     footer: `────────────────────────`,
     after: `🍰 *Copyright © Naruya Izumi 2024*`,
 };
-let handler = async (m, { conn, usedPrefix, command, isOwner, isMods, isPrems, args }) => {
+let handler = async (m, { conn, usedPrefix, command, isOwner, isMods, args }) => {
     try {
         await global.loading(m, conn);
         let tags;
@@ -68,8 +67,6 @@ let handler = async (m, { conn, usedPrefix, command, isOwner, isMods, isPrems, a
             ? "🧁 Developer"
             : isOwner
               ? "🪄 Owmer"
-              : isPrems
-                ? "💖 Ptemium User"
                 : "🍬 Free User";
         let vcard = `BEGIN:VCARD
 VERSION:3.0
@@ -205,7 +202,6 @@ END:VCARD`;
                     help: Array.isArray(plugin.tags) ? plugin.help : [plugin.help],
                     tags: Array.isArray(plugin.tags) ? plugin.tags : [plugin.tags],
                     prefix: "customPrefix" in plugin,
-                    premium: plugin.premium,
                     mods: plugin.mods,
                     owner: plugin.owner,
                     admin: plugin.admin,
@@ -244,7 +240,6 @@ END:VCARD`;
                                     .map((help) => {
                                         return body
                                             .replace(/%cmd/g, menu.prefix ? help : "%p" + help)
-                                            .replace(/%isPremium/g, menu.premium ? "🅟" : "")
                                             .replace(/%isAdmin/g, menu.admin ? "🅐" : "")
                                             .replace(/%isMods/g, menu.mods ? "🅓" : "")
                                             .replace(/%isOwner/g, menu.owner ? "🅞" : "")

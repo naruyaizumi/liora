@@ -50,6 +50,5 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 handler.help = ["agedetect"];
 handler.tags = ["ai"];
 handler.command = /^(agedetect|deteksiusia)$/i;
-handler.premium = true;
 
 export default handler;

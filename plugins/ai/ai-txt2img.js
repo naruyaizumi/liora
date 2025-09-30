@@ -29,6 +29,5 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
 handler.help = ["txt2img"];
 handler.tags = ["ai"];
 handler.command = /^(txt2img|text2img)$/i;
-handler.premium = true;
 
 export default handler;

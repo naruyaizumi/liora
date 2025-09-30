@@ -29,6 +29,5 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 handler.help = ["whatmusic"];
 handler.tags = ["tools"];
 handler.command = /^(whatmusic|judul)$/i;
-handler.premium = true;
 
 export default handler;

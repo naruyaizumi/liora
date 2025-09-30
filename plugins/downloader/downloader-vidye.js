@@ -33,6 +33,5 @@ let handler = async (m, { conn, args }) => {
 handler.help = ["videy"];
 handler.tags = ["downloader"];
 handler.command = /^(videy|vd)$/i;
-handler.premium = true;
 
 export default handler;

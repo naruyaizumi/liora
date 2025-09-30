@@ -27,16 +27,9 @@ let handler = async (m, { text, usedPrefix, command }) => {
                 let akses = [
                     h.owner && "👑 Owner",
                     h.mods && "🛠️ Mods",
-                    h.premium && "💎 Premium",
-                    h.limit && "⏳ Limit",
                     h.admin && "👮 Admin",
                     h.botAdmin && "🤖 Bot Admin",
                     h.group && "👥 Group Only",
-                    h.private && "📱 Private Only",
-                    h.onlyprem && "🔒 Only Premium",
-                    h.nsfw && "🔞 NSFW",
-                    h.rpg && "🎲 RPG",
-                    h.game && "🎮 Game",
                 ]
                     .filter(Boolean)
                     .join(", ");

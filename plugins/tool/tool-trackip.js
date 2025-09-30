@@ -83,6 +83,5 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 handler.help = ["trackip"];
 handler.tags = ["tools"];
 handler.command = /^(trackip)$/i;
-handler.premium = true;
 
 export default handler;

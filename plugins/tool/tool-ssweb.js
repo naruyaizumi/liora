@@ -44,6 +44,5 @@ let handler = async (m, { conn, args }) => {
 handler.help = ["ssweb"];
 handler.tags = ["tool"];
 handler.command = /^(ssweb)$/i;
-handler.premium = true;
 
 export default handler;

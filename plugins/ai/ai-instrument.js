@@ -41,6 +41,5 @@ let handler = async (m, { conn }) => {
 handler.help = ["instrument"];
 handler.tags = ["ai"];
 handler.command = /^(instrument|voiceremove)$/i;
-handler.premium = true;
 
 export default handler;

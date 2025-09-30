@@ -1,6 +1,6 @@
 {
     "name": "liora",
-    "version": "5.0.0-beta.0",
+    "version": "5.0.0-beta.1",
     "type": "module",
     "engines": {
         "node": ">=22.0.0"
@@ -21,7 +21,7 @@
     },
     "dependencies": {
         "awesome-phonenumber": "^7.5.0",
-        "baileys": "github:Itsukichann/Baileys",
+        "baileys": "npm:@vreden/meta",
         "better-sqlite3": "^12.4.1",
         "canvas": "^3.2.0",
         "chalk": "^5.6.2",

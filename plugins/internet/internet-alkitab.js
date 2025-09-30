@@ -58,6 +58,5 @@ let handler = async (m, { text, usedPrefix, command, conn }) => {
 handler.help = ["alkitab"];
 handler.tags = ["internet"];
 handler.command = /^(alkitab)$/i;
-handler.premium = true;
 
 export default handler;

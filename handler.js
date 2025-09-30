@@ -257,7 +257,6 @@ export async function handler(chatUpdate) {
                         isRAdmin,
                         isAdmin,
                         isBotAdmin,
-                        isPrems,
                         chatUpdate,
                         __dirname: ___dirname,
                         __filename,
@@ -348,14 +347,13 @@ export async function handler(chatUpdate) {
                         return;
                     if (name != "group-listblacklist.js" && !(isMods || isOwner) && isBlacklist)
                         return;
-                    if (user.command >= user.commandLimit && !isPrems && !(isOwner || isMods)) {
+                    if (user.command >= user.commandLimit && !(isOwner || isMods)) {
                         return conn.sendMessage(
                             m.chat,
                             {
                                 text: `🍗 *Limit command kamu sudah habis!*
 🍜 *${user.command} / ${user.commandLimit} digunakan.*
-⏳ *Silakan tunggu hingga reset limit di jam 00.00 WIB!*
-🍰 *Upgrade ke Premium untuk Unlimited Limit!*`,
+⏳ *Silakan tunggu hingga reset limit di jam 00.00 WIB!*`,
                                 contextInfo: {
                                     externalAdReply: {
                                         title: "🍡 AKSES DITOLAK",
@@ -390,10 +388,6 @@ export async function handler(chatUpdate) {
                     fail("owner", m, this);
                     continue;
                 }
-                if (plugin.premium && !isPrems) {
-                    fail("premium", m, this);
-                    continue;
-                }
                 if (plugin.group && !m.isGroup) {
                     fail("group", m, this);
                     continue;
@@ -425,7 +419,6 @@ export async function handler(chatUpdate) {
                     isRAdmin,
                     isAdmin,
                     isBotAdmin,
-                    isPrems,
                     chatUpdate,
                     __dirname: ___dirname,
                     __filename,

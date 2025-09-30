@@ -32,6 +32,5 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
 handler.help = ["carbon"];
 handler.tags = ["tools"];
 handler.command = /^(carbon|code2img)$/i;
-handler.premium = true;
 
 export default handler;

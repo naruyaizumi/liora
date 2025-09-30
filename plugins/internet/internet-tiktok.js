@@ -71,6 +71,5 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 handler.help = ["ttsearch"];
 handler.tags = ["internet"];
 handler.command = /^(ttsearch)$/i;
-handler.premium = true;
 
 export default handler;

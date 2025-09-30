@@ -25,6 +25,5 @@ let handler = async (m, { conn, text }) => {
 handler.help = ["watermark"];
 handler.tags = ["maker"];
 handler.command = /^(wm|watermark)$/i;
-handler.premium = true;
 
 export default handler;
