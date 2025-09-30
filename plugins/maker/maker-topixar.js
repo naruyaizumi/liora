@@ -21,12 +21,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         let uploaded = await uploader(media).catch(() => null);
         if (!uploaded) return m.reply("🍰 *Gagal mengunggah gambar. Coba lagi nanti!*");
 
-        let apiUrl = global.API(
-            "btz",
-            "/api/maker/jadipixar",
-            { url: uploaded },
-            "apikey"
-        );
+        let apiUrl = global.API("btz", "/api/maker/jadipixar", { url: uploaded }, "apikey");
 
         let response = await fetch(apiUrl);
         if (!response.ok) throw new Error("Gagal memproses gambar ke gaya Pixar!");

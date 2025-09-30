@@ -1,10 +1,10 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     let targets = [];
-    
+
     if (m.mentionedJid && m.mentionedJid.length) {
         targets.push(...m.mentionedJid);
     }
-    
+
     for (let arg of args) {
         if (/^\d{5,}$/.test(arg)) {
             let jid = arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net";
@@ -14,7 +14,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     targets = [...new Set(targets)];
     if (!targets.length)
-        return m.reply(`🍡 *Contoh penggunaan: ${usedPrefix + command} @user atau ${usedPrefix + command} 628xxxx*`);
+        return m.reply(
+            `🍡 *Contoh penggunaan: ${usedPrefix + command} @user atau ${usedPrefix + command} 628xxxx*`
+        );
 
     let msg = `🍓 *Promote selesai!*\n`;
     for (let target of targets) {

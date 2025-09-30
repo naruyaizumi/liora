@@ -6,7 +6,7 @@ import {
     uploader5,
     uploader6,
     uploader7,
-    uploader8
+    uploader8,
 } from "../../lib/uploader.js";
 
 const uploaders = {
@@ -28,7 +28,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                 .join("\n");
 
             return m.reply(
-`🍡 *Pilih server upload dengan angka:*
+                `🍡 *Pilih server upload dengan angka:*
 *${usedPrefix + command} <nomor>*
 
 🍰 *Daftar server:*
@@ -62,33 +62,32 @@ ${list}`
         }
 
         await conn.sendMessage(
-    m.chat,
-    {
-        text: `*${server.name}*\n📎 *URL berhasil dibuat!*`,
-        title: "🍰 Upload Success",
-        footer: global.config.watermark,
-        hasMediaAttachment: false,
-        interactive: [
+            m.chat,
             {
-                name: "cta_copy",
-                buttonParamsJson: JSON.stringify({
-                    display_text: "📋 Salin URL",
-                    copy_code: url
-                })
+                text: `*${server.name}*\n📎 *URL berhasil dibuat!*`,
+                title: "🍰 Upload Success",
+                footer: global.config.watermark,
+                hasMediaAttachment: false,
+                interactive: [
+                    {
+                        name: "cta_copy",
+                        buttonParamsJson: JSON.stringify({
+                            display_text: "📋 Salin URL",
+                            copy_code: url,
+                        }),
+                    },
+                    {
+                        name: "cta_url",
+                        buttonParamsJson: JSON.stringify({
+                            display_text: "🌐 Buka URL",
+                            url: url,
+                            merchant_url: url,
+                        }),
+                    },
+                ],
             },
-            {
-                name: "cta_url",
-                buttonParamsJson: JSON.stringify({
-                    display_text: "🌐 Buka URL",
-                    url: url,
-                    merchant_url: url
-                })
-            }
-        ]
-    },
-    { quoted: m }
-);
-
+            { quoted: m }
+        );
     } catch (e) {
         console.error(e);
         m.reply(`🍬 *Terjadi kesalahan!*\n🧁 ${e.message}`);

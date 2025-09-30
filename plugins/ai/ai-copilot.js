@@ -28,9 +28,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                         thumbnailUrl: "https://qu.ax/Mwdrk.jpg",
                         sourceUrl: "https://copilot.microsoft.com/",
                         mediaType: 1,
-                        renderLargerThumbnail: true
-                    }
-                }
+                        renderLargerThumbnail: true,
+                    },
+                },
             },
             { quoted: m }
         );

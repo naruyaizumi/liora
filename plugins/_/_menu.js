@@ -63,11 +63,7 @@ let handler = async (m, { conn, usedPrefix, command, isOwner, isMods, args }) =>
         if (teks == "server") tags = { server: "🖥️ Server Menu" };
         if (teks == "tools") tags = { tools: "🧸 Tools Menu" };
         let name = conn.getName(m.sender);
-        let status = isMods
-            ? "🧁 Developer"
-            : isOwner
-              ? "🪄 Owmer"
-                : "🍬 Free User";
+        let status = isMods ? "🧁 Developer" : isOwner ? "🪄 Owmer" : "🍬 Free User";
         let vcard = `BEGIN:VCARD
 VERSION:3.0
 N:;ttname;;;
@@ -156,7 +152,8 @@ END:VCARD`;
                             title: global.config.author,
                             body: subtitle,
                             mediaType: 1,
-                            thumbnailUrl: "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
+                            thumbnailUrl:
+                                "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
                             sourceUrl: global.config.website,
                             renderLargerThumbnail: true,
                         },

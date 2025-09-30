@@ -22,9 +22,9 @@ let handler = async (m, { conn, text }) => {
                         thumbnailUrl: "https://qu.ax/NcTqw.jpg",
                         sourceUrl: "https://www.blackbox.ai/",
                         mediaType: 1,
-                        renderLargerThumbnail: true
-                    }
-                }
+                        renderLargerThumbnail: true,
+                    },
+                },
             },
             { quoted: m }
         );

@@ -27,7 +27,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                         caption: "📨 *Undangan untuk bergabung ke grup!*",
                         code: inviteCode,
                         expiration: 86400,
-                    }
+                    },
                 });
                 msg += `🍬 *Undangan terkirim ke:* @${target.split("@")[0]}\n`;
             }

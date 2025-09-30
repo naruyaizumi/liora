@@ -13,11 +13,10 @@ let handler = async (m, { conn, text }) => {
 
         let albumItems = json.result.map((img, i) => ({
             image: { url: img },
-            caption: `🍰 Bing Image Result (${i + 1}/${json.result.length})\n🍬 Kata Kunci: ${text}`
+            caption: `🍰 Bing Image Result (${i + 1}/${json.result.length})\n🍬 Kata Kunci: ${text}`,
         }));
 
         await conn.sendAlbumMessage(m.chat, albumItems, { quoted: m, delay: 500 });
-
     } catch (error) {
         console.error(error);
         m.reply("🍬 *Terjadi kesalahan saat mengambil data dari Bing Image. Coba lagi nanti!*");

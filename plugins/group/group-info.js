@@ -1,7 +1,5 @@
 let handler = async (m, { conn, participants, groupMetadata }) => {
-    let pp = await conn
-        .profilePictureUrl(m.chat, "image")
-        .catch((_) => "https://qu.ax/jVZhH.jpg"); // eslint-disable-line no-unused-vars
+    let pp = await conn.profilePictureUrl(m.chat, "image").catch((_) => "https://qu.ax/jVZhH.jpg"); // eslint-disable-line no-unused-vars
     let { sWelcome, sBye, sPromote, sDemote } = global.db.data.chats[m.chat];
     let groupAdmins = participants.filter((p) => p.admin);
     let listAdmin = groupAdmins.map((v, i) => `🍩 *${i + 1}.* @${v.id.split("@")[0]}`).join("\n");

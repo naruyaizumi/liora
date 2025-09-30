@@ -535,56 +535,56 @@ export async function participantsUpdate({ id, participants, action }) {
     if (this.isInit) return;
     const chat = global.db.data.chats[id] || {};
     if (!chat.detect) return;
-    
+
     const metadata = (await this.groupMetadata(id)) || (this.chats[id] || {}).metadata;
     const subject = await this.getName(id);
     const descText =
-        typeof metadata?.desc === 'string' ?
-        metadata.desc :
-        (metadata?.desc?.toString?.() || 'unknown');
-    
+        typeof metadata?.desc === "string"
+            ? metadata.desc
+            : metadata?.desc?.toString?.() || "unknown";
+
     for (const user of participants) {
-        const userTag = '@' + user.split('@')[0];
-        
-        let baseText = '';
+        const userTag = "@" + user.split("@")[0];
+
+        let baseText = "";
         switch (action) {
-            case 'add':
-                baseText = chat.sWelcome || this.welcome || 'Welcome, @user';
+            case "add":
+                baseText = chat.sWelcome || this.welcome || "Welcome, @user";
                 break;
-            case 'remove':
-                baseText = chat.sBye || this.bye || 'Bye @user';
+            case "remove":
+                baseText = chat.sBye || this.bye || "Bye @user";
                 break;
-            case 'promote':
-                baseText = chat.sPromote || this.promote || '@user telah menjadi admin!';
+            case "promote":
+                baseText = chat.sPromote || this.promote || "@user telah menjadi admin!";
                 break;
-            case 'demote':
-                baseText = chat.sDemote || this.demote || '@user bukan admin lagi.';
+            case "demote":
+                baseText = chat.sDemote || this.demote || "@user bukan admin lagi.";
                 break;
             default:
-                baseText = '@user';
+                baseText = "@user";
         }
-        
+
         const text = baseText
-            .replace('@subject', subject)
-            .replace('@desc', descText)
-            .replace('@user', userTag)
+            .replace("@subject", subject)
+            .replace("@desc", descText)
+            .replace("@user", userTag)
             .trim();
-            
-        let ppUrl = await this.profilePictureUrl(user, 'image').catch(() => null);
-        if (!ppUrl) ppUrl = 'https://qu.ax/jVZhH.jpg';
-        
+
+        let ppUrl = await this.profilePictureUrl(user, "image").catch(() => null);
+        if (!ppUrl) ppUrl = "https://qu.ax/jVZhH.jpg";
+
         let ppBuffer = null;
         try {
             const r = await fetch(ppUrl);
             if (r.ok) ppBuffer = Buffer.from(await r.arrayBuffer());
         } catch {}
-        
+
         const msg = {
             caption: text,
             mentions: [user],
         };
         msg.image = ppBuffer ? ppBuffer : { url: ppUrl };
-        
+
         await this.sendMessage(id, msg);
     }
 }
