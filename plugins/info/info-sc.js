@@ -31,7 +31,7 @@ END:VCARD`;
             title: "🍡 Liora — WhatsApp Bot",
             subtitle: "",
             footer: "*© 2024 – 2025 Naruya Izumi*\n*All Rights Reserved*",
-            interactive: [
+            interactiveButtons: [
                 {
                     name: "cta_url",
                     buttonParamsJson: JSON.stringify({

@@ -8,6 +8,8 @@ import path, { join } from "path";
 import { unwatchFile, watchFile } from "fs";
 import chalk from "chalk";
 import printMessage from "./lib/print.js";
+import { bannerCanvas } from "./lib/welcome.js";
+
 
 const isNumber = (x) => typeof x === "number" && !isNaN(x);
 
@@ -532,61 +534,117 @@ ${text}
 }
 
 export async function participantsUpdate({ id, participants, action }) {
-    if (this.isInit) return;
-    const chat = global.db.data.chats[id] || {};
-    if (!chat.detect) return;
+  if (this.isInit) return
+  let chat = global.db.data.chats[id] || {}
+  const groupMetadata = (await this.groupMetadata(id)) || (conn.chats[id] || {}).metadata
+  for (let user of participants) {
+    let pp = await this.profilePictureUrl(user, "image").catch(
+      () => "https://qu.ax/jVZhH.jpg"
+    )
+    let img = await canvasBanner(pp)
+    let text = ""
+    let title = ""
+    let body = ""
+    let sourceUrl = "https://wa.me/" + this.user.jid.split("@")[0]
+    switch (action) {
+      case "add":
+        if (!chat.detect) return
+        text = (chat.sWelcome || this.welcome || conn.welcome || "Welcome, @user")
+          .replace("@subject", await this.getName(id))
+          .replace("@desc", groupMetadata.desc?.toString() || "unknow")
+          .replace("@user", "@" + user.split("@")[0])
+        title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗗𝗮𝘁𝗮𝗻𝗴 𝗞𝗮𝗸"
+        body = `Kamu adalah member ke-${groupMetadata.participants.length}.`
+        await this.sendMessage(id, {
+          text: text.trim(),
+          mentions: [user],
+          contextInfo: {
+            externalAdReply: {
+              title,
+              body,
+              thumbnail: img,
+              sourceUrl,
+              mediaType: 1,
+              renderLargerThumbnail: true
+            }
+          }
+        })
+        break
 
-    const metadata = (await this.groupMetadata(id)) || (this.chats[id] || {}).metadata;
-    const subject = await this.getName(id);
-    const descText =
-        typeof metadata?.desc === "string"
-            ? metadata.desc
-            : metadata?.desc?.toString?.() || "unknown";
+      case "remove":
+        if (!chat.detect) return
+        text = (chat.sBye || this.bye || conn.bye || "Bye @user")
+          .replace("@subject", await this.getName(id))
+          .replace("@desc", groupMetadata.desc?.toString() || "unknow")
+          .replace("@user", "@" + user.split("@")[0])
+        title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗧𝗶𝗻𝗴𝗴𝗮𝗹 𝗞𝗮𝗸"
+        body = `Kini grup berisi ${groupMetadata.participants.length} anggota.`
+        sourceUrl = `https://wa.me/${user.replace("@s.whatsapp.net", "")}`
+        await this.sendMessage(id, {
+          text: text.trim(),
+          mentions: [user],
+          contextInfo: {
+            externalAdReply: {
+              title,
+              body,
+              thumbnail: img,
+              sourceUrl,
+              mediaType: 1,
+              renderLargerThumbnail: true
+            }
+          }
+        })
+        break
 
-    for (const user of participants) {
-        const userTag = "@" + user.split("@")[0];
+      case "promote":
+        if (!chat.detect) return
+        text = (chat.sPromote || this.promote || conn.promote || "@user telah menjadi admin!")
+          .replace("@subject", await this.getName(id))
+          .replace("@desc", groupMetadata.desc?.toString() || "unknow")
+          .replace("@user", "@" + user.split("@")[0])
+        title = "˚ ༘`✦ ˑ ִֶ 𓂃⊹ 𝗣𝗿𝗼𝗺𝗼𝘁𝗲 𝗞𝗮𝗸"
+        body = global.config.watermark
+        await this.sendMessage(id, {
+          text: text.trim(),
+          mentions: [user],
+          contextInfo: {
+            externalAdReply: {
+              title,
+              body,
+              thumbnail: img,
+              sourceUrl,
+              mediaType: 1,
+              renderLargerThumbnail: true
+            }
+          }
+        })
+        break
 
-        let baseText = "";
-        switch (action) {
-            case "add":
-                baseText = chat.sWelcome || this.welcome || "Welcome, @user";
-                break;
-            case "remove":
-                baseText = chat.sBye || this.bye || "Bye @user";
-                break;
-            case "promote":
-                baseText = chat.sPromote || this.promote || "@user telah menjadi admin!";
-                break;
-            case "demote":
-                baseText = chat.sDemote || this.demote || "@user bukan admin lagi.";
-                break;
-            default:
-                baseText = "@user";
-        }
-
-        const text = baseText
-            .replace("@subject", subject)
-            .replace("@desc", descText)
-            .replace("@user", userTag)
-            .trim();
-
-        let ppUrl = await this.profilePictureUrl(user, "image").catch(() => null);
-        if (!ppUrl) ppUrl = "https://qu.ax/jVZhH.jpg";
-
-        let ppBuffer = null;
-        try {
-            const r = await fetch(ppUrl);
-            if (r.ok) ppBuffer = Buffer.from(await r.arrayBuffer());
-        } catch {}
-
-        const msg = {
-            caption: text,
-            mentions: [user],
-        };
-        msg.image = ppBuffer ? ppBuffer : { url: ppUrl };
-
-        await this.sendMessage(id, msg);
+      case "demote":
+        if (!chat.detect) return
+        text = (chat.sDemote || this.demote || conn.demote || "@user bukan admin lagi.")
+          .replace("@subject", await this.getName(id))
+          .replace("@desc", groupMetadata.desc?.toString() || "unknow")
+          .replace("@user", "@" + user.split("@")[0])
+        title = "˚ ༘`✦ ˑ ִֶ 𓂃⊹ 𝗗𝗲𝗺𝗼𝘁𝗲 𝗞𝗮𝗸"
+        body = global.config.watermark
+        await this.sendMessage(id, {
+          text: text.trim(),
+          mentions: [user],
+          contextInfo: {
+            externalAdReply: {
+              title,
+              body,
+              thumbnail: img,
+              sourceUrl,
+              mediaType: 1,
+              renderLargerThumbnail: true
+            }
+          }
+        })
+        break
     }
+  }
 }
 
 export async function deleteUpdate(message) {
@@ -619,3 +677,23 @@ watchFile(file, async () => {
     console.log(chalk.cyan.bold("🌸 Aku sedang memperbarui handler.js. Tunggu sebentar, ya!"));
     if (global.reloadHandler) console.log(await global.reloadHandler());
 });
+
+async function canvasBanner(avatar) {
+  const backgrounds = [
+    "https://files.catbox.moe/w9broq.jpg",
+    "https://files.catbox.moe/w9broq.jpg",
+  ]
+  const buffer = await bannerCanvas({
+    font: { name: "Poppins" },
+    avatar,
+    background: { type: "image", background: backgrounds.getRandom() },
+    title: { data: "Liora Official", color: "#fff", size: 20 },
+    description: { data: "© 2024 - 2025 Naruya Izumi", color: "#a7b9c5", size: 13
+    },
+    overlay_opacity: 0.3,
+    border: "#000000",
+    avatar_border: "#FFFFFF",
+  })
+
+  return buffer
+}

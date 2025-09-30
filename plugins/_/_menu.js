@@ -158,7 +158,7 @@ END:VCARD`;
                             renderLargerThumbnail: true,
                         },
                     },
-                    interactive: [
+                    interactiveButtons: [
                         {
                             name: "single_select",
                             buttonParamsJson: JSON.stringify({
@@ -286,7 +286,7 @@ END:VCARD`;
                         renderLargerThumbnail: true,
                     },
                 },
-                interactive: [
+                interactiveButtons: [
                     {
                         name: "single_select",
                         buttonParamsJson: JSON.stringify({

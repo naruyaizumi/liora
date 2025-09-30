@@ -25,7 +25,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 caption: detail,
                 footer: "YouTube Search",
                 title: "🍛 YouTube Downloader",
-                interactive: [
+                interactiveButtons: [
                     {
                         name: "single_select",
                         buttonParamsJson: JSON.stringify({

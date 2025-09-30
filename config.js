@@ -26,63 +26,54 @@
  * - Do not remove or alter original credits under any circumstances.
  */
 
-import "dotenv/config";
+import fs from "fs"
+import path from "path"
+
+const envPath = path.resolve(process.cwd(), ".env")
+if (fs.existsSync(envPath)) {
+  const lines = fs.readFileSync(envPath, "utf-8").split("\n")
+  for (const line of lines) {
+    if (!line || line.startsWith("#")) continue
+    const [key, ...vals] = line.split("=")
+    const value = vals.join("=").trim().replace(/^['"]|['"]$/g, "")
+    if (key && !(key in process.env)) {
+      process.env[key.trim()] = value
+    }
+  }
+}
 
 global.config = {
-    /*============== STAFF ==============*/
-    owner: [
-        ["6283143663697", "𝑵𝒂𝒓𝒖𝒚𝒂 𝑰𝒛𝒖𝒎𝒊", true],
-        ["31629155460", "𝑵𝒂𝒓𝒖𝒚𝒂 𝑰𝒛𝒖𝒎𝒊", true],
-        ["6281398961382", "𝑺𝑿𝒁𝒏𝒊𝒈𝒉𝒕𝒎𝒂𝒓", true],
-        ["6285167849436", "𝑨𝒔𝒉𝒂𝒂", true],
-        ["6287831816747", "𝑨𝒍𝒇𝒊 𝑫𝒆𝒗", true],
-        ["6281239621820", "𝒁𝒉𝒂𝒏 𝑫𝒆𝒗", true],
-    ],
-    newsletter: process.env.NEWSLETTER,
-    group: process.env.GROUP,
-    website: process.env.WEBSITE,
+  /*============== STAFF ==============*/
+  owner: [
+    ["6283143663697", "𝑵𝒂𝒓𝒖𝒚𝒂 𝑰𝒛𝒖𝒎𝒊", true],
+    ["31629155460", "𝑵𝒂𝒓𝒖𝒚𝒂 𝑰𝒛𝒖𝒎𝒊", true],
+    ["6281398961382", "𝑺𝑿𝒁𝒏𝒊𝒈𝒉𝒕𝒎𝒂𝒓", true],
+    ["6285167849436", "𝑨𝒔𝒉𝒂𝒂", true],
+    ["6287831816747", "𝑨𝒍𝒇𝒊 𝑫𝒆𝒗", true],
+    ["6281239621820", "𝒁𝒉𝒂𝒏 𝑫𝒆𝒗", true],
+  ],
+  newsletter: process.env.NEWSLETTER,
+  group: process.env.GROUP,
+  website: process.env.WEBSITE,
 
-    /*========== DEVELOPER MODE ==========*/
-    DEVELOPER: process.env.IS_IZUMI === "true",
+  /*========== DEVELOPER MODE ==========*/
+  DEVELOPER: process.env.IS_IZUMI === "true",
 
-    /*============= PAIRING =============*/
-    pairingNumber: process.env.PAIRING_NUMBER,
-    pairingAuth: process.env.PAIRING_AUTH === "true",
+  /*============= PAIRING =============*/
+  pairingNumber: process.env.PAIRING_NUMBER,
+  pairingAuth: process.env.PAIRING_AUTH === "true",
 
-    /*============== API ==============*/
-    APIs: {
-        btz: process.env.API_BTZ,
-    },
-    APIKeys: {
-        [process.env.API_BTZ]: process.env.APIKEY_BTZ,
-    },
+  /*============== API ==============*/
+  APIs: {
+    btz: process.env.API_BTZ,
+  },
+  APIKeys: {
+    [process.env.API_BTZ]: process.env.APIKEY_BTZ,
+  },
 
-    /*============= VPS PANEL =============*/
-    domain: process.env.PANEL_DOMAIN,
-    apikey: process.env.PANEL_APIKEY,
-    capikey: process.env.PANEL_CAPIKEY,
-    nestid: process.env.PANEL_NESTID,
-    egg: process.env.PANEL_EGG,
-    loc: process.env.PANEL_LOC,
-    VPS: {
-        host: process.env.VPS_HOST,
-        port: process.env.VPS_PORT,
-        username: process.env.VPS_USERNAME,
-        password: process.env.VPS_PASSWORD,
-    },
-    token: process.env.DIGITALOCEAN_TOKEN,
-
-    /*============= SUBDOMAIN =============*/
-    Subdo: {
-        "naruyaizumi.site": {
-            zone: process.env.CF_ZONE,
-            apitoken: process.env.CF_APIKEY,
-        },
-    },
-
-    /*============== MESSAGES ==============*/
-    watermark: "𝙇͢𝙞𝙤𝙧𝙖",
-    author: "𝙉͢𝙖𝙧𝙪𝙮𝙖 𝙄͢𝙯𝙪𝙢𝙞",
-    stickpack: "𝙇͢𝙞𝙤𝙧𝙖",
-    stickauth: "© 𝙉͢𝙖𝙧𝙪𝙮𝙖 𝙄͢𝙯𝙪𝙢𝙞",
-};
+  /*============== MESSAGES ==============*/
+  watermark: "𝙇͢𝙞𝙤𝙧𝙖",
+  author: "𝙉͢𝙖𝙧𝙪𝙮𝙖 𝙄͢𝙯𝙪𝙢𝙞",
+  stickpack: "𝙇͢𝙞𝙤𝙧𝙖",
+  stickauth: "© 𝙉͢𝙖𝙧𝙪𝙮𝙖 𝙄͢𝙯𝙪𝙢𝙞",
+}

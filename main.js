@@ -1,31 +1,32 @@
 /* global conn */
-process.on("uncaughtException", console.error);
-process.on("unhandledRejection", console.error);
-import "./config.js";
-import "./global.js";
-import { naruyaizumi, protoType, serialize } from "./lib/simple.js";
-import { schedule } from "./lib/cron.js";
+process.on("uncaughtException", console.error)
+process.on("unhandledRejection", console.error)
+
+import "./config.js"
+import "./global.js"
+import { naruyaizumi, protoType, serialize } from "./lib/simple.js"
+import { schedule } from "./lib/cron.js"
 import {
     fetchLatestBaileysVersion,
     makeCacheableSignalKeyStore,
     Browsers,
     useMultiFileAuthState,
-} from "baileys";
-import { readdirSync, statSync } from "fs";
-import { join } from "path";
-import chalk from "chalk";
-import P from "pino";
-import { initReload, initCron, connectionUpdateHandler } from "./lib/connection.js";
+} from "baileys"
+import { readdirSync, statSync } from "fs"
+import { join } from "path"
+import chalk from "chalk"
+import P from "pino"
+import { initReload, initCron, connectionUpdateHandler } from "./lib/connection.js"
 
-const pairingAuth = global.config.pairingAuth;
-const pairingNumber = global.config.pairingNumber;
+const pairingAuth = global.config.pairingAuth
+const pairingNumber = global.config.pairingNumber
 
-protoType();
-serialize();
+protoType()
+serialize()
 
 async function IZUMI() {
-    const { state, saveCreds } = await useMultiFileAuthState("./auth");
-    const { version: baileysVersion } = await fetchLatestBaileysVersion();
+    const { state, saveCreds } = await useMultiFileAuthState("./auth")
+    const { version: baileysVersion } = await fetchLatestBaileysVersion()
     console.log(
         chalk.cyan.bold(`
 ╭────────────────────────────────────╮
@@ -36,13 +37,14 @@ async function IZUMI() {
 │ 🌐  System : ${process.platform} CPU: ${process.arch}
 ╰────────────────────────────────────╯
 `)
-    );
+    )
     const connectionOptions = {
         version: baileysVersion,
         logger: P({ level: "silent" }),
         printQRInTerminal: !pairingAuth,
         browser: Browsers.ubuntu("Safari"),
         emitOwnEvents: true,
+        markOnlineOnConnect: true,
         auth: {
             creds: state.creds,
             keys: makeCacheableSignalKeyStore(
@@ -51,12 +53,14 @@ async function IZUMI() {
             ),
         },
     };
-    global.conn = naruyaizumi(connectionOptions);
-    conn.isInit = false;
+
+    global.conn = naruyaizumi(connectionOptions)
+    conn.isInit = false
+
     if (pairingAuth && !conn.authState.creds.registered) {
         setTimeout(async () => {
-            let code = await conn.requestPairingCode(pairingNumber, conn.Pairing);
-            code = code?.match(/.{1,4}/g)?.join("-") || code;
+            let code = await conn.requestPairingCode(pairingNumber, conn.Pairing)
+            code = code?.match(/.{1,4}/g)?.join("-") || code
             console.log(
                 chalk.cyan.bold(`
 ╭────────────────────────────────────╮
@@ -67,8 +71,8 @@ async function IZUMI() {
 │ 🕒  Generated At  : ${chalk.white.bold(new Date().toLocaleString("en-US"))}
 ╰────────────────────────────────────╯
 `)
-            );
-        }, 3000);
+            )
+        }, 3000)
     }
 
     schedule(
@@ -76,14 +80,14 @@ async function IZUMI() {
         async () => {
             if (global.db?.data) {
                 try {
-                    global.db.write();
+                    global.db.write()
                 } catch (e) {
-                    console.error("DB autosave gagal:", e);
+                    console.error("DB autosave gagal:", e)
                 }
             }
         },
-        { intervalSeconds: 5 }
-    );
+        { intervalSeconds: 10 }
+    )
 
     let isInit = true;
     let handler = await import("./handler.js");

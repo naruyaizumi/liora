@@ -16,7 +16,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
             caption: `🍱 *Hasil pencarian Aptoide untuk: ${text}*`,
             footer: "📦 Aptoide Downloader",
             title: "🍜 Pilih aplikasi yang ingin diunduh",
-            interactive: [
+            interactiveButtons: [
                 {
                     name: "single_select",
                     buttonParamsJson: JSON.stringify({

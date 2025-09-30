@@ -68,7 +68,7 @@ ${list}`
                 title: "🍰 Upload Success",
                 footer: global.config.watermark,
                 hasMediaAttachment: false,
-                interactive: [
+                interactiveButtons: [
                     {
                         name: "cta_copy",
                         buttonParamsJson: JSON.stringify({

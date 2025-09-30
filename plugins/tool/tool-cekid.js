@@ -35,7 +35,7 @@ let handler = async (m, { conn, args }) => {
             text: `🍬 *Informasi Ditemukan!*\n🍡 *Nama: ${name}*\n🍭 *ID: ${id}*`,
             footer: "",
             title: "🍧 CEK ID",
-            interactive: [
+            interactiveButtons: [
                 {
                     name: "cta_copy",
                     buttonParamsJson: JSON.stringify({

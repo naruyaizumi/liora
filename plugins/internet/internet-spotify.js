@@ -37,7 +37,7 @@ let handler = async (m, { conn, args, usedPrefix }) => {
                 caption: `🍛 *Ditemukan ${json.result.data.length} hasil pencarian:*\n\n🍡 *Silakan pilih lagu dari daftar di bawah ini untuk diunduh.*`,
                 footer: "🍩 Tekan tombol di bawah untuk melihat pilihan.",
                 title: "🍱 Spotify Downloader",
-                interactive: [
+                interactiveButtons: [
                     {
                         name: "single_select",
                         buttonParamsJson: JSON.stringify({
