@@ -20,7 +20,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                     externalAdReply: {
                         title: "🍣 Wikipedia Search",
                         body: "🍤 Hasil pencarian dari Wikipedia",
-                        thumbnailUrl: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg",
+                        thumbnailUrl: "https://qu.ax/nDkxR.jpg",
                         sourceUrl: `https://id.wikipedia.org/wiki/${encodeURIComponent(json.result.title)}`,
                         mediaType: 1,
                         renderLargerThumbnail: true,

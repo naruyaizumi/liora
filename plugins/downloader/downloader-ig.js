@@ -118,7 +118,5 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
 handler.help = ["instagram"];
 handler.tags = ["downloader"];
 handler.command = /^(instagram|ig|igdl)$/i;
-handler.limit = true;
-handler.register = true;
 
 export default handler;

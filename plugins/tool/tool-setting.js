@@ -107,7 +107,7 @@ let handler = async (m, { conn, isOwner, isAdmin, args, usedPrefix, command }) =
                 text: "🍽️ *Silakan pilih fitur yang ingin kamu aktifkan/nonaktifkan:*",
                 footer: "*Interactive Settings Menu* 🍱",
                 title: "🍱 Bot Settings Menu",
-                interactive: buttons,
+                interactiveButtons: buttons,
             },
             { quoted: m }
         );

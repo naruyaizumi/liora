@@ -2,7 +2,6 @@ import { createRequire } from "module";
 import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { platform } from "process";
-import yargs from "yargs";
 import Database from "better-sqlite3";
 
 global.__filename = function filename(pathURL = import.meta.url, rmPrefix = platform !== "win32") {
@@ -42,7 +41,6 @@ global.API = (name, path = "/", query = {}, apikeyqueryname) =>
         : "");
 
 global.timestamp = { start: new Date() };
-global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse());
 
 const dbPath = path.join(global.__dirname(import.meta.url), "database.db");
 const sqlite = new Database(dbPath);
@@ -114,7 +112,7 @@ global.dfail = (type, m, conn) => {
                         title: "🍡 AKSES DITOLAK",
                         body: global.config.watermark,
                         mediaType: 1,
-                        thumbnailUrl: "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
+                        thumbnailUrl: "https://qu.ax/RtoXq.jpg",
                         renderLargerThumbnail: true,
                     },
                 },

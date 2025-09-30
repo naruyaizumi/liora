@@ -26,7 +26,5 @@ let handler = async (m, { args, usedPrefix, command }) => {
 handler.help = ["cekip"];
 handler.tags = ["tools"];
 handler.command = /^(cekip|ip)$/i;
-handler.register = true;
-handler.limit = true;
 
 export default handler;

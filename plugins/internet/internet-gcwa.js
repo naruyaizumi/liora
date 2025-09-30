@@ -50,7 +50,7 @@ ${others}
 };
 
 handler.help = ["gcwa"];
-handler.tags = ["tools"];
+handler.tags = ["internet"];
 handler.command = /^((group(wa)?|gcwa)(-link)?)$/i;
 
 export default handler;

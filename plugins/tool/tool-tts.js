@@ -69,7 +69,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             caption: `🍓 *Text-to-Speech*\n🧁 *Teks: "${input}"*\n🍱 *Silakan pilih bahasa di bawah~*`,
             footer: "🍛 TTS Generator",
             title: "🍡 Pilih Bahasa",
-            interactive: [
+            interactiveButtons: [
                 {
                     name: "single_select",
                     buttonParamsJson: JSON.stringify({

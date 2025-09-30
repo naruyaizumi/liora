@@ -41,8 +41,6 @@ let handler = async (m, { conn, args }) => {
 handler.help = ["twitter"];
 handler.tags = ["downloader"];
 handler.command = /^(twitter|twdl)$/i;
-handler.limit = true;
-handler.register = true;
 
 export default handler;
 

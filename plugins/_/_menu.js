@@ -114,13 +114,11 @@ END:VCARD`;
         let subtitle = `🕒 ${timeID}`;
         const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
         const Version = packageJson.version;
-        const mode = global.opts.self ? "Private" : "Public";
         let listCmd = `
 🍓 *I N F O   B O T* 🍓
 ────────────────────────
 🧁 *Name: ${conn.user.name}*
 🍒 *Version: ${Version}*
-🍡 *Mode Bot: ${mode}*
 🍩 *Database: ${bytesToMB(fs.readFileSync("./database.db").byteLength)} Mb*
 🍧 *Uptime: ${uptime}*
 🍮 *Machine Uptime: ${muptime}*

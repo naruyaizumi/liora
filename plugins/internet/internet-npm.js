@@ -9,9 +9,7 @@ let handler = async (m, { conn, text }) => {
     await conn.sendMessage(m.chat, { text: txt }, { quoted: m });
 };
 handler.help = ["npmsearch"];
-handler.tags = ["tools"];
-handler.command = /^npm(js|search)?$/i;
-handler.register = true;
-handler.limit = true;
+handler.tags = ["internet"];
+handler.command = /^(npm(js|search)?)$/i;
 
 export default handler;

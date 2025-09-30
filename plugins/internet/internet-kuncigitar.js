@@ -36,7 +36,5 @@ ${chord}
 handler.help = ["chord"];
 handler.tags = ["music"];
 handler.command = /^(chord|kunci)$/i;
-handler.register = true;
-handler.limit = true;
 
 export default handler;

@@ -47,7 +47,5 @@ ${lyrics}
 handler.help = ["lyrics"];
 handler.tags = ["internet"];
 handler.command = /^(lyrics|lirik)$/i;
-handler.limit = true;
-handler.register = true;
 
 export default handler;

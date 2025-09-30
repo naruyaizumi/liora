@@ -317,7 +317,7 @@ export async function handler(chatUpdate) {
                                 body: global.config.watermark,
                                 mediaType: 1,
                                 thumbnailUrl:
-                                    "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
+                                    "https://qu.ax/RtoXq.jpg",
                                 renderLargerThumbnail: true,
                             },
                         },
@@ -362,7 +362,7 @@ export async function handler(chatUpdate) {
                                         body: global.config.watermark,
                                         mediaType: 1,
                                         thumbnailUrl:
-                                            "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
+                                            "https://qu.ax/RtoXq.jpg",
                                         renderLargerThumbnail: true,
                                     },
                                 },
@@ -459,7 +459,7 @@ ${text}
                                         title: "💥 Plugin Error Detected!",
                                         body: "📄 Lihat log error di atas",
                                         mediaType: 1,
-                                        thumbnailUrl: "https://files.catbox.moe/xfgvse.jpg",
+                                        thumbnailUrl: "https://qu.ax/MtzsZ.jpg",
                                         renderLargerThumbnail: true,
                                     },
                                 },
@@ -680,8 +680,10 @@ watchFile(file, async () => {
 
 async function canvasBanner(avatar) {
   const backgrounds = [
-    "https://files.catbox.moe/w9broq.jpg",
-    "https://files.catbox.moe/w9broq.jpg",
+    "https://qu.ax/UkBQK.jpg",
+    "https://qu.ax/hhKDj.jpg",
+    "https://qu.ax/xuUvD.jpg",
+    "https://qu.ax/iikRg.jpg",
   ]
   const buffer = await bannerCanvas({
     font: { name: "Poppins" },

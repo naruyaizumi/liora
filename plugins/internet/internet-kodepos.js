@@ -49,7 +49,7 @@ ${allResults}
                 externalAdReply: {
                     title: "📮 Hasil Pencarian Kode Pos",
                     body: `📌 ${text} - ${firstLocation.regency}, ${firstLocation.province}`,
-                    thumbnailUrl: "https://img86.pixhost.to/images/493/563104371_izumizopedia.jpg",
+                    thumbnailUrl: "https://qu.ax/CdKZv.jpg",
                     mediaType: 1,
                     renderLargerThumbnail: true,
                 },
@@ -61,7 +61,7 @@ ${allResults}
 };
 
 handler.help = ["kodepos"];
-handler.tags = ["tools"];
+handler.tags = ["internet"];
 handler.command = /^(kodepos|pos)$/i;
 
 export default handler;

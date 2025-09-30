@@ -37,7 +37,7 @@ let handler = async (m, { text, usedPrefix, command }) => {
 };
 
 handler.help = ["matauang"];
-handler.tags = ["tools"];
+handler.tags = ["internet"];
 handler.command = /^(matauang|konversi)$/i;
 
 export default handler;
