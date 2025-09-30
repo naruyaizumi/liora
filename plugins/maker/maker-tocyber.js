@@ -23,13 +23,13 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
         let apiUrl = global.API(
             "btz",
-            "/api/maker/jadighibli",
+            "/api/maker/jadicyberpunk",
             { url: uploaded },
             "apikey"
         );
 
         let response = await fetch(apiUrl);
-        if (!response.ok) throw new Error("Gagal memproses gambar ke gaya Ghibli!");
+        if (!response.ok) throw new Error("Gagal memproses gambar ke cyberpunk!");
 
         let buffer = Buffer.from(await response.arrayBuffer());
 
@@ -37,7 +37,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
             m.chat,
             {
                 image: buffer,
-                caption: `🍡 *Berhasil mengubah gambar jadi gaya Studio Ghibli!*`,
+                caption: `🍡 *Berhasil mengubah gambar jadi gaya Cyberpunk!*`,
             },
             { quoted: m }
         );
@@ -49,8 +49,8 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     }
 };
 
-handler.help = ["toghibli"];
-handler.tags = ["tools"];
-handler.command = /^(toghibli|jadighibli)$/i;
+handler.help = ["tocyber"];
+handler.tags = ["maker"];
+handler.command = /^(tocyber|jadicyberpunk)$/i;
 
 export default handler;

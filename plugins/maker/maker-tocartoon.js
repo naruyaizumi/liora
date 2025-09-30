@@ -47,7 +47,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 };
 
 handler.help = ["tocartoon"];
-handler.tags = ["tools"];
+handler.tags = ["maker"];
 handler.command = /^(tocartoon|jadicartoon)$/i;
 
 export default handler;

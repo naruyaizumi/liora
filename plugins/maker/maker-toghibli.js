@@ -3,12 +3,15 @@ import { uploader } from "../../lib/uploader.js";
 let handler = async (m, { conn, usedPrefix, command }) => {
     try {
         await global.loading(m, conn);
+
         let q = m.quoted ? m.quoted : m;
         let mime = (q.msg || q).mimetype || "";
+
         if (!mime)
             return m.reply(
                 `🍩 *Balas atau kirim gambar dengan caption!*\n\n🍬 *Contoh: ${usedPrefix + command}*`
             );
+
         if (!/image\/(jpeg|png|jpg)/.test(mime))
             return m.reply("🍪 *Format gambar tidak didukung! Gunakan JPG atau PNG.*");
 
@@ -20,13 +23,13 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
         let apiUrl = global.API(
             "btz",
-            "/api/maker/jadicomicbook",
+            "/api/maker/jadighibli",
             { url: uploaded },
             "apikey"
         );
 
         let response = await fetch(apiUrl);
-        if (!response.ok) throw new Error("Gagal memproses gambar ke komik!");
+        if (!response.ok) throw new Error("Gagal memproses gambar ke gaya Ghibli!");
 
         let buffer = Buffer.from(await response.arrayBuffer());
 
@@ -34,7 +37,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
             m.chat,
             {
                 image: buffer,
-                caption: `🍡 *Berhasil mengubah gambar jadi gaya komik!*`,
+                caption: `🍡 *Berhasil mengubah gambar jadi gaya Studio Ghibli!*`,
             },
             { quoted: m }
         );
@@ -46,8 +49,8 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     }
 };
 
-handler.help = ["tocomics"];
-handler.tags = ["tools"];
-handler.command = /^(tocomics|jadicomicbook)$/i;
+handler.help = ["toghibli"];
+handler.tags = ["maker"];
+handler.command = /^(toghibli|jadighibli)$/i;
 
 export default handler;

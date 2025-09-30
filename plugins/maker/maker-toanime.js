@@ -45,7 +45,7 @@ let handler = async (m, { conn }) => {
 };
 
 handler.help = ["toanime"];
-handler.tags = ["tools"];
+handler.tags = ["maker"];
 handler.command = /^(toanime|animefy)$/i;
 
 export default handler;
