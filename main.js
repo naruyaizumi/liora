@@ -27,6 +27,7 @@ serialize();
 async function IZUMI() {
     const { state, saveCreds } = await useMultiFileAuthState("./auth");
     const { version: baileysVersion } = await fetchLatestBaileysVersion();
+
     console.log(
         chalk.cyan.bold(`
 ╭────────────────────────────────────╮
@@ -38,6 +39,7 @@ async function IZUMI() {
 ╰────────────────────────────────────╯
 `)
     );
+
     const connectionOptions = {
         version: baileysVersion,
         logger: P({ level: "silent" }),
@@ -82,15 +84,16 @@ async function IZUMI() {
                 try {
                     global.db.write();
                 } catch (e) {
-                    console.error("DB autosave gagal:", e);
+                    console.error(e);
                 }
             }
         },
-        { intervalSeconds: 10 }
+        { intervalSeconds: 15 }
     );
 
     let isInit = true;
     let handler = await import("./handler.js");
+
     global.reloadHandler = async function (restartConn) {
         try {
             const Handler = await import(`./handler.js?update=${Date.now()}`).catch(console.error);
@@ -98,6 +101,7 @@ async function IZUMI() {
         } catch (e) {
             console.error(e);
         }
+
         if (restartConn) {
             const oldChats = global.conn.chats;
             try {
@@ -109,6 +113,7 @@ async function IZUMI() {
             global.conn = naruyaizumi(connectionOptions, { chats: oldChats });
             isInit = true;
         }
+
         if (!isInit) {
             conn.ev.off("messages.upsert", conn.handler);
             conn.ev.off("group-participants.update", conn.participantsUpdate);
@@ -116,24 +121,29 @@ async function IZUMI() {
             conn.ev.off("connection.update", conn.connectionUpdate);
             conn.ev.off("creds.update", conn.credsUpdate);
         }
+
         conn.spromote = "@user sekarang admin!";
         conn.sdemote = "@user sekarang bukan admin!";
         conn.welcome = "Hallo @user Selamat datang di @subject\n\n@desc";
         conn.bye = "Selamat tinggal @user";
         conn.sRevoke = "Link group telah diubah ke \n@revoke";
+
         conn.handler = handler.handler.bind(global.conn);
         conn.participantsUpdate = handler.participantsUpdate.bind(global.conn);
         conn.onDelete = handler.deleteUpdate.bind(global.conn);
         conn.connectionUpdate = connectionUpdateHandler.bind(global.conn);
         conn.credsUpdate = saveCreds.bind(global.conn);
+
         conn.ev.on("messages.upsert", conn.handler);
         conn.ev.on("group-participants.update", conn.participantsUpdate);
         conn.ev.on("message.delete", conn.onDelete);
         conn.ev.on("connection.update", conn.connectionUpdate);
         conn.ev.on("creds.update", conn.credsUpdate);
+
         isInit = false;
         return true;
     };
+
     const pluginFolder = global.__dirname(
         join(global.__dirname(import.meta.url), "./plugins/index")
     );

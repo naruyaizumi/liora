@@ -1,104 +1,154 @@
-# 🚀 Instalasi Liora via Pterodactyl
+# 🚀 Full Guide: Deploying Liora via Pterodactyl
 
-Panduan ini menjelaskan cara menjalankan **Liora** di panel **Pterodactyl**.  
-Karena Pterodactyl biasanya tidak mendukung `git clone` secara langsung, maka instalasi dilakukan melalui **ZIP release**.
-
----
-
-## 1. Unduh Release Terbaru
-
-1. Buka halaman **last release** Liora:  
-   👉 [Download Liora Latest Release](https://github.com/naruyaizumi/liora/releases/latest)
-2. Unduh file ZIP source code.
+This documentation explains how to deploy and run **Liora** inside a **Pterodactyl Panel**.  
+Because Pterodactyl often does not allow `git clone` directly, the deployment will be done via **ZIP Release Upload**.  
 
 ---
 
-## 2. Upload ke Pterodactyl
+## 1. Prerequisites
 
-1. Masuk ke panel **Pterodactyl** kamu.
-2. Pilih server Node.js yang sudah dibuat.
-3. Buka menu **Files** → klik **Upload** → unggah file ZIP Liora yang sudah didownload.
-4. Setelah selesai, **Extract/Unarchive** file ZIP di dalam panel.
+Before starting, make sure your server and Pterodactyl environment meet these requirements:
 
----
-
-## 3. Konfigurasi Environment
-
-1. Cari file `.env.example` di dalam folder hasil extract.
-2. Edit file tersebut sesuai kebutuhan (isi API key, session, dsb).
-3. **Save**, lalu **rename** file menjadi:
-
-```
-.env
-```
+- Node.js server (recommended version **v22+** for full compatibility)  
+- At least **1–2 GB RAM** and **5 GB disk space**  
+- Internet access (to fetch npm dependencies)  
+- Access to the Pterodactyl panel with file upload & console permissions  
 
 ---
 
-## 4. Setup Startup Command
+## 2. Download the Latest Release
 
-> Karena ada dependensi native (`gyp`), kita perlu install package terlebih dahulu.
-
-1. Masuk ke **Startup** di panel server.
-2. Ubah startup command default dari:
-
-```
-npm start
-```
-
-menjadi:
-
-```
-npm install
-```
-
-3. Simpan perubahan.
+1. Go to: [Liora Latest Release](https://github.com/naruyaizumi/liora/releases/latest)  
+2. Download the **Source Code (ZIP)** package.  
+3. Keep the file ready for upload to your Pterodactyl server.  
 
 ---
 
-## 5. Gunakan Egg Node.js Rekomendasi
+## 3. Upload & Extract to Pterodactyl
 
-Untuk pengalaman terbaik, gunakan Egg Node.js yang sudah saya siapkan:  
-👉 [Egg Node.js (20/22/23/24, Complete Tools)](https://gist.github.com/naruyaizumi/12a3c6baed67ca7fd7eaa11992c82631)
+1. Login to your **Pterodactyl Panel**.  
+2. Open your **Node.js server instance**.  
+3. Navigate to **Files → Upload**.  
+4. Upload the previously downloaded `liora.zip`.  
+5. Once uploaded, select it and **Extract/Unarchive**.  
+6. Confirm files are extracted properly:  
+   - `index.js`  
+   - `package.json`  
+   - `.env.example`  
+   - `/lib`, `/plugins`, `/auth`, etc.  
 
-Egg ini berbasis **Debian 13 Slim** dengan installer yang sudah include tool penting agar **Liora** bisa berjalan mulus.
+---
 
-- Mendukung `yarn` & `pnpm`
-- Sudah terpasang **build tools** untuk modul native (`sharp`, `gyp`, dll)
-- Cocok untuk script modern seperti Liora
+## 4. Environment Configuration
+
+1. Rename `.env.example` to `.env`:  
+
+   mv .env.example .env  
+
+2. Open `.env` inside Pterodactyl editor.  
+3. Set up your configuration variables:  
+   - `OWNER` → your WhatsApp number(s)  
+   - `PAIRING` → true/false depending on how you want to connect  
+   - `API` keys for external services  
+   - `DATABASE` path or URL  
+   - Other configs as needed (watermark, prefix, etc.)  
+
+4. Save changes.  
+
+---
+
+## 5. Adjust Startup Command
+
+By default, Pterodactyl Node.js egg runs `npm start`.  
+We need to install dependencies first.  
+
+1. Go to **Startup** section.  
+2. Change startup command from:  
+
+   npm start  
+
+   to:  
+
+   npm install  
+
+3. Save changes.  
 
 ---
 
 ## 6. Install Dependencies
 
-1. Pergi ke **Console**.
-2. Jalankan server → proses `npm install` akan berjalan otomatis.
-3. Tunggu sampai semua package selesai terpasang.
+1. Go to **Console**.  
+2. Start the server → it will run `npm install`.  
+3. Wait until all packages are installed (may take 1–5 minutes depending on network).  
+4. Confirm that a `node_modules` folder appears in Files after installation.  
 
 ---
 
-## 7. Jalankan Liora
+## 7. Switch Back to Start Command
 
-1. Setelah instalasi selesai, kembali ke **Startup**.
-2. Ubah command dari:
+After dependencies are installed:  
 
-```
-npm install
-```
+1. Go back to **Startup**.  
+2. Change startup command from:  
 
-menjadi:
+   npm install  
 
-```
-npm start
-```
+   back to:  
 
-3. Simpan perubahan.
-4. Balik ke **Console** lalu jalankan server.
+   npm start  
 
-✅ **Liora sekarang siap pairing!**
+3. Save.  
 
 ---
 
-### 📝 Catatan
+## 8. Recommended Node.js Egg (Optional but Highly Recommended)
 
-- Pastikan kamu menggunakan **Egg rekomendasi** agar semua dependensi dapat terpasang dengan baik.
-- Jika ingin menggunakan `yarn` atau `pnpm`, pastikan kamu ganti perintah `npm install` sesuai dengan package manager yang dipilih.
+For the best stability, use the custom Node.js Egg built for Liora:  
+👉 [Custom Node.js Egg (20/22/23/24, Complete Tools)](https://gist.github.com/naruyaizumi/12a3c6baed67ca7fd7eaa11992c82631)
+
+This Egg provides:  
+- Based on **Debian 13 Slim**  
+- Includes `build-essential`, `g++`, `python3`, `make`  
+- Preinstalled support for native modules like `sharp` and `better-sqlite3`  
+- Supports multiple package managers (`npm`, `yarn`, `pnpm`)  
+- Optimized for WhatsApp bots  
+
+To use it:  
+- Replace your current server’s Egg with the provided one.  
+- Recreate the container (data will persist if mounted correctly).  
+
+---
+
+## 9. Start Liora
+
+1. Open **Console** again.  
+2. Start the server.  
+3. If first run → pairing QR or pairing code will appear.  
+4. Scan/pair your WhatsApp account.  
+
+🌸 Liora is now running!  
+
+---
+
+## 10. Persistent Setup
+
+- Liora will now restart automatically when the server restarts (handled by Pterodactyl).  
+- Logs can be seen under the **Console** tab.  
+- If you need live debugging, check console output directly.  
+
+---
+
+### 📝 Notes & Best Practices
+
+- Always use **Node.js v22+** for long-term support.  
+- If memory usage is high, allocate at least **2 GB RAM**.  
+- Use `.env` file to separate secrets (API keys, database path).  
+- Regularly update dependencies:  
+  npm update  
+
+- To reinstall everything:  
+  delete `node_modules` and `package-lock.json`, then run `npm install`.  
+
+---
+
+🔒 With this setup, Liora should run smoothly in **Pterodactyl**, with proper dependency handling, environment configuration, and startup logic.

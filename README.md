@@ -160,12 +160,12 @@
 We take security, stability, and the comfort of contributors very seriously.  
  If you discover a **vulnerability** or a **bug**, please report it responsibly through the following:
 
-  <details>
-    <summary><b><span style="color:#FFC0CB;">Security Issues</span></b></summary>
-    <a href="SECURITY.md">
-      <img src="https://img.shields.io/badge/Security-Policy-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Security Policy"/>
-    </a>
-  </details>
+<details>
+  <summary><b><span style="color:#FFC0CB;">Security Issues</span></b></summary>
+  <a href="https://github.com/naruyaizumi/liora/blob/main/.github/SECURITY.md">
+    <img src="https://img.shields.io/badge/Security-Policy-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Security Policy"/>
+  </a>
+</details>
 
   <details>
     <summary><b><span style="color:#FFC0CB;">Bug Reports</span></b></summary>
@@ -224,7 +224,7 @@ This project follows
 <a href="https://semver.org/"><b>Semantic Versioning</b></a>
 to manage releases.  
  All new features, improvements, bug fixes, and deprecated changes are documented in detail in
-<a href="CHANGELOG.md"><b>CHANGELOG.md</b></a>.
+<a href="https://github.com/naruyaizumi/liora/blob/main/.github/CHANGELOG.md"><b>CHANGELOG.md</b></a>.
 
 </details>
 
@@ -482,24 +482,51 @@ We sincerely thank the following parties who have been instrumental in the devel
     </a>
   </p>
   <p align="justify">
-    Proyek ini menggunakan <b>@itsukichann/baileys</b> sebagai fondasi utama karena stabilitas, kompatibilitas, 
-    dan fleksibilitasnya dalam mengintegrasikan fitur WhatsApp ke dalam bot. 
-    Baileys menyediakan dukungan protokol terkini, memungkinkan pengembangan cepat, 
-    serta memudahkan pemeliharaan jangka panjang tanpa perlu membangun stack dari nol.
+    This project utilizes <b>@itsukichann/baileys</b> as its primary foundation due to its stability, compatibility, 
+    and flexibility in integrating WhatsApp features into the bot. 
+    Baileys provides up-to-date protocol support, enabling rapid development, 
+    seamless feature integration, and long-term maintainability without the need 
+    to build an entire stack from scratch.
   </p>
 </details>
 
-  <details>
-    <summary><span style="color:#FFC0CB; font-weight:bold;">Public API Providers</span></summary>
-    <p align="center">
-      <a href="https://api.betabotz.eu.org">
-        <img src="https://img.shields.io/badge/BetaBotz_API-2F2F2F?style=for-the-badge&logo=postman&logoColor=white&labelColor=00BFFF"/>
-      </a>
-      <a href="https://cloudkuimages.guru">
-        <img src="https://img.shields.io/badge/CloudKuImages-2F2F2F?style=for-the-badge&logo=icloud&logoColor=white&labelColor=FF8C00"/>
-      </a>
-    </p>
-  </details>
+<details>
+  <summary><span style="color:#FFC0CB; font-weight:bold;">Public API Providers</span></summary>
+  <p align="center">
+    <a href="https://api.betabotz.eu.org">
+      <img src="https://img.shields.io/badge/BetaBotz_API-2F2F2F?style=for-the-badge&logo=postman&logoColor=white&labelColor=00BFFF"/>
+    </a>
+    <a href="https://cloudkuimages.guru">
+      <img src="https://img.shields.io/badge/CloudKuImages-2F2F2F?style=for-the-badge&logo=icloud&logoColor=white&labelColor=FF8C00"/>
+    </a>
+    <a href="https://api.nekolabs.my.id">
+      <img src="https://img.shields.io/badge/NekoLabs_API-2F2F2F?style=for-the-badge&logo=swagger&logoColor=white&labelColor=8A2BE2"/>
+    </a>
+    <a href="https://data.bmkg.go.id">
+      <img src="https://img.shields.io/badge/BMKG_Data-2F2F2F?style=for-the-badge&logo=cloudflare&logoColor=white&labelColor=32CD32"/>
+    </a>
+  </p>
+  <p align="center">
+    <a href="https://catbox.moe">
+      <img src="https://img.shields.io/badge/Catbox_Uploader-2F2F2F?style=for-the-badge&logo=dropbox&logoColor=white&labelColor=FF4500"/>
+    </a>
+    <a href="https://uguu.se">
+      <img src="https://img.shields.io/badge/Uguu_Uploader-2F2F2F?style=for-the-badge&logo=nextcloud&logoColor=white&labelColor=1E90FF"/>
+    </a>
+    <a href="https://qu.ax">
+      <img src="https://img.shields.io/badge/Quax_Uploader-2F2F2F?style=for-the-badge&logo=drive&logoColor=white&labelColor=FF1493"/>
+    </a>
+    <a href="https://put.icu">
+      <img src="https://img.shields.io/badge/Puticu_Uploader-2F2F2F?style=for-the-badge&logo=google-drive&logoColor=white&labelColor=FFD700"/>
+    </a>
+    <a href="https://tmpfiles.org">
+      <img src="https://img.shields.io/badge/Tmpfiles_Uploader-2F2F2F?style=for-the-badge&logo=vercel&logoColor=white&labelColor=00CED1"/>
+    </a>
+    <a href="https://cdn.yupra.my.id">
+      <img src="https://img.shields.io/badge/YupraCDN_Uploader-2F2F2F?style=for-the-badge&logo=fastly&logoColor=white&labelColor=7FFF00"/>
+    </a>
+  </p>
+</details>
 
   <details>
     <summary><span style="color:#FFC0CB; font-weight:bold;">AI Assistance</span></summary>

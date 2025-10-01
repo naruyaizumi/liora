@@ -1,6 +1,6 @@
 {
     "name": "liora",
-    "version": "5.0.0-beta.2",
+    "version": "5.0.0-rc.0",
     "type": "module",
     "engines": {
         "node": ">=22.0.0"
@@ -8,9 +8,9 @@
     "scripts": {
         "start": "node index.js",
         "test": "node test.js",
-        "lint": "eslint .",
-        "prettier": "prettier --check .",
-        "prettier:fix": "prettier --write .",
+        "lint": "eslint --config .github/eslint.config.js .",
+        "prettier": "prettier --config .github/.prettierrc.json --check .",
+        "prettier:fix": "prettier --config .github/.prettierrc.json --write .",
         "build:addon": "node-gyp configure build"
     },
     "license": "Apache-2.0",

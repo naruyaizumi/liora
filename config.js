@@ -55,7 +55,10 @@ global.config = {
         ["6287831816747", "𝑨𝒍𝒇𝒊 𝑫𝒆𝒗", true],
         ["6281239621820", "𝒁𝒉𝒂𝒏 𝑫𝒆𝒗", true],
     ],
-    newsletter: process.env.NEWSLETTER,
+    newsletter: (process.env.NEWSLETTER || "")
+    .split(",")
+    .map(jid => jid.trim())
+    .filter(jid => jid.length),
     group: process.env.GROUP,
     website: process.env.WEBSITE,
 

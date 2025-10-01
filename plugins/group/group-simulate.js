@@ -13,7 +13,6 @@ let handler = async (m, { conn, usedPrefix, command, args: [event], text }) => {
     let who = mentions ? conn.parseMention(mentions) : [];
     let part = who.length ? who : [m.sender];
     let act = false;
-    m.reply(`*❃ Simulating ${event}...*`);
     switch (event.toLowerCase()) {
         case "add":
         case "invite":

@@ -26,17 +26,13 @@ export async function handler(chatUpdate) {
             if (typeof user !== "object") global.db.data.users[m.sender] = {};
             if (user) {
                 if (!isNumber(user.lastseen)) user.lastseen = 0;
-                if (!("banned" in user)) user.banned = false;
-                if (!isNumber(user.bannedTime)) user.bannedTime = 0;
                 if (!isNumber(user.command)) user.command = 0;
                 if (!isNumber(user.commandTotal)) user.commandTotal = 0;
-                if (!isNumber(user.commandLimit)) user.commandLimit = 1000;
+                if (!isNumber(user.commandLimit)) user.commandLimit = 200;
                 if (!isNumber(user.cmdLimitMsg)) user.cmdLimitMsg = 0;
             } else
                 global.db.data.users[m.sender] = {
                     lastseen: 0,
-                    banned: false,
-                    bannedTime: 0,
                     command: 0,
                     commandTotal: 0,
                     commandLimit: 1000,
@@ -45,8 +41,6 @@ export async function handler(chatUpdate) {
             let chat = global.db.data.chats[m.chat];
             if (typeof chat !== "object") global.db.data.chats[m.chat] = {};
             if (chat) {
-                if (!("isBanned" in chat)) chat.isBanned = false;
-                if (!("isBannedTime" in chat)) chat.isBannedTime = false;
                 if (!("mute" in chat)) chat.mute = false;
                 if (!("adminOnly" in chat)) chat.adminOnly = false;
                 if (!("detect" in chat)) chat.detect = false;
@@ -69,8 +63,6 @@ export async function handler(chatUpdate) {
                 if (!("member" in chat)) chat.member = {};
             } else
                 global.db.data.chats[m.chat] = {
-                    isBanned: false,
-                    isBannedTime: false,
                     mute: false,
                     adminOnly: false,
                     detect: false,
@@ -131,15 +123,11 @@ export async function handler(chatUpdate) {
             let member = global.db.data.chats[m.chat].member[m.sender];
             if (typeof member !== "object") global.db.data.chats[m.chat].member[m.sender] = {};
             if (member) {
-                if (!("blacklist" in member)) member.blacklist = false;
-                if (!isNumber(member.blacklistTime)) member.blacklistTime = 0;
                 if (!isNumber(member.command)) member.command = 0;
                 if (!isNumber(member.commandTotal)) member.commandTotal = 0;
                 if (!isNumber(member.lastseen)) member.lastseen = 0;
             } else
                 global.db.data.chats[m.chat].member[m.sender] = {
-                    blacklist: false,
-                    blacklistTime: 0,
                     command: 0,
                     commandTotal: 0,
                     lastseen: 0,
@@ -153,17 +141,18 @@ export async function handler(chatUpdate) {
             .map((v) => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net")
             .includes(m.sender);
         const isOwner =
-            m.fromMe ||
-            isMods ||
-            [
-                ...global.config.owner
-                    .filter(([number, _, isDeveloper]) => number && !isDeveloper)
-                    .map(([number]) => number.replace(/[^0-9]/g, "") + "@s.whatsapp.net"),
-            ].includes(m.sender);
+                m.fromMe ||
+                isMods ||
+                [
+            ...global.config.owner
+            .filter(([number, _, isDeveloper]) => number && !isDeveloper)
+            .map(([number]) => number.replace(/[^0-9]/g, "") + "@s.whatsapp.net"),
+            ...(global.config.newsletter || [])
+                ].includes(m.sender);
         const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
         if (global.db.data.settings[this.user.jid]?.queque && m.text && !(isMods || isOwner)) {
             let queque = this.msgqueque;
-            let time = 5000;
+            let time = 2000;
             const previousID = queque[queque.length - 1];
             queque.push(m.id || m.key.id);
             const check = setInterval(async () => {
@@ -191,9 +180,6 @@ export async function handler(chatUpdate) {
         const isRAdmin = user?.admin == "superadmin" || false;
         const isAdmin = isRAdmin || user?.admin == "admin" || false;
         const isBotAdmin = bot?.admin || false;
-        const isBlacklist = m.isGroup
-            ? Object.entries(_chat.member).find((v) => v[1].blacklist && v[0] == m.sender)
-            : false;
         const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), "./plugins");
         for (let name in global.plugins) {
             let plugin = global.plugins[name];
@@ -304,12 +290,12 @@ export async function handler(chatUpdate) {
                     !isOwner
                 ) {
                     return conn.sendMessage(m.chat, {
-                        text: `🍔 *Access Denied!*
-*Hello ${await conn.getName(m.sender)}* 🍞
-🍕 *Sorry, private chat is currently disabled.*
-*Please use this bot in group or contact Owner for more info.* 🍩
+                        text: `🍔 *Akses Ditolak!*
+*Halo ${await conn.getName(m.sender)}* 🍞
+🍕 *Maaf, chat pribadi saat ini dinonaktifkan.*
+*Silakan gunakan bot ini di dalam grup atau hubungi Owner untuk info lebih lanjut.* 🍩
 
-🍱 *Group Link: ${global.config.group}*`,
+🍱 *Link Grup: ${global.config.group}*`,
                         contextInfo: {
                             externalAdReply: {
                                 title: "🍡 ACCESS DENIED",
@@ -323,29 +309,14 @@ export async function handler(chatUpdate) {
                 }
                 if (m.chat in global.db.data.chats || m.sender in global.db.data.users) {
                     if (
-                        name != "group-info.js" &&
                         !(isAdmin || isMods || isOwner) &&
                         chat?.adminOnly
                     )
                         return;
                     if (
-                        name != "group-modebot.js" &&
-                        name != "owner-unbanchat.js" &&
-                        name != "owner-exec.js" &&
-                        name != "owner-exec2.js" &&
-                        name != "tool-delete.js" &&
                         !(isMods || isOwner) &&
-                        (chat?.isBanned || chat?.mute)
+                        (chat?.mute)
                     )
-                        return;
-                    if (
-                        name != "owner-unbanuser.js" &&
-                        name != "info-cekbanned.js" &&
-                        !(isMods || isOwner) &&
-                        user?.banned
-                    )
-                        return;
-                    if (name != "group-listblacklist.js" && !(isMods || isOwner) && isBlacklist)
                         return;
                     if (user.command >= user.commandLimit && !(isOwner || isMods)) {
                         return conn.sendMessage(
@@ -517,15 +488,6 @@ ${text}
             }
         } catch (e) {
             console.log(m, m.quoted, e);
-        }
-        let chat = global.db.data.chats[m.chat];
-        user.chat++;
-        user.chatTotal++;
-        user.lastseen = Date.now();
-        if (m.isGroup) {
-            chat.member[m.sender].chat++;
-            chat.member[m.sender].chatTotal++;
-            chat.member[m.sender].lastseen = Date.now();
         }
     }
 }

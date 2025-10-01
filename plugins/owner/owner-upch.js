@@ -1,3 +1,5 @@
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
 let handler = async (m, { conn, text }) => {
     try {
         let q = m.quoted ? m.quoted : m;
@@ -9,23 +11,29 @@ let handler = async (m, { conn, text }) => {
             let type = /image/.test(mime) ? "image" : /video/.test(mime) ? "video" : "audio";
             let media = await conn.downloadM(q, type, true);
 
-            await conn.sendFile(
-                global.config.newsletter,
-                media,
-                "",
-                text || "",
-                null,
-                /audio/.test(mime),
-                { mimetype: mime }
-            );
+            for (let jid of global.config.newsletter) {
+                await conn.sendFile(
+                    jid,
+                    media,
+                    "",
+                    text || "",
+                    null,
+                    /audio/.test(mime),
+                    { mimetype: mime }
+                );
+                await delay(2000);
+            }
         } else if (text) {
             await global.loading(m, conn);
-            await conn.sendMessage(global.config.newsletter, { text });
+            for (let jid of global.config.newsletter) {
+                await conn.sendMessage(jid, { text });
+                await delay(2000);
+            }
         } else {
             return m.reply("🍙 *Harap reply gambar, video, audio, atau ketik teks!*");
         }
 
-        m.reply("🍤 *Pesan berhasil dikirim ke channel!*");
+        m.reply(`🍤 *Pesan berhasil dikirim ke ${global.config.newsletter.length} channel dengan jeda 2 detik.*`);
     } catch (e) {
         console.error(e);
         m.reply("🍢 *Terjadi kesalahan saat mengirim pesan ke channel!*");
