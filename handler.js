@@ -8,7 +8,7 @@ import path, { join } from "path";
 import { unwatchFile, watchFile } from "fs";
 import chalk from "chalk";
 import printMessage from "./lib/print.js";
-import { bannerCanvas } from "./lib/welcome.js";
+import { bannerCanvas } from "./lib/canvas.js";
 
 
 const isNumber = (x) => typeof x === "number" && !isNaN(x);

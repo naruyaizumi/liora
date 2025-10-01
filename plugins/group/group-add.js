@@ -8,37 +8,16 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
     targets = [...new Set(targets)];
     if (!targets.length)
-        return m.reply(`🍡 *Contoh penggunaan:* ${usedPrefix + command} 628xxxx 628xxxx*`);
-
-    let msg = `🍓 *Tambah anggota selesai!*\n`;
-    let groupMeta = await conn.groupMetadata(m.chat);
-    let inviteCode = await conn.groupInviteCode(m.chat);
+        return m.reply(`🍡 *Contoh penggunaan: ${usedPrefix + command} 628xxxx 628xxxx*`);
 
     for (let target of targets) {
         try {
-            let res = await conn.groupParticipantsUpdate(m.chat, [target], "add");
-            if (res[0]?.status === "200") {
-                msg += `🧁 *Berhasil:* @${target.split("@")[0]}\n`;
-            } else {
-                await conn.sendMessage(target, {
-                    groupInvite: {
-                        jid: m.chat,
-                        name: groupMeta.subject,
-                        caption: "📨 *Undangan untuk bergabung ke grup!*",
-                        code: inviteCode,
-                        expiration: 86400,
-                    },
-                });
-                msg += `🍬 *Undangan terkirim ke:* @${target.split("@")[0]}\n`;
-            }
+            await conn.groupParticipantsUpdate(m.chat, [target], "add");
         } catch (e) {
             console.error(e);
-            msg += `🍩 *Error menambahkan:* @${target.split("@")[0]}\n`;
         }
         await delay(1500);
     }
-
-    m.reply(msg.trim(), null, { mentions: targets });
 };
 
 handler.help = ["add"];

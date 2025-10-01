@@ -1,7 +1,7 @@
 import { createCanvas, loadImage } from "canvas";
 
 let handler = async (m, { conn, args }) => {
-    if (!args[0]) return m.reply('🍭 *Masukkan nama desa/kelurahan ya sayang, misalnya "Senen"*');
+    if (!args[0]) return m.reply('🍭 *Masukkan nama desa/kelurahan, misalnya "Senen"*');
     let keyword = args.join(" ").toLowerCase();
     let keywords = keyword.split(",").map((k) => k.trim());
     let res = await fetch(
@@ -23,8 +23,8 @@ let handler = async (m, { conn, args }) => {
             let full = [nama, kecamatan, kabupaten, provinsi].filter(Boolean).join(", ");
             return [kode, full.toLowerCase()];
         });
-    let [kode, nama] =
-        wilayahLengkap.find(([_, full]) => {
+    let [kode] =
+        wilayahLengkap.find(([_, full]) => { // eslint-disable-line no-unused-vars
             return keywords.every((k) => full.includes(k));
         }) || [];
     if (!kode)

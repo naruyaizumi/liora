@@ -2,7 +2,7 @@ let handler = async (m, { args }) => {
     let id = args[1] ? args[1] : m.chat;
     let chat = global.db.data.chats[id];
     if (args[0]) {
-        if (isNaN(args[0])) return m.reply("🍭 *Hanya Angka Ya Sayang!*");
+        if (isNaN(args[0])) return m.reply("🍭 *Hanya Angka!*");
         let jumlahHari = 86400000 * args[0];
         let now = new Date() * 1;
         if (now < chat.isBannedTime) chat.isBannedTime += jumlahHari;

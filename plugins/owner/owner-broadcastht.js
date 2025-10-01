@@ -3,7 +3,7 @@ import { doBroadcast } from "../../lib/broadcast.js";
 const handler = async (m, { conn, text, usedPrefix, command }) => {
     const cc = m.quoted ? await m.getQuotedObj() : m;
     if (!cc) {
-        return m.reply("🩷 *Tidak ada pesan yang bisa dikirim, sayang~*");
+        return m.reply("🩷 *Tidak ada pesan yang bisa dikirim*");
     }
 
     const teks = text

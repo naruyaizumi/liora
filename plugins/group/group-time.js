@@ -4,7 +4,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!["open", "close"].includes(action) || !durationArg) {
         return m.reply(
             `
-🍩 *Format salah sayang~ Contoh penggunaan:*
+🍩 *Format salah Contoh penggunaan:*
 
 🍬 *Tutup grup selama 1 menit:*
 *${usedPrefix + command} close 1m*

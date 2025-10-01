@@ -186,12 +186,11 @@ We take security, stability, and the comfort of contributors very seriously.
 > This ensures the **safety, comfort, and trust** of all users.
 
 > [!TIP]  
-> 💡 Best practices for users & developers:
+> 🚀 **Installation Guide**  
 >
-> - Always keep your personal `.env` file **private**.
-> - The `.env` here is only a **template**.
-> - Regularly run `git pull origin main` to stay synced.
-> - When reporting bugs, include **logs, screenshots, or exact error messages**.
+> Choose your preferred installation method:  
+> - 📦 [Install via Pterodactyl](.github/INSTALLATION/PTERODACTYL.md)  
+> - ⚡ [Install via PM2](.github/INSTALLATION/PM2.md)
 
 > [!WARNING]  
 > 🚨 **Credit removal, modification, or selling this source code is strictly prohibited.**
@@ -465,9 +464,6 @@ We sincerely thank the following parties who have been instrumental in the devel
       <a href="https://wa.me/6281398961382">
         <img src="https://img.shields.io/badge/Owner-SXZnightmar-FFC0CB?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F"/>
       </a>
-      <a href="https://wa.me/6285167849436">
-        <img src="https://img.shields.io/badge/Developer-Ashaa-FFC0CB?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F"/>
-      </a>
       <a href="https://wa.me/6287831816747">
         <img src="https://img.shields.io/badge/Developer-Alfi%20Dev-FFC0CB?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F"/>
       </a>
@@ -477,59 +473,20 @@ We sincerely thank the following parties who have been instrumental in the devel
     </p>
   </details>
 
-  <details>
-    <summary><span style="color:#FFC0CB; font-weight:bold;">Libraries & Frameworks</span></summary>
-    <p align="center">
-      <a href="https://github.com/Itsukichann/Baileys">
-        <img src="https://img.shields.io/badge/@itsukichann/baileys-2F2F2F?style=for-the-badge&logo=github&logoColor=white&labelColor=0366d6"/>
-      </a>
-      <a href="https://www.npmjs.com/package/awesome-phonenumber">
-        <img src="https://img.shields.io/badge/awesome--phonenumber-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-      <a href="https://www.npmjs.com/package/chalk">
-        <img src="https://img.shields.io/badge/chalk-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-      <a href="https://www.npmjs.com/package/cheerio">
-        <img src="https://img.shields.io/badge/cheerio-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-      <a href="https://www.npmjs.com/package/dotenv">
-        <img src="https://img.shields.io/badge/dotenv-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-      <a href="https://www.npmjs.com/package/file-type">
-        <img src="https://img.shields.io/badge/file--type-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-      <a href="https://www.npmjs.com/package/lowdb">
-        <img src="https://img.shields.io/badge/lowdb-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-      <a href="https://www.npmjs.com/package/node-cron">
-        <img src="https://img.shields.io/badge/node--cron-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-      <a href="https://www.npmjs.com/package/node-webpmux">
-        <img src="https://img.shields.io/badge/node--webpmux-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-      <a href="https://www.npmjs.com/package/pino">
-        <img src="https://img.shields.io/badge/pino-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-      <a href="https://www.npmjs.com/package/ssh2">
-        <img src="https://img.shields.io/badge/ssh2-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-      <a href="https://www.npmjs.com/package/syntax-error">
-        <img src="https://img.shields.io/badge/syntax--error-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-      <a href="https://www.npmjs.com/package/wa-sticker-js">
-        <img src="https://img.shields.io/badge/wa--sticker--js-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-      <a href="https://www.npmjs.com/package/yargs">
-        <img src="https://img.shields.io/badge/yargs-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-      <a href="https://www.npmjs.com/package/yt-search">
-        <img src="https://img.shields.io/badge/yt--search-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-      <a href="https://www.npmjs.com/package/sharp">
-        <img src="https://img.shields.io/badge/sharp-2F2F2F?style=for-the-badge&logo=npm&logoColor=white&labelColor=CB3837"/>
-      </a>
-    </p>
-  </details>
+<details>
+  <summary><span style="color:#FFC0CB; font-weight:bold;">Libraries & Frameworks</span></summary>
+  <p align="center">
+    <a href="https://github.com/Itsukichann/Baileys">
+      <img src="https://img.shields.io/badge/@itsukichann/baileys-2F2F2F?style=for-the-badge&logo=github&logoColor=white&labelColor=0366d6"/>
+    </a>
+  </p>
+  <p align="justify">
+    Proyek ini menggunakan <b>@itsukichann/baileys</b> sebagai fondasi utama karena stabilitas, kompatibilitas, 
+    dan fleksibilitasnya dalam mengintegrasikan fitur WhatsApp ke dalam bot. 
+    Baileys menyediakan dukungan protokol terkini, memungkinkan pengembangan cepat, 
+    serta memudahkan pemeliharaan jangka panjang tanpa perlu membangun stack dari nol.
+  </p>
+</details>
 
   <details>
     <summary><span style="color:#FFC0CB; font-weight:bold;">Public API Providers</span></summary>

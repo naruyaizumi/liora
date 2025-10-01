@@ -4,7 +4,7 @@ let handler = async (m, { text, usedPrefix, command }) => {
         m.reply(`🍰 *Pesan bye berhasil diatur!*`);
     } else {
         return m.reply(
-            `🍩 *Teksnya mana sayang?*\n\n🍬 *Contoh penggunaan: ${usedPrefix + command} Selamat tinggal 🍙 @user*`
+            `🍩 *Teksnya mana?*\n\n🍬 *Contoh penggunaan: ${usedPrefix + command} Selamat tinggal 🍙 @user*`
         );
     }
 };

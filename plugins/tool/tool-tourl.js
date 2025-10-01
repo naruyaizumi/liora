@@ -39,25 +39,21 @@ ${list}`
         let server = uploaders[args[0]];
         if (!server) return m.reply(`🍩 *Server tidak valid!*`);
 
-        await global.loading(m, conn);
-
         let q = m.quoted ? m.quoted : m;
         let msg = q.msg || q;
         let mime = msg.mimetype || "";
         if (!mime) {
-            await global.loading(m, conn, true);
-            return m.reply(`🍡 *Balas pesan yang berisi file atau media ya sayang~*`);
+            return m.reply(`🍡 *Balas pesan yang berisi file atau media*`);
         }
-
+        
+        await global.loading(m, conn);
         let buffer = await q.download?.().catch(() => null);
         if (!buffer || !buffer.length) {
-            await global.loading(m, conn, true);
             return m.reply(`🍩 *Gagal mengunduh media-nya yaa~*`);
         }
 
         let url = await server.fn(buffer).catch(() => null);
         if (!url) {
-            await global.loading(m, conn, true);
             return m.reply(`🧁 *Gagal mengunggah file ke ${server.name}*`);
         }
 

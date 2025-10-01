@@ -10,7 +10,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
             );
         await global.loading(m, conn);
         let media = await q.download();
-        if (!media) return m.reply("🍰 *Gagal unduh gambarnya sayang~*");
+        if (!media) return m.reply("🍰 *Gagal unduh gambarnya*");
         let url = await uploader(media).catch(() => null);
         if (!url) return m.reply("🍮 *Gagal upload gambarnya ke server~*");
         let res = await fetch(global.API("btz", "/api/tools/decode-qr", { url }, "apikey"));

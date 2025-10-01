@@ -5,9 +5,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 `🍩 *Masukkan URL GitHub yang valid!*\n\n🍰 *Contoh:* ${usedPrefix + command} https://github.com/username/repo`
             );
         }
-        await global.loading(m, conn);
         let parts = text.split("/");
         if (parts.length < 5) return m.reply("🍓 *URL GitHub tidak lengkap!*");
+        await global.loading(m, conn);
         let user = parts[3];
         let repo = parts[4];
         let url = `https://api.github.com/repos/${user}/${repo}/zipball`;
@@ -16,7 +16,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             m.chat,
             url,
             filename,
-            `🍰 *Berhasil mendownload repository:*\n📦 ${repo}`,
+            `🍰 *Berhasil mendownload repository*`,
             m
         );
     } catch (e) {

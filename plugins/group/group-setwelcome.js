@@ -9,7 +9,7 @@ let handler = async (m, { text, usedPrefix, command }) => {
             );
         } else {
             return m.reply(
-                `🍓 *Teks welcome-nya mana, sayang?* 🍮\n\n*Contoh: ${usedPrefix + command} Hai, @user! 🍭 Selamat datang di @subject* 🍬\n\n*Gunakan: • @user = mention*\n*• @subject = nama grup*\n*• @desc = deskripsi grup*`
+                `🍓 *Teks welcome-nya mana* 🍮\n\n*Contoh: ${usedPrefix + command} Hai, @user! 🍭 Selamat datang di @subject* 🍬\n\n*Gunakan: • @user = mention*\n*• @subject = nama grup*\n*• @desc = deskripsi grup*`
             );
         }
     }

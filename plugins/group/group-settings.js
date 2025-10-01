@@ -5,7 +5,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }[(args[0] || "").toLowerCase()];
     if (isClose === undefined)
         return m.reply(
-            `🍰 *Format salah, sayang~*\n*Gunakan salah satu dari ini:*\n🍓 *${usedPrefix + command} open (Buka grup)*\n🍓 *${usedPrefix + command} close (Tutup grup)*`.trim()
+            `🍰 *Format salah*\n*Gunakan salah satu dari ini:*\n🍓 *${usedPrefix + command} open (Buka grup)*\n🍓 *${usedPrefix + command} close (Tutup grup)*`.trim()
         );
     await conn.groupSettingUpdate(m.chat, isClose);
 };

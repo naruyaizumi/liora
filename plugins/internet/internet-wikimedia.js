@@ -12,12 +12,13 @@ let handler = async (m, { conn, text }) => {
             return m.reply("🍣 *Tidak ada hasil untuk kata kunci tersebut!*");
 
         const results = json.result.slice(0, 50);
-        let albumItems = results.map((item, i) => ({
+
+        const albumItems = results.map((item, i) => ({
             image: { url: item.image },
-            caption: `🍱 Wikimedia Result (${i + 1}/${results.length})\n🍙 ${item.title}\n🍤 [Sumber](${item.source})`,
+            caption: `🍱 Wikimedia Result (${i + 1}/${results.length})\n🍙 ${item.title}\n🍤 Sumber: ${item.source}`,
         }));
 
-        await conn.sendAlbumMessage(m.chat, albumItems, { quoted: m, delay: 500 });
+        await conn.sendMessage(m.chat, { albumItems }, { quoted: m });
     } catch (error) {
         console.error(error);
         m.reply("🍡 *Terjadi kesalahan saat mengambil data dari Wikimedia. Coba lagi nanti!*");

@@ -1,45 +1,43 @@
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
     let targets = [];
 
     if (m.mentionedJid && m.mentionedJid.length) {
         targets.push(...m.mentionedJid);
     }
 
+    if (m.quoted && m.quoted.sender) {
+        targets.push(m.quoted.sender);
+    }
+
     for (let arg of args) {
         if (/^\d{5,}$/.test(arg)) {
-            let jid = arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net";
-            targets.push(jid);
+            targets.push(arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
         }
     }
 
-    targets = [...new Set(targets)];
+    targets = [...new Set(targets)].filter(
+        (v) => v !== m.sender && participants.some((p) => p.id === v)
+    );
 
-    if (!targets.length)
+    if (!targets.length) {
         return m.reply(
-            `🍡 *Contoh penggunaan:* ${usedPrefix + command} @user atau ${usedPrefix + command} 628xxxx`
+            `🍡 *Tag atau reply anggota yang ingin didemote*\n*Contoh: ${usedPrefix + command} @628xx*`
         );
+    }
 
-    let msg = `🍓 *Demote selesai!*\n`;
     for (let target of targets) {
         try {
-            let res = await conn.groupParticipantsUpdate(m.chat, [target], "demote");
-            if (res[0]?.status === "200") {
-                msg += `🧁 *Berhasil diturunkan jadi member:* @${target.split("@")[0]}\n`;
-            } else {
-                msg += `🍩 *Gagal demote:* @${target.split("@")[0]}\n`;
-            }
+            await conn.groupParticipantsUpdate(m.chat, [target], "demote");
         } catch (e) {
             console.error(e);
-            msg += `🍩 *Error demote:* @${target.split("@")[0]}\n`;
         }
         await delay(1500);
     }
-    m.reply(msg.trim(), null, { mentions: targets });
 };
 
 handler.help = ["demote"];
 handler.tags = ["group"];
-handler.command = /^(demote|down|unadmin)$/i;
+handler.command = /^(demote)$/i;
 handler.group = true;
 handler.botAdmin = true;
 handler.admin = true;

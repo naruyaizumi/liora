@@ -10,20 +10,17 @@ let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
     );
     if (!targets.length)
         return m.reply(
-            `🍩 *Tag atau reply anggota yang ingin dikeluarkan ya sayang~*\n*Contoh: ${usedPrefix + command} @628xx*`
+            `🍩 *Tag atau reply anggota yang ingin dikeluarkan*\n*Contoh: ${usedPrefix + command} @628xx*`
         );
     for (let target of targets) {
         await conn.groupParticipantsUpdate(m.chat, [target], "remove");
-        if (/^dor$/i.test(command)) {
-            await m.reply(`🔫 *DORRR!!!* 🍬 *Target berhasil dikeluarkan ya sayang~*`);
-        }
         await delay(1500);
     }
 };
 
 handler.help = ["kick"];
 handler.tags = ["group"];
-handler.command = /^(kick|k|dor)$/i;
+handler.command = /^(kick|k)$/i;
 handler.group = true;
 handler.botAdmin = true;
 handler.admin = true;

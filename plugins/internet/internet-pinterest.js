@@ -18,7 +18,13 @@ let handler = async (m, { conn, text }) => {
             caption: `🍣 Pinterest Result (${i + 1}/${results.length})`,
         }));
 
-        await conn.sendAlbumMessage(m.chat, albumItems, { quoted: m, delay: 500 });
+        await conn.sendMessage(
+            m.chat,
+            {
+                album: albumItems,
+            },
+            { quoted: m }
+        );
     } catch (error) {
         console.error(error);
         m.reply("🍡 *Terjadi kesalahan saat mengambil data dari Pinterest. Coba lagi nanti!*");

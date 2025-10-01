@@ -35,7 +35,7 @@ let handler = async (m, { conn }) => {
         console.error(e);
         await conn.reply(
             m.chat,
-            "💥 *Terjadi error saat memproses solusi.*\n🌸 *Coba sebentar lagi ya, sayang~*",
+            "💥 *Terjadi error saat memproses solusi.*",
             m
         );
     } finally {

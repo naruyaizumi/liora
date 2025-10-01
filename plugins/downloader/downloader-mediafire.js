@@ -1,5 +1,5 @@
 let handler = async (m, { conn, args }) => {
-    if (!args[0]) return m.reply("🍩 *Masukkan URL MediaFire dulu ya sayang!* 🍰");
+    if (!args[0]) return m.reply("🍩 *Masukkan URL MediaFire!*");
     let url = args[0];
     if (!/^https:\/\/www\.mediafire\.com\/file\//i.test(url))
         return m.reply("🍬 *URL tidak valid! Pastikan itu link MediaFire yang benar ya~*");

@@ -1,47 +1,41 @@
+
 import { uploader } from "../../lib/uploader.js";
 
 let handler = async (m, { conn, usedPrefix, command }) => {
     try {
-        let q = m.quoted ? m.quoted : m;
+        let q = m.quoted && m.quoted.mimetype ? m.quoted : m;
         let mime = (q.msg || q).mimetype || "";
-        if (!mime)
+
+        if (!/image\/(jpe?g|png)/i.test(mime)) {
             return m.reply(
-                `🍡 *Ayo balas gambar dulu, sayangku!*\n\n🍰 *Contoh: ${usedPrefix + command} gambar*`
+                `🍡 *Kirim atau reply gambar dengan caption ${usedPrefix + command}*`
             );
-        if (!/image\/(jpe?g|png)/.test(mime))
-            return m.reply(`🍬 *Hmm, format file salah~*\n\n🧁 *Gunakan gambar JPG atau PNG yaa~*`);
+        }
+
         await global.loading(m, conn);
+
         let img = await q.download();
-        if (!img) return m.reply("🍫 *Gagal mengunduh gambar*\n\n🍰 *Coba cek koneksi kamu yaa~*");
+        if (!img) return m.reply("🍫 *Gagal mengunduh gambar!*");
+
         let url = await uploader(img).catch(() => null);
         if (!url) return m.reply("🍫 *Gagal mengunggah gambar ke server!*");
+
         let api = global.API("btz", "/api/tools/removebg", { url }, "apikey");
         let res = await fetch(api);
         let json = await res.json();
+
         if (!json.status || !json.url) throw "🍩 *Gagal menghapus background!*";
-        let buffer = await (await fetch(json.url)).arrayBuffer();
-        let size = Buffer.byteLength(buffer);
-        let filename = "removebg_result.png";
-        await conn.sendMessage(
+
+        await conn.sendFile(
             m.chat,
-            {
-                image: Buffer.from(buffer),
-                fileName: filename,
-                mimetype: "image/png",
-                caption: `
-🍓 *Gambar selesai diproses!* 🧁
-━━━━━━━━━━━━━━━━━━━━
-📂 *Nama File: ${filename}*
-📏 *Ukuran File: ${(size / 1024).toFixed(2)} KB*
-🍰 *Status: Background berhasil dihapus!*
-━━━━━━━━━━━━━━━━━━━━
-`.trim(),
-            },
-            { quoted: m }
+            json.url,
+            "removebg.png",
+            "🍓 *Background berhasil dihapus!* 🧁",
+            m
         );
     } catch (e) {
         console.error(e);
-        m.reply(`🍩 *Ehh, ada kesalahan teknis~* 🍬`);
+        m.reply("🍩 *Ehh, ada kesalahan teknis~* 🍬");
     } finally {
         await global.loading(m, conn, true);
     }

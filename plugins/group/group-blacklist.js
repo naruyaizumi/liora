@@ -8,7 +8,7 @@ let handler = async (m, { usedPrefix, command, text }) => {
             : false;
     if (!who)
         return m.reply(
-            `🍓 *Reply atau tag orangnya dulu dong sayang~*\n*Contoh: ${usedPrefix + command}* @${m.sender.split("@")[0]}`,
+            `🍓 *Reply atau tag orangnya*\n*Contoh: ${usedPrefix + command}* @${m.sender.split("@")[0]}`,
             false,
             { mentions: [m.sender] }
         );
