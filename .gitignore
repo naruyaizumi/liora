@@ -1,0 +1,85 @@
+# -------------------------
+# DEPENDENCIES & BUILD
+# -------------------------
+node_modules/
+bower_components/
+jspm_packages/
+dist/
+build/
+.cache/
+.tmp/
+
+# -------------------------
+# ENVIRONMENT FILES
+# -------------------------
+.env
+.env.*
+!.env.example
+
+# -------------------------
+# DATABASE / DATA FILES
+# -------------------------
+database.db
+**/database.db
+*.sqlite
+*.db
+
+# -------------------------
+# LOGS & DEBUG
+# -------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# -------------------------
+# SYSTEM / OS FILES
+# -------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -------------------------
+# EDITOR / IDE FILES
+# -------------------------
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# -------------------------
+# TEST COVERAGE / REPORTS
+# -------------------------
+coverage/
+.nyc_output/
+lcov-report/
+
+# -------------------------
+# TEMPORARY / CACHE
+# -------------------------
+tmp/
+auth/
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+out/
+.vercel/
+
+# -------------------------
+# MISC
+# -------------------------
+*.tgz
+*.gz
+*.zip
+*.tar
+
+# -------------------------
+# TOOLS / BINARIES
+# -------------------------
+*.jar
+bfg.jar
