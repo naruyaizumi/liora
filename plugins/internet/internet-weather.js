@@ -24,7 +24,8 @@ let handler = async (m, { conn, args }) => {
             return [kode, full.toLowerCase()];
         });
     let [kode] =
-        wilayahLengkap.find(([_, full]) => { // eslint-disable-line no-unused-vars
+        wilayahLengkap.find(([_, full]) => {
+            // eslint-disable-line no-unused-vars
             return keywords.every((k) => full.includes(k));
         }) || [];
     if (!kode)

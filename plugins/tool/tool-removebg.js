@@ -1,4 +1,3 @@
-
 import { uploader } from "../../lib/uploader.js";
 
 let handler = async (m, { conn, usedPrefix, command }) => {
@@ -7,9 +6,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         let mime = (q.msg || q).mimetype || "";
 
         if (!/image\/(jpe?g|png)/i.test(mime)) {
-            return m.reply(
-                `🍡 *Kirim atau reply gambar dengan caption ${usedPrefix + command}*`
-            );
+            return m.reply(`🍡 *Kirim atau reply gambar dengan caption ${usedPrefix + command}*`);
         }
 
         await global.loading(m, conn);

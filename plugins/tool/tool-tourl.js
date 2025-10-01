@@ -45,7 +45,7 @@ ${list}`
         if (!mime) {
             return m.reply(`🍡 *Balas pesan yang berisi file atau media*`);
         }
-        
+
         await global.loading(m, conn);
         let buffer = await q.download?.().catch(() => null);
         if (!buffer || !buffer.length) {

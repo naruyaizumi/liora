@@ -32,19 +32,13 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
             await conn.sendMessage(m.chat, { album }, { quoted: m });
 
             if (jsonSlide.result.audio) {
-                await conn.sendFile(
-                    m.chat,
-                    jsonSlide.result.audio,
-                    "tiktok.mp3",
-                    "",
-                    m,
-                    false,
-                    { mimetype: "audio/mpeg" }
-                );
+                await conn.sendFile(m.chat, jsonSlide.result.audio, "tiktok.mp3", "", m, false, {
+                    mimetype: "audio/mpeg",
+                });
             }
             return;
         }
-        
+
         if (jsonVideo.status && jsonVideo.result.video?.length > 0) {
             await conn.sendFile(
                 m.chat,
@@ -54,15 +48,9 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
                 m
             );
             if (jsonVideo.result.audio?.length > 0) {
-                await conn.sendFile(
-                    m.chat,
-                    jsonVideo.result.audio[0],
-                    "tiktok.mp3",
-                    "",
-                    m,
-                    false,
-                    { mimetype: "audio/mpeg" }
-                );
+                await conn.sendFile(m.chat, jsonVideo.result.audio[0], "tiktok.mp3", "", m, false, {
+                    mimetype: "audio/mpeg",
+                });
             }
             return;
         }

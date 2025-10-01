@@ -10,7 +10,6 @@ import chalk from "chalk";
 import printMessage from "./lib/print.js";
 import { bannerCanvas } from "./lib/canvas.js";
 
-
 const isNumber = (x) => typeof x === "number" && !isNaN(x);
 
 export async function handler(chatUpdate) {
@@ -316,8 +315,7 @@ export async function handler(chatUpdate) {
                                 title: "🍡 ACCESS DENIED",
                                 body: global.config.watermark,
                                 mediaType: 1,
-                                thumbnailUrl:
-                                    "https://qu.ax/RtoXq.jpg",
+                                thumbnailUrl: "https://qu.ax/RtoXq.jpg",
                                 renderLargerThumbnail: true,
                             },
                         },
@@ -361,8 +359,7 @@ export async function handler(chatUpdate) {
                                         title: "🍡 AKSES DITOLAK",
                                         body: global.config.watermark,
                                         mediaType: 1,
-                                        thumbnailUrl:
-                                            "https://qu.ax/RtoXq.jpg",
+                                        thumbnailUrl: "https://qu.ax/RtoXq.jpg",
                                         renderLargerThumbnail: true,
                                     },
                                 },
@@ -534,117 +531,120 @@ ${text}
 }
 
 export async function participantsUpdate({ id, participants, action }) {
-  if (this.isInit) return
-  let chat = global.db.data.chats[id] || {}
-  const groupMetadata = (await this.groupMetadata(id)) || (conn.chats[id] || {}).metadata
-  for (let user of participants) {
-    let pp = await this.profilePictureUrl(user, "image").catch(
-      () => "https://qu.ax/jVZhH.jpg"
-    )
-    let img = await canvasBanner(pp)
-    let text = ""
-    let title = ""
-    let body = ""
-    let sourceUrl = "https://wa.me/" + this.user.jid.split("@")[0]
-    switch (action) {
-      case "add":
-        if (!chat.detect) return
-        text = (chat.sWelcome || this.welcome || conn.welcome || "Welcome, @user")
-          .replace("@subject", await this.getName(id))
-          .replace("@desc", groupMetadata.desc?.toString() || "unknow")
-          .replace("@user", "@" + user.split("@")[0])
-        title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗗𝗮𝘁𝗮𝗻𝗴 𝗞𝗮𝗸"
-        body = `Kamu adalah member ke-${groupMetadata.participants.length}.`
-        await this.sendMessage(id, {
-          text: text.trim(),
-          mentions: [user],
-          contextInfo: {
-            externalAdReply: {
-              title,
-              body,
-              thumbnail: img,
-              sourceUrl,
-              mediaType: 1,
-              renderLargerThumbnail: true
-            }
-          }
-        })
-        break
+    if (this.isInit) return;
+    let chat = global.db.data.chats[id] || {};
+    const groupMetadata = (await this.groupMetadata(id)) || (conn.chats[id] || {}).metadata;
+    for (let user of participants) {
+        let pp = await this.profilePictureUrl(user, "image").catch(() => "https://qu.ax/jVZhH.jpg");
+        let img = await canvasBanner(pp);
+        let text = "";
+        let title = "";
+        let body = "";
+        let sourceUrl = "https://wa.me/" + this.user.jid.split("@")[0];
+        switch (action) {
+            case "add":
+                if (!chat.detect) return;
+                text = (chat.sWelcome || this.welcome || conn.welcome || "Welcome, @user")
+                    .replace("@subject", await this.getName(id))
+                    .replace("@desc", groupMetadata.desc?.toString() || "unknow")
+                    .replace("@user", "@" + user.split("@")[0]);
+                title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗗𝗮𝘁𝗮𝗻𝗴 𝗞𝗮𝗸";
+                body = `Kamu adalah member ke-${groupMetadata.participants.length}.`;
+                await this.sendMessage(id, {
+                    text: text.trim(),
+                    mentions: [user],
+                    contextInfo: {
+                        externalAdReply: {
+                            title,
+                            body,
+                            thumbnail: img,
+                            sourceUrl,
+                            mediaType: 1,
+                            renderLargerThumbnail: true,
+                        },
+                    },
+                });
+                break;
 
-      case "remove":
-        if (!chat.detect) return
-        text = (chat.sBye || this.bye || conn.bye || "Bye @user")
-          .replace("@subject", await this.getName(id))
-          .replace("@desc", groupMetadata.desc?.toString() || "unknow")
-          .replace("@user", "@" + user.split("@")[0])
-        title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗧𝗶𝗻𝗴𝗴𝗮𝗹 𝗞𝗮𝗸"
-        body = `Kini grup berisi ${groupMetadata.participants.length} anggota.`
-        sourceUrl = `https://wa.me/${user.replace("@s.whatsapp.net", "")}`
-        await this.sendMessage(id, {
-          text: text.trim(),
-          mentions: [user],
-          contextInfo: {
-            externalAdReply: {
-              title,
-              body,
-              thumbnail: img,
-              sourceUrl,
-              mediaType: 1,
-              renderLargerThumbnail: true
-            }
-          }
-        })
-        break
+            case "remove":
+                if (!chat.detect) return;
+                text = (chat.sBye || this.bye || conn.bye || "Bye @user")
+                    .replace("@subject", await this.getName(id))
+                    .replace("@desc", groupMetadata.desc?.toString() || "unknow")
+                    .replace("@user", "@" + user.split("@")[0]);
+                title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗧𝗶𝗻𝗴𝗴𝗮𝗹 𝗞𝗮𝗸";
+                body = `Kini grup berisi ${groupMetadata.participants.length} anggota.`;
+                sourceUrl = `https://wa.me/${user.replace("@s.whatsapp.net", "")}`;
+                await this.sendMessage(id, {
+                    text: text.trim(),
+                    mentions: [user],
+                    contextInfo: {
+                        externalAdReply: {
+                            title,
+                            body,
+                            thumbnail: img,
+                            sourceUrl,
+                            mediaType: 1,
+                            renderLargerThumbnail: true,
+                        },
+                    },
+                });
+                break;
 
-      case "promote":
-        if (!chat.detect) return
-        text = (chat.sPromote || this.promote || conn.promote || "@user telah menjadi admin!")
-          .replace("@subject", await this.getName(id))
-          .replace("@desc", groupMetadata.desc?.toString() || "unknow")
-          .replace("@user", "@" + user.split("@")[0])
-        title = "˚ ༘`✦ ˑ ִֶ 𓂃⊹ 𝗣𝗿𝗼𝗺𝗼𝘁𝗲 𝗞𝗮𝗸"
-        body = global.config.watermark
-        await this.sendMessage(id, {
-          text: text.trim(),
-          mentions: [user],
-          contextInfo: {
-            externalAdReply: {
-              title,
-              body,
-              thumbnail: img,
-              sourceUrl,
-              mediaType: 1,
-              renderLargerThumbnail: true
-            }
-          }
-        })
-        break
+            case "promote":
+                if (!chat.detect) return;
+                text = (
+                    chat.sPromote ||
+                    this.promote ||
+                    conn.promote ||
+                    "@user telah menjadi admin!"
+                )
+                    .replace("@subject", await this.getName(id))
+                    .replace("@desc", groupMetadata.desc?.toString() || "unknow")
+                    .replace("@user", "@" + user.split("@")[0]);
+                title = "˚ ༘`✦ ˑ ִֶ 𓂃⊹ 𝗣𝗿𝗼𝗺𝗼𝘁𝗲 𝗞𝗮𝗸";
+                body = global.config.watermark;
+                await this.sendMessage(id, {
+                    text: text.trim(),
+                    mentions: [user],
+                    contextInfo: {
+                        externalAdReply: {
+                            title,
+                            body,
+                            thumbnail: img,
+                            sourceUrl,
+                            mediaType: 1,
+                            renderLargerThumbnail: true,
+                        },
+                    },
+                });
+                break;
 
-      case "demote":
-        if (!chat.detect) return
-        text = (chat.sDemote || this.demote || conn.demote || "@user bukan admin lagi.")
-          .replace("@subject", await this.getName(id))
-          .replace("@desc", groupMetadata.desc?.toString() || "unknow")
-          .replace("@user", "@" + user.split("@")[0])
-        title = "˚ ༘`✦ ˑ ִֶ 𓂃⊹ 𝗗𝗲𝗺𝗼𝘁𝗲 𝗞𝗮𝗸"
-        body = global.config.watermark
-        await this.sendMessage(id, {
-          text: text.trim(),
-          mentions: [user],
-          contextInfo: {
-            externalAdReply: {
-              title,
-              body,
-              thumbnail: img,
-              sourceUrl,
-              mediaType: 1,
-              renderLargerThumbnail: true
-            }
-          }
-        })
-        break
+            case "demote":
+                if (!chat.detect) return;
+                text = (chat.sDemote || this.demote || conn.demote || "@user bukan admin lagi.")
+                    .replace("@subject", await this.getName(id))
+                    .replace("@desc", groupMetadata.desc?.toString() || "unknow")
+                    .replace("@user", "@" + user.split("@")[0]);
+                title = "˚ ༘`✦ ˑ ִֶ 𓂃⊹ 𝗗𝗲𝗺𝗼𝘁𝗲 𝗞𝗮𝗸";
+                body = global.config.watermark;
+                await this.sendMessage(id, {
+                    text: text.trim(),
+                    mentions: [user],
+                    contextInfo: {
+                        externalAdReply: {
+                            title,
+                            body,
+                            thumbnail: img,
+                            sourceUrl,
+                            mediaType: 1,
+                            renderLargerThumbnail: true,
+                        },
+                    },
+                });
+                break;
+        }
     }
-  }
 }
 
 export async function deleteUpdate(message) {
@@ -679,23 +679,22 @@ watchFile(file, async () => {
 });
 
 async function canvasBanner(avatar) {
-  const backgrounds = [
-    "https://qu.ax/UkBQK.jpg",
-    "https://qu.ax/hhKDj.jpg",
-    "https://qu.ax/xuUvD.jpg",
-    "https://qu.ax/iikRg.jpg",
-  ]
-  const buffer = await bannerCanvas({
-    font: { name: "Poppins" },
-    avatar,
-    background: { type: "image", background: backgrounds.getRandom() },
-    title: { data: "Liora Official", color: "#fff", size: 20 },
-    description: { data: "© 2024 - 2025 Naruya Izumi", color: "#a7b9c5", size: 13
-    },
-    overlay_opacity: 0.3,
-    border: "#000000",
-    avatar_border: "#FFFFFF",
-  })
+    const backgrounds = [
+        "https://qu.ax/UkBQK.jpg",
+        "https://qu.ax/hhKDj.jpg",
+        "https://qu.ax/xuUvD.jpg",
+        "https://qu.ax/iikRg.jpg",
+    ];
+    const buffer = await bannerCanvas({
+        font: { name: "Poppins" },
+        avatar,
+        background: { type: "image", background: backgrounds.getRandom() },
+        title: { data: "Liora Official", color: "#fff", size: 20 },
+        description: { data: "© 2024 - 2025 Naruya Izumi", color: "#a7b9c5", size: 13 },
+        overlay_opacity: 0.3,
+        border: "#000000",
+        avatar_border: "#FFFFFF",
+    });
 
-  return buffer
+    return buffer;
 }

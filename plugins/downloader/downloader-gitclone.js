@@ -12,13 +12,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         let repo = parts[4];
         let url = `https://api.github.com/repos/${user}/${repo}/zipball`;
         let filename = `${repo}.zip`;
-        await conn.sendFile(
-            m.chat,
-            url,
-            filename,
-            `🍰 *Berhasil mendownload repository*`,
-            m
-        );
+        await conn.sendFile(m.chat, url, filename, `🍰 *Berhasil mendownload repository*`, m);
     } catch (e) {
         console.error(e);
         m.reply("🍩 *Gagal mengunduh repository. Pastikan URL benar!*");

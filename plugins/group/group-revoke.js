@@ -1,7 +1,7 @@
 let handler = async (m, { conn }) => {
     try {
-        let newCode = await conn.groupRevokeInvite(m.chat)
-        let newLink = `https://chat.whatsapp.com/${newCode}`
+        let newCode = await conn.groupRevokeInvite(m.chat);
+        let newLink = `https://chat.whatsapp.com/${newCode}`;
 
         await conn.sendMessage(
             m.chat,
@@ -20,18 +20,18 @@ let handler = async (m, { conn }) => {
                 ],
             },
             { quoted: m }
-        )
+        );
     } catch (e) {
-        console.error(e)
-        m.reply("🍩 *Gagal me-reset link grup. Coba lagi nanti yaa~*")
+        console.error(e);
+        m.reply("🍩 *Gagal me-reset link grup. Coba lagi nanti yaa~*");
     }
-}
+};
 
-handler.help = ["revoke"]
-handler.tags = ["group"]
-handler.command = /^(revoke)$/i
-handler.group = true
-handler.botAdmin = true
-handler.admin = true
+handler.help = ["revoke"];
+handler.tags = ["group"];
+handler.command = /^(revoke)$/i;
+handler.group = true;
+handler.botAdmin = true;
+handler.admin = true;
 
-export default handler
+export default handler;

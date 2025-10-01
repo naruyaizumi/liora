@@ -186,10 +186,11 @@ We take security, stability, and the comfort of contributors very seriously.
 > This ensures the **safety, comfort, and trust** of all users.
 
 > [!TIP]  
-> 🚀 **Installation Guide**  
+> 🚀 **Installation Guide**
 >
-> Choose your preferred installation method:  
-> - 📦 [Install via Pterodactyl](.github/INSTALLATION/PTERODACTYL.md)  
+> Choose your preferred installation method:
+>
+> - 📦 [Install via Pterodactyl](.github/INSTALLATION/PTERODACTYL.md)
 > - ⚡ [Install via PM2](.github/INSTALLATION/PM2.md)
 
 > [!WARNING]  

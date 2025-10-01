@@ -5,7 +5,9 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         let q = m.quoted ? m.quoted : m;
         let mime = (q.msg || q).mimetype || q.mediaType || "";
         if (!/^(video|audio)\//.test(mime)) {
-            return m.reply(`🍙 *Balas video atau voice note dengan perintah* \`${usedPrefix + command}\``);
+            return m.reply(
+                `🍙 *Balas video atau voice note dengan perintah* \`${usedPrefix + command}\``
+            );
         }
 
         await global.loading(m, conn);
@@ -17,15 +19,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         let audio = await convert(media, { format: "mp3" });
         if (!audio) return m.reply("🍡 *Konversi gagal!*");
 
-        await conn.sendFile(
-            m.chat,
-            audio,
-            "voice.mp3",
-            "",
-            m,
-            true,
-            { mimetype: "audio/mpeg" }
-        );
+        await conn.sendFile(m.chat, audio, "voice.mp3", "", m, true, { mimetype: "audio/mpeg" });
     } catch (e) {
         console.error(e);
         m.reply(`🥟 *Terjadi kesalahan saat konversi!*\n🍧 ${e.message}`);

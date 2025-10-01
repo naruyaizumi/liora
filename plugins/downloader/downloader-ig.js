@@ -74,7 +74,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
             }
             return;
         }
-        
+
         const albumItems = album.map((item) => {
             if (item.type === "image") return { image: { url: item.url }, caption: item.caption };
             if (item.type === "video") return { video: { url: item.url }, caption: item.caption };

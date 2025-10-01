@@ -33,11 +33,7 @@ let handler = async (m, { conn }) => {
         await conn.reply(m.chat, json.result || json.message, m);
     } catch (e) {
         console.error(e);
-        await conn.reply(
-            m.chat,
-            "💥 *Terjadi error saat memproses solusi.*",
-            m
-        );
+        await conn.reply(m.chat, "💥 *Terjadi error saat memproses solusi.*", m);
     } finally {
         await global.loading(m, conn, true);
     }
