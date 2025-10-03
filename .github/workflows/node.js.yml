@@ -1,43 +1,55 @@
 name: 🍱 Node.js CI
 
 on:
-    push:
-        branches: ["main"]
-    pull_request:
-        branches: ["main"]
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-        strategy:
-            matrix:
-                node-version: [22.x, 23.x, 24.x]
+    strategy:
+      matrix:
+        node-version: [22.x, 24.x]
 
-        steps:
-            - name: 🍙 Checkout Repository
-              uses: actions/checkout@v4
+    steps:
+      - name: 🍙 Checkout Repository
+        uses: actions/checkout@v4
 
-            - name: 🍜 Setup Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v4
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
+      - name: 🍜 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "yarn"
 
-            - name: 🍡 Install Dependencies
-              run: yarn install
+      - name: 🛠 Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential pkg-config cmake python3 python3-dev \
+            ffmpeg imagemagick \
+            libavformat-dev libavcodec-dev libavutil-dev \
+            libswresample-dev libswscale-dev \
+            libwebp-dev libpng-dev libjpeg-dev zlib1g-dev \
+            libfreetype6-dev libharfbuzz-dev libpango1.0-dev \
+            libgif-dev libopus-dev libvpx-dev
 
-            - name: 🍰 Audit Dependencies
-              run: yarn audit || true
+      - name: 🍡 Install Dependencies
+        run: yarn install --ignore-engines --frozen-lockfile
 
-            - name: 🍵 Check Unused Dependencies (depcheck)
-              run: npx depcheck --ignores=node-addon-api || true
+      - name: 🍰 Audit Dependencies
+        run: yarn audit || true
 
-            - name: 🍩 Check Outdated Dependencies (npm-check)
-              run: npx npm-check || true
+      - name: 🍵 Check Unused Dependencies (depcheck)
+        run: npx depcheck --ignores=node-addon-api || true
 
-            - name: 🍕 Check for Updates (npm-check-updates)
-              run: npx npm-check-updates || true
+      - name: 🍩 Check Outdated Dependencies (npm-check)
+        run: npx npm-check || true
 
-            - name: 🍧 Run Tests
-              run: yarn test
+      - name: 🍕 Check for Updates (npm-check-updates)
+        run: npx npm-check-updates || true
+
+      - name: 🍧 Run Tests
+        run: yarn test

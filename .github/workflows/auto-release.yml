@@ -5,7 +5,7 @@ on:
         branches: ["main"]
 
 permissions:
-    contents: write # penting! biar bisa create release
+    contents: write
 
 jobs:
     release:
