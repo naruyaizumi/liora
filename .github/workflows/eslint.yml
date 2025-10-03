@@ -17,9 +17,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: "yarn"
 
-      - name: 🍩 Install dependencies (dev only)
-        run: yarn install --frozen-lockfile --ignore-optional
+      - name: 🍩 Install dependencies (skip native build)
+        run: yarn install --frozen-lockfile --ignore-scripts --ignore-optional
 
       - name: 🍰 Run ESLint
         run: yarn eslint .
