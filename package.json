@@ -1,6 +1,6 @@
 {
     "name": "liora",
-    "version": "5.0.0-rc.0",
+    "version": "5.0.0",
     "type": "module",
     "engines": {
         "node": ">=22.0.0"
@@ -8,7 +8,7 @@
     "scripts": {
         "start": "node index.js",
         "test": "node test.js",
-        "lint": "eslint .",
+        "lint": "eslint --config .",
         "prettier": "prettier --config .github/.prettierrc.json --check .",
         "prettier:fix": "prettier --config .github/.prettierrc.json --write .",
         "build:addon": "node-gyp configure build"
@@ -26,8 +26,7 @@
         "canvas": "^3.2.0",
         "chalk": "^5.6.2",
         "file-type": "^21.0.0",
-        "node-webpmux": "^3.2.1",
-        "pino": "^9.12.0",
+        "pino": "^10.0.0",
         "sharp": "^0.34.4",
         "syntax-error": "^1.4.0",
         "yt-search": "^2.13.1"
