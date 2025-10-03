@@ -1,5 +1,5 @@
 import { uploader3 } from "../../lib/uploader.js";
-import { sticker } from "../../lib/sticker.js";
+import { sticker } from "../../src/bridge.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     await global.loading(m, conn);
@@ -23,13 +23,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         let [top, bottom] = args.join(" ").split("|");
         top = encodeURIComponent(top || "_");
         bottom = encodeURIComponent(bottom || "_");
-
         let apiUrl = `https://api.memegen.link/images/custom/${top}/${bottom}.png?background=${encodeURIComponent(up)}`;
         let buffer = Buffer.from(await (await fetch(apiUrl)).arrayBuffer());
-        let file = await conn.getFile(buffer, true);
-        let stickerImage = await sticker(file, {
-            packName: global.config.stickpack,
-            authorName: global.config.stickauth,
+        let stickerImage = await sticker(buffer, {
+            packName: global.config.stickpack || "",
+            authorName: global.config.stickauth || "",
         });
 
         await conn.sendFile(m.chat, stickerImage, "sticker.webp", "", m, false, {

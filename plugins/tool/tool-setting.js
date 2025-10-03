@@ -5,7 +5,6 @@ let handler = async (m, { conn, isOwner, isAdmin, args, usedPrefix, command }) =
     let features = [
         { key: "adminOnly", scope: "chat", name: "Admin Only" },
         { key: "detect", scope: "chat", name: "Detect" },
-        { key: "otakuNews", scope: "chat", name: "Otaku News" },
         { key: "notifgempa", scope: "chat", name: "Notif Gempa" },
         { key: "antidelete", scope: "chat", name: "Anti Delete" },
         { key: "antiLinks", scope: "chat", name: "Anti Link" },

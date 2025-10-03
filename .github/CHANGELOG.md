@@ -1,94 +1,44 @@
-## Version 4.0.0 — 2025-09-19 (Major Update)
+# Version 5.0.0 — Major Release
 
-### `Added`
+## Added
+- **Media Uploader v8** with enhanced performance and reliability.  
+- New visual transformation tools: *Cartoon, Comic, Cyber, Disney, Ghibli, Pixar, Figure, SDM Tinggi, Hijab, Black & White*.  
+- **iPhone-style Quote Chat** rendering.  
+- **Navigation** for improved command flow and usability.  
+- **Native Banner Rendering (Canvas-based)** for lightweight and efficient banners.  
+- **Native Sticker Maker (C++)** for faster and more stable sticker generation.  
+- **Native Converter (C++)** supporting extended audio/video transformations.  
+- **Automatic Sticker Cropping** to ensure output meets WhatsApp constraints without loss of quality.  
 
-- New **Tool-Stalking** feature.
-- **Pinterest Downloader**.
-- **YouTube Video v2**.
-- **YouTube Audio v2**.
-- **Converter utilities**.
+## Removed
+- Deprecated **Premium system**.  
+- **Otakkudesu module** (unmaintained).  
+- Generic **scrape** and **cheerio-based scrapers**.  
+- Legacy database fields (`data`, `chat`, `user`).  
+- **Yargs-based CLI commands**.  
+- Deprecated **LID mapping in getters** (fully replaced with JID normalization).  
+- **node-webpmux**, replaced by an internal native Exif handler.  
 
-### `Removed`
-
-- Legacy **AI Enhanced**.
-- Old **YouTube Downloader (ytdl)**.
-- **ytplay** command.
-- **TikTok v2**.
-- All **NSFW modules**.
-- Deprecated getters (`getFile`, `sendContact`, button & unused getters).
-- **setpp landscape**.
-- RPG-related modules (**Dungeon**, **Werewolf**, **Fun Games Menu**).
-- **Anti ViewOnce**.
-- **Donasi**, **Menfess**, **Prototype**, **Audio Effect**.
-- Third-party scrapers (**CapCut**, **Facebook**, **Terabox**).
-- Unused APIs & CLI options (flag CLI, scrape unused).
-- Hardcoded logic & LID–JID normalization.
-- Several unused modules.
-
-### `Fixed`
-
-- Corrected **getName** behavior.
-- Improved **Anti-Link** detection.
-- Fixed downloaders (**MediaFire**, **Videy**, **Twitter**, **StalkWA**, **APK Downloader**).
-- Enhanced core functions for **Node.js 22+**.
-- Adjusted **Maker & Scraper** functions.
-- Refactored **all plugins** for better maintainability.
-- Synchronized **API changes** (MediaFire + GDrive + Videy).
-- Fixed object getters & **decode JID**.
-- Improved **quoted message handling** (now resolves LID → JID properly).
-- Fixed **audio PTT sending** (voice notes now work reliably).
-- Database initialization & global settings improvements.
-- Improved **menu system**.
-- Full **Linter compliance (100%)**.
-- Refactored **plugin structure**.
-- Fixed `ERR_INVALID_ARG_TYPE` issues.
-- Optimized **broadcast** & **hidetag** with better filtering logic.
-- Dependency optimizations & bug fixes.
+## Fixed
+- Sticker box padding and layout alignment.  
+- Refactored **media uploader** for stability.  
+- Improved `toAnime` and `toGTA` visual generators.  
+- Stability fixes for **smeme** generation.  
+- Updated compatibility with latest **Baileys** core.  
+- Optimized **Native Cron (C++)**, improving task scheduling performance.  
+- Automatic save and migration for **SQLite database**.  
+- Corrected converter reliability for audio and PTT output.  
+- Enhanced **ATTP** rendering for consistent results.  
+- Fixed watermark application logic.  
+- Resolved issues in **native JID store** mapping.  
+- Migrated **Exif metadata** handling to fully native C++.  
+- Optimized audio conversion flows: `toMP3` and `toPTT`.  
+- Refined **global loading indicator** for natural user experience.  
+- Full **linter compliance** and codebase cleanup.  
+- Updated **Pino** logging library: v9.13.1 → v10.0.0.  
 
 ---
 
-## Version 4.0.3 — 2025-09-21 (Patch Update)
-
-### `Added`
-
-- Automatic **self-update system** (auto check & pull updates).
-
-### `Removed`
-
-- _(No features removed in this patch update)._
-
-### `Fixed`
-
-- Improved **MP3 handling**.
-- Fixed **PTT (Push-to-Talk / voice notes)** reliability.
-
----
-
-## Version 4.1.0 — (Minor Update)
-
-### `Added`
-
-- **cekreso** command.
-- **resize** image handler.
-- **SQLite database** (replacing lowdb).
-- **Native cron (C++ based)** for scheduling.
-
-### `Removed`
-
-- Tag owner (command cleanup).
-- Lowdb (migrated to SQLite).
-- Node-cron (migrated to native C++).
-- wa-sticker-js (replaced by ffmpeg + webpmux).
-- Exif module (replaced by custom logic).
-
-### `Fixed`
-
-- Uploader stability.
-- Security in fetch requests.
-- Import path resolution.
-- Tool syntax consistency.
-- Resize + resolution handler.
-- Getter media handling.
-- Converter (MP3/PTT improvements).
-- Binding CPP stability.
-- Refactor sticker logic (now stable and scalable).
+> [!IMPORTANT]  
+> Additional C++ tool bindings require a compatible Pterodactyl Egg.  
+> Recommended: [Liora Node.js Egg](https://gist.github.com/naruyaizumi/12a3c6baed67ca7fd7eaa11992c82631)

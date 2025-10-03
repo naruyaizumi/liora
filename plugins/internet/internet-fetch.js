@@ -420,11 +420,9 @@ let handler = async (m, { text, conn, usedPrefix, command }) => {
             msg = { document: buffer, mimetype: mime, fileName: filename, caption: baseCaption };
         }
     }
-
-    let sentOk = false;
+    
     try {
         await conn.sendMessage(m.chat, msg, { quoted: m });
-        sentOk = true;
     } catch {
         if (msg.image) msg.image = { url: filePath };
         else if (msg.video) msg.video = { url: filePath };

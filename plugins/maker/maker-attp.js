@@ -1,20 +1,27 @@
+import { addExif } from "../../src/bridge.js";
+
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     try {
         if (!args[0]) {
             return m.reply(
-                `🍙 *Masukkan teks untuk dibuat ATTP yaa!*\n\n🍤 *Contoh:* ${usedPrefix + command} Konichiwa~`
+                `🍙 *Masukkan teks untuk dibuat ATTP yaa!*\n\n🍤 *Contoh: ${usedPrefix + command} Konichiwa~*`
             );
         }
 
         await global.loading(m, conn);
 
         const apiUrl = global.API("btz", "/api/maker/attp", { text: args.join(" ") }, "apikey");
-        const response = await fetch(apiUrl);
-        if (!response.ok) return m.reply("🍜 *Gagal memproses teks. Coba lagi nanti!*");
+        const res = await fetch(apiUrl);
+        if (!res.ok) throw new Error("Gagal fetch dari API ATTP");
 
-        const buffer = Buffer.from(await response.arrayBuffer());
+        const buffer = Buffer.from(await res.arrayBuffer());
+        const stickerImage = await addExif(buffer, {
+            packName: global.config.stickpack || "",
+            authorName: global.config.stickauth || "",
+            emojis: [],
+        });
 
-        await conn.sendFile(m.chat, buffer, "sticker.webp", "", m, false, {
+        await conn.sendFile(m.chat, stickerImage, "sticker.webp", "", m, false, {
             asSticker: true,
         });
     } catch (e) {

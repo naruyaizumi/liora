@@ -20,19 +20,11 @@
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/prettier.yml">
   <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/prettier.yml?label=Prettier&style=for-the-badge&logo=prettier&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Prettier CI"/>
 </a>
-<a href="https://github.com/naruyaizumi/liora/actions/workflows/codeql.yml">
-  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/codeql.yml?label=CodeQL&style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="CodeQL Scan"/>
-</a>
-<a href="https://github.com/naruyaizumi/liora/actions/workflows/dependency-review.yml">
-  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/dependency-review.yml?label=Dependency%20Review&style=for-the-badge&logo=dependabot&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Dependency Review"/>
-</a>
+
 <!-- Repo Metadata -->
 <img src="https://img.shields.io/github/last-commit/naruyaizumi/liora?style=for-the-badge&logo=git&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Last Commit"/>
 <a href="https://github.com/naruyaizumi/liora/releases">
   <img src="https://img.shields.io/github/v/release/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Latest Release"/>
-</a>
-<a href="https://github.com/naruyaizumi/liora/discussions">
-  <img src="https://img.shields.io/github/discussions/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Discussions"/>
 </a>
 
 <!-- License -->
@@ -55,11 +47,6 @@
   <img src="https://img.shields.io/badge/ESLint-Linting-FFC0CB?style=for-the-badge&logo=eslint&logoColor=white&labelColor=2F2F2F" alt="ESLint"/>
 </a>
 
-<!-- CodeQL -->
-<a href="https://codeql.github.com/">
-  <img src="https://img.shields.io/badge/CodeQL-Analysis-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="CodeQL"/>
-</a>
-
 <!-- WhatsApp Channel -->
 <a href="https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03">
   <img src="https://img.shields.io/badge/WhatsApp-Channel-FFC0CB?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F" alt="WhatsApp Channel"/>
@@ -75,24 +62,9 @@
   <img src="https://img.shields.io/badge/Linux-Server-FFC0CB?style=for-the-badge&logo=linux&logoColor=black&labelColor=2F2F2F" alt="Linux"/>
 </a>
 
-<!-- Discord (Community Link) -->
-<a href="https://discord.gg/Ujphasn5">
-  <img src="https://img.shields.io/badge/Discord-Community-FFC0CB?style=for-the-badge&logo=discord&logoColor=white&labelColor=2F2F2F" alt="Discord"/>
-</a>
-
 <!-- Instagram -->
 <a href="https://instagram.com/naruyaizumi">
   <img src="https://img.shields.io/badge/Instagram-@naruyaizumi-FFC0CB?style=for-the-badge&logo=instagram&logoColor=white&labelColor=2F2F2F" alt="Instagram"/>
-</a>
-
-<!-- TikTok -->
-<a href="https://tiktok.com/@naruyaizumi">
-  <img src="https://img.shields.io/badge/TikTok-@naruyaizumi-FFC0CB?style=for-the-badge&logo=tiktok&logoColor=white&labelColor=2F2F2F" alt="TikTok"/>
-</a>
-
-<!-- Telegram -->
-<a href="https://t.me/naruyaizumi">
-  <img src="https://img.shields.io/badge/Telegram-@naruyaizumi-FFC0CB?style=for-the-badge&logo=telegram&logoColor=white&labelColor=2F2F2F" alt="Telegram"/>
 </a>
 
 <!-- Spotify Playlist -->
@@ -181,20 +153,20 @@ We take security, stability, and the comfort of contributors very seriously.
 ---
 
 > [!CAUTION]  
-> ⚠️ Please **do not disclose vulnerabilities or bugs publicly** without reporting them first.  
+> Please **do not disclose vulnerabilities or bugs publicly** without reporting them first.  
 > Use the provided issue templates to submit detailed reports.  
 > This ensures the **safety, comfort, and trust** of all users.
 
 > [!TIP]  
-> 🚀 **Installation Guide**
+> **Installation Guide**
 >
 > Choose your preferred installation method:
 >
-> - 📦 [Install via Pterodactyl](.github/INSTALLATION/PTERODACTYL.md)
-> - ⚡ [Install via PM2](.github/INSTALLATION/PM2.md)
+> - [Install via Pterodactyl](.github/INSTALLATION/PTERODACTYL.md)
+> - [Install via PM2](.github/INSTALLATION/PM2.md)
 
 > [!WARNING]  
-> 🚨 **Credit removal, modification, or selling this source code is strictly prohibited.**
+> **Credit removal, modification, or selling this source code is strictly prohibited.**
 >
 > - Keep all author credits intact (README, configs, bot commands).
 > - Selling/redistributing for personal gain is not allowed.

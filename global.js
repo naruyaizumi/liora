@@ -86,9 +86,9 @@ global.loadDatabase = () => db.read();
 
 global.loading = async (m, conn, back = false) => {
     if (!back) {
-        return conn.sendReact(m.chat, "🍥", m.key);
+        return conn.sendPresenceUpdate("composing", m.chat);
     } else {
-        return conn.sendReact(m.chat, "", m.key);
+        return conn.sendPresenceUpdate("paused", m.chat);
     }
 };
 

@@ -5,7 +5,7 @@ process.on("unhandledRejection", console.error);
 import "./config.js";
 import "./global.js";
 import { naruyaizumi, protoType, serialize } from "./lib/simple.js";
-import { schedule } from "./lib/cron.js";
+import { schedule } from "./src/bridge.js";
 import {
     fetchLatestBaileysVersion,
     makeCacheableSignalKeyStore,

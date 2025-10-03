@@ -165,7 +165,7 @@ export async function handler(chatUpdate) {
         if (m.isBaileys || m.fromMe) return;
         m.exp += Math.ceil(Math.random() * 10);
         let usedPrefix;
-        let _chat = global.db.data && global.db.data.chats && global.db.data.chats[m.chat];
+        
         const groupMetadata =
             (m.isGroup
                 ? (conn.chats[m.chat] || {}).metadata ||
@@ -446,34 +446,35 @@ ${text}
             const quequeIndex = this.msgqueque.indexOf(m.id || m.key.id);
             if (quequeIndex !== -1) this.msgqueque.splice(quequeIndex, 1);
         }
-        let user,
-            stats = global.db.data.stats;
-        if (m) {
-            if (m.sender) user = global.db.data.users[m.sender];
-            let stat;
-            if (m.plugin) {
-                let now = +new Date();
-                if (m.plugin in stats) {
-                    stat = stats[m.plugin];
-                    if (!isNumber(stat.total)) stat.total = 1;
-                    if (!isNumber(stat.success)) stat.success = m.error != null ? 0 : 1;
-                    if (!isNumber(stat.last)) stat.last = now;
-                    if (!isNumber(stat.lastSuccess)) stat.lastSuccess = m.error != null ? 0 : now;
-                } else
-                    stat = stats[m.plugin] = {
-                        total: 1,
-                        success: m.error != null ? 0 : 1,
-                        last: now,
-                        lastSuccess: m.error != null ? 0 : now,
-                    };
-                stat.total += 1;
-                stat.last = now;
-                if (m.error == null) {
-                    stat.success += 1;
-                    stat.lastSuccess = now;
-                }
-            }
+        
+        let stats = global.db.data.stats;
+if (m) {
+    let stat;
+    if (m.plugin) {
+        let now = +new Date();
+        if (m.plugin in stats) {
+            stat = stats[m.plugin];
+            if (!isNumber(stat.total)) stat.total = 1;
+            if (!isNumber(stat.success)) stat.success = m.error != null ? 0 : 1;
+            if (!isNumber(stat.last)) stat.last = now;
+            if (!isNumber(stat.lastSuccess)) stat.lastSuccess = m.error != null ? 0 : now;
+        } else {
+            stat = stats[m.plugin] = {
+                total: 1,
+                success: m.error != null ? 0 : 1,
+                last: now,
+                lastSuccess: m.error != null ? 0 : now,
+            };
         }
+        stat.total += 1;
+        stat.last = now;
+        if (m.error == null) {
+            stat.success += 1;
+            stat.lastSuccess = now;
+        }
+    }
+}
+
         try {
             if (!global.db.data.settings[this.user.jid]?.noprint) {
                 await printMessage(m, this);
@@ -494,7 +495,6 @@ export async function participantsUpdate({ id, participants, action }) {
         let text = "";
         let title = "";
         let body = "";
-        let sourceUrl = "https://wa.me/" + this.user.jid.split("@")[0];
         switch (action) {
             case "add":
                 if (!chat.detect) return;
@@ -512,7 +512,6 @@ export async function participantsUpdate({ id, participants, action }) {
                             title,
                             body,
                             thumbnail: img,
-                            sourceUrl,
                             mediaType: 1,
                             renderLargerThumbnail: true,
                         },
@@ -528,7 +527,6 @@ export async function participantsUpdate({ id, participants, action }) {
                     .replace("@user", "@" + user.split("@")[0]);
                 title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗧𝗶𝗻𝗴𝗴𝗮𝗹 𝗞𝗮𝗸";
                 body = `Kini grup berisi ${groupMetadata.participants.length} anggota.`;
-                sourceUrl = `https://wa.me/${user.replace("@s.whatsapp.net", "")}`;
                 await this.sendMessage(id, {
                     text: text.trim(),
                     mentions: [user],
@@ -537,7 +535,6 @@ export async function participantsUpdate({ id, participants, action }) {
                             title,
                             body,
                             thumbnail: img,
-                            sourceUrl,
                             mediaType: 1,
                             renderLargerThumbnail: true,
                         },
@@ -566,7 +563,6 @@ export async function participantsUpdate({ id, participants, action }) {
                             title,
                             body,
                             thumbnail: img,
-                            sourceUrl,
                             mediaType: 1,
                             renderLargerThumbnail: true,
                         },
@@ -590,7 +586,6 @@ export async function participantsUpdate({ id, participants, action }) {
                             title,
                             body,
                             thumbnail: img,
-                            sourceUrl,
                             mediaType: 1,
                             renderLargerThumbnail: true,
                         },

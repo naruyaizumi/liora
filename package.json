@@ -8,7 +8,7 @@
     "scripts": {
         "start": "node index.js",
         "test": "node test.js",
-        "lint": "eslint --config .github/eslint.config.js .",
+        "lint": "eslint .",
         "prettier": "prettier --config .github/.prettierrc.json --check .",
         "prettier:fix": "prettier --config .github/.prettierrc.json --write .",
         "build:addon": "node-gyp configure build"

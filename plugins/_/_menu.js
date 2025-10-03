@@ -35,7 +35,6 @@ let handler = async (m, { conn, usedPrefix, command, isOwner, isMods, args }) =>
             "maker",
             "owner",
             "islam",
-            "server",
             "tools",
         ];
         if (!arrayMenu.includes(teks)) teks = "404";
@@ -49,7 +48,6 @@ let handler = async (m, { conn, usedPrefix, command, isOwner, isMods, args }) =>
                 maker: "🎀 Maker Menu",
                 owner: "🪄 Owner Menu",
                 islam: "🍃️ Islami Menu",
-                server: "🖥️ Server Menu",
                 tools: "🧸 Tools Menu",
             };
         if (teks == "ai") tags = { ai: "🧠 AI Menu" };
@@ -60,7 +58,6 @@ let handler = async (m, { conn, usedPrefix, command, isOwner, isMods, args }) =>
         if (teks == "maker") tags = { maker: "🎀 Maker Menu" };
         if (teks == "owner") tags = { owner: "🪄 Owner Menu" };
         if (teks == "islam") tags = { islam: "🍃️ Islami Menu" };
-        if (teks == "server") tags = { server: "🖥️ Server Menu" };
         if (teks == "tools") tags = { tools: "🧸 Tools Menu" };
         let name = conn.getName(m.sender);
         let status = isMods ? "🧁 Developer" : isOwner ? "🪄 Owmer" : "🍬 Free User";
@@ -129,7 +126,7 @@ END:VCARD`;
             let icon = icons[i] || "⭐";
             return {
                 title: `${icon} Menu ${capitalize(v)}`,
-                description: `${icon} Fitur ${v} siap dipakai 🚀`,
+                description: `Fitur ${v} siap dipakai 🚀`,
                 id: `${usedPrefix + command} ${v}`,
             };
         });

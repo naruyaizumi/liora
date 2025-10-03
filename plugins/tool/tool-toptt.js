@@ -1,34 +1,55 @@
-import { convert } from "../../lib/convert.js";
+import { convert } from "../../src/bridge.js";
 
 let handler = async (m, { conn, usedPrefix, command }) => {
-    try {
-        let q = m.quoted ? m.quoted : m;
-        let mime = (q.msg || q).mimetype || q.mediaType || "";
-        if (!/^(video|audio)\//.test(mime)) {
-            return m.reply(
-                `🍙 *Balas video atau voice note dengan perintah* \`${usedPrefix + command}\``
-            );
-        }
+  try {
+    let q = m.quoted ? m.quoted : m;
+    let mime = (q.msg || q).mimetype || q.mediaType || "";
 
-        await global.loading(m, conn);
-
-        let type = mime.split("/")[0];
-        let media = await conn.downloadM(q, type);
-        if (!media) return m.reply("🍔 *Gagal mengunduh media!*");
-
-        let audio = await convert(media, { format: "mp3" });
-        if (!audio) return m.reply("🍡 *Konversi gagal!*");
-
-        await conn.sendFile(m.chat, audio, "voice.mp3", "", m, true, { mimetype: "audio/mpeg" });
-    } catch (e) {
-        console.error(e);
-        m.reply(`🥟 *Terjadi kesalahan saat konversi!*\n🍧 ${e.message}`);
-    } finally {
-        await global.loading(m, conn, true);
+    if (!mime || !/^(video|audio)\//.test(mime)) {
+      return m.reply(
+        `🍙 *Balas video atau audio dengan perintah ${usedPrefix + command}*`
+      );
     }
+
+    await global.loading(m, conn);
+
+    let buffer = await q.download?.();
+    if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
+      return m.reply("🍔 *Gagal ambil buffer media!*");
+    }
+
+    let audio = await convert(buffer, {
+      format: "opus",
+      sampleRate: 48000,
+      channels: 1,
+      bitrate: "64k"
+    });
+
+    if (!Buffer.isBuffer(audio) || audio.length === 0) {
+      return m.reply("🍡 *Konversi gagal, hasil kosong!*");
+    }
+
+    await conn.sendFile(
+      m.chat,
+      audio,
+      "voice.ogg",
+      "",
+      m,
+      true,
+      {
+        mimetype: "audio/ogg; codecs=opus",
+        ptt: true
+      }
+    );
+  } catch (e) {
+    console.error(e);
+    m.reply(`🥟 *Terjadi kesalahan saat konversi!*\n🍧 ${e.message}`);
+  } finally {
+    await global.loading(m, conn, true);
+  }
 };
 
-handler.help = ["toptt"];
+handler.help = ["toptt", "tovn"];
 handler.tags = ["tools"];
 handler.command = /^(toptt|tovn)$/i;
 

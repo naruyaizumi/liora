@@ -1,4 +1,4 @@
-let handler = async (m, { conn }) => {
+let handler = async (m) => {
     try {
         let text = JSON.stringify(m, null, 2);
         await m.reply("```" + text + "```");

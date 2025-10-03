@@ -104,7 +104,7 @@ After dependencies are installed:
 ## 8. Recommended Node.js Egg (Optional but Highly Recommended)
 
 For the best stability, use the custom Node.js Egg built for Liora:  
-👉 [Custom Node.js Egg (20/22/23/24, Complete Tools)](https://gist.github.com/naruyaizumi/12a3c6baed67ca7fd7eaa11992c82631)
+👉 [Custom Node.js Egg (20/22/24, Complete Tools)](https://gist.github.com/naruyaizumi/12a3c6baed67ca7fd7eaa11992c82631)
 
 This Egg provides:
 
