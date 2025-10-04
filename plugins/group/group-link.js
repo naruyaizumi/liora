@@ -1,18 +1,18 @@
 let handler = async (m, { conn, groupMetadata }) => {
-    try {
-        let code = await conn.groupInviteCode(m.chat);
-        let link = `https://chat.whatsapp.com/${code}`;
-        let teks = `🍡 *Nama Grup:* ${groupMetadata.subject}
+  try {
+    let code = await conn.groupInviteCode(m.chat);
+    let link = `https://chat.whatsapp.com/${code}`;
+    let teks = `🍡 *Nama Grup:* ${groupMetadata.subject}
 🍰 *ID Grup:* ${m.chat}
 
 🍬 *Link Undangan Grup:*
 ${link}`;
 
-        await m.reply(teks);
-    } catch (e) {
-        console.error(e);
-        m.reply("🍪 *Gagal mengambil link grup.*");
-    }
+    await m.reply(teks);
+  } catch (e) {
+    console.error(e);
+    m.reply("🍪 *Gagal mengambil link grup.*");
+  }
 };
 
 handler.help = ["grouplink"];

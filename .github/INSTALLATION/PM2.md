@@ -17,41 +17,41 @@ Before installation, make sure your environment is ready:
 ### Debian/Ubuntu
 
 apt update && apt install -y \
-  build-essential pkg-config cmake \
-  python3 python3-dev \
-  ffmpeg imagemagick \
-  libavformat-dev libavcodec-dev libavutil-dev \
-  libswresample-dev libswscale-dev \
-  libwebp-dev libpng-dev libjpeg-dev zlib1g-dev \
-  libfreetype6-dev libharfbuzz-dev libpango1.0-dev \
-  libgif-dev libopus-dev libvpx-dev \
-  git curl wget zip unzip
+ build-essential pkg-config cmake \
+ python3 python3-dev \
+ ffmpeg imagemagick \
+ libavformat-dev libavcodec-dev libavutil-dev \
+ libswresample-dev libswscale-dev \
+ libwebp-dev libpng-dev libjpeg-dev zlib1g-dev \
+ libfreetype6-dev libharfbuzz-dev libpango1.0-dev \
+ libgif-dev libopus-dev libvpx-dev \
+ git curl wget zip unzip
 
 ### CentOS/RHEL 7
 
 yum groupinstall -y "Development Tools"
 yum install -y epel-release
 yum install -y \
-  cmake \
-  python3 python3-devel \
-  ffmpeg ImageMagick \
-  libwebp-devel libpng-devel libjpeg-turbo-devel \
-  zlib-devel freetype-devel harfbuzz-devel pango-devel giflib-devel \
-  opus-devel libvpx-devel \
-  git curl wget zip unzip
-  
+ cmake \
+ python3 python3-devel \
+ ffmpeg ImageMagick \
+ libwebp-devel libpng-devel libjpeg-turbo-devel \
+ zlib-devel freetype-devel harfbuzz-devel pango-devel giflib-devel \
+ opus-devel libvpx-devel \
+ git curl wget zip unzip
+
 ### CentOS/RHEL 8+
 
 dnf groupinstall -y "Development Tools"
 dnf install -y epel-release
 dnf install -y \
-  cmake \
-  python3 python3-devel \
-  ffmpeg ImageMagick \
-  libwebp-devel libpng-devel libjpeg-turbo-devel \
-  zlib-devel freetype-devel harfbuzz-devel pango-devel giflib-devel \
-  opus-devel libvpx-devel \
-  git curl wget zip unzip
+ cmake \
+ python3 python3-devel \
+ ffmpeg ImageMagick \
+ libwebp-devel libpng-devel libjpeg-turbo-devel \
+ zlib-devel freetype-devel harfbuzz-devel pango-devel giflib-devel \
+ opus-devel libvpx-devel \
+ git curl wget zip unzip
 
 ### Install Node.js (Recommended via NodeSource)
 
@@ -217,14 +217,14 @@ npm update
 
 ```javascript
 module.exports = {
-    apps: [
-        {
-            name: "liora",
-            script: "index.js",
-            watch: true,
-            max_memory_restart: "512M",
-        },
-    ],
+  apps: [
+    {
+      name: "liora",
+      script: "index.js",
+      watch: true,
+      max_memory_restart: "512M",
+    },
+  ],
 };
 ```
 

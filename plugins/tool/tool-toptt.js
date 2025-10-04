@@ -7,7 +7,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
     if (!mime || !/^(video|audio)\//.test(mime)) {
       return m.reply(
-        `🍙 *Balas video atau audio dengan perintah ${usedPrefix + command}*`
+        `🍙 *Balas video atau audio dengan perintah ${usedPrefix + command}*`,
       );
     }
 
@@ -22,25 +22,17 @@ let handler = async (m, { conn, usedPrefix, command }) => {
       format: "opus",
       sampleRate: 48000,
       channels: 1,
-      bitrate: "64k"
+      bitrate: "64k",
     });
 
     if (!Buffer.isBuffer(audio) || audio.length === 0) {
       return m.reply("🍡 *Konversi gagal, hasil kosong!*");
     }
 
-    await conn.sendFile(
-      m.chat,
-      audio,
-      "voice.ogg",
-      "",
-      m,
-      true,
-      {
-        mimetype: "audio/ogg; codecs=opus",
-        ptt: true
-      }
-    );
+    await conn.sendFile(m.chat, audio, "voice.ogg", "", m, true, {
+      mimetype: "audio/ogg; codecs=opus",
+      ptt: true,
+    });
   } catch (e) {
     console.error(e);
     m.reply(`🥟 *Terjadi kesalahan saat konversi!*\n🍧 ${e.message}`);

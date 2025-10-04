@@ -1,12 +1,14 @@
 let handler = async (m, { conn }) => {
-    await global.loading(m, conn);
-    try {
-        let res = await (await fetch("https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json")).json();
-        let data = res.Infogempa.gempa;
-        let mmiInfo = data.Dirasakan
-            ? `📍 *Wilayah yang Merasakan : ${data.Dirasakan} Skala MMI*`
-            : `📍 *Wilayah yang Merasakan : Tidak ada data*`;
-        let teks = `🍓 *Info Gempa Terkini - BMKG* 🍓
+  await global.loading(m, conn);
+  try {
+    let res = await (
+      await fetch("https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json")
+    ).json();
+    let data = res.Infogempa.gempa;
+    let mmiInfo = data.Dirasakan
+      ? `📍 *Wilayah yang Merasakan : ${data.Dirasakan} Skala MMI*`
+      : `📍 *Wilayah yang Merasakan : Tidak ada data*`;
+    let teks = `🍓 *Info Gempa Terkini - BMKG* 🍓
 ━━━━━━━━━━━━━━━━━━━
 📅 *Tanggal : ${data.Tanggal}*
 🕒 *Waktu : ${data.Jam} WIB*
@@ -22,16 +24,16 @@ ${mmiInfo}
 ━━━━━━━━━━━━━━━━━━━
 🍰 *Sumber: BMKG (Badan Meteorologi, Klimatologi, dan Geofisika)*
 `.trim();
-        await conn.sendFile(
-            m.chat,
-            "https://data.bmkg.go.id/DataMKG/TEWS/" + data.Shakemap,
-            "map.jpg",
-            teks,
-            m
-        );
-    } finally {
-        await global.loading(m, conn, true);
-    }
+    await conn.sendFile(
+      m.chat,
+      "https://data.bmkg.go.id/DataMKG/TEWS/" + data.Shakemap,
+      "map.jpg",
+      teks,
+      m,
+    );
+  } finally {
+    await global.loading(m, conn, true);
+  }
 };
 
 handler.help = ["infogempa"];

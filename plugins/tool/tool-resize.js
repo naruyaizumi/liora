@@ -1,32 +1,37 @@
-import sharp from "sharp"
+import sharp from "sharp";
 
 let handler = async (m, { conn, args }) => {
   try {
-    let towidth = parseInt(args[0])
-    let toheight = parseInt(args[1])
-    if (!towidth) return m.reply("🍓 *Masukkan ukuran width!*")
-    if (!toheight) return m.reply("🍰 *Masukkan ukuran height!*")
+    let towidth = parseInt(args[0]);
+    let toheight = parseInt(args[1]);
+    if (!towidth) return m.reply("🍓 *Masukkan ukuran width!*");
+    if (!toheight) return m.reply("🍰 *Masukkan ukuran height!*");
 
-    let q = m.quoted ? m.quoted : m
-    let mime = (q.msg || q).mimetype || q.mediaType || ""
-    if (!mime) return m.reply("🍩 *Media tidak ditemukan. Kirim/reply gambar yang ingin di-resize!*")
+    let q = m.quoted ? m.quoted : m;
+    let mime = (q.msg || q).mimetype || q.mediaType || "";
+    if (!mime)
+      return m.reply(
+        "🍩 *Media tidak ditemukan. Kirim/reply gambar yang ingin di-resize!*",
+      );
     if (!/image\/(jpe?g|png|webp)/.test(mime)) {
-      return m.reply(`🧁 *Format ${mime} tidak didukung!*`)
+      return m.reply(`🧁 *Format ${mime} tidak didukung!*`);
     }
 
-    await global.loading(m, conn)
+    await global.loading(m, conn);
 
-    const media = await q.download()
-    if (!media || !media.length) return m.reply("🍪 *Gagal download media!*")
-    const before = await sharp(media).metadata()
+    const media = await q.download();
+    if (!media || !media.length) return m.reply("🍪 *Gagal download media!*");
+    const before = await sharp(media).metadata();
     const resized = await sharp(media)
       .resize(towidth, toheight, { fit: "inside" })
-      .toBuffer()
-    const after = await sharp(resized).metadata()
+      .toBuffer();
+    const after = await sharp(resized).metadata();
 
-    await conn.sendMessage(m.chat, {
-      image: resized,
-      caption: `
+    await conn.sendMessage(
+      m.chat,
+      {
+        image: resized,
+        caption: `
 🍬 *COMPRESS & RESIZE* 🍬
 ━━━━━━━━━━━━━━━━━━━
 🍓 *Sebelum:*
@@ -36,19 +41,20 @@ let handler = async (m, { conn, args }) => {
 🧁 *Sesudah:*
 🍦 *Lebar: ${after.width}px*
 🍦 *Tinggi: ${after.height}px*
-`.trim()
-    }, { quoted: m })
-
+`.trim(),
+      },
+      { quoted: m },
+    );
   } catch (e) {
-    console.error(e)
-    await m.reply(`🍨 *Gagal resize:* ${e.message}`)
+    console.error(e);
+    await m.reply(`🍨 *Gagal resize:* ${e.message}`);
   } finally {
-    await global.loading(m, conn, true)
+    await global.loading(m, conn, true);
   }
-}
+};
 
-handler.help = ["resize"]
-handler.tags = ["tools"]
-handler.command = /^(resize)$/i
+handler.help = ["resize"];
+handler.tags = ["tools"];
+handler.command = /^(resize)$/i;
 
-export default handler
+export default handler;

@@ -7,13 +7,14 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
     if (!mime || !/^(video|audio)\//.test(mime)) {
       return m.reply(
-        `🍙 *Balas video atau audio dengan perintah ${usedPrefix + command}*`
+        `🍙 *Balas video atau audio dengan perintah ${usedPrefix + command}*`,
       );
     }
 
     await global.loading(m, conn);
     let buffer = await q.download?.();
-    if (!Buffer.isBuffer(buffer)) return m.reply("🍔 *Gagal ambil buffer media!*");
+    if (!Buffer.isBuffer(buffer))
+      return m.reply("🍔 *Gagal ambil buffer media!*");
     let audio = await convert(buffer, { format: "mp3" });
     if (!Buffer.isBuffer(audio) || audio.length === 0) {
       return m.reply("🍡 *Konversi gagal, hasil kosong!*");
@@ -26,7 +27,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
       "🍱 *Berhasil dikonversi ke MP3!*",
       m,
       false,
-      { mimetype: "audio/mpeg" }
+      { mimetype: "audio/mpeg" },
     );
   } catch (e) {
     console.error(e);

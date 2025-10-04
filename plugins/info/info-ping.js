@@ -1,11 +1,11 @@
 let handler = async (m, { conn }) => {
-    let startTime = performance.now();
-    let endTime = performance.now();
-    let responseTime = (endTime - startTime).toFixed(6);
-    let message = `*PING PONG* 🏓
+  let startTime = performance.now();
+  let endTime = performance.now();
+  let responseTime = (endTime - startTime).toFixed(6);
+  let message = `*PING PONG* 🏓
 🚀 *Response: ${responseTime} ms*`;
 
-    await conn.sendMessage(m.chat, { text: message });
+  await conn.sendMessage(m.chat, { text: message });
 };
 
 handler.help = ["ping"];

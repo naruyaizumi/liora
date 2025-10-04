@@ -16,25 +16,25 @@ await engineCheck();
 let childProcess = null;
 
 async function start(file) {
-    const args = [join(__dirname, file), ...process.argv.slice(2)];
-    childProcess = spawn(process.argv[0], args, {
-        stdio: ["inherit", "inherit", "inherit", "ipc"],
-    });
+  const args = [join(__dirname, file), ...process.argv.slice(2)];
+  childProcess = spawn(process.argv[0], args, {
+    stdio: ["inherit", "inherit", "inherit", "ipc"],
+  });
 
-    childProcess.on("message", (msg) => {
-        if (msg === "uptime") childProcess.send(process.uptime());
-    });
+  childProcess.on("message", (msg) => {
+    if (msg === "uptime") childProcess.send(process.uptime());
+  });
 
-    childProcess.on("exit", (code) => {
-        console.log(`[${name}] exited with code ${code}`);
-        childProcess = null;
-    });
+  childProcess.on("exit", (code) => {
+    console.log(`[${name}] exited with code ${code}`);
+    childProcess = null;
+  });
 
-    if (!rl.listenerCount("line")) {
-        rl.on("line", (line) => {
-            if (childProcess) childProcess.send(line.trim());
-        });
-    }
+  if (!rl.listenerCount("line")) {
+    rl.on("line", (line) => {
+      if (childProcess) childProcess.send(line.trim());
+    });
+  }
 }
 
 start("main.js");

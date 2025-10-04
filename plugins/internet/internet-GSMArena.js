@@ -1,21 +1,24 @@
 let handler = async (m, { conn, usedPrefix, command, text }) => {
-    try {
-        if (!text)
-            return m.reply(
-                `🍙 *Masukkan nama HP!*\n🍡 *Contoh: ${usedPrefix + command} samsung s25 ultra*`
-            );
-        await global.loading(m, conn);
+  try {
+    if (!text)
+      return m.reply(
+        `🍙 *Masukkan nama HP!*\n🍡 *Contoh: ${usedPrefix + command} samsung s25 ultra*`,
+      );
+    await global.loading(m, conn);
 
-        let response = await fetch(
-            global.API("btz", "/api/webzone/gsmarena", { query: text }, "apikey")
-        );
-        if (!response.ok)
-            throw new Error(`🍤 *Gagal mendapatkan data dari API. Status:* ${response.status}`);
-        let json = await response.json();
-        if (!json.status || !json.result) return m.reply("🍜 *HP tidak ditemukan!*");
-        let data = json.result;
-        let specs = data.specifications;
-        let caption = `
+    let response = await fetch(
+      global.API("btz", "/api/webzone/gsmarena", { query: text }, "apikey"),
+    );
+    if (!response.ok)
+      throw new Error(
+        `🍤 *Gagal mendapatkan data dari API. Status:* ${response.status}`,
+      );
+    let json = await response.json();
+    if (!json.status || !json.result)
+      return m.reply("🍜 *HP tidak ditemukan!*");
+    let data = json.result;
+    let specs = data.specifications;
+    let caption = `
 🍙 *${data.name}*
 🍣 *Detail GSMArena: ${data.url}*
 ━━━━━━━━━━━━━━━━━━━
@@ -77,31 +80,31 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
 🍩 *Harga: ${specs.price || "Tidak tersedia"}*
 `.trim();
 
-        await conn.sendMessage(
-            m.chat,
-            {
-                text: caption,
-                contextInfo: {
-                    externalAdReply: {
-                        title: data.name,
-                        body: "🍙 Klik untuk detail spesifikasi lengkap!",
-                        thumbnailUrl: data.image,
-                        mediaType: 1,
-                        renderLargerThumbnail: true,
-                        sourceUrl: data.url,
-                    },
-                },
-            },
-            { quoted: m }
-        );
-    } catch (error) {
-        console.error(error);
-        return m.reply(
-            `🍩 *Terjadi kesalahan saat memproses permintaan.*\n🍜 *Detail:* ${error.message}`
-        );
-    } finally {
-        await global.loading(m, conn, true);
-    }
+    await conn.sendMessage(
+      m.chat,
+      {
+        text: caption,
+        contextInfo: {
+          externalAdReply: {
+            title: data.name,
+            body: "🍙 Klik untuk detail spesifikasi lengkap!",
+            thumbnailUrl: data.image,
+            mediaType: 1,
+            renderLargerThumbnail: true,
+            sourceUrl: data.url,
+          },
+        },
+      },
+      { quoted: m },
+    );
+  } catch (error) {
+    console.error(error);
+    return m.reply(
+      `🍩 *Terjadi kesalahan saat memproses permintaan.*\n🍜 *Detail:* ${error.message}`,
+    );
+  } finally {
+    await global.loading(m, conn, true);
+  }
 };
 
 handler.help = ["gsmarena"];

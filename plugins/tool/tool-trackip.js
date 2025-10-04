@@ -1,14 +1,18 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-    if (!text) return m.reply(`🍙 *Contoh penggunaan: ${usedPrefix + command} 103.217.224.106*`);
-    try {
-        await global.loading(m, conn);
-        let response = await fetch(`https://ipwho.is/${text}`);
-        if (!response.ok) throw new Error("🍜 Gagal mengambil data dari ipwho.is");
-        let ipData = await response.json();
-        if (!ipData.success) throw new Error(`🍛 IP ${text} tidak ditemukan atau tidak valid.`);
-        let mapLink = `https://www.openstreetmap.org/?mlat=${ipData.latitude}&mlon=${ipData.longitude}&zoom=12`;
-        let mapThumbnail = `https://static-maps.yandex.ru/1.x/?ll=${ipData.longitude},${ipData.latitude}&size=450,450&z=12&l=map&pt=${ipData.longitude},${ipData.latitude},pm2rdl`;
-        let formattedData = `
+  if (!text)
+    return m.reply(
+      `🍙 *Contoh penggunaan: ${usedPrefix + command} 103.217.224.106*`,
+    );
+  try {
+    await global.loading(m, conn);
+    let response = await fetch(`https://ipwho.is/${text}`);
+    if (!response.ok) throw new Error("🍜 Gagal mengambil data dari ipwho.is");
+    let ipData = await response.json();
+    if (!ipData.success)
+      throw new Error(`🍛 IP ${text} tidak ditemukan atau tidak valid.`);
+    let mapLink = `https://www.openstreetmap.org/?mlat=${ipData.latitude}&mlon=${ipData.longitude}&zoom=12`;
+    let mapThumbnail = `https://static-maps.yandex.ru/1.x/?ll=${ipData.longitude},${ipData.latitude}&size=450,450&z=12&l=map&pt=${ipData.longitude},${ipData.latitude},pm2rdl`;
+    let formattedData = `
 🍙 *\`INFORMASI IP: ${text}\`*
 
 🍜 *IP Address : ${ipData.ip}*
@@ -48,36 +52,39 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
 🍱 *Peta Lokasi : ${mapLink}*
 `;
-        await conn.sendMessage(m.chat, {
-            location: { degreesLatitude: ipData.latitude, degreesLongitude: ipData.longitude },
-            caption: "🍙 Lokasi berdasarkan data IP",
-        });
-        await conn.sendMessage(m.chat, {
-            text: formattedData,
-            contextInfo: {
-                externalAdReply: {
-                    title: `🍜 Lokasi IP ${text}`,
-                    body: "🍣 Klik untuk lihat di OpenStreetMap",
-                    thumbnailUrl: mapThumbnail,
-                    renderLargerThumbnail: true,
-                    mediaType: 1,
-                    mediaUrl: mapLink,
-                    sourceUrl: "https://instagram.com/naruyaizumi_",
-                },
-            },
-        });
-        const resizeImage = (url, width = 512, height = 512) => {
-            return `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=${width}&h=${height}&fit=inside`;
-        };
-        await conn.sendMessage(m.chat, {
-            image: { url: resizeImage(ipData.flag.img) },
-            caption: `🍩 *Bendera negara: ${ipData.country} ${ipData.flag.emoji} ${ipData.flag.emoji_unicode}*`,
-        });
-    } catch (err) {
-        m.reply(`🍡 *Terjadi kesalahan: ${err.message}*`);
-    } finally {
-        await global.loading(m, conn, true);
-    }
+    await conn.sendMessage(m.chat, {
+      location: {
+        degreesLatitude: ipData.latitude,
+        degreesLongitude: ipData.longitude,
+      },
+      caption: "🍙 Lokasi berdasarkan data IP",
+    });
+    await conn.sendMessage(m.chat, {
+      text: formattedData,
+      contextInfo: {
+        externalAdReply: {
+          title: `🍜 Lokasi IP ${text}`,
+          body: "🍣 Klik untuk lihat di OpenStreetMap",
+          thumbnailUrl: mapThumbnail,
+          renderLargerThumbnail: true,
+          mediaType: 1,
+          mediaUrl: mapLink,
+          sourceUrl: "https://instagram.com/naruyaizumi_",
+        },
+      },
+    });
+    const resizeImage = (url, width = 512, height = 512) => {
+      return `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=${width}&h=${height}&fit=inside`;
+    };
+    await conn.sendMessage(m.chat, {
+      image: { url: resizeImage(ipData.flag.img) },
+      caption: `🍩 *Bendera negara: ${ipData.country} ${ipData.flag.emoji} ${ipData.flag.emoji_unicode}*`,
+    });
+  } catch (err) {
+    m.reply(`🍡 *Terjadi kesalahan: ${err.message}*`);
+  } finally {
+    await global.loading(m, conn, true);
+  }
 };
 
 handler.help = ["trackip"];

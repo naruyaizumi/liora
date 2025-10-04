@@ -1,35 +1,35 @@
 {
-    "name": "liora",
-    "version": "5.0.0",
-    "type": "module",
-    "engines": {
-        "node": ">=22.0.0"
-    },
-    "scripts": {
-        "start": "node index.js",
-        "test": "node test.js",
-        "lint": "eslint .",
-        "build:addon": "node-gyp configure build"
-    },
-    "license": "Apache-2.0",
-    "author": {
-        "name": "Naruya Izumi",
-        "url": "https://linkbio.co/naruyaizumi"
-    },
-    "dependencies": {
-        "baileys": "7.0.0-rc.5",
-        "better-sqlite3": "^12.4.1",
-        "canvas": "^3.2.0",
-        "chalk": "^5.6.2",
-        "file-type": "^21.0.0",
-        "pino": "^10.0.0",
-        "sharp": "^0.34.4"
-    },
-    "devDependencies": {
-        "@eslint/js": "^9.37.0",
-        "eslint": "^9.37.0",
-        "globals": "^16.4.0",
-        "node-addon-api": "^8.5.0"
-    },
-    "packageManager": "pnpm@10.18.0+sha512.e804f889f1cecc40d572db084eec3e4881739f8dec69c0ff10d2d1beff9a4e309383ba27b5b750059d7f4c149535b6cd0d2cb1ed3aeb739239a4284a68f40cfa"
+  "name": "liora",
+  "version": "5.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js",
+    "lint": "eslint .",
+    "build:addon": "node-gyp configure build"
+  },
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Naruya Izumi",
+    "url": "https://linkbio.co/naruyaizumi"
+  },
+  "dependencies": {
+    "baileys": "7.0.0-rc.5",
+    "better-sqlite3": "^12.4.1",
+    "canvas": "^3.2.0",
+    "chalk": "^5.6.2",
+    "file-type": "^21.0.0",
+    "pino": "^10.0.0",
+    "sharp": "^0.34.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.37.0",
+    "eslint": "^9.37.0",
+    "globals": "^16.4.0",
+    "node-addon-api": "^8.5.0"
+  },
+  "packageManager": "pnpm@10.18.0+sha512.e804f889f1cecc40d572db084eec3e4881739f8dec69c0ff10d2d1beff9a4e309383ba27b5b750059d7f4c149535b6cd0d2cb1ed3aeb739239a4284a68f40cfa"
 }

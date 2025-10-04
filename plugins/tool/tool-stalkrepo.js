@@ -1,19 +1,21 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-    if (!text)
-        return m.reply(
-            `🍱 *Contoh penggunaan: ${usedPrefix + command} naruyaizumi liora atau ${usedPrefix + command} naruyaizumi/liora*`
-        );
-    await global.loading(m, conn);
-    try {
-        let repoQuery = text.includes("/") ? text : text.replace(/\s+/, "/");
-        let res = await fetch(global.API("btz", "/api/stalk/repo", { repo: repoQuery }, "apikey"));
-        if (!res.ok) throw `🍜 *Gagal mengakses API!*`;
-        let json = await res.json();
-        if (json.code !== 200 || !json.result?.items?.length)
-            throw `🍡 *Repositori tidak ditemukan!*`;
-        let repo = json.result.items[0];
-        let author = repo.author;
-        let caption = `
+  if (!text)
+    return m.reply(
+      `🍱 *Contoh penggunaan: ${usedPrefix + command} naruyaizumi liora atau ${usedPrefix + command} naruyaizumi/liora*`,
+    );
+  await global.loading(m, conn);
+  try {
+    let repoQuery = text.includes("/") ? text : text.replace(/\s+/, "/");
+    let res = await fetch(
+      global.API("btz", "/api/stalk/repo", { repo: repoQuery }, "apikey"),
+    );
+    if (!res.ok) throw `🍜 *Gagal mengakses API!*`;
+    let json = await res.json();
+    if (json.code !== 200 || !json.result?.items?.length)
+      throw `🍡 *Repositori tidak ditemukan!*`;
+    let repo = json.result.items[0];
+    let author = repo.author;
+    let caption = `
 🍱 *GITHUB REPOSITORY STALK* 🍱
 ━━━━━━━━━━━━━━━━━━━
 👤 *Author*
@@ -50,13 +52,17 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 🚀 *Push Terakhir: ${new Date(repo.pushedAt).toLocaleDateString("id-ID")}*
 ━━━━━━━━━━━━━━━━━━━
 `.trim();
-        await conn.sendFile(m.chat, author.avatar_url, "author.jpg", caption, m);
-    } catch (e) {
-        console.error(e);
-        m.reply(typeof e === "string" ? e : "🍩 *Terjadi kesalahan saat stalk repositori.*");
-    } finally {
-        await global.loading(m, conn, true);
-    }
+    await conn.sendFile(m.chat, author.avatar_url, "author.jpg", caption, m);
+  } catch (e) {
+    console.error(e);
+    m.reply(
+      typeof e === "string"
+        ? e
+        : "🍩 *Terjadi kesalahan saat stalk repositori.*",
+    );
+  } finally {
+    await global.loading(m, conn, true);
+  }
 };
 
 handler.help = ["stalkrepo"];

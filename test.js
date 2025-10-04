@@ -1,31 +1,31 @@
-import fs from "fs"
-import path, { dirname } from "path"
-import assert from "assert"
-import { fileURLToPath } from "url"
-import { createRequire } from "module"
+import fs from "fs";
+import path, { dirname } from "path";
+import assert from "assert";
+import { fileURLToPath } from "url";
+import { createRequire } from "module";
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-const require = createRequire(__dirname)
-const pkg = require(path.join(__dirname, "./package.json"))
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const require = createRequire(__dirname);
+const pkg = require(path.join(__dirname, "./package.json"));
 
-let folders = [".", ...(pkg.directories ? Object.values(pkg.directories) : [])]
-let files = []
+let folders = [".", ...(pkg.directories ? Object.values(pkg.directories) : [])];
+let files = [];
 
 for (let folder of folders) {
-  if (!fs.existsSync(folder)) continue
+  if (!fs.existsSync(folder)) continue;
   for (let file of fs.readdirSync(folder).filter((v) => v.endsWith(".js"))) {
-    files.push(path.resolve(path.join(folder, file)))
+    files.push(path.resolve(path.join(folder, file)));
   }
 }
 
 for (let file of files) {
-  if (file === __filename) continue
-  console.error("Checking", file)
-  const src = fs.readFileSync(file, "utf8")
+  if (file === __filename) continue;
+  console.error("Checking", file);
+  const src = fs.readFileSync(file, "utf8");
   if (!src.trim()) {
-    throw new Error(`File kosong atau tidak valid: ${file}`)
+    throw new Error(`File kosong atau tidak valid: ${file}`);
   }
-  assert.ok(file)
-  console.log("Done", file)
+  assert.ok(file);
+  console.log("Done", file);
 }

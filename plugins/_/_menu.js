@@ -2,8 +2,16 @@ import os from "os";
 import fs from "fs";
 
 const CATEGORIES = [
-  "all", "ai", "downloader", "group", "info",
-  "internet", "maker", "owner", "islam", "tools"
+  "all",
+  "ai",
+  "downloader",
+  "group",
+  "info",
+  "internet",
+  "maker",
+  "owner",
+  "islam",
+  "tools",
 ];
 
 const MENU_META = {
@@ -18,7 +26,10 @@ const MENU_META = {
   tools: "🧸 Tools",
 };
 
-let handler = async (m, { conn, usedPrefix, command, isOwner, isMods, args }) => {
+let handler = async (
+  m,
+  { conn, usedPrefix, command, isOwner, isMods, args },
+) => {
   await global.loading(m, conn);
 
   let name = await conn.getName(m.sender);
@@ -40,20 +51,27 @@ let handler = async (m, { conn, usedPrefix, command, isOwner, isMods, args }) =>
 `.trim();
 
   if (!args[0]) {
-    let list = CATEGORIES.map((v, i) => `*${i + 1}. ${capitalize(v)}*`).join("\n");
-    return conn.sendMessage(m.chat, {
-      text: `${infoBot}\n${list}\n\n📌 *Contoh: ${usedPrefix + command} 1 atau ${usedPrefix + command} ai*`,
-      contextInfo: {
-        externalAdReply: {
-          title: global.config.author,
-          body: "Menu Bot",
-          thumbnailUrl: "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
-          sourceUrl: global.config.website,
-          mediaType: 1,
-          renderLargerThumbnail: true,
+    let list = CATEGORIES.map((v, i) => `*${i + 1}. ${capitalize(v)}*`).join(
+      "\n",
+    );
+    return conn.sendMessage(
+      m.chat,
+      {
+        text: `${infoBot}\n${list}\n\n📌 *Contoh: ${usedPrefix + command} 1 atau ${usedPrefix + command} ai*`,
+        contextInfo: {
+          externalAdReply: {
+            title: global.config.author,
+            body: "Menu Bot",
+            thumbnailUrl:
+              "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
+            sourceUrl: global.config.website,
+            mediaType: 1,
+            renderLargerThumbnail: true,
+          },
         },
       },
-    }, { quoted: m });
+      { quoted: m },
+    );
   }
 
   let input = args[0].toLowerCase();
@@ -72,8 +90,8 @@ let handler = async (m, { conn, usedPrefix, command, isOwner, isMods, args }) =>
   }
 
   let help = Object.values(global.plugins)
-    .filter(p => !p.disabled)
-    .map(p => ({
+    .filter((p) => !p.disabled)
+    .map((p) => ({
       help: Array.isArray(p.help) ? p.help : [p.help],
       tags: Array.isArray(p.tags) ? p.tags : [p.tags],
       owner: p.owner,
@@ -82,12 +100,15 @@ let handler = async (m, { conn, usedPrefix, command, isOwner, isMods, args }) =>
     }));
 
   let selectedTags = input === "all" ? Object.keys(MENU_META) : [input];
-  let sections = selectedTags.map(tag => {
-    let cmds = help.filter(p => p.tags.includes(tag)).flatMap(p =>
-      p.help.map(cmd =>
-        `*• ${usedPrefix + cmd}* ${p.admin ? "🅐" : ""}${p.mods ? "🅓" : ""}${p.owner ? "🅞" : ""}`
-      )
-    );
+  let sections = selectedTags.map((tag) => {
+    let cmds = help
+      .filter((p) => p.tags.includes(tag))
+      .flatMap((p) =>
+        p.help.map(
+          (cmd) =>
+            `*• ${usedPrefix + cmd}* ${p.admin ? "🅐" : ""}${p.mods ? "🅓" : ""}${p.owner ? "🅞" : ""}`,
+        ),
+      );
     return `*${MENU_META[tag]} Menu*\n${cmds.join("\n")}`;
   });
 
@@ -102,19 +123,24 @@ ${sections.join("\n\n")}
 *© 2024 – 2025 Naruya Izumi*
 `.trim();
 
-  await conn.sendMessage(m.chat, {
-    text: output,
-    contextInfo: {
-      externalAdReply: {
-        title: global.config.author,
-        body: "🍱 Daftar Command",
-        thumbnailUrl: "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
-        sourceUrl: global.config.website,
-        mediaType: 1,
-        renderLargerThumbnail: true,
+  await conn.sendMessage(
+    m.chat,
+    {
+      text: output,
+      contextInfo: {
+        externalAdReply: {
+          title: global.config.author,
+          body: "🍱 Daftar Command",
+          thumbnailUrl:
+            "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
+          sourceUrl: global.config.website,
+          mediaType: 1,
+          renderLargerThumbnail: true,
+        },
       },
     },
-  }, { quoted: m });
+    { quoted: m },
+  );
 };
 
 handler.help = ["menu"];
@@ -123,9 +149,14 @@ handler.command = /^(menu|help)$/i;
 export default handler;
 
 function formatTime(sec) {
-  let m = Math.floor(sec / 60), h = Math.floor(m / 60), d = Math.floor(h / 24);
-  m %= 60; h %= 24;
-  return [d && `${d}d`, h && `${h}h`, m && `${m}m`].filter(Boolean).join(" ") || "0m";
+  let m = Math.floor(sec / 60),
+    h = Math.floor(m / 60),
+    d = Math.floor(h / 24);
+  m %= 60;
+  h %= 24;
+  return (
+    [d && `${d}d`, h && `${h}h`, m && `${m}m`].filter(Boolean).join(" ") || "0m"
+  );
 }
 function capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);

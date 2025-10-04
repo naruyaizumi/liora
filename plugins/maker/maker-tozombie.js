@@ -2,56 +2,50 @@ import { uploader } from "../../lib/uploader.js";
 
 let handler = async (m, { conn, usedPrefix, command }) => {
   try {
-    await global.loading(m, conn);
     let q = m.quoted ? m.quoted : m;
     let mime = (q.msg || q).mimetype || "";
     if (!mime)
       return m.reply(
-        `🍓 *Balas atau kirim gambar dengan caption!*\n🍩 *Contoh: ${usedPrefix + command}*`,
+        `🧁 *Balas atau kirim gambar dengan caption!*\n\n*Contoh: ${usedPrefix + command}*`,
       );
     if (!/image\/(jpeg|png|jpg)/.test(mime))
-      return m.reply(
-        "🍰 *Format gambar tidak didukung! Gunakan JPG atau PNG.*",
-      );
-
+      return m.reply("🍜 *Format tidak valid! Gunakan JPG/PNG ya~*");
+    await global.loading(m, conn);
     let media = await q.download().catch(() => null);
     if (!media)
-      return m.reply("🍧 *Gagal mengunduh gambar! Pastikan file tidak rusak.*");
+      return m.reply("🍩 *Gagal mengunduh gambar pastikan file tidak rusak~*");
 
     let uploaded = await uploader(media).catch(() => null);
-    if (!uploaded) return m.reply("🍡 *Gagal mengunggah gambar!*");
+    if (!uploaded) return m.reply("🍰 *Upload gagal! Coba lagi nanti~*");
 
     let apiUrl = global.API(
       "btz",
-      "/api/maker/jadisdmtinggi",
+      "/api/maker/jadizombie",
       { url: uploaded },
       "apikey",
     );
     let response = await fetch(apiUrl);
-    if (!response.ok)
-      return m.reply(
-        "🍩 *Terjadi kesalahan saat memproses gambar. Coba lagi nanti!*",
-      );
+    if (!response.ok) return m.reply("🍬 *Gagal menghubungi API zombie!*");
 
     let buffer = Buffer.from(await response.arrayBuffer());
 
     await conn.sendFile(
       m.chat,
       buffer,
-      "sdmtinggi.png",
-      `🍰 *Gambar berhasil dikonversi ke gaya SDM Tinggi!*`,
+      "jadizombie.png",
+      `🍭 *Transformasi Berhasil seram seperti malam di Aokigahara*`,
       m,
     );
   } catch (e) {
     console.error(e);
-    m.reply(`🍧 *Terjadi Kesalahan Teknis!*\n🍡 *Detail:* ${e.message || e}`);
+    m.reply(`🍡 *Ups ada error teknis!* 🍪\nDetail: ${e.message || e}`);
   } finally {
     await global.loading(m, conn, true);
   }
 };
 
-handler.help = ["tosdmtinggi"];
+handler.help = ["tozombie"];
 handler.tags = ["maker"];
-handler.command = /^(tosdmtinggi|sdmtinggi)$/i;
+handler.command = /^(tozombie|zombie)$/i;
 
 export default handler;

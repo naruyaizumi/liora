@@ -1,13 +1,19 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-    if (!text) return m.reply(`🍙 *Contoh penggunaan: ${usedPrefix + command} naruyaizumi*`);
-    await global.loading(m, conn);
-    try {
-        let res = await fetch(global.API("btz", "/api/stalk/github", { username: text }, "apikey"));
-        if (!res.ok) throw `🍜 *Gagal mengakses API!*`;
-        let json = await res.json();
-        if (json.code !== 200 || !json.result?.user) throw `🍡 *User GitHub tidak ditemukan!*`;
-        let user = json.result.user;
-        let caption = `
+  if (!text)
+    return m.reply(
+      `🍙 *Contoh penggunaan: ${usedPrefix + command} naruyaizumi*`,
+    );
+  await global.loading(m, conn);
+  try {
+    let res = await fetch(
+      global.API("btz", "/api/stalk/github", { username: text }, "apikey"),
+    );
+    if (!res.ok) throw `🍜 *Gagal mengakses API!*`;
+    let json = await res.json();
+    if (json.code !== 200 || !json.result?.user)
+      throw `🍡 *User GitHub tidak ditemukan!*`;
+    let user = json.result.user;
+    let caption = `
 🍱 *GITHUB USER STALK* 🍱
 ━━━━━━━━━━━━━━━━━━━
 👤 *Profil*
@@ -35,13 +41,17 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 🔗 *GitHub URL: ${user.githubUrl}*
 ━━━━━━━━━━━━━━━━━━━
 `.trim();
-        await conn.sendFile(m.chat, user.avatarUrl, "ghuser.jpg", caption, m);
-    } catch (e) {
-        console.error(e);
-        m.reply(typeof e === "string" ? e : "🍩 *Terjadi kesalahan saat stalk GitHub user.*");
-    } finally {
-        await global.loading(m, conn, true);
-    }
+    await conn.sendFile(m.chat, user.avatarUrl, "ghuser.jpg", caption, m);
+  } catch (e) {
+    console.error(e);
+    m.reply(
+      typeof e === "string"
+        ? e
+        : "🍩 *Terjadi kesalahan saat stalk GitHub user.*",
+    );
+  } finally {
+    await global.loading(m, conn, true);
+  }
 };
 
 handler.help = ["stalkgh"];

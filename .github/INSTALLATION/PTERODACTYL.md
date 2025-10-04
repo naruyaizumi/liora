@@ -32,10 +32,10 @@ Before starting, make sure your server and Pterodactyl environment meet these re
 4. Upload the previously downloaded `liora.zip`.
 5. Once uploaded, select it and **Extract/Unarchive**.
 6. Confirm files are extracted properly:
-    - `index.js`
-    - `package.json`
-    - `.env.example`
-    - `/lib`, `/plugins`, `/auth`, etc.
+   - `index.js`
+   - `package.json`
+   - `.env.example`
+   - `/lib`, `/plugins`, `/auth`, etc.
 
 ---
 
@@ -43,15 +43,15 @@ Before starting, make sure your server and Pterodactyl environment meet these re
 
 1. Rename `.env.example` to `.env`:
 
-    mv .env.example .env
+   mv .env.example .env
 
 2. Open `.env` inside Pterodactyl editor.
 3. Set up your configuration variables:
-    - `OWNER` → your WhatsApp number(s)
-    - `PAIRING` → true/false depending on how you want to connect
-    - `API` keys for external services
-    - `DATABASE` path or URL
-    - Other configs as needed (watermark, prefix, etc.)
+   - `OWNER` → your WhatsApp number(s)
+   - `PAIRING` → true/false depending on how you want to connect
+   - `API` keys for external services
+   - `DATABASE` path or URL
+   - Other configs as needed (watermark, prefix, etc.)
 
 4. Save changes.
 
@@ -65,11 +65,11 @@ We need to install dependencies first.
 1. Go to **Startup** section.
 2. Change startup command from:
 
-    npm start
+   npm start
 
-    to:
+   to:
 
-    npm install
+   npm install
 
 3. Save changes.
 
@@ -91,11 +91,11 @@ After dependencies are installed:
 1. Go back to **Startup**.
 2. Change startup command from:
 
-    npm install
+   npm install
 
-    back to:
+   back to:
 
-    npm start
+   npm start
 
 3. Save.
 
