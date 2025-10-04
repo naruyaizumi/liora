@@ -21,7 +21,7 @@ jobs:
       - name: 🍡 Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.18.0
+          run_install: false
 
       - name: 🍩 Install dependencies (skip native build)
         run: pnpm install --frozen-lockfile --ignore-scripts --ignore-optional
