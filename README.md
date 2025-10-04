@@ -17,13 +17,8 @@
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/eslint.yml">
   <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/eslint.yml?label=ESLint&style=for-the-badge&logo=eslint&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="ESLint CI"/>
 </a>
-<a href="https://github.com/naruyaizumi/liora/actions/workflows/prettier.yml">
-  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/prettier.yml?label=Prettier&style=for-the-badge&logo=prettier&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Prettier CI"/>
-</a>
 
 <!-- Repo Metadata -->
-<img src="https://img.shields.io/github/last-commit/naruyaizumi/liora?style=for-the-badge&logo=git&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Last Commit"/>
-<a href="https://github.com/naruyaizumi/liora/releases">
   <img src="https://img.shields.io/github/v/release/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Latest Release"/>
 </a>
 
@@ -34,7 +29,7 @@
 
 <!-- Node.js Versions -->
 <a href="https://nodejs.org/en">
-  <img src="https://img.shields.io/badge/Node.js-v22%20|%2023%20|%2024-FFC0CB?style=for-the-badge&logo=node.js&logoColor=white&labelColor=2F2F2F" alt="Node.js"/>
+  <img src="https://img.shields.io/badge/Node.js-v22%20|%2024-FFC0CB?style=for-the-badge&logo=node.js&logoColor=white&labelColor=2F2F2F" alt="Node.js"/>
 </a>
 
 <!-- JavaScript ESM -->
@@ -52,24 +47,9 @@
   <img src="https://img.shields.io/badge/WhatsApp-Channel-FFC0CB?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F" alt="WhatsApp Channel"/>
 </a>
 
-<!-- NPM -->
-<a href="https://www.npmjs.com/">
-  <img src="https://img.shields.io/badge/NPM-Package-FFC0CB?style=for-the-badge&logo=npm&logoColor=white&labelColor=2F2F2F" alt="NPM"/>
-</a>
-
-<!-- Linux -->
-<a href="https://www.linux.org/">
-  <img src="https://img.shields.io/badge/Linux-Server-FFC0CB?style=for-the-badge&logo=linux&logoColor=black&labelColor=2F2F2F" alt="Linux"/>
-</a>
-
 <!-- Instagram -->
 <a href="https://instagram.com/naruyaizumi">
   <img src="https://img.shields.io/badge/Instagram-@naruyaizumi-FFC0CB?style=for-the-badge&logo=instagram&logoColor=white&labelColor=2F2F2F" alt="Instagram"/>
-</a>
-
-<!-- Spotify Playlist -->
-<a href="https://open.spotify.com/playlist/0j68uRJvay44fmcTnbJGPS?si=_1SyqT43T52i2QybhZyhAQ" target="_blank">
-  <img src="https://img.shields.io/badge/Spotify-Izumi's%20Playlist-FFC0CB?style=for-the-badge&logo=spotify&logoColor=white&labelColor=2F2F2F" alt="Spotify Playlist" />
 </a>
 
 </p>
