@@ -20,11 +20,7 @@ let handler = async (m, { conn }) => {
             .filter(
                 (pe) =>
                     pe !== "node_modules" &&
-                    pe !== "auth" &&
-                    pe !== "package-lock.json" &&
-                    pe !== "yarn.lock" &&
-                    pe !== "pnpm-lock.yaml" &&
-                    pe !== ""
+                    pe !== "auth"
             );
         await execSync(`zip -r ${backupPath} ${ls.join(" ")}`);
         await conn.sendMessage(

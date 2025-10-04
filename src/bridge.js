@@ -115,11 +115,11 @@ export function convert(input, options = {}) {
   if (!Buffer.isBuffer(buf)) throw new Error("convert() input harus Buffer");
 
   return converterNative.convert(buf, {
-    format: options.format || "opus",   // "mp3" | "opus" | "aac" | "m4a" | "wav"
-    bitrate: options.bitrate || "64k",  // string "64k" / bps number
-    channels: options.channels ?? 2,    // 1 PTT
+    format: options.format || "opus",
+    bitrate: options.bitrate || "64k",
+    channels: options.channels ?? 2,
     sampleRate: options.sampleRate || 48000,
-    ptt: !!options.ptt,                 // true for voice/ptt (will force 48k/mono for opus)
-    vbr: options.vbr !== false          // default on
+    ptt: !!options.ptt,
+    vbr: options.vbr !== false
   });
 }

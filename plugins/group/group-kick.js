@@ -1,30 +1,45 @@
 let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
-    let targets = [];
-    if (m.mentionedJid.length) targets.push(...m.mentionedJid);
-    if (m.quoted && m.quoted.sender) targets.push(m.quoted.sender);
+    let targets = []
+    if (m.mentionedJid.length) targets.push(...m.mentionedJid)
+    if (m.quoted && m.quoted.sender) targets.push(m.quoted.sender)
     for (let arg of args) {
-        if (/^\d{5,}$/.test(arg)) targets.push(arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
+        if (/^\d{5,}$/.test(arg)) {
+            targets.push(arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net")
+        }
     }
+
+    targets = await Promise.all(
+        targets.map(async (jid) => {
+            if (jid.endsWith("@s.whatsapp.net")) {
+                return await conn.signalRepository.lidMapping.getLIDForPN(jid) || jid
+            }
+            return jid
+        })
+    )
+
     targets = [...new Set(targets)].filter(
         (v) => v !== m.sender && participants.some((p) => p.id === v)
-    );
-    if (!targets.length)
+    )
+
+    if (!targets.length) {
         return m.reply(
             `🍩 *Tag atau reply anggota yang ingin dikeluarkan*\n*Contoh: ${usedPrefix + command} @628xx*`
-        );
-    for (let target of targets) {
-        await conn.groupParticipantsUpdate(m.chat, [target], "remove");
-        await delay(1500);
+        )
     }
-};
 
-handler.help = ["kick"];
-handler.tags = ["group"];
-handler.command = /^(kick|k)$/i;
-handler.group = true;
-handler.botAdmin = true;
-handler.admin = true;
+    for (let target of targets) {
+        await conn.groupParticipantsUpdate(m.chat, [target], "remove")
+        await delay(1500)
+    }
+}
 
-export default handler;
+handler.help = ["kick"]
+handler.tags = ["group"]
+handler.command = /^(kick|k)$/i
+handler.group = true
+handler.botAdmin = true
+handler.admin = true
 
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+export default handler
+
+const delay = (ms) => new Promise((res) => setTimeout(res, ms))

@@ -26,25 +26,6 @@
  * - Do not remove or alter original credits under any circumstances.
  */
 
-import fs from "fs";
-import path from "path";
-
-const envPath = path.resolve(process.cwd(), ".env");
-if (fs.existsSync(envPath)) {
-    const lines = fs.readFileSync(envPath, "utf-8").split("\n");
-    for (const line of lines) {
-        if (!line || line.startsWith("#")) continue;
-        const [key, ...vals] = line.split("=");
-        const value = vals
-            .join("=")
-            .trim()
-            .replace(/^['"]|['"]$/g, "");
-        if (key && !(key in process.env)) {
-            process.env[key.trim()] = value;
-        }
-    }
-}
-
 global.config = {
     /*============== STAFF ==============*/
     owner: [
@@ -54,26 +35,22 @@ global.config = {
         ["6287831816747", "𝑨𝒍𝒇𝒊 𝑫𝒆𝒗", true],
         ["6281239621820", "𝒁𝒉𝒂𝒏 𝑫𝒆𝒗", true],
     ],
-    newsletter: (process.env.NEWSLETTER || "")
-        .split(",")
-        .map((jid) => jid.trim())
-        .filter((jid) => jid.length),
-    group: process.env.GROUP,
-    website: process.env.WEBSITE,
+    group: "https://", // WhatsApp group
+    website: "https://", // optional
 
     /*========== DEVELOPER MODE ==========*/
-    DEVELOPER: process.env.IS_IZUMI === "true",
+    DEV: false, // true? are you kidding me?
 
     /*============= PAIRING =============*/
-    pairingNumber: process.env.PAIRING_NUMBER,
-    pairingAuth: process.env.PAIRING_AUTH === "true",
+    pairingNumber: "628xxxxxxx",  // bot number
+    pairingAuth: true, // true: code | false: Qr
 
     /*============== API ==============*/
     APIs: {
-        btz: process.env.API_BTZ,
+        btz: "https://api.betabotz.org",
     },
     APIKeys: {
-        [process.env.API_BTZ]: process.env.APIKEY_BTZ,
+        "https://api.betabotz.org": "API_KEY",
     },
 
     /*============== MESSAGES ==============*/

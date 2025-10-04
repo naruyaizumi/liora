@@ -1,3 +1,31 @@
+# Version 6.0.0 — Major Release
+
+## Added
+- **TikTok v2 Downloader** with improved reliability.  
+- **Compress (Sharp-based)** for smarter image compression without quality loss.  
+
+## Removed
+- **InteractiveButton** (deprecated in Baileys 7.x).  
+- Dependencies: *awesome-phonenumber*, *ytsearch*.  
+- **Album message** (unstable in current Baileys).  
+- **Media search** (deprecated).  
+- **Unused features** and legacy code.  
+- **Write on Paper (ImageMagick)** feature (removed for simplification).  
+
+## Fixed
+- Full **Migration to LID** (native IDs).  
+- Optimized API results for faster responses.  
+- Improved **Canvas rendering** for welcome banners.  
+- Linter compliance across codebase.  
+- Database migration stability.  
+- **Bad decrypt** issue in Baileys.  
+- Minimalized code for performance and readability.  
+
+---
+
+> [!NOTE]  
+> This release ensures better stability and simplified code by removing unused features and aligning with the latest Baileys 7.x.x breaking changes.
+
 # Version 5.0.0 — Major Release
 
 ## Added

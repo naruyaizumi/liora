@@ -22,7 +22,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "yarn"
+          cache: "pnpm"
+
+      - name: 🍡 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.0
 
       - name: 🛠 Install System Dependencies
         run: |
@@ -37,19 +42,16 @@ jobs:
             libgif-dev libopus-dev libvpx-dev
 
       - name: 🍡 Install Dependencies
-        run: yarn install --ignore-engines --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: 🍰 Audit Dependencies
-        run: yarn audit || true
+        run: pnpm audit || true
 
-      - name: 🍵 Check Unused Dependencies (depcheck)
+      - name: 🍵 Check Unused Dependencies
         run: npx depcheck --ignores=node-addon-api || true
 
-      - name: 🍩 Check Outdated Dependencies (npm-check)
-        run: npx npm-check || true
-
-      - name: 🍕 Check for Updates (npm-check-updates)
+      - name: 🍕 Check for Updates
         run: npx npm-check-updates || true
 
       - name: 🍧 Run Tests
-        run: yarn test
+        run: pnpm test

@@ -8,7 +8,7 @@ import path, { join } from "path";
 import { unwatchFile, watchFile } from "fs";
 import chalk from "chalk";
 import printMessage from "./lib/print.js";
-import { bannerCanvas } from "./lib/canvas.js";
+import { canvas } from "./lib/canvas.js";
 
 const isNumber = (x) => typeof x === "number" && !isNaN(x);
 
@@ -48,16 +48,13 @@ export async function handler(chatUpdate) {
                 if (!("sBye" in chat)) chat.sBye = "";
                 if (!("sPromote" in chat)) chat.sPromote = "";
                 if (!("sDemote" in chat)) chat.sDemote = "";
-                if (!("antidelete" in chat)) chat.antidelete = false;
                 if (!("antiLinks" in chat)) chat.antiLinks = false;
-                if (!("antitagsw" in chat)) chat.antitagsw = false;
                 if (!("antiAudio" in chat)) chat.antiAudio = false;
                 if (!("antiFile" in chat)) chat.antiFile = false;
                 if (!("antiFoto" in chat)) chat.antiFoto = false;
                 if (!("antiVideo" in chat)) chat.antiVideo = false;
                 if (!("antiSticker" in chat)) chat.antiSticker = false;
                 if (!("autoApprove" in chat)) chat.autoApprove = false;
-                if (!("teks" in chat)) chat.teks = true;
                 if (!("notifgempa" in chat)) chat.notifgempa = false;
                 if (!("gempaDateTime" in chat)) chat.gempaDateTime = "";
                 if (!("member" in chat)) chat.member = {};
@@ -70,16 +67,13 @@ export async function handler(chatUpdate) {
                     sBye: "",
                     sPromote: "",
                     sDemote: "",
-                    antidelete: false,
                     antiLinks: false,
-                    antitagsw: false,
                     antiAudio: false,
                     antiFile: false,
                     antiFoto: false,
                     antiVideo: false,
                     antiSticker: false,
                     autoApprove: false,
-                    teks: true,
                     notifgempa: false,
                     gempaDateTime: "",
                     member: {},
@@ -90,7 +84,6 @@ export async function handler(chatUpdate) {
                 if (!("self" in settings)) settings.self = false;
                 if (!("gconly" in settings)) settings.gconly = false;
                 if (!("autoread" in settings)) settings.autoread = false;
-                if (!("composing" in settings)) settings.composing = false;
                 if (!("restrict" in settings)) settings.restrict = false;
                 if (!("cleartmp" in settings)) settings.cleartmp = true;
                 if (!("anticall" in settings)) settings.anticall = false;
@@ -102,7 +95,6 @@ export async function handler(chatUpdate) {
                     self: false,
                     gconly: false,
                     autoread: false,
-                    composing: false,
                     restrict: false,
                     cleartmp: true,
                     anticall: false,
@@ -135,24 +127,39 @@ export async function handler(chatUpdate) {
         } catch (e) {
             console.error(e);
         }
-        const isMods = global.config.owner
+        
+const isMods = (
+    await Promise.all(
+        global.config.owner
             .filter(([number, _, isDeveloper]) => number && isDeveloper)
-            .map(([number]) => number)
-            .map((v) => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net")
-            .includes(m.sender);
-        const isOwner =
-            m.fromMe ||
-            isMods ||
+            .map(([number]) => number.replace(/[^0-9]/g, "") + "@s.whatsapp.net")
+            .flatMap((pn) => [
+                pn,
+                conn.signalRepository.lidMapping.getLIDForPN(pn)
+            ])
+    )
+).filter(Boolean).includes(m.sender)
+
+const isOwner =
+    m.fromMe ||
+    isMods ||
+    (
+        await Promise.all(
             [
                 ...global.config.owner
                     .filter(([number, _, isDeveloper]) => number && !isDeveloper)
                     .map(([number]) => number.replace(/[^0-9]/g, "") + "@s.whatsapp.net"),
                 ...(global.config.newsletter || []),
-            ].includes(m.sender);
+            ].flatMap((pn) => [
+                pn,
+                conn.signalRepository.lidMapping.getLIDForPN(pn)
+            ])
+        )
+    ).filter(Boolean).includes(m.sender)
         const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
         if (global.db.data.settings[this.user.jid]?.queque && m.text && !(isMods || isOwner)) {
             let queque = this.msgqueque;
-            let time = 2000;
+            let time = 5000;
             const previousID = queque[queque.length - 1];
             queque.push(m.id || m.key.id);
             const check = setInterval(async () => {
@@ -166,20 +173,29 @@ export async function handler(chatUpdate) {
         m.exp += Math.ceil(Math.random() * 10);
         let usedPrefix;
         
-        const groupMetadata =
-            (m.isGroup
-                ? (conn.chats[m.chat] || {}).metadata ||
-                  (await this.groupMetadata(m.chat).catch((_) => null))
-                : {}) || {};
-        const participants = (m.isGroup ? groupMetadata.participants : []) || [];
-        const user =
-            (m.isGroup ? participants.find((u) => conn.decodeJid(u.id) === m.sender) : {}) || {};
-        const bot =
-            (m.isGroup ? participants.find((u) => conn.decodeJid(u.id) == this.user.jid) : {}) ||
-            {};
-        const isRAdmin = user?.admin == "superadmin" || false;
-        const isAdmin = isRAdmin || user?.admin == "admin" || false;
-        const isBotAdmin = bot?.admin || false;
+const groupMetadata =
+  (m.isGroup
+    ? (conn.chats[m.chat] || {}).metadata ||
+      (await this.groupMetadata(m.chat).catch(() => null))
+    : {}) || {}
+
+const participants = (m.isGroup ? groupMetadata.participants : []) || []
+
+const senderId = conn.decodeJid(m.sender)
+const botId    = conn.decodeJid(this.user.id)
+
+const user = (m.isGroup
+  ? participants.find((u) => conn.decodeJid(u.id) === senderId || conn.decodeJid(u.phoneNumber) === senderId)
+  : {}) || {}
+  
+const bot = (m.isGroup
+  ? participants.find((u) => conn.decodeJid(u.id) === botId || conn.decodeJid(u.phoneNumber) === botId)
+  : {}) || {}
+
+const isRAdmin   = user?.admin === "superadmin"
+const isAdmin    = isRAdmin || user?.admin === "admin"
+const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin"
+
         const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), "./plugins");
         for (let name in global.plugins) {
             let plugin = global.plugins[name];
@@ -339,8 +355,6 @@ export async function handler(chatUpdate) {
                     user.commandTotal++;
                     user.lastCmd = Date.now();
                 }
-                if (setting.composing)
-                    await this.sendPresenceUpdate("composing", m.chat).catch(() => {});
                 if (setting.autoread) await this.readMessages([m.key]).catch(() => {});
                 if (plugin.mods && !isMods) {
                     fail("mods", m, this);
@@ -491,7 +505,7 @@ export async function participantsUpdate({ id, participants, action }) {
     const groupMetadata = (await this.groupMetadata(id)) || (conn.chats[id] || {}).metadata;
     for (let user of participants) {
         let pp = await this.profilePictureUrl(user, "image").catch(() => "https://qu.ax/jVZhH.jpg");
-        let img = await canvasBanner(pp);
+        let img = await canvas(pp);
         let text = "";
         let title = "";
         let body = "";
@@ -626,24 +640,3 @@ watchFile(file, async () => {
     console.log(chalk.cyan.bold("🌸 Aku sedang memperbarui handler.js. Tunggu sebentar, ya!"));
     if (global.reloadHandler) console.log(await global.reloadHandler());
 });
-
-async function canvasBanner(avatar) {
-    const backgrounds = [
-        "https://qu.ax/UkBQK.jpg",
-        "https://qu.ax/hhKDj.jpg",
-        "https://qu.ax/xuUvD.jpg",
-        "https://qu.ax/iikRg.jpg",
-    ];
-    const buffer = await bannerCanvas({
-        font: { name: "Poppins" },
-        avatar,
-        background: { type: "image", background: backgrounds.getRandom() },
-        title: { data: "Liora Official", color: "#fff", size: 20 },
-        description: { data: "© 2024 - 2025 Naruya Izumi", color: "#a7b9c5", size: 13 },
-        overlay_opacity: 0.3,
-        border: "#000000",
-        avatar_border: "#FFFFFF",
-    });
-
-    return buffer;
-}

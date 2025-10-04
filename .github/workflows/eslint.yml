@@ -16,11 +16,15 @@ jobs:
       - name: 🍤 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: "yarn"
+          node-version: 24
+
+      - name: 🍡 Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.0
 
       - name: 🍩 Install dependencies (skip native build)
-        run: yarn install --frozen-lockfile --ignore-scripts --ignore-optional
+        run: pnpm install --frozen-lockfile --ignore-scripts --ignore-optional
 
       - name: 🍰 Run ESLint
-        run: yarn eslint .
+        run: pnpm eslint .

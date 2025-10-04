@@ -1,66 +1,30 @@
 let handler = async (m, { conn }) => {
-    let vcard = `BEGIN:VCARD
-VERSION:3.0
-N:;ttname;;;
-FN:ttname
-item1.TEL;waid=13135550002:+1 (313) 555-0002
-item1.X-ABLabel:Ponsel
-END:VCARD`;
-    let qkontak = {
-        key: {
-            fromMe: false,
-            participant: "13135550002@s.whatsapp.net",
-            remoteJid: "status@broadcast",
-        },
-        message: {
-            contactMessage: {
-                displayName: "Meta Ai",
-                vcard,
+    let caption = `🍙 *Project Script Izumi* 🍙
+
+📂 *Repository:*
+*https://github.com/naruyaizumi/liora*
+
+🐛 *Report Issue:*
+*https://github.com/naruyaizumi/liora/issues*
+
+🔧 *Pull Request:*
+*https://github.com/naruyaizumi/liora/pulls*
+
+✨ *Jangan lupa kasih ⭐ di repo ya!*`;
+
+    await conn.sendMessage(m.chat, {
+        text: caption,
+        contextInfo: {
+            externalAdReply: {
+                title: "🍡 Liora — WhatsApp Bot",
+                body: "© 2024 – 2025 Naruya Izumi | All Rights Reserved",
+                thumbnailUrl: "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
+                sourceUrl: "https://github.com/naruyaizumi/liora",
+                mediaType: 1,
+                renderLargerThumbnail: true,
             },
         },
-    };
-
-    await conn.sendMessage(
-        m.chat,
-        {
-            image: { url: "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg" },
-            caption:
-                "🍙 *Project Script Izumi* 🍙\n" +
-                "📂 *Repository: Source code resmi Liora*\n" +
-                "✨ *Jangan lupa kasih ⭐ di repo kalau suka ya!*",
-            title: "🍡 Liora — WhatsApp Bot",
-            subtitle: "",
-            footer: "*© 2024 – 2025 Naruya Izumi*\n*All Rights Reserved*",
-            interactiveButtons: [
-                {
-                    name: "cta_url",
-                    buttonParamsJson: JSON.stringify({
-                        display_text: "🌐 GitHub Repo",
-                        url: "https://github.com/naruyaizumi/liora",
-                        merchant_url: "https://github.com/naruyaizumi/liora",
-                    }),
-                },
-                {
-                    name: "cta_url",
-                    buttonParamsJson: JSON.stringify({
-                        display_text: "🐛 Report Issue",
-                        url: "https://github.com/naruyaizumi/liora/issues",
-                        merchant_url: "https://github.com/naruyaizumi/liora/issues",
-                    }),
-                },
-                {
-                    name: "cta_url",
-                    buttonParamsJson: JSON.stringify({
-                        display_text: "🔧 Pull Request",
-                        url: "https://github.com/naruyaizumi/liora/pulls",
-                        merchant_url: "https://github.com/naruyaizumi/liora/pulls",
-                    }),
-                },
-            ],
-            hasMediaAttachment: true,
-        },
-        { quoted: qkontak }
-    );
+    });
 };
 
 handler.help = ["script"];

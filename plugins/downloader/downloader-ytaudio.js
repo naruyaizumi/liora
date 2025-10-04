@@ -1,35 +1,41 @@
 let handler = async (m, { conn, args }) => {
     if (!args[0]) return m.reply("🍙 *Masukkan URL YouTube yang valid!*");
+
     let url = args[0];
-    let youtubeRegex = /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/.+/i;
+    let youtubeRegex = /^https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be|music\.youtube\.com)\/.+/i;
     if (!youtubeRegex.test(url))
-        return m.reply("🍤 *URL tidak valid! Harap masukkan link YouTube yang benar.*");
+        return m.reply("🍤 *URL tidak valid! Harap masukkan link YouTube/YouTube Music yang benar.*");
+
+    await global.loading(m, conn);
     try {
-        await global.loading(m, conn);
-        let response = await fetch(global.API("btz", "/api/download/ytmp3", { url }, "apikey"));
-        if (!response.ok) return m.reply("🍜 *Gagal menghubungi API. Coba lagi nanti ya!*");
-        let json = await response.json();
-        if (!json.status || !json.result || !json.result.mp3)
-            return m.reply(
-                "🍱 *Gagal memproses permintaan!*\n🍡 *Pastikan URL benar dan coba lagi.*"
-            );
-        let { thumb, mp3, source, title } = json.result;
-        await conn.sendFile(m.chat, mp3, `${title}.mp3`, "", m, true, {
+        const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/v1?url=${url}&format=mp3`;
+        const res = await fetch(apiUrl);
+        if (!res.ok) throw new Error("Gagal menghubungi API.");
+
+        const json = await res.json();
+        if (!json.status || !json.result?.downloadUrl) {
+            throw new Error("Konten tidak bisa diproses.");
+        }
+
+        const { title, cover, downloadUrl, duration } = json.result;
+
+        await conn.sendMessage(m.chat, {
+            audio: { url: downloadUrl },
             mimetype: "audio/mpeg",
+            fileName: `${title}.mp3`,
             contextInfo: {
                 externalAdReply: {
                     title: title,
-                    body: "🍣 YouTube Music",
-                    mediaUrl: source,
-                    mediaType: 2,
-                    thumbnailUrl: thumb,
+                    body: `🍣 YouTube Music • ${duration}`,
+                    thumbnailUrl: cover,
+                    mediaType: 1,
                     renderLargerThumbnail: true,
                 },
             },
-        });
+        }, { quoted: m });
     } catch (e) {
         console.error(e);
-        return m.reply("🍩 *Terjadi kesalahan saat memproses permintaan.*");
+        await m.reply(`🍩 *Terjadi kesalahan:* ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

@@ -3,24 +3,7 @@ let handler = async (m, { conn }) => {
         let newCode = await conn.groupRevokeInvite(m.chat);
         let newLink = `https://chat.whatsapp.com/${newCode}`;
 
-        await conn.sendMessage(
-            m.chat,
-            {
-                text: `🍓 *Link undangan grup berhasil di-reset!*`,
-                title: "🍡 Grup Invite Link",
-                footer: "📋 Klik tombol di bawah untuk menyalin link baru~",
-                interactiveButtons: [
-                    {
-                        name: "cta_copy",
-                        buttonParamsJson: JSON.stringify({
-                            display_text: "📋 Salin Link Grup",
-                            copy_code: newLink,
-                        }),
-                    },
-                ],
-            },
-            { quoted: m }
-        );
+        await m.reply(`🍓 *Link undangan grup berhasil di-reset!*\n📋 *Link baru: ${newLink}*`);
     } catch (e) {
         console.error(e);
         m.reply("🍩 *Gagal me-reset link grup. Coba lagi nanti yaa~*");

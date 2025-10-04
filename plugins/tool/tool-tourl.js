@@ -28,62 +28,26 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                 .join("\n");
 
             return m.reply(
-                `🍡 *Pilih server upload dengan angka:*
-*${usedPrefix + command} <nomor>*
-
-🍰 *Daftar server:*
-${list}`
+                `🍡 *Pilih server upload dengan angka:*\n` +
+                `*${usedPrefix + command} <nomor>*\n\n` +
+                `🍰 *Daftar server:*\n${list}`
             );
         }
 
         let server = uploaders[args[0]];
-        if (!server) return m.reply(`🍩 *Server tidak valid!*`);
-
         let q = m.quoted ? m.quoted : m;
         let msg = q.msg || q;
         let mime = msg.mimetype || "";
-        if (!mime) {
-            return m.reply(`🍡 *Balas pesan yang berisi file atau media*`);
-        }
+        if (!mime) return m.reply(`🍡 *Balas pesan yang berisi file atau media*`);
 
         await global.loading(m, conn);
         let buffer = await q.download?.().catch(() => null);
-        if (!buffer || !buffer.length) {
-            return m.reply(`🍩 *Gagal mengunduh media-nya yaa~*`);
-        }
+        if (!buffer || !buffer.length) return m.reply(`🍩 *Gagal mengunduh media*`);
 
         let url = await server.fn(buffer).catch(() => null);
-        if (!url) {
-            return m.reply(`🧁 *Gagal mengunggah file ke ${server.name}*`);
-        }
+        if (!url) return m.reply(`🧁 *Gagal mengunggah file ke ${server.name}*`);
 
-        await conn.sendMessage(
-            m.chat,
-            {
-                text: `*${server.name}*\n📎 *URL berhasil dibuat!*`,
-                title: "🍰 Upload Success",
-                footer: global.config.watermark,
-                hasMediaAttachment: false,
-                interactiveButtons: [
-                    {
-                        name: "cta_copy",
-                        buttonParamsJson: JSON.stringify({
-                            display_text: "📋 Salin URL",
-                            copy_code: url,
-                        }),
-                    },
-                    {
-                        name: "cta_url",
-                        buttonParamsJson: JSON.stringify({
-                            display_text: "🌐 Buka URL",
-                            url: url,
-                            merchant_url: url,
-                        }),
-                    },
-                ],
-            },
-            { quoted: m }
-        );
+        await m.reply(`*${server.name}*\n📎 *URL: ${url}*`);
     } catch (e) {
         console.error(e);
         m.reply(`🍬 *Terjadi kesalahan!*\n🧁 ${e.message}`);

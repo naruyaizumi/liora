@@ -1,86 +1,59 @@
-const languages = [
-    ["id-ID", "🇮🇩 Indonesia"],
-    ["en-US", "🇺🇸 English"],
-    ["ja-JP", "🇯🇵 Japanese"],
-    ["fr-FR", "🇫🇷 French"],
-    ["fil-PH", "🇵🇭 Filipino"],
-    ["my-MM", "🇲🇲 Burmese"],
-    ["de-DE", "🇩🇪 German"],
-    ["it-IT", "🇮🇹 Italian"],
-    ["ko-KR", "🇰🇷 Korean"],
-    ["th-TH", "🇹🇭 Thai"],
-    ["hi-IN", "🇮🇳 Hindi"],
-    ["ru-RU", "🇷🇺 Russian"],
-];
+const languages = {
+    1: ["id-ID", "🇮🇩 Indonesia"],
+    2: ["en-US", "🇺🇸 English"],
+    3: ["ja-JP", "🇯🇵 Japanese"],
+    4: ["fr-FR", "🇫🇷 French"],
+    5: ["fil-PH", "🇵🇭 Filipino"],
+    6: ["my-MM", "🇲🇲 Burmese"],
+    7: ["de-DE", "🇩🇪 German"],
+    8: ["it-IT", "🇮🇹 Italian"],
+    9: ["ko-KR", "🇰🇷 Korean"],
+    10: ["th-TH", "🇹🇭 Thai"],
+    11: ["hi-IN", "🇮🇳 Hindi"],
+    12: ["ru-RU", "🇷🇺 Russian"],
+};
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-    if (!args[0])
-        return m.reply(
-            `🍬 *Masukkan teks untuk diubah jadi suara!*\n\n🍭 *Contoh: ${usedPrefix + command} Halo Izumi*`
+    if (!args[0]) {
+        let list = Object.entries(languages)
+            .map(([num, [code, name]]) => `*${num}. ${name} (${code})*`)
+            .join("\n");
+
+        return m.reply(`🍬 *Pilih bahasa dengan angka + teksnya*\n📌 *Contoh: ${usedPrefix + command} 1 Halo Izumi*\n\n🍡 *Daftar Bahasa TTS:*\n${list}`
         );
-    const input = args.join(" ");
-    if (input.includes("|")) {
-        const [rawCode, ...rest] = input.split("|");
-        const langCode = rawCode.trim();
-        const text = rest.join("|").trim();
-        const selected = languages.find(([code]) => code === langCode);
-        if (!selected) return m.reply("🍡 *Bahasa tidak valid!*");
-        if (!text) return m.reply("🍥 *Teksnya mana?*");
-        await global.loading(m, conn);
-        try {
-            const apiUrl = global.API(
-                "btz",
-                "/api/sound/texttosound",
-                { text1: text, lang: langCode },
-                "apikey"
-            );
-            const res = await fetch(apiUrl, { headers: { accept: "application/json" } });
-            if (!res.ok) throw new Error("HTTP " + res.status);
-            const json = await res.json();
-            const fileUrl = json.result || json.url;
-            if (!fileUrl) throw new Error("No result URL from API");
-            await conn.sendFile(m.chat, fileUrl, "audio.mp3", "", m, true, {
-                mimetype: "audio/mpeg",
-                ptt: true,
-            });
-        } catch (e) {
-            console.error(e);
-            m.reply("🍥 *Error saat membuat suara!*");
-        } finally {
-            await global.loading(m, conn, true);
-        }
-        return;
     }
-    const sections = [
-        {
-            title: "🍙 Pilih Bahasa",
-            rows: languages.map(([code, name]) => ({
-                header: name,
-                title: code,
-                description: `Gunakan ${name} untuk TTS`,
-                id: `${usedPrefix + command} ${code}|${input}`,
-            })),
-        },
-    ];
-    await conn.sendMessage(
-        m.chat,
-        {
-            image: { url: "https://i.ibb.co.com/WvvGn72q/IMG-20250923-WA0061.jpg" },
-            caption: `🍓 *Text-to-Speech*\n🧁 *Teks: "${input}"*\n🍱 *Silakan pilih bahasa di bawah~*`,
-            footer: "🍛 TTS Generator",
-            title: "🍡 Pilih Bahasa",
-            interactiveButtons: [
-                {
-                    name: "single_select",
-                    buttonParamsJson: JSON.stringify({
-                        title: "🍙 Bahasa TTS",
-                        sections,
-                    }),
-                },
-            ],
-        },
-        { quoted: m }
-    );
+
+    let num = parseInt(args[0]);
+    if (!languages[num]) return m.reply("🍡 *Nomor bahasa tidak valid!*");
+
+    let [langCode] = languages[num];
+    let text = args.slice(1).join(" ");
+    if (!text) return m.reply("🍥 *Teksnya mana?*");
+
+    await global.loading(m, conn);
+    try {
+        const apiUrl = global.API(
+            "btz",
+            "/api/sound/texttosound",
+            { text1: text, lang: langCode },
+            "apikey"
+        );
+        const res = await fetch(apiUrl, { headers: { accept: "application/json" } });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const json = await res.json();
+        const fileUrl = json.result || json.url;
+        if (!fileUrl) throw new Error("No result URL from API");
+
+        await conn.sendFile(m.chat, fileUrl, "tts.mp3", "", m, true, {
+            mimetype: "audio/mpeg",
+            ptt: true,
+        });
+    } catch (e) {
+        console.error(e);
+        m.reply("🍥 *Error saat membuat suara!*");
+    } finally {
+        await global.loading(m, conn, true);
+    }
 };
 
 handler.help = ["tts"];

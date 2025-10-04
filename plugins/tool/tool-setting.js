@@ -1,121 +1,73 @@
+let features = [
+    { key: "adminOnly", scope: "chat", name: "Admin Only" },
+    { key: "detect", scope: "chat", name: "Detect" },
+    { key: "notifgempa", scope: "chat", name: "Notif Gempa" },
+    { key: "antiLinks", scope: "chat", name: "Anti Link" },
+    { key: "antiSticker", scope: "chat", name: "Anti Sticker" },
+    { key: "antiAudio", scope: "chat", name: "Anti Audio" },
+    { key: "antiFile", scope: "chat", name: "Anti File" },
+    { key: "antiFoto", scope: "chat", name: "Anti Foto" },
+    { key: "antiVideo", scope: "chat", name: "Anti Video" },
+    { key: "autoApprove", scope: "chat", name: "Auto Approve" },
+
+    { key: "self", scope: "bot", name: "Self Mode" },
+    { key: "gconly", scope: "bot", name: "Group Only" },
+    { key: "queque", scope: "bot", name: "Antrian Pesan" },
+    { key: "noprint", scope: "bot", name: "No Print" },
+    { key: "autoread", scope: "bot", name: "Auto Read" },
+    { key: "restrict", scope: "bot", name: "Restrict" },
+    { key: "cleartmp", scope: "bot", name: "Clear Tmp File" },
+    { key: "anticall", scope: "bot", name: "Anti Call" },
+    { key: "adReply", scope: "bot", name: "Ad Reply Mode" },
+    { key: "noerror", scope: "bot", name: "Hide Error Mode" },
+];
+
+function listFeatures(isOwner, chat, bot) {
+    let available = isOwner ? features : features.filter(f => f.scope === "chat");
+    return available.map((f, i) => {
+        let aktif = f.scope === "chat" ? chat[f.key] : bot[f.key];
+        return `*${i + 1}. ${f.name} [${aktif ? "ON 🍃" : "OFF 🍂"}]*`;
+    }).join("\n");
+}
+
 let handler = async (m, { conn, isOwner, isAdmin, args, usedPrefix, command }) => {
     let chat = global.db.data.chats[m.chat];
     let bot = global.db.data.settings[conn.user.jid] || {};
 
-    let features = [
-        { key: "adminOnly", scope: "chat", name: "Admin Only" },
-        { key: "detect", scope: "chat", name: "Detect" },
-        { key: "notifgempa", scope: "chat", name: "Notif Gempa" },
-        { key: "antidelete", scope: "chat", name: "Anti Delete" },
-        { key: "antiLinks", scope: "chat", name: "Anti Link" },
-        { key: "antitagsw", scope: "chat", name: "Anti Tag SW" },
-        { key: "antiSticker", scope: "chat", name: "Anti Sticker" },
-        { key: "antiAudio", scope: "chat", name: "Anti Audio" },
-        { key: "antiFile", scope: "chat", name: "Anti File" },
-        { key: "antiFoto", scope: "chat", name: "Anti Foto" },
-        { key: "antiVideo", scope: "chat", name: "Anti Video" },
-        { key: "autoApprove", scope: "chat", name: "Auto Approve" },
-        { key: "teks", scope: "chat", name: "Respond Text" },
-
-        { key: "self", scope: "bot", name: "Self Mode" },
-        { key: "gconly", scope: "bot", name: "Group Only" },
-        { key: "queque", scope: "bot", name: "Antrian Pesan" },
-        { key: "noprint", scope: "bot", name: "No Print" },
-        { key: "autoread", scope: "bot", name: "Auto Read" },
-        { key: "composing", scope: "bot", name: "Composing" },
-        { key: "restrict", scope: "bot", name: "Restrict" },
-        { key: "backup", scope: "bot", name: "Auto Backup" },
-        { key: "cleartmp", scope: "bot", name: "Clear Tmp File" },
-        { key: "anticall", scope: "bot", name: "Anti Call" },
-        { key: "adReply", scope: "bot", name: "Ad Reply Mode" },
-        { key: "noerror", scope: "bot", name: "Hide Error Mode" },
-    ];
-
-    let raw = m.selectedButtonId || m.text || "";
-    let [cmd, mode, fiturKey] = raw.trim().split(" ");
-    if (cmd === ".setting" && fiturKey) {
-        let fitur = features.find((f) => f.key === fiturKey);
-        if (!fitur) return m.reply("🔥 *Fitur tidak ditemukan.*");
-        if (!["enable", "disable"].includes(mode))
-            return m.reply(
-                `🔥 *Format salah. Gunakan: ${usedPrefix + command} enable|disable [fitur]*`
-            );
-        let isEnable = mode === "enable";
-        if (fitur.scope === "chat") {
-            if (!(isAdmin || isOwner)) return global.dfail("admin", m, conn);
-            chat[fitur.key] = isEnable;
-        } else if (fitur.scope === "bot") {
-            if (!isOwner) return global.dfail("owner", m, conn);
-            bot[fitur.key] = isEnable;
-        }
-        return m.reply(
-            `🍡 *Fitur ${fitur.name} sekarang ${isEnable ? "AKTIF 🍱" : "NONAKTIF 🍚"}!*`
-        );
-    }
     if (!args[0]) {
-        let availableFeatures = isOwner ? features : features.filter((f) => f.scope === "chat");
-        let buttons = [
-            {
-                name: "single_select",
-                buttonParamsJson: JSON.stringify({
-                    title: "🍙 Enable Features",
-                    sections: [
-                        {
-                            title: isOwner ? "🍜 All Features" : "🍜 Chat Features Only",
-                            rows: availableFeatures.map((f) => {
-                                let aktif = f.scope === "chat" ? chat[f.key] : bot[f.key];
-                                return {
-                                    header: aktif ? "🧊 Active" : "🔥 Inactive",
-                                    title: `${f.name} 🍘`,
-                                    description: aktif
-                                        ? `🍱 Currently active`
-                                        : `🍚 Currently inactive`,
-                                    id: `.setting enable ${f.key}`,
-                                };
-                            }),
-                        },
-                    ],
-                }),
-            },
-            {
-                name: "single_select",
-                buttonParamsJson: JSON.stringify({
-                    title: "🍤 Disable Features",
-                    sections: [
-                        {
-                            title: isOwner ? "🍣 All Features" : "🍣 Chat Features Only",
-                            rows: availableFeatures.map((f) => {
-                                let aktif = f.scope === "chat" ? chat[f.key] : bot[f.key];
-                                return {
-                                    header: aktif ? "🧊 Active" : "🔥 Already Off",
-                                    title: `${f.name} 🍥`,
-                                    description: aktif
-                                        ? `🍛 Click to disable`
-                                        : `🍚 Already inactive`,
-                                    id: `.setting disable ${f.key}`,
-                                };
-                            }),
-                        },
-                    ],
-                }),
-            },
-        ];
-        return conn.sendMessage(
-            m.chat,
-            {
-                text: "🍽️ *Silakan pilih fitur yang ingin kamu aktifkan/nonaktifkan:*",
-                footer: "*Interactive Settings Menu* 🍱",
-                title: "🍱 Bot Settings Menu",
-                interactiveButtons: buttons,
-            },
-            { quoted: m }
+        let daftar = listFeatures(isOwner, chat, bot);
+        return m.reply(
+            `🍱 *Daftar Fitur:*\n${daftar}\n\n*Contoh: • ${usedPrefix + command} 1 2 3  (aktifkan fitur 1,2,3)*\n*• ${usedPrefix + (command === "on" ? "off" : "on")} 4 5  (nonaktifkan fitur 4,5)*`
         );
     }
+
+    let enable = command === "on";
+    let indexes = args.map(n => parseInt(n)).filter(n => !isNaN(n));
+
+    if (!indexes.length) return m.reply("🔥 *Nomor fitur tidak valid!*");
+
+    let results = [];
+    for (let i of indexes) {
+        let fitur = (isOwner ? features : features.filter(f => f.scope === "chat"))[i - 1];
+        if (!fitur) continue;
+
+        if (fitur.scope === "chat") {
+            if (!(isAdmin || isOwner)) continue;
+            chat[fitur.key] = enable;
+        } else if (fitur.scope === "bot") {
+            if (!isOwner) continue;
+            bot[fitur.key] = enable;
+        }
+        results.push(`*${fitur.name} : ${enable ? "ON 🍃" : "OFF 🍂"}*`);
+    }
+
+    if (!results.length) return m.reply("🔥 *Tidak ada fitur yang bisa diubah.*");
+    return m.reply("🍡 *Hasil:*\n" + results.join("\n"));
 };
 
-handler.help = ["setting"];
+handler.help = ["on", "off"];
 handler.tags = ["tools"];
-handler.command = /^(setting)$/i;
+handler.command = /^(on|off)$/i;
 handler.group = true;
 
 export default handler;
