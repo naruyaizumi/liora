@@ -22,12 +22,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "pnpm"
 
       - name: 🍡 Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.18.0
+          run_install: false
 
       - name: 🛠 Install System Dependencies
         run: |
@@ -48,10 +48,10 @@ jobs:
         run: pnpm audit || true
 
       - name: 🍵 Check Unused Dependencies
-        run: npx depcheck --ignores=node-addon-api || true
+        run: pnpm exec depcheck --ignores=node-addon-api || true
 
       - name: 🍕 Check for Updates
-        run: npx npm-check-updates || true
+        run: pnpm exec npm-check-updates || true
 
       - name: 🍧 Run Tests
         run: pnpm test
