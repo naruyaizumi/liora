@@ -18,13 +18,10 @@ export async function handler(chatUpdate) {
   if (!m) return;
   try {
     m = smsg(this, m) || m;
-    let chat, settings;
-    try {
-      chat = global.db.data.chats[m.chat];
-      settings = global.db.data.settings[this.user.jid];
-    } catch (e) {
-      console.error(e);
-    }
+    let settings;
+try {
+  settings = global.db.data.settings[this.user.jid];
+} catch (e) { console.error(e); }
     
     const isMods = (
       await Promise.all(
@@ -201,7 +198,6 @@ export async function handler(chatUpdate) {
         if (!isAccept) continue;
         m.plugin = name;
         let chat = global.db.data.chats[m.chat];
-        let setting = global.db.data.settings[this.user.jid];
         if (typeof m.text !== "string") m.text = "";
         if (
           !m.fromMe &&

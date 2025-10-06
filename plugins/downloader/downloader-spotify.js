@@ -19,7 +19,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       return m.reply("🍣 *Gagal menemukan atau mengunduh lagu dari Spotify!*");
     }
 
-    let { title, artist, duration, cover, url } = json.result.metadata;
+    let { title, artist, duration, cover } = json.result.metadata;
     let audioUrl = json.result.downloadUrl;
 
     await conn.sendFile(m.chat, audioUrl, `${title}.mp3`, "", m, true, {
@@ -29,8 +29,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
           title: title,
           body: `${artist} • ${duration}`,
           thumbnailUrl: cover,
-          mediaUrl: url,
-          mediaType: 2,
+          mediaType: 1,
           renderLargerThumbnail: true,
         },
       },
