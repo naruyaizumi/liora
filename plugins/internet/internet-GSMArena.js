@@ -108,7 +108,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
 };
 
 handler.help = ["gsmarena"];
-handler.tags = ["search"];
+handler.tags = ["internet"];
 handler.command = /^(gsmarena|specs)$/i;
 
 export default handler;

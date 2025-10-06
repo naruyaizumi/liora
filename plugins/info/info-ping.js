@@ -11,6 +11,5 @@ let handler = async (m, { conn }) => {
 handler.help = ["ping"];
 handler.tags = ["info"];
 handler.command = /^(ping)$/i;
-handler.owner = true;
 
 export default handler;

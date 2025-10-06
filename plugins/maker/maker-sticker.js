@@ -12,16 +12,21 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     await global.loading(m, conn);
 
-    let file;
+    let buffer;
     if (args[0] && isUrl(args[0])) {
-      file = await conn.getFile(args[0], true);
+      const res = await fetch(args[0]);
+      if (!res.ok) throw new Error("Gagal mengambil file dari URL.");
+      buffer = Buffer.from(await res.arrayBuffer());
     } else {
       const media = await q.download?.();
       if (!media) return m.reply("🍩 *Gagal download media!*");
-      file = await conn.getFile(media, true);
+      buffer = Buffer.isBuffer(media)
+        ? media
+        : media.data
+        ? Buffer.from(media.data)
+        : null;
     }
 
-    const buffer = Buffer.isBuffer(file) ? file : file?.data;
     if (!buffer) throw new Error("Buffer kosong, file gagal diproses.");
 
     let opts = {
@@ -45,9 +50,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       result = await sticker(buffer, opts);
     }
 
-    await conn.sendFile(m.chat, result, "sticker.webp", "", m, false, {
-      asSticker: true,
-    });
+    await conn.sendMessage(m.chat, { sticker: result }, { quoted: m });
   } catch (e) {
     console.error(e);
     await m.reply("❌ *Gagal membuat stiker:* " + e.message);
@@ -58,7 +61,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
 handler.help = ["sticker"];
 handler.tags = ["maker"];
-handler.command = /^s(tic?ker)?(gif)?$/i;
+handler.command = /^(s(tic?ker)?)$/i;
 
 export default handler;
 

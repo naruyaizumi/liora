@@ -38,19 +38,16 @@ global.config = {
   group: "https://", // WhatsApp group
   website: "https://", // optional
 
-  /*========== DEVELOPER MODE ==========*/
-  DEV: false, // true? are you kidding me?
-
   /*============= PAIRING =============*/
   pairingNumber: "628xxxxxxx", // bot number
   pairingAuth: true, // true: code | false: Qr
 
   /*============== API ==============*/
   APIs: {
-    btz: "https://api.betabotz.org",
+    btz: "https://api.betabotz.eu.org",
   },
   APIKeys: {
-    "https://api.betabotz.org": "API_KEY",
+    "https://api.betabotz.eu.org": "API_KEY",
   },
 
   /*============== MESSAGES ==============*/
