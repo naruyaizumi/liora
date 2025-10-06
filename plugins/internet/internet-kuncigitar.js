@@ -41,7 +41,7 @@ ${chord}
 };
 
 handler.help = ["chord"];
-handler.tags = ["music"];
+handler.tags = ["internet"];
 handler.command = /^(chord|kunci)$/i;
 
 export default handler;

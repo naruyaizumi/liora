@@ -23,7 +23,7 @@ const MENU_META = {
   maker: "🎀 Maker",
   owner: "🪄 Owner",
   islam: "🍃 Islami",
-  tools: "🧸 Tools",
+  tools: "🧸. Tools",
 };
 
 let handler = async (

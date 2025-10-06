@@ -2,7 +2,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     if (!text || !/^https:\/\/github\.com\/[\w-]+\/[\w-]+/i.test(text)) {
       return m.reply(
-        `🍩 *Masukkan URL GitHub yang valid!*\n\n🍰 *Contoh:* ${usedPrefix + command} https://github.com/username/repo`,
+        `🍩 *Masukkan URL GitHub yang valid!*\n🍰 *Contoh: ${usedPrefix + command} https://github.com/username/repo*`,
       );
     }
     let parts = text.split("/");

@@ -125,7 +125,7 @@ let handler = async (m, { conn, args }) => {
 };
 
 handler.help = ["cuaca"];
-handler.tags = ["tools"];
+handler.tags = ["internet"];
 handler.command = /^(cuaca)$/i;
 
 export default handler;

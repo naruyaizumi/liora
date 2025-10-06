@@ -47,10 +47,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     const fileUrl = json.result || json.url;
     if (!fileUrl) throw new Error("No result URL from API");
 
-    await conn.sendFile(m.chat, fileUrl, "tts.mp3", "", m, true, {
-      mimetype: "audio/mpeg",
-      ptt: true,
-    });
+    await conn.sendFile(m.chat, fileUrl, "tts.mp3", "", m, true);
   } catch (e) {
     console.error(e);
     m.reply("🍥 *Error saat membuat suara!*");

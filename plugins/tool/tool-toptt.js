@@ -29,10 +29,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
       return m.reply("🍡 *Konversi gagal, hasil kosong!*");
     }
 
-    await conn.sendFile(m.chat, audio, "voice.ogg", "", m, true, {
-      mimetype: "audio/ogg; codecs=opus",
-      ptt: true,
-    });
+    await conn.sendFile(m.chat, audio, "voice.opus", "", m, true);
   } catch (e) {
     console.error(e);
     m.reply(`🥟 *Terjadi kesalahan saat konversi!*\n🍧 ${e.message}`);
@@ -41,7 +38,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
   }
 };
 
-handler.help = ["toptt", "tovn"];
+handler.help = ["toptt"];
 handler.tags = ["tools"];
 handler.command = /^(toptt|tovn)$/i;
 
