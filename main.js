@@ -129,7 +129,7 @@ async function IZUMI() {
       const oldChats = global.conn?.chats || {}
       try {
         global.conn.ws?.close()
-      } catch {}
+      } catch {/* ignore */}
       conn.ev.removeAllListeners()
       global.conn = naruyaizumi(connectionOptions, { chats: oldChats })
       isInit = true
