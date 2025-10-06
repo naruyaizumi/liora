@@ -45,49 +45,108 @@ global.API = (name, path = "/", query = {}, apikeyqueryname) =>
 
 global.timestamp = { start: new Date() };
 
-const dbPath = path.join(global.__dirname(import.meta.url), "database.db");
-const sqlite = new Database(dbPath);
+function normalizeValue(v) {
+  if (typeof v === "boolean") return v ? 1 : 0;
+  if (v === undefined) return null;
+  return v;
+}
+
+const dbPath = path.join(path.dirname(fileURLToPath(import.meta.url)), "database.db");
+const sqlite = new Database(dbPath, { timeout: 5000 });
+
+sqlite.pragma("journal_mode = WAL");
+sqlite.pragma("synchronous = NORMAL");
+sqlite.pragma("cache_size = -128000");
+sqlite.pragma("temp_store = MEMORY");
+sqlite.pragma("mmap_size = 30000000000");
 
 sqlite.exec(`
-CREATE TABLE IF NOT EXISTS store (
-  key TEXT PRIMARY KEY,
-  value TEXT
+CREATE TABLE IF NOT EXISTS chats (
+  jid TEXT PRIMARY KEY,
+  mute INTEGER DEFAULT 0,
+  adminOnly INTEGER DEFAULT 0,
+  detect INTEGER DEFAULT 0,
+  sWelcome TEXT DEFAULT '',
+  sBye TEXT DEFAULT '',
+  sPromote TEXT DEFAULT '',
+  sDemote TEXT DEFAULT '',
+  antiLinks INTEGER DEFAULT 0,
+  antiAudio INTEGER DEFAULT 0,
+  antiFile INTEGER DEFAULT 0,
+  antiFoto INTEGER DEFAULT 0,
+  antiVideo INTEGER DEFAULT 0,
+  antiSticker INTEGER DEFAULT 0,
+  autoApprove INTEGER DEFAULT 0,
+  notifgempa INTEGER DEFAULT 0,
+  gempaDateTime TEXT DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS settings (
+  jid TEXT PRIMARY KEY,
+  self INTEGER DEFAULT 0,
+  gconly INTEGER DEFAULT 0,
+  queque INTEGER DEFAULT 0,
+  autoread INTEGER DEFAULT 0,
+  restrict INTEGER DEFAULT 0,
+  cleartmp INTEGER DEFAULT 1,
+  anticall INTEGER DEFAULT 0,
+  adReply INTEGER DEFAULT 0,
+  noprint INTEGER DEFAULT 0,
+  noerror INTEGER DEFAULT 1
 );
 `);
 
-class data {
+class DataWrapper {
   constructor() {
     this.data = {
-      users: {},
-      chats: {},
-      stats: {},
-      settings: {},
-      bots: {},
+      chats: new Proxy({}, {
+        get: (_, jid) => {
+          let row = sqlite.prepare("SELECT * FROM chats WHERE jid = ?").get(jid);
+          if (!row) {
+            sqlite.prepare("INSERT INTO chats (jid) VALUES (?)").run(jid);
+            row = sqlite.prepare("SELECT * FROM chats WHERE jid = ?").get(jid);
+          }
+          return new Proxy(row, {
+            set: (obj, prop, value) => {
+              if (prop in row) {
+                sqlite.prepare(`UPDATE chats SET ${prop} = ? WHERE jid = ?`)
+                .run(normalizeValue(value), jid);
+                obj[prop] = value;
+                return true;
+              }
+              return false;
+            }
+          });
+        }
+      }),
+      settings: new Proxy({}, {
+        get: (_, jid) => {
+          let row = sqlite.prepare("SELECT * FROM settings WHERE jid = ?").get(jid);
+          if (!row) {
+            sqlite.prepare("INSERT INTO settings (jid) VALUES (?)").run(jid);
+            row = sqlite.prepare("SELECT * FROM settings WHERE jid = ?").get(jid);
+          }
+          return new Proxy(row, {
+            set: (obj, prop, value) => {
+              if (prop in row) {
+                sqlite.prepare(`UPDATE settings SET ${prop} = ? WHERE jid = ?`)
+                .run(normalizeValue(value), jid);
+                obj[prop] = value;
+                return true;
+              }
+              return false;
+            }
+          });
+        }
+      })
     };
-  }
-  read() {
-    const row = sqlite
-      .prepare("SELECT value FROM store WHERE key = ?")
-      .get("db");
-    if (row) {
-      try {
-        this.data = JSON.parse(row.value);
-      } catch (e) {
-        console.error("❌ DB parse error:", e);
-      }
-    }
-  }
-  write() {
-    sqlite
-      .prepare("INSERT OR REPLACE INTO store (key, value) VALUES (?, ?)")
-      .run("db", JSON.stringify(this.data));
   }
 }
 
-const db = new data();
-db.read();
+const db = new DataWrapper();
 global.db = db;
-global.loadDatabase = () => db.read();
+
+global.sqlite = sqlite;
 
 global.loading = async (m, conn, back = false) => {
   if (!back) {

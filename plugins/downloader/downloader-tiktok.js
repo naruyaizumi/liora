@@ -7,16 +7,13 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
 
   const url = args[0];
   if (!/^https?:\/\/(www\.)?(vm\.|vt\.|m\.)?tiktok\.com\/.+/i.test(url)) {
-    return m.reply(
-      "🍰 *URL tidak valid! Harap masukkan link TikTok yang benar.*",
-    );
+    return m.reply("🍰 *URL tidak valid! Harap masukkan link TikTok yang benar.*");
   }
 
   await global.loading(m, conn);
+
   try {
-    const res = await fetch(
-      `https://api.nekolabs.my.id/downloader/tiktok?url=${url}`,
-    );
+    const res = await fetch(`https://api.nekolabs.my.id/downloader/tiktok?url=${url}`);
     const json = await res.json();
     const { videoUrl, images } = json?.result || {};
 
@@ -25,13 +22,18 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
         m.chat,
         videoUrl,
         "tiktok.mp4",
-        "🍰 *Berhasil unduh video TikTok!* 🍡",
+        ``,
         m,
       );
     } else if (images?.length) {
-      for (let i = 0; i < images.length; i++) {
-        await conn.sendFile(m.chat, images[i], `slide_${i + 1}.jpg`, "", m);
-      }
+      const items = images.map((img, i) => ({
+        image: { url: img },
+        caption: `📸 Slide ${i + 1} dari ${images.length}`,
+      }));
+
+      await conn.sendAlbum(m.chat, items, { quoted: m });
+    } else {
+      await m.reply("🍮 *Tidak ada media ditemukan dalam URL tersebut.*");
     }
   } catch (e) {
     console.error(e);

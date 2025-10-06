@@ -1,7 +1,7 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   if (!args[0])
     return m.reply(
-      `🍩 *Masukkan link Google Drive!* \n\n🍰 *Contoh: ${usedPrefix + command} https://drive.google.com/file*`,
+      `🍩 *Masukkan link Google Drive!*\n🍰 *Contoh: ${usedPrefix + command} https://drive.google.com/file*`,
     );
   let url = args[0];
   if (!/^https?:\/\/(drive\.google\.com|docs\.google\.com)\//i.test(url)) {
