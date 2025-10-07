@@ -1,3 +1,5 @@
+import { fetch } from "../../src/bridge.js"
+
 let handler = async (m, { conn, text }) => {
   if (!text || typeof text !== "string")
     return m.reply("Enter a valid query for Blackbox AI!")

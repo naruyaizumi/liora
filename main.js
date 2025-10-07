@@ -1,4 +1,5 @@
 /* global conn */
+process.env.UV_THREADPOOL_SIZE = 128
 process.on("uncaughtException", console.error)
 process.on("unhandledRejection", console.error)
 
@@ -73,7 +74,7 @@ async function IZUMI() {
   if (pairingAuth && !conn.authState.creds.registered) {
     setTimeout(async () => {
       try {
-        let code = await conn.restPairingCode(pairingNumber, conn.Pairing)
+        let code = await conn.requestPairingCode(pairingNumber, conn.Pairing)
         code = code?.match(/.{1,4}/g)?.join("-") || code
         console.log(
   chalk.cyan.bold(`

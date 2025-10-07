@@ -1,3 +1,5 @@
+import { fetch } from "../../src/bridge.js"
+
 let handler = async (m, { conn }) => {
   await global.loading(m, conn)
   try {

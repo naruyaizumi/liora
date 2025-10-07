@@ -1,4 +1,5 @@
 import { sticker } from "../../src/bridge.js"
+import { fetch } from "../../src/bridge.js"
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   try {

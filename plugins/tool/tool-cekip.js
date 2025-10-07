@@ -1,3 +1,5 @@
+import { fetch } from "../../src/bridge.js"
+
 let handler = async (m, { args, usedPrefix, command }) => {
   if (!args[0])
     return m.reply(

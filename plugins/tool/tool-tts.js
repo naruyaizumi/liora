@@ -1,3 +1,5 @@
+import { fetch } from "../../src/bridge.js"
+
 const languages = {
   1: ["id-ID", "🇮🇩 Indonesia"],
   2: ["en-US", "🇺🇸 English"],

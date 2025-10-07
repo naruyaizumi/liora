@@ -1,5 +1,6 @@
 import { uploader3 } from "../../lib/uploader.js"
 import { sticker } from "../../src/bridge.js"
+import { fetch } from "../../src/bridge.js"
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   await global.loading(m, conn)

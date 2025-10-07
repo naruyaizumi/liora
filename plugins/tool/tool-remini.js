@@ -1,4 +1,5 @@
 import { uploader } from "../../lib/uploader.js"
+import { fetch } from "../../src/bridge.js"
 
 let handler = async (m, { conn, args, command }) => {
   const version = ["1", "2", "3", "4"].includes(args[0]) ? args[0] : "1"

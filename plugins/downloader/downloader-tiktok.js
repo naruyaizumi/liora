@@ -1,46 +1,41 @@
+import { fetch } from "../../src/bridge.js"
+
 let handler = async (m, { conn, usedPrefix, command, args }) => {
-  if (!args[0])
+  if (!args[0]) {
     return m.reply(
       `Please provide a valid TikTok URL.\n› Example: ${usedPrefix + command} https://vt.tiktok.com`
     )
+  }
 
-  const rawUrl = args[0]
-  const isTikTok = /^https?:\/\/(www\.)?(vm\.|vt\.|m\.)?tiktok\.com\/.+/i.test(rawUrl)
-  if (!isTikTok)
+  const url = args[0]
+  if (!/^https?:\/\/(www\.)?(vm\.|vt\.|m\.)?tiktok\.com\/.+/i.test(url)) {
     return m.reply("Invalid URL! Please provide a valid TikTok link.")
+  }
 
-  const url = /^https?:\/\/vm\.tiktok\.com(\/|$)/.test(rawUrl)
-    ? await resolveTikTokUrl(rawUrl)
-    : rawUrl
+  await global.loading(m, conn)
 
   try {
-    await global.loading(m, conn)
+    const res = await fetch(`https://api.nekolabs.my.id/downloader/tiktok?url=${url}`)
+    const json = await res.json()
 
-    const resSlide = await fetch(global.API("btz", "/api/download/ttslide", { url }, "apikey"))
-    const resVideo = await fetch(global.API("btz", "/api/download/tiktok", { url }, "apikey"))
+    if (!json?.status) throw new Error("Invalid response from Nekolabs API")
 
-    const jsonSlide = await resSlide.json()
-    const jsonVideo = await resVideo.json()
+    const { videoUrl, images } = json.result || {}
 
-    if (jsonSlide.status && Array.isArray(jsonSlide.result?.images) && jsonSlide.result.images.length > 0) {
-      const images = jsonSlide.result.images
-      if (images.length === 1)
-        await conn.sendFile(m.chat, images[0], "slide.jpg", null, m)
-      else
-        await conn.sendAlbum(m.chat, images.map(url => ({ image: { url } })), { quoted: m })
-      return
-    }
-
-    const videoUrl = jsonVideo?.result?.video?.[0]
-    if (jsonVideo.status && videoUrl) {
+    if (videoUrl) {
       await conn.sendFile(m.chat, videoUrl, "tiktok.mp4", null, m)
-      return
+    } else if (Array.isArray(images) && images.length) {
+      const slides = images.map((img, i) => ({
+        image: { url: img },
+        caption: `Slide ${i + 1} of ${images.length}`,
+      }))
+      await conn.sendAlbum(m.chat, slides, { quoted: m })
+    } else {
+      await m.reply("No media found for this TikTok link.")
     }
-
-    m.reply("No downloadable content found. Try another TikTok link.")
-  } catch (err) {
-    console.error(err)
-    m.reply(`An error occurred: ${err.message}`)
+  } catch (e) {
+    console.error(e)
+    await m.reply(`Error: ${e.message}`)
   } finally {
     await global.loading(m, conn, true)
   }
@@ -51,8 +46,3 @@ handler.tags = ["downloader"]
 handler.command = /^(tiktok|tt)$/i
 
 export default handler
-
-async function resolveTikTokUrl(rawUrl) {
-  const res = await fetch(rawUrl, { method: "HEAD", redirect: "follow" })
-  return res.url
-}

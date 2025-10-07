@@ -1,3 +1,5 @@
+import { fetch } from "../../src/bridge.js"
+
 let handler = async (m, { conn, text, args, usedPrefix, command }) => {
   const url = text || args[0]
   if (!url || !/^https?:\/\/(www\.)?threads\.net\//i.test(url))

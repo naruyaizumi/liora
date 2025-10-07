@@ -1,4 +1,5 @@
 import { uploader } from "../../lib/uploader.js"
+import { fetch } from "../../src/bridge.js" 
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   try {

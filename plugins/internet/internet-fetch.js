@@ -1,8 +1,8 @@
-import { exec } from "child_process"
 import fs from "fs/promises"
-import { join } from "path"
 import os from "os"
+import path from "path"
 import { fileTypeFromBuffer } from "file-type"
+import { fetch } from "../../src/bridge.js"
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!/^https?:\/\//i.test(text || ""))
@@ -10,28 +10,40 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
   await global.loading(m, conn)
 
-  const tmp = join(os.tmpdir(), `fetch_${Date.now()}.bin`)
-  const headersFile = join(os.tmpdir(), `headers_${Date.now()}.txt`)
-  const curlCmd = `curl -L --silent --show-error --max-time 45 -D "${headersFile}" -o "${tmp}" "${text}"`
-
-  let stderr = ""
-  await new Promise((resolve) => {
-    const proc = exec(curlCmd, (err) => resolve(err))
-    proc.stderr.on("data", (d) => (stderr += d.toString()))
-  })
-
+  const tmpFile = path.join(os.tmpdir(), `fetch_${Date.now()}.bin`)
   const timestamp = new Date().toTimeString().split(" ")[0]
-  const headersRaw = await fs.readFile(headersFile, "utf-8").catch(() => "(no headers)")
-  const buffer = await fs.readFile(tmp).catch(() => Buffer.alloc(0))
-  const stat = await fs.stat(tmp).catch(() => ({ size: 0 }))
-  const sizeMB = (stat.size / (1024 * 1024)).toFixed(2)
 
-  const type = await fileTypeFromBuffer(buffer).catch(() => null)
+  let result, buffer, mime, ext, sizeMB
+  let headersRaw = ""
+  let ok = false
 
-  let headerMime = headersRaw.match(/content-type:\s*([^\n\r]+)/i)?.[1]?.trim().toLowerCase() || ""
-  headerMime = headerMime.split(";")[0].trim()
-  const mime = type?.mime || headerMime || "application/octet-stream"
-  const ext = type?.ext || mime.split("/")[1] || "bin"
+  try {
+    result = await fetch(text)
+    buffer = Buffer.isBuffer(result.body) ? result.body : Buffer.from(result.body)
+    ok = true
+
+    await fs.writeFile(tmpFile, buffer)
+    const stat = await fs.stat(tmpFile)
+    sizeMB = (stat.size / (1024 * 1024)).toFixed(2)
+
+    const type = await fileTypeFromBuffer(buffer).catch(() => null)
+    let headerMime =
+      (result.headers?.["content-type"]?.[0] || "").split(";")[0].trim().toLowerCase()
+    mime = type?.mime || headerMime || "application/octet-stream"
+    ext = type?.ext || mime.split("/")[1] || "bin"
+
+    if (result.headers && typeof result.headers === "object") {
+      headersRaw = Object.entries(result.headers)
+        .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
+        .join("\n")
+    }
+  } catch (err) {
+    ok = false
+    buffer = Buffer.alloc(0)
+    mime = "text/plain"
+    ext = "txt"
+    headersRaw = err?.message || "Fetch failed."
+  }
 
   const isJson = mime === "application/json"
   const isText = /^text\//.test(mime)
@@ -42,16 +54,16 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   let caption = [
     "```",
     `┌─[${timestamp}]─────────────`,
-    `│  Network Fetch Log`,
+    `│  Native Fetch Log`,
     "└────────────────────────────",
     `URL     : ${text}`,
-    `Status  : ${stderr ? "ERROR" : "OK"}`,
-    `Size    : ${sizeMB} MB`,
+    `Status  : ${ok ? "OK" : "ERROR"}`,
+    `Size    : ${sizeMB || "0.00"} MB`,
     `MIME    : ${mime}`,
     `Output  : result.${ext}`,
     "────────────────────────────",
     "HEADERS (Top 10):",
-    headersRaw.split("\n").slice(0, 10).join("\n"),
+    headersRaw.split("\n").slice(0, 10).join("\n") || "(no headers)",
     "```",
   ].join("\n")
 
@@ -66,6 +78,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
     if (content.length > 3000)
       content = content.slice(0, 3000) + "\n\n[ truncated :v ]"
+
     caption += `\n────────────────────────────\nPreview:\n\`\`\`\n${content}\n\`\`\``
 
     msg = {
@@ -90,14 +103,13 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       await conn.sendMessage(m.chat, { text: caption }, { quoted: m })
     })
 
-  await fs.unlink(tmp).catch(() => {})
-  await fs.unlink(headersFile).catch(() => {})
+  await fs.unlink(tmpFile).catch(() => {})
   await global.loading(m, conn, true)
 }
 
 handler.help = ["fetch"]
 handler.tags = ["internet"]
-handler.command = /^(fetch|curl|get)$/i
+handler.command = /^(fetch|get)$/i
 handler.owner = true
 
 export default handler
