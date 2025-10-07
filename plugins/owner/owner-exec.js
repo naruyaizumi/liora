@@ -1,7 +1,7 @@
-import cp, { exec as _exec } from "child_process"
+import { exec as _exec } from "child_process"
 import { promisify } from "util"
 
-const exec = promisify(_exec).bind(cp)
+const exec = promisify(_exec)
 const dangerousCommands = [
   "rm -rf /",
   "rm -rf *",
@@ -20,78 +20,44 @@ const dangerousCommands = [
   ">:(){ :|: & };:",
 ]
 
-let vcard = `BEGIN:VCARD
-VERSION:3.0
-N:;ttname;;;
-FN:ttname
-item1.TEL;waid=13135550002:+1 (313) 555-0002
-item1.X-ABLabel:Ponsel
-END:VCARD`
-let q = {
-  key: {
-    fromMe: false,
-    participant: "13135550002@s.whatsapp.net",
-    remoteJid: "status@broadcast",
-  },
-  message: {
-    contactMessage: {
-      displayName: "𝗘 𝗫 𝗘 𝗖",
-      vcard,
-    },
-  },
-}
-
 const handler = async (m, { conn, isMods, command, text }) => {
   if (!isMods) return
   if (!command || !text) return
 
-  if (dangerousCommands.some((cmd) => text.trim().startsWith(cmd))) {
-    return conn.sendMessage(
-      m.chat,
-      {
-        text: `⚠️ Command blocked for security reasons.\n> ${text.trim()}`,
-      },
-      { quoted: q },
-    )
+  if (dangerousCommands.some(cmd => text.trim().startsWith(cmd))) {
+    return conn.sendMessage(m.chat, {
+      text: [
+        "```",
+        "Command blocked for security reasons.",
+        `> ${text.trim()}`,
+        "```"
+      ].join("\n"),
+    })
   }
 
   let output
   try {
-    output = await exec(command.trimStart() + " " + text.trimEnd())
+    output = await exec(`${command.trim()} ${text.trim()}`)
   } catch (error) {
     output = error
   }
 
   const { stdout, stderr } = output
-  const timestamp = new Date().toTimeString().split(" ")[0]
-
+  const result = stdout || stderr || "(no output)"
   const message = [
     "```",
-    `=== [${timestamp}] EXEC ===`,
-    `$ ${command.trimStart()} ${text.trimEnd()}`,
-    "────────────────────────",
-    stdout?.trim()
-      ? stdout
-          .trim()
-          .split("\n")
-          .map((line) => `> ${line}`)
-          .join("\n")
-      : stderr?.trim()
-      ? stderr
-          .trim()
-          .split("\n")
-          .map((line) => `! ${line}`)
-          .join("\n")
-      : "> (no output)",
+    `$ ${command.trim()} ${text.trim()}`,
+    "────────────────────────────",
+    result.trim(),
     "```",
   ].join("\n")
 
-  await conn.sendMessage(m.chat, { text: message }, { quoted: q })
+  await conn.sendMessage(m.chat, { text: message })
 }
 
 handler.help = ["$"]
 handler.tags = ["owner"]
-handler.customPrefix = /^[$] /
-handler.command = new RegExp()
+handler.customPrefix = /^\$ /
+handler.command = /(?:)/i
 
 export default handler

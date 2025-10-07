@@ -9,6 +9,13 @@
 - Graceful Shutdown & Crash Cooldown system for stable runtime supervision.  
 - Linux-style CLI interface with uniform separators and clean headers.  
 - **Native C++ Fetch Bridge** — implemented using `libcurl` with full HTTP/2 optimization and memory-safe buffer management, replacing Node’s built-in fetch for higher performance and lower latency across network requests.  
+- **SQL-based Authentication Layer** — replaced `useMultiFileAuthState` with `SQLiteAuth()` for a more durable, corruption-resistant Baileys session store powered by `better-sqlite3`.  
+- **Refactored Store System (`store.bind`)** — fully rebuilt for Baileys v7 compatibility:  
+  - Event-safe, idempotent, and memory-leak-free binding.  
+  - Group metadata caching with TTL and inflight deduplication.  
+  - Message trimming with automatic per-chat memory control.  
+  - Eliminated redundant listeners and reduced event overhead.  
+- Reduced console verbosity with cleaner, categorized runtime logs for better readability.  
 
 ---
 
@@ -17,6 +24,8 @@
 - Legacy reload loop logic replaced by debounced watcher.  
 - ffmpeg subprocess dependency for audio conversion.  
 - Emoji-based UI formatting and inconsistent ASCII borders.  
+- Old multi-file session handler (`useMultiFileAuthState`) replaced with single-file `auth.db` managed through SQLite.  
+- Deprecated store event system replaced with modern, safe `bind(conn)` implementation.  
 
 ---
 
@@ -29,16 +38,26 @@
 - Optimized in-memory cleanup for temporary media buffers.  
 - Unified timestamp and output layout across all command replies.  
 - Rewrote fetch handling layer to use `bridge.js` as a single entrypoint — improving consistency, cancellation control, and reducing JS overhead during parallel HTTP operations.  
+- Replaced verbose logging across `connection.js`, `main.js`, and `handler.js` with lightweight, structured event-based outputs.  
+- Fixed race conditions during concurrent plugin reloads and database checkpoints.  
+- Fixed group metadata duplication and stale cache issues in `store.bind`.  
+- Minor stability patches and consistency fixes across async handlers.  
 
 ---
 
 ## Summary
-Version 7 introduces a **complete internal refactor** centered on speed, reliability, and maintainability.  
+Version 7 introduces a **complete internal refactor** focused on stability, speed, and maintainability.  
 - Fully async core (Promise-based I/O)  
 - Rebuilt database and media engine  
 - Native runtime supervision  
+- SQLite-based authentication for Baileys session  
 - Native C++ HTTP bridge for ultra-fast network calls  
-- Clean Linux-style console output
+- Clean, minimal Linux-style console output  
+- Optimized event handling, plugin reloader, and store binding system  
+
+---
+
+*Liora 7.0.0 marks the transition from mixed async/sync architecture to a fully native async environment, combining Node.js performance with native C++ bridges for near-zero latency operations.*
 
 ---
 
