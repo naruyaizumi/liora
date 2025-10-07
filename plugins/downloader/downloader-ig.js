@@ -1,83 +1,84 @@
-import { fileTypeFromBuffer } from "file-type";
+import { fileTypeFromBuffer } from "file-type"
 
 let handler = async (m, { conn, usedPrefix, command, args }) => {
   if (!args[0])
     return m.reply(
-      `🍡 *Masukkan URL Instagram yang valid!*\n🍰 *Contoh: ${usedPrefix + command} https://www.instagram.com/*`,
-    );
+      `Please provide a valid Instagram URL.\n› Example: ${usedPrefix + command} https://www.instagram.com/p/...`
+    )
 
-  const url = args[0];
+  const url = args[0]
   if (!/^https?:\/\/(www\.)?instagram\.com\//i.test(url))
-    return m.reply("🍰 *URL tidak valid! Kirimkan link Instagram yang benar, ya.*");
+    return m.reply("Invalid URL. Please send a proper Instagram link.")
 
-  await global.loading(m, conn);
+  await global.loading(m, conn)
+
   try {
-    const apiUrl = global.API("btz", "/api/download/igdowloader", { url }, "apikey");
-    const json = await fetch(apiUrl).then(res => res.json());
+    const apiUrl = global.API("btz", "/api/download/igdowloader", { url }, "apikey")
+    const json = await fetch(apiUrl).then(res => res.json())
 
     if (!json.status || !json.message?.length)
-      return m.reply("🍓 *Kontennya nggak ditemukan!*");
+      return m.reply("No media found for this Instagram link.")
 
-    const sent = new Set();
-    const album = [];
+    const sent = new Set()
+    const album = []
 
-    for (const content of json.message) {
-      if (!content._url || sent.has(content._url)) continue;
-      sent.add(content._url);
+    for (const item of json.message) {
+      if (!item._url || sent.has(item._url)) continue
+      sent.add(item._url)
 
       try {
-        const res = await fetch(content._url);
-        const buffer = Buffer.from(await res.arrayBuffer());
-        const file = await fileTypeFromBuffer(buffer);
-        if (!file) continue;
+        const res = await fetch(item._url)
+        const buffer = Buffer.from(await res.arrayBuffer())
+        const type = await fileTypeFromBuffer(buffer)
+        if (!type) continue
 
-        if (file.mime.startsWith("image")) {
+        if (type.mime.startsWith("image")) {
           album.push({
             image: buffer,
-            caption: `🍡 Foto Instagram (${album.length + 1}/${json.message.length})`,
+            caption: null,
             filename: `ig_${Date.now()}.jpg`,
-            mime: file.mime,
-          });
-        } else if (file.mime.startsWith("video")) {
+            mime: type.mime,
+          })
+        } else if (type.mime.startsWith("video")) {
           album.push({
             video: buffer,
-            caption: `🍡 Video Instagram (${album.length + 1}/${json.message.length})`,
+            caption: null,
             filename: `ig_${Date.now()}.mp4`,
-            mime: file.mime,
-          });
+            mime: type.mime,
+          })
         }
       } catch (err) {
-        console.error("🍮 Gagal analisis konten:", content._url, err);
+        console.error("Error analyzing media:", item._url, err)
       }
     }
 
-    if (album.length === 0)
-      return m.reply("🍧 *Tidak ada konten valid yang bisa diunduh.*");
+    if (!album.length) return m.reply("No valid media files were found.")
 
     if (album.length === 1) {
-      const item = album[0];
-      const type = item.image ? "image" : "video";
+      const media = album[0]
+      const type = media.image ? "image" : "video"
       await conn.sendFile(
         m.chat,
-        item[type],
-        item.filename,
-        item.caption,
+        media[type],
+        media.filename,
+        null,
         m,
-      );
-      return;
+        false,
+        { mimetype: media.mime }
+      )
+    } else {
+      await conn.sendAlbum(m.chat, album, { quoted: m })
     }
-
-    await conn.sendAlbum(m.chat, album, { quoted: m });
   } catch (err) {
-    console.error(err);
-    m.reply("🍮 *Terjadi kesalahan saat mengambil data dari Instagram. Coba lagi nanti!*");
+    console.error(err)
+    m.reply("An error occurred while fetching from Instagram. Please try again later.")
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["instagram"];
-handler.tags = ["downloader"];
-handler.command = /^(instagram|ig|igdl)$/i;
+handler.help = ["instagram"]
+handler.tags = ["downloader"]
+handler.command = /^(instagram|ig|igdl)$/i
 
-export default handler;
+export default handler

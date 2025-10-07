@@ -1,60 +1,60 @@
-import sharp from "sharp";
+import sharp from "sharp"
 
-let handler = async (m, { conn, args }) => {
+let handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
-    let towidth = parseInt(args[0]);
-    let toheight = parseInt(args[1]);
-    if (!towidth) return m.reply("🍓 *Masukkan ukuran width!*");
-    if (!toheight) return m.reply("🍰 *Masukkan ukuran height!*");
-
-    let q = m.quoted ? m.quoted : m;
-    let mime = (q.msg || q).mimetype || q.mediaType || "";
-    if (!mime)
+    const towidth = parseInt(args[0])
+    const toheight = parseInt(args[1])
+    if (!towidth || !toheight)
       return m.reply(
-        "🍩 *Media tidak ditemukan. Kirim/reply gambar yang ingin di-resize!*",
-      );
-    if (!/image\/(jpe?g|png|webp)/.test(mime)) {
-      return m.reply(`🧁 *Format ${mime} tidak didukung!*`);
-    }
+        `Enter target size.\n› Example: ${usedPrefix + command} 1000 500`
+      )
 
-    await global.loading(m, conn);
+    const q = m.quoted ? m.quoted : m
+    const mime = (q.msg || q).mimetype || q.mediaType || ""
+    if (!mime) return m.reply("No media detected. Reply or send an image.")
+    if (!/image\/(jpe?g|png|webp)/i.test(mime))
+      return m.reply(`Unsupported format: ${mime}`)
 
-    const media = await q.download();
-    if (!media || !media.length) return m.reply("🍪 *Gagal download media!*");
-    const before = await sharp(media).metadata();
+    await global.loading(m, conn)
+
+    const media = await q.download()
+    if (!media?.length) return m.reply("Failed to download media.")
+
+    const before = await sharp(media).metadata()
+    const beforeRatio = before.width / before.height
+    const targetRatio = towidth / toheight
+    const fitMode = Math.abs(beforeRatio - targetRatio) < 0.05 ? "inside" : "cover"
+
     const resized = await sharp(media)
-      .resize(towidth, toheight, { fit: "inside" })
-      .toBuffer();
-    const after = await sharp(resized).metadata();
+      .resize(towidth, toheight, { fit: fitMode, position: "centre" })
+      .toBuffer()
 
-    await conn.sendMessage(
-      m.chat,
-      {
-        image: resized,
-        caption: `
-🍬 *COMPRESS & RESIZE* 🍬
-━━━━━━━━━━━━━━━━━━━
-🍓 *Sebelum:*
-🍧 *Lebar: ${before.width}px*
-🍧 *Tinggi: ${before.height}px*
-━━━━━━━━━━━━━━━━━━━
-🧁 *Sesudah:*
-🍦 *Lebar: ${after.width}px*
-🍦 *Tinggi: ${after.height}px*
-`.trim(),
-      },
-      { quoted: m },
-    );
+    const after = await sharp(resized).metadata()
+
+    const caption = [
+      "```",
+      "┌─[IMAGE RESIZE]────────────",
+      "│  Operation: Resize",
+      "└───────────────────────────",
+      `Original : ${before.width}×${before.height}px`,
+      `Resized  : ${after.width}×${after.height}px`,
+      `Mode     : ${fitMode.toUpperCase()}`,
+      "───────────────────────────",
+      "Done successfully.",
+      "```",
+    ].join("\n")
+
+    await conn.sendMessage(m.chat, { image: resized, caption }, { quoted: m })
   } catch (e) {
-    console.error(e);
-    await m.reply(`🍨 *Gagal resize:* ${e.message}`);
+    console.error(e)
+    await m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["resize"];
-handler.tags = ["tools"];
-handler.command = /^(resize)$/i;
+handler.help = ["resize <width> <height>"]
+handler.tags = ["tools"]
+handler.command = /^(resize|crop)$/i
 
-export default handler;
+export default handler

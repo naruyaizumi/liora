@@ -19,9 +19,11 @@ export async function handler(chatUpdate) {
   try {
     m = smsg(this, m) || m;
     let settings;
-try {
-  settings = global.db.data.settings[this.user.jid];
-} catch (e) { console.error(e); }
+    try {
+      settings = global.db.data.settings[this.user.jid];
+    } catch (e) {
+      console.error(e);
+    }
     
     const isMods = (
       await Promise.all(
@@ -198,6 +200,7 @@ try {
         if (!isAccept) continue;
         m.plugin = name;
         let chat = global.db.data.chats[m.chat];
+
         if (typeof m.text !== "string") m.text = "";
         if (
           !m.fromMe &&
@@ -212,22 +215,29 @@ try {
           !isMods &&
           !isOwner
         ) {
-          return conn.sendMessage(m.chat, {
-            text: `🍔 *Akses Ditolak!*
-*Halo ${await conn.getName(m.sender)}* 🍞
-🍕 *Maaf, chat pribadi saat ini dinonaktifkan.*
-
-🍱 *Link Grup: ${global.config.group}*`,
-            contextInfo: {
-              externalAdReply: {
-                title: "🍡 ACCESS DENIED",
-                body: global.config.watermark,
-                mediaType: 1,
-                thumbnailUrl: "https://qu.ax/RtoXq.jpg",
-                renderLargerThumbnail: true,
-              },
-            },
-          });
+      return conn.sendMessage(m.chat, {
+  text: [
+    "```",
+    `┌─[ACCESS DENIED]────────────`,
+    `│  Private chat is currently disabled.`,
+    "└────────────────────────────",
+    `User   : ${await conn.getName(m.sender)}`,
+    `Action : Blocked private access`,
+    `Group  : ${global.config.group}`,
+    "────────────────────────────",
+    "Join the group to continue using the bot.",
+    "```",
+  ].join("\n"),
+  contextInfo: {
+    externalAdReply: {
+      title: "ACCESS DENIED",
+      body: global.config.watermark,
+      mediaType: 1,
+      thumbnailUrl: "https://qu.ax/DdwBH.jpg",
+      renderLargerThumbnail: true,
+    },
+  },
+})
         }
         if (
           !isAdmin && !isMods && !isOwner && chat?.adminOnly
@@ -281,39 +291,46 @@ try {
           console.error(e);
           
           if (e && settings.noerror) {
-            m.reply("🍩 *Upss... ada sedikit error sistem nih~* 🍓");
+            m.reply(
+  `┌─[SYSTEM ERROR]──────
+│  Something went wrong.
+└──────────────────`
+);
           } else if (e) {
             let text = format(e);
             for (let key of Object.values(global.config.APIKeys || {}))
               text = text.replace(new RegExp(key, "g"), "#HIDDEN#");
-            let errorMsg = `
-*╭─❖ 「 💥 Plugin Error Detected! 」*
-*│ 📛 Plugin: ${m.plugin}*
-*│ 🙋 Sender: ${m.sender}*
-*│ 💬 Chat: ${m.chat}*
-*╰────────────────────*
-*「 📄 Error Logs 」*
-\`\`\`
-${text}
-\`\`\`
-━━━━━━━━━━━━━━━━━━━━━━
-`.trim();
-            await this.sendMessage(
-              m.chat,
-              {
-                text: errorMsg,
-                contextInfo: {
-                  externalAdReply: {
-                    title: "💥 Plugin Error Detected!",
-                    body: "📄 Lihat log error di atas",
-                    mediaType: 1,
-                    thumbnailUrl: "https://qu.ax/MtzsZ.jpg",
-                    renderLargerThumbnail: true,
-                  },
-                },
-              },
-              { quoted: m },
-            );
+            let timestamp = new Date().toISOString().replace("T", " ").split(".")[0]
+let errorMsg = [
+  "```",
+  `┌─[${timestamp}]─[ERROR]`,
+  `│ Plugin : ${plugin}`,
+  `│ ChatID : ${chat}`,
+  "├─TRACEBACK────────────────────",
+  ...text
+    .trim()
+    .split("\n")
+    .map((line) => `│ ${line}`),
+  "└──────────────────────────────",
+  "```",
+].join("\n")
+
+await this.sendMessage(
+  m.chat,
+  {
+    text: errorMsg,
+    contextInfo: {
+      externalAdReply: {
+        title: "System Error Log",
+        body: "Runtime diagnostic",
+        thumbnailUrl: "https://qu.ax/MtzsZ.jpg",
+        mediaType: 1,
+        renderLargerThumbnail: true,
+      },
+    },
+  },
+  { quoted: m },
+)
           }
         } finally {
           if (typeof plugin.after === "function") {
@@ -346,97 +363,80 @@ ${text}
 }
 
 export async function participantsUpdate({ id, participants, action }) {
-  if (this.isInit) return;
+  if (this.isInit) return
 
-  const conn = this;
-  const chat = global.db.data.chats[id] || {};
+  const conn = this
+  const chat = global.db.data.chats[id] || {}
   const groupMetadata =
-    (await conn.groupMetadata(id)) || (conn.chats[id] || {}).metadata;
+    (await conn.groupMetadata(id)) || (conn.chats[id] || {}).metadata
+
+  if (!groupMetadata || !participants?.length) return
 
   for (const user of participants) {
-    const pp = await conn
-      .profilePictureUrl(user, "image")
-      .catch(() => "https://qu.ax/jVZhH.jpg");
-    const img = await canvas(pp);
+    if (!chat.detect) continue
 
-    let text = "";
-    let title = "";
-    let body = "";
+    const pp =
+      (await conn.profilePictureUrl(user, "image").catch(() => null)) ||
+      "https://qu.ax/jVZhH.jpg"
+
+    const img = await canvas(pp).catch(() => null)
+    const groupName = await conn.getName(id)
+    const desc = groupMetadata.desc?.toString() || "-"
+
+    let text = ""
+    let title = ""
+    let body = ""
 
     switch (action) {
       case "add":
-        if (!chat.detect) return;
+        text = (chat.sWelcome || conn.welcome || "Welcome, @user")
+          .replace("@subject", groupName)
+          .replace("@desc", desc)
+          .replace("@user", "@" + user.split("@")[0])
 
-        text = (
-          chat.sWelcome ||
-          conn.welcome ||
-          "Welcome, @user"
-        )
-          .replace("@subject", await conn.getName(id))
-          .replace("@desc", groupMetadata.desc?.toString() || "unknow")
-          .replace("@user", "@" + user.split("@")[0]);
+        title = "[ SYSTEM NOTICE ] User Joined"
+        body = `+ Total members: ${groupMetadata.participants.length}`
 
-        title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗗𝗮𝘁𝗮𝗻𝗴 𝗞𝗮𝗸";
-        body = `Kamu adalah member ke-${groupMetadata.participants.length}.`;
-
-        await conn.sendMessage(id, {
-          text: text.trim(),
-          mentions: [user],
-          contextInfo: {
-            externalAdReply: {
-              title,
-              body,
-              thumbnail: img,
-              mediaType: 1,
-              renderLargerThumbnail: true,
-            },
-          },
-        });
-        break;
+        break
 
       case "remove":
-        if (!chat.detect) return;
+        text = (chat.sBye || conn.bye || "Goodbye, @user")
+          .replace("@subject", groupName)
+          .replace("@desc", desc)
+          .replace("@user", "@" + user.split("@")[0])
 
-        text = (
-          chat.sBye ||
-          conn.bye ||
-          "Bye @user"
-        )
-          .replace("@subject", await conn.getName(id))
-          .replace("@desc", groupMetadata.desc?.toString() || "unknow")
-          .replace("@user", "@" + user.split("@")[0]);
+        title = "[ SYSTEM NOTICE ] User Left"
+        body = `- Members remaining: ${groupMetadata.participants.length}`
 
-        title = "˚ ༘✦ ִֶ 𓂃⊹ 𝗦𝗲𝗹𝗮𝗺𝗮𝘁 𝗧𝗶𝗻𝗴𝗴𝗮𝗹 𝗞𝗮𝗸";
-        body = `Kini grup berisi ${groupMetadata.participants.length} anggota.`;
-
-        await conn.sendMessage(id, {
-          text: text.trim(),
-          mentions: [user],
-          contextInfo: {
-            externalAdReply: {
-              title,
-              body,
-              thumbnail: img,
-              mediaType: 1,
-              renderLargerThumbnail: true,
-            },
-          },
-        });
-        break;
+        break
 
       default:
-        break;
+        continue
     }
+
+    await conn.sendMessage(id, {
+      text: text.trim(),
+      mentions: [user],
+      contextInfo: {
+        externalAdReply: {
+          title,
+          body,
+          thumbnail: img,
+          mediaType: 1,
+          renderLargerThumbnail: true,
+        },
+      },
+    })
   }
 }
 
-let file = global.__filename(import.meta.url, true);
+let file = global.__filename(import.meta.url, true)
 watchFile(file, async () => {
-  unwatchFile(file);
+  unwatchFile(file)
   console.log(
     chalk.cyan.bold(
-      "🌸 Aku sedang memperbarui handler.js. Tunggu sebentar, ya!",
-    ),
-  );
-  if (global.reloadHandler) console.log(await global.reloadHandler());
-});
+      "[ SYSTEM ] handler.js updated — reloading modules..."
+    )
+  )
+  if (global.reloadHandler) console.log(await global.reloadHandler())
+})

@@ -1,6 +1,6 @@
 ![header](https://capsule-render.vercel.app/api?type=waving&color=0:FFC0CB,50:FFE4E1,100:E6E6FA&height=250&section=header&text=Liora%20WhatsApp%20Bot&fontSize=55&fontAlignY=35&animation=twinkling&fontColor=ffffff)
 
-[![Typing SVG](https://readme-typing-svg.herokuapp.com?size=25&duration=3500&pause=1000&color=FFC0CB&center=true&vCenter=true&width=800&lines=⚡+Fast.+Modular.+API-Powered.;🌍+Open-Source.+Flexible.+Developer-Friendly.;🔧+Clean+Code.+Easy+to+Extend.+Community-Driven.)](https://github.com/naruyaizumi/liora)
+[![Typing SVG](https://readme-typing-svg.herokuapp.com?size=25&duration=3500&pause=1000&color=FFC0CB&center=true&vCenter=true&width=800&lines=⚙️+Engineered+for+Precision+and+Power.;🧩+Modular.+Native.+C%2B%2B+Enhanced.;🔐+Secure.+Scalable.+Built+for+Developers.)](https://github.com/naruyaizumi/liora)
 
 <div align="center">
   
@@ -132,26 +132,24 @@ We take security, stability, and the comfort of contributors very seriously.
 
 ---
 
-> [!CAUTION]  
-> Please **do not disclose vulnerabilities or bugs publicly** without reporting them first.  
-> Use the provided issue templates to submit detailed reports.  
-> This ensures the **safety, comfort, and trust** of all users.
+> [!CAUTION]
+> **Do not publicly disclose vulnerabilities or internal bugs.**  
+> If you discover a security issue, report it responsibly through the official issue templates or via direct contact.  
+> This process preserves the **integrity, stability, and trust** of the Liora ecosystem.
 
-> [!TIP]  
-> **Installation Guide**
->
-> Choose your preferred installation method:
->
-> - [Install via Pterodactyl](.github/INSTALLATION/PTERODACTYL.md)
-> - [Install via PM2](.github/INSTALLATION/PM2.md)
+> [!TIP]
+> **Installation Methods**  
+> You can deploy Liora using any preferred process manager or container environment:  
+> - [Pterodactyl Installation Guide](.github/INSTALLATION/PTERODACTYL.md)  
+> - [PM2 Installation Guide](.github/INSTALLATION/PM2.md)  
+> Ensure that your runtime environment meets the minimum requirements of **Node.js 22+**, with full access to the system’s build tools.
 
-> [!WARNING]  
-> **Credit removal, modification, or selling this source code is strictly prohibited.**
+> [!WARNING]
+> **Unauthorized modification, credit removal, or commercial distribution is strictly forbidden.**  
+> - Keep all author and contributor credits intact (README, configuration headers, and embedded metadata).  
+> - Redistribution, reselling, or rebranding for personal gain is a direct violation of project terms.  
 >
-> - Keep all author credits intact (README, configs, bot commands).
-> - Selling/redistributing for personal gain is not allowed.
->
-> Credits = _respect, recognition, and appreciation_ to contributors.
+> Credits represent **respect, transparency, and acknowledgment** — not decoration.
 
 <details>
   <summary>
@@ -183,154 +181,138 @@ to manage releases.
 <details>
   <summary>
     <span style="display:inline; color:#FF69B4; font-weight:bold;">
-     ✨ Liora – WhatsApp BOT Script
+      🍧 Liora – Advanced WhatsApp Bot
     </span>
   </summary>
 
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500&family=Pacifico&display=swap" rel="stylesheet">
 
   <div align="center" style="font-family: 'Pacifico', cursive; color:#FF69B4; font-size:34px; font-weight:bold; margin:15px 0;">
-    <img src="https://readme-typing-svg.herokuapp.com?size=28&duration=3500&color=FFC0CB&center=true&vCenter=true&width=600&lines=✨+Liora+–+WhatsApp+BOT+Script" alt="Typing SVG" />
+    <img src="https://readme-typing-svg.herokuapp.com?size=28&duration=3500&color=FFC0CB&center=true&vCenter=true&width=600&lines=🌸+Liora+–+Advanced+WhatsApp+Bot" alt="Typing SVG" />
   </div>
 
   <p align="center" style="font-family: 'Fira Code', monospace; font-size:16px; color:#eaeaea;">
-    Liora is a WhatsApp Multi-Device bot script built for everyone — from curious learners to professional developers.  
-    It provides a <b>solid foundation</b> with a modular architecture, making it easy to customize, extend, and scale.
+    Liora is not a plug-and-play bot — it’s a <b>fully-fledged WhatsApp engine</b> built for developers who demand  
+    performance, control, and precision.  
+    It combines <b>modern JavaScript (ESM)</b> architecture with <b>native C++ add-ons</b> for extreme speed and reliability.
   </p>
 
   <p style="font-family: 'Fira Code', monospace; font-size:15px; color:#d1d1d1;">
-    Designed with performance and clarity in mind, Liora empowers you to build bots that are:
+    Designed for experienced developers and system architects, Liora emphasizes:
   </p>
 
   <ul style="font-family: 'Fira Code', monospace; font-size:15px; color:#f5f5f5; list-style:none;">
     <li>
-      <img src="https://img.icons8.com/color/24/rocket--v1.png" width="20" style="vertical-align:middle;"/>
-      <b>Lightweight & Fast</b> → optimized for speed and stability
+      <img src="https://img.icons8.com/color/24/lightning-bolt--v1.png" width="20" style="vertical-align:middle;"/>
+      <b>Native-Level Performance</b> → powered by Node-API (C++) add-ons, bypassing traditional bottlenecks
     </li>
     <li>
-      <img src="https://img.icons8.com/color/24/puzzle.png" width="20" style="vertical-align:middle;"/>
-      <b>Modular & Extensible</b> → add or remove features with ease
+      <img src="https://img.icons8.com/color/24/code-fork.png" width="20" style="vertical-align:middle;"/>
+      <b>Complex but Modular</b> → over 100+ tightly-engineered features, each optimized for speed and precision
     </li>
     <li>
-      <img src="https://img.icons8.com/color/24/satellite.png" width="20" style="vertical-align:middle;"/>
-      <b>API-Ready</b> → connect with external services or your own logic
+      <img src="https://img.icons8.com/color/24/lock--v1.png" width="20" style="vertical-align:middle;"/>
+      <b>API & Key-Driven Ecosystem</b> → power scales with API access; the more keys you own, the stronger Liora becomes
     </li>
     <li>
-      <img src="https://img.icons8.com/color/24/idea.png" width="20" style="vertical-align:middle;"/>
-      <b>Developer-Friendly</b> → clean structure, well-documented, and open for contributions
+      <img src="https://img.icons8.com/color/24/mind-map.png" width="20" style="vertical-align:middle;"/>
+      <b>Low-Level Control</b> → direct access to system processes, custom schedulers, and resource management
     </li>
   </ul>
 
   <p style="font-family: 'Fira Code', monospace; font-size:15px; color:#eaeaea;">
-    Whether you want to <b>experiment, learn, or deploy a production bot</b>,  
-    Liora is here as your reliable starting point.
+    Liora is <b>not built for casual users</b> — it’s engineered for those who understand what’s under the hood.  
+    Setup requires real environment handling, API key management, and build configuration awareness.
+  </p>
+
+  <p align="center" style="font-family: 'Fira Code', monospace; font-size:14px; color:#bfbfbf; font-style:italic;">
+    If you seek plug-and-play, this is not for you.<br>
+    If you seek raw power, modular depth, and system-level control — welcome to Liora.
   </p>
 </details>
 
 <details>
   <summary>
     <span style="display:inline; color:#FFC0CB; font-weight:bold;">
-      📁 Key Features
+      🍃 Core Features
     </span>
   </summary>
 
   <ul>
     <li>
       <img src="https://img.icons8.com/color/48/unlock-2.png" width="20" style="vertical-align:middle;"/>
-      <b>Full Open Source</b> — 100% transparent, no obfuscation or locked code.
+      <b>Fully Open Source</b> — no encryption, no obfuscation; everything is transparent and auditable.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/puzzle.png" width="20" style="vertical-align:middle;"/>
-      <b>Modular Architecture</b> — every feature is standalone, simple to add, remove, or customize.
+      <b>Modular System</b> — each component is isolated and replaceable, built for deep customization.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/lightning-bolt.png" width="20" style="vertical-align:middle;"/>
-      <b>Lightweight Build</b> — only ~200MB with dependencies, optimized for performance.
+      <b>Native-Level Performance</b> — powered by Node-API (C++) bridges for faster execution and lower I/O overhead.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/document.png" width="20" style="vertical-align:middle;"/>
-      <b>Modern JavaScript (ESM)</b> — clean codebase with ES Modules for clarity and compatibility.
+      <b>Modern JavaScript (Pure ESM)</b> — clean, asynchronous, and future-proof by design.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/nodejs.png" width="20" style="vertical-align:middle;"/>
-      <b>Node.js v22+ Ready</b> — built to run on the latest Node.js (22, 23, 24).
+      <b>Node.js v22+ Compatible</b> — optimized for the latest runtime environments and event-loop improvements.
     </li>
     <li>
-      <img src="https://img.icons8.com/color/48/package.png" width="20" style="vertical-align:middle;"/>
-      <b>Minimal Dependencies</b> — deploy smoothly even on low-spec VPS.
+      <img src="https://img.icons8.com/color/48/database.png" width="20" style="vertical-align:middle;"/>
+      <b>Integrated SQLite + Native Cache</b> — designed for speed, stability, and persistent runtime storage.
     </li>
     <li>
-      <img src="https://img.icons8.com/color/48/rocket.png" width="20" style="vertical-align:middle;"/>
-      <b>Easy Deployment</b> — works seamlessly with PM2, Pterodactyl, or your favorite process manager.
+      <img src="https://img.icons8.com/color/48/experimental.png" width="20" style="vertical-align:middle;"/>
+      <b>Experimental Architecture</b> — Liora evolves constantly. Expect rapid updates, breaking changes, and innovation.
     </li>
   </ul>
 
+  <p style="font-family:'Fira Code', monospace; font-size:14px; color:#cfcfcf; text-align:center;">
+    Liora isn’t built to be easy — it’s built to be powerful.  
+    A system that adapts with technology, breaks limits, and rebuilds itself faster than trends can catch up.
+  </p>
 </details>
 
 <details>
   <summary>
     <span style="display:inline; color:#FFC0CB; font-weight:bold;">
-     🎯 Popular Features
+      🎯 Core Functional Modules
     </span>
   </summary>
 
   <ul>
     <li>
-      <img src="https://img.icons8.com/color/48/video.png" width="20" style="vertical-align:middle;"/>
-      <b>Media Downloader</b> — fetch videos, audio, and files from multiple platforms.
-    </li>
-    <li>
-      <img src="https://img.icons8.com/color/48/speech-bubble-with-dots.png" width="20" style="vertical-align:middle;"/>
-      <b>Interactive Commands</b> — menus, buttons, and reactions for better UX.
+      <img src="https://img.icons8.com/color/48/download-2.png" width="20" style="vertical-align:middle;"/>
+      <b>Downloader Engine</b> — supports major platforms for fetching videos, audio, and documents directly via API or scraper.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/artificial-intelligence.png" width="20" style="vertical-align:middle;"/>
-      <b>AI Integrations</b> — connect with AI tools for smarter automation.
+      <b>AI Integration</b> — direct communication with external AI systems for automation, processing, and analysis.
     </li>
     <li>
-      <img src="https://img.icons8.com/color/48/security-configuration.png" width="20" style="vertical-align:middle;"/>
-      <b>Group Moderation</b> — tools for admins to manage communities easily.
+      <img src="https://img.icons8.com/color/48/group.png" width="20" style="vertical-align:middle;"/>
+      <b>Group Management</b> — moderation, auto-detection, and adaptive response tools following WhatsApp protocol standards.
     </li>
     <li>
-      <img src="https://img.icons8.com/color/48/server.png" width="20" style="vertical-align:middle;"/>
-      <b>Server Utilities</b> — system info, monitoring, and useful admin commands.
+      <img src="https://img.icons8.com/color/48/wrench.png" width="20" style="vertical-align:middle;"/>
+      <b>Toolset Library</b> — a collection of essential utilities: converter, compressor, encoder, and API-powered processors.
+    </li>
+    <li>
+      <img src="https://img.icons8.com/color/48/paint-palette.png" width="20" style="vertical-align:middle;"/>
+      <b>Maker Suite</b> — creative utilities for image and sticker generation using native canvas and WebP optimization.
+    </li>
+    <li>
+      <img src="https://img.icons8.com/color/48/settings.png" width="20" style="vertical-align:middle;"/>
+      <b>System Utilities</b> — uptime monitor, diagnostics, and performance tracing for debugging and optimization.
     </li>
   </ul>
-</details>
 
-<details>
-  <summary>
-    <span style="display:inline; color:#FFC0CB; font-weight:bold;">
-      🔍 Technical Details
-    </span>
-  </summary>
-
-  <table>
-    <tr>
-      <td><b>Script Name</b></td>
-      <td><img src="https://img.shields.io/badge/Liora-FFC0CB?style=for-the-badge&labelColor=2F2F2F"/></td>
-    </tr>
-    <tr>
-      <td><b>Framework</b></td>
-      <td><img src="https://img.shields.io/badge/@itsukichann%2Fbaileys-FFC0CB?style=for-the-badge&labelColor=2F2F2F"/></td>
-    </tr>
-    <tr>
-      <td><b>Language</b></td>
-      <td><img src="https://img.shields.io/badge/JavaScript%20(ESM)-FFC0CB?style=for-the-badge&logo=javascript&logoColor=white&labelColor=2F2F2F"/></td>
-    </tr>
-    <tr>
-      <td><b>Runtime</b></td>
-      <td><img src="https://img.shields.io/badge/Node.js%20v22%2F23%2F24-FFC0CB?style=for-the-badge&logo=node.js&logoColor=white&labelColor=2F2F2F"/></td>
-    </tr>
-    <tr>
-      <td><b>Package Manager</b></td>
-      <td><img src="https://img.shields.io/badge/npm%20%7C%20yarn%20%7C%20pnpm-FFC0CB?style=for-the-badge&logo=npm&logoColor=white&labelColor=2F2F2F"/></td>
-    </tr>
-    <tr>
-      <td><b>License</b></td>
-      <td><img src="https://img.shields.io/badge/Apache%202.0-FFC0CB?style=for-the-badge&logo=apache&logoColor=white&labelColor=2F2F2F"/></td>
-    </tr>
-  </table>
+  <p style="font-family:'Fira Code', monospace; font-size:14px; color:#cfcfcf; text-align:center;">
+    Liora avoids bloat — no games, no RPGs, no interactive buttons.  
+    Every feature is purpose-built, protocol-compliant, and engineered for reliability.
+  </p>
 </details>
 
 <details>
@@ -429,16 +411,21 @@ We sincerely thank the following parties who have been instrumental in the devel
 <details>
   <summary><span style="color:#FFC0CB; font-weight:bold;">Libraries & Frameworks</span></summary>
   <p align="center">
-    <a href="https://github.com/Itsukichann/Baileys">
-      <img src="https://img.shields.io/badge/@itsukichann/baileys-2F2F2F?style=for-the-badge&logo=github&logoColor=white&labelColor=0366d6"/>
+    <a href="https://www.npmjs.com/package/baileys">
+      <img src="https://img.shields.io/badge/Baileys-WhiskeySockets-2F2F2F?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAYAAABX..."
+           alt="WhiskeySockets"
+           style="border-radius:8px; height:28px; vertical-align:middle;" />
+      <img src="https://raw.githubusercontent.com/WhiskeySockets/Baileys/refs/heads/master/Media/logo.png"
+           alt="WhiskeySockets Logo"
+           width="32"
+           height="32"
+           style="margin-left:8px; vertical-align:middle;" />
     </a>
   </p>
   <p align="justify">
-    This project utilizes <b>@itsukichann/baileys</b> as its primary foundation due to its stability, compatibility, 
-    and flexibility in integrating WhatsApp features into the bot. 
-    Baileys provides up-to-date protocol support, enabling rapid development, 
-    seamless feature integration, and long-term maintainability without the need 
-    to build an entire stack from scratch.
+    This project is powered by <b>Baileys (WhiskeySockets)</b> — the official, stable, and feature-rich
+    WebSocket library for WhatsApp. It offers modern APIs, multi-device support, and consistent updates 
+    that ensure long-term maintainability for advanced bot frameworks like <b>Liora</b>.
   </p>
 </details>
 
@@ -454,62 +441,35 @@ We sincerely thank the following parties who have been instrumental in the devel
     <a href="https://api.nekolabs.my.id">
       <img src="https://img.shields.io/badge/NekoLabs_API-2F2F2F?style=for-the-badge&logo=swagger&logoColor=white&labelColor=8A2BE2"/>
     </a>
-    <a href="https://data.bmkg.go.id">
-      <img src="https://img.shields.io/badge/BMKG_Data-2F2F2F?style=for-the-badge&logo=cloudflare&logoColor=white&labelColor=32CD32"/>
-    </a>
   </p>
   <p align="center">
-    <a href="https://catbox.moe">
-      <img src="https://img.shields.io/badge/Catbox_Uploader-2F2F2F?style=for-the-badge&logo=dropbox&logoColor=white&labelColor=FF4500"/>
-    </a>
-    <a href="https://uguu.se">
-      <img src="https://img.shields.io/badge/Uguu_Uploader-2F2F2F?style=for-the-badge&logo=nextcloud&logoColor=white&labelColor=1E90FF"/>
-    </a>
-    <a href="https://qu.ax">
-      <img src="https://img.shields.io/badge/Quax_Uploader-2F2F2F?style=for-the-badge&logo=drive&logoColor=white&labelColor=FF1493"/>
-    </a>
-    <a href="https://put.icu">
-      <img src="https://img.shields.io/badge/Puticu_Uploader-2F2F2F?style=for-the-badge&logo=google-drive&logoColor=white&labelColor=FFD700"/>
-    </a>
-    <a href="https://tmpfiles.org">
-      <img src="https://img.shields.io/badge/Tmpfiles_Uploader-2F2F2F?style=for-the-badge&logo=vercel&logoColor=white&labelColor=00CED1"/>
-    </a>
-    <a href="https://cdn.yupra.my.id">
-      <img src="https://img.shields.io/badge/YupraCDN_Uploader-2F2F2F?style=for-the-badge&logo=fastly&logoColor=white&labelColor=7FFF00"/>
-    </a>
+    <i>Official public API sources used by <b>Liora Engine</b> for AI, media, and utility endpoints.</i>
   </p>
 </details>
 
-  <details>
-    <summary><span style="color:#FFC0CB; font-weight:bold;">AI Assistance</span></summary>
-    <p align="center">
-      <img src="https://img.shields.io/badge/OpenAI-ChatGPT-412991?style=for-the-badge&logo=openai&logoColor=white"/>
-      <img src="https://img.shields.io/badge/Google-Gemini-4285F4?style=for-the-badge&logo=google&logoColor=white"/>
-      <img src="https://img.shields.io/badge/GitHub-Copilot-181717?style=for-the-badge&logo=github&logoColor=white"/>
-    </p>
-  </details>
+<details>
+  <summary><span style="color:#FFC0CB; font-weight:bold;">AI Assistance</span></summary>
+  <p align="center">
+    <a href="https://chat.openai.com" target="_blank">
+      <img src="https://img.shields.io/badge/Powered%20by-ChatGPT-2F2F2F?style=for-the-badge&logo=openai&logoColor=00FF99&labelColor=2F2F2F"/>
+    </a>
+  </p>
+  <p align="justify">
+    Special thanks to <b>ChatGPT</b> by <b>OpenAI</b> for providing technical insights, 
+    problem-solving assistance, and creative guidance during Liora's development.  
+    Many debugging, optimization, and architectural improvements were achieved through 
+    its continuous collaboration.
+  </p>
+</details>
 
-  <details>
-    <summary><span style="color:#FFC0CB; font-weight:bold;">Environment & Deployment</span></summary>
-
-| Category            | Tools / Platforms             |
-| ------------------- | ----------------------------- |
-| **Runtime**         | Node.js v22 / v23 / v24       |
-| **Language**        | JavaScript (ESM)              |
-| **Package Manager** | npm / yarn / pnpm             |
-| **Process Manager** | PM2 / Pterodactyl             |
-| **VPS**             | Hostinger, DigitalOcean, etc. |
-
-  </details>
-
-  <details>
-    <summary><span style="color:#FFC0CB; font-weight:bold;">Personal Acknowledgements</span></summary>
-    <ul>
-      <li><b>God Almighty</b> — for all blessings and guidance</li>
-      <li><b>Parents & Family</b> — for moral support and encouragement</li>
-      <li><b>Community & Users</b> — for trust, feedback, and contributions</li>
-    </ul>
-  </details>
+<details>
+  <summary><span style="color:#FFC0CB; font-weight:bold;">Personal Acknowledgements</span></summary>
+  <ul>
+    <li>💖 <b>God Almighty</b> — for endless blessings, strength, and guidance.</li>
+    <li>🌸 <b>Parents & Family</b> — for unconditional love, moral support, and encouragement.</li>
+    <li>🍡 <b>Community & Users</b> — for trust, feedback, and continuous inspiration to improve Liora.</li>
+  </ul>
+</details>
 
 </details>
 

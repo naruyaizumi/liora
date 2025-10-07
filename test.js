@@ -3,11 +3,16 @@ import path, { dirname } from "path"
 import assert from "assert"
 import { fileURLToPath } from "url"
 import { createRequire } from "module"
+import chalk from "chalk"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const require = createRequire(__dirname)
 const pkg = require(path.join(__dirname, "./package.json"))
+
+function timestamp() {
+  return chalk.gray(new Date().toISOString().replace("T", " ").split(".")[0])
+}
 
 async function collectFiles() {
   const folders = [".", ...(pkg.directories ? Object.values(pkg.directories) : [])]
@@ -28,26 +33,42 @@ async function collectFiles() {
 }
 
 async function checkFiles() {
+  console.log(chalk.cyan(`\n[${timestamp()}] [liora] Starting source validation...`))
+
   const files = await collectFiles()
+  let passed = 0
+  let failed = 0
 
   for (const file of files) {
     if (file === __filename) continue
-    console.log(`🍡 Checking: ${file}`)
     try {
       const src = await readFile(file, "utf8")
-      if (!src.trim()) throw new Error(`🍪 File kosong atau tidak valid: ${file}`)
+      if (!src.trim()) throw new Error("Empty or invalid file content.")
       assert.ok(file)
-      console.log(`🍰 Done: ${file}`)
+      console.log(chalk.green(`[${timestamp()}] [OK] ${file}`))
+      passed++
     } catch (err) {
-      console.error(`🍫 Error: ${err.message}`)
+      console.error(chalk.red(`[${timestamp()}] [FAIL] ${file} → ${err.message}`))
+      failed++
       process.exitCode = 1
     }
   }
+
+  console.log(chalk.gray("───────────────────────────────────────────"))
+  console.log(
+    chalk.cyanBright(
+      `[${timestamp()}] [liora] Completed — ${chalk.green(`${passed} passed`)}, ${chalk.red(`${failed} failed`)}`
+    )
+  )
+
+  if (failed === 0) {
+    console.log(chalk.greenBright(`[${timestamp()}] [liora] All files validated successfully.`))
+  } else {
+    console.warn(chalk.yellow(`[${timestamp()}] [liora] Some files failed validation.`))
+  }
 }
 
-checkFiles()
-  .then(() => console.log("🧁 All files validated successfully! 🍬"))
-  .catch((err) => {
-    console.error("🍩 FATAL:", err)
-    process.exit(1)
-  })
+checkFiles().catch((err) => {
+  console.error(chalk.red(`[${timestamp()}] [liora] FATAL: ${err.message}`))
+  process.exit(1)
+})

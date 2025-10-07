@@ -134,14 +134,14 @@ static uint64_t choose_layout_legacy(int ch) {
 #endif
 
 static int default_frame_size(AVCodecID id, int /*sr*/){
-  if (id == AV_CODEC_ID_OPUS) return 960;    // 20ms @ 48k
-  if (id == AV_CODEC_ID_MP3)  return 1152;   // MP3
-  return 1024;                               // AAC/PCM
+  if (id == AV_CODEC_ID_OPUS) return 960;
+  if (id == AV_CODEC_ID_MP3)  return 1152;
+  return 1024;
 }
 
 static std::vector<uint8_t> convertCore(
   const uint8_t* input, size_t inLen,
-  const std::string& out_format,   // "mp3" | "opus" | "ogg" | "wav" | "aac" | "m4a"
+  const std::string& out_format,
   int64_t bitrate_bps,
   int sample_rate,
   int channels,

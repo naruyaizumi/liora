@@ -9,6 +9,8 @@
     "start": "node index.js",
     "test": "node test.js",
     "lint": "eslint .",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --write .",
     "build:addon": "node-gyp configure build"
   },
   "license": "Apache-2.0",

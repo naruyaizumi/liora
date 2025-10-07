@@ -11,7 +11,7 @@ const rl = createInterface({ input: process.stdin, output: process.stdout })
 
 const pkgPath = join(__dirname, "./package.json")
 const pkgData = await readFile(pkgPath, "utf8").catch((err) => {
-  console.error(chalk.redBright("🍪 [FATAL] Gagal membaca package.json:"), err)
+  console.error(chalk.redBright(`[liora.supervisor] [FATAL] Failed to read package.json: ${err.message}`))
   process.exit(1)
 })
 const { name } = JSON.parse(pkgData)
@@ -25,25 +25,27 @@ let lastCrash = 0
 
 async function start(file) {
   const args = [join(__dirname, file), ...process.argv.slice(2)]
-  const tag = chalk.cyanBright(`[${name}]`)
+  const tag = chalk.cyan(`[${name}]`)
 
   return new Promise((resolve) => {
     childProcess = spawn(process.argv[0], args, {
       stdio: ["inherit", "inherit", "inherit", "ipc"],
     })
 
+    const time = () => new Date().toISOString().replace("T", " ").split(".")[0]
+
     childProcess.on("message", (msg) => {
       if (msg === "uptime") childProcess.send(process.uptime())
     })
 
     childProcess.on("exit", (code, signal) => {
-      console.log(chalk.magentaBright(`🍰 ${tag} exited (code: ${code}, signal: ${signal})`))
+      console.log(chalk.magenta(`[${time()}] ${tag} process exited (code=${code}, signal=${signal})`))
       childProcess = null
       resolve(code)
     })
 
     childProcess.on("error", (err) => {
-      console.error(chalk.redBright(`🍪 ${tag} child process error:`), err)
+      console.error(chalk.red(`[${time()}] ${tag} process error: ${err.message}`))
       childProcess?.kill("SIGTERM")
       resolve(1)
     })
@@ -53,6 +55,8 @@ async function start(file) {
         if (childProcess?.connected) childProcess.send(line.trim())
       })
     }
+
+    console.log(chalk.greenBright(`[${time()}] ${tag} child process started.`))
   })
 }
 
@@ -60,12 +64,14 @@ async function stopChild(signal = "SIGINT") {
   if (shuttingDown || !childProcess) return
   shuttingDown = true
 
-  const tag = chalk.cyanBright(`[${name}]`)
-  console.log(chalk.yellowBright(`\n🍩 ${tag} Received ${signal}, shutting down gracefully...`))
+  const tag = chalk.cyan(`[${name}]`)
+  const time = () => new Date().toISOString().replace("T", " ").split(".")[0]
+
+  console.log(chalk.yellow(`[${time()}] ${tag} received ${signal}, shutting down gracefully...`))
   childProcess.kill(signal)
 
   const timeout = setTimeout(() => {
-    console.warn(chalk.redBright(`🍫 ${tag} Child did not exit in time, forcing kill...`))
+    console.warn(chalk.red(`[${time()}] ${tag} force killing unresponsive process...`))
     childProcess.kill("SIGKILL")
   }, 10000)
 
@@ -76,17 +82,19 @@ async function stopChild(signal = "SIGINT") {
     })
   })
 
-  console.log(chalk.greenBright(`🍰 ${tag} Graceful shutdown complete.`))
+  console.log(chalk.green(`[${time()}] ${tag} graceful shutdown complete.`))
   process.exit(0)
 }
 
 async function supervise() {
-  const tag = chalk.cyanBright(`[${name}]`)
+  const tag = chalk.cyan(`[${name}]`)
+  const time = () => new Date().toISOString().replace("T", " ").split(".")[0]
+
   while (true) {
     const exitCode = await start("main.js")
 
     if (shuttingDown || exitCode === 0) {
-      console.log(chalk.greenBright(`🍰 ${tag} stopped normally.`))
+      console.log(chalk.green(`[${time()}] ${tag} stopped normally.`))
       break
     }
 
@@ -96,11 +104,11 @@ async function supervise() {
     lastCrash = now
 
     if (crashCount >= 5) {
-      console.warn(chalk.redBright(`🍪 ${tag} too many crashes in a short time — pausing for 5 minutes.`))
+      console.warn(chalk.red(`[${time()}] ${tag} too many crashes — pausing for 5 minutes.`))
       await new Promise((r) => setTimeout(r, 300000))
       crashCount = 0
     } else {
-      console.warn(chalk.yellowBright(`🍪 ${tag} restarting in 3s...`))
+      console.warn(chalk.yellow(`[${time()}] ${tag} restarting in 3 seconds...`))
       await new Promise((r) => setTimeout(r, 3000))
     }
   }
@@ -109,11 +117,13 @@ async function supervise() {
 process.on("SIGINT", () => stopChild("SIGINT"))
 process.on("SIGTERM", () => stopChild("SIGTERM"))
 process.on("uncaughtException", (err) => {
-  console.error(chalk.redBright(`🍫 [${name}] Uncaught exception:`), err)
+  const time = new Date().toISOString().replace("T", " ").split(".")[0]
+  console.error(chalk.red(`[${time}] [${name}] Uncaught Exception: ${err.message}`))
   stopChild("SIGTERM")
 })
 
 supervise().catch((err) => {
-  console.error(chalk.redBright("🍪 [FATAL] Supervisor error:"), err)
+  const time = new Date().toISOString().replace("T", " ").split(".")[0]
+  console.error(chalk.red(`[${time}] [liora] FATAL: ${err.message}`))
   process.exit(1)
 })

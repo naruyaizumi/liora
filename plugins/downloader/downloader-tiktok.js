@@ -1,50 +1,58 @@
 let handler = async (m, { conn, usedPrefix, command, args }) => {
-  if (!args[0]) {
+  if (!args[0])
     return m.reply(
-      `🍡 *Masukkan URL TikTok yang valid!*\n🍰 *Contoh: ${usedPrefix + command} https://vt.tiktok.com*`,
-    );
-  }
+      `Please provide a valid TikTok URL.\n› Example: ${usedPrefix + command} https://vt.tiktok.com`
+    )
 
-  const url = args[0];
-  if (!/^https?:\/\/(www\.)?(vm\.|vt\.|m\.)?tiktok\.com\/.+/i.test(url)) {
-    return m.reply("🍰 *URL tidak valid! Harap masukkan link TikTok yang benar.*");
-  }
+  const rawUrl = args[0]
+  const isTikTok = /^https?:\/\/(www\.)?(vm\.|vt\.|m\.)?tiktok\.com\/.+/i.test(rawUrl)
+  if (!isTikTok)
+    return m.reply("Invalid URL! Please provide a valid TikTok link.")
 
-  await global.loading(m, conn);
+  const url = /^https?:\/\/vm\.tiktok\.com(\/|$)/.test(rawUrl)
+    ? await resolveTikTokUrl(rawUrl)
+    : rawUrl
 
   try {
-    const res = await fetch(`https://api.nekolabs.my.id/downloader/tiktok?url=${url}`);
-    const json = await res.json();
-    const { videoUrl, images } = json?.result || {};
+    await global.loading(m, conn)
 
-    if (videoUrl) {
-      await conn.sendFile(
-        m.chat,
-        videoUrl,
-        "tiktok.mp4",
-        ``,
-        m,
-      );
-    } else if (images?.length) {
-      const items = images.map((img, i) => ({
-        image: { url: img },
-        caption: `📸 Slide ${i + 1} dari ${images.length}`,
-      }));
+    const resSlide = await fetch(global.API("btz", "/api/download/ttslide", { url }, "apikey"))
+    const resVideo = await fetch(global.API("btz", "/api/download/tiktok", { url }, "apikey"))
 
-      await conn.sendAlbum(m.chat, items, { quoted: m });
-    } else {
-      await m.reply("🍮 *Tidak ada media ditemukan dalam URL tersebut.*");
+    const jsonSlide = await resSlide.json()
+    const jsonVideo = await resVideo.json()
+
+    if (jsonSlide.status && Array.isArray(jsonSlide.result?.images) && jsonSlide.result.images.length > 0) {
+      const images = jsonSlide.result.images
+      if (images.length === 1)
+        await conn.sendFile(m.chat, images[0], "slide.jpg", null, m)
+      else
+        await conn.sendAlbum(m.chat, images.map(url => ({ image: { url } })), { quoted: m })
+      return
     }
-  } catch (e) {
-    console.error(e);
-    await m.reply(`🍮 *Terjadi kesalahan:* ${e.message}`);
+
+    const videoUrl = jsonVideo?.result?.video?.[0]
+    if (jsonVideo.status && videoUrl) {
+      await conn.sendFile(m.chat, videoUrl, "tiktok.mp4", null, m)
+      return
+    }
+
+    m.reply("No downloadable content found. Try another TikTok link.")
+  } catch (err) {
+    console.error(err)
+    m.reply(`An error occurred: ${err.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["tiktok"];
-handler.tags = ["downloader"];
-handler.command = /^(tiktok|tt)$/i;
+handler.help = ["tiktok"]
+handler.tags = ["downloader"]
+handler.command = /^(tiktok|tt)$/i
 
-export default handler;
+export default handler
+
+async function resolveTikTokUrl(rawUrl) {
+  const res = await fetch(rawUrl, { method: "HEAD", redirect: "follow" })
+  return res.url
+}

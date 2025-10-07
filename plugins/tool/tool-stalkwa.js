@@ -1,85 +1,101 @@
 let handler = async (m, { conn, text }) => {
   try {
-    await global.loading(m, conn);
+    await global.loading(m, conn)
 
-    let target =
+    const target =
       m.mentionedJid?.[0] ||
       m.quoted?.sender ||
-      (text && /^\d+$/.test(text) ? text + "@s.whatsapp.net" : null);
+      (text && /^\d+$/.test(text) ? text + "@s.whatsapp.net" : null)
 
     if (!target)
-      return m.reply("🍙 *Masukkan nomor, mention, atau reply user!*");
+      return m.reply("Enter a number, mention, or reply to a user.")
 
-    let pnJid = target.endsWith("@s.whatsapp.net")
+    const pnJid = target.endsWith("@s.whatsapp.net")
       ? target
-      : (await conn.signalRepository.lidMapping.getPNForLID(target)) || target;
+      : (await conn.signalRepository.lidMapping.getPNForLID(target)) || target
 
-    const [cek] = await conn.onWhatsApp(pnJid);
-    if (!cek?.exists) return m.reply("🍩 *Nomor tidak terdaftar di WhatsApp!*");
+    const [cek] = await conn.onWhatsApp(pnJid)
+    if (!cek?.exists) return m.reply("This number is not registered on WhatsApp.")
 
-    let userJid = cek.jid;
-    let lid =
-      (await conn.signalRepository.lidMapping.getLIDForPN(userJid)) || cek.lid;
+    const userJid = cek.jid
+    const lid =
+      (await conn.signalRepository.lidMapping.getLIDForPN(userJid)) || cek.lid
 
-    let pp = await conn
-      .profilePictureUrl(userJid, "image")
-      .catch(() => "https://qu.ax/jVZhH.jpg");
-    let statusRes = await conn.fetchStatus(userJid).catch(() => null);
-    let about = statusRes?.[0]?.status?.status || "Tidak tersedia";
-    let lastUpdate = statusRes?.[0]?.status?.setAt
+    const pp =
+      (await conn.profilePictureUrl(userJid, "image").catch(() => null)) ||
+      "https://qu.ax/jVZhH.jpg"
+
+    const statusRes = await conn.fetchStatus(userJid).catch(() => null)
+    const about = statusRes?.[0]?.status?.status || "-"
+    const lastUpdate = statusRes?.[0]?.status?.setAt
       ? formatDate(new Date(statusRes[0].status.setAt))
-      : null;
-    let bisnis = await conn.getBusinessProfile(userJid).catch(() => null);
-    let businessHours = "";
-    if (bisnis?.business_hours?.business_config?.length) {
-      businessHours =
-        "\n🍵 *Jam Operasional:*\n" +
-        bisnis.business_hours.business_config
+      : "-"
+    const bisnis = await conn.getBusinessProfile(userJid).catch(() => null)
+
+    const businessHours = bisnis?.business_hours?.business_config?.length
+      ? bisnis.business_hours.business_config
           .map((cfg) => {
-            let day = dayId(cfg.day_of_week);
-            let open = minuteToTime(cfg.open_time);
-            let close = minuteToTime(cfg.close_time);
-            return `*•> ${day}: ${open} - ${close}*`;
+            const day = dayId(cfg.day_of_week)
+            const open = minuteToTime(cfg.open_time)
+            const close = minuteToTime(cfg.close_time)
+            return `• ${day}: ${open} - ${close}`
           })
-          .join("\n");
-    }
-    let title =
+          .join("\n")
+      : "-"
+
+    const title =
       bisnis?.description || bisnis?.category
-        ? "🍰 WhatsApp Business"
-        : "🍩 WhatsApp";
+        ? "WhatsApp Business"
+        : "WhatsApp User"
 
-    let caption = `*${title}*
-────────────────────
-🍡 *User:* @${userJid.split("@")[0]}
-🍙 *LID: ${lid}*
+    const timestamp = new Date().toTimeString().split(" ")[0]
 
-🍰 *Status: ${about}*
-${about !== "Tidak tersedia" && lastUpdate ? `🕒 *Terakhir diubah: ${lastUpdate}*` : ""}
-${bisnis?.description ? `🍮 *Bisnis:* ${bisnis.description}` : ""}
-${bisnis?.category ? `🍧 *Kategori: ${Array.isArray(bisnis.category) ? bisnis.category.join(", ") : bisnis.category}*` : ""}
-${bisnis?.email ? `🍬 *Email: ${bisnis.email}*` : ""}
-${bisnis?.website?.length ? `🍭 *Website: ${bisnis.website.join(", ")}*` : ""}
-${bisnis?.address ? `🍪 *Alamat: ${bisnis.address}*` : ""}
-${businessHours}`.trim();
+    const caption = [
+      "```",
+      `┌─[${timestamp}]────────────`,
+      `│  ${title}`,
+      "└──────────────────────",
+      `User        : @${userJid.split("@")[0]}`,
+      `LID         : ${lid || "-"}`,
+      `Status      : ${about}`,
+      `Updated     : ${lastUpdate}`,
+      `Business    : ${bisnis?.description || "-"}`,
+      `Category    : ${
+        Array.isArray(bisnis?.category)
+          ? bisnis.category.join(", ")
+          : bisnis?.category || "-"
+      }`,
+      `Email       : ${bisnis?.email || "-"}`,
+      `Website     : ${bisnis?.website?.join(", ") || "-"}`,
+      `Address     : ${bisnis?.address || "-"}`,
+      `Work Hours  : ${businessHours}`,
+      "───────────────────────",
+      "Profile info fetched successfully.",
+      "```",
+    ].join("\n")
 
-    await conn.sendFile(m.chat, pp, "profile.jpg", caption, m, null, {
-      mentions: [userJid],
-    });
+    await conn.sendMessage(
+      m.chat,
+      {
+        image: { url: pp },
+        caption,
+        mentions: [userJid],
+      },
+      { quoted: m },
+    )
   } catch (e) {
-    console.error(e);
-    m.reply(
-      "🍩 *Gagal mengambil data profil, mungkin nomornya salah atau disembunyikan~*",
-    );
+    console.error(e)
+    m.reply("Failed to fetch profile info. Possibly hidden or invalid.")
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["stalkwa"];
-handler.tags = ["tools"];
-handler.command = /^(stalkwa|getwa|cekwa)$/i;
+handler.help = ["stalkwa"]
+handler.tags = ["tools"]
+handler.command = /^(stalkwa|getwa|cekwa)$/i
 
-export default handler;
+export default handler
 
 function formatDate(date) {
   return (
@@ -92,7 +108,7 @@ function formatDate(date) {
       hour12: false,
       timeZone: "Asia/Jakarta",
     }).format(date) + " WIB"
-  );
+  )
 }
 
 function dayId(day) {
@@ -104,13 +120,13 @@ function dayId(day) {
     thu: "Kamis",
     fri: "Jumat",
     sat: "Sabtu",
-  };
-  return map[day] || day;
+  }
+  return map[day] || day
 }
 
 function minuteToTime(minute) {
-  if (!minute && minute !== 0) return "-";
-  let h = Math.floor(minute / 60);
-  let m = minute % 60;
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")} WIB`;
+  if (!minute && minute !== 0) return "-"
+  const h = Math.floor(minute / 60)
+  const m = minute % 60
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")} WIB`
 }

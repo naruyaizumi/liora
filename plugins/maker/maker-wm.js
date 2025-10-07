@@ -2,11 +2,8 @@ import { addExif, sticker } from "../../src/bridge.js"
 
 let handler = async (m, { conn, text }) => {
   const q = m.quoted ? m.quoted : m
-  if (!q || !/sticker|image|video/.test(q.mtype)) {
-    return m.reply(
-      "🍡 *Balas stiker, gambar, atau video untuk diganti watermark!*"
-    )
-  }
+  if (!q || !/sticker|image|video/.test(q.mtype))
+    return m.reply("Reply to a sticker, image, or video to change its watermark.")
 
   let [packName, authorName] = (text || "").split("|")
   packName = (packName || global.config.stickpack || "").trim()
@@ -16,13 +13,12 @@ let handler = async (m, { conn, text }) => {
 
   try {
     let buffer
-
     const media = await q.download?.()
-    if (!media) throw new Error("Download gagal")
+    if (!media) throw new Error("Failed to download media.")
 
     if (typeof media === "string" && /^https?:\/\//.test(media)) {
       const res = await fetch(media)
-      if (!res.ok) throw new Error("Gagal mengambil file dari URL")
+      if (!res.ok) throw new Error("Failed to fetch file from URL.")
       buffer = Buffer.from(await res.arrayBuffer())
     } else if (Buffer.isBuffer(media)) {
       buffer = media
@@ -30,7 +26,7 @@ let handler = async (m, { conn, text }) => {
       buffer = Buffer.from(media.data)
     }
 
-    if (!buffer) throw new Error("Buffer kosong")
+    if (!buffer) throw new Error("Empty buffer, media could not be processed.")
 
     let result
     const isWebp =
@@ -47,7 +43,7 @@ let handler = async (m, { conn, text }) => {
     await conn.sendMessage(m.chat, { sticker: result }, { quoted: m })
   } catch (e) {
     console.error(e)
-    m.reply(`🍰 *Ups, gagal pasang watermark!*\n📄 *Error:* ${e.message}`)
+    m.reply(`Failed to apply watermark.\nError: ${e.message}`)
   } finally {
     await global.loading(m, conn, true)
   }

@@ -1,18 +1,18 @@
 let handler = async (m, { text, usedPrefix, command }) => {
   if (text) {
-    global.db.data.chats[m.chat].sBye = text;
-    m.reply(`🍰 *Pesan bye berhasil diatur!*`);
-  } else {
-    return m.reply(
-      `🍩 *Teksnya mana?*\n\n🍬 *Contoh penggunaan: ${usedPrefix + command} Selamat tinggal 🍙 @user*`,
-    );
+    global.db.data.chats[m.chat].sBye = text
+    return m.reply("Bye message successfully updated.")
   }
-};
 
-handler.help = ["setbye"];
-handler.tags = ["group"];
-handler.command = /^(setbye)$/i;
-handler.group = true;
-handler.owner = true;
+  return m.reply(
+    `Enter the goodbye message.\n› Example: ${usedPrefix + command} Goodbye @user\n\nAvailable placeholders:\n• @user = mention\n• @subject = group name`
+  )
+}
 
-export default handler;
+handler.help = ["setbye"]
+handler.tags = ["group"]
+handler.command = /^(setbye)$/i
+handler.group = true
+handler.owner = true
+
+export default handler

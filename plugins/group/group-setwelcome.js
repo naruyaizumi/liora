@@ -1,26 +1,26 @@
 let handler = async (m, { text, usedPrefix, command }) => {
-  let chat = global.db.data.chats[m.chat];
-  if (!chat) chat = global.db.data.chats[m.chat] = {};
+  let chat = global.db.data.chats[m.chat]
+  if (!chat) chat = global.db.data.chats[m.chat] = {}
+
   if (!text) {
     if (chat.sWelcome) {
-      chat.sWelcome = "";
-      return m.reply(
-        "🍩 *Pesan welcome telah di-reset!* 🍰\n*Sekarang nggak ada pesan sambutan khusus di grup ini~*",
-      );
+      chat.sWelcome = ""
+      return m.reply("Welcome message has been reset.\nNo active greeting message in this group.")
     } else {
       return m.reply(
-        `🍓 *Teks welcome-nya mana* 🍮\n\n*Contoh: ${usedPrefix + command} Hai, @user! 🍭 Selamat datang di @subject* 🍬\n\n*Gunakan: • @user = mention*\n*• @subject = nama grup*\n*• @desc = deskripsi grup*`,
-      );
+        `Enter the welcome text.\n› Example: ${usedPrefix + command} Hello @user, welcome to @subject\n\nAvailable placeholders:\n• @user = mention\n• @subject = group name\n• @desc = group description`
+      )
     }
   }
-  chat.sWelcome = text;
-  return m.reply("🍰 *Welcome berhasil diatur!* 🍓");
-};
 
-handler.help = ["setwelcome"];
-handler.tags = ["group"];
-handler.command = /^(setwelcome|setw)$/i;
-handler.group = true;
-handler.admin = true;
+  chat.sWelcome = text
+  return m.reply("Welcome message successfully updated.")
+}
 
-export default handler;
+handler.help = ["setwelcome"]
+handler.tags = ["group"]
+handler.command = /^(setwelcome|setw)$/i
+handler.group = true
+handler.admin = true
+
+export default handler

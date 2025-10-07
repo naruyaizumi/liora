@@ -1,44 +1,38 @@
-let handler = async (m, { conn, args }) => {
-  if (!args[0]) return m.reply("⚠️ *Masukkan URL YouTube yang valid!*");
-  let url = args[0];
-  let youtubeRegex =
-    /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|shorts\/|live\/)|youtu\.be\/)[\w-]+(\S+)?$/i;
-  if (!youtubeRegex.test(url))
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+  if (!args[0])
     return m.reply(
-      "❌ *URL tidak valid! Harap masukkan link YouTube yang benar.*",
-    );
+      `Please provide a valid YouTube video link.\n› Example: ${usedPrefix + command} https://youtu.be/dQw4w9WgXcQ`
+    )
+
+  const url = args[0]
+  const youtubeRegex =
+    /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|shorts\/|live\/)|youtu\.be\/)[\w-]+(\S+)?$/i
+  if (!youtubeRegex.test(url))
+    return m.reply("Invalid URL! Please provide a valid YouTube video link.")
+
+  const headers = { "X-API-Key": global.config.ytdl }
+  await global.loading(m, conn)
+
   try {
-    await global.loading(m, conn);
-    let response = await fetch(
-      global.API("btz", "/api/download/ytmp4", { url }, "apikey"),
-    );
-    if (!response.ok)
-      return m.reply("💔 *Gagal menghubungi API. Coba lagi nanti ya!*");
-    let json = await response.json();
-    if (!json.status || !json.result || !json.result.mp4)
-      return m.reply(
-        "❌ *Gagal memproses permintaan!*\n*Pastikan URL benar dan coba lagi.*",
-      );
-    let { mp4, title } = json.result;
-    await conn.sendFile(
-      m.chat,
-      mp4,
-      `${title}.mp4`,
-      `🎬 *Berikut adalah video yang berhasil diunduh!*\n📌 *Judul: ${title}*`,
-      m,
-      false,
-      { mimetype: "video/mp4" },
-    );
-  } catch (e) {
-    console.error(e);
-    return m.reply("❌ *Terjadi kesalahan saat memproses permintaan.*");
+    const apiUrl = `https://cloudkutube.eu/ytmp4?url=${url}&buffer=true`
+    const res = await fetch(apiUrl, { headers })
+    if (!res.ok) throw new Error(`Failed to reach API. Status: ${res.status}`)
+
+    const buffer = Buffer.from(await res.arrayBuffer())
+
+    await conn.sendFile(m.chat, buffer, `video_${Date.now()}.mp4`, null, m, false, {
+      mimetype: "video/mp4",
+    })
+  } catch (err) {
+    console.error(err)
+    m.reply(`Error while downloading: ${err.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["ytmp4"];
-handler.tags = ["downloader"];
-handler.command = /^(ytmp4)$/i;
+handler.help = ["ytmp4"]
+handler.tags = ["downloader"]
+handler.command = /^(ytmp4)$/i
 
-export default handler;
+export default handler

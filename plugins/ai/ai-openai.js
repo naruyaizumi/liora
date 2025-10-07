@@ -2,44 +2,42 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     if (!text)
       return m.reply(
-        `🍩 *Masukkan teks pertanyaan untuk AI!*\n\n🍰 *Contoh: ${usedPrefix + command} Apa itu AI?*`,
-      );
-    await global.loading(m, conn);
-    let apiUrl = global.API(
-      "btz",
-      "/api/search/openai-chat",
-      { text },
-      "apikey",
-    );
-    let response = await fetch(apiUrl);
-    if (!response.ok)
-      return m.reply(
-        "🍬 *Terjadi kesalahan dalam memproses permintaan. Coba lagi nanti!*",
-      );
-    let json = await response.json();
-    if (!json.message)
-      return m.reply(
-        "🍪 *Gagal mendapatkan jawaban dari AI. Coba lagi nanti!*",
-      );
-    await conn.sendMessage(
-      m.chat,
-      {
-        text: `🍱 *OpenAI:*\n\n${json.message}`,
-      },
-      { quoted: m },
-    );
+        `Enter your question.\n› Example: ${usedPrefix + command} What is Artificial Intelligence?`
+      )
+
+    await global.loading(m, conn)
+
+    const apiUrl = global.API("btz", "/api/search/openai-chat", { text }, "apikey")
+    const response = await fetch(apiUrl)
+    if (!response.ok) return m.reply("Request failed. Please try again later.")
+
+    const json = await response.json()
+    if (!json.message) return m.reply("No response received from OpenAI.")
+
+    const timestamp = new Date().toTimeString().split(" ")[0]
+    const output = [
+      "```",
+      `┌─[${timestamp}]────────────`,
+      `│  OPENAI CHAT RESPONSE`,
+      "└──────────────────────",
+      `> Query: ${text}`,
+      "───────────────────────",
+      json.message.trim(),
+      "───────────────────────",
+      "```",
+    ].join("\n")
+
+    await conn.sendMessage(m.chat, { text: output }, { quoted: m })
   } catch (e) {
-    console.error(e);
-    m.reply(
-      "🍙 *Terjadi Kesalahan Teknis!*\n🍜 *Maaf ya, coba lagi sebentar lagi~*",
-    );
+    console.error(e)
+    m.reply("Error: " + e.message)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["ai"];
-handler.tags = ["ai"];
-handler.command = /^(ai|openai)$/i;
+handler.help = ["ai"]
+handler.tags = ["ai"]
+handler.command = /^(ai|openai)$/i
 
-export default handler;
+export default handler

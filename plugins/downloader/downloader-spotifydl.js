@@ -1,38 +1,43 @@
-let handler = async (m, { conn, args }) => {
+let handler = async (m, { conn, args, usedPrefix, command }) => {
   if (!args[0] || !args[0].startsWith("http"))
-    return m.reply("🍙 *Berikan link lagu Spotify yang valid ya~!*");
-  await global.loading(m, conn);
+    return m.reply(
+      `Please provide a valid Spotify track URL.\n› Example: ${usedPrefix + command} https://open.spotify.com/track/...`
+    )
+
+  await global.loading(m, conn)
+
   try {
-    let res = await fetch(
-      global.API("btz", "/api/download/spotify", { url: args[0] }, "apikey"),
-    );
-    let json = await res.json();
+    const res = await fetch(global.API("btz", "/api/download/spotify", { url: args[0] }, "apikey"))
+    if (!res.ok) throw new Error(`Failed to contact API. Status: ${res.status}`)
+
+    const json = await res.json()
     if (!json.status || !json.result?.data?.url)
-      return m.reply("🍤 *Gagal mengunduh lagu dari Spotify!*");
-    let { title, artist, thumbnail, url } = json.result.data;
-    await conn.sendFile(m.chat, url, `${title}.mp3`, "", m, true, {
+      throw new Error("Failed to download track from Spotify.")
+
+    const { title, artist, thumbnail, url } = json.result.data
+
+    await conn.sendFile(m.chat, url, `${title}.mp3`, null, m, true, {
       mimetype: "audio/mpeg",
       contextInfo: {
         externalAdReply: {
-          title: title,
+          title,
           body: artist?.name || "Spotify",
           thumbnailUrl: thumbnail,
-          mediaUrl: args[0],
           mediaType: 1,
           renderLargerThumbnail: true,
         },
       },
-    });
-  } catch (e) {
-    console.error(e);
-    m.reply("🍩 *Terjadi kesalahan saat mengunduh lagu Spotify!*");
+    })
+  } catch (err) {
+    console.error(err)
+    m.reply(`An error occurred: ${err.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["spotifydl"];
-handler.tags = ["downloader"];
-handler.command = /^(spotifydl|spdl)$/i;
+handler.help = ["spotifydl"]
+handler.tags = ["downloader"]
+handler.command = /^(spotifydl|spdl)$/i
 
-export default handler;
+export default handler

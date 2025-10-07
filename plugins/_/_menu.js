@@ -1,163 +1,137 @@
-import os from "os";
-import fs from "fs";
+import { readFile } from "fs/promises"
+import os from "os"
 
-const CATEGORIES = [
-  "all",
-  "ai",
-  "downloader",
-  "group",
-  "info",
-  "internet",
-  "maker",
-  "owner",
-  "islam",
-  "tools",
-];
+const CATEGORIES = ["ai", "downloader", "group", "info", "internet", "maker", "owner", "tools"]
 
 const MENU_META = {
-  ai: "🧠 AI",
-  downloader: "🍥 Downloader",
-  group: "🧃 Grup",
-  info: "📖 Info",
-  internet: "💌 Internet",
-  maker: "🎀 Maker",
-  owner: "🪄 Owner",
-  islam: "🍃 Islami",
-  tools: "🧸. Tools",
-};
+  ai: "AI",
+  downloader: "Downloader",
+  group: "Group",
+  info: "Information",
+  internet: "Internet",
+  maker: "Maker",
+  owner: "Owner",
+  tools: "Tools",
+}
 
-let handler = async (
-  m,
-  { conn, usedPrefix, command, isOwner, isMods, args },
-) => {
-  await global.loading(m, conn);
+let handler = async (m, { conn, usedPrefix, command, args }) => {
+  let pkg
+  try {
+    const data = await readFile("./package.json", "utf8")
+    pkg = JSON.parse(data)
+  } catch {
+    pkg = { name: "Unknown", version: "?", type: "?", license: "?", author: { name: "Unknown" } }
+  }
 
-  let name = await conn.getName(m.sender);
-  let status = isMods ? "Developer" : isOwner ? "Owner" : "User";
+  const now = new Date()
+  const timestamp = now.toTimeString().split(" ")[0]
+  const uptimeBot = formatTime(process.uptime())
+  const uptimeSys = formatTime(os.uptime())
 
-  const pkg = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
-  const version = pkg.version;
-  let uptime = formatTime(process.uptime());
-  let muptime = formatTime(os.uptime());
+  const help = Object.values(global.plugins)
+    .filter((p) => !p.disabled)
+    .map((p) => ({
+      help: [].concat(p.help || []),
+      tags: [].concat(p.tags || []),
+      owner: p.owner,
+      admin: p.admin,
+    }))
 
-  let infoBot = `
-🍓 *INFO BOT*
-────────────────
-🧁 *Bot: ${conn.user.name}*
-🍒 *Version: ${version}*
-🍧 *Uptime: ${uptime}*
-🍮 *Server Uptime: ${muptime}*
-────────────────
-`.trim();
+  const input = (args[0] || "").toLowerCase()
 
-  if (!args[0]) {
-    let list = CATEGORIES.map((v, i) => `*${i + 1}. ${capitalize(v)}*`).join(
-      "\n",
-    );
+  if (!input) {
+    const list = CATEGORIES.map((v, i) => `${String(i + 1).padStart(2, "0")}. ${MENU_META[v]}`).join("\n")
+
+    const text = [
+      "```",
+      `[${timestamp}] Liora Environment`,
+      "────────────────────────────",
+      `Name       : ${pkg.name}`,
+      `Version    : ${pkg.version}`,
+      `License    : ${pkg.license}`,
+      `Type       : ${pkg.type}`,
+      `NodeJS     : ${process.version}`,
+      `VPS Uptime : ${uptimeSys}`,
+      `Bot Uptime : ${uptimeBot}`,
+      "",
+      `Owner      : ${pkg.author?.name || "Naruya Izumi"}`,
+      `GitHub     : https://github.com/naruyaizumi`,
+      `Social     : https://linkbio.co/naruyaizumi`,
+      "────────────────────────────",
+      "Liora Menu:",
+      list,
+      "",
+      `› Example: ${usedPrefix + command} ai`,
+      "```",
+    ].join("\n")
+
     return conn.sendMessage(
       m.chat,
       {
-        text: `${infoBot}\n${list}\n\n📌 *Contoh: ${usedPrefix + command} 1 atau ${usedPrefix + command} ai*`,
+        text,
         contextInfo: {
           externalAdReply: {
-            title: global.config.author,
-            body: "Menu Bot",
-            thumbnailUrl:
-              "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
+            title: "Liora Menu",
+            body: global.config.watermark,
+            thumbnailUrl: "https://qu.ax/nvlGQ.jpg",
             sourceUrl: global.config.website,
             mediaType: 1,
             renderLargerThumbnail: true,
           },
         },
       },
-      { quoted: m },
-    );
+      { quoted: m }
+    )
   }
 
-  let input = args[0].toLowerCase();
+  const idx = parseInt(input) - 1
+  const category = !isNaN(idx) && CATEGORIES[idx] ? CATEGORIES[idx] : input
+  if (!CATEGORIES.includes(category)) return m.reply("Invalid category.")
 
-  if (!isNaN(input)) {
-    let idx = parseInt(input) - 1;
-    if (idx >= 0 && idx < CATEGORIES.length) {
-      input = CATEGORIES[idx];
-    } else {
-      return m.reply("🍩 *Nomor kategori tidak valid!*");
-    }
-  }
+  const cmds = help
+    .filter((p) => p.tags.includes(category))
+    .flatMap((p) =>
+      p.help.map((cmd) => `- ${usedPrefix + cmd}${p.owner ? " (owner)" : p.admin ? " (admin)" : ""}`)
+    )
 
-  if (!CATEGORIES.includes(input)) {
-    return m.reply("🍩 *Kategori tidak valid!*");
-  }
+  const text =
+    cmds.length > 0
+      ? [
+          "```",
+          `[${timestamp}] ${MENU_META[category]} Commands`,
+          "────────────────────────────",
+          cmds.join("\n"),
+          "```",
+        ].join("\n")
+      : `No commands found for ${MENU_META[category]} category.`
 
-  let help = Object.values(global.plugins)
-    .filter((p) => !p.disabled)
-    .map((p) => ({
-      help: Array.isArray(p.help) ? p.help : [p.help],
-      tags: Array.isArray(p.tags) ? p.tags : [p.tags],
-      owner: p.owner,
-      admin: p.admin,
-      mods: p.mods,
-    }));
-
-  let selectedTags = input === "all" ? Object.keys(MENU_META) : [input];
-  let sections = selectedTags.map((tag) => {
-    let cmds = help
-      .filter((p) => p.tags.includes(tag))
-      .flatMap((p) =>
-        p.help.map(
-          (cmd) =>
-            `*• ${usedPrefix + cmd}* ${p.admin ? "🅐" : ""}${p.mods ? "🅓" : ""}${p.owner ? "🅞" : ""}`,
-        ),
-      );
-    return `*${MENU_META[tag]} Menu*\n${cmds.join("\n")}`;
-  });
-
-  let output = `
-🍓 *INFO USER*
-────────────────
-🍩 *Nama: ${name}*
-🧁 *Status: ${status}*
-
-${sections.join("\n\n")}
-
-*© 2024 – 2025 Naruya Izumi*
-`.trim();
-
-  await conn.sendMessage(
+  return conn.sendMessage(
     m.chat,
     {
-      text: output,
+      text,
       contextInfo: {
         externalAdReply: {
-          title: global.config.author,
-          body: "🍱 Daftar Command",
-          thumbnailUrl:
-            "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
+          title: MENU_META[category],
+          body: "Command List",
+          thumbnailUrl: "https://qu.ax/nvlGQ.jpg",
           sourceUrl: global.config.website,
           mediaType: 1,
           renderLargerThumbnail: true,
         },
       },
     },
-    { quoted: m },
-  );
-};
+    { quoted: m }
+  )
+}
 
-handler.help = ["menu"];
-handler.command = /^(menu|help)$/i;
+handler.help = ["menu"]
+handler.command = /^(menu|help)$/i
 
-export default handler;
+export default handler
 
 function formatTime(sec) {
-  let m = Math.floor(sec / 60),
-    h = Math.floor(m / 60),
-    d = Math.floor(h / 24);
-  m %= 60;
-  h %= 24;
-  return (
-    [d && `${d}d`, h && `${h}h`, m && `${m}m`].filter(Boolean).join(" ") || "0m"
-  );
-}
-function capitalize(s) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
+  const m = Math.floor(sec / 60)
+  const h = Math.floor(m / 60)
+  const d = Math.floor(h / 24)
+  return [d && `${d}d`, h % 24 && `${h % 24}h`, m % 60 && `${m % 60}m`].filter(Boolean).join(" ") || "0m"
 }

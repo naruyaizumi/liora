@@ -1,50 +1,56 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  if (!args[0]) {
+  if (!args[0])
     return m.reply(
-      `🍙 *Masukkan judul lagu untuk dicari!*\n*Contoh: ${usedPrefix + command} Serana*`,
-    );
-  }
+      `Please provide a song title to search.\n› Example: ${usedPrefix + command} Swim`
+    )
 
-  let query = args.join(" ");
-  await global.loading(m, conn);
+  const query = args.join(" ")
+  const headers = { "X-API-Key": global.config.ytdl }
+  await global.loading(m, conn)
 
   try {
-    let res = await fetch(
-      `https://api.nekolabs.my.id/downloader/youtube/play/v1?q=${query}`,
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    let json = await res.json();
+    const search = await fetch(`https://cloudkutube.eu/search?q=${query}`, { headers })
+    if (!search.ok) throw new Error(`HTTP ${search.status}`)
 
-    if (!json.status || !json.result?.downloadUrl) {
-      return m.reply("🍣 *Gagal menemukan atau mengunduh audio!*");
-    }
+    const json = await search.json()
+    const video = json?.data?.[0]
+    if (!video?.url) return m.reply("No video results found.")
 
-    let { title, channel, duration, cover, url } = json.result.metadata;
-    let audioUrl = json.result.downloadUrl;
+    const videoUrl = video.url
+    const title = video.title || "YouTube Audio"
+    const channel = video.channel?.name || "Unknown Channel"
+    const thumbnail = video.thumbnail || null
+    const duration = video.duration?.formatted || "Unknown"
 
-    await conn.sendFile(m.chat, audioUrl, `${title}.mp3`, "", m, true, {
+    const dlUrl = `https://cloudkutube.eu/ytmp3?url=${videoUrl}&buffer=true`
+    const res = await fetch(dlUrl, { headers })
+    if (!res.ok) throw new Error(`Failed to fetch audio: HTTP ${res.status}`)
+
+    const buffer = Buffer.from(await res.arrayBuffer())
+
+    await conn.sendFile(m.chat, buffer, `${title}.mp3`, null, m, true, {
       mimetype: "audio/mpeg",
       contextInfo: {
         externalAdReply: {
-          title: title,
+          title,
           body: `${channel} • ${duration}`,
-          thumbnailUrl: cover,
-          mediaUrl: url,
+          thumbnailUrl: thumbnail,
+          mediaUrl: videoUrl,
           mediaType: 2,
           renderLargerThumbnail: true,
         },
       },
-    });
-  } catch (e) {
-    console.error(e);
-    m.reply("🍤 *Terjadi kesalahan saat mengambil data YouTube!*");
+    })
+  } catch (err) {
+    console.error(err)
+    m.reply(`Error while downloading: ${err.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["play"];
-handler.tags = ["downloader"];
-handler.command = /^(play)$/i;
+handler.help = ["play"]
+handler.tags = ["downloader"]
+handler.command = /^(play)$/i
 
-export default handler;
+export default handler

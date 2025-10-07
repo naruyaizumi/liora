@@ -1,43 +1,38 @@
 let handler = async (m, { conn, usedPrefix, command, args }) => {
   try {
-    await global.loading(m, conn);
+    await global.loading(m, conn)
+
     if (!args.length)
       return m.reply(
-        `🍔 *Masukkan kode yang ingin dijadikan gambar!*\n🍱 *Contoh: ${usedPrefix + command} console.log("Hello World!")*`,
-      );
-    let code = args.join(" ");
-    let apiUrl = global.API(
-      "btz",
-      "/api/maker/carbon",
-      { text: code },
-      "apikey",
-    );
-    let response = await fetch(apiUrl);
+        `Enter the code to convert into an image.\n› Example: ${usedPrefix + command} console.log("Hello World!")`
+      )
+
+    const code = args.join(" ")
+    const apiUrl = global.API("btz", "/api/maker/carbon", { text: code }, "apikey")
+    const response = await fetch(apiUrl)
+
     if (!response.ok)
-      return m.reply(
-        "🍟 *Terjadi kesalahan saat memproses gambar. Coba lagi nanti!*",
-      );
-    let json = await response.json();
+      return m.reply(`Failed to generate code image. (HTTP ${response.status})`)
+
+    const json = await response.json()
     if (!json.status || !json.result)
-      return m.reply("🍕 *Gagal mendapatkan hasil. Coba lagi nanti!*");
+      return m.reply("No valid image result received from API.")
+
     await conn.sendMessage(
       m.chat,
-      {
-        image: { url: json.result },
-        caption: "🍣 *Kode berhasil diubah menjadi gambar!*",
-      },
-      { quoted: m },
-    );
+      { image: { url: json.result } },
+      { quoted: m }
+    )
   } catch (e) {
-    console.error(e);
-    m.reply(`🍩 *Terjadi Kesalahan Teknis!*\n🍜 *Detail:* ${e.message}`);
+    console.error(e)
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["carbon"];
-handler.tags = ["tools"];
-handler.command = /^(carbon|code2img)$/i;
+handler.help = ["carbon"]
+handler.tags = ["tools"]
+handler.command = /^(carbon|code2img)$/i
 
-export default handler;
+export default handler

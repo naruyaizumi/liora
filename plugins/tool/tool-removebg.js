@@ -1,47 +1,39 @@
-import { uploader } from "../../lib/uploader.js";
+import { uploader } from "../../lib/uploader.js"
 
 let handler = async (m, { conn, usedPrefix, command }) => {
   try {
-    let q = m.quoted && m.quoted.mimetype ? m.quoted : m;
-    let mime = (q.msg || q).mimetype || "";
+    const q = m.quoted && m.quoted.mimetype ? m.quoted : m
+    const mime = (q.msg || q).mimetype || ""
 
-    if (!/image\/(jpe?g|png)/i.test(mime)) {
-      return m.reply(
-        `🍡 *Kirim atau reply gambar dengan caption ${usedPrefix + command}*`,
-      );
-    }
+    if (!/image\/(jpe?g|png)/i.test(mime))
+      return m.reply(`Send or reply to an image.\n› Example: ${usedPrefix + command}`)
 
-    await global.loading(m, conn);
+    await global.loading(m, conn)
 
-    let img = await q.download();
-    if (!img) return m.reply("🍫 *Gagal mengunduh gambar!*");
+    const img = await q.download()
+    if (!img) return m.reply("Failed to download the image.")
 
-    let url = await uploader(img).catch(() => null);
-    if (!url) return m.reply("🍫 *Gagal mengunggah gambar ke server!*");
+    const url = await uploader(img).catch(() => null)
+    if (!url) return m.reply("Failed to upload image to server.")
 
-    let api = global.API("btz", "/api/tools/removebg", { url }, "apikey");
-    let res = await fetch(api);
-    let json = await res.json();
+    const api = global.API("btz", "/api/tools/removebg", { url }, "apikey")
+    const res = await fetch(api)
+    if (!res.ok) throw new Error(`Server returned ${res.status}`)
 
-    if (!json.status || !json.url) throw "🍩 *Gagal menghapus background!*";
+    const json = await res.json()
+    if (!json.status || !json.url) throw new Error("Failed to remove background.")
 
-    await conn.sendFile(
-      m.chat,
-      json.url,
-      "removebg.png",
-      "🍓 *Background berhasil dihapus!* 🧁",
-      m,
-    );
+    await conn.sendFile(m.chat, json.url, "removebg.png", "Background removed successfully.", m)
   } catch (e) {
-    console.error(e);
-    m.reply("🍩 *Ehh, ada kesalahan teknis~* 🍬");
+    console.error(e)
+    m.reply(`Error: ${e.message || e}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["removebg"];
-handler.tags = ["tools"];
-handler.command = /^(removebg)$/i;
+handler.help = ["removebg"]
+handler.tags = ["tools"]
+handler.command = /^(removebg)$/i
 
-export default handler;
+export default handler

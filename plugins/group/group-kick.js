@@ -1,45 +1,54 @@
 let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
-  let targets = [];
-  if (m.mentionedJid.length) targets.push(...m.mentionedJid);
-  if (m.quoted && m.quoted.sender) targets.push(m.quoted.sender);
-  for (let arg of args) {
-    if (/^\d{5,}$/.test(arg)) {
-      targets.push(arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
-    }
+  const targets = []
+
+  if (m.mentionedJid?.length) targets.push(...m.mentionedJid)
+  if (m.quoted?.sender) targets.push(m.quoted.sender)
+
+  for (const arg of args) {
+    if (/^\d{5,}$/.test(arg))
+      targets.push(arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net")
   }
 
-  targets = await Promise.all(
-    targets.map(async (jid) => {
+  const mapped = await Promise.all(
+    targets.map(async jid => {
       if (jid.endsWith("@s.whatsapp.net")) {
-        return (await conn.signalRepository.lidMapping.getLIDForPN(jid)) || jid;
+        const lid = await conn.signalRepository.lidMapping
+          .getLIDForPN(jid)
+          .catch(() => null)
+        return lid || jid
       }
-      return jid;
-    }),
-  );
+      return jid
+    })
+  )
 
-  targets = [...new Set(targets)].filter(
-    (v) => v !== m.sender && participants.some((p) => p.id === v),
-  );
+  const validTargets = [...new Set(mapped)].filter(
+    v => v !== m.sender && participants.some(p => p.id === v)
+  )
 
-  if (!targets.length) {
+  if (!validTargets.length)
     return m.reply(
-      `🍩 *Tag atau reply anggota yang ingin dikeluarkan*\n*Contoh: ${usedPrefix + command} @628xx*`,
-    );
-  }
+      `Specify members to remove.\n› Example: ${usedPrefix + command} @628xxxx`
+    )
 
-  for (let target of targets) {
-    await conn.groupParticipantsUpdate(m.chat, [target], "remove");
-    await delay(1500);
-  }
-};
+  await Promise.allSettled(
+    validTargets.map(async target => {
+      try {
+        await conn.groupParticipantsUpdate(m.chat, [target], "remove")
+      } catch (err) {
+        console.error(`Remove failed for ${target}:`, err)
+      }
+      await delay(1500)
+    })
+  )
+}
 
-handler.help = ["kick"];
-handler.tags = ["group"];
-handler.command = /^(kick|k)$/i;
-handler.group = true;
-handler.botAdmin = true;
-handler.admin = true;
+handler.help = ["kick"]
+handler.tags = ["group"]
+handler.command = /^(kick|k)$/i
+handler.group = true
+handler.botAdmin = true
+handler.admin = true
 
-export default handler;
+export default handler
 
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms))

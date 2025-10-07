@@ -2,46 +2,44 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     if (!text)
       return m.reply(
-        `🎸 *Masukkan judul lagu untuk mencari chord!*\n📌 *Contoh: ${usedPrefix + command} Bawa dia kembali*`,
-      );
-    await global.loading(m, conn);
-    let apiUrl = global.API(
-      "btz",
-      "/api/search/chord",
-      { song: text },
-      "apikey",
-    );
-    let response = await fetch(apiUrl);
-    if (!response.ok)
-      return m.reply("⚠️ *Terjadi kesalahan dalam pencarian chord!*");
-    let json = await response.json();
-    if (!json.result)
-      return m.reply("⚠️ *Chord tidak ditemukan atau terjadi kesalahan!*");
-    let { title, chord } = json.result;
-    let caption = `
-🎵 *Chord Lagu: ${title}*
-🎸 *Kunci Gitar:*
-\`\`\`
-${chord}
-\`\`\`
-`.trim();
-    await conn.sendMessage(
-      m.chat,
-      {
-        text: caption,
-      },
-      { quoted: m },
-    );
+        `Enter a song title to find its guitar chords.\n› Example: ${usedPrefix + command} it's only me`
+      )
+
+    await global.loading(m, conn)
+
+    const apiUrl = global.API("btz", "/api/search/chord", { song: text }, "apikey")
+    const res = await fetch(apiUrl)
+    if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch chord.`)
+
+    const json = await res.json()
+    if (!json.result) return m.reply("No chord found or an error occurred.")
+
+    const { title, chord } = json.result
+    const timestamp = new Date().toTimeString().split(" ")[0]
+
+    const output = [
+      "```",
+      `┌─[${timestamp}]────────────`,
+      `│  CHORD FINDER`,
+      "└──────────────────────",
+      `Title  : ${title}`,
+      "───────────────────────",
+      chord.trim(),
+      "───────────────────────",
+      "```",
+    ].join("\n")
+
+    await conn.sendMessage(m.chat, { text: output }, { quoted: m })
   } catch (e) {
-    console.error(e);
-    m.reply(`❌ *Terjadi Kesalahan!*\n⚠️ *Detail:* ${e.message}`);
+    console.error(e)
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["chord"];
-handler.tags = ["internet"];
-handler.command = /^(chord|kunci)$/i;
+handler.help = ["chord"]
+handler.tags = ["internet"]
+handler.command = /^(chord|kunci)$/i
 
-export default handler;
+export default handler

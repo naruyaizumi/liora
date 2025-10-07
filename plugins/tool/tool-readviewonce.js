@@ -1,15 +1,17 @@
 let handler = async (m, { conn }) => {
-  let q = m.quoted ? m.quoted : m;
+  const q = m.quoted ? m.quoted : m
   try {
-    let media = await q.download?.();
-    await conn.sendFile(m.chat, media, null, q.text || "", m);
-  } catch {
-    m.reply("🍥 *Media gagal dimuat kak!*");
+    const media = await q.download?.()
+    if (!media) return m.reply("Failed to retrieve media.")
+    await conn.sendFile(m.chat, media, null, q.text || "", m)
+  } catch (err) {
+    console.error(err)
+    m.reply("Error: unable to load media.")
   }
-};
+}
 
-handler.help = ["readviewonce"];
-handler.tags = ["tools"];
-handler.command = /^(read(view(once)?)?|rvo)$/i;
+handler.help = ["readviewonce"]
+handler.tags = ["tools"]
+handler.command = /^(read(view(once)?)?|rvo)$/i
 
-export default handler;
+export default handler

@@ -1,20 +1,50 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  let isClose = {
-    open: "not_announcement",
-    close: "announcement",
-  }[(args[0] || "").toLowerCase()];
-  if (isClose === undefined)
+  const timestamp = new Date().toTimeString().split(" ")[0]
+  const arg = (args[0] || "").toLowerCase()
+  const isClose = { open: "not_announcement", close: "announcement" }[arg]
+
+  if (isClose === undefined) {
     return m.reply(
-      `🍰 *Format salah*\n*Gunakan salah satu dari ini:*\n🍓 *${usedPrefix + command} open (Buka grup)*\n🍓 *${usedPrefix + command} close (Tutup grup)*`.trim(),
-    );
-  await conn.groupSettingUpdate(m.chat, isClose);
-};
+      [
+        "```",
+        `┌─[${timestamp}]────────────`,
+        `│  GROUP SETTINGS`,
+        "└──────────────────────",
+        `Usage : ${usedPrefix + command} open | close`,
+        "───────────────────────",
+        "open  → allow members to send messages",
+        "close → only admins can send messages",
+        "```",
+      ].join("\n"),
+    )
+  }
 
-handler.help = ["group"];
-handler.tags = ["group"];
-handler.command = /^(g|group)$/i;
-handler.group = true;
-handler.admin = true;
-handler.botAdmin = true;
+  await conn.groupSettingUpdate(m.chat, isClose)
 
-export default handler;
+  const status =
+    arg === "open"
+      ? "GROUP OPENED (members can chat)"
+      : "GROUP CLOSED (admins only)"
+
+  return m.reply(
+    [
+      "```",
+      `┌─[${timestamp}]────────────`,
+      `│  GROUP SETTINGS`,
+      "└──────────────────────",
+      `Status : ${status}`,
+      "───────────────────────",
+      "Group setting updated successfully.",
+      "```",
+    ].join("\n"),
+  )
+}
+
+handler.help = ["group"]
+handler.tags = ["group"]
+handler.command = /^(g|group)$/i
+handler.group = true
+handler.admin = true
+handler.botAdmin = true
+
+export default handler

@@ -35,21 +35,21 @@ async function IZUMI() {
   const { version: baileysVersion } = await fetchLatestBaileysVersion()
 
   console.log(
-    chalk.cyan.bold(`
-╭────────────────────────────────────╮
-│ 📡  Baileys Initialization 📡
-│ ─────────────────────────────────
-│ 📡  Baileys Version : v${baileysVersion.join(".")}
-│ 📅  Date : ${new Date().toLocaleDateString("en-US", {
-      weekday: "long",
-      day: "2-digit",
-      month: "long",
-      year: "numeric"
-    })}
-│ 🌐  System : ${process.platform} CPU: ${process.arch}
-╰────────────────────────────────────╯
+  chalk.cyan.bold(`
+┌────────────────────────────────────┐
+│  BAILEYS INITIALIZATION
+│  -------------------------------
+│  Version : v${baileysVersion.join(".")}
+│  Date    : ${new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  })}
+│  System  : ${process.platform.toUpperCase()} (${process.arch})
+└────────────────────────────────────┘
 `)
-  )
+)
 
   const connectionOptions = {
     version: baileysVersion,
@@ -76,16 +76,16 @@ async function IZUMI() {
         let code = await conn.restPairingCode(pairingNumber, conn.Pairing)
         code = code?.match(/.{1,4}/g)?.join("-") || code
         console.log(
-          chalk.cyan.bold(`
-╭────────────────────────────────────╮
-│ 🎉  Pairing Code Ready to Use!  🎉
-│ ─────────────────────────────────
-│ 📲  Your Number    : ${chalk.white.bold(pairingNumber)}
-│ 📄  Pairing Code  : ${chalk.white.bold(code)}
-│ 🕒  Generated At  : ${chalk.white.bold(new Date().toLocaleString("en-US"))}
-╰────────────────────────────────────╯
+  chalk.cyan.bold(`
+┌────────────────────────────────────┐
+│  PAIRING CODE INITIALIZED
+│  -------------------------------
+│  Number   : ${chalk.white.bold(pairingNumber)}
+│  Code     : ${chalk.white.bold(code)}
+│  Created  : ${chalk.white.bold(new Date().toLocaleString("en-US"))}
+└────────────────────────────────────┘
 `)
-        )
+)
       } catch (err) {
         console.error("Failed to generate pairing code:", err)
       }
@@ -117,12 +117,20 @@ async function IZUMI() {
 
       if (HandlerModule && typeof HandlerModule.handler === "function") {
         handler = HandlerModule
-        console.log(chalk.green("🍃 handler.js reloaded successfully"))
+        console.log(
+          chalk.green(`[${new Date().toISOString().replace("T", " ").split(".")[0]}] [liora] handler.js reloaded successfully`)
+        )
       } else {
-        console.warn(chalk.yellow("🔥 handler.js loaded but no valid export found."))
+        console.warn(
+          chalk.yellow(`[${new Date().toISOString().replace("T", " ").split(".")[0]}] [liora] handler.js loaded but no valid export found`)
+        )
       }
     } catch (e) {
-      console.error("Error loading handler.js:", e)
+      const time = new Date().toISOString().replace("T", " ").split(".")[0]
+      console.error(
+        chalk.redBright(`[${time}] [liora] handler.js reload failed`)
+      )
+      console.error(chalk.red(`└─ ${e.message || e}`))
     }
 
     if (restartConn) {
@@ -146,12 +154,6 @@ async function IZUMI() {
         if (typeof ev[1] === "function") conn.ev.off(ev[0], ev[1])
       }
     }
-
-    conn.spromote = "@user sekarang admin!"
-    conn.sdemote = "@user sekarang bukan admin!"
-    conn.welcome = "Hallo @user Selamat datang di @subject\n\n@desc"
-    conn.bye = "Selamat tinggal @user"
-    conn.sRevoke = "Link group telah diubah ke \n@revoke"
 
     conn.handler = handler?.handler?.bind(global.conn) || (() => {})
     conn.participantsUpdate =
