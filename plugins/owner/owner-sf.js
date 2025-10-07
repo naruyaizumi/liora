@@ -1,68 +1,59 @@
-import fs from "fs"
+import fs from "fs/promises"
 import path from "path"
 
-let handler = async (m, { args }) => {
-  const timestamp = new Date().toTimeString().split(" ")[0]
-  if (!args.length) args = ["."]
-  const target = path.join(...args)
+const handler = async (m, { args }) => {
+  const now = new Date().toTimeString().split(" ")[0]
+  const target = path.resolve(...(args.length ? args : ["."]))
 
-  if (!m.quoted) {
-    if (!fs.existsSync(target))
-      return m.reply(`Folder not found: ${target}`)
+  try {
+    if (!m.quoted) {
+      const items = await fs.readdir(target, { withFileTypes: true }).catch(() => null)
+      if (!items) return m.reply(`Folder not found: ${target}`)
 
-    const list = fs
-      .readdirSync(target)
-      .map((name) => {
-        const stats = fs.statSync(path.join(target, name))
-        return { name, isDir: stats.isDirectory() }
-      })
-      .sort((a, b) => {
-        if (a.isDir && !b.isDir) return -1
-        if (!a.isDir && b.isDir) return 1
-        return a.name.localeCompare(b.name)
-      })
-      .map((item) => (item.isDir ? `📁 ${item.name}/` : `📄 ${item.name}`))
-      .join("\n")
+      const list = items
+        .sort((a, b) => (a.isDirectory() === b.isDirectory() ? a.name.localeCompare(b.name) : a.isDirectory() ? -1 : 1))
+        .map((item) => `${item.isDirectory() ? "📁" : "📄"} ${item.name}${item.isDirectory() ? "/" : ""}`)
+        .join("\n") || "(empty directory)"
 
-    const output = [
-      "```",
-      `Time  : ${timestamp}`,
-      `Path  : ${target}`,
-      "───────────────────────────",
-      list || "(empty directory)",
-      "───────────────────────────",
-      "Directory listing complete.",
-      "```",
-    ].join("\n")
+      return m.reply(
+        [
+          "```",
+          `Time  : ${now}`,
+          `Path  : ${target}`,
+          "───────────────────────────",
+          list,
+          "───────────────────────────",
+          "Directory listing complete.",
+          "```",
+        ].join("\n")
+      )
+    }
 
-    return m.reply(output)
+    const q = m.quoted
+    if (!q?.download) return m.reply("This message is not a media file.")
+
+    const buffer = await q.download().catch(() => null)
+    if (!buffer) return m.reply("Failed to download the quoted file.")
+
+    const filename = q.fileName || "file.unknown"
+    const fullpath = path.join(target, filename)
+
+    await fs.mkdir(path.dirname(fullpath), { recursive: true })
+    await fs.writeFile(fullpath, buffer)
+
+    return m.reply(
+      [
+        "```",
+        `Time : ${now}`,
+        `Saved As : ${fullpath}`,
+        "───────────────────────────",
+        "File written successfully.",
+        "```",
+      ].join("\n")
+    )
+  } catch (err) {
+    return m.reply(`Error: ${err.message}`)
   }
-
-  const q = m.quoted
-  const filename = q.fileName || "file.unknown"
-  const mime = q.mimetype || ""
-
-  if (!mime && !q.download)
-    return m.reply("This message is not a media file, skipping save operation.")
-
-  const buffer = await q.download?.().catch(() => null)
-  if (!buffer) return m.reply("Failed to download the quoted file.")
-
-  const fullpath = path.join(target, filename)
-  fs.mkdirSync(path.dirname(fullpath), { recursive: true })
-  fs.writeFileSync(fullpath, buffer)
-
-  const text = [
-    "```",
-    `Time : ${timestamp}`,
-    `Saved As : ${fullpath}`,
-    `Size : ${(buffer.length / 1024).toFixed(2)} KB`,
-    "───────────────────────────",
-    "File written successfully.",
-    "```",
-  ].join("\n")
-
-  return m.reply(text)
 }
 
 handler.help = ["sf"]

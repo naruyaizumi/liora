@@ -20,7 +20,9 @@ build/
 # DATABASE / DATA FILES
 # -------------------------
 database.db
+auth.db
 **/database.db
+**/auth.db
 *.sqlite
 *.db
 

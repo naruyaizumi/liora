@@ -1,40 +1,43 @@
 # Version 7.0.0 — Major System Rewrite
 
 ## Added
-- Async migration across codebase using `fs/promises` API for non-blocking I/O.
-- Refactored `chats` table schema with explicit defaults and unified data types.
-- Native `sendAlbum()` support for multi-media (image/video) message threads.
-- Native audio bridge (`convert()` via Node-API) replacing external ffmpeg.
-- Debounced Plugin Reloader powered by native C++ cron bridge.
-- Graceful Shutdown & Crash Cooldown system for stable runtime supervision.
-- Linux-style CLI interface with uniform separators and clean headers.
+- Async migration across codebase using `fs/promises` API for non-blocking I/O.  
+- Refactored `chats` table schema with explicit defaults and unified data types.  
+- Native `sendAlbum()` support for multi-media (image/video) message threads.  
+- Native audio bridge (`convert()` via Node-API) replacing external ffmpeg.  
+- Debounced Plugin Reloader powered by native C++ cron bridge.  
+- Graceful Shutdown & Crash Cooldown system for stable runtime supervision.  
+- Linux-style CLI interface with uniform separators and clean headers.  
+- **Native C++ Fetch Bridge** — implemented using `libcurl` with full HTTP/2 optimization and memory-safe buffer management, replacing Node’s built-in fetch for higher performance and lower latency across network requests.  
 
 ---
 
 ## Removed
-- All blocking `fs.*Sync` calls and redundant synchronous logic.
-- Legacy reload loop logic replaced by debounced watcher.
-- ffmpeg subprocess dependency for audio conversion.
-- Emoji-based UI formatting and inconsistent ASCII borders.
+- All blocking `fs.*Sync` calls and redundant synchronous logic.  
+- Legacy reload loop logic replaced by debounced watcher.  
+- ffmpeg subprocess dependency for audio conversion.  
+- Emoji-based UI formatting and inconsistent ASCII borders.  
 
 ---
 
 ## Fixed
-- Prevented NULL and type-mismatch issues in database initialization.
-- Eliminated redundant plugin reloads during multiple file saves.
-- Solved I/O blocking on concurrent file operations.
-- Improved MIME detection and fallback handling in `sendFile()`.
-- Stabilized process restarts with smart cooldown (5 × crash → pause 5 min).
-- Optimized in-memory cleanup for temporary media buffers.
-- Unified timestamp and output layout across all command replies.
+- Prevented NULL and type-mismatch issues in database initialization.  
+- Eliminated redundant plugin reloads during multiple file saves.  
+- Solved I/O blocking on concurrent file operations.  
+- Improved MIME detection and fallback handling in `sendFile()`.  
+- Stabilized process restarts with smart cooldown (5 × crash → pause 5 min).  
+- Optimized in-memory cleanup for temporary media buffers.  
+- Unified timestamp and output layout across all command replies.  
+- Rewrote fetch handling layer to use `bridge.js` as a single entrypoint — improving consistency, cancellation control, and reducing JS overhead during parallel HTTP operations.  
 
 ---
 
 ## Summary
-Version 7 brings a full structural rewrite focused on asynchronous performance, stability, and developer experience.
-- Fully async core (Promise-based I/O)
-- Rebuilt database and media engine
-- Native runtime supervision
+Version 7 introduces a **complete internal refactor** centered on speed, reliability, and maintainability.  
+- Fully async core (Promise-based I/O)  
+- Rebuilt database and media engine  
+- Native runtime supervision  
+- Native C++ HTTP bridge for ultra-fast network calls  
 - Clean Linux-style console output
 
 ---

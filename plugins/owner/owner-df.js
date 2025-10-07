@@ -1,8 +1,8 @@
-import fs from "fs"
+import fs from "fs/promises"
 import path from "path"
 
 let handler = async (m, { args, usedPrefix, command }) => {
-  const timestamp = new Date().toTimeString().split(" ")[0]
+  const time = new Date().toTimeString().split(" ")[0]
 
   if (!args.length)
     return m.reply(
@@ -13,35 +13,31 @@ let handler = async (m, { args, usedPrefix, command }) => {
   let target = path.join(...args)
   if (!path.extname(target)) target += ".js"
 
-  if (!fs.existsSync(target))
-    return m.reply(`File or folder not found: ${target}`)
-
-  const isDir = fs.statSync(target).isDirectory()
-
   try {
-    if (isDir) {
-      fs.rmSync(target, { recursive: true, force: true })
-    } else {
-      fs.unlinkSync(target)
-    }
+    await fs.access(target).catch(() => { throw new Error(`File or folder not found: ${target}`) })
+    const stat = await fs.stat(target)
+    const isDir = stat.isDirectory()
 
-    const caption = [
+    if (isDir) await fs.rm(target, { recursive: true, force: true })
+    else await fs.unlink(target)
+
+    const msg = [
       "```",
-      `Time   : ${timestamp}`,
-      `Path   : ${target}`,
-      `Type   : ${isDir ? "Directory" : "File"}`,
+      `Time : ${time}`,
+      `Path : ${target}`,
+      `Type : ${isDir ? "Directory" : "File"}`,
       "───────────────────────────",
-      "Operation completed.",
+      "Operation completed successfully.",
       "```",
     ].join("\n")
 
-    return m.reply(caption)
+    await m.reply(msg)
   } catch (err) {
-    return m.reply(`An error occurred.\n${err.message}`)
+    await m.reply(`Error: ${err.message}`)
   }
 }
 
-handler.help = ["df <path>"]
+handler.help = ["deletefile"]
 handler.tags = ["owner"]
 handler.command = /^(df|deletefile)$/i
 handler.mods = true
