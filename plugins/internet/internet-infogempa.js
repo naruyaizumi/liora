@@ -4,28 +4,30 @@ let handler = async (m, { conn }) => {
     await global.loading(m, conn);
     try {
         const res = await fetch("https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json");
+        if (!res.ok) throw new Error("Failed to fetch data from BMKG");
         const json = await res.json();
         const data = json.Infogempa.gempa;
 
         const timestamp = new Date().toTimeString().split(" ")[0];
-        const mmi = data.Dirasakan ? `${data.Dirasakan} Skala MMI` : "Tidak ada data";
+        const mmi = data.Dirasakan ? `${data.Dirasakan} MMI Scale` : "No data available";
+
         const teks = [
             "```",
             `┌─[${timestamp}]────────────`,
             `│  EARTHQUAKE REPORT (BMKG)`,
             "└──────────────────────",
-            `Tanggal    : ${data.Tanggal}`,
-            `Waktu (WIB): ${data.Jam}`,
-            `Waktu (UTC): ${data.DateTime}`,
-            `Lokasi     : ${data.Wilayah}`,
-            `Koordinat  : ${data.Coordinates}`,
-            `Magnitudo  : ${data.Magnitude}`,
-            `Kedalaman  : ${data.Kedalaman}`,
-            `Potensi    : ${data.Potensi}`,
+            `Date        : ${data.Tanggal}`,
+            `Local Time  : ${data.Jam} WIB`,
+            `UTC Time    : ${data.DateTime}`,
+            `Location    : ${data.Wilayah}`,
+            `Coordinates : ${data.Coordinates}`,
+            `Magnitude   : ${data.Magnitude}`,
+            `Depth       : ${data.Kedalaman}`,
+            `Potential   : ${data.Potensi}`,
             "───────────────────────",
-            `Dirasakan  : ${mmi}`,
+            `Felt Intensity : ${mmi}`,
             "───────────────────────",
-            "Sumber     : BMKG (Badan Meteorologi, Klimatologi, dan Geofisika)",
+            "Source : BMKG (Meteorology, Climatology and Geophysics Agency)",
             "```",
         ].join("\n");
 
@@ -44,8 +46,8 @@ let handler = async (m, { conn }) => {
     }
 };
 
-handler.help = ["infogempa"];
+handler.help = ["earthquake"];
 handler.tags = ["internet"];
-handler.command = /^(infogempa)$/i;
+handler.command = /^(earthquake)$/i;
 
 export default handler;

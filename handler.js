@@ -10,7 +10,7 @@ import chalk from "chalk";
 import printMessage from "./lib/print.js";
 import { canvas } from "./lib/canvas.js";
 
-const CMD_PREFIX_RE = /^[/!.|•√§∆%✓&?]/;
+const CMD_PREFIX_RE = /^[/!.]/;
 
 const safe = async (fn, fallback = undefined) => {
     try {

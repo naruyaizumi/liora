@@ -12,7 +12,6 @@ const features = [
 
     { key: "self", scope: "bot", name: "Self Mode" },
     { key: "gconly", scope: "bot", name: "Group Only" },
-    { key: "queque", scope: "bot", name: "Message Queue" },
     { key: "noprint", scope: "bot", name: "No Print" },
     { key: "autoread", scope: "bot", name: "Auto Read" },
     { key: "restrict", scope: "bot", name: "Restrict" },
