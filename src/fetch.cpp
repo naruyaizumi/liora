@@ -427,6 +427,44 @@ public:
       if (v.IsUndefined()) return e.Undefined();
       return v;
     }));
+    h.Set("forEach", Napi::Function::New(env, [](const Napi::CallbackInfo& info)->Napi::Value{
+      Napi::Env e = info.Env();
+      if (info.Length() < 1 || !info[0].IsFunction()) {
+        return e.Undefined();
+      }
+      Napi::Function callback = info[0].As<Napi::Function>();
+      Napi::Object self = info.This().As<Napi::Object>();
+      Napi::Value vf = self.Get("__first");
+      if (!vf.IsObject()) return e.Undefined();
+      Napi::Object firstObj = vf.As<Napi::Object>();
+      Napi::Array keys = firstObj.GetPropertyNames();
+      for (uint32_t i = 0; i < keys.Length(); ++i) {
+        Napi::Value keyVal = keys.Get(i);
+        std::string key = keyVal.ToString().Utf8Value();
+        Napi::Value value = firstObj.Get(key);
+        callback.Call({ value, keyVal, self });
+      }
+      return e.Undefined();
+    }));
+    h.Set("entries", Napi::Function::New(env, [](const Napi::CallbackInfo& info)->Napi::Value{
+      Napi::Env e = info.Env();
+      Napi::Object self = info.This().As<Napi::Object>();
+      Napi::Value vf = self.Get("__first");
+      if (!vf.IsObject()) return Napi::Array::New(e, 0);
+      Napi::Object firstObj = vf.As<Napi::Object>();
+      Napi::Array keys = firstObj.GetPropertyNames();
+      Napi::Array result = Napi::Array::New(e);
+      for (uint32_t i = 0; i < keys.Length(); ++i) {
+        Napi::Value keyVal = keys.Get(i);
+        Napi::Value value = firstObj.Get(keyVal.ToString());
+        Napi::Array entry = Napi::Array::New(e, 2);
+        entry.Set((uint32_t)0, keyVal);
+        entry.Set((uint32_t)1, value);
+        result.Set(i, entry);
+      }
+      return result;
+    }));
+    
     res.Set("headers", h);
 
     auto* holder = new BodyHolder(std::move(resp_.body));
