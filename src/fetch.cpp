@@ -1,6 +1,5 @@
 #include <napi.h>
 #include <curl/curl.h>
-
 #include <string>
 #include <vector>
 #include <map>
@@ -10,6 +9,8 @@
 #include <sstream>
 #include <cctype>
 #include <atomic>
+#include <chrono>
+#include <random>
 
 namespace {
 
@@ -116,6 +117,92 @@ struct BodyHolder {
   explicit BodyHolder(std::vector<unsigned char>&& v): data(std::move(v)) {}
 };
 
+static inline void vecAppend(std::vector<unsigned char>& dst, const std::string& s) {
+  dst.insert(dst.end(), s.begin(), s.end());
+}
+static inline void vecAppendRaw(std::vector<unsigned char>& dst, const unsigned char* p, size_t n) {
+  dst.insert(dst.end(), p, p + n);
+}
+static std::string randomBoundary() {
+  auto now = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+  std::mt19937_64 rng((uint64_t)now ^ (uint64_t)std::random_device{}());
+  std::uniform_int_distribution<uint64_t> dist;
+  std::ostringstream oss;
+  oss << "----LioraFormBoundary";
+  for (int i=0;i<3;i++) oss << std::hex << dist(rng);
+  return oss.str();
+}
+// serialize formData { key: string|Buffer|{ value|data|buffer, filename?, contentType? } }
+static void buildMultipartFromNapi(const Napi::Object& formObj,
+                                   std::vector<unsigned char>& outBody,
+                                   std::string& outBoundary) {
+  outBoundary = randomBoundary();
+  auto keys = formObj.GetPropertyNames();
+  for (uint32_t i=0;i<keys.Length();++i) {
+    std::string name = keys.Get(i).ToString().Utf8Value();
+    Napi::Value v = formObj.Get(name);
+    vecAppend(outBody, "--" + outBoundary + "\r\n");
+
+    std::string filename;
+    std::string contentType;
+    const unsigned char* dataPtr = nullptr;
+    size_t dataLen = 0;
+    std::string textVal;
+
+    auto flushDataPart = [&](bool isFile){
+      std::ostringstream head;
+      head << "Content-Disposition: form-data; name=\"" << name << "\"";
+      if (isFile) {
+        if (filename.empty()) filename = "blob";
+        head << "; filename=\"" << filename << "\"\r\n";
+        if (contentType.empty()) contentType = "application/octet-stream";
+        head << "Content-Type: " << contentType << "\r\n\r\n";
+        vecAppend(outBody, head.str());
+        if (dataPtr && dataLen) vecAppendRaw(outBody, dataPtr, dataLen);
+        vecAppend(outBody, "\r\n");
+      } else {
+        head << "\r\n\r\n";
+        vecAppend(outBody, head.str());
+        vecAppend(outBody, textVal);
+        vecAppend(outBody, "\r\n");
+      }
+    };
+
+    if (v.IsBuffer()) {
+      auto b = v.As<Napi::Buffer<uint8_t>>();
+      dataPtr = b.Data();
+      dataLen = b.Length();
+      flushDataPart(true);
+    } else if (v.IsObject()) {
+      Napi::Object o = v.As<Napi::Object>();
+      if (o.Has("value") && o.Get("value").IsBuffer()) {
+        auto b = o.Get("value").As<Napi::Buffer<uint8_t>>();
+        dataPtr = b.Data(); dataLen = b.Length();
+      } else if (o.Has("data") && o.Get("data").IsBuffer()) {
+        auto b = o.Get("data").As<Napi::Buffer<uint8_t>>();
+        dataPtr = b.Data(); dataLen = b.Length();
+      } else if (o.Has("buffer") && o.Get("buffer").IsBuffer()) {
+        auto b = o.Get("buffer").As<Napi::Buffer<uint8_t>>();
+        dataPtr = b.Data(); dataLen = b.Length();
+      } else if (o.Has("value")) {
+        auto s = o.Get("value").ToString().Utf8Value();
+        textVal = s;
+      } else {
+        textVal = o.ToString().Utf8Value();
+      }
+      if (o.Has("filename")) filename = o.Get("filename").ToString().Utf8Value();
+      if (o.Has("contentType")) contentType = o.Get("contentType").ToString().Utf8Value();
+
+      if (dataPtr && dataLen) flushDataPart(true);
+      else flushDataPart(false);
+    } else {
+      textVal = v.ToString().Utf8Value();
+      flushDataPart(false);
+    }
+  }
+  vecAppend(outBody, "--" + outBoundary + "--\r\n");
+}
+
 class FetchWorker : public Napi::AsyncWorker {
 public:
   FetchWorker(Napi::Env env, std::string url, Napi::Object opts, Napi::Promise::Deferred def)
@@ -138,10 +225,11 @@ public:
         auto v = h.Get(k).ToString().Utf8Value();
         if (!k.empty()) headersKVs_.push_back(k + ": " + v);
       }
-      haveUserUA_    = h.Has("User-Agent") || h.Has("user-agent");
-      haveAcceptEnc_ = h.Has("Accept-Encoding") || h.Has("accept-encoding");
-      haveConn_      = h.Has("Connection") || h.Has("connection");
-      haveExpect_    = h.Has("Expect") || h.Has("expect");
+      haveUserUA_      = h.Has("User-Agent") || h.Has("user-agent");
+      haveAcceptEnc_   = h.Has("Accept-Encoding") || h.Has("accept-encoding");
+      haveConn_        = h.Has("Connection") || h.Has("connection");
+      haveExpect_      = h.Has("Expect") || h.Has("expect");
+      haveContentType_ = h.Has("Content-Type") || h.Has("content-type");
     }
 
     if (opts.Has("body")) {
@@ -153,6 +241,15 @@ public:
         auto s = v.ToString().Utf8Value();
         body_.assign(s.begin(), s.end());
       }
+    }
+
+    if (opts.Has("formData") && opts.Get("formData").IsObject()) {
+      Napi::Object form = opts.Get("formData").As<Napi::Object>();
+      multipartBoundary_.clear();
+      multipartBody_.clear();
+      buildMultipartFromNapi(form, multipartBody_, multipartBoundary_);
+      useMultipart_ = true;
+      body_.clear();
     }
 
     if (opts.Has("onData") && opts.Get("onData").IsFunction()) {
@@ -201,11 +298,6 @@ public:
     else if (methodUp == "HEAD") curl_easy_setopt(easy.get(), CURLOPT_NOBODY, 1L);
     else                         curl_easy_setopt(easy.get(), CURLOPT_CUSTOMREQUEST, method_.c_str());
 
-    if (!body_.empty()) {
-      curl_easy_setopt(easy.get(), CURLOPT_POSTFIELDS, reinterpret_cast<char*>(body_.data()));
-      curl_easy_setopt(easy.get(), CURLOPT_POSTFIELDSIZE, static_cast<long>(body_.size()));
-    }
-
     SList hdrs;
     if (!haveUserUA_)    hdrs.append("User-Agent: undici/6 (liora-native)");
     if (!haveAcceptEnc_ && decompress_) {
@@ -214,6 +306,18 @@ public:
     }
     if (!haveConn_)      hdrs.append("Connection: keep-alive");
     if (!haveExpect_)    hdrs.append("Expect:");
+
+    if (useMultipart_) {
+      curl_easy_setopt(easy.get(), CURLOPT_POSTFIELDS, reinterpret_cast<char*>(multipartBody_.data()));
+      curl_easy_setopt(easy.get(), CURLOPT_POSTFIELDSIZE, static_cast<long>(multipartBody_.size()));
+      if (!haveContentType_) {
+        std::string ct = "Content-Type: multipart/form-data; boundary=" + multipartBoundary_;
+        hdrs.append(ct.c_str());
+      }
+    } else if (!body_.empty()) {
+      curl_easy_setopt(easy.get(), CURLOPT_POSTFIELDS, reinterpret_cast<char*>(body_.data()));
+      curl_easy_setopt(easy.get(), CURLOPT_POSTFIELDSIZE, static_cast<long>(body_.size()));
+    }
 
     for (const auto& h : headersKVs_) hdrs.append(h.c_str());
     if (hdrs.get()) curl_easy_setopt(easy.get(), CURLOPT_HTTPHEADER, hdrs.get());
@@ -478,13 +582,17 @@ private:
   std::string cookieString_;
   long long   maxBodySize_{-1};
 
-  bool haveUserUA_ = false, haveAcceptEnc_ = false, haveConn_ = false, haveExpect_ = false;
+  bool haveUserUA_ = false, haveAcceptEnc_ = false, haveConn_ = false, haveExpect_ = false, haveContentType_ = false;
 
   bool streaming_ = false;
   bool wantProgress_ = false;
 
   std::vector<std::string> headersKVs_;
   std::vector<unsigned char> body_;
+
+  bool useMultipart_ = false;
+  std::vector<unsigned char> multipartBody_;
+  std::string multipartBoundary_;
 
   ResponseData resp_;
   std::atomic<bool> abort_{false};

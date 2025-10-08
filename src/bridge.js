@@ -123,7 +123,7 @@ export function convert(input, options = {}) {
 }
 
 /* =====================
-   FETCH BRIDGE (Ultra Optimized)
+   FETCH BRIDGE
    ===================== */
 const fetchNative = loadAddon("fetch");
 

@@ -8,46 +8,24 @@
 
 <img src="https://raw.githubusercontent.com/innng/innng/master/assets/kyubey.gif" width="150" height="150" />
   
-<!-- Project & Social Badges -->
 <p align="center">
-<!-- Workflows -->
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/node.js.yml">
   <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/node.js.yml?label=Node.js%20CI&style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Node.js CI"/>
 </a>
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/eslint.yml">
   <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/eslint.yml?label=ESLint&style=for-the-badge&logo=eslint&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="ESLint CI"/>
 </a>
-
-<!-- Repo Metadata -->
   <img src="https://img.shields.io/github/v/release/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Latest Release"/>
 </a>
-
-<!-- License -->
 <a href="https://www.apache.org/licenses/LICENSE-2.0">
   <img src="https://img.shields.io/badge/License-Apache%202.0-FFC0CB?style=for-the-badge&logo=apache&logoColor=white&labelColor=2F2F2F" alt="License"/>
 </a>
-
-<!-- Node.js Versions -->
-<a href="https://nodejs.org/en">
-  <img src="https://img.shields.io/badge/Node.js-v22%20|%2024-FFC0CB?style=for-the-badge&logo=node.js&logoColor=white&labelColor=2F2F2F" alt="Node.js"/>
-</a>
-
-<!-- JavaScript ESM -->
 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">
   <img src="https://img.shields.io/badge/JavaScript-ESM-FFC0CB?style=for-the-badge&logo=javascript&logoColor=black&labelColor=2F2F2F" alt="JavaScript"/>
 </a>
-
-<!-- ESLint -->
-<a href="https://eslint.org/">
-  <img src="https://img.shields.io/badge/ESLint-Linting-FFC0CB?style=for-the-badge&logo=eslint&logoColor=white&labelColor=2F2F2F" alt="ESLint"/>
-</a>
-
-<!-- WhatsApp Channel -->
 <a href="https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03">
   <img src="https://img.shields.io/badge/WhatsApp-Channel-FFC0CB?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F" alt="WhatsApp Channel"/>
 </a>
-
-<!-- Instagram -->
 <a href="https://instagram.com/naruyaizumi">
   <img src="https://img.shields.io/badge/Instagram-@naruyaizumi-FFC0CB?style=for-the-badge&logo=instagram&logoColor=white&labelColor=2F2F2F" alt="Instagram"/>
 </a>
@@ -56,7 +34,6 @@
 
 ---
 
-<!-- GitHub Stats -->
 <span align="center" style="color:#FFC0CB;">
   <img src="https://img.icons8.com/fluency/48/combo-chart.png" width="22" />
   GitHub Stats
@@ -64,8 +41,6 @@
 <p align="center">
   <img loading="lazy" width="396" src="https://github-readme-stats.vercel.app/api?username=naruyaizumi&show_icons=true&hide_border=true&bg_color=0D1117&title_color=FFC0CB&text_color=FFE4E1&icon_color=FFB6C1" alt="GitHub stats" />
 </p>
-
-<!-- GitHub Streak -->
 <span align="center" style="color:#FFC0CB;">
   <img src="https://img.icons8.com/color/48/fire-element.png" width="22" />
   GitHub Streak
@@ -73,8 +48,6 @@
 <p align="center">
   <img loading="lazy" width="396" src="https://streak-stats.demolab.com?user=naruyaizumi&hide_border=true&background=0D1117&ring=FFC0CB&fire=FFB6C1&currStreakNum=FFFFFF&sideNums=FFFFFF&currStreakLabel=FFC0CB&sideLabels=FFC0CB&dates=FFE4E1" alt="GitHub streak" />
 </p>
-
-<!-- Top Languages -->
 <span align="center" style="color:#FFC0CB;">
   <img src="https://img.icons8.com/color/48/code-file.png" width="22" />
   Top Languages
@@ -82,11 +55,7 @@
 <p align="center">
   <img loading="lazy" width="396" src="https://github-readme-stats.vercel.app/api/top-langs/?username=naruyaizumi&layout=compact&hide_border=true&bg_color=0D1117&title_color=FFC0CB&text_color=FFE4E1&icon_color=FFB6C1" alt="Top languages" />
 </p>
-
-<!-- GitHub Trophies -->
 <img src="https://github-profile-trophy.vercel.app/?username=naruyaizumi&theme=juicyfresh&no-frame=true&margin-w=10&column=7" alt="GitHub Trophies" />
-
-<!-- Activity Graph -->
 <img src="https://github-readme-activity-graph.vercel.app/graph?username=naruyaizumi&bg_color=0D1117&hide_border=true&color=FFC0CB&line=FFB6C1&point=FFD1DC&area=FFE4E1" alt="GitHub Activity Graph" />
 
 </div>
