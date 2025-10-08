@@ -208,8 +208,8 @@ public:
   FetchWorker(Napi::Env env, std::string url, Napi::Object opts, Napi::Promise::Deferred def)
   : Napi::AsyncWorker(env), deferred_(def), url_(std::move(url)) {
     method_         = getString(opts, "method", "GET");
-    timeoutMs_      = getInt(opts, "timeout", 45000);
-    maxRedirects_   = getInt(opts, "maxRedirects", 10);
+    timeoutMs_      = getInt(opts, "timeout", 300000);
+    maxRedirects_   = getInt(opts, "maxRedirects", 20);
     insecureTLS_    = getBool(opts, "insecure", false);
     decompress_     = getBool(opts, "decompress", true);
     ipResolve_      = getString(opts, "ipResolve", "auto"); // "v4"|"v6"|"auto"

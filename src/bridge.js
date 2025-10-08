@@ -176,6 +176,6 @@ export function fetch(url, options = {}) {
         })
         .catch((err) => {
             const msg = err instanceof Error ? err.message : String(err);
-            throw new Error(`[fetch.bridge] ${msg}`);
+            throw new Error(msg);
         });
 }

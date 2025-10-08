@@ -24,7 +24,7 @@ let handler = async (m, { conn }) => {
                 externalAdReply: {
                     title: "Liora — WhatsApp Bot",
                     body: "GitHub Repository",
-                    thumbnailUrl: "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
+                    thumbnailUrl: "https://qu.ax/cOOdr.jpg",
                     sourceUrl: "https://github.com/naruyaizumi/liora",
                     mediaType: 1,
                     renderLargerThumbnail: true,
