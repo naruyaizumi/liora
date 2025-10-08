@@ -4,51 +4,48 @@ import { fileURLToPath, pathToFileURL } from "url";
 import { platform } from "process";
 import Database from "better-sqlite3";
 
-global.__filename = function filename(
-  pathURL = import.meta.url,
-  rmPrefix = platform !== "win32",
-) {
-  return rmPrefix
-    ? /file:\/\/\//.test(pathURL)
-      ? fileURLToPath(pathURL)
-      : pathURL
-    : pathToFileURL(pathURL).toString();
+global.__filename = function filename(pathURL = import.meta.url, rmPrefix = platform !== "win32") {
+    return rmPrefix
+        ? /file:\/\/\//.test(pathURL)
+            ? fileURLToPath(pathURL)
+            : pathURL
+        : pathToFileURL(pathURL).toString();
 };
 
 global.__dirname = function dirname(pathURL) {
-  return path.dirname(global.__filename(pathURL, true));
+    return path.dirname(global.__filename(pathURL, true));
 };
 
 global.__require = function require(dir = import.meta.url) {
-  return createRequire(dir);
+    return createRequire(dir);
 };
 
 global.API = (name, path = "/", query = {}, apikeyqueryname) =>
-  (name in global.config.APIs ? global.config.APIs[name] : name) +
-  path +
-  (query || apikeyqueryname
-    ? "?" +
-      new URLSearchParams(
-        Object.entries({
-          ...query,
-          ...(apikeyqueryname
-            ? {
-                [apikeyqueryname]:
-                  global.config.APIKeys[
-                    name in global.config.APIs ? global.config.APIs[name] : name
-                  ],
-              }
-            : {}),
-        }),
-      )
-    : "");
+    (name in global.config.APIs ? global.config.APIs[name] : name) +
+    path +
+    (query || apikeyqueryname
+        ? "?" +
+          new URLSearchParams(
+              Object.entries({
+                  ...query,
+                  ...(apikeyqueryname
+                      ? {
+                            [apikeyqueryname]:
+                                global.config.APIKeys[
+                                    name in global.config.APIs ? global.config.APIs[name] : name
+                                ],
+                        }
+                      : {}),
+              })
+          )
+        : "");
 
 global.timestamp = { start: new Date() };
 
 function normalizeValue(v) {
-  if (typeof v === "boolean") return v ? 1 : 0;
-  if (v === undefined) return null;
-  return v;
+    if (typeof v === "boolean") return v ? 1 : 0;
+    if (v === undefined) return null;
+    return v;
 }
 
 const dbPath = path.join(path.dirname(fileURLToPath(import.meta.url)), "database.db");
@@ -94,50 +91,58 @@ CREATE TABLE IF NOT EXISTS settings (
 `);
 
 class DataWrapper {
-  constructor() {
-    this.data = {
-      chats: new Proxy({}, {
-        get: (_, jid) => {
-          let row = sqlite.prepare("SELECT * FROM chats WHERE jid = ?").get(jid);
-          if (!row) {
-            sqlite.prepare("INSERT INTO chats (jid) VALUES (?)").run(jid);
-            row = sqlite.prepare("SELECT * FROM chats WHERE jid = ?").get(jid);
-          }
-          return new Proxy(row, {
-            set: (obj, prop, value) => {
-              if (prop in row) {
-                sqlite.prepare(`UPDATE chats SET ${prop} = ? WHERE jid = ?`)
-                .run(normalizeValue(value), jid);
-                obj[prop] = value;
-                return true;
-              }
-              return false;
-            }
-          });
-        }
-      }),
-      settings: new Proxy({}, {
-        get: (_, jid) => {
-          let row = sqlite.prepare("SELECT * FROM settings WHERE jid = ?").get(jid);
-          if (!row) {
-            sqlite.prepare("INSERT INTO settings (jid) VALUES (?)").run(jid);
-            row = sqlite.prepare("SELECT * FROM settings WHERE jid = ?").get(jid);
-          }
-          return new Proxy(row, {
-            set: (obj, prop, value) => {
-              if (prop in row) {
-                sqlite.prepare(`UPDATE settings SET ${prop} = ? WHERE jid = ?`)
-                .run(normalizeValue(value), jid);
-                obj[prop] = value;
-                return true;
-              }
-              return false;
-            }
-          });
-        }
-      })
-    };
-  }
+    constructor() {
+        this.data = {
+            chats: new Proxy(
+                {},
+                {
+                    get: (_, jid) => {
+                        let row = sqlite.prepare("SELECT * FROM chats WHERE jid = ?").get(jid);
+                        if (!row) {
+                            sqlite.prepare("INSERT INTO chats (jid) VALUES (?)").run(jid);
+                            row = sqlite.prepare("SELECT * FROM chats WHERE jid = ?").get(jid);
+                        }
+                        return new Proxy(row, {
+                            set: (obj, prop, value) => {
+                                if (prop in row) {
+                                    sqlite
+                                        .prepare(`UPDATE chats SET ${prop} = ? WHERE jid = ?`)
+                                        .run(normalizeValue(value), jid);
+                                    obj[prop] = value;
+                                    return true;
+                                }
+                                return false;
+                            },
+                        });
+                    },
+                }
+            ),
+            settings: new Proxy(
+                {},
+                {
+                    get: (_, jid) => {
+                        let row = sqlite.prepare("SELECT * FROM settings WHERE jid = ?").get(jid);
+                        if (!row) {
+                            sqlite.prepare("INSERT INTO settings (jid) VALUES (?)").run(jid);
+                            row = sqlite.prepare("SELECT * FROM settings WHERE jid = ?").get(jid);
+                        }
+                        return new Proxy(row, {
+                            set: (obj, prop, value) => {
+                                if (prop in row) {
+                                    sqlite
+                                        .prepare(`UPDATE settings SET ${prop} = ? WHERE jid = ?`)
+                                        .run(normalizeValue(value), jid);
+                                    obj[prop] = value;
+                                    return true;
+                                }
+                                return false;
+                            },
+                        });
+                    },
+                }
+            ),
+        };
+    }
 }
 
 const db = new DataWrapper();
@@ -146,59 +151,59 @@ global.db = db;
 global.sqlite = sqlite;
 
 global.loading = async (m, conn, back = false) => {
-  if (!back) {
-    return conn.sendPresenceUpdate("composing", m.chat);
-  } else {
-    return conn.sendPresenceUpdate("paused", m.chat);
-  }
+    if (!back) {
+        return conn.sendPresenceUpdate("composing", m.chat);
+    } else {
+        return conn.sendPresenceUpdate("paused", m.chat);
+    }
 };
 
 global.dfail = (type, m, conn) => {
-  const msg = {
-    owner: `\`\`\`
+    const msg = {
+        owner: `\`\`\`
 [ACCESS DENIED]
 This command is restricted to the system owner only.
 Contact the administrator for permission.
 \`\`\``,
-    mods: `\`\`\`
+        mods: `\`\`\`
 [ACCESS DENIED]
 Moderator privileges required to execute this command.
 \`\`\``,
-    group: `\`\`\`
+        group: `\`\`\`
 [ACCESS DENIED]
 This command can only be executed within a group context.
 \`\`\``,
-    admin: `\`\`\`
+        admin: `\`\`\`
 [ACCESS DENIED]
 You must be a group administrator to perform this action.
 \`\`\``,
-    botAdmin: `\`\`\`
+        botAdmin: `\`\`\`
 [ACCESS DENIED]
 System privileges insufficient.
 Grant admin access to the bot to continue.
 \`\`\``,
-    restrict: `\`\`\`
+        restrict: `\`\`\`
 [ACCESS BLOCKED]
 This feature is currently restricted or disabled by configuration.
 \`\`\``,
-  }[type]
+    }[type];
 
-  if (!msg) return
+    if (!msg) return;
 
-  conn.sendMessage(
-    m.chat,
-    {
-      text: msg,
-      contextInfo: {
-        externalAdReply: {
-          title: "ACCESS CONTROL SYSTEM",
-          body: global.config.watermark || "Liora Secure Environment",
-          mediaType: 1,
-          thumbnailUrl: "https://qu.ax/DdwBH.jpg",
-          renderLargerThumbnail: true,
+    conn.sendMessage(
+        m.chat,
+        {
+            text: msg,
+            contextInfo: {
+                externalAdReply: {
+                    title: "ACCESS CONTROL SYSTEM",
+                    body: global.config.watermark || "Liora Secure Environment",
+                    mediaType: 1,
+                    thumbnailUrl: "https://qu.ax/DdwBH.jpg",
+                    renderLargerThumbnail: true,
+                },
+            },
         },
-      },
-    },
-    { quoted: m }
-  )
-}
+        { quoted: m }
+    );
+};

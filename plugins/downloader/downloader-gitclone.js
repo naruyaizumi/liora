@@ -1,32 +1,31 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  try {
-    if (!text || !/^https:\/\/github\.com\/[\w-]+\/[\w-]+/i.test(text))
-      return m.reply(
-        `Please provide a valid GitHub repository URL.\n› Example: ${usedPrefix + command} https://github.com/username/repo`
-      )
+    try {
+        if (!text || !/^https:\/\/github\.com\/[\w-]+\/[\w-]+/i.test(text))
+            return m.reply(
+                `Please provide a valid GitHub repository URL.\n› Example: ${usedPrefix + command} https://github.com/username/repo`
+            );
 
-    const parts = text.split("/")
-    if (parts.length < 5)
-      return m.reply("Incomplete GitHub repository URL.")
+        const parts = text.split("/");
+        if (parts.length < 5) return m.reply("Incomplete GitHub repository URL.");
 
-    await global.loading(m, conn)
+        await global.loading(m, conn);
 
-    const user = parts[3]
-    const repo = parts[4]
-    const url = `https://api.github.com/repos/${user}/${repo}/zipball`
-    const filename = `${repo}.zip`
+        const user = parts[3];
+        const repo = parts[4];
+        const url = `https://api.github.com/repos/${user}/${repo}/zipball`;
+        const filename = `${repo}.zip`;
 
-    await conn.sendFile(m.chat, url, filename, null, m)
-  } catch (err) {
-    console.error(err)
-    m.reply("Failed to download repository. Please check the URL.")
-  } finally {
-    await global.loading(m, conn, true)
-  }
-}
+        await conn.sendFile(m.chat, url, filename, null, m);
+    } catch (err) {
+        console.error(err);
+        m.reply("Failed to download repository. Please check the URL.");
+    } finally {
+        await global.loading(m, conn, true);
+    }
+};
 
-handler.help = ["gitclone"]
-handler.tags = ["downloader"]
-handler.command = /^(gitclone)$/i
+handler.help = ["gitclone"];
+handler.tags = ["downloader"];
+handler.command = /^(gitclone)$/i;
 
-export default handler
+export default handler;

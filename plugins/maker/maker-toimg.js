@@ -1,35 +1,36 @@
-import sharp from "sharp"
+import sharp from "sharp";
 
 let handler = async (m, { conn, usedPrefix, command }) => {
-  try {
-    const q = m.quoted ? m.quoted : m
-    const mime = (q.msg || q).mimetype || q.mediaType || ""
-    if (!/webp/.test(mime))
-      return m.reply(`Reply a sticker with the command: ${usedPrefix + command}`)
+    try {
+        const q = m.quoted ? m.quoted : m;
+        const mime = (q.msg || q).mimetype || q.mediaType || "";
+        if (!/webp/.test(mime))
+            return m.reply(`Reply a sticker with the command: ${usedPrefix + command}`);
 
-    await global.loading(m, conn)
+        await global.loading(m, conn);
 
-    const buffer = await q.download?.()
-    if (!buffer || !Buffer.isBuffer(buffer)) throw new Error("Failed to download sticker buffer.")
+        const buffer = await q.download?.();
+        if (!buffer || !Buffer.isBuffer(buffer))
+            throw new Error("Failed to download sticker buffer.");
 
-    const output = await sharp(buffer).png().toBuffer()
-    if (!output.length) throw new Error("Conversion failed, output is empty.")
+        const output = await sharp(buffer).png().toBuffer();
+        if (!output.length) throw new Error("Conversion failed, output is empty.");
 
-    await conn.sendMessage(
-      m.chat,
-      { image: output, caption: "Sticker successfully converted to image." },
-      { quoted: m }
-    )
-  } catch (e) {
-    console.error(e)
-    m.reply(`Conversion failed.\nError: ${e.message}`)
-  } finally {
-    await global.loading(m, conn, true)
-  }
-}
+        await conn.sendMessage(
+            m.chat,
+            { image: output, caption: "Sticker successfully converted to image." },
+            { quoted: m }
+        );
+    } catch (e) {
+        console.error(e);
+        m.reply(`Conversion failed.\nError: ${e.message}`);
+    } finally {
+        await global.loading(m, conn, true);
+    }
+};
 
-handler.help = ["toimg"]
-handler.tags = ["maker"]
-handler.command = /^(toimg)$/i
+handler.help = ["toimg"];
+handler.tags = ["maker"];
+handler.command = /^(toimg)$/i;
 
-export default handler
+export default handler;

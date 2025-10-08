@@ -1,5 +1,5 @@
 let handler = async (m, { conn }) => {
-  const vcard = `BEGIN:VCARD
+    const vcard = `BEGIN:VCARD
 VERSION:3.0
 FN:Naruya Izumi
 ORG:Naruya Izumi
@@ -11,45 +11,45 @@ URL;type=WORK:https://www.instagram.com/naruyaizumi
 X-WA-BIZ-NAME:Naruya Izumi
 X-WA-BIZ-DESCRIPTION:𝙊𝙬𝙣𝙚𝙧 𝙤𝙛 𝙇𝙞𝙤𝙧𝙖 𝙎𝙘𝙧𝙞𝙥𝙩
 X-WA-BIZ-HOURS:Mo-Su 00:00-23:59
-END:VCARD`
+END:VCARD`;
 
-  const q = {
-    key: {
-      fromMe: false,
-      participant: "0@s.whatsapp.net",
-      remoteJid: "status@broadcast",
-    },
-    message: {
-      contactMessage: {
-        displayName: "Naruya Izumi",
-        vcard,
-      },
-    },
-  }
-
-  await conn.sendMessage(
-    m.chat,
-    {
-      contacts: {
-        displayName: "Naruya Izumi",
-        contacts: [{ vcard }],
-      },
-      contextInfo: {
-        externalAdReply: {
-          title: "© 2024–2025 Liora Project",
-          body: "Contact the Owner via WhatsApp",
-          thumbnailUrl: "https://qu.ax/RFEvm.jpg",
-          mediaType: 1,
-          renderLargerThumbnail: true,
+    const q = {
+        key: {
+            fromMe: false,
+            participant: "0@s.whatsapp.net",
+            remoteJid: "status@broadcast",
         },
-      },
-    },
-    { quoted: q }
-  )
-}
+        message: {
+            contactMessage: {
+                displayName: "Naruya Izumi",
+                vcard,
+            },
+        },
+    };
 
-handler.help = ["owner"]
-handler.tags = ["info"]
-handler.command = /^(owner|creator)$/i
+    await conn.sendMessage(
+        m.chat,
+        {
+            contacts: {
+                displayName: "Naruya Izumi",
+                contacts: [{ vcard }],
+            },
+            contextInfo: {
+                externalAdReply: {
+                    title: "© 2024–2025 Liora Project",
+                    body: "Contact the Owner via WhatsApp",
+                    thumbnailUrl: "https://qu.ax/RFEvm.jpg",
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                },
+            },
+        },
+        { quoted: q }
+    );
+};
 
-export default handler
+handler.help = ["owner"];
+handler.tags = ["info"];
+handler.command = /^(owner|creator)$/i;
+
+export default handler;

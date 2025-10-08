@@ -1,30 +1,30 @@
 name: 🍡 ESLint Check
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main"]
 
 jobs:
-  eslint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 🍙 Checkout code
-        uses: actions/checkout@v4
+    eslint:
+        runs-on: ubuntu-latest
+        steps:
+            - name: 🍙 Checkout code
+              uses: actions/checkout@v4
 
-      - name: 🍤 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
+            - name: 🍤 Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24
 
-      - name: 🍡 Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
+            - name: 🍡 Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  run_install: false
 
-      - name: 🍩 Install dependencies (skip native build)
-        run: pnpm install --frozen-lockfile --ignore-scripts
+            - name: 🍩 Install dependencies (skip native build)
+              run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: 🍰 Run ESLint
-        run: pnpm eslint .
+            - name: 🍰 Run ESLint
+              run: pnpm eslint .

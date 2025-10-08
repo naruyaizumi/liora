@@ -108,15 +108,17 @@ We take security, stability, and the comfort of contributors very seriously.
 
 > [!TIP]
 > **Installation Methods**  
-> You can deploy Liora using any preferred process manager or container environment:  
-> - [Pterodactyl Installation Guide](.github/INSTALLATION/PTERODACTYL.md)  
+> You can deploy Liora using any preferred process manager or container environment:
+>
+> - [Pterodactyl Installation Guide](.github/INSTALLATION/PTERODACTYL.md)
 > - [PM2 Installation Guide](.github/INSTALLATION/PM2.md)  
-> Ensure that your runtime environment meets the minimum requirements of **Node.js 22+**, with full access to the system’s build tools.
+>   Ensure that your runtime environment meets the minimum requirements of **Node.js 22+**, with full access to the system’s build tools.
 
 > [!WARNING]
-> **Unauthorized modification, credit removal, or commercial distribution is strictly forbidden.**  
-> - Keep all author and contributor credits intact (README, configuration headers, and embedded metadata).  
-> - Redistribution, reselling, or rebranding for personal gain is a direct violation of project terms.  
+> **Unauthorized modification, credit removal, or commercial distribution is strictly forbidden.**
+>
+> - Keep all author and contributor credits intact (README, configuration headers, and embedded metadata).
+> - Redistribution, reselling, or rebranding for personal gain is a direct violation of project terms.
 >
 > Credits represent **respect, transparency, and acknowledgment** — not decoration.
 

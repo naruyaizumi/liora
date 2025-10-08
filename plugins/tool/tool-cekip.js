@@ -1,50 +1,49 @@
-import { fetch } from "../../src/bridge.js"
+import { fetch } from "../../src/bridge.js";
 
 let handler = async (m, { args, usedPrefix, command }) => {
-  if (!args[0])
-    return m.reply(
-      `Enter a domain name or URL.\n› Example: ${usedPrefix + command} google.com`
-    )
+    if (!args[0])
+        return m.reply(
+            `Enter a domain name or URL.\n› Example: ${usedPrefix + command} google.com`
+        );
 
-  const domain = args[0]
-    .replace(/^https?:\/\//i, "")
-    .replace(/^www\./i, "")
-    .split("/")[0]
+    const domain = args[0]
+        .replace(/^https?:\/\//i, "")
+        .replace(/^www\./i, "")
+        .split("/")[0];
 
-  try {
-    const res = await fetch(`http://ip-api.com/json/${domain}`)
-    const data = await res.json()
+    try {
+        const res = await fetch(`http://ip-api.com/json/${domain}`);
+        const data = await res.json();
 
-    if (data.status !== "success")
-      return m.reply(`Failed to resolve IP for domain: ${domain}`)
+        if (data.status !== "success") return m.reply(`Failed to resolve IP for domain: ${domain}`);
 
-    const result = [
-      "```",
-      "┌─[Network Lookup]────────────",
-      `│  Query     : ${data.query}`,
-      `│  Country   : ${data.country} (${data.countryCode})`,
-      `│  Region    : ${data.regionName} (${data.region})`,
-      `│  City      : ${data.city}`,
-      `│  ZIP       : ${data.zip}`,
-      `│  Latitude  : ${data.lat}`,
-      `│  Longitude : ${data.lon}`,
-      `│  Timezone  : ${data.timezone}`,
-      `│  ISP       : ${data.isp}`,
-      `│  Org       : ${data.org}`,
-      `│  AS        : ${data.as}`,
-      "└────────────────────────────",
-      "```"
-    ].join("\n")
+        const result = [
+            "```",
+            "┌─[Network Lookup]────────────",
+            `│  Query     : ${data.query}`,
+            `│  Country   : ${data.country} (${data.countryCode})`,
+            `│  Region    : ${data.regionName} (${data.region})`,
+            `│  City      : ${data.city}`,
+            `│  ZIP       : ${data.zip}`,
+            `│  Latitude  : ${data.lat}`,
+            `│  Longitude : ${data.lon}`,
+            `│  Timezone  : ${data.timezone}`,
+            `│  ISP       : ${data.isp}`,
+            `│  Org       : ${data.org}`,
+            `│  AS        : ${data.as}`,
+            "└────────────────────────────",
+            "```",
+        ].join("\n");
 
-    await m.reply(result)
-  } catch (err) {
-    console.error(err)
-    m.reply("Error: Unable to fetch IP information.")
-  }
-}
+        await m.reply(result);
+    } catch (err) {
+        console.error(err);
+        m.reply("Error: Unable to fetch IP information.");
+    }
+};
 
-handler.help = ["cekip"]
-handler.tags = ["tools"]
-handler.command = /^(cekip|ip)$/i
+handler.help = ["cekip"];
+handler.tags = ["tools"];
+handler.command = /^(cekip|ip)$/i;
 
-export default handler
+export default handler;

@@ -1,6 +1,6 @@
 let handler = async (m, { conn, text }) => {
-  let group = text ? text : m.chat;
-  await conn.groupLeave(group);
+    let group = text ? text : m.chat;
+    await conn.groupLeave(group);
 };
 
 handler.help = ["leavegc"];

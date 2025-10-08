@@ -1,49 +1,49 @@
 name: 🍓 Prettier Auto Format
 
 on:
-  push:
-    branches: ["main"]
+    push:
+        branches: ["main"]
 
 jobs:
-  prettier:
-    runs-on: ubuntu-latest
+    prettier:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: 🍬 Checkout code
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.PAT_TOKEN }}
-          fetch-depth: 2
+        steps:
+            - name: 🍬 Checkout code
+              uses: actions/checkout@v4
+              with:
+                  token: ${{ secrets.PAT_TOKEN }}
+                  fetch-depth: 2
 
-      - name: 🍥 Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
+            - name: 🍥 Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  run_install: false
 
-      - name: 🧁 Restore pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
+            - name: 🧁 Restore pnpm cache
+              uses: actions/cache@v4
+              with:
+                  path: ~/.pnpm-store
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pnpm-
 
-      - name: 🍡 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "pnpm"
+            - name: 🍡 Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: "pnpm"
 
-      - name: 🍧 Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+            - name: 🍧 Install dependencies
+              run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: 🍰 Auto-format with Prettier
-        run: pnpm prettier:fix || true
+            - name: 🍰 Auto-format with Prettier
+              run: pnpm prettier:fix || true
 
-      - name: 🍫 Commit & Push Prettier changes
-        run: |
-          git config --global user.name "naruyaizumi"
-          git config --global user.email "sexystyle088@gmail.com"
-          git add .
-          git diff --cached --quiet || git commit -m "style: auto-format with Prettier"
-          git push || true
+            - name: 🍫 Commit & Push Prettier changes
+              run: |
+                  git config --global user.name "naruyaizumi"
+                  git config --global user.email "sexystyle088@gmail.com"
+                  git add .
+                  git diff --cached --quiet || git commit -m "style: auto-format with Prettier"
+                  git push || true
