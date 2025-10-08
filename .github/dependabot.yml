@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "auto-merge"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "production"
