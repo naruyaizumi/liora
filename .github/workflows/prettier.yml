@@ -38,7 +38,7 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: 🍰 Auto-format with Prettier
-        run: pnpm prettier --write .
+        run: pnpm prettier:fix
 
       - name: 🍫 Commit & Push Prettier changes
         run: |
