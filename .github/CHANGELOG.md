@@ -9,6 +9,8 @@
 - Graceful Shutdown & Crash Cooldown system for stable runtime supervision.  
 - Linux-style CLI interface with uniform separators and clean headers.  
 - **Native C++ Fetch Bridge** — implemented using `libcurl` with full HTTP/2 optimization and memory-safe buffer management, replacing Node’s built-in fetch for higher performance and lower latency across network requests.  
+- **FormData & Blob Support in Native Fetch** — added complete multipart/form-data compatibility to native C++ bridge, enabling seamless upload of binary payloads and buffers directly from Node.js without third-party polyfills.  
+- **Uploader System Refactor** — all uploader functions (`uploader1–uploader8`) now use native `FormData` and `Blob` APIs (no external `form-data` dependency) ensuring better compatibility with the C++ fetch bridge and reduced JS overhead.  
 - **SQL-based Authentication Layer** — replaced `useMultiFileAuthState` with `SQLiteAuth()` for a more durable, corruption-resistant Baileys session store powered by `better-sqlite3`.  
 - **Refactored Store System (`store.bind`)** — fully rebuilt for Baileys v7 compatibility:  
   - Event-safe, idempotent, and memory-leak-free binding.  
@@ -26,6 +28,7 @@
 - Emoji-based UI formatting and inconsistent ASCII borders.  
 - Old multi-file session handler (`useMultiFileAuthState`) replaced with single-file `auth.db` managed through SQLite.  
 - Deprecated store event system replaced with modern, safe `bind(conn)` implementation.  
+- Third-party `form-data` dependency — replaced by native Blob/FormData implementation integrated with the C++ fetch bridge.  
 
 ---
 
@@ -38,7 +41,7 @@
 - Optimized in-memory cleanup for temporary media buffers.  
 - Unified timestamp and output layout across all command replies.  
 - Rewrote fetch handling layer to use `bridge.js` as a single entrypoint — improving consistency, cancellation control, and reducing JS overhead during parallel HTTP operations.  
-- Replaced verbose logging across `connection.js`, `main.js`, and `handler.js` with lightweight, structured event-based outputs.  
+- Added Blob/FormData handling in native fetch to fix broken uploads for `uploader()`, `uploader2()`, and related functions.  
 - Fixed race conditions during concurrent plugin reloads and database checkpoints.  
 - Fixed group metadata duplication and stale cache issues in `store.bind`.  
 - Minor stability patches and consistency fixes across async handlers.  
@@ -51,15 +54,13 @@ Version 7 introduces a **complete internal refactor** focused on stability, spee
 - Rebuilt database and media engine  
 - Native runtime supervision  
 - SQLite-based authentication for Baileys session  
-- Native C++ HTTP bridge for ultra-fast network calls  
+- **Native C++ HTTP bridge with full Blob/FormData upload support**  
 - Clean, minimal Linux-style console output  
 - Optimized event handling, plugin reloader, and store binding system  
 
 ---
 
-*Liora 7.0.0 marks the transition from mixed async/sync architecture to a fully native async environment, combining Node.js performance with native C++ bridges for near-zero latency operations.*
-
----
+*Liora 7.0.0 marks the transition from mixed async/sync architecture to a fully native async environment, combining Node.js performance with native C++ bridges for near-zero latency operations and seamless binary data handling.*
 
 # Version 6.0.0 — Major Release
 
