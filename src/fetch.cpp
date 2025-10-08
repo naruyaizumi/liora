@@ -132,7 +132,7 @@ static std::string randomBoundary() {
   for (int i=0;i<3;i++) oss << std::hex << dist(rng);
   return oss.str();
 }
-// serialize formData { key: string|Buffer|{ value|data|buffer, filename?, contentType? } }
+
 static void buildMultipartFromNapi(const Napi::Object& formObj,
                                    std::vector<unsigned char>& outBody,
                                    std::string& outBoundary) {

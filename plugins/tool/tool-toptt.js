@@ -1,5 +1,3 @@
-import { convert } from "../../src/bridge.js";
-
 let handler = async (m, { conn, usedPrefix, command }) => {
     try {
         const q = m.quoted ? m.quoted : m;
@@ -13,18 +11,10 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         const buffer = await q.download?.();
         if (!Buffer.isBuffer(buffer) || buffer.length === 0)
             return m.reply("Failed to get media buffer.");
-
-        const audio = await convert(buffer, {
-            format: "opus",
-            sampleRate: 48000,
-            channels: 1,
-            bitrate: "64k",
+        await conn.sendFile(m.chat, buffer, "voice.opus", "", m, true, {
+            asAudio: true,
+            ptt: true,
         });
-
-        if (!Buffer.isBuffer(audio) || audio.length === 0)
-            return m.reply("Conversion failed: empty result.");
-
-        await conn.sendFile(m.chat, audio, "voice.opus", m, true);
     } catch (e) {
         console.error(e);
         m.reply(`Error during conversion:\n${e.message}`);
