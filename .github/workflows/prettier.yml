@@ -3,10 +3,6 @@ name: 🍓 Prettier Auto Format
 on:
   push:
     branches: ["main"]
-    paths-ignore:
-      - "README.md"
-      - "LICENSE"
-      - ".github/**"
 
 jobs:
   prettier:
@@ -22,14 +18,21 @@ jobs:
       - name: 🍥 Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
           run_install: false
+
+      - name: 🧁 Restore pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
       - name: 🍡 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: 🍧 Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
