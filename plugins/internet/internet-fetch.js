@@ -1,4 +1,4 @@
-import { mkdtemp, open, stat, writeFile, rm } from "fs/promises"
+import { mkdtemp, open, stat, rm } from "fs/promises"
 import os from "os"
 import path from "path"
 import { fileTypeFromBuffer } from "file-type"
@@ -82,7 +82,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (isJson) {
       try {
         content = JSON.stringify(JSON.parse(content), null, 2)
-      } catch {}
+      } catch {/* ignore */}
     }
     if (content.length > 3000) content = content.slice(0, 3000) + "\n\n[ truncated :v ]"
 

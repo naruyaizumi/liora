@@ -53,9 +53,10 @@ const matchPrefix = (prefix, text) => {
         });
     }
     if (typeof prefix === "string") {
-        const esc = new RegExp(prefix.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&"));
-        return [[esc.exec(text), esc]];
-    }
+  const safe = prefix.replace(/[^a-zA-Z0-9_-]/g, "\\$&");
+  const esc = new RegExp(`^${safe}`, "i");
+  return [[esc.exec(text), esc]];
+}
     return [[[], new RegExp()]];
 };
 

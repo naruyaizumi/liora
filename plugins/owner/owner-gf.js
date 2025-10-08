@@ -1,5 +1,5 @@
 import { join, extname } from "path"
-import { access, readFile } from "fs/promises"
+import { open } from "fs/promises"
 
 let handler = async (m, { conn, args, usedPrefix, command, __dirname }) => {
   const time = new Date().toTimeString().split(" ")[0]
@@ -16,10 +16,10 @@ let handler = async (m, { conn, args, usedPrefix, command, __dirname }) => {
     if (!extname(target)) target += ".js"
 
     const filepath = join(__dirname, "../", target)
-    await access(filepath).catch(() => { throw new Error(`File not found: ${target}`) })
+    const handle = await open(filepath, "r")
+    const fileBuffer = await handle.readFile()
+    await handle.close()
 
-    // Baca file langsung setelah akses (menghindari race condition)
-    const fileBuffer = await readFile(filepath, { flag: "r" })
     const fileName = target.split("/").pop()
     const fileSize = (fileBuffer.length / 1024).toFixed(2)
 
@@ -34,12 +34,16 @@ let handler = async (m, { conn, args, usedPrefix, command, __dirname }) => {
       "```",
     ].join("\n")
 
-    await conn.sendMessage(m.chat, {
-      document: fileBuffer,
-      fileName,
-      mimetype: "application/octet-stream",
-      caption
-    }, { quoted: m })
+    await conn.sendMessage(
+      m.chat,
+      {
+        document: fileBuffer,
+        fileName,
+        mimetype: "application/octet-stream",
+        caption,
+      },
+      { quoted: m },
+    )
   } catch (err) {
     m.reply(`Error: ${err.message}`)
   }
