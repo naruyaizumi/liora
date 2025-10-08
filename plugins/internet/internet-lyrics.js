@@ -1,58 +1,64 @@
+import { fetch } from "../../src/bridge.js"
+
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     if (!text)
       return m.reply(
-        `🎶 *Masukkan judul atau potongan lirik lagu!*\n📌 *Contoh: ${usedPrefix + command} Bawa dia kembali*`,
-      );
-    await global.loading(m, conn);
-    let apiUrl = global.API(
-      "btz",
-      "/api/search/lirik",
-      { lirik: text },
-      "apikey",
-    );
-    let response = await fetch(apiUrl);
-    if (!response.ok)
-      return m.reply("⚠️ *Terjadi kesalahan dalam pencarian lirik!*");
-    let json = await response.json();
-    if (!json.result)
-      return m.reply("⚠️ *Lirik tidak ditemukan atau terjadi kesalahan!*");
-    let { lyrics, title, artist, image, url } = json.result;
-    let caption = `
-🎵 *Lirik Lagu: ${title}*
-🎤 *Artis: ${artist}*
-━━━━━━━━━━━━━━━━━━━
-📜 *Lirik:*
-${lyrics}
-━━━━━━━━━━━━━━━━━━━
-🔗 *Sumber: ${url}*
-`.trim();
+        `Enter a song title or lyric fragment.\n› Example: ${usedPrefix + command} I was never there`
+      )
+
+    await global.loading(m, conn)
+    const apiUrl = global.API("btz", "/api/search/lirik", { lirik: text }, "apikey")
+    const res = await fetch(apiUrl)
+    if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch lyrics.`)
+
+    const json = await res.json()
+    if (!json.result) return m.reply("No lyrics found for that query.")
+
+    const { title, artist, lyrics, image, url } = json.result
+    const timestamp = new Date().toTimeString().split(" ")[0]
+
+    const output = [
+      "```",
+      `┌─[${timestamp}]────────────`,
+      `│  LYRICS SEARCH`,
+      "└──────────────────────",
+      `Title  : ${title}`,
+      `Artist : ${artist}`,
+      "───────────────────────",
+      lyrics.trim(),
+      "───────────────────────",
+      `Source : ${url}`,
+      "```",
+    ].join("\n")
+
     await conn.sendMessage(
       m.chat,
       {
-        text: caption,
+        text: output,
         contextInfo: {
           externalAdReply: {
             title: title,
-            body: `Lagu dari ${artist}`,
+            body: `Artist: ${artist}`,
             thumbnailUrl: image,
+            sourceUrl: url,
             mediaType: 1,
             renderLargerThumbnail: true,
           },
         },
       },
-      { quoted: m },
-    );
+      { quoted: m }
+    )
   } catch (e) {
-    console.error(e);
-    m.reply(`❌ *Terjadi Kesalahan!*\n⚠️ *Detail:* ${e.message}`);
+    console.error(e)
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["lyrics"];
-handler.tags = ["internet"];
-handler.command = /^(lyrics|lirik)$/i;
+handler.help = ["lyrics"]
+handler.tags = ["internet"]
+handler.command = /^(lyrics|lirik)$/i
 
-export default handler;
+export default handler

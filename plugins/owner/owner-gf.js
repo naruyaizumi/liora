@@ -1,34 +1,52 @@
-import { join, extname } from "path";
-import { readFileSync, existsSync } from "fs";
+import { join, extname } from "path"
+import fs from "fs/promises"
 
 let handler = async (m, { conn, args, usedPrefix, command, __dirname }) => {
+  const time = new Date().toTimeString().split(" ")[0]
+
   if (!args.length)
     return m.reply(
-      `🍓 *Masukkan path file yang ingin diambil~*\n\n*Contoh:* ${usedPrefix + command} plugins owner owner-delsw\n*Contoh:* ${usedPrefix + command} package.json`,
-    );
+      `Enter the target file path.\n` +
+      `› Example: ${usedPrefix + command} plugins owner owner-sf\n` +
+      `› Example: ${usedPrefix + command} package.json`
+    )
 
-  let target = join(...args);
-  if (!extname(target)) target += ".js";
+  try {
+    let target = join(...args)
+    if (!extname(target)) target += ".js"
 
-  let filepath = join(__dirname, "../", target);
-  if (!existsSync(filepath))
-    return m.reply(`🍎 *File "${target}" tidak ditemukan!*`);
+    const filepath = join(__dirname, "../", target)
+    await fs.access(filepath).catch(() => { throw new Error(`File not found: ${target}`) })
 
-  await conn.sendMessage(
-    m.chat,
-    {
-      document: readFileSync(filepath),
-      fileName: target.split("/").pop(),
+    const fileBuffer = await fs.readFile(filepath)
+    const fileName = target.split("/").pop()
+    const fileSize = (fileBuffer.length / 1024).toFixed(2)
+
+    const caption = [
+      "```",
+      `Time : ${time}`,
+      `Path : ${target}`,
+      `Name : ${fileName}`,
+      `Size : ${fileSize} KB`,
+      "───────────────────────────",
+      "File successfully sent.",
+      "```",
+    ].join("\n")
+
+    await conn.sendMessage(m.chat, {
+      document: fileBuffer,
+      fileName,
       mimetype: "application/octet-stream",
-      caption: `📂 *Berikut file: ${target}* 🍡`,
-    },
-    { quoted: m },
-  );
-};
+      caption
+    }, { quoted: m })
+  } catch (err) {
+    m.reply(`Error: ${err.message}`)
+  }
+}
 
-handler.help = ["getfile <path>"];
-handler.tags = ["owner"];
-handler.command = /^(getfile|getplugin|gf)$/i;
-handler.mods = true;
+handler.help = ["getfile"]
+handler.tags = ["owner"]
+handler.command = /^(getfile|gf)$/i
+handler.mods = true
 
-export default handler;
+export default handler

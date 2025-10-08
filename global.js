@@ -68,8 +68,6 @@ CREATE TABLE IF NOT EXISTS chats (
   detect INTEGER DEFAULT 0,
   sWelcome TEXT DEFAULT '',
   sBye TEXT DEFAULT '',
-  sPromote TEXT DEFAULT '',
-  sDemote TEXT DEFAULT '',
   antiLinks INTEGER DEFAULT 0,
   antiAudio INTEGER DEFAULT 0,
   antiFile INTEGER DEFAULT 0,
@@ -85,7 +83,6 @@ CREATE TABLE IF NOT EXISTS settings (
   jid TEXT PRIMARY KEY,
   self INTEGER DEFAULT 0,
   gconly INTEGER DEFAULT 0,
-  queque INTEGER DEFAULT 0,
   autoread INTEGER DEFAULT 0,
   restrict INTEGER DEFAULT 0,
   cleartmp INTEGER DEFAULT 1,
@@ -157,33 +154,51 @@ global.loading = async (m, conn, back = false) => {
 };
 
 global.dfail = (type, m, conn) => {
-  let msg = {
-    owner:
-      "✨ *Maaf, fitur ini hanya bisa digunakan oleh pemilikku. Silakan tanyakan langsung kepada dia.*",
-    mods: "⚙️ *Fitur ini khusus untuk moderator. Jika membutuhkan bantuan, silakan hubungi moderator utama.*",
-    group:
-      "🌐 *Perintah ini hanya bisa digunakan di dalam grup. Coba gunakan di grup lain, ya.*",
-    admin: "🛡️ *Hanya admin grup yang dapat menggunakan perintah ini.*",
-    botAdmin:
-      "🤖 *Aku perlu menjadi admin di grup ini agar dapat menjalankan perintah ini. Bisa bantu aku jadi admin?*",
-    restrict: "❌ *Maaf, fitur ini telah dibatasi dan tidak dapat digunakan.*",
-  }[type];
-  if (msg) {
-    conn.sendMessage(
-      m.chat,
-      {
-        text: msg,
-        contextInfo: {
-          externalAdReply: {
-            title: "🍡 AKSES DITOLAK",
-            body: global.config.watermark,
-            mediaType: 1,
-            thumbnailUrl: "https://qu.ax/RtoXq.jpg",
-            renderLargerThumbnail: true,
-          },
+  const msg = {
+    owner: `\`\`\`
+[ACCESS DENIED]
+This command is restricted to the system owner only.
+Contact the administrator for permission.
+\`\`\``,
+    mods: `\`\`\`
+[ACCESS DENIED]
+Moderator privileges required to execute this command.
+\`\`\``,
+    group: `\`\`\`
+[ACCESS DENIED]
+This command can only be executed within a group context.
+\`\`\``,
+    admin: `\`\`\`
+[ACCESS DENIED]
+You must be a group administrator to perform this action.
+\`\`\``,
+    botAdmin: `\`\`\`
+[ACCESS DENIED]
+System privileges insufficient.
+Grant admin access to the bot to continue.
+\`\`\``,
+    restrict: `\`\`\`
+[ACCESS BLOCKED]
+This feature is currently restricted or disabled by configuration.
+\`\`\``,
+  }[type]
+
+  if (!msg) return
+
+  conn.sendMessage(
+    m.chat,
+    {
+      text: msg,
+      contextInfo: {
+        externalAdReply: {
+          title: "ACCESS CONTROL SYSTEM",
+          body: global.config.watermark || "Liora Secure Environment",
+          mediaType: 1,
+          thumbnailUrl: "https://qu.ax/DdwBH.jpg",
+          renderLargerThumbnail: true,
         },
       },
-      { quoted: m },
-    );
-  }
-};
+    },
+    { quoted: m }
+  )
+}

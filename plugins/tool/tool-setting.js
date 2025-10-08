@@ -1,4 +1,4 @@
-let features = [
+const features = [
   { key: "adminOnly", scope: "chat", name: "Admin Only" },
   { key: "detect", scope: "chat", name: "Detect" },
   { key: "notifgempa", scope: "chat", name: "Notif Gempa" },
@@ -12,71 +12,69 @@ let features = [
 
   { key: "self", scope: "bot", name: "Self Mode" },
   { key: "gconly", scope: "bot", name: "Group Only" },
-  { key: "queque", scope: "bot", name: "Antrian Pesan" },
+  { key: "queque", scope: "bot", name: "Message Queue" },
   { key: "noprint", scope: "bot", name: "No Print" },
   { key: "autoread", scope: "bot", name: "Auto Read" },
   { key: "restrict", scope: "bot", name: "Restrict" },
-  { key: "cleartmp", scope: "bot", name: "Clear Tmp File" },
+  { key: "cleartmp", scope: "bot", name: "Clear Tmp" },
   { key: "anticall", scope: "bot", name: "Anti Call" },
-  { key: "adReply", scope: "bot", name: "Ad Reply Mode" },
-  { key: "noerror", scope: "bot", name: "Hide Error Mode" },
-];
+  { key: "adReply", scope: "bot", name: "Ad Reply" },
+  { key: "noerror", scope: "bot", name: "Hide Error" },
+]
 
 function listFeatures(isOwner, chat, bot) {
-  let available = isOwner
-    ? features
-    : features.filter((f) => f.scope === "chat");
+  const available = isOwner ? features : features.filter(f => f.scope === "chat")
   return available
     .map((f, i) => {
-      let aktif = f.scope === "chat" ? chat[f.key] : bot[f.key];
-      return `*${i + 1}. ${f.name} [${aktif ? "ON 🍃" : "OFF 🍂"}]*`;
+      const state = f.scope === "chat" ? chat[f.key] : bot[f.key]
+      return `${i + 1}. ${f.name} [${state ? "ON" : "OFF"}]`
     })
-    .join("\n");
+    .join("\n")
 }
 
-let handler = async (
-  m,
-  { conn, isOwner, isAdmin, args, usedPrefix, command },
-) => {
-  let chat = global.db.data.chats[m.chat];
-  let bot = global.db.data.settings[conn.user.jid] || {};
+let handler = async (m, { conn, isOwner, isAdmin, args, usedPrefix, command }) => {
+  const chat = global.db.data.chats[m.chat]
+  const bot = global.db.data.settings[conn.user.jid] || {}
 
   if (!args[0]) {
-    let daftar = listFeatures(isOwner, chat, bot);
+    const daftar = listFeatures(isOwner, chat, bot)
     return m.reply(
-      `🍱 *Daftar Fitur:*\n${daftar}\n\n*Contoh: • ${usedPrefix + command} 1 2 3  (aktifkan fitur 1,2,3)*\n*• ${usedPrefix + (command === "on" ? "off" : "on")} 4 5  (nonaktifkan fitur 4,5)*`,
-    );
+      `=== Feature Toggle ===
+${daftar}
+
+Usage:
+› ${usedPrefix + command} 1 2 3 => enable multiple features
+› ${usedPrefix + (command === "on" ? "off" : "on")} 4 5 6 => disable features`
+    )
   }
 
-  let enable = command === "on";
-  let indexes = args.map((n) => parseInt(n)).filter((n) => !isNaN(n));
+  const enable = command === "on"
+  const indexes = args.map(n => parseInt(n)).filter(n => !isNaN(n))
 
-  if (!indexes.length) return m.reply("🔥 *Nomor fitur tidak valid!*");
+  if (!indexes.length) return m.reply("Invalid feature number.")
 
-  let results = [];
-  for (let i of indexes) {
-    let fitur = (
-      isOwner ? features : features.filter((f) => f.scope === "chat")
-    )[i - 1];
-    if (!fitur) continue;
+  const results = []
+  for (const i of indexes) {
+    const fitur = (isOwner ? features : features.filter(f => f.scope === "chat"))[i - 1]
+    if (!fitur) continue
 
     if (fitur.scope === "chat") {
-      if (!(isAdmin || isOwner)) continue;
-      chat[fitur.key] = enable;
+      if (!(isAdmin || isOwner)) continue
+      chat[fitur.key] = enable
     } else if (fitur.scope === "bot") {
-      if (!isOwner) continue;
-      bot[fitur.key] = enable;
+      if (!isOwner) continue
+      bot[fitur.key] = enable
     }
-    results.push(`*${fitur.name} : ${enable ? "ON 🍃" : "OFF 🍂"}*`);
+    results.push(`${fitur.name}: ${enable ? "ON" : "OFF"}`)
   }
 
-  if (!results.length) return m.reply("🔥 *Tidak ada fitur yang bisa diubah.*");
-  return m.reply("🍡 *Hasil:*\n" + results.join("\n"));
-};
+  if (!results.length) return m.reply("No features were modified.")
+  return m.reply(`Updated features:\n${results.join("\n")}`)
+}
 
-handler.help = ["on", "off"];
-handler.tags = ["tools"];
-handler.command = /^(on|off)$/i;
-handler.group = true;
+handler.help = ["on", "off"]
+handler.tags = ["tools"]
+handler.command = /^(on|off)$/i
+handler.group = true
 
-export default handler;
+export default handler

@@ -1,15 +1,23 @@
 let handler = async (m, { conn }) => {
-  let startTime = performance.now();
-  let endTime = performance.now();
-  let responseTime = (endTime - startTime).toFixed(6);
-  let message = `*PING PONG* 🏓
-🚀 *Response: ${responseTime} ms*`;
+  const startTime = performance.now()
+  const endTime = performance.now()
+  const responseTime = (endTime - startTime).toFixed(3)
+  const timestamp = new Date().toTimeString().split(" ")[0]
 
-  await conn.sendMessage(m.chat, { text: message });
-};
+  const text = [
+    "```",
+    `[${timestamp}] Liora Ping`,
+    "────────────────────────",
+    `Response Time : ${responseTime} ms`,
+    "────────────────────────",
+    "```",
+  ].join("\n")
 
-handler.help = ["ping"];
-handler.tags = ["info"];
-handler.command = /^(ping)$/i;
+  await conn.sendMessage(m.chat, { text }, { quoted: m })
+}
 
-export default handler;
+handler.help = ["ping"]
+handler.tags = ["info"]
+handler.command = /^(ping)$/i
+
+export default handler

@@ -1,34 +1,50 @@
+import { fetch } from "../../src/bridge.js"
+
 let handler = async (m, { args, usedPrefix, command }) => {
   if (!args[0])
     return m.reply(
-      `📦 *Contoh penggunaan: ${usedPrefix + command} google.com*`,
-    );
-  let domain = args[0]
+      `Enter a domain name or URL.\n› Example: ${usedPrefix + command} google.com`
+    )
+
+  const domain = args[0]
     .replace(/^https?:\/\//i, "")
     .replace(/^www\./i, "")
-    .split("/")[0];
-  let response = await fetch(`http://ip-api.com/json/${domain}`);
-  let res = await response.json();
-  if (res.status !== "success")
-    return m.reply(`❌ *IP untuk domain ${domain} tidak ditemukan!*`);
-  let teks = `🌐 *Informasi IP Domain* 🌐
-────────────────────
-🔍 *Query: ${res.query}*
-🌍 *Negara: ${res.country} (${res.countryCode})*
-📍 *Wilayah: ${res.regionName} (${res.region})*
-🏙️ *Kota: ${res.city}*
-🏷️ *ZIP: ${res.zip}*
-🧭 *Latitude: ${res.lat}*
-🧭 *Longitude: ${res.lon}*
-🕒 *Zona Waktu: ${res.timezone}*
-🧠 *ISP: ${res.isp}*
-💼 *Organisasi: ${res.org}*
-📡 *AS: ${res.as}*`.trim();
-  await m.reply(teks);
-};
+    .split("/")[0]
 
-handler.help = ["cekip"];
-handler.tags = ["tools"];
-handler.command = /^(cekip|ip)$/i;
+  try {
+    const res = await fetch(`http://ip-api.com/json/${domain}`)
+    const data = await res.json()
 
-export default handler;
+    if (data.status !== "success")
+      return m.reply(`Failed to resolve IP for domain: ${domain}`)
+
+    const result = [
+      "```",
+      "┌─[Network Lookup]────────────",
+      `│  Query     : ${data.query}`,
+      `│  Country   : ${data.country} (${data.countryCode})`,
+      `│  Region    : ${data.regionName} (${data.region})`,
+      `│  City      : ${data.city}`,
+      `│  ZIP       : ${data.zip}`,
+      `│  Latitude  : ${data.lat}`,
+      `│  Longitude : ${data.lon}`,
+      `│  Timezone  : ${data.timezone}`,
+      `│  ISP       : ${data.isp}`,
+      `│  Org       : ${data.org}`,
+      `│  AS        : ${data.as}`,
+      "└────────────────────────────",
+      "```"
+    ].join("\n")
+
+    await m.reply(result)
+  } catch (err) {
+    console.error(err)
+    m.reply("Error: Unable to fetch IP information.")
+  }
+}
+
+handler.help = ["cekip"]
+handler.tags = ["tools"]
+handler.command = /^(cekip|ip)$/i
+
+export default handler

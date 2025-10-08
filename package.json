@@ -1,6 +1,6 @@
 {
   "name": "liora",
-  "version": "6.0.0",
+  "version": "7.0.0",
   "type": "module",
   "engines": {
     "node": ">=22.0.0"
@@ -8,6 +8,8 @@
   "scripts": {
     "start": "node index.js",
     "test": "node test.js",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --write .",
     "lint": "eslint .",
     "build:addon": "node-gyp configure build"
   },
@@ -17,6 +19,7 @@
     "url": "https://linkbio.co/naruyaizumi"
   },
   "dependencies": {
+    "audio-decode": "^2.2.3",
     "baileys": "7.0.0-rc.5",
     "better-sqlite3": "^12.4.1",
     "canvas": "^3.2.0",
@@ -30,6 +33,5 @@
     "eslint": "^9.37.0",
     "globals": "^16.4.0",
     "node-addon-api": "^8.5.0"
-  },
-  "packageManager": "pnpm@10.18.0+sha512.e804f889f1cecc40d572db084eec3e4881739f8dec69c0ff10d2d1beff9a4e309383ba27b5b750059d7f4c149535b6cd0d2cb1ed3aeb739239a4284a68f40cfa"
+  }
 }

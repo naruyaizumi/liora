@@ -1,45 +1,41 @@
-let handler = async (m, { conn, args }) => {
-  if (!args[0]) return m.reply("🍩 *Masukkan URL MediaFire!*");
-  let url = args[0];
-  if (!/^https:\/\/www\.mediafire\.com\/file\//i.test(url))
+import { fetch } from "../../src/bridge.js"
+
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+  if (!args[0])
     return m.reply(
-      "🍬 *URL tidak valid! Pastikan itu link MediaFire yang benar ya~*",
-    );
+      `Please provide a MediaFire URL.\n› Example: ${usedPrefix + command} https://www.mediafire.com/file`
+    )
+
+  const url = args[0]
+  if (!/^https:\/\/www\.mediafire\.com\/file\//i.test(url))
+    return m.reply("Invalid URL! Please use a valid MediaFire link.")
+
   try {
-    await global.loading(m, conn);
-    let response = await fetch(
-      global.API("btz", "/api/download/mediafire", { url }, "apikey"),
-    );
-    if (!response.ok)
-      return m.reply("🍜 *Gagal menghubungi API. Coba lagi nanti ya!*");
-    let json = await response.json();
-    if (!json.status || !json.result || !json.result.download_url)
-      return m.reply(
-        "🍡 *Gagal mendapatkan file. Pastikan URL benar dan coba lagi!*",
-      );
-    let { filename, filesize, mimetype, uploaded, download_url } = json.result;
-    let text = `
-🍙 *MediaFire Downloader* 🍙
-━━━━━━━━━━━━━━━━━━━
-🍘 *Nama File: ${filename}*
-🍱 *Ukuran File: ${filesize}*
-🍛 *Tanggal Upload: ${uploaded}*
-🥟 *MIME Type: ${mimetype || "-"}*
-━━━━━━━━━━━━━━━━━━━
-`.trim();
-    await conn.sendFile(m.chat, download_url, filename, text, m, false, {
+    await global.loading(m, conn)
+
+    const apiUrl = global.API("btz", "/api/download/mediafire", { url }, "apikey")
+    const res = await fetch(apiUrl)
+    if (!res.ok) throw new Error(`Failed to contact API. Status: ${res.status}`)
+
+    const json = await res.json()
+    if (!json.status || !json.result?.download_url)
+      throw new Error("Unable to retrieve file information from MediaFire.")
+
+    const { filename, mimetype, download_url } = json.result
+
+    await conn.sendFile(m.chat, download_url, filename, null, m, false, {
       mimetype: mimetype || "application/octet-stream",
-    });
-  } catch (e) {
-    console.error(e);
-    m.reply("🍤 *Terjadi kesalahan saat memproses permintaan!*");
+    })
+  } catch (err) {
+    console.error(err)
+    m.reply(`An error occurred: ${err.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["mediafire"];
-handler.tags = ["downloader"];
-handler.command = /^(mediafire|mf)$/i;
+handler.help = ["mediafire"]
+handler.tags = ["downloader"]
+handler.command = /^(mediafire|mf)$/i
 
-export default handler;
+export default handler

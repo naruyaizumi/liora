@@ -1,41 +1,64 @@
-import fs from "fs";
-import path from "path";
+import fs from "fs/promises"
+import path from "path"
 
-let handler = async (m, { args }) => {
-  if (!args.length) args = ["."];
-  let target = path.join(...args);
-  if (!m.quoted) {
-    if (!fs.existsSync(target))
-      return m.reply(`🍩 *Folder ${target} tidak ada!*`);
-    let list = fs
-      .readdirSync(target)
-      .map((name) => {
-        let stats = fs.statSync(path.join(target, name));
-        return {
-          name,
-          isDir: stats.isDirectory(),
-        };
-      })
-      .sort((a, b) => {
-        if (a.isDir && !b.isDir) return -1;
-        if (!a.isDir && b.isDir) return 1;
-        return a.name.localeCompare(b.name);
-      })
-      .map((item) => (item.isDir ? `📁 ${item.name}/` : `📄 ${item.name}`))
-      .join("\n");
-    return m.reply(`🌸 *Isi Folder: ${target}*\n\n${list}`);
+const handler = async (m, { args }) => {
+  const now = new Date().toTimeString().split(" ")[0]
+  const target = path.resolve(...(args.length ? args : ["."]))
+
+  try {
+    if (!m.quoted) {
+      const items = await fs.readdir(target, { withFileTypes: true }).catch(() => null)
+      if (!items) return m.reply(`Folder not found: ${target}`)
+
+      const list = items
+        .sort((a, b) => (a.isDirectory() === b.isDirectory() ? a.name.localeCompare(b.name) : a.isDirectory() ? -1 : 1))
+        .map((item) => `${item.isDirectory() ? "📁" : "📄"} ${item.name}${item.isDirectory() ? "/" : ""}`)
+        .join("\n") || "(empty directory)"
+
+      return m.reply(
+        [
+          "```",
+          `Time  : ${now}`,
+          `Path  : ${target}`,
+          "───────────────────────────",
+          list,
+          "───────────────────────────",
+          "Directory listing complete.",
+          "```",
+        ].join("\n")
+      )
+    }
+
+    const q = m.quoted
+    if (!q?.download) return m.reply("This message is not a media file.")
+
+    const buffer = await q.download().catch(() => null)
+    if (!buffer) return m.reply("Failed to download the quoted file.")
+
+    const filename = q.fileName || "file.unknown"
+    const fullpath = path.join(target, filename)
+
+    await fs.mkdir(path.dirname(fullpath), { recursive: true })
+    await fs.writeFile(fullpath, buffer)
+
+    return m.reply(
+      [
+        "```",
+        `Time : ${now}`,
+        `Saved As : ${fullpath}`,
+        "───────────────────────────",
+        "File written successfully.",
+        "```",
+      ].join("\n")
+    )
+  } catch (err) {
+    return m.reply(`Error: ${err.message}`)
   }
-  let filename = m.quoted.fileName || "file.unknown";
-  let buffer = await m.quoted.download();
-  let fullpath = path.join(target, filename);
-  fs.mkdirSync(path.dirname(fullpath), { recursive: true });
-  fs.writeFileSync(fullpath, buffer);
-  await m.reply(`🍓 *Berhasil disimpan sebagai:*\n📁 *${fullpath}*`);
-};
+}
 
-handler.help = ["sf"];
-handler.tags = ["owner"];
-handler.command = /^(sf|savefile)$/i;
-handler.mods = true;
+handler.help = ["sf"]
+handler.tags = ["owner"]
+handler.command = /^(sf|savefile)$/i
+handler.mods = true
 
-export default handler;
+export default handler

@@ -1,20 +1,35 @@
+import { fetch } from "../../src/bridge.js"
+
 let handler = async (m, { conn, text }) => {
-  if (!text) return m.reply("🍡 *Masukkan query pencarian NPM!*");
+  if (!text)
+    return m.reply("Usage: npmsearch <package>\nExample: .npmsearch sharp");
 
-  let res = await fetch(
-    `http://registry.npmjs.com/-/v1/search?text=${encodeURIComponent(text)}`,
+  const res = await fetch(
+    `https://registry.npmjs.com/-/v1/search?text=${encodeURIComponent(text)}`
   );
-  let { objects } = await res.json();
+  const { objects } = await res.json();
 
-  if (!objects.length) return m.reply(`🍓 *Query "${text}" tidak ditemukan.*`);
+  if (!objects.length)
+    return m.reply(`No results found for "${text}".`);
 
-  let limited = objects.slice(0, 20);
+  const limited = objects.slice(0, 10);
+  const timestamp = new Date().toTimeString().split(" ")[0];
 
-  let txt = limited.map(({ package: pkg }, i) => {
-    return `🍧 *${i + 1}. ${pkg.name} (v${pkg.version})*\n🍰 *${pkg.links.npm}*`;
-  }).join`\n\n`;
+  const result = [
+    "```",
+    `┌─[${timestamp}]────────────`,
+    `│  NPM SEARCH RESULT`,
+    "└──────────────────────",
+    `Query   : ${text}`,
+    "───────────────────────",
+    ...limited.map(
+      ({ package: pkg }, i) =>
+        `${i + 1}. ${pkg.name} (v${pkg.version})\n    ↳ ${pkg.links.npm}`
+    ),
+    "```",
+  ].join("\n");
 
-  await conn.sendMessage(m.chat, { text: txt }, { quoted: m });
+  await conn.sendMessage(m.chat, { text: result }, { quoted: m });
 };
 
 handler.help = ["npmsearch"];

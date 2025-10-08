@@ -4,7 +4,6 @@
  *
  * @founder     གྷ Naruya Izumi <https://linkbio.co/naruyaizumi> | wa.me/6283143663697
  * @owner       གྷ SXZnightmar <wa.me/6281398961382>
- * @business    གྷ Ashaa <wa.me/6285167849436>
  * @api-dev     གྷ Alfi Dev <wa.me/6287831816747>
  * @python-dev  གྷ Zhan Dev <wa.me/6281239621820>
  *
@@ -49,6 +48,7 @@ global.config = {
   APIKeys: {
     "https://api.betabotz.eu.org": "API_KEY",
   },
+  ytdl: "API_KEY", // https://cloudkutube.eu
 
   /*============== MESSAGES ==============*/
   watermark: "𝙇͢𝙞𝙤𝙧𝙖",

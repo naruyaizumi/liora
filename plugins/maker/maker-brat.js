@@ -1,40 +1,40 @@
-import { sticker } from "../../src/bridge.js";
+import { sticker } from "../../src/bridge.js"
+import { fetch } from "../../src/bridge.js"
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
-    if (!args[0]) {
+    if (!args[0])
       return m.reply(
-        `🍙 *Masukkan teks untuk dibuat Brat Sticker yaa!*\n🍤 *Contoh: ${usedPrefix + command} Konichiwa~*`,
-      );
-    }
+        `Enter sticker text.\n› Example: ${usedPrefix + command} Konichiwa~`
+      )
 
-    await global.loading(m, conn);
+    await global.loading(m, conn)
 
     const res = await fetch(
-      global.API("btz", "/api/maker/brat", { text: args.join(" ") }, "apikey"),
-    );
-    if (!res.ok) throw new Error("Gagal fetch API Brat");
+      global.API("btz", "/api/maker/brat", { text: args.join(" ") }, "apikey")
+    )
+    if (!res.ok) throw new Error("Failed to fetch Brat API.")
 
-    const buffer = Buffer.from(await res.arrayBuffer());
+    const buffer = Buffer.from(await res.arrayBuffer())
 
     const stickerImage = await sticker(buffer, {
       packName: global.config.stickpack || "",
       authorName: global.config.stickauth || "",
-    });
+    })
 
     await conn.sendFile(m.chat, stickerImage, "sticker.webp", "", m, false, {
       asSticker: true,
-    });
+    })
   } catch (e) {
-    console.error(e);
-    m.reply(`🍩 *Yaaah ada error!* ${e.message || ""}`);
+    console.error(e)
+    m.reply("Error: " + e.message)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["brat"];
-handler.tags = ["maker"];
-handler.command = /^(brat)$/i;
+handler.help = ["brat"]
+handler.tags = ["maker"]
+handler.command = /^(brat)$/i
 
-export default handler;
+export default handler

@@ -1,39 +1,53 @@
-import { uploader } from "../../lib/uploader.js";
+import { uploader } from "../../lib/uploader.js"
+import { fetch } from "../../src/bridge.js"
 
 let handler = async (m, { conn, usedPrefix, command }) => {
   try {
-    let q = m.quoted ? m.quoted : null;
+    const q = m.quoted ? m.quoted : null
     if (!q)
       return m.reply(
-        `🍜 *Balas pesan yang berisi audio/video!*\n\n🍱 *Contoh:* ${usedPrefix + command} Judulnya apa nih?`,
-      );
-    await global.loading(m, conn);
-    let media = await q.download().catch(() => null);
-    if (!media) return m.reply("🍩 *Gagal mengunduh media. Coba lagi!*");
-    let url = await uploader(media).catch(() => null);
-    if (!url)
-      return m.reply(
-        "🍙 *Gagal upload file. Pastikan format audio/video benar.*",
-      );
-    let apiUrl = global.API("btz", "/api/tools/whatmusic", { url }, "apikey");
-    let res = await fetch(apiUrl);
+        `Enter an audio/video message to detect.\n› Example: ${usedPrefix + command} what's this song?`
+      )
+
+    await global.loading(m, conn)
+
+    const media = await q.download().catch(() => null)
+    if (!media || !media.length)
+      return m.reply("Failed to download the media file.")
+
+    const url = await uploader(media).catch(() => null)
+    if (!url) return m.reply("Failed to upload the media to the server.")
+
+    const api = global.API("btz", "/api/tools/whatmusic", { url }, "apikey")
+    const res = await fetch(api)
     if (!res.ok)
-      return m.reply(
-        "🍛 *Gagal menghubungi layanan BetaBotz. Coba lagi nanti!*",
-      );
-    let json = await res.json();
-    if (!json.status) return m.reply("🍣 *Lagu tidak terdeteksi!*");
-    await m.reply(`🍔 *Hasil Deteksi Musik:*\n\n${json.result.trim()}`);
+      throw new Error(`HTTP ${res.status}: Failed to reach BetaBotz service.`)
+
+    const json = await res.json()
+    if (!json.status || !json.result)
+      return m.reply("No matching song found for the provided clip.")
+
+    const timestamp = new Date().toTimeString().split(" ")[0]
+    const result = [
+      "```",
+      `┌─[${timestamp}]────────────`,
+      `│  WHATMUSIC DETECTOR`,
+      "└──────────────────────",
+      `${json.result.trim()}`,
+      "```",
+    ].join("\n")
+
+    await conn.sendMessage(m.chat, { text: result }, { quoted: m })
   } catch (e) {
-    console.error(e);
-    m.reply(`🍰 *Terjadi Kesalahan Teknis!*\n\n${e.message}`);
+    console.error(e)
+    await m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["whatmusic"];
-handler.tags = ["internet"];
-handler.command = /^(whatmusic|judul)$/i;
+handler.help = ["whatmusic"]
+handler.tags = ["internet"]
+handler.command = /^(whatmusic|judul)$/i
 
-export default handler;
+export default handler

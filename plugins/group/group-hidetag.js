@@ -1,86 +1,62 @@
-import fs from "fs";
-import path from "path";
+import fs from "fs/promises"
+import path from "path"
 
 let handler = async (m, { conn, text, participants }) => {
-  let q = m.quoted || m;
-  let mime = (q.msg || q).mimetype || "";
-  let users = participants.map((p) => p.id);
-  let teks = text || q.text || "";
-  let mappedMentions = [];
-  let finalText = teks;
+  const q = m.quoted || m
+  const mime = (q.msg || q).mimetype || ""
+  const users = participants.map(p => p.id)
+  let message = text || q.text || ""
+  const mentions = []
 
-  if (teks) {
-    for (let p of participants) {
-      if (p.lid && teks.includes("@" + p.lid.split("@")[0])) {
-        mappedMentions.push(p.id);
-        finalText = finalText.replace(
-          "@" + p.lid.split("@")[0],
-          "@" + p.id.split("@")[0],
-        );
-      }
-      if (p.id && teks.includes("@" + p.id.split("@")[0])) {
-        mappedMentions.push(p.id);
+  if (message) {
+    for (const p of participants) {
+      const id = p.id.split("@")[0]
+      const lid = p.lid ? p.lid.split("@")[0] : null
+      if (message.includes("@" + id) || (lid && message.includes("@" + lid))) {
+        mentions.push(p.id)
+        message = message
+          .replace("@" + lid, "@" + id)
+          .replace("@" + id, "@" + id)
       }
     }
   }
 
-  let finalMentions = [...new Set([...users, ...mappedMentions])];
-  let sendOpt = { mentions: finalMentions, quoted: m };
+  const finalMentions = [...new Set([...users, ...mentions])]
+  const options = { mentions: finalMentions, quoted: m }
+
   if (mime) {
-    if (!/^(image|video|audio)\//.test(mime)) {
-      return m.reply(
-        "🍓 *Jenis file tidak didukung! Hanya foto, video, atau audio yang bisa digunakan.*",
-      );
+    if (!/^(image|video|audio)\//.test(mime))
+      return m.reply(`Unsupported file type. Only image, video, or audio allowed.`)
+
+    const ext = mime.split("/")[1]
+    const filePath = path.join("./tmp", `${Date.now()}.${ext}`)
+    const media = await q.download()
+
+    await fs.mkdir(path.dirname(filePath), { recursive: true })
+    await fs.writeFile(filePath, media)
+
+    const sendFile = async (type) => {
+      await conn.sendFile(m.chat, filePath, `file.${ext}`, message, m, type === "audio", {
+        ...options,
+        mimetype: mime
+      })
+      await fs.unlink(filePath).catch(() => {})
     }
 
-    let ext = mime.split("/")[1];
-    let filePath = path.join("./tmp", `${Date.now()}.${ext}`);
-    let media = await q.download();
-    fs.writeFileSync(filePath, media);
-
-    if (/image/.test(mime)) {
-      await conn.sendFile(
-        m.chat,
-        filePath,
-        `file.${ext}`,
-        finalText,
-        m,
-        false,
-        sendOpt,
-      );
-    } else if (/video/.test(mime)) {
-      await conn.sendFile(
-        m.chat,
-        filePath,
-        `file.${ext}`,
-        finalText,
-        m,
-        false,
-        sendOpt,
-      );
-    } else if (/audio/.test(mime)) {
-      await conn.sendFile(m.chat, filePath, `file.${ext}`, "", m, true, {
-        ...sendOpt,
-        mimetype: "audio/mpeg",
-      });
-    }
-
-    fs.unlinkSync(filePath);
-  } else if (finalText) {
-    await conn.sendMessage(
-      m.chat,
-      { text: finalText, mentions: finalMentions },
-      { quoted: m },
-    );
+    if (/image/.test(mime)) return sendFile("image")
+    if (/video/.test(mime)) return sendFile("video")
+    if (/audio/.test(mime)) return sendFile("audio")
+  } else if (message) {
+    await conn.sendMessage(m.chat, { text: message, ...options })
   } else {
-    m.reply("🍡 *Kirim media (foto/video/audio) atau teks, atau balas pesan.*");
+    return m.reply(`Send a message, caption, or media to use hidetag.`)
   }
-};
+}
 
-handler.help = ["hidetag"];
-handler.tags = ["group"];
-handler.command = /^(hidetag|ht|h)$/i;
-handler.group = true;
-handler.admin = true;
+handler.help = ["hidetag"]
+handler.tags = ["group"]
+handler.command = /^(hidetag|ht|h)$/i
+handler.group = true
+handler.admin = true
 
-export default handler;
+export default handler

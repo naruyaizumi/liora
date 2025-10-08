@@ -1,22 +1,46 @@
 let handler = async (m, { conn }) => {
+  const timestamp = new Date().toTimeString().split(" ")[0]
+
   try {
-    let newCode = await conn.groupRevokeInvite(m.chat);
-    let newLink = `https://chat.whatsapp.com/${newCode}`;
+    const newCode = await conn.groupRevokeInvite(m.chat)
+    const newLink = `https://chat.whatsapp.com/${newCode}`
 
-    await m.reply(
-      `🍓 *Link undangan grup berhasil di-reset!*\n📋 *Link baru: ${newLink}*`,
-    );
+    const text = [
+      "```",
+      `┌─[${timestamp}]────────────`,
+      `│  GROUP LINK RESET`,
+      "└──────────────────────",
+      `Status : SUCCESS`,
+      `New Link : ${newLink}`,
+      "───────────────────────",
+      "Group invite link has been successfully reset.",
+      "```",
+    ].join("\n")
+
+    await m.reply(text)
   } catch (e) {
-    console.error(e);
-    m.reply("🍩 *Gagal me-reset link grup. Coba lagi nanti yaa~*");
+    console.error(e)
+
+    const errText = [
+      "```",
+      `┌─[${timestamp}]────────────`,
+      `│  GROUP LINK RESET`,
+      "└──────────────────────",
+      `Status : FAILED`,
+      "───────────────────────",
+      "Error while resetting the group invite link.",
+      "```",
+    ].join("\n")
+
+    await m.reply(errText)
   }
-};
+}
 
-handler.help = ["revoke"];
-handler.tags = ["group"];
-handler.command = /^(revoke)$/i;
-handler.group = true;
-handler.botAdmin = true;
-handler.admin = true;
+handler.help = ["revoke"]
+handler.tags = ["group"]
+handler.command = /^(revoke)$/i
+handler.group = true
+handler.botAdmin = true
+handler.admin = true
 
-export default handler;
+export default handler

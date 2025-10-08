@@ -1,21 +1,25 @@
 let handler = async (m, { conn, usedPrefix, command }) => {
-  let bot = conn.user.jid;
-  let q = m.quoted ? m.quoted : m;
-  let mime = (q.msg || q).mimetype || "";
-  if (/image/.test(mime)) {
-    let img = await q.download();
-    if (!img) return m.reply("Gambar tidak ditemukan");
-    await conn.updateProfilePicture(bot, img);
-    conn.reply(m.chat, "Sukses Mengganti Foto Profile Bot!", m);
-  } else
-    return m.reply(
-      `kirim/balas gambar dengan caption *${usedPrefix + command}*`,
-    );
-};
+  const bot = conn.user.jid
+  const q = m.quoted ? m.quoted : m
+  const mime = (q.msg || q).mimetype || ""
 
-handler.help = ["setppbot"];
-handler.tags = ["owner"];
-handler.command = /^setpp(bot)?$/i;
-handler.mods = true;
+  if (!/image/.test(mime))
+    return m.reply(`Send or reply an image with caption ${usedPrefix + command}`)
 
-export default handler;
+  try {
+    const img = await q.download()
+    if (!img) return m.reply("Failed to download image.")
+    await conn.updateProfilePicture(bot, img)
+    m.reply("Bot profile picture updated successfully.")
+  } catch (e) {
+    console.error(e)
+    m.reply("Failed to update bot profile picture.")
+  }
+}
+
+handler.help = ["setppbot"]
+handler.tags = ["owner"]
+handler.command = /^setpp(bot)?$/i
+handler.mods = true
+
+export default handler

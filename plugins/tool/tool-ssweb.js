@@ -1,48 +1,54 @@
-let handler = async (m, { conn, args }) => {
+import { fetch } from "../../src/bridge.js"
+
+let handler = async (m, { conn, args, usedPrefix, command }) => {
   if (args.length < 2) {
-    await conn.sendMessage(
-      m.chat,
-      {
-        text: `⚠️ *Silakan pilih mode tampilan untuk screenshot!*\n\n📌 *Gunakan format:*\n\`.ssweb [angka] [url]\`\n\n🌐 *Mode yang tersedia:*\n🖥️ *1. Desktop*\n📱 *2. Tablet*\n📲 *3. Ponsel*`,
-      },
-      { quoted: m },
-    );
-    return;
+    return m.reply(
+      `Enter display mode and URL.\n› Example: ${usedPrefix + command} 1 https://example.com\nAvailable modes:\n1. Desktop\n2. Tablet\n3. Mobile`
+    )
   }
-  let mode = args[0];
-  let url = args.slice(1).join(" ");
-  let devices = { 1: "desktop", 2: "tablet", 3: "phone" };
+
+  const mode = args[0]
+  const url = args.slice(1).join(" ")
+  const devices = { 1: "desktop", 2: "tablet", 3: "phone" }
+
   if (!devices[mode])
     return m.reply(
-      "⚠️ *Mode tidak valid! Pilih antara 1 (Desktop), 2 (Tablet), atau 3 (Ponsel).*",
-    );
-  await global.loading(m, conn);
+      "Invalid mode. Choose 1 (Desktop), 2 (Tablet), or 3 (Mobile)."
+    )
+
+  await global.loading(m, conn)
+
   try {
-    let device = devices[mode];
-    let response = await fetch(
-      global.API("btz", "/api/tools/ssweb", { url, device }, "apikey"),
-    );
-    if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
-    let arrayBuffer = await response.arrayBuffer();
-    let buffer = Buffer.from(arrayBuffer);
-    await conn.sendMessage(
-      m.chat,
-      {
-        image: buffer,
-        caption: `📸 *Screenshot Tampilan ${device.toUpperCase()}*\n\n🔗 *URL: ${url}*`,
-      },
-      { quoted: m },
-    );
-  } catch (error) {
-    console.error("❌ Error:", error);
-    m.reply("❌ *Terjadi kesalahan saat mengambil screenshot!*");
+    const device = devices[mode]
+    const res = await fetch(global.API("btz", "/api/tools/ssweb", { url, device }, "apikey"))
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+
+    const buffer = Buffer.from(await res.arrayBuffer())
+    const timestamp = new Date().toTimeString().split(" ")[0]
+
+    const caption = [
+      "```",
+      `┌─[${timestamp}]────────────`,
+      `│  Screenshot (${device.toUpperCase()})`,
+      "└──────────────────────",
+      `URL  : ${url}`,
+      `Mode : ${device}`,
+      "───────────────────────",
+      "Screenshot captured successfully.",
+      "```"
+    ].join("\n")
+
+    await conn.sendMessage(m.chat, { image: buffer, caption }, { quoted: m })
+  } catch (e) {
+    console.error(e)
+    await m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["ssweb"];
-handler.tags = ["tool"];
-handler.command = /^(ssweb)$/i;
+handler.help = ["ssweb <mode> <url>"]
+handler.tags = ["tools"]
+handler.command = /^(ssweb)$/i
 
-export default handler;
+export default handler

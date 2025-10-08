@@ -1,58 +1,51 @@
+import { fetch } from "../../src/bridge.js"
+
 let handler = async (m, { conn, text, args, usedPrefix, command }) => {
-  let url = text || args[0];
-  if (!url || !/^https?:\/\/(www\.)?threads\.com\//i.test(url)) {
+  const url = text || args[0]
+  if (!url || !/^https?:\/\/(www\.)?threads\.net\//i.test(url))
     return m.reply(
-      `🍩 *Link Threads tidak valid!*\n\n🍰 *Contoh: ${usedPrefix + command} https://www.threads.com/@user/post/xxxxx*`,
-    );
-  }
+      `Please provide a valid Threads link.\n› Example: ${usedPrefix + command} https://www.threads.net`
+    )
+
+  await global.loading(m, conn)
+
   try {
-    await global.loading(m, conn);
-    let res = await fetch(
-      global.API("btz", "/api/download/threads", { url }, "apikey"),
-    );
-    if (!res.ok)
-      throw new Error(`🍪 Gagal mengambil data! Status ${res.status}`);
-    let json = await res.json();
+    const res = await fetch(global.API("btz", "/api/download/threads", { url }, "apikey"))
+    if (!res.ok) throw new Error(`Failed to fetch Threads data. Status: ${res.status}`)
+
+    const json = await res.json()
     if (!json.status || !json.result)
-      return m.reply("🍬 *Gagal mendapatkan konten Threads.*");
-    let { image_urls, video_urls } = json.result;
+      throw new Error("Failed to retrieve Threads content.")
+
+    const { image_urls, video_urls } = json.result
+
     if (Array.isArray(video_urls) && video_urls.length) {
-      let video = video_urls[0]?.download_url || video_urls[0];
-      await conn.sendFile(
-        m.chat,
-        video,
-        "threads.mp4",
-        `🍱 *Video Threads berhasil diunduh!*`,
-        m,
-        false,
-        { mimetype: "video/mp4" },
-      );
-      return;
+      const video = video_urls[0]?.download_url || video_urls[0]
+      await conn.sendFile(m.chat, video, "threads.mp4", null, m, false, {
+        mimetype: "video/mp4",
+      })
+      return
     }
+
     if (Array.isArray(image_urls) && image_urls.length) {
-      for (let img of image_urls) {
-        if (!img) continue;
-        await conn.sendFile(
-          m.chat,
-          img,
-          "threads.jpg",
-          "🍡 *Gambar Threads berhasil diunduh!*",
-          m,
-        );
+      for (const img of image_urls) {
+        if (!img) continue
+        await conn.sendFile(m.chat, img, "threads.jpg", null, m)
       }
-      return;
+      return
     }
-    m.reply("🍙 *Konten tidak ditemukan. Coba kirim link lain.*");
+
+    m.reply("No downloadable content found for this Threads link.")
   } catch (err) {
-    console.error(err);
-    m.reply(`🍜 *Terjadi kesalahan:*\n${err.message}`);
+    console.error(err)
+    m.reply(`An error occurred: ${err.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["threads"];
-handler.tags = ["downloader"];
-handler.command = /^(threads)$/i;
+handler.help = ["threads"]
+handler.tags = ["downloader"]
+handler.command = /^(threads)$/i
 
-export default handler;
+export default handler

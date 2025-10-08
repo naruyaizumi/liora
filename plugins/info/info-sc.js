@@ -1,35 +1,42 @@
 let handler = async (m, { conn }) => {
-  let caption = `🍙 *Project Script Izumi* 🍙
+  const timestamp = new Date().toTimeString().split(" ")[0]
 
-📂 *Repository:*
-*https://github.com/naruyaizumi/liora*
+  const text = [
+    "```",
+    `[${timestamp}] Liora Repository`,
+    "────────────────────────────",
+    "Project Script Izumi",
+    "",
+    "Repository : https://github.com/naruyaizumi/liora",
+    "Report Bug : https://github.com/naruyaizumi/liora/issues",
+    "Pull Req   : https://github.com/naruyaizumi/liora/pulls",
+    "",
+    "────────────────────────────",
+    "© 2024 – 2025 Naruya Izumi • All Rights Reserved",
+    "```",
+  ].join("\n")
 
-🐛 *Report Issue:*
-*https://github.com/naruyaizumi/liora/issues*
-
-🔧 *Pull Request:*
-*https://github.com/naruyaizumi/liora/pulls*
-
-✨ *Jangan lupa kasih ⭐ di repo ya!*`;
-
-  await conn.sendMessage(m.chat, {
-    text: caption,
-    contextInfo: {
-      externalAdReply: {
-        title: "🍡 Liora — WhatsApp Bot",
-        body: "© 2024 – 2025 Naruya Izumi | All Rights Reserved",
-        thumbnailUrl:
-          "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
-        sourceUrl: "https://github.com/naruyaizumi/liora",
-        mediaType: 1,
-        renderLargerThumbnail: true,
+  await conn.sendMessage(
+    m.chat,
+    {
+      text,
+      contextInfo: {
+        externalAdReply: {
+          title: "Liora — WhatsApp Bot",
+          body: "GitHub Repository",
+          thumbnailUrl: "https://files.cloudkuimages.guru/images/9e9c94dc0838.jpg",
+          sourceUrl: "https://github.com/naruyaizumi/liora",
+          mediaType: 1,
+          renderLargerThumbnail: true,
+        },
       },
     },
-  });
-};
+    { quoted: m }
+  )
+}
 
-handler.help = ["script"];
-handler.tags = ["info"];
-handler.command = /^(script|sc)$/i;
+handler.help = ["script"]
+handler.tags = ["info"]
+handler.command = /^(script|sc)$/i
 
-export default handler;
+export default handler

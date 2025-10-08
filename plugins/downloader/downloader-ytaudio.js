@@ -1,55 +1,40 @@
-let handler = async (m, { conn, args }) => {
-  if (!args[0]) return m.reply("🍙 *Masukkan URL YouTube yang valid!*");
+import { fetch } from "../../src/bridge.js"
 
-  let url = args[0];
-  let youtubeRegex =
-    /^https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be|music\.youtube\.com)\/.+/i;
-  if (!youtubeRegex.test(url))
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+  if (!args[0])
     return m.reply(
-      "🍤 *URL tidak valid! Harap masukkan link YouTube/YouTube Music yang benar.*",
-    );
+      `Please provide a valid YouTube video link.\n› Example: ${usedPrefix + command} https://youtu.be/dQw4w9WgXcQ`
+    )
 
-  await global.loading(m, conn);
+  const url = args[0]
+  const youtubeRegex =
+    /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|shorts\/|live\/)|youtu\.be\/)[\w-]+(\S+)?$/i
+  if (!youtubeRegex.test(url))
+    return m.reply("Invalid URL! Please provide a valid YouTube video link.")
+
+  const headers = { "X-API-Key": global.config.ytdl }
+  await global.loading(m, conn)
+
   try {
-    const apiUrl = `https://api.nekolabs.my.id/downloader/youtube/v1?url=${url}&format=mp3`;
-    const res = await fetch(apiUrl);
-    if (!res.ok) throw new Error("Gagal menghubungi API.");
+    const apiUrl = `https://cloudkutube.eu/ytmp3?url=${url}&buffer=true`
+    const res = await fetch(apiUrl, { headers })
+    if (!res.ok) throw new Error(`Failed to reach API. Status: ${res.status}`)
 
-    const json = await res.json();
-    if (!json.status || !json.result?.downloadUrl) {
-      throw new Error("Konten tidak bisa diproses.");
-    }
+    const buffer = Buffer.from(await res.arrayBuffer())
 
-    const { title, cover, downloadUrl, duration } = json.result;
-
-    await conn.sendMessage(
-      m.chat,
-      {
-        audio: { url: downloadUrl },
-        mimetype: "audio/mpeg",
-        fileName: `${title}.mp3`,
-        contextInfo: {
-          externalAdReply: {
-            title: title,
-            body: `🍣 YouTube Music • ${duration}`,
-            thumbnailUrl: cover,
-            mediaType: 1,
-            renderLargerThumbnail: true,
-          },
-        },
-      },
-      { quoted: m },
-    );
-  } catch (e) {
-    console.error(e);
-    await m.reply(`🍩 *Terjadi kesalahan:* ${e.message}`);
+    await conn.sendFile(m.chat, buffer, `audio_${Date.now()}.mp3`, null, m, true, {
+      mimetype: "audio/mpeg",
+    })
+  } catch (err) {
+    console.error(err)
+    m.reply(`Error while downloading: ${err.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["ytmp3"];
-handler.tags = ["downloader"];
-handler.command = /^(ytmp3)$/i;
+handler.help = ["ytmp3"]
+handler.tags = ["downloader"]
+handler.command = /^(ytmp3)$/i
 
-export default handler;
+export default handler

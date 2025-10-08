@@ -1,47 +1,45 @@
 let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
-  let targets = [];
+  const targets = []
 
-  if (m.mentionedJid && m.mentionedJid.length) {
-    targets.push(...m.mentionedJid);
-  }
+  if (m.mentionedJid?.length) targets.push(...m.mentionedJid)
+  if (m.quoted?.sender) targets.push(m.quoted.sender)
 
-  if (m.quoted && m.quoted.sender) {
-    targets.push(m.quoted.sender);
-  }
-
-  for (let arg of args) {
+  for (const arg of args) {
     if (/^\d{5,}$/.test(arg)) {
-      targets.push(arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
+      targets.push(arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net")
     }
   }
 
-  targets = [...new Set(targets)].filter(
-    (v) => v !== m.sender && participants.some((p) => p.id === v),
-  );
+  const validTargets = [...new Set(targets)].filter(
+    v => v !== m.sender && participants.some(p => p.id === v)
+  )
 
-  if (!targets.length) {
+  if (!validTargets.length)
     return m.reply(
-      `🍡 *Tag atau reply anggota yang ingin dipromote*\n*Contoh: ${usedPrefix + command} @628xx*`,
-    );
-  }
+      `Specify members to promote.\n› Example: ${usedPrefix + command} @628xxxx`
+    )
 
-  for (let target of targets) {
-    try {
-      await conn.groupParticipantsUpdate(m.chat, [target], "promote");
-    } catch (e) {
-      console.error(e);
-    }
-    await delay(1500);
-  }
-};
+  await Promise.allSettled(
+    validTargets.map(async target => {
+      try {
+        await conn.groupParticipantsUpdate(m.chat, [target], "promote")
+      } catch (err) {
+        console.error(`Promote failed for ${target}:`, err)
+      }
+      await delay(1500)
+    })
+  )
 
-handler.help = ["promote"];
-handler.tags = ["group"];
-handler.command = /^(promote)$/i;
-handler.group = true;
-handler.botAdmin = true;
-handler.admin = true;
+  return m.reply(`Promotion process completed.`)
+}
 
-export default handler;
+handler.help = ["promote"]
+handler.tags = ["group"]
+handler.command = /^(promote)$/i
+handler.group = true
+handler.botAdmin = true
+handler.admin = true
 
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+export default handler
+
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms))

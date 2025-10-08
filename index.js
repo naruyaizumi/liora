@@ -11,7 +11,7 @@ const rl = createInterface({ input: process.stdin, output: process.stdout })
 
 const pkgPath = join(__dirname, "./package.json")
 const pkgData = await readFile(pkgPath, "utf8").catch((err) => {
-  console.error(chalk.redBright("🍪 [FATAL] Gagal membaca package.json:"), err)
+  console.error(chalk.redBright(`[supervisor] FATAL: cannot read package.json (${err.message})`))
   process.exit(1)
 })
 const { name } = JSON.parse(pkgData)
@@ -25,25 +25,26 @@ let lastCrash = 0
 
 async function start(file) {
   const args = [join(__dirname, file), ...process.argv.slice(2)]
-  const tag = chalk.cyanBright(`[${name}]`)
 
   return new Promise((resolve) => {
     childProcess = spawn(process.argv[0], args, {
       stdio: ["inherit", "inherit", "inherit", "ipc"],
     })
 
+    const time = () => new Date().toISOString().split("T")[1].split(".")[0]
+
     childProcess.on("message", (msg) => {
       if (msg === "uptime") childProcess.send(process.uptime())
     })
 
     childProcess.on("exit", (code, signal) => {
-      console.log(chalk.magentaBright(`🍰 ${tag} exited (code: ${code}, signal: ${signal})`))
-      childProcess = null
+      if (code !== 0 && !shuttingDown)
+        console.warn(chalk.yellow(`[${time()}] ${name}: exited (${code || signal})`))
       resolve(code)
     })
 
     childProcess.on("error", (err) => {
-      console.error(chalk.redBright(`🍪 ${tag} child process error:`), err)
+      console.error(chalk.red(`[${time()}] ${name}: process error (${err.message})`))
       childProcess?.kill("SIGTERM")
       resolve(1)
     })
@@ -60,12 +61,12 @@ async function stopChild(signal = "SIGINT") {
   if (shuttingDown || !childProcess) return
   shuttingDown = true
 
-  const tag = chalk.cyanBright(`[${name}]`)
-  console.log(chalk.yellowBright(`\n🍩 ${tag} Received ${signal}, shutting down gracefully...`))
+  const time = () => new Date().toISOString().split("T")[1].split(".")[0]
+  console.log(chalk.gray(`[${time()}] ${name}: shutting down (${signal})`))
   childProcess.kill(signal)
 
   const timeout = setTimeout(() => {
-    console.warn(chalk.redBright(`🍫 ${tag} Child did not exit in time, forcing kill...`))
+    console.warn(chalk.red(`[${time()}] ${name}: force kill unresponsive process`))
     childProcess.kill("SIGKILL")
   }, 10000)
 
@@ -76,19 +77,15 @@ async function stopChild(signal = "SIGINT") {
     })
   })
 
-  console.log(chalk.greenBright(`🍰 ${tag} Graceful shutdown complete.`))
+  console.log(chalk.green(`[${time()}] ${name}: shutdown complete`))
   process.exit(0)
 }
 
 async function supervise() {
-  const tag = chalk.cyanBright(`[${name}]`)
   while (true) {
-    const exitCode = await start("main.js")
+    const code = await start("main.js")
 
-    if (shuttingDown || exitCode === 0) {
-      console.log(chalk.greenBright(`🍰 ${tag} stopped normally.`))
-      break
-    }
+    if (shuttingDown || code === 0) break
 
     const now = Date.now()
     if (now - lastCrash < 60000) crashCount++
@@ -96,12 +93,11 @@ async function supervise() {
     lastCrash = now
 
     if (crashCount >= 5) {
-      console.warn(chalk.redBright(`🍪 ${tag} too many crashes in a short time — pausing for 5 minutes.`))
+      console.warn(chalk.red(`Too many crashes. Cooling down 5 min...`))
       await new Promise((r) => setTimeout(r, 300000))
       crashCount = 0
     } else {
-      console.warn(chalk.yellowBright(`🍪 ${tag} restarting in 3s...`))
-      await new Promise((r) => setTimeout(r, 3000))
+      await new Promise((r) => setTimeout(r, 2000))
     }
   }
 }
@@ -109,11 +105,11 @@ async function supervise() {
 process.on("SIGINT", () => stopChild("SIGINT"))
 process.on("SIGTERM", () => stopChild("SIGTERM"))
 process.on("uncaughtException", (err) => {
-  console.error(chalk.redBright(`🍫 [${name}] Uncaught exception:`), err)
+  console.error(chalk.red(`[supervisor] Uncaught Exception: ${err.message}`))
   stopChild("SIGTERM")
 })
 
 supervise().catch((err) => {
-  console.error(chalk.redBright("🍪 [FATAL] Supervisor error:"), err)
+  console.error(chalk.red(`[supervisor] FATAL: ${err.message}`))
   process.exit(1)
 })

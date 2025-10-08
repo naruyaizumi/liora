@@ -4,7 +4,7 @@ import { pathToFileURL } from "url"
 
 const handler = async (m, { text, usedPrefix, command }) => {
   if (!text)
-    return m.reply(`✍️ *Contoh penggunaan: ${usedPrefix + command} tt*`)
+    return m.reply(`Enter command name to search.\n› Example: ${usedPrefix + command} tt`)
 
   const pluginsDir = "./plugins"
   const excludeFiles = ["owner-exec.js", "owner-exec2.js", "owner-exec3.js"]
@@ -12,7 +12,7 @@ const handler = async (m, { text, usedPrefix, command }) => {
     (file) => !excludeFiles.includes(path.basename(file))
   )
 
-  const hasil = []
+  const result = []
   await Promise.all(
     files.map(async (file) => {
       const fullPath = path.resolve(file)
@@ -30,50 +30,55 @@ const handler = async (m, { text, usedPrefix, command }) => {
           .filter(Boolean)
 
         if (cmds.some((cmd) => cmd.toLowerCase() === text.toLowerCase())) {
-          const akses = [
-            h.owner && "👑 Owner",
-            h.mods && "🛠️ Mods",
-            h.admin && "👮 Admin",
-            h.botAdmin && "🤖 Bot Admin",
-            h.group && "👥 Group Only",
+          const access = [
+            h.owner && "Owner",
+            h.mods && "Mods",
+            h.admin && "Admin",
+            h.botAdmin && "BotAdmin",
+            h.group && "GroupOnly",
           ]
             .filter(Boolean)
             .join(", ")
 
           const hasAPI =
             typeof h === "function" && h.toString().includes("global.API")
-              ? "✨ Ada"
-              : "—"
+              ? "Yes"
+              : "No"
 
           const help = Array.isArray(h.help) ? h.help.join(", ") : "-"
           const tags = Array.isArray(h.tags) ? h.tags.join(", ") : "-"
           const imports =
             [...content.matchAll(/^import\s+.+?from\s+['"].+?['"]/gm)]
-              .map((m) => `*${m[0]}*`)
+              .map((m) => m[0])
               .join("\n") || "—"
 
-          hasil.push(
-            `🧸 *File: ${file.replace("./", "")}*
-🎯 *Fitur: ${help}*
-🌸 *Command: ${cmds.join(", ")}*
-🍡 *Jumlah: ${cmds.length}*
-🏷️ *Tag: ${tags}*
-🔐 *Akses: ${akses || "—"}*
-🔮 *API: ${hasAPI}*
-📦 *Import:*\n${imports}`
-          )
+          result.push([
+            "```",
+            `┌─[${path.basename(file)}]────────────`,
+            `│  Command Search`,
+            "└────────────────────────",
+            `File     : ${file.replace("./", "")}`,
+            `Feature  : ${help}`,
+            `Command  : ${cmds.join(", ")}`,
+            `Count    : ${cmds.length}`,
+            `Tags     : ${tags}`,
+            `Access   : ${access || "-"}`,
+            `API Used : ${hasAPI}`,
+            "────────────────────────",
+            "Imports:",
+            imports,
+            "```",
+          ].join("\n"))
         }
       } catch (err) {
-        console.error(`💥 Error di file ${file}:`, err.message)
+        console.error(`Error in ${file}:`, err.message)
       }
     })
   )
 
-  if (!hasil.length)
-    return m.reply(`💔 *Nggak nemu fitur dengan command:* "${text}"`)
-  m.reply(
-    `🔍 *Fitur dengan command: "${text}" ditemukan di:*\n\n${hasil.join("\n\n")}`
-  )
+  if (!result.length)
+    return m.reply(`No feature found for command "${text}".`)
+  m.reply(result.join("\n\n"))
 }
 
 handler.help = ["carifitur"]
