@@ -60,10 +60,10 @@ export NVM_DIR="$HOME/.nvm"
 # shellcheck disable=SC1090
 \. "$NVM_DIR/nvm.sh"
 
-echo "[INFO] Installing Node.js v22..."
-nvm install 22
-nvm use 22
-nvm alias default 22
+echo "[INFO] Installing Node.js v24..."
+nvm install 24
+nvm use 24
+nvm alias default 24
 
 echo "[OK] Node.js version: $(node -v)"
 echo "[OK] npm version: $(npm -v)"
@@ -139,7 +139,7 @@ echo "
    - fetch
 
  Optimized for:
-   - Node.js 22.x (official via NVM)
+   - Node.js 24.x (official via NVM)
    - libcurl + ffmpeg + sqlite3 + Node-API
 
  Liora is now running under PM2 supervision.

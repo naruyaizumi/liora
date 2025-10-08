@@ -7,7 +7,6 @@ on:
       - "README.md"
       - "LICENSE"
       - ".github/**"
-      - "package-lock.json"
 
 jobs:
   prettier:
