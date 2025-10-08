@@ -7,7 +7,7 @@
 ![Liora](https://files.cloudkuimages.guru/images/405de5beff26.jpg)
 
 <img src="https://raw.githubusercontent.com/innng/innng/master/assets/kyubey.gif" width="150" height="150" />
-  
+
 <p align="center">
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/node.js.yml">
   <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/node.js.yml?label=Node.js%20CI&style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Node.js CI"/>
@@ -15,19 +15,69 @@
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/eslint.yml">
   <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/eslint.yml?label=ESLint&style=for-the-badge&logo=eslint&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="ESLint CI"/>
 </a>
+<a href="https://github.com/naruyaizumi/liora/actions/workflows/prettier.yml">
+  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/prettier.yml?label=Prettier&style=for-the-badge&logo=prettier&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Prettier CI"/>
+</a>
+<a href="https://github.com/naruyaizumi/liora/actions/workflows/codeql.yml">
+  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/codeql.yml?label=CodeQL&style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="CodeQL Scan"/>
+</a>
+<a href="https://github.com/naruyaizumi/liora/actions/workflows/dependency-review.yml">
+  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/dependency-review.yml?label=Dependency%20Review&style=for-the-badge&logo=dependabot&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Dependency Review"/>
+</a>
+<img src="https://img.shields.io/github/last-commit/naruyaizumi/liora?style=for-the-badge&logo=git&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Last Commit"/>
+<a href="https://github.com/naruyaizumi/liora/releases">
   <img src="https://img.shields.io/github/v/release/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Latest Release"/>
 </a>
+<a href="https://github.com/naruyaizumi/liora/discussions">
+  <img src="https://img.shields.io/github/discussions/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Discussions"/>
+</a>
+
 <a href="https://www.apache.org/licenses/LICENSE-2.0">
   <img src="https://img.shields.io/badge/License-Apache%202.0-FFC0CB?style=for-the-badge&logo=apache&logoColor=white&labelColor=2F2F2F" alt="License"/>
 </a>
+
+<a href="https://nodejs.org/en">
+  <img src="https://img.shields.io/badge/Node.js-v22%20|%2023%20|%2024-FFC0CB?style=for-the-badge&logo=node.js&logoColor=white&labelColor=2F2F2F" alt="Node.js"/>
+</a>
+
 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">
   <img src="https://img.shields.io/badge/JavaScript-ESM-FFC0CB?style=for-the-badge&logo=javascript&logoColor=black&labelColor=2F2F2F" alt="JavaScript"/>
 </a>
+
+<a href="https://eslint.org/">
+  <img src="https://img.shields.io/badge/ESLint-Linting-FFC0CB?style=for-the-badge&logo=eslint&logoColor=white&labelColor=2F2F2F" alt="ESLint"/>
+</a>
+
+<a href="https://codeql.github.com/">
+  <img src="https://img.shields.io/badge/CodeQL-Analysis-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="CodeQL"/>
+</a>
+
 <a href="https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03">
   <img src="https://img.shields.io/badge/WhatsApp-Channel-FFC0CB?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F" alt="WhatsApp Channel"/>
 </a>
+
+<a href="https://www.npmjs.com/">
+  <img src="https://img.shields.io/badge/NPM-Package-FFC0CB?style=for-the-badge&logo=npm&logoColor=white&labelColor=2F2F2F" alt="NPM"/>
+</a>
+
+<a href="https://www.linux.org/">
+  <img src="https://img.shields.io/badge/Linux-Server-FFC0CB?style=for-the-badge&logo=linux&logoColor=black&labelColor=2F2F2F" alt="Linux"/>
+</a>
+
 <a href="https://instagram.com/naruyaizumi">
   <img src="https://img.shields.io/badge/Instagram-@naruyaizumi-FFC0CB?style=for-the-badge&logo=instagram&logoColor=white&labelColor=2F2F2F" alt="Instagram"/>
+</a>
+
+<a href="https://tiktok.com/@naruyaizumi">
+  <img src="https://img.shields.io/badge/TikTok-@naruyaizumi-FFC0CB?style=for-the-badge&logo=tiktok&logoColor=white&labelColor=2F2F2F" alt="TikTok"/>
+</a>
+
+<a href="https://t.me/naruyaizumi">
+  <img src="https://img.shields.io/badge/Telegram-@naruyaizumi-FFC0CB?style=for-the-badge&logo=telegram&logoColor=white&labelColor=2F2F2F" alt="Telegram"/>
+</a>
+
+<a href="https://open.spotify.com/playlist/0j68uRJvay44fmcTnbJGPS?si=_1SyqT43T52i2QybhZyhAQ" target="_blank">
+  <img src="https://img.shields.io/badge/Spotify-Izumi's%20Playlist-FFC0CB?style=for-the-badge&logo=spotify&logoColor=white&labelColor=2F2F2F" alt="Spotify Playlist" />
 </a>
 
 </p>
