@@ -30,15 +30,16 @@ jobs:
 
       - name: 🛠 Install System Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
+          sudo apt update -y
+          sudo apt install -y \
             build-essential pkg-config cmake python3 python3-dev \
             ffmpeg imagemagick \
             libavformat-dev libavcodec-dev libavutil-dev \
             libswresample-dev libswscale-dev \
             libwebp-dev libpng-dev libjpeg-dev zlib1g-dev \
             libfreetype6-dev libharfbuzz-dev libpango1.0-dev \
-            libgif-dev libopus-dev libvpx-dev
+            libgif-dev libopus-dev libvpx-dev \
+            libcurl4-openssl-dev libnghttp2-dev libssl-dev
 
       - name: 🍡 Install Dependencies
         run: pnpm install --frozen-lockfile
