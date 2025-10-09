@@ -28,13 +28,45 @@ const getSettings = (jid) => {
     }
 };
 
-const toJid = (n) => n.replace(/[^0-9]/g, "") + "@s.whatsapp.net";
+const toJid = (n) => {
+  const raw = Array.isArray(n) ? n[0] : (n?.num ?? n?.id ?? n);
+  const digits = String(raw ?? "").replace(/[^0-9]/g, "");
+  return digits ? digits + "@s.whatsapp.net" : "";
+};
 
-const resolveOwners = async (conn, owners) => {
-    const pns = owners.map(([num]) => toJid(num));
-    const both = pns.flatMap((pn) => [pn, conn.signalRepository?.lidMapping?.getLIDForPN?.(pn)]);
-    const resolved = await Promise.all(both);
-    return resolved.filter(Boolean);
+const resolveOwners = async (conn, owners = []) => {
+  if (!conn?.lidMappingStore) {
+    return owners
+      .map((entry) => toJid(Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.id ?? entry)))
+      .filter(Boolean);
+  }
+  const cache = conn.lidMappingStore.cache;
+  const out = new Set();
+  for (const entry of owners) {
+    const num = Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.id ?? entry);
+    const jid = toJid(num);
+    if (!jid) continue;
+    out.add(jid);
+    let lid = cache?.get(jid);
+    if (!lid) {
+      try { lid = await conn.lidMappingStore.getLIDForPN(jid); } catch {}
+    }
+    if (lid) {
+      out.add(lid);
+      try { cache?.set(jid, lid); cache?.set(lid, jid); } catch {}
+    }
+    if (lid) {
+      let back = cache?.get(lid);
+      if (!back) {
+        try { back = await conn.lidMappingStore.getPNForLID(lid); } catch {}
+      }
+      if (back) {
+        out.add(back);
+        try { cache?.set(lid, back); cache?.set(back, lid); } catch {}
+      }
+    }
+  }
+  return [...out];
 };
 
 const parsePrefix = (connPrefix, pluginPrefix) => {
@@ -170,14 +202,14 @@ export async function handler(chatUpdate) {
         (m.isGroup
             ? participants.find(
                   (u) =>
-                      this.decodeJid(u.id) === senderId ||
-                      this.decodeJid(u.phoneNumber) === senderId
+                      this.decodeJid(u.lid) === senderId ||
+                      this.decodeJid(u.id) === senderId
               )
             : {}) || {};
     const bot =
         (m.isGroup
             ? participants.find(
-                  (u) => this.decodeJid(u.id) === botId || this.decodeJid(u.phoneNumber) === botId
+                  (u) => this.decodeJid(u.lid) === botId || this.decodeJid(u.id) === botId
               )
             : {}) || {};
     const isRAdmin = user?.admin === "superadmin";

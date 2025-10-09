@@ -36,8 +36,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
 };
 
-handler.help = ["play"];
+handler.help = ["ytplay"];
 handler.tags = ["downloader"];
-handler.command = /^play$/i;
+handler.command = /^(ytplay)$/i;
 
 export default handler;

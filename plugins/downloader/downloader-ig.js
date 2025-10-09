@@ -37,15 +37,11 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
                     album.push({
                         image: buffer,
                         caption: null,
-                        filename: `ig_${Date.now()}.jpg`,
-                        mime: type.mime,
                     });
                 } else if (type.mime.startsWith("video")) {
                     album.push({
                         video: buffer,
                         caption: null,
-                        filename: `ig_${Date.now()}.mp4`,
-                        mime: type.mime,
                     });
                 }
             } catch (err) {
@@ -54,19 +50,18 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
         }
 
         if (!album.length) return m.reply("No valid media files were found.");
-
         if (album.length === 1) {
             const media = album[0];
             const type = media.image ? "image" : "video";
-            await conn.sendFile(m.chat, media[type], media.filename, null, m, false, {
+            await conn.sendFile(m.chat, media[type], "", null, m, false, {
                 mimetype: media.mime,
             });
         } else {
-            await conn.sendAlbum(m.chat, album, { quoted: m });
+            await conn.sendMessage(m.chat, { album }, { quoted: m });
         }
     } catch (err) {
         console.error(err);
-        m.reply("An error occurred while fetching from Instagram. Please try again later.");
+        await m.reply("An error occurred while fetching from Instagram. Please try again later.");
     } finally {
         await global.loading(m, conn, true);
     }

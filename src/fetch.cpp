@@ -299,7 +299,7 @@ public:
     else                         curl_easy_setopt(easy.get(), CURLOPT_CUSTOMREQUEST, method_.c_str());
 
     SList hdrs;
-    if (!haveUserUA_)    hdrs.append("User-Agent: undici/6 (liora-native)");
+    if (!haveUserUA_)    hdrs.append("User-Agent: undici/6 naruyaizumi");
     if (!haveAcceptEnc_ && decompress_) {
       curl_easy_setopt(easy.get(), CURLOPT_ACCEPT_ENCODING, "");
       hdrs.append("Accept-Encoding: br, gzip, deflate");

@@ -1,23 +1,20 @@
 import { fetch } from "../../src/bridge.js";
 
 let handler = async (m, { conn, usedPrefix, command, args }) => {
-    if (!args[0]) {
+    if (!args[0])
         return m.reply(
             `Please provide a valid TikTok URL.\n› Example: ${usedPrefix + command} https://vt.tiktok.com`
         );
-    }
 
     const url = args[0];
-    if (!/^https?:\/\/(www\.)?(vm\.|vt\.|m\.)?tiktok\.com\/.+/i.test(url)) {
+    if (!/^https?:\/\/(www\.)?(vm\.|vt\.|m\.)?tiktok\.com\/.+/i.test(url))
         return m.reply("Invalid URL! Please provide a valid TikTok link.");
-    }
 
     await global.loading(m, conn);
 
     try {
         const res = await fetch(`https://api.nekolabs.my.id/downloader/tiktok?url=${url}`);
         const json = await res.json();
-
         if (!json?.status) throw new Error("Invalid response from Nekolabs API");
 
         const { videoUrl, images } = json.result || {};
@@ -29,7 +26,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
                 image: { url: img },
                 caption: `Slide ${i + 1} of ${images.length}`,
             }));
-            await conn.sendAlbum(m.chat, slides, { quoted: m });
+            await conn.sendMessage(m.chat, { album: slides }, { quoted: m });
         } else {
             await m.reply("No media found for this TikTok link.");
         }

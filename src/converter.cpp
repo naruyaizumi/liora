@@ -88,7 +88,8 @@ static OpenInputResult OpenFromBuffer(const uint8_t* data, size_t len){
   R.fmt.p = (AVFormatContext*)ensure_cptr(avformat_alloc_context(), "avformat_alloc_context failed");
   R.fmt.p->pb = R.io.p;
   R.fmt.p->flags |= AVFMT_FLAG_CUSTOM_IO;
-
+  
+  av_log_set_level(AV_LOG_QUIET);
   ensure(avformat_open_input(&R.fmt.p, "", nullptr, nullptr) == 0, "avformat_open_input failed");
   ensure(avformat_find_stream_info(R.fmt.p, nullptr) >= 0, "avformat_find_stream_info failed");
   return R;
