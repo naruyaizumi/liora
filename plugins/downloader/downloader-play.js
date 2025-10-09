@@ -3,49 +3,39 @@ import { fetch } from "../../src/bridge.js";
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0])
         return m.reply(
-            `Please provide a song title to search.\n› Example: ${usedPrefix + command} Swim`
+            `Please provide a song title.\n› Example: ${usedPrefix + command} Mata Air`
         );
 
-    const query = args.join(" ");
-    const headers = { "X-API-Key": global.config.ytdl };
     await global.loading(m, conn);
-
     try {
-        const search = await fetch(`https://cloudkutube.eu/search?q=${query}`, { headers });
-        if (!search.ok) throw new Error(`HTTP ${search.status}`);
+        const res = await fetch(
+            "https://api.nekolabs.my.id/downloader/youtube/play/v1?q=" +
+            encodeURIComponent(args.join(" ").trim())
+        );
+        const json = await res.json();
 
-        const json = await search.json();
-        const video = json?.data?.[0];
-        if (!video?.url) return m.reply("No video results found.");
+        if (!json.status || !json.result?.downloadUrl)
+            return m.reply("Failed to retrieve the requested YouTube track.");
 
-        const videoUrl = video.url;
-        const title = video.title || "YouTube Audio";
-        const channel = video.channel?.name || "Unknown Channel";
-        const thumbnail = video.thumbnail || null;
-        const duration = video.duration?.formatted || "Unknown";
+        const { title, channel, duration, cover, url } = json.result.metadata;
+        const audio = await fetch(json.result.downloadUrl);
+        const buffer = Buffer.from(await audio.arrayBuffer());
 
-        const dlUrl = `https://cloudkutube.eu/ytmp3?url=${videoUrl}&buffer=true`;
-        const res = await fetch(dlUrl, { headers });
-        if (!res.ok) throw new Error(`Failed to fetch audio: HTTP ${res.status}`);
-
-        const buffer = Buffer.from(await res.arrayBuffer());
-
-        await conn.sendFile(m.chat, buffer, `${title}.mp3`, null, m, true, {
+        await conn.sendFile(m.chat, buffer, `${title}.mp3`, "", m, true, {
             mimetype: "audio/mpeg",
             contextInfo: {
                 externalAdReply: {
                     title,
                     body: `${channel} • ${duration}`,
-                    thumbnailUrl: thumbnail,
-                    mediaUrl: videoUrl,
+                    thumbnailUrl: cover,
+                    mediaUrl: url,
                     mediaType: 2,
                     renderLargerThumbnail: true,
                 },
             },
         });
-    } catch (err) {
-        console.error(err);
-        m.reply(`Error while downloading: ${err.message}`);
+    } catch (e) {
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }
@@ -53,6 +43,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
 handler.help = ["play"];
 handler.tags = ["downloader"];
-handler.command = /^(play)$/i;
+handler.command = /^play$/i;
 
 export default handler;

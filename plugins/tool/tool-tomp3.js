@@ -1,3 +1,5 @@
+import { convert } from "../../src/bridge.js";
+
 let handler = async (m, { conn, usedPrefix, command }) => {
     try {
         const q = m.quoted ? m.quoted : m;
@@ -9,12 +11,21 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         await global.loading(m, conn);
 
         const buffer = await q.download?.();
-        if (!Buffer.isBuffer(buffer) || !buffer.length)
-            return m.reply("Failed to get media buffer.");
-        await conn.sendFile(m.chat, buffer, "output.mp3", "", m, false, {
-            asAudio: true,
-            mimetype: "audio/mpeg",
-        });
+        if (!Buffer.isBuffer(buffer)) return m.reply("Failed to fetch media buffer.");
+
+        const audio = await convert(buffer, { format: "mp3" });
+        if (!Buffer.isBuffer(audio) || !audio.length)
+            return m.reply("Conversion failed: empty result.");
+
+        await conn.sendMessage(
+            m.chat,
+            {
+                audio,
+                mimetype: "audio/mpeg",
+                fileName: "output.mp3",
+            },
+            { quoted: m }
+        );
     } catch (e) {
         console.error(e);
         m.reply(`Error during conversion:\n${e.message}`);
