@@ -24,15 +24,12 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         if (!Buffer.isBuffer(audio) || audio.length === 0)
             return m.reply("Conversion failed: empty result.");
 
-        await conn.sendMessage(
-            m.chat,
-            {
-                audio,
-                mimetype: "audio/ogg; codecs=opus",
-                ptt: true,
-            },
-            { quoted: m }
-        );
+        await conn.sendMessage(m.chat, {
+            audio,
+            mimetype: "audio/ogg; codecs=opus",
+            ptt: true,
+        }, { quoted: m });
+
     } catch (e) {
         console.error(e);
         m.reply(`Error during conversion:\n${e.message}`);
