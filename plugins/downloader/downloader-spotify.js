@@ -2,15 +2,13 @@ import { fetch } from "../../src/bridge.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0])
-        return m.reply(
-            `Please provide a song title.\n› Example: ${usedPrefix + command} Swim`
-        );
+        return m.reply(`Please provide a song title.\n› Example: ${usedPrefix + command} Swim`);
 
     await global.loading(m, conn);
     try {
         const res = await fetch(
             "https://api.nekolabs.my.id/downloader/spotify/play/v1?q=" +
-            encodeURIComponent(args.join(" ").trim())
+                encodeURIComponent(args.join(" ").trim())
         );
         const json = await res.json();
 
