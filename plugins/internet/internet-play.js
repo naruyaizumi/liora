@@ -1,18 +1,20 @@
-import yts from "yt-search"
+import yts from "yt-search";
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text)
-        return m.reply(`Usage: ${usedPrefix + command} <query>\n› Example: ${usedPrefix + command} YAD`)
+        return m.reply(
+            `Usage: ${usedPrefix + command} <query>\n› Example: ${usedPrefix + command} YAD`
+        );
 
     try {
-        await global.loading(m, conn)
+        await global.loading(m, conn);
 
-        const search = await yts(text)
-        const videos = search.videos
+        const search = await yts(text);
+        const videos = search.videos;
         if (!Array.isArray(videos) || videos.length === 0)
-            return m.reply(`No results found for "${text}".`)
+            return m.reply(`No results found for "${text}".`);
 
-        const video = videos[0]
+        const video = videos[0];
         const info = `\`\`\`
 Title    : ${video.title}
 Duration : ${video.timestamp || "-"} (${video.seconds}s)
@@ -20,7 +22,7 @@ Views    : ${formatNumber(video.views)}
 Channel  : ${video.author.name}${video.author.verified ? " ✔" : ""}
 Uploaded : ${video.ago || "-"}
 Select a format below to download:
-\`\`\``
+\`\`\``;
 
         await conn.sendMessage(
             m.chat,
@@ -42,53 +44,54 @@ Select a format below to download:
                                             header: "Audio",
                                             title: "YTMP3",
                                             description: "Download high-quality MP3 audio",
-                                            id: `.ytmp3 ${video.url}`
+                                            id: `.ytmp3 ${video.url}`,
                                         },
                                         {
-    header: "Audio",
-    title: "YTPLAY",
-    description: "Fast download audio directly from query",
-    id: `.ytplay ${text}`
-},
+                                            header: "Audio",
+                                            title: "YTPLAY",
+                                            description: "Fast download audio directly from query",
+                                            id: `.ytplay ${text}`,
+                                        },
                                         {
                                             header: "Video",
                                             title: "YTMP4",
                                             description: "Download standard-quality MP4 video",
-                                            id: `.ytmp4 ${video.url}`
+                                            id: `.ytmp4 ${video.url}`,
                                         },
                                         {
                                             header: "Extras",
                                             title: "Lyrics / Info",
-                                            description: "Get lyrics or extra details for this song",
-                                            id: `.lyrics ${text}`
-                                        }
-                                    ]
-                                }
-                            ]
-                        })
-                    }
+                                            description:
+                                                "Get lyrics or extra details for this song",
+                                            id: `.lyrics ${text}`,
+                                        },
+                                    ],
+                                },
+                            ],
+                        }),
+                    },
                 ],
-                hasMediaAttachment: false
+                hasMediaAttachment: false,
             },
             { quoted: m }
-        )
+        );
     } catch (e) {
-        console.error(e)
-        m.reply("Error: Failed to process the request.")
+        console.error(e);
+        m.reply("Error: Failed to process the request.");
     } finally {
-        await global.loading(m, conn, true)
+        await global.loading(m, conn, true);
     }
-}
+};
 
-handler.help = ["play"]
-handler.tags = ["downloader"]
-handler.command = /^(play)$/i
+handler.help = ["play"];
+handler.tags = ["downloader"];
+handler.command = /^(play)$/i;
 
-export default handler
+export default handler;
 
 function formatNumber(num) {
-    if (num >= 1e9) return (num / 1e9).toFixed(1).replace(/\.0$/, "") + "B"
-    if (num >= 1e6) return (num / 1e6).toFixed(1).replace(/\.0$/, "") + "M"
-    if (num >= 1e3) return (num / 1e3).toFixed(1).replace(/\.0$/, "") + "K"
-    return num.toString()
+    if (num >= 1e9) return (num / 1e9).toFixed(1).replace(/\.0$/, "") + "B";
+    if (num >= 1e6) return (num / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
+    if (num >= 1e3) return (num / 1e3).toFixed(1).replace(/\.0$/, "") + "K";
+    return num.toString();
 }

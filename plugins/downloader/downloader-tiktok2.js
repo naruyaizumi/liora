@@ -4,7 +4,11 @@ let handler = async (m, { conn, args }) => {
     if (!args[0]) return m.reply("Usage: .tiktok2 <tiktok-url>");
     const url = args[0].trim();
 
-    if (!/^https?:\/\/(www\.)?(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com|m\.tiktok\.com)\/.+/i.test(url))
+    if (
+        !/^https?:\/\/(www\.)?(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com|m\.tiktok\.com)\/.+/i.test(
+            url
+        )
+    )
         return m.reply("Invalid URL. Please use a valid TikTok link.");
 
     await global.loading(m, conn);
@@ -26,7 +30,8 @@ let handler = async (m, { conn, args }) => {
         await conn.sendMessage(
             m.chat,
             {
-                text: "Raw API Response:\n```" + JSON.stringify(json, null, 2).slice(0, 4000) + "```",
+                text:
+                    "Raw API Response:\n```" + JSON.stringify(json, null, 2).slice(0, 4000) + "```",
             },
             { quoted: m }
         );
