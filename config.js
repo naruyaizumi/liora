@@ -2,10 +2,9 @@
  * Liora WhatsApp Bot
  * @description Open source WhatsApp bot based on Node.js and Baileys.
  *
- * @founder     གྷ Naruya Izumi <https://linkbio.co/naruyaizumi> | wa.me/6283143663697
- * @owner       གྷ SXZnightmar <wa.me/6281398961382>
- * @api-dev     གྷ Alfi Dev <wa.me/6287831816747>
- * @python-dev  གྷ Zhan Dev <wa.me/6281239621820>
+ * @owner       Naruya Izumi <https://linkbio.co/naruyaizumi>
+ * @developer   SXZnightmar <wa.me/6281398961382>
+ * @developer   Alfi Dev <wa.me/6287831816747>
  *
  * @copyright   © 2024 - 2025 Naruya Izumi
  * @license     Apache License 2.0
@@ -28,11 +27,9 @@
 global.config = {
     /*============== STAFF ==============*/
     owner: [
-        ["6283143663697", "𝑵𝒂𝒓𝒖𝒚𝒂 𝑰𝒛𝒖𝒎𝒊", true],
-        ["31629155460", "𝑵𝒂𝒓𝒖𝒚𝒂 𝑰𝒛𝒖𝒎𝒊", true],
-        ["6281398961382", "𝑺𝑿𝒁𝒏𝒊𝒈𝒉𝒕𝒎𝒂𝒓", true],
-        ["6287831816747", "𝑨𝒍𝒇𝒊 𝑫𝒆𝒗", true],
-        ["6281239621820", "𝒁𝒉𝒂𝒏 𝑫𝒆𝒗", true],
+        ["31629155460", "𝑵𝒂𝒓𝒖𝒚𝒂 𝑰𝒛𝒖𝒎𝒊", true], // true: isMods
+        ["", "", false], // false: isOwner
+        ["", "", false],
     ],
     group: "https://", // WhatsApp group
     website: "https://", // optional
