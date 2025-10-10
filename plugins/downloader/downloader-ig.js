@@ -8,7 +8,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
     );
   }
   const url = args[0].trim();
-  if (/instagram\.com\/stories\//i.test(url)) {
+  if (/^https?:\/\/(www\.)?instagram\.com\/stories\//i.test(url)) {
     return m.reply("Instagram Story URLs are not supported.");
   }
   if (!/^https?:\/\/(www\.)?instagram\.com\//i.test(url)) {
