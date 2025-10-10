@@ -1,70 +1,63 @@
-import { fileTypeFromBuffer } from "file-type";
 import { fetch } from "../../src/bridge.js";
+import { fileTypeFromBuffer } from "file-type";
 
 let handler = async (m, { conn, usedPrefix, command, args }) => {
-    if (!args[0])
-        return m.reply(
-            `Please provide a valid Instagram URL.\n› Example: ${usedPrefix + command} https://www.instagram.com/p/...`
-        );
-
-    const url = args[0];
-    if (!/^https?:\/\/(www\.)?instagram\.com\//i.test(url))
-        return m.reply("Invalid URL. Please send a proper Instagram link.");
-
+  if (!args[0]) {
+    return m.reply(
+      `Usage: ${usedPrefix + command} <instagram_url>\nExample: › ${usedPrefix + command} https://www.instagram.com/p/...`
+    );
+  }
+  const url = args[0].trim();
+  if (/instagram\.com\/stories\//i.test(url)) {
+    return m.reply("Instagram Story URLs are not supported.");
+  }
+  if (!/^https?:\/\/(www\.)?instagram\.com\//i.test(url)) {
+    return m.reply("Invalid URL. Please provide a valid Instagram link.");
+  }
+  try {
     await global.loading(m, conn);
-
-    try {
-        const apiUrl = global.API("btz", "/api/download/igdowloader", { url }, "apikey");
-        const json = await fetch(apiUrl).then((res) => res.json());
-
-        if (!json.status || !json.message?.length)
-            return m.reply("No media found for this Instagram link.");
-
-        const sent = new Set();
-        const album = [];
-
-        for (const item of json.message) {
-            if (!item._url || sent.has(item._url)) continue;
-            sent.add(item._url);
-
-            try {
-                const res = await fetch(item._url);
-                const buffer = Buffer.from(await res.arrayBuffer());
-                const type = await fileTypeFromBuffer(buffer);
-                if (!type) continue;
-
-                if (type.mime.startsWith("image")) {
-                    album.push({
-                        image: buffer,
-                        caption: null,
-                    });
-                } else if (type.mime.startsWith("video")) {
-                    album.push({
-                        video: buffer,
-                        caption: null,
-                    });
-                }
-            } catch (err) {
-                console.error("Error analyzing media:", item._url, err);
-            }
-        }
-
-        if (!album.length) return m.reply("No valid media files were found.");
-        if (album.length === 1) {
-            const media = album[0];
-            const type = media.image ? "image" : "video";
-            await conn.sendFile(m.chat, media[type], "", null, m, false, {
-                mimetype: media.mime,
-            });
-        } else {
-            await conn.sendMessage(m.chat, { album }, { quoted: m });
-        }
-    } catch (err) {
-        console.error(err);
-        await m.reply("An error occurred while fetching from Instagram. Please try again later.");
-    } finally {
-        await global.loading(m, conn, true);
+    const apiUrl = `https://api.nekolabs.my.id/downloader/instagram?url=${url}`;
+    const json = await fetch(apiUrl).then((res) => res.json());
+    if (!json.status || !json.result) {
+      return m.reply("No media found or the post may be private.");
     }
+    const result = json.result;
+    const album = [];
+    if (result.metadata?.isVideo) {
+      const videoUrls = result.url || result.downloadUrl || [];
+      for (const link of videoUrls) {
+        album.push({ type: "video", url: link });
+      }
+    } else if (Array.isArray(result.downloadUrl)) {
+      for (const link of result.downloadUrl) {
+        album.push({ type: "image", url: link });
+      }
+    }
+    if (album.length === 0) {
+      return m.reply("No valid media files found.");
+    }
+    if (album.length === 1) {
+      const item = album[0];
+      const message =
+        item.type === "image"
+          ? { image: { url: item.url } }
+          : { video: { url: item.url } };
+      await conn.sendMessage(m.chat, message, { quoted: m });
+      return;
+    }
+    const albumItems = album.map((item, index) =>
+      item.type === "image"
+        ? { image: { url: item.url }, caption: `Slide ${index + 1}` }
+        : { video: { url: item.url }, caption: `Slide ${index + 1}` }
+    );
+
+    await conn.sendMessage(m.chat, { album: albumItems }, { quoted: m });
+  } catch (err) {
+    console.error("[Instagram DL Error]", err);
+    m.reply("An error occurred while fetching data from Instagram. Try again later.");
+  } finally {
+    await global.loading(m, conn, true);
+  }
 };
 
 handler.help = ["instagram"];

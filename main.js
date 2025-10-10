@@ -5,7 +5,7 @@ process.on("unhandledRejection", console.error);
 
 import "./config.js";
 import "./global.js";
-import { naruyaizumi, protoType, serialize } from "./lib/simple.js";
+import { naruyaizumi, protoType, serialize } from "./lib/message.js";
 import { SQLiteAuth } from "./lib/auth.js";
 import { schedule } from "./src/bridge.js";
 import { fetchLatestBaileysVersion, makeCacheableSignalKeyStore, Browsers } from "baileys";

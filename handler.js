@@ -1,13 +1,13 @@
 /* global conn */ // eslint-disable-line no-unused-vars
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 import "./global.js";
-import { smsg } from "./lib/simple.js";
+import { smsg } from "./lib/message.js";
 import { format } from "util";
 import { fileURLToPath } from "url";
 import path, { join } from "path";
 import { watch } from "fs";
 import chalk from "chalk";
-import printMessage from "./lib/print.js";
+import printMessage from "./lib/logger.js";
 import { canvas } from "./lib/canvas.js";
 
 const CMD_PREFIX_RE = /^[/!.]/;
