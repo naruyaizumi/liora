@@ -84,13 +84,6 @@ fi
 
 cd liora
 
-if [ ! -f ".env" ]; then
-  echo "[INFO] Creating .env from example..."
-  cp .env.example .env
-else
-  echo "[OK] .env file exists."
-fi
-
 echo "[INFO] Installing dependencies..."
 npm install
 
