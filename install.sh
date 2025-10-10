@@ -6,19 +6,19 @@ echo "
  Liora Automated Installer
 ==========================================
   Environment Setup:
-    - Node.js via NVM
+    - Node.js v24 via NVM
     - Native addon toolchain (C++)
     - better-sqlite3, ffmpeg, curl, etc.
     - PM2 Process Manager
+    - PNPM via Corepack
 ==========================================
 "
-
 if [ -f /etc/debian_version ]; then
   OS_FAMILY="debian"
 elif [ -f /etc/redhat-release ]; then
   OS_FAMILY="rhel"
 else
-  echo "Error: Unsupported OS. Only Debian/Ubuntu and RHEL/CentOS supported."
+  echo "Error: Unsupported OS. Only Debian/Ubuntu and RHEL/CentOS are supported."
   exit 1
 fi
 
@@ -58,7 +58,7 @@ fi
 
 export NVM_DIR="$HOME/.nvm"
 # shellcheck disable=SC1090
-\. "$NVM_DIR/nvm.sh"
+. "$NVM_DIR/nvm.sh"
 
 echo "[INFO] Installing Node.js v24..."
 nvm install 24
@@ -68,9 +68,15 @@ nvm alias default 24
 echo "[OK] Node.js version: $(node -v)"
 echo "[OK] npm version: $(npm -v)"
 
+echo "[INFO] Enabling Corepack and installing PNPM..."
+corepack enable
+corepack prepare pnpm@latest --activate
+
+echo "[OK] PNPM version: $(pnpm -v)"
+
 if ! command -v pm2 >/dev/null 2>&1; then
   echo "[INFO] Installing PM2 globally..."
-  npm install -g pm2
+  pnpm add -g pm2
 else
   echo "[OK] PM2 detected: $(pm2 -v)"
 fi
@@ -84,12 +90,12 @@ fi
 
 cd liora
 
-echo "[INFO] Installing dependencies..."
-npm install
+echo "[INFO] Installing dependencies with PNPM..."
+pnpm install --frozen-lockfile || pnpm install
 
 if [ -f "binding.gyp" ]; then
   echo "[INFO] Building native addons..."
-  npm rebuild --build-from-source || echo "[WARN] Native build failed. Continuing..."
+  pnpm rebuild --build-from-source || echo "[WARN] Native build failed, skipping..."
 else
   echo "[WARN] binding.gyp not found, skipping native build."
 fi
@@ -111,12 +117,12 @@ echo "
  Liora Installation Complete
 ==========================================
  Node.js     : $(node -v)
- npm          : $(npm -v)
- PM2 Version  : $(pm2 -v)
- N-API Level  : $(node -p "process.versions.napi")
- CPU Arch     : $(uname -m)
- Platform     : $(uname -s)
- Working Dir  : $(pwd)
+ PNPM        : $(pnpm -v)
+ PM2 Version : $(pm2 -v)
+ N-API Level : $(node -p "process.versions.napi")
+ CPU Arch    : $(uname -m)
+ Platform    : $(uname -s)
+ Working Dir : $(pwd)
 
  PM2 Commands:
    pm2 list
@@ -132,8 +138,9 @@ echo "
    - fetch
 
  Optimized for:
-   - Node.js 24.x (official via NVM)
+   - Node.js 24.x (via NVM)
    - libcurl + ffmpeg + sqlite3 + Node-API
+   - PNPM workspace integration
 
  Liora is now running under PM2 supervision.
 ==========================================

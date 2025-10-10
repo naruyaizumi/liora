@@ -156,14 +156,6 @@ We take security, stability, and the comfort of contributors very seriously.
 > If you discover a security issue, report it responsibly through the official issue templates or via direct contact.  
 > This process preserves the **integrity, stability, and trust** of the Liora ecosystem.
 
-> [!TIP]
-> **Installation Methods**  
-> You can deploy Liora using any preferred process manager or container environment:
->
-> - [Pterodactyl Installation Guide](.github/INSTALLATION/PTERODACTYL.md)
-> - [PM2 Installation Guide](.github/INSTALLATION/PM2.md)  
->   Ensure that your runtime environment meets the minimum requirements of **Node.js 22+**, with full access to the system’s build tools.
-
 > [!WARNING]
 > **Unauthorized modification, credit removal, or commercial distribution is strictly forbidden.**
 >
@@ -171,6 +163,20 @@ We take security, stability, and the comfort of contributors very seriously.
 > - Redistribution, reselling, or rebranding for personal gain is a direct violation of project terms.
 >
 > Credits represent **respect, transparency, and acknowledgment** — not decoration.
+
+> [!IMPORTANT]
+> **Liora is not a “friendly-user” WhatsApp bot.**  
+> This project is a **hardcore, developer-grade system** built with native C++, Node-API, and hybrid ESM architecture.  
+> Every subsystem — from message handling, SQL storage, to native bridge operations — is engineered for **performance, modularity, and precision**, not casual use.  
+>
+> Intended for developers who understand:
+> - Async/await and Node.js event loop behavior  
+> - Native C++ addons and build pipelines  
+> - Baileys internal structure and metadata manipulation  
+> - SQL-based data persistence and concurrency control  
+>
+> If you’re looking for a “plug-and-play” bot, **this is not it**.  
+> Liora is a **runtime framework**, not a script.
 
 <details>
   <summary>
