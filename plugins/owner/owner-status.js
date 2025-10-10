@@ -1,5 +1,3 @@
-import fs from "fs/promises";
-
 let handler = async (m, { conn, text }) => {
     try {
         const q = m.quoted ? m.quoted : m;

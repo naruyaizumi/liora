@@ -102,6 +102,7 @@ ensureTable(
   detect INTEGER DEFAULT 0,
   sWelcome TEXT DEFAULT '',
   sBye TEXT DEFAULT '',
+
   antiLinks INTEGER DEFAULT 0,
   antiAudio INTEGER DEFAULT 0,
   antiFile INTEGER DEFAULT 0,
@@ -140,12 +141,6 @@ ensureTable(
   `
 );
 
-function dropTableSafe(name) {
-    sqlite.backup(`./database/backup-${name}-${Date.now()}.db`);
-    sqlite.exec(`DROP TABLE IF EXISTS ${name}`);
-    console.log(`[DB] Dropped table ${name} safely (backup created)`);
-}
-
 sqlite.pragma("wal_checkpoint(FULL)");
 sqlite.pragma("optimize");
 
@@ -172,7 +167,7 @@ class DataWrapper {
                         try {
                             const parsed = JSON.parse(row[k]);
                             if (typeof parsed === "object") row[k] = parsed;
-                        } catch {}
+                        } catch {/* Jawa */}
                     }
 
                     return new Proxy(row, {

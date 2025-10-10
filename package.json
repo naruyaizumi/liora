@@ -18,14 +18,14 @@
         "url": "https://linkbio.co/naruyaizumi"
     },
     "dependencies": {
-        "audio-decode": "^2.2.3",
-        "baileys": "7.0.0-rc.5",
+        "baileys": "npm:@itsukichan/baileys",
         "better-sqlite3": "^12.4.1",
         "canvas": "^3.2.0",
         "chalk": "^5.6.2",
         "file-type": "^21.0.0",
         "pino": "^10.0.0",
-        "sharp": "^0.34.4"
+        "sharp": "^0.34.4",
+        "yt-search": "^2.13.1"
     },
     "devDependencies": {
         "@eslint/js": "^9.37.0",

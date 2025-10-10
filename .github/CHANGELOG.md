@@ -1,3 +1,37 @@
+# Version 7.1.0 — Minor Update
+
+## Added
+
+- **Upload Channel** — added native support for posting media and messages directly to WhatsApp Channels.
+- **Upload Mentioned Status** — allows sending status updates with user mentions.
+- **Bing Image Search** — integrated Bing API for fast, accurate image search results.
+- **WikiMedia Search** — added WikiMedia image and article lookup support.
+- **Pinterest Search** — implemented Pinterest crawler for visual content discovery.
+- **Anti Mentioned Status** — prevents users from tagging bot or owner in WhatsApp statuses.
+- **YTS Package** — lightweight YouTube Search module for fast metadata and video lookup.
+
+---
+
+## Removed
+
+- **Audio Decoder Module** — removed legacy decoder to reduce binary overhead.
+- **C++ Convert Warning Logs** — suppressed redundant native bridge logs for cleaner output.
+- **Deprecated Convert Routines** — eliminated old redundant conversion logic replaced by native bridge.
+
+---
+
+## Fixed
+
+- **Play Button (Interactive Message)** — fixed delayed playback response on interactive media messages.
+- **Auth + Store (SQLite)** — stabilized authentication and persistent storage synchronization.
+- **Album Message Delivery** — resolved multi-image/video grouping errors.
+- **CTA Copy Button** — restored proper clipboard copy behavior in call-to-action templates.
+- **Resolve ID ⇄ LID** — improved mapping accuracy between JID and LID in multi-device environments.
+- **Baileys Migration** — synchronized compatibility with latest Baileys core changes.
+- **SQLite Memory Store** — optimized memory mode for improved read/write performance.
+
+---
+
 # Version 7.0.0 — Major System Rewrite
 
 ## Added
@@ -66,6 +100,8 @@ Version 7 introduces a **complete internal refactor** focused on stability, spee
 ---
 
 _Liora 7.0.0 marks the transition from mixed async/sync architecture to a fully native async environment, combining Node.js performance with native C++ bridges for near-zero latency operations and seamless binary data handling._
+
+---
 
 # Version 6.0.0 — Major Release
 
