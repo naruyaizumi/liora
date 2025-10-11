@@ -18,11 +18,9 @@ let handler = async (m, { conn, text }) => {
         `┌─[${timestamp}]────────────`,
         `│  NPM SEARCH RESULT`,
         "└──────────────────────",
-        `Query   : ${text}`,
-        "───────────────────────",
         ...limited.map(
             ({ package: pkg }, i) =>
-                `${i + 1}. ${pkg.name} (v${pkg.version})\n    ↳ ${pkg.links.npm}`
+                `${i + 1}. ${pkg.name} (v${pkg.version})\n  ↳ ${pkg.links.npm}`
         ),
         "```",
     ].join("\n");

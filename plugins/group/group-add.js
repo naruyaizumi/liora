@@ -33,8 +33,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         `│  GROUP MEMBER ADD`,
         "└──────────────────────",
         `Total Targets : ${targets.length}`,
-        `Added         : ${success.length}`,
-        `Failed        : ${failed.length}`,
+        `Added : ${success.length}`,
+        `Failed : ${failed.length}`,
         "───────────────────────",
         success.length
             ? success.map((u) => `+ ${u.replace("@s.whatsapp.net", "")}`).join("\n")

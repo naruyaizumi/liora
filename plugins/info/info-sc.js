@@ -9,7 +9,7 @@ let handler = async (m, { conn }) => {
         "",
         "Repository : https://github.com/naruyaizumi/liora",
         "Report Bug : https://github.com/naruyaizumi/liora/issues",
-        "Pull Req   : https://github.com/naruyaizumi/liora/pulls",
+        "Pull Req : https://github.com/naruyaizumi/liora/pulls",
         "",
         "────────────────────────────",
         "© 2024 – 2025 Naruya Izumi • All Rights Reserved",

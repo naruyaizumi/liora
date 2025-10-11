@@ -48,21 +48,8 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
             },
         },
     };
-
-    await m.reply(
-        [
-            "```",
-            `┌─[${timestamp}]────────────`,
-            `│  Broadcast Info`,
-            "└──────────────────────",
-            `Total Groups : ${totalGroups}`,
-            `Muted Groups : ${muted}`,
-            `Active Groups: ${groups.length}`,
-            "───────────────────────",
-            "Starting broadcast...",
-            "```",
-        ].join("\n")
-    );
+    
+    await m.reply('Starting broadcast hidetag...');
 
     const { success, failed } = await doBroadcast(conn, cc, teks, groups, qtoko, jpegThumbnail, {
         ht: true,

@@ -22,8 +22,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             `┌─[${timestamp}]────────────`,
             `│  OPENAI CHAT RESPONSE`,
             "└──────────────────────",
-            `> Query: ${text}`,
-            "───────────────────────",
             json.message.trim(),
             "───────────────────────",
             "```",

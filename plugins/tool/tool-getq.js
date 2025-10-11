@@ -14,26 +14,13 @@ let handler = async (m) => {
             `Quoted From : ${m.quoted?.sender || "Unknown"}`,
             "───────────────────────",
             text,
-            "───────────────────────",
-            "End of debug output.",
             "```",
         ].join("\n");
 
         await m.reply(response);
     } catch (error) {
         console.error(error);
-        const timestamp = new Date().toTimeString().split(" ")[0];
-        const errMsg = [
-            "```",
-            `┌─[${timestamp}]────────────`,
-            `│  DEBUG ERROR`,
-            "└──────────────────────",
-            `! ${error.message}`,
-            "───────────────────────",
-            "Debug process failed.",
-            "```",
-        ].join("\n");
-        await m.reply(errMsg);
+        await m.reply(`! ${error.message}`);
     }
 };
 

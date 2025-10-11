@@ -51,20 +51,20 @@ let handler = async (m, { conn, text }) => {
             `┌─[${timestamp}]────────────`,
             `│  ${title}`,
             "└──────────────────────",
-            `User        : @${userJid.split("@")[0]}`,
-            `LID         : ${lid || "-"}`,
-            `Status      : ${about}`,
-            `Updated     : ${lastUpdate}`,
-            `Business    : ${bisnis?.description || "-"}`,
-            `Category    : ${
+            `User : @${userJid.split("@")[0]}`,
+            `LID : ${lid || "-"}`,
+            `Status : ${about}`,
+            `Updated : ${lastUpdate}`,
+            `Business : ${bisnis?.description || "-"}`,
+            `Category : ${
                 Array.isArray(bisnis?.category)
                     ? bisnis.category.join(", ")
                     : bisnis?.category || "-"
             }`,
-            `Email       : ${bisnis?.email || "-"}`,
-            `Website     : ${bisnis?.website?.join(", ") || "-"}`,
-            `Address     : ${bisnis?.address || "-"}`,
-            `Work Hours  : ${businessHours}`,
+            `Email : ${bisnis?.email || "-"}`,
+            `Website : ${bisnis?.website?.join(", ") || "-"}`,
+            `Address : ${bisnis?.address || "-"}`,
+            `Work Hours : ${businessHours}`,
             "───────────────────────",
             "Profile info fetched successfully.",
             "```",

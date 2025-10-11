@@ -1,19 +1,8 @@
 let handler = async (m, { conn }) => {
     const startTime = performance.now();
     const endTime = performance.now();
-    const responseTime = (endTime - startTime).toFixed(3);
-    const timestamp = new Date().toTimeString().split(" ")[0];
-
-    const text = [
-        "```",
-        `[${timestamp}] Liora Ping`,
-        "────────────────────────",
-        `Response Time : ${responseTime} ms`,
-        "────────────────────────",
-        "```",
-    ].join("\n");
-
-    await conn.sendMessage(m.chat, { text }, { quoted: m });
+    const responseTime = (endTime - startTime).toFixed(5);
+    await m.reply(`PONG: ${responseTime} ms`);
 };
 
 handler.help = ["ping"];

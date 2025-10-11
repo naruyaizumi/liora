@@ -21,60 +21,15 @@ let handler = async (m, { text, usedPrefix, command }) => {
         case "off":
         case "mute":
             if (chat.mute)
-                return m.reply(
-                    [
-                        "```",
-                        `┌─[${timestamp}]────────────`,
-                        `│  BOT MODE`,
-                        "└──────────────────────",
-                        "Status : ALREADY OFFLINE",
-                        "───────────────────────",
-                        "Bot is already muted.",
-                        "```",
-                    ].join("\n")
-                );
+                return m.reply('Status : ALREADY OFFLINE');
             chat.mute = true;
-            return m.reply(
-                [
-                    "```",
-                    `┌─[${timestamp}]────────────`,
-                    `│  BOT MODE`,
-                    "└──────────────────────",
-                    "Status : MUTED",
-                    "───────────────────────",
-                    "Bot is now in silent mode.",
-                    "```",
-                ].join("\n")
-            );
-
+            return m.reply('Status : MUTED');
         case "on":
         case "unmute":
             if (!chat.mute)
-                return m.reply(
-                    [
-                        "```",
-                        `┌─[${timestamp}]────────────`,
-                        `│  BOT MODE`,
-                        "└──────────────────────",
-                        "Status : ALREADY ONLINE",
-                        "───────────────────────",
-                        "Bot is already active.",
-                        "```",
-                    ].join("\n")
-                );
+                return m.reply('Status : ALREADY ONLINE');
             chat.mute = false;
-            return m.reply(
-                [
-                    "```",
-                    `┌─[${timestamp}]────────────`,
-                    `│  BOT MODE`,
-                    "└──────────────────────",
-                    "Status : ONLINE",
-                    "───────────────────────",
-                    "Bot has been reactivated.",
-                    "```",
-                ].join("\n")
-            );
+            return m.reply('Status : ONLINE');
 
         default:
             return m.reply(

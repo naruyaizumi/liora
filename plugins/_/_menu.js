@@ -40,6 +40,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
             help: [].concat(p.help || []),
             tags: [].concat(p.tags || []),
             owner: p.owner,
+            mods: p.mods,
             admin: p.admin,
         }));
 
@@ -100,7 +101,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
         .filter((p) => p.tags.includes(category))
         .flatMap((p) =>
             p.help.map(
-                (cmd) => `- ${usedPrefix + cmd}${p.owner ? " (owner)" : p.admin ? " (admin)" : ""}`
+                (cmd) => `- ${usedPrefix + cmd}${p.mods ? "(developer)" : p.owner ? " (owner)" : p.admin ? " (admin)" : ""}`
             )
         );
 

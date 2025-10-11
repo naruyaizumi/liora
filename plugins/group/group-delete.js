@@ -30,7 +30,7 @@ let handler = async (m, { conn }) => {
 
 handler.help = ["delete"];
 handler.tags = ["group"];
-handler.command = /^(d|delete|del)$/i;
+handler.command = /^(d|delete)$/i;
 handler.group = true;
 handler.admin = true;
 handler.botAdmin = true;

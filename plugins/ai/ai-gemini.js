@@ -115,8 +115,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             `┌─[${timestamp}]────────────`,
             `│  GEMINI AI RESPONSE`,
             "└──────────────────────",
-            `> Query: ${prompt}`,
-            "───────────────────────",
             resultText.trim(),
             "───────────────────────",
             "```",

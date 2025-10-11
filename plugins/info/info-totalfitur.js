@@ -9,9 +9,9 @@ let handler = async (m, { conn }) => {
         "```",
         `[${timestamp}] Liora Plugin Statistics`,
         "────────────────────────────",
-        `Total Features  : ${totalCommands}`,
+        `Total Features : ${totalCommands}`,
         `Total Categories: ${totalTags}`,
-        `Total Plugins   : ${totalPlugins}`,
+        `Total Plugins : ${totalPlugins}`,
         "```",
     ].join("\n");
 

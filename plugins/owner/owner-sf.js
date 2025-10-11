@@ -2,7 +2,6 @@ import fs from "fs/promises";
 import path from "path";
 
 const handler = async (m, { args }) => {
-    const now = new Date().toTimeString().split(" ")[0];
     const target = path.resolve(...(args.length ? args : ["."]));
 
     try {
@@ -28,7 +27,6 @@ const handler = async (m, { args }) => {
             return m.reply(
                 [
                     "```",
-                    `Time  : ${now}`,
                     `Path  : ${target}`,
                     "───────────────────────────",
                     list,
@@ -54,7 +52,6 @@ const handler = async (m, { args }) => {
         return m.reply(
             [
                 "```",
-                `Time : ${now}`,
                 `Saved As : ${fullpath}`,
                 "───────────────────────────",
                 "File written successfully.",

@@ -20,8 +20,6 @@ let handler = async (m, { conn, text }) => {
             `┌─[${timestamp}]────────────`,
             `│  BLACKBOX AI RESPONSE`,
             "└──────────────────────",
-            `> Query: ${text}`,
-            "───────────────────────",
             json.message.trim(),
             "───────────────────────",
             "```",

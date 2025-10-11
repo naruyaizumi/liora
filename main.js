@@ -37,7 +37,6 @@ async function IZUMI() {
         printQRInTerminal: !pairingAuth,
         browser: Browsers.ubuntu("Safari"),
         emitOwnEvents: true,
-        markOnlineOnConnect: true,
         auth: {
             creds: state.creds,
             keys: makeCacheableSignalKeyStore(
@@ -55,9 +54,9 @@ async function IZUMI() {
             try {
                 let code = await conn.requestPairingCode(pairingNumber, conn.Pairing);
                 code = code?.match(/.{1,4}/g)?.join("-") || code;
-                console.log(chalk.green(`[liora] Pairing code for ${pairingNumber}: ${code}`));
+                console.log(chalk.green(`Pairing code for ${pairingNumber}: ${code}`));
             } catch (err) {
-                console.error("[liora] Pairing code error:", err.message);
+                console.error("Pairing code error:", err.message);
             }
         }, 2500);
     }
@@ -69,7 +68,7 @@ async function IZUMI() {
                 global.sqlite.prepare("PRAGMA wal_checkpoint(FULL);").run();
                 global.sqlite.prepare("PRAGMA optimize;").run();
             } catch (e) {
-                console.error("[liora] DB checkpoint:", e.message);
+                console.error("DB checkpoint:", e.message);
             }
         },
         { intervalSeconds: 600 }
@@ -85,10 +84,9 @@ async function IZUMI() {
             );
             if (HandlerModule && typeof HandlerModule.handler === "function") {
                 handler = HandlerModule;
-                console.log(chalk.gray(`[liora] handler.js reloaded`));
             }
         } catch (e) {
-            console.error(`[liora] Reload failed: ${e.message}`);
+            console.error(`Reload failed: ${e.message}`);
         }
 
         if (restartConn) {
@@ -151,7 +149,7 @@ async function IZUMI() {
                 else if (/\.js$/.test(file)) results.push(filepath);
             }
         } catch (err) {
-            console.error("[liora] Failed to read plugin folder:", err.message);
+            console.error("Failed to read plugin folder:", err.message);
         }
         return results;
     }

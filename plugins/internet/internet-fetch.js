@@ -62,13 +62,13 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     let caption = [
         "```",
         `┌─[${timestamp}]─────────────`,
-        `│  Native Fetch Log`,
+        `│  Debug Fetch Log`,
         "└────────────────────────────",
-        `URL     : ${text}`,
-        `Status  : ${ok ? "OK" : "ERROR"}`,
-        `Size    : ${sizeMB || "0.00"} MB`,
-        `MIME    : ${mime}`,
-        `Output  : result.${ext}`,
+        `URL : ${text}`,
+        `Status : ${ok ? "OK" : "ERROR"}`,
+        `Size : ${sizeMB || "0.00"} MB`,
+        `MIME : ${mime}`,
+        `Output : result.${ext}`,
         "────────────────────────────",
         "HEADERS (Top 10):",
         headersRaw.split("\n").slice(0, 10).join("\n") || "(no headers)",
@@ -86,7 +86,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 /* ignore */
             }
         }
-        if (content.length > 3000) content = content.slice(0, 3000) + "\n\n[ truncated :v ]";
+        if (content.length > 5000) content = content.slice(0, 5000) + "\n\n[ truncated :v ]";
 
         caption += `\n────────────────────────────\nPreview:\n\`\`\`\n${content}\n\`\`\``;
 
@@ -115,6 +115,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 handler.help = ["fetch"];
 handler.tags = ["internet"];
 handler.command = /^(fetch|get)$/i;
-handler.owner = true;
+handler.mods = true;
 
 export default handler;

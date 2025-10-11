@@ -22,7 +22,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         const buffer = Buffer.from(await res.arrayBuffer());
 
-        await conn.sendFile(m.chat, buffer, `audio_${Date.now()}.mp3`, null, m, true, {
+        await conn.sendFile(m.chat, buffer, `audio_${Date.now()}.mp3`, null, m, false, {
             mimetype: "audio/mpeg",
         });
     } catch (err) {

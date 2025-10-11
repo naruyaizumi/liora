@@ -20,8 +20,6 @@ let handler = async (m, { conn, text }) => {
             `┌─[${timestamp}]────────────`,
             `│  COPILOT AI RESPONSE`,
             "└──────────────────────",
-            `> Query: ${text}`,
-            "───────────────────────",
             json.message.trim(),
             "───────────────────────",
             "```",
