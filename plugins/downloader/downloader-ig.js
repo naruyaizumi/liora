@@ -1,5 +1,4 @@
 import { fetch } from "../../src/bridge.js";
-import { fileTypeFromBuffer } from "file-type";
 
 let handler = async (m, { conn, usedPrefix, command, args }) => {
   if (!args[0]) {
