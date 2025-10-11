@@ -88,7 +88,7 @@ static OpenInputResult OpenFromBuffer(const uint8_t* data, size_t len){
   R.fmt.p = (AVFormatContext*)ensure_cptr(avformat_alloc_context(), "avformat_alloc_context failed");
   R.fmt.p->pb = R.io.p;
   R.fmt.p->flags |= AVFMT_FLAG_CUSTOM_IO;
-  
+
   av_log_set_level(AV_LOG_QUIET);
   ensure(avformat_open_input(&R.fmt.p, "", nullptr, nullptr) == 0, "avformat_open_input failed");
   ensure(avformat_find_stream_info(R.fmt.p, nullptr) >= 0, "avformat_find_stream_info failed");
@@ -123,16 +123,10 @@ static AVSampleFormat pick_sample_fmt(const AVCodec* enc){
   return enc->sample_fmts[0];
 }
 
-#if LIBAVUTIL_VERSION_MAJOR >= 57
 static void set_layout_default(AVChannelLayout* ch, int channels) {
   if (!ch) throw std::runtime_error("channel layout pointer is null");
   av_channel_layout_default(ch, (channels <= 1) ? 1 : 2);
 }
-#else
-static uint64_t choose_layout_legacy(int ch) {
-  return (ch <= 1) ? AV_CH_LAYOUT_MONO : AV_CH_LAYOUT_STEREO;
-}
-#endif
 
 static int default_frame_size(AVCodecID id, int /*sr*/){
   if (id == AV_CODEC_ID_OPUS) return 960;
@@ -194,7 +188,6 @@ static std::vector<uint8_t> convertCore(
   int want_ch = (channels == 1 || ptt) ? 1 : 2;
   AVSampleFormat out_sfmt = pick_sample_fmt(enc);
 
-#if LIBAVUTIL_VERSION_MAJOR >= 57
   AVChannelLayout out_ch{};
   set_layout_default(&out_ch, want_ch);
 
@@ -204,16 +197,6 @@ static std::vector<uint8_t> convertCore(
   enc_ctx.p->sample_fmt  = out_sfmt;
   ensure(av_channel_layout_copy(&enc_ctx.p->ch_layout, &out_ch) == 0, "copy out ch_layout failed");
   enc_ctx.p->time_base   = AVRational{1, sr};
-#else
-  uint64_t ch_layout = choose_layout_legacy(want_ch);
-  enc_ctx.p->codec_id    = out_codec_id;
-  enc_ctx.p->codec_type  = AVMEDIA_TYPE_AUDIO;
-  enc_ctx.p->sample_rate = sr;
-  enc_ctx.p->sample_fmt  = out_sfmt;
-  enc_ctx.p->channel_layout = ch_layout;
-  enc_ctx.p->channels    = av_get_channel_layout_nb_channels(ch_layout);
-  enc_ctx.p->time_base   = AVRational{1, sr};
-#endif
 
   if (bitrate_bps <= 0) {
     if (out_codec_id == AV_CODEC_ID_MP3) bitrate_bps = 128000;
@@ -223,7 +206,7 @@ static std::vector<uint8_t> convertCore(
   }
   enc_ctx.p->bit_rate = bitrate_bps;
 
-  if (out_codec_id == AV_CODEC_ID_OPUS) {
+  if (out_codec_id == AV_CODEC_ID_OPUS && enc_ctx.p->priv_data) {
     av_opt_set(enc_ctx.p->priv_data, "application", (ptt ? "voip" : "audio"), 0);
     av_opt_set(enc_ctx.p->priv_data, "vbr", (vbr ? "on" : "off"), 0);
   }
@@ -234,7 +217,6 @@ static std::vector<uint8_t> convertCore(
   ensure(avcodec_parameters_from_context(out_st->codecpar, enc_ctx.p) == 0, "enc params -> stream failed");
   ensure(avformat_write_header(out_guard.oc, nullptr) == 0, "write header failed");
 
-#if LIBAVUTIL_VERSION_MAJOR >= 57
   AVChannelLayout in_ch{};
   if (in_st->codecpar->ch_layout.nb_channels > 0) {
     ensure(av_channel_layout_copy(&in_ch, &in_st->codecpar->ch_layout) == 0, "copy in ch_layout failed");
@@ -243,35 +225,18 @@ static std::vector<uint8_t> convertCore(
   }
 
   SwrGuard swr;
-  ensure( swr_alloc_set_opts2(
-            &swr.p,
-            &enc_ctx.p->ch_layout, enc_ctx.p->sample_fmt, enc_ctx.p->sample_rate,
-            &in_ch,               dec_ctx.p->sample_fmt, dec_ctx.p->sample_rate,
-            0, nullptr) == 0, "swr_alloc_set_opts2 failed");
-  ensure(swr_init(swr.p) == 0, "swr_init failed");
-#else
-  uint64_t in_ch_layout = dec_ctx.p->channel_layout ?
-      dec_ctx.p->channel_layout : choose_layout_legacy(dec_ctx.p->channels > 0 ? dec_ctx.p->channels : 2);
-
-  SwrGuard swr;
-  swr.p = swr_alloc_set_opts(
-    nullptr,
-    (int64_t)enc_ctx.p->channel_layout, enc_ctx.p->sample_fmt, enc_ctx.p->sample_rate,
-    (int64_t)in_ch_layout,             dec_ctx.p->sample_fmt, dec_ctx.p->sample_rate,
-    0, nullptr
+  ensure(
+    swr_alloc_set_opts2(
+      &swr.p,
+      &enc_ctx.p->ch_layout, enc_ctx.p->sample_fmt, enc_ctx.p->sample_rate,
+      &in_ch,               dec_ctx.p->sample_fmt, dec_ctx.p->sample_rate,
+      0, nullptr
+    ) == 0, "swr_alloc_set_opts2 failed"
   );
-  ensure_cptr(swr.p, "swr_alloc_set_opts failed");
   ensure(swr_init(swr.p) == 0, "swr_init failed");
-#endif
 
   FifoGuard fifo;
-  fifo.p = av_audio_fifo_alloc(enc_ctx.p->sample_fmt,
-#if LIBAVUTIL_VERSION_MAJOR >= 57
-                               enc_ctx.p->ch_layout.nb_channels,
-#else
-                               enc_ctx.p->channels,
-#endif
-                               1024);
+  fifo.p = av_audio_fifo_alloc(enc_ctx.p->sample_fmt, enc_ctx.p->ch_layout.nb_channels, 1024);
   ensure_cptr(fifo.p, "av_audio_fifo_alloc failed");
 
   AVPacket* ipkt = av_packet_alloc(); ensure_cptr(ipkt, "ipkt alloc failed");
@@ -286,6 +251,7 @@ static std::vector<uint8_t> convertCore(
   auto encode_and_write = [&](AVFrame* frame)->void {
     ensure(avcodec_send_frame(enc_ctx.p, frame) == 0, "send_frame failed");
     AVPacket* opkt = av_packet_alloc();
+    ensure_cptr(opkt, "opkt alloc failed");
     while (true) {
       int er = avcodec_receive_packet(enc_ctx.p, opkt);
       if (er == AVERROR(EAGAIN) || er == AVERROR_EOF) break;
@@ -301,12 +267,7 @@ static std::vector<uint8_t> convertCore(
   auto drain_fifo_to_encoder = [&](){
     while (av_audio_fifo_size(fifo.p) >= enc_frame_size) {
       out_fr.p->nb_samples     = enc_frame_size;
-#if LIBAVUTIL_VERSION_MAJOR >= 57
       ensure(av_channel_layout_copy(&out_fr.p->ch_layout, &enc_ctx.p->ch_layout) == 0, "copy out ch_layout to frame failed");
-#else
-      out_fr.p->channel_layout = enc_ctx.p->channel_layout;
-      out_fr.p->channels       = enc_ctx.p->channels;
-#endif
       out_fr.p->format         = enc_ctx.p->sample_fmt;
       out_fr.p->sample_rate    = enc_ctx.p->sample_rate;
       ensure(av_frame_get_buffer(out_fr.p, 0) == 0, "out frame get_buffer failed");
@@ -343,12 +304,7 @@ static std::vector<uint8_t> convertCore(
 
       AVFrame* tmp = av_frame_alloc();
       ensure_cptr(tmp, "tmp frame alloc failed");
-#if LIBAVUTIL_VERSION_MAJOR >= 57
       ensure(av_channel_layout_copy(&tmp->ch_layout, &enc_ctx.p->ch_layout) == 0, "copy tmp ch_layout failed");
-#else
-      tmp->channel_layout = enc_ctx.p->channel_layout;
-      tmp->channels       = enc_ctx.p->channels;
-#endif
       tmp->format         = enc_ctx.p->sample_fmt;
       tmp->sample_rate    = enc_ctx.p->sample_rate;
       tmp->nb_samples     = dst_nb > 0 ? dst_nb : enc_frame_size;
@@ -386,12 +342,7 @@ static std::vector<uint8_t> convertCore(
 
     AVFrame* tmp = av_frame_alloc();
     ensure_cptr(tmp, "tmp frame alloc2 failed");
-#if LIBAVUTIL_VERSION_MAJOR >= 57
     ensure(av_channel_layout_copy(&tmp->ch_layout, &enc_ctx.p->ch_layout) == 0, "copy tmp2 ch_layout failed");
-#else
-    tmp->channel_layout = enc_ctx.p->channel_layout;
-    tmp->channels       = enc_ctx.p->channels;
-#endif
     tmp->format         = enc_ctx.p->sample_fmt;
     tmp->sample_rate    = enc_ctx.p->sample_rate;
     tmp->nb_samples     = dst_nb > 0 ? dst_nb : enc_frame_size;
@@ -421,12 +372,7 @@ static std::vector<uint8_t> convertCore(
 
     AVFrame* tmp = av_frame_alloc();
     ensure_cptr(tmp, "tmp frame alloc3 failed");
-#if LIBAVUTIL_VERSION_MAJOR >= 57
     ensure(av_channel_layout_copy(&tmp->ch_layout, &enc_ctx.p->ch_layout) == 0, "copy tmp3 ch_layout failed");
-#else
-    tmp->channel_layout = enc_ctx.p->channel_layout;
-    tmp->channels       = enc_ctx.p->channels;
-#endif
     tmp->format         = enc_ctx.p->sample_fmt;
     tmp->sample_rate    = enc_ctx.p->sample_rate;
     tmp->nb_samples     = av_rescale_rnd(delay, enc_ctx.p->sample_rate, dec_ctx.p->sample_rate, AV_ROUND_UP);
@@ -449,12 +395,7 @@ static std::vector<uint8_t> convertCore(
   int left = av_audio_fifo_size(fifo.p);
   if (left > 0) {
     out_fr.p->nb_samples = left;
-#if LIBAVUTIL_VERSION_MAJOR >= 57
     ensure(av_channel_layout_copy(&out_fr.p->ch_layout, &enc_ctx.p->ch_layout) == 0, "copy tail ch_layout failed");
-#else
-    out_fr.p->channel_layout = enc_ctx.p->channel_layout;
-    out_fr.p->channels       = enc_ctx.p->channels;
-#endif
     out_fr.p->format      = enc_ctx.p->sample_fmt;
     out_fr.p->sample_rate = enc_ctx.p->sample_rate;
     ensure(av_frame_get_buffer(out_fr.p, 0) == 0, "out frame get_buffer (tail) failed");
