@@ -40,7 +40,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
         if (sizeKB < 200) quality += 5;
         quality = Math.max(20, Math.min(95, quality));
 
-        let outFormat = format;
+        let outFormat;
         const pipe = sharp(input, { failOn: "none" });
 
         if (format === "jpeg" || format === "jpg") {
