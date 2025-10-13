@@ -7,9 +7,7 @@
     },
     "scripts": {
         "start": "node index.js",
-        "test": "node test.js",
-        "lint": "eslint .",
-        "prettier:fix": "prettier --write ."
+        "test": "node test.js"
     },
     "license": "Apache-2.0",
     "author": {

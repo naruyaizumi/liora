@@ -25,13 +25,12 @@ jobs:
         with:
           node-version: 22
           check-latest: true
-          cache: false
 
       - name: 🍧 Install dependencies
         run: pnpm install --ignore-scripts
 
       - name: 🍰 Run Prettier auto-format
-        run: pnpm prettier:fix || true
+        run: pnpm prettier --write . || true
 
       - name: 🍫 Commit & Push changes
         run: |
