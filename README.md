@@ -1,6 +1,6 @@
 ![header](https://capsule-render.vercel.app/api?type=waving&color=0:FFC0CB,50:FFE4E1,100:E6E6FA&height=250&section=header&text=Liora%20WhatsApp%20Bot&fontSize=55&fontAlignY=35&animation=twinkling&fontColor=ffffff)
 
-[![Typing SVG](https://readme-typing-svg.herokuapp.com?size=25&duration=3500&pause=1000&color=FFC0CB&center=true&vCenter=true&width=800&lines=⚙️+Engineered+for+Precision+and+Power.;🧩+Modular.+Native.+C%2B%2B+Enhanced.;🔐+Secure.+Scalable.+Built+for+Developers.)](https://github.com/naruyaizumi/liora)
+[![Typing SVG](https://readme-typing-svg.herokuapp.com?size=25&duration=3500&pause=1000&color=FFC0CB&center=true&vCenter=true&width=800&lines=⚙️+Engineered+for+Precision+and+Performance.;🧩+Powered+by+Liora-lib+Native+Bridge.;🔐+Secure.+Scalable.+Built+for+Developers.)](https://github.com/naruyaizumi/liora)
 
 <div align="center">
   
@@ -164,20 +164,6 @@ We take security, stability, and the comfort of contributors very seriously.
 >
 > Credits represent **respect, transparency, and acknowledgment** — not decoration.
 
-> [!IMPORTANT]
-> **Liora is not a “friendly-user” WhatsApp bot.**  
-> This project is a **hardcore, developer-grade system** built with native C++, Node-API, and hybrid ESM architecture.  
-> Every subsystem — from message handling, SQL storage, to native bridge operations — is engineered for **performance, modularity, and precision**, not casual use.  
->
-> Intended for developers who understand:
-> - Async/await and Node.js event loop behavior  
-> - Native C++ addons and build pipelines  
-> - Baileys internal structure and metadata manipulation  
-> - SQL-based data persistence and concurrency control  
->
-> If you’re looking for a “plug-and-play” bot, **this is not it**.  
-> Liora is a **runtime framework**, not a script.
-
 <details>
   <summary>
     <span style="display:inline; color:#FFC0CB; font-weight:bold;">
@@ -219,42 +205,36 @@ to manage releases.
   </div>
 
   <p align="center" style="font-family: 'Fira Code', monospace; font-size:16px; color:#eaeaea;">
-    Liora is not a plug-and-play bot — it’s a <b>fully-fledged WhatsApp engine</b> built for developers who demand  
-    performance, control, and precision.  
-    It combines <b>modern JavaScript (ESM)</b> architecture with <b>native C++ add-ons</b> for extreme speed and reliability.
+    Liora is a modern, high-performance WhatsApp automation framework.  
+    It combines <b>pure JavaScript (ESM)</b> with <b>Liora-lib</b>, a native bridge that handles all heavy media and network tasks —  
+    no extra tools or manual builds required.
   </p>
 
   <p style="font-family: 'Fira Code', monospace; font-size:15px; color:#d1d1d1;">
-    Designed for experienced developers and system architects, Liora emphasizes:
+    Built for developers who want flexibility and stability without complex setup. Liora provides:
   </p>
 
   <ul style="font-family: 'Fira Code', monospace; font-size:15px; color:#f5f5f5; list-style:none;">
     <li>
       <img src="https://img.icons8.com/color/24/lightning-bolt--v1.png" width="20" style="vertical-align:middle;"/>
-      <b>Native-Level Performance</b> → powered by Node-API (C++) add-ons, bypassing traditional bottlenecks
+      <b>Native Performance</b> — powered by <code>liora-lib</code> with prebuilt Linux binaries
     </li>
     <li>
       <img src="https://img.icons8.com/color/24/code-fork.png" width="20" style="vertical-align:middle;"/>
-      <b>Complex but Modular</b> → over 100+ tightly-engineered features, each optimized for speed and precision
+      <b>Modular Architecture</b> — every feature isolated, easy to extend or replace
     </li>
     <li>
       <img src="https://img.icons8.com/color/24/lock--v1.png" width="20" style="vertical-align:middle;"/>
-      <b>API & Key-Driven Ecosystem</b> → power scales with API access; the more keys you own, the stronger Liora becomes
+      <b>Secure and Reliable</b> — designed for production-grade WhatsApp bots
     </li>
     <li>
       <img src="https://img.icons8.com/color/24/mind-map.png" width="20" style="vertical-align:middle;"/>
-      <b>Low-Level Control</b> → direct access to system processes, custom schedulers, and resource management
+      <b>Developer Friendly</b> — simple commands, strong defaults, and clean configuration
     </li>
   </ul>
 
-  <p style="font-family: 'Fira Code', monospace; font-size:15px; color:#eaeaea;">
-    Liora is <b>not built for casual users</b> — it’s engineered for those who understand what’s under the hood.  
-    Setup requires real environment handling, API key management, and build configuration awareness.
-  </p>
-
   <p align="center" style="font-family: 'Fira Code', monospace; font-size:14px; color:#bfbfbf; font-style:italic;">
-    If you seek plug-and-play, this is not for you.<br>
-    If you seek raw power, modular depth, and system-level control — welcome to Liora.
+    No compiling. No external tools. Just install, configure, and run.
   </p>
 </details>
 
@@ -268,37 +248,36 @@ to manage releases.
   <ul>
     <li>
       <img src="https://img.icons8.com/color/48/unlock-2.png" width="20" style="vertical-align:middle;"/>
-      <b>Fully Open Source</b> — no encryption, no obfuscation; everything is transparent and auditable.
+      <b>Fully Open Source</b> — no encryption, no obfuscation. Every part of the system is transparent and easy to audit.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/puzzle.png" width="20" style="vertical-align:middle;"/>
-      <b>Modular System</b> — each component is isolated and replaceable, built for deep customization.
+      <b>Modular Architecture</b> — each module is self-contained and replaceable, allowing simple or advanced customization.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/lightning-bolt.png" width="20" style="vertical-align:middle;"/>
-      <b>Native-Level Performance</b> — powered by Node-API (C++) bridges for faster execution and lower I/O overhead.
+      <b>Optimized Performance</b> — powered by <code>liora-lib</code> native bindings for fast media and network operations.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/document.png" width="20" style="vertical-align:middle;"/>
-      <b>Modern JavaScript (Pure ESM)</b> — clean, asynchronous, and future-proof by design.
+      <b>Modern JavaScript (ESM)</b> — built on a clean asynchronous design for maintainability and future compatibility.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/nodejs.png" width="20" style="vertical-align:middle;"/>
-      <b>Node.js v22+ Compatible</b> — optimized for the latest runtime environments and event-loop improvements.
+      <b>Node.js v22+ Ready</b> — fully compatible with the latest Node runtime and event loop improvements.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/database.png" width="20" style="vertical-align:middle;"/>
-      <b>Integrated SQLite + Native Cache</b> — designed for speed, stability, and persistent runtime storage.
+      <b>Integrated SQLite Storage</b> — persistent, high-speed data caching with minimal setup.
     </li>
     <li>
-      <img src="https://img.icons8.com/color/48/experimental.png" width="20" style="vertical-align:middle;"/>
-      <b>Experimental Architecture</b> — Liora evolves constantly. Expect rapid updates, breaking changes, and innovation.
+      <img src="https://img.icons8.com/color/48/idea.png" width="20" style="vertical-align:middle;"/>
+      <b>Actively Evolving</b> — regular updates focused on stability, performance, and developer experience.
     </li>
   </ul>
 
   <p style="font-family:'Fira Code', monospace; font-size:14px; color:#cfcfcf; text-align:center;">
-    Liora isn’t built to be easy — it’s built to be powerful.  
-    A system that adapts with technology, breaks limits, and rebuilds itself faster than trends can catch up.
+    Liora focuses on reliability and simplicity — everything you need to build scalable WhatsApp automation without the extra complexity.
   </p>
 </details>
 

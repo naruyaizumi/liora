@@ -1,5 +1,4 @@
-import { addExif, sticker } from "../../src/bridge.js";
-import { fetch } from "../../src/bridge.js";
+import { fetch, addExif, sticker } from "liora-lib";
 
 let handler = async (m, { conn, text }) => {
     const q = m.quoted ? m.quoted : m;

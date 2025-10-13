@@ -1,4 +1,4 @@
-import { fetch } from "../../src/bridge.js";
+import { fetch } from "liora-lib";
 
 const languages = {
     1: ["id-ID", "🇮🇩 Indonesia"],

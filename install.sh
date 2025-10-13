@@ -3,112 +3,86 @@ set -e
 
 echo "
 ==========================================
- Liora Automated Installer
+ Liora Quick Installer
 ==========================================
-  Environment Setup:
-    - Node.js v24 via NVM
-    - Native addon toolchain (C++)
-    - better-sqlite3, ffmpeg, curl, etc.
-    - PM2 Process Manager
-    - PNPM via Corepack
+ Environment Setup:
+   - Node.js v24 (via NVM)
+   - PNPM + PM2
+   - FFmpeg + SQLite + curl
+   - liora-lib native bindings
 ==========================================
 "
+
 if [ -f /etc/debian_version ]; then
   OS_FAMILY="debian"
 elif [ -f /etc/redhat-release ]; then
   OS_FAMILY="rhel"
 else
-  echo "Error: Unsupported OS. Only Debian/Ubuntu and RHEL/CentOS are supported."
+  echo "Error: Unsupported OS (use Debian/Ubuntu or RHEL/CentOS)."
   exit 1
 fi
 
+echo "[INFO] Installing base system dependencies..."
 if [ "$OS_FAMILY" = "debian" ]; then
-  echo "[INFO] Updating system packages..."
   sudo apt update -y
-  sudo apt install -y \
-    build-essential pkg-config cmake python3 python3-dev \
-    ffmpeg imagemagick \
-    libavformat-dev libavcodec-dev libavutil-dev \
-    libswresample-dev libswscale-dev \
-    libwebp-dev libpng-dev libjpeg-dev zlib1g-dev \
-    libfreetype6-dev libharfbuzz-dev libpango1.0-dev \
-    libgif-dev libopus-dev libvpx-dev \
-    libcurl4-openssl-dev libnghttp2-dev libssl-dev \
-    git curl wget zip unzip
-elif [ "$OS_FAMILY" = "rhel" ]; then
-  echo "[INFO] Installing dependencies for RHEL/CentOS..."
+  sudo apt install -y build-essential python3 ffmpeg curl git wget sqlite3 pkg-config unzip zip
+else
   sudo yum groupinstall -y "Development Tools"
   sudo yum install -y epel-release
-  sudo yum install -y \
-    cmake python3 python3-devel \
-    ffmpeg ImageMagick \
-    libwebp-devel libpng-devel libjpeg-turbo-devel \
-    zlib-devel freetype-devel harfbuzz-devel pango-devel giflib-devel \
-    opus-devel libvpx-devel \
-    libcurl-devel nghttp2-devel openssl-devel \
-    git curl wget zip unzip
+  sudo yum install -y python3 ffmpeg curl git wget sqlite pkgconfig unzip zip
 fi
 
 if [ ! -d "$HOME/.nvm" ]; then
   echo "[INFO] Installing NVM..."
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-else
-  echo "[OK] NVM already installed."
+  curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 fi
-
 export NVM_DIR="$HOME/.nvm"
 # shellcheck disable=SC1090
 . "$NVM_DIR/nvm.sh"
 
 echo "[INFO] Installing Node.js v24..."
-nvm install 24
+nvm install 24 >/dev/null
 nvm use 24
 nvm alias default 24
 
-echo "[OK] Node.js version: $(node -v)"
-echo "[OK] npm version: $(npm -v)"
+echo "[OK] Node.js $(node -v), npm $(npm -v)"
 
-echo "[INFO] Enabling Corepack and installing PNPM..."
+echo "[INFO] Setting up PNPM..."
 corepack enable
 corepack prepare pnpm@latest --activate
+echo "[OK] PNPM $(pnpm -v)"
 
-echo "[OK] PNPM version: $(pnpm -v)"
-
-if ! command -v pm2 >/dev/null 2>&1; then
-  echo "[INFO] Installing PM2 globally..."
+if ! command -v pm2 >/dev/null; then
+  echo "[INFO] Installing PM2..."
   pnpm add -g pm2
-else
-  echo "[OK] PM2 detected: $(pm2 -v)"
 fi
+echo "[OK] PM2 $(pm2 -v)"
 
 if [ ! -d "liora" ]; then
-  echo "[INFO] Cloning Liora repository..."
+  echo "[INFO] Cloning Liora..."
   git clone https://github.com/naruyaizumi/liora.git
 else
-  echo "[OK] Liora directory detected."
+  echo "[OK] Liora directory found."
 fi
 
 cd liora
 
-echo "[INFO] Installing dependencies with PNPM..."
+echo "[INFO] Installing dependencies..."
 pnpm install --frozen-lockfile || pnpm install
 
-if [ -f "binding.gyp" ]; then
-  echo "[INFO] Building native addons..."
-  pnpm rebuild --build-from-source || echo "[WARN] Native build failed, skipping..."
+if [ -d "node_modules/liora-lib" ]; then
+  echo "[OK] liora-lib detected — prebuilt bindings handled automatically."
 else
-  echo "[WARN] binding.gyp not found, skipping native build."
+  echo "[WARN] liora-lib not installed; ensure it's listed in package.json."
 fi
 
 if pm2 list | grep -q "liora"; then
-  echo "[INFO] Restarting existing Liora process..."
   pm2 restart liora
 else
-  echo "[INFO] Starting Liora..."
   pm2 start index.js --name "liora"
 fi
 
-pm2 save
+pm2 save >/dev/null
 pm2 startup -u "$(whoami)" --hp "$HOME" | tee pm2_startup.log
 eval "$(grep 'sudo' pm2_startup.log | tail -1)" || true
 
@@ -118,30 +92,18 @@ echo "
 ==========================================
  Node.js     : $(node -v)
  PNPM        : $(pnpm -v)
- PM2 Version : $(pm2 -v)
- N-API Level : $(node -p "process.versions.napi")
+ PM2         : $(pm2 -v)
+ SQLite3     : $(sqlite3 --version | cut -d ' ' -f 1)
  CPU Arch    : $(uname -m)
  Platform    : $(uname -s)
- Working Dir : $(pwd)
+ Directory   : $(pwd)
 
  PM2 Commands:
-   pm2 list
    pm2 logs liora
    pm2 restart liora
    pm2 stop liora
    pm2 delete liora
 
- Installed Native Modules:
-   - cron
-   - sticker
-   - converter
-   - fetch
-
- Optimized for:
-   - Node.js 24.x (via NVM)
-   - libcurl + ffmpeg + sqlite3 + Node-API
-   - PNPM workspace integration
-
- Liora is now running under PM2 supervision.
+ Liora is now running under PM2.
 ==========================================
 "

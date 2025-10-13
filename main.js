@@ -7,7 +7,7 @@ import "./config.js";
 import "./global.js";
 import { naruyaizumi, protoType, serialize } from "./lib/message.js";
 import { SQLiteAuth } from "./lib/auth.js";
-import { schedule } from "./src/bridge.js";
+import { schedule } from "liora-lib";
 import { fetchLatestBaileysVersion, makeCacheableSignalKeyStore, Browsers } from "baileys";
 import { readdir, stat } from "fs/promises";
 import { join } from "path";

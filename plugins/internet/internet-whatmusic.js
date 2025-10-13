@@ -1,5 +1,5 @@
 import { uploader } from "../../lib/uploader.js";
-import { fetch } from "../../src/bridge.js";
+import { fetch } from "liora-lib";
 
 let handler = async (m, { conn, usedPrefix, command }) => {
     try {

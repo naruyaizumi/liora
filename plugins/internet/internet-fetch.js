@@ -2,7 +2,7 @@ import { mkdtemp, open, stat, rm } from "fs/promises";
 import os from "os";
 import path from "path";
 import { fileTypeFromBuffer } from "file-type";
-import { fetch } from "../../src/bridge.js";
+import { fetch } from "liora-lib";
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!/^https?:\/\//i.test(text || ""))

@@ -1,4 +1,4 @@
-import { fetch } from "../../src/bridge.js";
+import { fetch } from "liora-lib";
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {

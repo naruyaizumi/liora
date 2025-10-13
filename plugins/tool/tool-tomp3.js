@@ -1,4 +1,4 @@
-import { convert } from "../../src/bridge.js";
+import { convert } from "liora-lib";
 
 let handler = async (m, { conn, usedPrefix, command }) => {
     try {
