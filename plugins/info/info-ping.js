@@ -1,7 +1,7 @@
-let handler = async (m, { conn }) => {
+let handler = async (m) => {
     const startTime = performance.now();
     const endTime = performance.now();
-    const responseTime = (endTime - startTime).toFixed(5);
+    const responseTime = (endTime - startTime).toFixed(3);
     await m.reply(`PONG: ${responseTime} ms`);
 };
 

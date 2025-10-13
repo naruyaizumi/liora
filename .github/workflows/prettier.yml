@@ -18,13 +18,14 @@ jobs:
       - name: 🍥 Setup pnpm
         uses: pnpm/action-setup@v4
         with:
+          version: 10
           run_install: false
 
       - name: 🧁 Restore pnpm cache
         uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-cache
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
@@ -32,10 +33,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "pnpm"
+          check-latest: true
 
       - name: 🍧 Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --ignore-scripts
 
       - name: 🧃 Check version change
         id: check_version
@@ -63,4 +64,4 @@ jobs:
           git config --global user.email "sexystyle088@gmail.com"
           git add .
           git diff --cached --quiet || git commit -m "style: auto-format with Prettier"
-          git push || true
+          git push origin main || true

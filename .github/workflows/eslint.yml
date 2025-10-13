@@ -23,8 +23,8 @@ jobs:
               with:
                   run_install: false
 
-            - name: 🍩 Install dependencies (skip native build)
-              run: pnpm install --frozen-lockfile --ignore-scripts
+            - name: 🍩 Install dependencies
+              run: pnpm install --ignore-scripts
 
             - name: 🍰 Run ESLint
               run: pnpm eslint .

@@ -9,7 +9,6 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         : cc.text || cc.caption || "";
 
     const allGroups = Object.keys(conn.chats).filter((jid) => jid.endsWith("@g.us"));
-    const totalGroups = allGroups.length;
     const groups = [];
     let muted = 0;
 

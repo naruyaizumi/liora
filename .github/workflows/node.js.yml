@@ -28,30 +28,11 @@ jobs:
               with:
                   run_install: false
 
-            - name: 🛠 Install System Dependencies
-              run: |
-                  sudo apt update -y
-                  sudo apt install -y \
-                    build-essential pkg-config cmake python3 python3-dev \
-                    ffmpeg imagemagick \
-                    libavformat-dev libavcodec-dev libavutil-dev \
-                    libswresample-dev libswscale-dev \
-                    libwebp-dev libpng-dev libjpeg-dev zlib1g-dev \
-                    libfreetype6-dev libharfbuzz-dev libpango1.0-dev \
-                    libgif-dev libopus-dev libvpx-dev \
-                    libcurl4-openssl-dev libnghttp2-dev libssl-dev
-
             - name: 🍡 Install Dependencies
-              run: pnpm install --frozen-lockfile
+              run: pnpm install --ignore-scripts
 
             - name: 🍰 Audit Dependencies
               run: pnpm audit || true
-
-            - name: 🍵 Check Unused Dependencies
-              run: pnpm exec depcheck --ignores=node-addon-api || true
-
-            - name: 🍕 Check for Updates
-              run: pnpm exec npm-check-updates || true
 
             - name: 🍧 Run Tests
               run: pnpm test

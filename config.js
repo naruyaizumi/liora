@@ -35,7 +35,7 @@ global.config = {
     website: "https://", // optional
 
     /*============= PAIRING =============*/
-    pairingNumber: "628xxxxxxx", // bot number
+    pairingNumber: "-", // bot number
     pairingAuth: true, // true: code | false: Qr
 
     /*============== API ==============*/
@@ -45,8 +45,6 @@ global.config = {
     APIKeys: {
         "https://api.betabotz.eu.org": "API_KEY",
     },
-    ytdl: "API_KEY", // https://cloudkutube.eu
-
     /*============== MESSAGES ==============*/
     watermark: "𝙇͢𝙞𝙤𝙧𝙖",
     author: "𝙉͢𝙖𝙧𝙪𝙮𝙖 𝙄͢𝙯𝙪𝙢𝙞",

@@ -156,6 +156,14 @@ We take security, stability, and the comfort of contributors very seriously.
 > If you discover a security issue, report it responsibly through the official issue templates or via direct contact.  
 > This process preserves the **integrity, stability, and trust** of the Liora ecosystem.
 
+> [!TIP]  
+> **Installation Guide**
+>
+> Choose your preferred installation method:
+>
+> - [Install via Pterodactyl](.github/INSTALLATION/PTERODACTYL.md)
+> - [Install via PM2](.github/INSTALLATION/PM2.md)
+
 > [!WARNING]
 > **Unauthorized modification, credit removal, or commercial distribution is strictly forbidden.**
 >

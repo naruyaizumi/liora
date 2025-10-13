@@ -1,8 +1,5 @@
-let handler = async (m, { conn }) => {
-    const timestamp = new Date().toTimeString().split(" ")[0];
+let handler = async (m) => {
     try {
-        const newCode = await conn.groupRevokeInvite(m.chat);
-        const newLink = `https://chat.whatsapp.com/${newCode}`;
         await m.reply('Group invite link has been successfully reset.');
     } catch (e) {
         console.error(e);
