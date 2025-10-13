@@ -18,47 +18,21 @@ jobs:
       - name: 🍥 Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
           run_install: false
-
-      - name: 🧁 Restore pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-cache
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
 
       - name: 🍡 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          check-latest: true
+          cache: "pnpm"
 
       - name: 🍧 Install dependencies
         run: pnpm install --ignore-scripts
 
-      - name: 🧃 Check version change
-        id: check_version
-        run: |
-          NEW_VERSION=$(jq -r .version package.json)
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          OLD_VERSION=${LAST_TAG#v}
-          echo "Current version: $NEW_VERSION"
-          echo "Last tag: $LAST_TAG"
-
-          if [ "$NEW_VERSION" != "$OLD_VERSION" ]; then
-            echo "version_changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "version_changed=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: 🍰 Auto-format with Prettier
-        if: steps.check_version.outputs.version_changed == 'true'
+      - name: 🍰 Run Prettier auto-format
         run: pnpm prettier:fix || true
 
-      - name: 🍫 Commit & Push Prettier changes
-        if: steps.check_version.outputs.version_changed == 'true'
+      - name: 🍫 Commit & Push changes
         run: |
           git config --global user.name "naruyaizumi"
           git config --global user.email "sexystyle088@gmail.com"
