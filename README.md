@@ -389,9 +389,6 @@ We sincerely thank the following parties who have been instrumental in the devel
       <a href="https://wa.me/6287831816747">
         <img src="https://img.shields.io/badge/Developer-Alfi%20Dev-FFC0CB?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F"/>
       </a>
-      <a href="https://wa.me/6281239621820">
-        <img src="https://img.shields.io/badge/Developer-Zhan%20Dev-FFC0CB?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F"/>
-      </a>
     </p>
   </details>
 
