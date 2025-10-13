@@ -1,3 +1,13 @@
+# Version 7.2.1 — Patch Update
+
+## Fixed
+
+- **Stability Improvements** — resolved several minor bugs introduced in version **7.2.0** that affected socket initialization and helper synchronization.  
+- **Dependency Handling** — corrected issues with `liora-lib` integration to ensure smoother native module loading across environments.  
+- **Internal Error Handling** — improved resilience of startup routines and fixed occasional crashes during runtime initialization.
+
+---
+
 # Version 7.2.0 — Minor Update
 
 ## Added
