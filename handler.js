@@ -29,44 +29,64 @@ const getSettings = (jid) => {
 };
 
 const toJid = (n) => {
-  const raw = Array.isArray(n) ? n[0] : (n?.num ?? n?.id ?? n);
-  const digits = String(raw ?? "").replace(/[^0-9]/g, "");
-  return digits ? digits + "@s.whatsapp.net" : "";
+    const raw = Array.isArray(n) ? n[0] : (n?.num ?? n?.id ?? n);
+    const digits = String(raw ?? "").replace(/[^0-9]/g, "");
+    return digits ? digits + "@s.whatsapp.net" : "";
 };
 
 const resolveOwners = async (conn, owners = []) => {
-  if (!conn?.lidMappingStore) {
-    return owners
-      .map((entry) => toJid(Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.id ?? entry)))
-      .filter(Boolean);
-  }
-  const cache = conn.lidMappingStore.cache;
-  const out = new Set();
-  for (const entry of owners) {
-    const num = Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.id ?? entry);
-    const jid = toJid(num);
-    if (!jid) continue;
-    out.add(jid);
-    let lid = cache?.get(jid);
-    if (!lid) {
-      try { lid = await conn.lidMappingStore.getLIDForPN(jid); } catch {/* Jawa */}
+    if (!conn?.lidMappingStore) {
+        return owners
+            .map((entry) =>
+                toJid(Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.id ?? entry))
+            )
+            .filter(Boolean);
     }
-    if (lid) {
-      out.add(lid);
-      try { cache?.set(jid, lid); cache?.set(lid, jid); } catch {/* Jawa */}
+    const cache = conn.lidMappingStore.cache;
+    const out = new Set();
+    for (const entry of owners) {
+        const num = Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.id ?? entry);
+        const jid = toJid(num);
+        if (!jid) continue;
+        out.add(jid);
+        let lid = cache?.get(jid);
+        if (!lid) {
+            try {
+                lid = await conn.lidMappingStore.getLIDForPN(jid);
+            } catch {
+                /* Jawa */
+            }
+        }
+        if (lid) {
+            out.add(lid);
+            try {
+                cache?.set(jid, lid);
+                cache?.set(lid, jid);
+            } catch {
+                /* Jawa */
+            }
+        }
+        if (lid) {
+            let back = cache?.get(lid);
+            if (!back) {
+                try {
+                    back = await conn.lidMappingStore.getPNForLID(lid);
+                } catch {
+                    /* Jawa */
+                }
+            }
+            if (back) {
+                out.add(back);
+                try {
+                    cache?.set(lid, back);
+                    cache?.set(back, lid);
+                } catch {
+                    /* Jawa */
+                }
+            }
+        }
     }
-    if (lid) {
-      let back = cache?.get(lid);
-      if (!back) {
-        try { back = await conn.lidMappingStore.getPNForLID(lid); } catch {/* Jawa */}
-      }
-      if (back) {
-        out.add(back);
-        try { cache?.set(lid, back); cache?.set(back, lid); } catch {/* Jawa */}
-      }
-    }
-  }
-  return [...out];
+    return [...out];
 };
 
 const parsePrefix = (connPrefix, pluginPrefix) => {
@@ -201,9 +221,7 @@ export async function handler(chatUpdate) {
     const user =
         (m.isGroup
             ? participants.find(
-                  (u) =>
-                      this.decodeJid(u.lid) === senderId ||
-                      this.decodeJid(u.id) === senderId
+                  (u) => this.decodeJid(u.lid) === senderId || this.decodeJid(u.id) === senderId
               )
             : {}) || {};
     const bot =

@@ -20,16 +20,14 @@ let handler = async (m, { text, usedPrefix, command }) => {
     switch (text.toLowerCase()) {
         case "off":
         case "mute":
-            if (chat.mute)
-                return m.reply('Status : ALREADY OFFLINE');
+            if (chat.mute) return m.reply("Status : ALREADY OFFLINE");
             chat.mute = true;
-            return m.reply('Status : MUTED');
+            return m.reply("Status : MUTED");
         case "on":
         case "unmute":
-            if (!chat.mute)
-                return m.reply('Status : ALREADY ONLINE');
+            if (!chat.mute) return m.reply("Status : ALREADY ONLINE");
             chat.mute = false;
-            return m.reply('Status : ONLINE');
+            return m.reply("Status : ONLINE");
 
         default:
             return m.reply(

@@ -167,7 +167,9 @@ class DataWrapper {
                         try {
                             const parsed = JSON.parse(row[k]);
                             if (typeof parsed === "object") row[k] = parsed;
-                        } catch {/* Jawa */}
+                        } catch {
+                            /* Jawa */
+                        }
                     }
 
                     return new Proxy(row, {

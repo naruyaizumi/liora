@@ -2,8 +2,8 @@
 
 ## Fixed
 
-- **Stability Improvements** — resolved several minor bugs introduced in version **7.2.0** that affected socket initialization and helper synchronization.  
-- **Dependency Handling** — corrected issues with `liora-lib` integration to ensure smoother native module loading across environments.  
+- **Stability Improvements** — resolved several minor bugs introduced in version **7.2.0** that affected socket initialization and helper synchronization.
+- **Dependency Handling** — corrected issues with `liora-lib` integration to ensure smoother native module loading across environments.
 - **Internal Error Handling** — improved resilience of startup routines and fixed occasional crashes during runtime initialization.
 
 ---
@@ -12,23 +12,23 @@
 
 ## Added
 
-- **Helper Socket** — introduced a modular helper layer to streamline socket management and improve maintainability.  
+- **Helper Socket** — introduced a modular helper layer to streamline socket management and improve maintainability.
 - **Liora-lib Dependency** — integrated the new `liora-lib` native library for optimized performance and simplified native operations.
 
 ---
 
 ## Removed
 
-- **Redundant Protocols** — deprecated legacy protocol routines to reduce complexity.  
-- **Silent Subtype Message** — removed unused subtype message handling for cleaner event flow.  
-- **Nested Try-Catch / If-Else** — refactored deeply nested logic into clearer, modular structures.  
+- **Redundant Protocols** — deprecated legacy protocol routines to reduce complexity.
+- **Silent Subtype Message** — removed unused subtype message handling for cleaner event flow.
+- **Nested Try-Catch / If-Else** — refactored deeply nested logic into clearer, modular structures.
 - **Native C++ Add-on** — eliminated the old C++ native layer, fully migrated to `liora-lib`.
 
 ---
 
 ## Fixed
 
-- **makeWASocket, Serialise, smsg, and Prototype** — improved internal consistency, performance, and reliability across these core utilities.  
+- **makeWASocket, Serialise, smsg, and Prototype** — improved internal consistency, performance, and reliability across these core utilities.
 - **Socket Store Implementation** — enhanced the integration and stability of the store system within the socket layer.
 
 ---

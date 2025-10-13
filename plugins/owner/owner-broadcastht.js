@@ -47,8 +47,8 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
             },
         },
     };
-    
-    await m.reply('Starting broadcast hidetag...');
+
+    await m.reply("Starting broadcast hidetag...");
 
     const { success, failed } = await doBroadcast(conn, cc, teks, groups, qtoko, jpegThumbnail, {
         ht: true,

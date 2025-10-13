@@ -19,8 +19,7 @@ let handler = async (m, { conn, text }) => {
         `│  NPM SEARCH RESULT`,
         "└──────────────────────",
         ...limited.map(
-            ({ package: pkg }, i) =>
-                `${i + 1}. ${pkg.name} (v${pkg.version})\n  ↳ ${pkg.links.npm}`
+            ({ package: pkg }, i) => `${i + 1}. ${pkg.name} (v${pkg.version})\n  ↳ ${pkg.links.npm}`
         ),
         "```",
     ].join("\n");

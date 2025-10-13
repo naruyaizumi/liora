@@ -21,7 +21,7 @@ let handler = async (m, { args, usedPrefix, command }) => {
         if (isDir) await fs.rm(target, { recursive: true, force: true });
         else await fs.unlink(target);
 
-        await m.reply('Operation completed successfully.');
+        await m.reply("Operation completed successfully.");
     } catch (err) {
         await m.reply(`Error: ${err.message}`);
     }

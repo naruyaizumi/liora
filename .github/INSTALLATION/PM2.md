@@ -182,14 +182,14 @@ npm update
 
 ```javascript
 module.exports = {
-  apps: [
-    {
-      name: "liora",
-      script: "index.js",
-      watch: true,
-      max_memory_restart: "512M",
-    },
-  ],
+    apps: [
+        {
+            name: "liora",
+            script: "index.js",
+            watch: true,
+            max_memory_restart: "512M",
+        },
+    ],
 };
 ```
 

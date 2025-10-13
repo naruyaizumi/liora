@@ -48,7 +48,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         },
     };
 
-    await m.reply('Starting broadcast...');
+    await m.reply("Starting broadcast...");
 
     const { success, failed } = await doBroadcast(conn, cc, teks, groups, qtoko, jpegThumbnail, {
         ht: false,
