@@ -24,89 +24,34 @@
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/dependency-review.yml">
   <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/dependency-review.yml?label=Dependency%20Review&style=for-the-badge&logo=dependabot&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Dependency Review"/>
 </a>
-<img src="https://img.shields.io/github/last-commit/naruyaizumi/liora?style=for-the-badge&logo=git&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Last Commit"/>
-<a href="https://github.com/naruyaizumi/liora/releases">
-  <img src="https://img.shields.io/github/v/release/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Latest Release"/>
-</a>
-<a href="https://github.com/naruyaizumi/liora/discussions">
-  <img src="https://img.shields.io/github/discussions/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Discussions"/>
-</a>
-
 <a href="https://www.apache.org/licenses/LICENSE-2.0">
   <img src="https://img.shields.io/badge/License-Apache%202.0-FFC0CB?style=for-the-badge&logo=apache&logoColor=white&labelColor=2F2F2F" alt="License"/>
 </a>
-
-<a href="https://nodejs.org/en">
-  <img src="https://img.shields.io/badge/Node.js-v22%20|%2023%20|%2024-FFC0CB?style=for-the-badge&logo=node.js&logoColor=white&labelColor=2F2F2F" alt="Node.js"/>
-</a>
-
 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">
   <img src="https://img.shields.io/badge/JavaScript-ESM-FFC0CB?style=for-the-badge&logo=javascript&logoColor=black&labelColor=2F2F2F" alt="JavaScript"/>
 </a>
-
-<a href="https://eslint.org/">
-  <img src="https://img.shields.io/badge/ESLint-Linting-FFC0CB?style=for-the-badge&logo=eslint&logoColor=white&labelColor=2F2F2F" alt="ESLint"/>
-</a>
-
-<a href="https://codeql.github.com/">
-  <img src="https://img.shields.io/badge/CodeQL-Analysis-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="CodeQL"/>
-</a>
-
 <a href="https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03">
   <img src="https://img.shields.io/badge/WhatsApp-Channel-FFC0CB?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F" alt="WhatsApp Channel"/>
 </a>
-
 <a href="https://www.npmjs.com/">
   <img src="https://img.shields.io/badge/NPM-Package-FFC0CB?style=for-the-badge&logo=npm&logoColor=white&labelColor=2F2F2F" alt="NPM"/>
 </a>
-
 <a href="https://www.linux.org/">
   <img src="https://img.shields.io/badge/Linux-Server-FFC0CB?style=for-the-badge&logo=linux&logoColor=black&labelColor=2F2F2F" alt="Linux"/>
 </a>
-
 <a href="https://instagram.com/naruyaizumi">
   <img src="https://img.shields.io/badge/Instagram-@naruyaizumi-FFC0CB?style=for-the-badge&logo=instagram&logoColor=white&labelColor=2F2F2F" alt="Instagram"/>
 </a>
-
 <a href="https://tiktok.com/@naruyaizumi">
   <img src="https://img.shields.io/badge/TikTok-@naruyaizumi-FFC0CB?style=for-the-badge&logo=tiktok&logoColor=white&labelColor=2F2F2F" alt="TikTok"/>
 </a>
-
 <a href="https://t.me/naruyaizumi">
   <img src="https://img.shields.io/badge/Telegram-@naruyaizumi-FFC0CB?style=for-the-badge&logo=telegram&logoColor=white&labelColor=2F2F2F" alt="Telegram"/>
 </a>
-
 <a href="https://open.spotify.com/playlist/0j68uRJvay44fmcTnbJGPS?si=_1SyqT43T52i2QybhZyhAQ" target="_blank">
   <img src="https://img.shields.io/badge/Spotify-Izumi's%20Playlist-FFC0CB?style=for-the-badge&logo=spotify&logoColor=white&labelColor=2F2F2F" alt="Spotify Playlist" />
 </a>
-
 </p>
-
----
-
-<span align="center" style="color:#FFC0CB;">
-  <img src="https://img.icons8.com/fluency/48/combo-chart.png" width="22" />
-  GitHub Stats
-</span>
-<p align="center">
-  <img loading="lazy" width="396" src="https://github-readme-stats.vercel.app/api?username=naruyaizumi&show_icons=true&hide_border=true&bg_color=0D1117&title_color=FFC0CB&text_color=FFE4E1&icon_color=FFB6C1" alt="GitHub stats" />
-</p>
-<span align="center" style="color:#FFC0CB;">
-  <img src="https://img.icons8.com/color/48/fire-element.png" width="22" />
-  GitHub Streak
-</span>
-<p align="center">
-  <img loading="lazy" width="396" src="https://streak-stats.demolab.com?user=naruyaizumi&hide_border=true&background=0D1117&ring=FFC0CB&fire=FFB6C1&currStreakNum=FFFFFF&sideNums=FFFFFF&currStreakLabel=FFC0CB&sideLabels=FFC0CB&dates=FFE4E1" alt="GitHub streak" />
-</p>
-<span align="center" style="color:#FFC0CB;">
-  <img src="https://img.icons8.com/color/48/code-file.png" width="22" />
-  Top Languages
-</span>
-<p align="center">
-  <img loading="lazy" width="396" src="https://github-readme-stats.vercel.app/api/top-langs/?username=naruyaizumi&layout=compact&hide_border=true&bg_color=0D1117&title_color=FFC0CB&text_color=FFE4E1&icon_color=FFB6C1" alt="Top languages" />
-</p>
-<img src="https://github-profile-trophy.vercel.app/?username=naruyaizumi&theme=juicyfresh&no-frame=true&margin-w=10&column=7" alt="GitHub Trophies" />
-<img src="https://github-readme-activity-graph.vercel.app/graph?username=naruyaizumi&bg_color=0D1117&hide_border=true&color=FFC0CB&line=FFB6C1&point=FFD1DC&area=FFE4E1" alt="GitHub Activity Graph" />
 
 </div>
 

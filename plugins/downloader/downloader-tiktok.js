@@ -15,7 +15,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
     try {
         const res = await fetch(`https://api.nekolabs.my.id/downloader/tiktok?url=${url}`);
         const json = await res.json();
-        if (!json?.status) throw new Error("Invalid response from Nekolabs API");
+        if (!json?.success) throw new Error("Invalid response from Nekolabs API");
 
         const { videoUrl, images } = json.result || {};
 

@@ -2,18 +2,18 @@ import { fetch } from "liora-lib";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0])
-        return m.reply(`Please provide a song title.\n› Example: ${usedPrefix + command} Swim`);
+        return m.reply(`Please provide a song title.\n› Example: ${usedPrefix + command} Mata Air`);
 
     await global.loading(m, conn);
     try {
         const res = await fetch(
-            "https://api.nekolabs.my.id/downloader/spotify/play/v1?q=" +
+            "https://api.nekolabs.my.id/downloader/youtube/play/v1?q=" +
                 encodeURIComponent(args.join(" ").trim())
         );
         const json = await res.json();
         if (!json.success || !json.result?.downloadUrl)
-            return m.reply("Failed to retrieve the requested Spotify track.");
-        const { title, artist, duration, cover } = json.result.metadata;
+            return m.reply("Failed to retrieve the requested YouTube track.");
+        const { title, channel, duration, cover, url } = json.result.metadata;
         const audio = await fetch(json.result.downloadUrl);
         const buffer = Buffer.from(await audio.arrayBuffer());
         await conn.sendFile(m.chat, buffer, `${title}.mp3`, "", m, true, {
@@ -21,9 +21,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             contextInfo: {
                 externalAdReply: {
                     title,
-                    body: `${artist} • ${duration}`,
+                    body: `${channel} • ${duration}`,
                     thumbnailUrl: cover,
-                    mediaType: 1,
+                    mediaUrl: url,
+                    mediaType: 2,
                     renderLargerThumbnail: true,
                 },
             },
@@ -35,8 +36,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
 };
 
-handler.help = ["spotify"];
+handler.help = ["ytplay"];
 handler.tags = ["downloader"];
-handler.command = /^(spotify)$/i;
+handler.command = /^(ytplay)$/i;
 
 export default handler;

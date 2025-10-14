@@ -17,7 +17,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
         await global.loading(m, conn);
         const apiUrl = `https://api.nekolabs.my.id/downloader/instagram?url=${url}`;
         const json = await fetch(apiUrl).then((res) => res.json());
-        if (!json.status || !json.result) {
+        if (!json.success || !json.result) {
             return m.reply("No media found or the post may be private.");
         }
         const result = json.result;
