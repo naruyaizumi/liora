@@ -45,13 +45,17 @@ We need to install dependencies first.
 
 1. Go to **Startup** section.
 2. Change startup command from:
+
 ```bash
     npm start
 ```
+
     to:
+
 ```bash
     npm install
 ```
+
 3. Save changes.
 
 ---
@@ -71,13 +75,17 @@ After dependencies are installed:
 
 1. Go back to **Startup**.
 2. Change startup command from:
+
 ```bash
     npm install
 ```
+
     back to:
+
 ```bash
     npm start
 ```
+
 3. Save.
 
 ---
