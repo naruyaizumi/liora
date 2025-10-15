@@ -1,13 +1,19 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
-        if (!text) return m.reply(`Enter Twitter username to search.\n› Example: ${usedPrefix + command} naruyaizumi`);
+        if (!text)
+            return m.reply(
+                `Enter Twitter username to search.\n› Example: ${usedPrefix + command} naruyaizumi`
+            );
         await global.loading(m, conn);
 
-        const res = await fetch(global.API("btz", "/api/stalk/twitter", { username: text }, "apikey"));
+        const res = await fetch(
+            global.API("btz", "/api/stalk/twitter", { username: text }, "apikey")
+        );
         if (!res.ok) return m.reply("Failed to access Twitter API.");
 
         const json = await res.json();
-        if (!json.status || !json.result) return m.reply("Twitter account not found or unavailable.");
+        if (!json.status || !json.result)
+            return m.reply("Twitter account not found or unavailable.");
 
         const {
             profileImage,

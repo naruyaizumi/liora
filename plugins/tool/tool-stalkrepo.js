@@ -7,7 +7,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         await global.loading(m, conn);
         const repoQuery = text.includes("/") ? text : text.replace(/\s+/, "/");
-        const res = await fetch(global.API("btz", "/api/stalk/repo", { repo: repoQuery }, "apikey"));
+        const res = await fetch(
+            global.API("btz", "/api/stalk/repo", { repo: repoQuery }, "apikey")
+        );
         if (!res.ok) return m.reply("Failed to access API endpoint.");
 
         const json = await res.json();

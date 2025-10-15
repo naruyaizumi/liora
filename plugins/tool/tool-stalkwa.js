@@ -54,15 +54,17 @@ User : @${userJid.split("@")[0]}
 LID : ${lid || "-"}
 Status : ${about}
 Updated : ${lastUpdate}
-${title === "WhatsApp Business" ? `Business : ${bisnis?.description || "-"}
-Category : ${Array.isArray(bisnis?.category)
-        ? bisnis.category.join(", ")
-        : bisnis?.category || "-"}
+${
+    title === "WhatsApp Business"
+        ? `Business : ${bisnis?.description || "-"}
+Category : ${Array.isArray(bisnis?.category) ? bisnis.category.join(", ") : bisnis?.category || "-"}
 Email : ${bisnis?.email || "-"}
 Website : ${bisnis?.website?.join(", ") || "-"}
 Address : ${bisnis?.address || "-"}
 Work Hours : 
-${businessHours}\n` : ""}
+${businessHours}\n`
+        : ""
+}
 ───────────────────────
 Profile info fetched successfully.
 \`\`\``;
