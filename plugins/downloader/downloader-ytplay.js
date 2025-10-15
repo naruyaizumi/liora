@@ -29,10 +29,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             converted instanceof Buffer
                 ? converted
                 : converted?.buffer
-                ? Buffer.from(converted.buffer)
-                : converted?.data
-                ? Buffer.from(converted.data)
-                : Buffer.from(converted);
+                  ? Buffer.from(converted.buffer)
+                  : converted?.data
+                    ? Buffer.from(converted.data)
+                    : Buffer.from(converted);
 
         await conn.sendMessage(
             m.chat,

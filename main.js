@@ -12,7 +12,12 @@ import { readdir, stat } from "fs/promises";
 import { join } from "path";
 import chalk from "chalk";
 import P from "pino";
-import { initReload, initCron, connectionUpdateHandler, getBaileysVersion } from "./lib/connection.js";
+import {
+    initReload,
+    initCron,
+    connectionUpdateHandler,
+    getBaileysVersion,
+} from "./lib/connection.js";
 
 const pairingAuth = global.config.pairingAuth;
 const pairingNumber = global.config.pairingNumber;

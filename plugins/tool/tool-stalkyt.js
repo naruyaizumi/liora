@@ -1,13 +1,17 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
-        if (!text) return m.reply(`Enter YouTube channel name to search.\n› Example: ${usedPrefix + command} naruyaizumi`);
+        if (!text)
+            return m.reply(
+                `Enter YouTube channel name to search.\n› Example: ${usedPrefix + command} naruyaizumi`
+            );
         await global.loading(m, conn);
 
         const res = await fetch(global.API("btz", "/api/stalk/yt", { username: text }, "apikey"));
         if (!res.ok) return m.reply("Failed to access YouTube API.");
 
         const json = await res.json();
-        if (!json.status || !json.result?.data?.length) return m.reply("YouTube channel not found.");
+        if (!json.status || !json.result?.data?.length)
+            return m.reply("YouTube channel not found.");
 
         const data = json.result.data[0];
         const { channelId, url, channelName, avatar, isVerified, subscriberH, description } = data;

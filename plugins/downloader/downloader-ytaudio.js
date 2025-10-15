@@ -23,8 +23,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             return m.reply("Failed to process request. Please try again later.");
         const { title, mp3, thumb, source } = json.result;
         const audioRes = await fetch(mp3);
-        if (!audioRes.ok)
-            throw new Error(`Failed to fetch audio file. Status: ${audioRes.status}`);
+        if (!audioRes.ok) throw new Error(`Failed to fetch audio file. Status: ${audioRes.status}`);
         const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
         const converted = convert(audioBuffer, {
             format: "opus",
@@ -37,10 +36,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             converted instanceof Buffer
                 ? converted
                 : converted?.buffer
-                ? Buffer.from(converted.buffer)
-                : converted?.data
-                ? Buffer.from(converted.data)
-                : Buffer.from(converted);
+                  ? Buffer.from(converted.buffer)
+                  : converted?.data
+                    ? Buffer.from(converted.data)
+                    : Buffer.from(converted);
 
         await conn.sendMessage(
             m.chat,

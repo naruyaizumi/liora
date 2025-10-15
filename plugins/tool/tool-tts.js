@@ -43,8 +43,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const fileUrl = json.result || json.url;
         if (!fileUrl) throw new Error("No audio file returned from API.");
         const audioRes = await fetch(fileUrl);
-        if (!audioRes.ok)
-            throw new Error(`Failed to fetch audio. Status: ${audioRes.status}`);
+        if (!audioRes.ok) throw new Error(`Failed to fetch audio. Status: ${audioRes.status}`);
         const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
         const converted = convert(audioBuffer, {
             format: "opus",
@@ -57,10 +56,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             converted instanceof Buffer
                 ? converted
                 : converted?.buffer
-                ? Buffer.from(converted.buffer)
-                : converted?.data
-                ? Buffer.from(converted.data)
-                : Buffer.from(converted);
+                  ? Buffer.from(converted.buffer)
+                  : converted?.data
+                    ? Buffer.from(converted.data)
+                    : Buffer.from(converted);
 
         await conn.sendMessage(
             m.chat,

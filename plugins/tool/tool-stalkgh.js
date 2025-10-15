@@ -1,8 +1,13 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
-        if (!text) return m.reply(`Enter GitHub username to search.\n› Example: ${usedPrefix + command} naruyaizumi`);
+        if (!text)
+            return m.reply(
+                `Enter GitHub username to search.\n› Example: ${usedPrefix + command} naruyaizumi`
+            );
         await global.loading(m, conn);
-        const res = await fetch(global.API("btz", "/api/stalk/github", { username: text }, "apikey"));
+        const res = await fetch(
+            global.API("btz", "/api/stalk/github", { username: text }, "apikey")
+        );
         if (!res.ok) return m.reply("Failed to access API endpoint.");
 
         const json = await res.json();

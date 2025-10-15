@@ -1,6 +1,9 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
-        if (!text) return m.reply(`Enter NPM package name to search.\n› Example: ${usedPrefix + command} naruyaizumi`);
+        if (!text)
+            return m.reply(
+                `Enter NPM package name to search.\n› Example: ${usedPrefix + command} naruyaizumi`
+            );
         await global.loading(m, conn);
         const res = await fetch(global.API("btz", "/api/stalk/npm", { name: text }, "apikey"));
         if (!res.ok) return m.reply("Failed to access API endpoint.");
@@ -25,9 +28,7 @@ Main File   : ${data.main || "-"}
 Author      : ${data.author?.name || "-"}
 License     : ${data.license || "-"}
 ───────────────────────
-Repository  : ${
-    data.repository?.url?.replace(/^git\+/, "").replace(/\.git$/, "") || "-"
-}
+Repository  : ${data.repository?.url?.replace(/^git\+/, "").replace(/\.git$/, "") || "-"}
 Homepage    : ${data.homepage || "-"}
 Bug Tracker : ${data.bugs?.url || "-"}
 ───────────────────────
@@ -38,9 +39,7 @@ Name  : ${data._npmUser?.name || "-"}
 Email : ${data._npmUser?.email || "-"}
 ───────────────────────
 Maintainers
-${(result.maintainers || [])
-    .map((v) => `• ${v.name} (${v.email})`)
-    .join("\n") || "-"}
+${(result.maintainers || []).map((v) => `• ${v.name} (${v.email})`).join("\n") || "-"}
 ───────────────────────
 Created  : ${created}
 Modified : ${modified}
