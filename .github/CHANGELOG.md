@@ -1,3 +1,35 @@
+# Version 7.3.0 — Minor Update
+
+## Added
+- **Stalkers Tool** — introduced a multi-platform stalker suite supporting WhatsApp, Instagram, TikTok, Twitter (X), YouTube, GitHub Repositories, and NPM packages.
+- **Store Patch** — improved internal store synchronization to ensure consistent state updates across sessions.  
+- **Unified SQLite Auth System** — merged `SQLiteAuth` and `SQLiteKeyStore` into a single, more reliable authentication handler.  
+- **Baileys Version Metadata** — added `baileys-version.json` for dynamic version tracking.  
+- **Close Reason Logic** — implemented a robust disconnect reason interpreter with contextual recovery strategies.
+
+---
+
+## Removed
+- **Warp Converter** — deprecated due to potential race condition and database lock issues.  
+- **Legacy Baileys Fetch Routine** — removed redundant remote version fetching.  
+- **Default Close Reason (Baileys)** — replaced with a fully custom logic-driven reconnect system.
+
+---
+
+## Fixed
+- **Nekolab API Response** — resolved inconsistent response formatting and error handling.  
+- **String Buffer Handling** — improved parsing and memory handling for buffer/string transformations.  
+- **SQLite Busy Error** — mitigated database lock issues through optimized concurrency control.
+
+---
+
+## Internal Testing
+- Stress-tested connection open spam resilience.  
+- Validated pairing spam safety.  
+- Monitored potential memory leaks within `liora-lib`.
+
+---
+
 # Version 7.2.1 — Patch Update
 
 ## Fixed

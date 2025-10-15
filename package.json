@@ -1,6 +1,6 @@
 {
     "name": "liora",
-    "version": "7.2.1",
+    "version": "7.3.0",
     "type": "module",
     "engines": {
         "node": ">=22.0.0"
@@ -15,12 +15,13 @@
         "url": "https://linkbio.co/naruyaizumi"
     },
     "dependencies": {
+        "async-mutex": "^0.5.0",
         "baileys": "npm:@itsukichan/baileys",
         "better-sqlite3": "^12.4.1",
         "canvas": "^3.2.0",
         "chalk": "^5.6.2",
         "file-type": "^21.0.0",
-        "liora-lib": "^1.0.10",
+        "liora-lib": "^1.0.24",
         "pino": "^10.0.0",
         "sharp": "^0.34.4",
         "yt-search": "^2.13.1"
@@ -31,5 +32,5 @@
         "globals": "^16.4.0",
         "prettier": "^3.6.2"
     },
-    "packageManager": "pnpm@10.18.1+sha512.77a884a165cbba2d8d1c19e3b4880eee6d2fcabd0d879121e282196b80042351d5eb3ca0935fa599da1dc51265cc68816ad2bddd2a2de5ea9fdf92adbec7cd34"
+    "packageManager": "pnpm@10.18.3"
 }
