@@ -1,19 +1,18 @@
 /* global conn */
-process.env.UV_THREADPOOL_SIZE = 128;
 process.on("uncaughtException", console.error);
 process.on("unhandledRejection", console.error);
 
 import "./config.js";
 import "./global.js";
 import { naruyaizumi, protoType, serialize } from "./lib/message.js";
-import { SQLiteAuth } from "./lib/auth.js";
+import { SQLiteAuth, SQLiteKeyStore } from "./lib/auth.js";
 import { schedule } from "liora-lib";
-import { fetchLatestBaileysVersion, makeCacheableSignalKeyStore, Browsers } from "baileys";
+import { Browsers } from "baileys";
 import { readdir, stat } from "fs/promises";
 import { join } from "path";
 import chalk from "chalk";
 import P from "pino";
-import { initReload, initCron, connectionUpdateHandler } from "./lib/connection.js";
+import { initReload, initCron, connectionUpdateHandler, getBaileysVersion } from "./lib/connection.js";
 
 const pairingAuth = global.config.pairingAuth;
 const pairingNumber = global.config.pairingNumber;
@@ -23,8 +22,7 @@ serialize();
 
 async function IZUMI() {
     const { state, saveCreds } = SQLiteAuth();
-    const { version: baileysVersion } = await fetchLatestBaileysVersion();
-
+    const baileysVersion = await getBaileysVersion();
     console.log(
         chalk.cyan(
             `\n[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}\n`
@@ -39,10 +37,7 @@ async function IZUMI() {
         emitOwnEvents: true,
         auth: {
             creds: state.creds,
-            keys: makeCacheableSignalKeyStore(
-                state.keys,
-                P().child({ level: "silent", stream: "store" })
-            ),
+            keys: SQLiteKeyStore(),
         },
     };
 

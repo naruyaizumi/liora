@@ -1,4 +1,4 @@
-import { fetch } from "liora-lib";
+import { fetch, convert } from "liora-lib";
 
 const languages = {
     1: ["id-ID", "🇮🇩 Indonesia"],
@@ -24,14 +24,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             `Select TTS language by number + text.\n› Example: ${usedPrefix + command} 1 Halo Izumi\n\nAvailable languages:\n${list}`
         );
     }
-
     const num = parseInt(args[0]);
     if (!languages[num]) return m.reply("Invalid language number.");
-
     const [langCode] = languages[num];
     const text = args.slice(1).join(" ");
     if (!text) return m.reply("Enter text to convert into speech.");
-
     await global.loading(m, conn);
     try {
         const apiUrl = global.API(
@@ -40,14 +37,40 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             { text1: text, lang: langCode },
             "apikey"
         );
-
         const res = await fetch(apiUrl);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
         const fileUrl = json.result || json.url;
         if (!fileUrl) throw new Error("No audio file returned from API.");
+        const audioRes = await fetch(fileUrl);
+        if (!audioRes.ok)
+            throw new Error(`Failed to fetch audio. Status: ${audioRes.status}`);
+        const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
+        const converted = convert(audioBuffer, {
+            format: "opus",
+            bitrate: "96k",
+            channels: 1,
+            sampleRate: 48000,
+            ptt: true,
+        });
+        const finalBuffer =
+            converted instanceof Buffer
+                ? converted
+                : converted?.buffer
+                ? Buffer.from(converted.buffer)
+                : converted?.data
+                ? Buffer.from(converted.data)
+                : Buffer.from(converted);
 
-        await conn.sendFile(m.chat, fileUrl, "tts.mp3", null, m, true);
+        await conn.sendMessage(
+            m.chat,
+            {
+                audio: finalBuffer,
+                mimetype: "audio/ogg; codecs=opus",
+                ptt: true,
+            },
+            { quoted: m }
+        );
     } catch (e) {
         console.error(e);
         m.reply(`Error: ${e.message}`);

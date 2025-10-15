@@ -1,4 +1,4 @@
-import { fetch } from "liora-lib";
+import { fetch, convert } from "liora-lib";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0])
@@ -13,22 +13,55 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const json = await res.json();
         if (!json.success || !json.result?.downloadUrl)
             return m.reply("Failed to retrieve the requested Spotify track.");
+
         const { title, artist, duration, cover } = json.result.metadata;
-        const audio = await fetch(json.result.downloadUrl);
-        const buffer = Buffer.from(await audio.arrayBuffer());
-        await conn.sendFile(m.chat, buffer, `${title}.mp3`, "", m, true, {
-            mimetype: "audio/mpeg",
-            contextInfo: {
-                externalAdReply: {
-                    title,
-                    body: `${artist} • ${duration}`,
-                    thumbnailUrl: cover,
-                    mediaType: 1,
-                    renderLargerThumbnail: true,
+
+        // fetch audio asli
+        const audioRes = await fetch(json.result.downloadUrl);
+        if (!audioRes.ok)
+            throw new Error(`Failed to fetch audio. Status: ${audioRes.status}`);
+
+        const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
+
+        // convert ke opus untuk ptt
+        const converted = convert(audioBuffer, {
+            format: "opus",
+            bitrate: "128k",
+            channels: 1,
+            sampleRate: 48000,
+            ptt: true,
+        });
+
+        // pastikan hasil konversi valid
+        const finalBuffer =
+            converted instanceof Buffer
+                ? converted
+                : converted?.buffer
+                ? Buffer.from(converted.buffer)
+                : converted?.data
+                ? Buffer.from(converted.data)
+                : Buffer.from(converted);
+
+        await conn.sendMessage(
+            m.chat,
+            {
+                audio: finalBuffer,
+                mimetype: "audio/ogg; codecs=opus",
+                ptt: true,
+                contextInfo: {
+                    externalAdReply: {
+                        title,
+                        body: `${artist} • ${duration}`,
+                        thumbnailUrl: cover,
+                        mediaType: 1,
+                        renderLargerThumbnail: true,
+                    },
                 },
             },
-        });
+            { quoted: m }
+        );
     } catch (e) {
+        console.error(e);
         m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);

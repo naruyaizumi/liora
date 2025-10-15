@@ -3,7 +3,6 @@ import { fileURLToPath } from "url";
 import { spawn } from "child_process";
 import { createInterface } from "readline";
 import { readFile } from "fs/promises";
-import { engineCheck } from "./lib/core.js";
 import chalk from "chalk";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -15,8 +14,6 @@ const pkgData = await readFile(pkgPath, "utf8").catch((err) => {
     process.exit(1);
 });
 const { name } = JSON.parse(pkgData);
-
-await engineCheck();
 
 let childProcess = null;
 let shuttingDown = false;

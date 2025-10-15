@@ -11,13 +11,13 @@ let handler = async (m, { conn, text }) => {
 
         const pnJid = target.endsWith("@s.whatsapp.net")
             ? target
-            : (await conn.signalRepository.lidMapping.getPNForLID(target)) || target;
+            : (await conn.lidMappingStore.getPNForLID(target)) || target;
 
         const [cek] = await conn.onWhatsApp(pnJid);
         if (!cek?.exists) return m.reply("This number is not registered on WhatsApp.");
 
         const userJid = cek.jid;
-        const lid = (await conn.signalRepository.lidMapping.getLIDForPN(userJid)) || cek.lid;
+        const lid = (await conn.lidMappingStore.getLIDForPN(userJid)) || cek.lid;
 
         const pp =
             (await conn.profilePictureUrl(userJid, "image").catch(() => null)) ||
@@ -46,29 +46,26 @@ let handler = async (m, { conn, text }) => {
 
         const timestamp = new Date().toTimeString().split(" ")[0];
 
-        const caption = [
-            "```",
-            `┌─[${timestamp}]────────────`,
-            `│  ${title}`,
-            "└──────────────────────",
-            `User : @${userJid.split("@")[0]}`,
-            `LID : ${lid || "-"}`,
-            `Status : ${about}`,
-            `Updated : ${lastUpdate}`,
-            `Business : ${bisnis?.description || "-"}`,
-            `Category : ${
-                Array.isArray(bisnis?.category)
-                    ? bisnis.category.join(", ")
-                    : bisnis?.category || "-"
-            }`,
-            `Email : ${bisnis?.email || "-"}`,
-            `Website : ${bisnis?.website?.join(", ") || "-"}`,
-            `Address : ${bisnis?.address || "-"}`,
-            `Work Hours : ${businessHours}`,
-            "───────────────────────",
-            "Profile info fetched successfully.",
-            "```",
-        ].join("\n");
+        const caption = `\`\`\`
+┌─[${timestamp}]────────────
+│  ${title}
+└──────────────────────
+User : @${userJid.split("@")[0]}
+LID : ${lid || "-"}
+Status : ${about}
+Updated : ${lastUpdate}
+${title === "WhatsApp Business" ? `Business : ${bisnis?.description || "-"}
+Category : ${Array.isArray(bisnis?.category)
+        ? bisnis.category.join(", ")
+        : bisnis?.category || "-"}
+Email : ${bisnis?.email || "-"}
+Website : ${bisnis?.website?.join(", ") || "-"}
+Address : ${bisnis?.address || "-"}
+Work Hours : 
+${businessHours}\n` : ""}
+───────────────────────
+Profile info fetched successfully.
+\`\`\``;
 
         await conn.sendMessage(
             m.chat,
@@ -95,7 +92,7 @@ export default handler;
 
 function formatDate(date) {
     return (
-        new Intl.DateTimeFormat("id-ID", {
+        new Intl.DateTimeFormat("en-US", {
             day: "2-digit",
             month: "long",
             year: "numeric",
@@ -109,13 +106,13 @@ function formatDate(date) {
 
 function dayId(day) {
     const map = {
-        sun: "Minggu",
-        mon: "Senin",
-        tue: "Selasa",
-        wed: "Rabu",
-        thu: "Kamis",
-        fri: "Jumat",
-        sat: "Sabtu",
+        sun: "Sunday",
+        mon: "Monday",
+        tue: "Tuesday",
+        wed: "Wednesday",
+        thu: "Thursday",
+        fri: "Friday",
+        sat: "Saturday",
     };
     return map[day] || day;
 }
