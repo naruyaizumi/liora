@@ -5,4 +5,5 @@
 .prettierignore     export-ignore
 .prettierrc.json    export-ignore
 eslint.config.js    export-ignore
+pnpm-lock.yaml      export-ignore
 *.md                export-ignore
