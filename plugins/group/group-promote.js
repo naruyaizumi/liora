@@ -1,34 +1,29 @@
 let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
-    const targets = [];
+    let target;
 
-    if (m.mentionedJid?.length) targets.push(...m.mentionedJid);
-    if (m.quoted?.sender) targets.push(m.quoted.sender);
-
-    for (const arg of args) {
-        if (/^\d{5,}$/.test(arg)) {
-            targets.push(arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
-        }
+    if (m.mentionedJid?.length) target = m.mentionedJid[0];
+    else if (m.quoted?.sender) target = m.quoted.sender;
+    else if (args[0]) {
+        const num = args[0].replace(/[^0-9]/g, "");
+        if (num) target = await conn.lidMappingStore.getLIDForPN(num + "@s.whatsapp.net");
     }
 
-    const validTargets = [...new Set(targets)].filter(
-        (v) => v !== m.sender && participants.some((p) => p.id === v)
-    );
+    if (!target)
+        return m.reply(`Specify one valid member to promote.\n› Example: ${usedPrefix + command} @628xxxx`);
 
-    if (!validTargets.length)
-        return m.reply(`Specify members to promote.\n› Example: ${usedPrefix + command} @628xxxx`);
+    const exists = participants.some(p => p.id === target);
+    if (!exists) return m.reply("User is not a member of this group.");
 
-    await Promise.allSettled(
-        validTargets.map(async (target) => {
-            try {
-                await conn.groupParticipantsUpdate(m.chat, [target], "promote");
-            } catch (err) {
-                console.error(`Promote failed for ${target}:`, err);
-            }
-            await delay(1500);
-        })
-    );
-
-    return m.reply(`Promotion process completed.`);
+    try {
+        await conn.groupParticipantsUpdate(m.chat, [target], "promote");
+        await conn.sendMessage(m.chat, {
+            text: `Successfully promoted @${target.split("@")[0]}.`,
+            mentions: [target],
+        }, { quoted: m });
+    } catch (err) {
+        console.error(`Promote failed for ${target}:`, err);
+        m.reply("Failed to promote the specified member.");
+    }
 };
 
 handler.help = ["promote"];
@@ -39,5 +34,3 @@ handler.botAdmin = true;
 handler.admin = true;
 
 export default handler;
-
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

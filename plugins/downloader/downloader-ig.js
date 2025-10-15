@@ -1,57 +1,40 @@
+import { fileTypeFromBuffer } from "file-type";
 import { fetch } from "liora-lib";
 
-let handler = async (m, { conn, usedPrefix, command, args }) => {
-    if (!args[0]) {
-        return m.reply(
-            `Usage: ${usedPrefix + command} <instagram_url>\nExample: › ${usedPrefix + command} https://www.instagram.com/p/...`
-        );
-    }
-    const url = args[0].trim();
-    if (/^https?:\/\/(www\.)?instagram\.com\/stories\//i.test(url)) {
-        return m.reply("Instagram Story URLs are not supported.");
-    }
-    if (!/^https?:\/\/(www\.)?instagram\.com\//i.test(url)) {
-        return m.reply("Invalid URL. Please provide a valid Instagram link.");
-    }
-    try {
-        await global.loading(m, conn);
-        const apiUrl = `https://api.nekolabs.my.id/downloader/instagram?url=${url}`;
-        const json = await fetch(apiUrl).then((res) => res.json());
-        if (!json.success || !json.result) {
-            return m.reply("No media found or the post may be private.");
-        }
-        const result = json.result;
-        const album = [];
-        if (result.metadata?.isVideo) {
-            const videoUrls = result.url || result.downloadUrl || [];
-            for (const link of videoUrls) {
-                album.push({ type: "video", url: link });
-            }
-        } else if (Array.isArray(result.downloadUrl)) {
-            for (const link of result.downloadUrl) {
-                album.push({ type: "image", url: link });
-            }
-        }
-        if (album.length === 0) {
-            return m.reply("No valid media files found.");
-        }
-        if (album.length === 1) {
-            const item = album[0];
-            const message =
-                item.type === "image" ? { image: { url: item.url } } : { video: { url: item.url } };
-            await conn.sendMessage(m.chat, message, { quoted: m });
-            return;
-        }
-        const albumItems = album.map((item, index) =>
-            item.type === "image"
-                ? { image: { url: item.url }, caption: `Slide ${index + 1}` }
-                : { video: { url: item.url }, caption: `Slide ${index + 1}` }
-        );
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+    const url = args[0];
+    if (!url)
+        return m.reply(`Please provide a valid Instagram URL.\n› Example: ${usedPrefix + command} https://www.instagram.com/p/...`);
+    if (!/^https?:\/\/(www\.)?instagram\.com\//i.test(url))
+        return m.reply("Invalid URL. Please send a proper Instagram link.");
 
-        await conn.sendMessage(m.chat, { album: albumItems }, { quoted: m });
+    await global.loading(m, conn);
+    try {
+        const json = await fetch(global.API("btz", "/api/download/igdowloader", { url }, "apikey")).then(r => r.json());
+        if (!json.status || !json.message?.length) return m.reply("No media found.");
+
+        const album = [];
+        let video = null;
+
+        for (const i of json.message) {
+            if (!i._url) continue;
+            const res = await fetch(i._url);
+            const buf = Buffer.from(await res.arrayBuffer());
+            const type = await fileTypeFromBuffer(buf);
+            if (!type) continue;
+
+            if (type.mime.startsWith("image")) album.push({ image: buf, filename: `ig_${Date.now()}.jpg`, mime: type.mime });
+            else if (type.mime.startsWith("video")) video = { video: buf, filename: `ig_${Date.now()}.mp4`, mime: type.mime };
+        }
+
+        if (video) {
+            await conn.sendMessage(m.chat, { video: video.video, mimetype: video.mime, fileName: video.filename }, { quoted: m });
+        } else if (album.length) {
+            await conn.sendAlbum(m.chat, album, { quoted: m });
+        } else m.reply("No valid media files found.");
     } catch (err) {
-        console.error("[Instagram DL Error]", err);
-        m.reply("An error occurred while fetching data from Instagram. Try again later.");
+        console.error(err);
+        m.reply(`Error: ${err.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

@@ -22,9 +22,15 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             throw new Error("Failed to process Google Drive link.");
 
         const { data, fileName, mimetype } = json.result;
-        await conn.sendFile(m.chat, data, fileName, null, m, false, {
-            mimetype: mimetype || "application/octet-stream",
-        });
+        await conn.sendMessage(
+            m.chat,
+            {
+                document: { url: data },
+                fileName,
+                mimetype: mimetype || "application/octet-stream",
+            },
+            { quoted: m }
+        );
     } catch (err) {
         console.error(err);
         m.reply(`Error: ${err.message}`);

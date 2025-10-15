@@ -15,7 +15,15 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         const url = `https://api.github.com/repos/${user}/${repo}/zipball`;
         const filename = `${repo}.zip`;
 
-        await conn.sendFile(m.chat, url, filename, null, m);
+        await conn.sendMessage(
+            m.chat,
+            {
+                document: { url },
+                fileName: filename,
+                mimetype: "application/zip",
+            },
+            { quoted: m }
+        );
     } catch (err) {
         console.error(err);
         m.reply("Failed to download repository. Please check the URL.");

@@ -1,52 +1,28 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-    let targets = [];
-    for (let arg of args) {
-        if (/^\d{5,}$/.test(arg)) {
-            let jid = arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net";
-            targets.push(jid);
-        }
+    let target;
+
+    if (m.mentionedJid?.[0]) target = m.mentionedJid[0];
+    else if (m.quoted?.sender) target = m.quoted.sender;
+    else if (args[0] && /^\d{5,}$/.test(args[0])) {
+        const num = args[0].replace(/[^0-9]/g, "");
+        target = await conn.lidMappingStore.getLIDForPN(num + "@s.whatsapp.net");
     }
-    targets = [...new Set(targets)];
-    if (!targets.length)
+
+    if (!target)
         return m.reply(
-            `Enter WhatsApp numbers to add.\n› Example: ${usedPrefix + command} 628xxxx 628xxxx`
+            `Specify one valid number or mention to add.\n› Example: ${usedPrefix + command} 628xxxx`
         );
 
-    const timestamp = new Date().toTimeString().split(" ")[0];
-    let success = [];
-    let failed = [];
-
-    for (let target of targets) {
-        try {
-            await conn.groupParticipantsUpdate(m.chat, [target], "add");
-            success.push(target);
-        } catch (e) {
-            failed.push(target);
-            console.error(e);
-        }
-        await delay(1500);
+    try {
+        await conn.groupParticipantsUpdate(m.chat, [target], "add");
+        await conn.sendMessage(m.chat, {
+            text: `Successfully added @${target.split("@")[0]} to the group.`,
+            mentions: [target],
+        }, { quoted: m });
+    } catch (err) {
+        console.error(`Add failed for ${target}:`, err);
+        m.reply("Failed to add the specified member.");
     }
-
-    const response = [
-        "```",
-        `┌─[${timestamp}]────────────`,
-        `│  GROUP MEMBER ADD`,
-        "└──────────────────────",
-        `Total Targets : ${targets.length}`,
-        `Added : ${success.length}`,
-        `Failed : ${failed.length}`,
-        "───────────────────────",
-        success.length
-            ? success.map((u) => `+ ${u.replace("@s.whatsapp.net", "")}`).join("\n")
-            : "(no successful adds)",
-        failed.length
-            ? "\n───────────────────────\nFailed:\n" +
-              failed.map((u) => `- ${u.replace("@s.whatsapp.net", "")}`).join("\n")
-            : "",
-        "```",
-    ].join("\n");
-
-    await conn.sendMessage(m.chat, { text: response }, { quoted: m });
 };
 
 handler.help = ["add"];
@@ -57,5 +33,3 @@ handler.botAdmin = true;
 handler.admin = true;
 
 export default handler;
-
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));

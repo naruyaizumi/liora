@@ -1,34 +1,26 @@
 let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
-    const targets = [];
-
-    if (m.mentionedJid?.length) targets.push(...m.mentionedJid);
-    if (m.quoted?.sender) targets.push(m.quoted.sender);
-
-    for (const arg of args) {
-        if (/^\d{5,}$/.test(arg)) {
-            targets.push(arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
-        }
+    let target =
+        m.mentionedJid?.[0] ||
+        m.quoted?.sender ||
+        null;
+    if (!target && args[0] && /^\d{5,}$/.test(args[0])) {
+        const num = args[0].replace(/[^0-9]/g, "");
+        target = await conn.lidMappingStore.getLIDForPN(num + "@s.whatsapp.net");
     }
 
-    const validTargets = [...new Set(targets)].filter(
-        (v) => v !== m.sender && participants.some((p) => p.id === v)
-    );
+    if (!target || !participants.some(p => p.id === target))
+        return m.reply(`Specify one valid member to demote.\n› Example: ${usedPrefix + command} @628xxxx`);
 
-    if (!validTargets.length)
-        return m.reply(`Specify members to demote.\n› Example: ${usedPrefix + command} @628xxxx`);
-
-    await Promise.allSettled(
-        validTargets.map(async (target) => {
-            try {
-                await conn.groupParticipantsUpdate(m.chat, [target], "demote");
-            } catch (err) {
-                console.error(`Demote failed for ${target}:`, err);
-            }
-            await delay(1500);
-        })
-    );
-
-    return m.reply(`Demotion process completed.`);
+    try {
+        await conn.groupParticipantsUpdate(m.chat, [target], "demote");
+        await conn.sendMessage(m.chat, {
+            text: `Successfully demoted @${target.split("@")[0]}.`,
+            mentions: [target],
+        }, { quoted: m });
+    } catch (err) {
+        console.error(`Demote failed for ${target}:`, err);
+        m.reply("Failed to demote the specified member.");
+    }
 };
 
 handler.help = ["demote"];
@@ -39,5 +31,3 @@ handler.botAdmin = true;
 handler.admin = true;
 
 export default handler;
-
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

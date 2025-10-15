@@ -20,16 +20,14 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
 
         if (Array.isArray(video_urls) && video_urls.length) {
             const video = video_urls[0]?.download_url || video_urls[0];
-            await conn.sendFile(m.chat, video, "threads.mp4", null, m, false, {
-                mimetype: "video/mp4",
-            });
+            await conn.sendMessage(m.chat, { video: { url: video } }, { quoted: m });
             return;
         }
 
         if (Array.isArray(image_urls) && image_urls.length) {
             for (const img of image_urls) {
                 if (!img) continue;
-                await conn.sendFile(m.chat, img, "threads.jpg", null, m);
+                await conn.sendMessage(m.chat, { image: { url: img } }, { quoted: m });
             }
             return;
         }

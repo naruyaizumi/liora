@@ -1,47 +1,26 @@
 let handler = async (m, { text, usedPrefix, command }) => {
-    const timestamp = new Date().toTimeString().split(" ")[0];
-    let chat = global.db.data.chats[m.chat];
+    const chat = global.db.data.chats[m.chat];
 
     if (!text) {
         const status = chat.mute ? "OFFLINE" : "ONLINE";
-        const info = [
-            "```",
-            `┌─[${timestamp}]────────────`,
-            `│  BOT STATUS`,
-            "└──────────────────────",
-            `Current : ${status}`,
-            "───────────────────────",
-            "Use 'on' or 'off' to change bot mode.",
-            "```",
-        ].join("\n");
-        return m.reply(info);
+        return m.reply(`Bot status: ${status}\nUse '${usedPrefix + command} on' or '${usedPrefix + command} off' to change mode.`);
     }
 
     switch (text.toLowerCase()) {
         case "off":
         case "mute":
-            if (chat.mute) return m.reply("Status : ALREADY OFFLINE");
+            if (chat.mute) return m.reply("Bot is already OFFLINE.");
             chat.mute = true;
-            return m.reply("Status : MUTED");
+            return m.reply("Bot is now OFFLINE.");
+
         case "on":
         case "unmute":
-            if (!chat.mute) return m.reply("Status : ALREADY ONLINE");
+            if (!chat.mute) return m.reply("Bot is already ONLINE.");
             chat.mute = false;
-            return m.reply("Status : ONLINE");
+            return m.reply("Bot is now ONLINE.");
 
         default:
-            return m.reply(
-                [
-                    "```",
-                    `┌─[${timestamp}]────────────`,
-                    `│  BOT MODE`,
-                    "└──────────────────────",
-                    `Usage : ${usedPrefix + command} on | off`,
-                    "───────────────────────",
-                    "Invalid parameter provided.",
-                    "```",
-                ].join("\n")
-            );
+            return m.reply(`Invalid parameter.\nUsage: ${usedPrefix + command} on | off`);
     }
 };
 

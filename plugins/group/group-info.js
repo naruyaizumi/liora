@@ -1,23 +1,31 @@
-let handler = async (m, { conn, participants, groupMetadata }) => {
+let handler = async (m, { conn }) => {
     const timestamp = new Date().toTimeString().split(" ")[0];
-    const pp = await conn.profilePictureUrl(m.chat, "image").catch(() => "https://qu.ax/jVZhH.jpg");
 
-    const { sWelcome, sBye } = global.db.data.chats[m.chat];
+    const chat = conn.chats[m.chat];
+    const row = conn[Symbol.for("liora.store.db")]
+        ?.prepare("SELECT data FROM groups WHERE id = ?")
+        ?.get(m.chat);
+    const meta = chat?.metadata || (row ? row.data : null);
+    const groupMeta = typeof meta === "string" ? JSON.parse(meta) : meta || {};
+
+    const participants = groupMeta.participants || [];
     const groupAdmins = participants.filter((p) => p.admin);
-    const listAdmin = groupAdmins.map((v, i) => `${i + 1}. @${v.id.split("@")[0]}`).join("\n");
-
     const owner =
-        groupMetadata.owner ||
+        groupMeta.owner ||
         groupAdmins.find((p) => p.admin === "superadmin")?.id ||
         m.chat.split`-`[0] + "@s.whatsapp.net";
+
+    const listAdmin = groupAdmins.map((v, i) => `${i + 1}. @${v.id.split("@")[0]}`).join("\n");
+    const sWelcome = global.db.data.chats[m.chat]?.sWelcome || "(none)";
+    const sBye = global.db.data.chats[m.chat]?.sBye || "(none)";
 
     const text = [
         "```",
         `┌─[${timestamp}]────────────`,
         `│  GROUP INFO`,
         "└──────────────────────",
-        `Group ID : ${groupMetadata.id}`,
-        `Name : ${groupMetadata.subject}`,
+        `Group ID : ${m.chat}`,
+        `Name : ${groupMeta.subject || chat?.subject || "(unknown)"}`,
         `Members : ${participants.length}`,
         `Owner : @${owner.split("@")[0]}`,
         "───────────────────────",
@@ -28,11 +36,12 @@ let handler = async (m, { conn, participants, groupMetadata }) => {
         `Leave Msg : ${sBye}`,
         "───────────────────────",
         `Description :`,
-        groupMetadata.desc?.toString() || "(none)",
+        groupMeta.desc?.toString() || "(none)",
         "```",
     ].join("\n");
 
-    await conn.sendFile(m.chat, pp, null, text.trim(), m, null, {
+    await conn.sendMessage(m.chat, {
+        text: text.trim(),
         mentions: [...groupAdmins.map((v) => v.id), owner],
     });
 };

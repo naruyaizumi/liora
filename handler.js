@@ -221,13 +221,13 @@ export async function handler(chatUpdate) {
     const user =
         (m.isGroup
             ? participants.find(
-                  (u) => this.decodeJid(u.lid) === senderId || this.decodeJid(u.id) === senderId
+                  (u) => this.decodeJid(u.id) === senderId || this.decodeJid(u.phoneNumber) === senderId
               )
             : {}) || {};
     const bot =
         (m.isGroup
             ? participants.find(
-                  (u) => this.decodeJid(u.lid) === botId || this.decodeJid(u.id) === botId
+                  (u) => this.decodeJid(u.id) === botId || this.decodeJid(u.phoneNumber) === botId
               )
             : {}) || {};
     const isRAdmin = user?.admin === "superadmin";

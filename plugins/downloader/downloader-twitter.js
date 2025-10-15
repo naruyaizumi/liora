@@ -20,10 +20,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const { media_extended } = json.result;
 
         for (const media of media_extended) {
-            if (media.type === "image")
-                await conn.sendFile(m.chat, media.url, "image.jpg", null, m);
-            else if (media.type.startsWith("video"))
-                await conn.sendFile(m.chat, media.url, "video.mp4", null, m);
+            if (media.type === "image") {
+                await conn.sendMessage(m.chat, { image: { url: media.url } }, { quoted: m });
+            } else if (media.type.startsWith("video")) {
+                await conn.sendMessage(m.chat, { video: { url: media.url } }, { quoted: m });
+            }
         }
     } catch (err) {
         console.error(err);

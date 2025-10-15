@@ -1,42 +1,27 @@
 let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
-    const targets = [];
+    let target =
+        m.mentionedJid?.[0] ||
+        m.quoted?.sender ||
+        null;
 
-    if (m.mentionedJid?.length) targets.push(...m.mentionedJid);
-    if (m.quoted?.sender) targets.push(m.quoted.sender);
-
-    for (const arg of args) {
-        if (/^\d{5,}$/.test(arg)) targets.push(arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
+    if (!target && args[0] && /^\d{5,}$/.test(args[0])) {
+        const num = args[0].replace(/[^0-9]/g, "");
+        target = await conn.lidMappingStore.getLIDForPN(num + "@s.whatsapp.net");
     }
 
-    const mapped = await Promise.all(
-        targets.map(async (jid) => {
-            if (jid.endsWith("@s.whatsapp.net")) {
-                const lid = await conn.signalRepository.lidMapping
-                    .getLIDForPN(jid)
-                    .catch(() => null);
-                return lid || jid;
-            }
-            return jid;
-        })
-    );
+    if (!target || !participants.some(p => p.id === target))
+        return m.reply(`Specify one valid member to remove.\n› Example: ${usedPrefix + command} @628xxxx`);
 
-    const validTargets = [...new Set(mapped)].filter(
-        (v) => v !== m.sender && participants.some((p) => p.id === v)
-    );
-
-    if (!validTargets.length)
-        return m.reply(`Specify members to remove.\n› Example: ${usedPrefix + command} @628xxxx`);
-
-    await Promise.allSettled(
-        validTargets.map(async (target) => {
-            try {
-                await conn.groupParticipantsUpdate(m.chat, [target], "remove");
-            } catch (err) {
-                console.error(`Remove failed for ${target}:`, err);
-            }
-            await delay(1500);
-        })
-    );
+    try {
+        await conn.groupParticipantsUpdate(m.chat, [target], "remove");
+        await conn.sendMessage(m.chat, {
+            text: `Successfully removed @${target.split("@")[0]}.`,
+            mentions: [target],
+        }, { quoted: m });
+    } catch (err) {
+        console.error(`Remove failed for ${target}:`, err);
+        m.reply("Failed to remove the specified member.");
+    }
 };
 
 handler.help = ["kick"];
@@ -47,5 +32,3 @@ handler.botAdmin = true;
 handler.admin = true;
 
 export default handler;
-
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

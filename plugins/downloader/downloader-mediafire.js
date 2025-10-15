@@ -23,9 +23,15 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         const { filename, mimetype, download_url } = json.result;
 
-        await conn.sendFile(m.chat, download_url, filename, null, m, false, {
-            mimetype: mimetype || "application/octet-stream",
-        });
+        await conn.sendMessage(
+            m.chat,
+            {
+                document: { url: download_url },
+                fileName: filename,
+                mimetype: mimetype || "application/octet-stream",
+            },
+            { quoted: m }
+        );
     } catch (err) {
         console.error(err);
         m.reply(`An error occurred: ${err.message}`);

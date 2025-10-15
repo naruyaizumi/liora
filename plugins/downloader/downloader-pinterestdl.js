@@ -22,9 +22,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const { media_type, image, video } = json.result.data;
 
         if (media_type === "image" && image) {
-            await conn.sendFile(m.chat, image, "pinterest.jpg", null, m);
+            await conn.sendMessage(m.chat, { image: { url: image } }, { quoted: m });
         } else if (media_type?.startsWith("video") && video) {
-            await conn.sendFile(m.chat, video, "pinterest.mp4", null, m);
+            await conn.sendMessage(m.chat, { video: { url: video } }, { quoted: m });
         } else {
             return m.reply("No downloadable media found in this URL.");
         }
