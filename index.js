@@ -2,7 +2,7 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { spawn } from "child_process";
 import { createInterface } from "readline";
-import { readFile } from "fs/promises";
+import { readFile, mkdir } from "fs/promises";
 import chalk from "chalk";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -14,6 +14,18 @@ const pkgData = await readFile(pkgPath, "utf8").catch((err) => {
     process.exit(1);
 });
 const { name } = JSON.parse(pkgData);
+
+async function ensureDirs() {
+    const dirs = [join(__dirname, "tmp"), join(__dirname, "database")];
+    for (const dir of dirs) {
+        try {
+            await mkdir(dir, { recursive: true });
+        } catch (err) {
+            console.warn(chalk.yellow(`[supervisor] Cannot create folder "${dir}": ${err.message}`));
+        }
+    }
+}
+await ensureDirs();
 
 let childProcess = null;
 let shuttingDown = false;

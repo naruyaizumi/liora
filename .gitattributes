@@ -1,0 +1,8 @@
+* text=auto
+
+.github/            export-ignore
+.gitignore          export-ignore
+.prettierignore     export-ignore
+.prettierrc.json    export-ignore
+eslint.config.js    export-ignore
+*.md                export-ignore
