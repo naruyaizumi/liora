@@ -1,7 +1,5 @@
 ![header](https://capsule-render.vercel.app/api?type=waving&color=0:FFC0CB,50:FFE4E1,100:E6E6FA&height=250&section=header&text=Liora%20WhatsApp%20Bot&fontSize=55&fontAlignY=35&animation=twinkling&fontColor=ffffff)
 
-[![Typing SVG](https://readme-typing-svg.herokuapp.com?size=25&duration=3500&pause=1000&color=FFC0CB&center=true&vCenter=true&width=800&lines=⚙️+Engineered+for+Precision+and+Performance.;🧩+Powered+by+Liora-lib+Native+Bridge.;🔐+Secure.+Scalable.+Built+for+Developers.)](https://github.com/naruyaizumi/liora)
-
 <div align="center">
   
 ![Liora](https://files.cloudkuimages.guru/images/405de5beff26.jpg)
@@ -24,32 +22,12 @@
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/dependency-review.yml">
   <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/dependency-review.yml?label=Dependency%20Review&style=for-the-badge&logo=dependabot&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Dependency Review"/>
 </a>
-<a href="https://www.apache.org/licenses/LICENSE-2.0">
-  <img src="https://img.shields.io/badge/License-Apache%202.0-FFC0CB?style=for-the-badge&logo=apache&logoColor=white&labelColor=2F2F2F" alt="License"/>
-</a>
-<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">
-  <img src="https://img.shields.io/badge/JavaScript-ESM-FFC0CB?style=for-the-badge&logo=javascript&logoColor=black&labelColor=2F2F2F" alt="JavaScript"/>
-</a>
+
 <a href="https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03">
   <img src="https://img.shields.io/badge/WhatsApp-Channel-FFC0CB?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F" alt="WhatsApp Channel"/>
 </a>
-<a href="https://www.npmjs.com/">
-  <img src="https://img.shields.io/badge/NPM-Package-FFC0CB?style=for-the-badge&logo=npm&logoColor=white&labelColor=2F2F2F" alt="NPM"/>
-</a>
-<a href="https://www.linux.org/">
-  <img src="https://img.shields.io/badge/Linux-Server-FFC0CB?style=for-the-badge&logo=linux&logoColor=black&labelColor=2F2F2F" alt="Linux"/>
-</a>
 <a href="https://instagram.com/naruyaizumi">
   <img src="https://img.shields.io/badge/Instagram-@naruyaizumi-FFC0CB?style=for-the-badge&logo=instagram&logoColor=white&labelColor=2F2F2F" alt="Instagram"/>
-</a>
-<a href="https://tiktok.com/@naruyaizumi">
-  <img src="https://img.shields.io/badge/TikTok-@naruyaizumi-FFC0CB?style=for-the-badge&logo=tiktok&logoColor=white&labelColor=2F2F2F" alt="TikTok"/>
-</a>
-<a href="https://t.me/naruyaizumi">
-  <img src="https://img.shields.io/badge/Telegram-@naruyaizumi-FFC0CB?style=for-the-badge&logo=telegram&logoColor=white&labelColor=2F2F2F" alt="Telegram"/>
-</a>
-<a href="https://open.spotify.com/playlist/0j68uRJvay44fmcTnbJGPS?si=_1SyqT43T52i2QybhZyhAQ" target="_blank">
-  <img src="https://img.shields.io/badge/Spotify-Izumi's%20Playlist-FFC0CB?style=for-the-badge&logo=spotify&logoColor=white&labelColor=2F2F2F" alt="Spotify Playlist" />
 </a>
 </p>
 
@@ -147,7 +125,7 @@ to manage releases.
 <details>
   <summary>
     <span style="display:inline; color:#FF69B4; font-weight:bold;">
-      🍧 Liora – Advanced WhatsApp Bot
+      🍧 Liora – WhatsApp Bot
     </span>
   </summary>
 
@@ -323,43 +301,6 @@ We sincerely thank the following parties who have been instrumental in the devel
       </a>
     </p>
   </details>
-
-<details>
-  <summary><span style="color:#FFC0CB; font-weight:bold;">Libraries & Frameworks</span></summary>
-  <p align="center">
-    <a href="https://www.npmjs.com/package/@itsukichann/baileys">
-      <img src="https://img.shields.io/badge/Baileys-Itsukichann-2F2F2F?style=for-the-badge&logo=typescript&logoColor=white"
-           alt="@itsukichann/baileys" />
-    </a>
-  </p>
-  <p align="justify">
-    This project is powered by <b>@itsukichann/baileys</b> — a <b>CommonJS hybrid</b> fork of Baileys 
-    providing extended compatibility and advanced message APIs.  
-    <b>Liora</b> runs in a fully <b>ESM-native environment</b>, capable of destructuring imports directly 
-    without require wrappers, ensuring seamless integration and modern module execution.  
-    It supports <b>InteractiveButton</b>, <b>Mentioned Status</b>, <b>Newsletter Messages</b>, 
-    and deep <b>message manipulation</b> across all chat contexts.
-  </p>
-</details>
-
-<details>
-  <summary><span style="color:#FFC0CB; font-weight:bold;">Public API Providers</span></summary>
-  <p align="center">
-    <a href="https://api.betabotz.eu.org">
-      <img src="https://img.shields.io/badge/BetaBotz_API-2F2F2F?style=for-the-badge&logo=postman&logoColor=white&labelColor=00BFFF"/>
-    </a>
-    <a href="https://cloudkuimages.guru">
-      <img src="https://img.shields.io/badge/CloudKuImages-2F2F2F?style=for-the-badge&logo=icloud&logoColor=white&labelColor=FF8C00"/>
-    </a>
-    <a href="https://api.nekolabs.my.id">
-      <img src="https://img.shields.io/badge/NekoLabs_API-2F2F2F?style=for-the-badge&logo=swagger&logoColor=white&labelColor=8A2BE2"/>
-    </a>
-  </p>
-  <p align="center">
-    <i>Official public API sources used by <b>Liora Engine</b> for AI, media, and utility endpoints.</i>
-  </p>
-</details>
-
 </details>
 
 <details>
@@ -408,25 +349,6 @@ We sincerely thank the following parties who have been instrumental in the devel
   <p align="center">
     <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=FF69B4&center=true&vCenter=true&width=500&lines=Your+support+keeps+this+project+alive!;Thank+you+for+helping+me+grow" alt="Support Typing Animation"/>
   </p>
-</details>
-
-<details>
-  <summary>
-    <span style="display:inline; color:#FFC0CB; font-weight:bold;">
-      🌸 Arigatou ne~!
-    </span>
-  </summary>
-
-  <p align="center" style="font-size:16px; color:#eaeaea;">
-    Hopefully everything you've read here can be useful for your projects and experiments.  
-    If something is still unclear, feel free to connect through our community and socials.
-  </p>
-
-  <blockquote align="center" style="font-size:15px; color:#d1d1d1;">
-    This documentation was written out of <b>coding enthusiasm</b>,  
-    <b>open-source spirit</b>, and as a gentle reminder:  
-    <i>don’t forget to eat</i> 🍓
-  </blockquote>
 </details>
 
 ![footer](https://capsule-render.vercel.app/api?type=waving&color=0:FFC0CB,50:FFE4E1,100:E6E6FA&height=150&section=footer)
