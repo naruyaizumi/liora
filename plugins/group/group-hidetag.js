@@ -1,7 +1,7 @@
 let handler = async (m, { conn, text, participants }) => {
     const q = m.quoted || m;
     const mime = (q.msg || q).mimetype || "";
-    const users = participants.map(p => p.id);
+    const users = participants.map((p) => p.id);
     const message = text || q.text || "";
 
     if (!message && !mime) return m.reply("Send a message or reply to media to use hidetag.");

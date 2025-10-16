@@ -15,10 +15,14 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     try {
         await conn.groupParticipantsUpdate(m.chat, [target], "add");
-        await conn.sendMessage(m.chat, {
-            text: `Successfully added @${target.split("@")[0]} to the group.`,
-            mentions: [target],
-        }, { quoted: m });
+        await conn.sendMessage(
+            m.chat,
+            {
+                text: `Successfully added @${target.split("@")[0]} to the group.`,
+                mentions: [target],
+            },
+            { quoted: m }
+        );
     } catch (err) {
         console.error(`Add failed for ${target}:`, err);
         m.reply("Failed to add the specified member.");

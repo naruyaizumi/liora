@@ -31,10 +31,14 @@ File Size: ${sizeKB} KB
 Image metadata retrieved successfully.
         `.trim();
 
-        await conn.sendMessage(m.chat, {
-            image: buffer,
-            caption: text,
-        }, { quoted: m });
+        await conn.sendMessage(
+            m.chat,
+            {
+                image: buffer,
+                caption: text,
+            },
+            { quoted: m }
+        );
     } catch (e) {
         console.error(e);
         m.reply(`Error reading image resolution.\n${e.message}`);

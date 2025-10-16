@@ -3,7 +3,9 @@ let handler = async (m, { text, usedPrefix, command }) => {
 
     if (!text) {
         const status = chat.mute ? "OFFLINE" : "ONLINE";
-        return m.reply(`Bot status: ${status}\nUse '${usedPrefix + command} on' or '${usedPrefix + command} off' to change mode.`);
+        return m.reply(
+            `Bot status: ${status}\nUse '${usedPrefix + command} on' or '${usedPrefix + command} off' to change mode.`
+        );
     }
 
     switch (text.toLowerCase()) {

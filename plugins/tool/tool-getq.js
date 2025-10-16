@@ -38,7 +38,8 @@ function inspectDeep(obj, depth = 0, seen = new WeakSet()) {
                 result[key] = inspectDeep(value, depth + 1, seen);
             } else {
                 if (Buffer.isBuffer(value)) result[key] = `<Buffer length=${value.length}>`;
-                else if (typeof value === "function") result[key] = `[Function ${value.name || "anonymous"}]`;
+                else if (typeof value === "function")
+                    result[key] = `[Function ${value.name || "anonymous"}]`;
                 else result[key] = value;
             }
         } catch (err) {

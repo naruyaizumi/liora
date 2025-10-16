@@ -9,12 +9,9 @@ let handler = async (m, { conn }) => {
     const isOwner =
         Array.isArray(global.config?.owner) &&
         global.config.owner.some(([num]) => senderPN.includes(num));
-    const isMod =
-        Array.isArray(global.mods) &&
-        global.mods.some(num => senderPN.includes(num));
+    const isMod = Array.isArray(global.mods) && global.mods.some((num) => senderPN.includes(num));
 
-    if (isOwner || isMod)
-        return m.reply("Cannot delete message from Owner or Developer.");
+    if (isOwner || isMod) return m.reply("Cannot delete message from Owner or Developer.");
 
     try {
         await conn.sendMessage(chat, {
@@ -27,7 +24,9 @@ let handler = async (m, { conn }) => {
         });
     } catch (e) {
         console.error(e);
-        return m.reply("Failed to delete message — it may already be gone or not belong to another user.");
+        return m.reply(
+            "Failed to delete message — it may already be gone or not belong to another user."
+        );
     }
 };
 

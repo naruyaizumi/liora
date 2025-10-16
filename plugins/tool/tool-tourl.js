@@ -32,9 +32,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         }
 
         const server = uploaders[args[0]];
-        const q = m.quoted && (m.quoted.mimetype || m.quoted.mediaType)
-            ? m.quoted
-            : m;
+        const q = m.quoted && (m.quoted.mimetype || m.quoted.mediaType) ? m.quoted : m;
         const mime = (q.msg || q).mimetype || q.mediaType || "";
 
         if (!mime) return m.reply("Send or reply to a media file to upload.");

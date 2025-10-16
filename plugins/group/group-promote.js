@@ -9,17 +9,23 @@ let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
     }
 
     if (!target)
-        return m.reply(`Specify one valid member to promote.\n› Example: ${usedPrefix + command} @628xxxx`);
+        return m.reply(
+            `Specify one valid member to promote.\n› Example: ${usedPrefix + command} @628xxxx`
+        );
 
-    const exists = participants.some(p => p.id === target);
+    const exists = participants.some((p) => p.id === target);
     if (!exists) return m.reply("User is not a member of this group.");
 
     try {
         await conn.groupParticipantsUpdate(m.chat, [target], "promote");
-        await conn.sendMessage(m.chat, {
-            text: `Successfully promoted @${target.split("@")[0]}.`,
-            mentions: [target],
-        }, { quoted: m });
+        await conn.sendMessage(
+            m.chat,
+            {
+                text: `Successfully promoted @${target.split("@")[0]}.`,
+                mentions: [target],
+            },
+            { quoted: m }
+        );
     } catch (err) {
         console.error(`Promote failed for ${target}:`, err);
         m.reply("Failed to promote the specified member.");

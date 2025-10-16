@@ -221,7 +221,9 @@ export async function handler(chatUpdate) {
     const user =
         (m.isGroup
             ? participants.find(
-                  (u) => this.decodeJid(u.id) === senderId || this.decodeJid(u.phoneNumber) === senderId
+                  (u) =>
+                      this.decodeJid(u.id) === senderId ||
+                      this.decodeJid(u.phoneNumber) === senderId
               )
             : {}) || {};
     const bot =

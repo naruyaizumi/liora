@@ -7,7 +7,9 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
     const q = m.quoted ? m.quoted : m;
     const mime = (q.msg || q).mimetype || q.mediaType || "";
     if (!/^image\/(jpe?g|png|webp)$/i.test(mime))
-        return m.reply(`Send or reply to an image (jpg/png/webp) with: ${usedPrefix + command} [1-5]`);
+        return m.reply(
+            `Send or reply to an image (jpg/png/webp) with: ${usedPrefix + command} [1-5]`
+        );
 
     await global.loading(m, conn);
     try {
