@@ -17,16 +17,13 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         const album = data.result.map((img, i) => ({
             image: { url: img },
-            caption: `\`\`\`
-Result ${i + 1}/${data.result.length}
-Query  : ${text}
-\`\`\``,
+            caption: `Result ${i + 1}/${data.result.length}`,
         }));
 
-        await conn.sendMessage(m.chat, { album }, { quoted: m });
+        await conn.sendAlbum(m.chat, album, { quoted: m });
     } catch (err) {
         console.error(err);
-        m.reply(`Error: Failed to fetch Bing image results.`);
+        m.reply("Error: Failed to fetch Bing image results.");
     } finally {
         await global.loading(m, conn, true);
     }

@@ -32,48 +32,34 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         }
 
         const server = uploaders[args[0]];
-        const q = m.quoted ? m.quoted : m;
-        const msg = q.msg || q;
-        const mime = msg.mimetype || "";
-        if (!mime) return m.reply(`Reply to a media message to upload.`);
+        const q = m.quoted && (m.quoted.mimetype || m.quoted.mediaType)
+            ? m.quoted
+            : m;
+        const mime = (q.msg || q).mimetype || q.mediaType || "";
+
+        if (!mime) return m.reply("Send or reply to a media file to upload.");
 
         await global.loading(m, conn);
-        const buffer = await q.download?.().catch(() => null);
-        if (!buffer || !buffer.length) return m.reply(`Failed to download the media.`);
+
+        const buffer = await q.download?.();
+        if (!Buffer.isBuffer(buffer) || !buffer.length)
+            return m.reply("Failed to get media buffer.");
 
         const url = await server.fn(buffer).catch(() => null);
         if (!url) return m.reply(`Upload failed on ${server.name}. Try another server.`);
 
-        const timestamp = new Date().toTimeString().split(" ")[0];
-        const response = [
-            "```",
-            `┌─[${timestamp}]────────────`,
-            `│  File Uploaded Successfully`,
-            "└──────────────────────",
-            `Server   : ${server.name}`,
-            `Status   : OK`,
-            `Size     : ${(buffer.length / 1024).toFixed(2)} KB`,
-            `Output   : ${url}`,
-            "───────────────────────",
-            "Upload completed successfully.",
-            "```",
+        const sizeKB = (buffer.length / 1024).toFixed(2);
+        const caption = [
+            `File uploaded successfully`,
+            `Server : ${server.name}`,
+            `Size   : ${sizeKB} KB`,
+            `URL    : ${url}`,
         ].join("\n");
 
-        await conn.sendMessage(m.chat, { text: response }, { quoted: m });
+        await conn.sendMessage(m.chat, { text: caption }, { quoted: m });
     } catch (e) {
         console.error(e);
-        const timestamp = new Date().toTimeString().split(" ")[0];
-        const errMsg = [
-            "```",
-            `┌─[${timestamp}]────────────`,
-            `│  Upload Error`,
-            "└──────────────────────",
-            `! ${e.message}`,
-            "───────────────────────",
-            "Upload failed.",
-            "```",
-        ].join("\n");
-        await conn.sendMessage(m.chat, { text: errMsg }, { quoted: m });
+        await m.reply(`Upload failed: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

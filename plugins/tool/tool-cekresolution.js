@@ -19,24 +19,22 @@ let handler = async (m, { conn }) => {
         if (!buffer || !buffer.length) return m.reply("Failed to download the image.");
 
         const { width, height } = await sharp(buffer).metadata();
-
-        const timestamp = new Date().toTimeString().split(" ")[0];
         const sizeKB = (buffer.length / 1024).toFixed(2);
 
-        const info = [
-            "```",
-            `┌─[${timestamp}]────────────`,
-            `│  Image Resolution`,
-            "└──────────────────────",
-            `Width    : ${width}px`,
-            `Height   : ${height}px`,
-            `FileSize : ${sizeKB} KB`,
-            "───────────────────────",
-            "Image metadata retrieved successfully.",
-            "```",
-        ].join("\n");
+        const text = `
+Image Resolution
+────────────────────────────
+Width: ${width}px
+Height: ${height}px
+File Size: ${sizeKB} KB
+────────────────────────────
+Image metadata retrieved successfully.
+        `.trim();
 
-        await conn.sendFile(m.chat, buffer, "image.jpg", info, m);
+        await conn.sendMessage(m.chat, {
+            image: buffer,
+            caption: text,
+        }, { quoted: m });
     } catch (e) {
         console.error(e);
         m.reply(`Error reading image resolution.\n${e.message}`);

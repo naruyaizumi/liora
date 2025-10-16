@@ -25,9 +25,13 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             authorName: global.config.stickauth || "",
         });
 
-        await conn.sendFile(m.chat, stickerImage, "brat.webp", "", m, false, {
-            asSticker: true,
-        });
+        await conn.sendMessage(
+            m.chat,
+            {
+                sticker: stickerImage,
+            },
+            { quoted: m }
+        );
     } catch (e) {
         console.error(e);
         m.reply("Error: " + e.message);

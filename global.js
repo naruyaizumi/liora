@@ -110,7 +110,6 @@ ensureTable(
   antiVideo INTEGER DEFAULT 0,
   antiSticker INTEGER DEFAULT 0,
   autoApprove INTEGER DEFAULT 0,
-  antitagsw INTEGER DEFAULT 0,
   notifgempa INTEGER DEFAULT 0,
   gempaDateTime TEXT DEFAULT ''
   `

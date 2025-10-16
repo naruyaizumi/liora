@@ -1,9 +1,7 @@
 import { join, extname } from "path";
 import { open } from "fs/promises";
 
-let handler = async (m, { conn, args, usedPrefix, command, __dirname }) => {
-    const time = new Date().toTimeString().split(" ")[0];
-
+let handler = async (m, { conn, args, __dirname, usedPrefix, command }) => {
     if (!args.length)
         return m.reply(
             `Enter the target file path.\n` +
@@ -14,38 +12,22 @@ let handler = async (m, { conn, args, usedPrefix, command, __dirname }) => {
     try {
         let target = join(...args);
         if (!extname(target)) target += ".js";
-
         const filepath = join(__dirname, "../", target);
         const handle = await open(filepath, "r");
         const fileBuffer = await handle.readFile();
         await handle.close();
-
         const fileName = target.split("/").pop();
-        const fileSize = (fileBuffer.length / 1024).toFixed(2);
-
-        const caption = [
-            "```",
-            `Time : ${time}`,
-            `Path : ${target}`,
-            `Name : ${fileName}`,
-            `Size : ${fileSize} KB`,
-            "───────────────────────────",
-            "File successfully sent.",
-            "```",
-        ].join("\n");
-
         await conn.sendMessage(
             m.chat,
             {
                 document: fileBuffer,
                 fileName,
                 mimetype: "application/octet-stream",
-                caption,
             },
             { quoted: m }
         );
     } catch (err) {
-        m.reply(`Error: ${err.message}`);
+        await m.reply(`Error: ${err.message}`);
     }
 };
 

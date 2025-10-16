@@ -1,5 +1,8 @@
 let handler = async (m, { conn, text }) => {
-    let group = text ? text : m.chat;
+    const group = text || m.chat;
+    await conn.sendMessage(group, {
+        text: "This bot is leaving the group.",
+    });
     await conn.groupLeave(group);
 };
 

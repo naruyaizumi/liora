@@ -40,6 +40,7 @@ async function IZUMI() {
         printQRInTerminal: !pairingAuth,
         browser: Browsers.ubuntu("Safari"),
         emitOwnEvents: true,
+        syncFullHistory: true,
         auth: {
             creds: state.creds,
             keys: SQLiteKeyStore(),

@@ -8,36 +8,27 @@ let handler = async (m, { conn }) => {
         const json = await res.json();
         const data = json.Infogempa.gempa;
 
-        const timestamp = new Date().toTimeString().split(" ")[0];
         const mmi = data.Dirasakan ? `${data.Dirasakan} MMI Scale` : "No data available";
+        const text = `
+Earthquake Report (BMKG)
+────────────────────────────
+Date: ${data.Tanggal}
+Local Time: ${data.Jam} WIB
+UTC Time: ${data.DateTime}
+Location: ${data.Wilayah}
+Coordinates: ${data.Coordinates}
+Magnitude: ${data.Magnitude}
+Depth: ${data.Kedalaman}
+Potential: ${data.Potensi}
+Felt Intensity: ${mmi}
+────────────────────────────
+Source: BMKG (Meteorology, Climatology and Geophysics Agency)
+        `.trim();
 
-        const teks = [
-            "```",
-            `┌─[${timestamp}]────────────`,
-            `│  EARTHQUAKE REPORT (BMKG)`,
-            "└──────────────────────",
-            `Date : ${data.Tanggal}`,
-            `Local Time : ${data.Jam} WIB`,
-            `UTC Time : ${data.DateTime}`,
-            `Location : ${data.Wilayah}`,
-            `Coordinates : ${data.Coordinates}`,
-            `Magnitude : ${data.Magnitude}`,
-            `Depth : ${data.Kedalaman}`,
-            `Potential : ${data.Potensi}`,
-            "───────────────────────",
-            `Felt Intensity : ${mmi}`,
-            "───────────────────────",
-            "Source : BMKG (Meteorology, Climatology and Geophysics Agency)",
-            "```",
-        ].join("\n");
-
-        await conn.sendFile(
-            m.chat,
-            `https://data.bmkg.go.id/DataMKG/TEWS/${data.Shakemap}`,
-            "shakemap.jpg",
-            teks,
-            m
-        );
+        await conn.sendMessage(m.chat, {
+            image: { url: `https://data.bmkg.go.id/DataMKG/TEWS/${data.Shakemap}` },
+            caption: text,
+        });
     } catch (e) {
         console.error(e);
         await m.reply(`Error: ${e.message}`);

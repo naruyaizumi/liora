@@ -29,16 +29,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const after = await sharp(resized).metadata();
 
         const caption = [
-            "```",
-            "┌─[IMAGE RESIZE]────────────",
-            "│  Operation: Resize",
-            "└───────────────────────────",
+            "Image Resize",
             `Original : ${before.width}×${before.height}px`,
             `Resized  : ${after.width}×${after.height}px`,
             `Mode     : ${fitMode.toUpperCase()}`,
-            "───────────────────────────",
-            "Done successfully.",
-            "```",
+            "Resize completed successfully.",
         ].join("\n");
 
         await conn.sendMessage(m.chat, { image: resized, caption }, { quoted: m });
@@ -50,7 +45,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
 };
 
-handler.help = ["resize <width> <height>"];
+handler.help = ["resize"];
 handler.tags = ["tools"];
 handler.command = /^(resize|crop)$/i;
 

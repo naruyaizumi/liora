@@ -7,9 +7,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
     const q = m.quoted ? m.quoted : m;
     const mime = (q.msg || q).mimetype || q.mediaType || "";
     if (!/^image\/(jpe?g|png|webp)$/i.test(mime))
-        return m.reply(
-            `Send or reply to an image (jpg/png/webp) with: ${usedPrefix + command} [1-5]`
-        );
+        return m.reply(`Send or reply to an image (jpg/png/webp) with: ${usedPrefix + command} [1-5]`);
 
     await global.loading(m, conn);
     try {
@@ -65,21 +63,15 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
         const afterBytes = output.length;
         const saved = Math.max(0, beforeBytes - afterBytes);
         const ratio = beforeBytes ? ((saved / beforeBytes) * 100).toFixed(1) : "0.0";
-        const timestamp = new Date().toTimeString().split(" ")[0];
 
         const result = [
-            "```",
-            `┌─[${timestamp}]────────────`,
-            `│  Image Compression`,
-            "└──────────────────────",
+            `Image Compression`,
             `Level   : ${autoLevel} (Q≈${quality})`,
             `Format  : ${format} → ${outFormat}`,
             `Before  : ${formatBytes(beforeBytes)}`,
             `After   : ${formatBytes(afterBytes)}`,
             `Saved   : ${formatBytes(saved)} (${ratio}%)`,
-            "───────────────────────",
-            "Compression completed successfully.",
-            "```",
+            `Compression completed successfully.`,
         ].join("\n");
 
         await conn.sendMessage(

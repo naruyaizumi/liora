@@ -24,13 +24,10 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         const json = await res.json();
         if (!json.status || !json.url) throw new Error("Failed to remove background.");
 
-        await conn.sendFile(
-            m.chat,
-            json.url,
-            "removebg.png",
-            "Background removed successfully.",
-            m
-        );
+        await conn.sendMessage(m.chat, {
+            image: { url: json.url },
+            caption: "Background removed successfully.",
+        }, { quoted: m });
     } catch (e) {
         console.error(e);
         m.reply(`Error: ${e.message || e}`);
