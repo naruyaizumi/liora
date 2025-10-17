@@ -36,10 +36,10 @@ async function IZUMI() {
 
     const connectionOptions = {
         version: baileysVersion,
-        logger: P({ level: "silent" }),
+        logger: P({ level: "error" }),
         printQRInTerminal: !pairingAuth,
         browser: Browsers.ubuntu("Safari"),
-        emitOwnEvents: true,
+        emitOwnEvents: false,
         syncFullHistory: false,
         auth: {
             creds: state.creds,
@@ -78,6 +78,47 @@ async function IZUMI() {
     let isInit = true;
     let handler = await import("./handler.js");
 
+    function detachAllEvents() {
+        if (!conn?.ev) return;
+        const events = [
+            "messages.upsert",
+            "group-participants.update",
+            "message.delete",
+            "connection.update",
+            "creds.update",
+        ];
+        for (const ev of events) conn.ev.removeAllListeners(ev);
+    }
+
+    function attachAllEvents() {
+        if (!conn?.ev) return;
+
+        conn.handler = handler?.handler?.bind(global.conn) || (() => {});
+        conn.participantsUpdate = handler?.participantsUpdate?.bind(global.conn) || (() => {});
+        conn.onDelete = handler?.deleteUpdate?.bind(global.conn) || (() => {});
+        conn.connectionUpdate = connectionUpdateHandler?.bind(global.conn) || (() => {});
+        conn.credsUpdate = saveCreds?.bind(global.conn) || (() => {});
+
+        conn.ev.on("messages.upsert", conn.handler);
+        conn.ev.on("group-participants.update", conn.participantsUpdate);
+        conn.ev.on("message.delete", conn.onDelete);
+        conn.ev.on("connection.update", conn.connectionUpdate);
+        conn.ev.on("creds.update", conn.credsUpdate);
+    }
+    
+    async function restartConnHard() {
+        try {
+            try { detachAllEvents(); } catch {}
+            try { conn.ws?.close(); } catch {}
+            try { delete conn.ws; } catch {}
+            await new Promise((r) => setTimeout(r, 1200));
+            const oldChats = global.conn?.chats || {};
+            global.conn = naruyaizumi(connectionOptions, { chats: oldChats });
+        } catch (e) {
+            console.error("restartConnHard:", e.message);
+        }
+    }
+
     global.reloadHandler = async function (restartConn = false) {
         try {
             const HandlerModule = await import(`./handler.js?update=${Date.now()}`).catch(
@@ -91,46 +132,11 @@ async function IZUMI() {
         }
 
         if (restartConn) {
-            const oldChats = global.conn?.chats || {};
-            try {
-                global.conn.ws?.close();
-            } catch {
-                /* ignore */
-            }
-            conn.ev.removeAllListeners();
-            global.conn = naruyaizumi(connectionOptions, { chats: oldChats });
-            isInit = true;
+            await restartConnHard();
+        } else {
+            detachAllEvents();
         }
-
-        if (!isInit && conn.ev) {
-            for (const [ev, fn] of [
-                ["messages.upsert", conn.handler],
-                ["group-participants.update", conn.participantsUpdate],
-                ["message.delete", conn.onDelete],
-                ["connection.update", conn.connectionUpdate],
-                ["creds.update", conn.credsUpdate],
-            ]) {
-                if (typeof fn === "function") conn.ev.off(ev, fn);
-            }
-        }
-
-        conn.handler = handler?.handler?.bind(global.conn) || (() => {});
-        conn.participantsUpdate = handler?.participantsUpdate?.bind(global.conn) || (() => {});
-        conn.onDelete = handler?.deleteUpdate?.bind(global.conn) || (() => {});
-        conn.connectionUpdate = connectionUpdateHandler?.bind(global.conn) || (() => {});
-        conn.credsUpdate = saveCreds?.bind(global.conn) || (() => {});
-
-        if (conn.ev) {
-            if (typeof conn.handler === "function") conn.ev.on("messages.upsert", conn.handler);
-            if (typeof conn.participantsUpdate === "function")
-                conn.ev.on("group-participants.update", conn.participantsUpdate);
-            if (typeof conn.onDelete === "function") conn.ev.on("message.delete", conn.onDelete);
-            if (typeof conn.connectionUpdate === "function")
-                conn.ev.on("connection.update", conn.connectionUpdate);
-            if (typeof conn.credsUpdate === "function")
-                conn.ev.on("creds.update", conn.credsUpdate);
-        }
-
+        attachAllEvents();
         isInit = false;
         return true;
     };

@@ -16,7 +16,7 @@
     },
     "dependencies": {
         "async-mutex": "^0.5.0",
-        "baileys": "npm:@periskope/baileys@7.0.0-rc5-3",
+        "baileys": "npm:@periskope/baileys@7.0.0-alpha-30",
         "better-sqlite3": "^12.4.1",
         "canvas": "^3.2.0",
         "chalk": "^5.6.2",
