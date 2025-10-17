@@ -5,6 +5,7 @@ node_modules/
 build/
 .cache/
 .tmp/
+pnpm-lock.yaml
 
 # -------------------------
 # DATABASE / DATA FILES
@@ -13,6 +14,7 @@ database.db
 auth.db
 store.db
 *.db
+database/
 
 # -------------------------
 # LOGS & DEBUG

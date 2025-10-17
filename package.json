@@ -16,8 +16,7 @@
     },
     "dependencies": {
         "async-mutex": "^0.5.0",
-        "audio-decode": "^2.2.3",
-        "baileys": "7.0.0-rc.5",
+        "baileys": "npm:@periskope/baileys@7.0.0-rc5-3",
         "better-sqlite3": "^12.4.1",
         "canvas": "^3.2.0",
         "chalk": "^5.6.2",
@@ -25,6 +24,14 @@
         "liora-lib": "^1.0.24",
         "pino": "^10.0.0",
         "sharp": "^0.34.4"
+    },
+    "peerDependencies": {
+        "audio-decode": "^2.2.3"
+    },
+    "peerDependenciesMeta": {
+        "audio-decode": {
+            "optional": true
+        }
     },
     "devDependencies": {
         "@eslint/js": "^9.37.0",
