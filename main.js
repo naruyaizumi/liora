@@ -105,12 +105,18 @@ async function IZUMI() {
         conn.ev.on("connection.update", conn.connectionUpdate);
         conn.ev.on("creds.update", conn.credsUpdate);
     }
-    
+
     async function restartConnHard() {
         try {
-            try { detachAllEvents(); } catch {}
-            try { conn.ws?.close(); } catch {}
-            try { delete conn.ws; } catch {}
+            try {
+                detachAllEvents();
+            } catch {}
+            try {
+                conn.ws?.close();
+            } catch {}
+            try {
+                delete conn.ws;
+            } catch {}
             await new Promise((r) => setTimeout(r, 1200));
             const oldChats = global.conn?.chats || {};
             global.conn = naruyaizumi(connectionOptions, { chats: oldChats });
