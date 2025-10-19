@@ -3,7 +3,8 @@ import { fetch } from "liora-lib";
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     try {
         const text = args.join(" ");
-        if (!text) return m.reply(`Please provide text for ATTP.\nExample: ${usedPrefix + command} Hello`);
+        if (!text)
+            return m.reply(`Please provide text for ATTP.\nExample: ${usedPrefix + command} Hello`);
 
         await global.loading(m, conn);
 
@@ -14,11 +15,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const buffer = Buffer.from(await res.arrayBuffer());
         if (!buffer || !buffer.length) throw new Error("Failed to get sticker from API.");
 
-        await conn.sendMessage(
-            m.chat,
-            { sticker: buffer },
-            { quoted: m }
-        );
+        await conn.sendMessage(m.chat, { sticker: buffer }, { quoted: m });
     } catch (e) {
         m.reply(`Error occurred.\n${e.message}`);
     } finally {

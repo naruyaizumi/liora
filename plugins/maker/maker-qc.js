@@ -23,11 +23,7 @@ let handler = async (m, { conn, args }) => {
             authorName: global.config.stickauth || "",
         });
 
-        await conn.sendMessage(
-            m.chat,
-            { sticker: stickerImage },
-            { quoted: m }
-        );
+        await conn.sendMessage(m.chat, { sticker: stickerImage }, { quoted: m });
     } catch (e) {
         m.reply("Error: " + e.message);
     } finally {

@@ -6,7 +6,9 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         const mime = (q.msg || q).mimetype || "";
 
         if (!mime || !/image\/(jpeg|png|jpg)/.test(mime)) {
-            return m.reply(`Reply or send an image with the command:\nExample: ${usedPrefix + command}`);
+            return m.reply(
+                `Reply or send an image with the command:\nExample: ${usedPrefix + command}`
+            );
         }
 
         await global.loading(m, conn);

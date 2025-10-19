@@ -64,9 +64,8 @@ export async function before(m) {
     if (!m.isGroup) return true;
 
     const groupMetadata =
-        (m.isGroup
-            ? this.chats?.[m.chat]?.metadata || (await this.groupMetadata(m.chat))
-            : {}) || {};
+        (m.isGroup ? this.chats?.[m.chat]?.metadata || (await this.groupMetadata(m.chat)) : {}) ||
+        {};
     const participants = m.isGroup ? groupMetadata.participants || [] : [];
     const senderId = this.decodeJid(m.sender);
     const botId = this.decodeJid(this.user.id);

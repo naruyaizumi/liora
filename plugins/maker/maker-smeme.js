@@ -9,8 +9,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             return m.reply("Only JPEG, PNG, or WEBP images are supported.");
 
         const [textT = "", textB = ""] = args.join(" ").split("|");
-        if (!textT && !textB) return m.reply(
-            `Please provide meme text.\n› Example: ${usedPrefix + command} top|bottom`);
+        if (!textT && !textB)
+            return m.reply(
+                `Please provide meme text.\n› Example: ${usedPrefix + command} top|bottom`
+            );
 
         await global.loading(m, conn);
         const media = await q.download();
@@ -28,11 +30,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             authorName: global.config.stickauth || "",
         });
 
-        await conn.sendMessage(
-            m.chat,
-            { sticker: stickerImage },
-            { quoted: m }
-        );
+        await conn.sendMessage(m.chat, { sticker: stickerImage }, { quoted: m });
     } catch (e) {
         m.reply("Error: " + e.message);
     } finally {

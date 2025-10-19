@@ -221,9 +221,7 @@ export async function handler(chatUpdate) {
     const user =
         (m.isGroup
             ? participants.find(
-                  (u) =>
-                      this.decodeJid(u.lid) === senderId ||
-                      this.decodeJid(u.id) === senderId
+                  (u) => this.decodeJid(u.lid) === senderId || this.decodeJid(u.id) === senderId
               )
             : {}) || {};
     const bot =
@@ -242,10 +240,14 @@ export async function handler(chatUpdate) {
         if (!plugin || plugin.disabled) continue;
 
         const __filename = join(___dirname, name);
-        
+
         if (typeof plugin.before === "function") {
             try {
-                const stop = await plugin.before.call(this, m, { conn: this, filename: __filename, dirname: ___dirname });
+                const stop = await plugin.before.call(this, m, {
+                    conn: this,
+                    filename: __filename,
+                    dirname: ___dirname,
+                });
                 if (stop) continue;
             } catch (e) {
                 console.error(e);

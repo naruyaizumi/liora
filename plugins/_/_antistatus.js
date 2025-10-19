@@ -24,13 +24,31 @@ export async function before(m) {
             out.add(jid);
             let lid = cache?.get(jid);
             if (!lid) {
-                try { lid = await conn.lidMappingStore.getLIDForPN(jid); } catch {}
+                try {
+                    lid = await conn.lidMappingStore.getLIDForPN(jid);
+                } catch {}
             }
-            if (lid) { out.add(lid); try { cache?.set(jid, lid); cache?.set(lid, jid); } catch {} }
+            if (lid) {
+                out.add(lid);
+                try {
+                    cache?.set(jid, lid);
+                    cache?.set(lid, jid);
+                } catch {}
+            }
             if (lid) {
                 let back = cache?.get(lid);
-                if (!back) { try { back = await conn.lidMappingStore.getPNForLID(lid); } catch {} }
-                if (back) { out.add(back); try { cache?.set(lid, back); cache?.set(back, lid); } catch {} }
+                if (!back) {
+                    try {
+                        back = await conn.lidMappingStore.getPNForLID(lid);
+                    } catch {}
+                }
+                if (back) {
+                    out.add(back);
+                    try {
+                        cache?.set(lid, back);
+                        cache?.set(back, lid);
+                    } catch {}
+                }
             }
         }
         return [...out];
@@ -47,9 +65,8 @@ export async function before(m) {
     if (isOwner || isMods) return true;
 
     const groupMetadata =
-        (m.isGroup
-            ? this.chats?.[m.chat]?.metadata || (await this.groupMetadata(m.chat))
-            : {}) || {};
+        (m.isGroup ? this.chats?.[m.chat]?.metadata || (await this.groupMetadata(m.chat)) : {}) ||
+        {};
     const participants = m.isGroup ? groupMetadata.participants || [] : [];
     const senderId = this.decodeJid(m.sender);
     const botId = this.decodeJid(this.user.id);
@@ -85,4 +102,4 @@ export async function before(m) {
     }
 
     return true;
-};
+}

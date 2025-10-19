@@ -3,9 +3,10 @@ import { fetch } from "liora-lib";
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     try {
         const code = args.join(" ");
-        if (!code) return m.reply(
-            `Please enter some code.\n› Example: ${usedPrefix + command} console.log("Hello World");`
-        );
+        if (!code)
+            return m.reply(
+                `Please enter some code.\n› Example: ${usedPrefix + command} console.log("Hello World");`
+            );
 
         await global.loading(m, conn);
 

@@ -30,7 +30,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
             m.chat,
             {
                 video: { url: result },
-                caption: "Sticker successfully converted to video."
+                caption: "Sticker successfully converted to video.",
             },
             { quoted: m }
         );

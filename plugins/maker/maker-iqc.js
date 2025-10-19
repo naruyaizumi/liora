@@ -2,9 +2,10 @@ import { fetch } from "liora-lib";
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
-        if (!text) return m.reply(
-            `Please provide text for IQC Image.\nExample: ${usedPrefix + command} Liora and Izumi`
-        );
+        if (!text)
+            return m.reply(
+                `Please provide text for IQC Image.\nExample: ${usedPrefix + command} Liora and Izumi`
+            );
 
         await global.loading(m, conn);
 

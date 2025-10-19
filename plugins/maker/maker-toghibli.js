@@ -31,7 +31,10 @@ let handler = async (m, { conn, args, command, usedPrefix }) => {
 
         await conn.sendMessage(
             m.chat,
-            { image: { url: img1Url }, caption: `Ghibli-style transformation result (v${version}).` },
+            {
+                image: { url: img1Url },
+                caption: `Ghibli-style transformation result (v${version}).`,
+            },
             { quoted: m }
         );
     } catch (e) {

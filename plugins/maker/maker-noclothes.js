@@ -36,6 +36,6 @@ let handler = async (m, { conn }) => {
 handler.help = ["toanime"];
 handler.tags = ["maker"];
 handler.command = /^(noclothes)$/i;
-handler.owner = true
+handler.owner = true;
 
 export default handler;

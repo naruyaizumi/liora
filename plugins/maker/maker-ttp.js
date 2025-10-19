@@ -2,7 +2,7 @@ import { sticker, fetch } from "liora-lib";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     try {
-        if (!args[0]) 
+        if (!args[0])
             return m.reply(`Enter sticker text.\n› Example: ${usedPrefix + command} Konichiwa~`);
 
         await global.loading(m, conn);
@@ -19,11 +19,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             authorName: global.config.stickauth || "",
         });
 
-        await conn.sendMessage(
-            m.chat,
-            { sticker: stickerImage },
-            { quoted: m }
-        );
+        await conn.sendMessage(m.chat, { sticker: stickerImage }, { quoted: m });
     } catch (e) {
         m.reply("Technical error: " + (e.message || e));
     } finally {
