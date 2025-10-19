@@ -26,10 +26,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         if (!buffer) throw new Error("Empty buffer. File could not be processed.");
 
         const opts = {
-            crop: true,
+            crop: false,
             quality: 90,
-            fps: 15,
-            maxDuration: 15,
+            fps: 30,
+            maxDuration: 10,
             packName: global.config.stickpack || "",
             authorName: global.config.stickauth || "",
             emojis: [],

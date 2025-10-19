@@ -1,0 +1,88 @@
+export async function before(m) {
+    if (!m.isGroup) return true;
+
+    const toJid = (n) => {
+        const raw = Array.isArray(n) ? n[0] : (n?.num ?? n?.lid ?? n);
+        const digits = String(raw ?? "").replace(/[^0-9]/g, "");
+        return digits ? digits + "@s.whatsapp.net" : "";
+    };
+
+    const resolveOwners = async (conn, owners = []) => {
+        if (!conn?.lidMappingStore) {
+            return owners
+                .map((entry) =>
+                    toJid(Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.lid ?? entry))
+                )
+                .filter(Boolean);
+        }
+        const cache = conn.lidMappingStore.cache;
+        const out = new Set();
+        for (const entry of owners) {
+            const num = Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.lid ?? entry);
+            const jid = toJid(num);
+            if (!jid) continue;
+            out.add(jid);
+            let lid = cache?.get(jid);
+            if (!lid) {
+                try { lid = await conn.lidMappingStore.getLIDForPN(jid); } catch {}
+            }
+            if (lid) { out.add(lid); try { cache?.set(jid, lid); cache?.set(lid, jid); } catch {} }
+            if (lid) {
+                let back = cache?.get(lid);
+                if (!back) { try { back = await conn.lidMappingStore.getPNForLID(lid); } catch {} }
+                if (back) { out.add(back); try { cache?.set(lid, back); cache?.set(back, lid); } catch {} }
+            }
+        }
+        return [...out];
+    };
+
+    const devOwners = global.config.owner.filter(([n, , isDev]) => n && isDev);
+    const regOwners = global.config.owner.filter(([n, , isDev]) => n && !isDev);
+    const devList = await resolveOwners(this, devOwners);
+    const regList = await resolveOwners(this, regOwners);
+    const isMods = devList.includes(m.sender);
+    const isOwner = m.fromMe || isMods || regList.includes(m.sender);
+
+    if (m.isBaileys || m.fromMe) return true;
+    if (isOwner || isMods) return true;
+
+    const groupMetadata =
+        (m.isGroup
+            ? this.chats?.[m.chat]?.metadata || (await this.groupMetadata(m.chat))
+            : {}) || {};
+    const participants = m.isGroup ? groupMetadata.participants || [] : [];
+    const senderId = this.decodeJid(m.sender);
+    const botId = this.decodeJid(this.user.id);
+    const user =
+        participants.find(
+            (u) => this.decodeJid(u.lid) === senderId || this.decodeJid(u.id) === senderId
+        ) || {};
+    const bot =
+        participants.find(
+            (u) => this.decodeJid(u.lid) === botId || this.decodeJid(u.id) === botId
+        ) || {};
+    const isAdmin = user?.admin === "admin" || user?.admin === "superadmin";
+    const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
+
+    if (isAdmin) return true;
+    let chat = global.db.data.chats[m.chat];
+    if (!chat) return true;
+    if (!chat?.antiStatus || !isBotAdmin) return true;
+
+    if (m.mtype === "groupStatusMentionMessage") {
+        try {
+            await this.sendMessage(m.chat, {
+                delete: {
+                    remoteJid: m.chat,
+                    fromMe: false,
+                    id: m.key.id,
+                    participant: m.key.participant || m.sender,
+                },
+            });
+        } catch {
+            // Jawa
+        }
+    }
+
+    return true;
+};

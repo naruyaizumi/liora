@@ -16,7 +16,7 @@ END:VCARD`;
     const q = {
         key: {
             fromMe: false,
-            participant: "0@s.whatsapp.net",
+            participant: "12066409886@s.whatsapp.net",
             remoteJid: "status@broadcast",
         },
         message: {

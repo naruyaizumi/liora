@@ -1,0 +1,7 @@
+onlyBuiltDependencies:
+  - '@itsukichan/baileys'
+  - better-sqlite3
+  - canvas
+  - liora-lib
+  - protobufjs
+  - sharp

@@ -16,18 +16,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         const json = await response.json();
         if (!json.message) return m.reply("No response received from OpenAI.");
 
-        const timestamp = new Date().toTimeString().split(" ")[0];
-        const output = [
-            "```",
-            `┌─[${timestamp}]────────────`,
-            `│  OPENAI CHAT RESPONSE`,
-            "└──────────────────────",
-            json.message.trim(),
-            "───────────────────────",
-            "```",
-        ].join("\n");
-
-        await conn.sendMessage(m.chat, { text: output }, { quoted: m });
+        await conn.sendMessage(m.chat, { text: json.message.trim() }, { quoted: m });
     } catch (e) {
         console.error(e);
         m.reply("Error: " + e.message);

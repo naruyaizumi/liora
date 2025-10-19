@@ -23,11 +23,10 @@ let handler = async (m, { conn }) => {
 
         const text = `
 Image Resolution
-────────────────────────────
 Width: ${width}px
 Height: ${height}px
 File Size: ${sizeKB} KB
-────────────────────────────
+──────────────────
 Image metadata retrieved successfully.
         `.trim();
 

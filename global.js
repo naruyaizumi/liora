@@ -102,13 +102,14 @@ ensureTable(
   detect INTEGER DEFAULT 0,
   sWelcome TEXT DEFAULT '',
   sBye TEXT DEFAULT '',
-
   antiLinks INTEGER DEFAULT 0,
   antiAudio INTEGER DEFAULT 0,
   antiFile INTEGER DEFAULT 0,
   antiFoto INTEGER DEFAULT 0,
   antiVideo INTEGER DEFAULT 0,
   antiSticker INTEGER DEFAULT 0,
+  antiStatus INTEGER DEFAULT 0,
+  antiInteractive INTEGER DEFAULT 0,
   autoApprove INTEGER DEFAULT 0,
   notifgempa INTEGER DEFAULT 0,
   gempaDateTime TEXT DEFAULT ''
@@ -202,8 +203,11 @@ global.db = db;
 global.sqlite = sqlite;
 
 global.loading = async (m, conn, back = false) => {
-    if (!back) return conn.sendPresenceUpdate("composing", m.chat);
-    else return conn.sendPresenceUpdate("paused", m.chat);
+    if (!back) {
+        return conn.sendReact(m.chat, "🍥", m.key);
+    } else {
+        return conn.sendReact(m.chat, "", m.key);
+    }
 };
 
 global.dfail = (type, m, conn) => {

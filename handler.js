@@ -29,7 +29,7 @@ const getSettings = (jid) => {
 };
 
 const toJid = (n) => {
-    const raw = Array.isArray(n) ? n[0] : (n?.num ?? n?.id ?? n);
+    const raw = Array.isArray(n) ? n[0] : (n?.num ?? n?.lid ?? n);
     const digits = String(raw ?? "").replace(/[^0-9]/g, "");
     return digits ? digits + "@s.whatsapp.net" : "";
 };
@@ -38,14 +38,14 @@ const resolveOwners = async (conn, owners = []) => {
     if (!conn?.lidMappingStore) {
         return owners
             .map((entry) =>
-                toJid(Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.id ?? entry))
+                toJid(Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.lid ?? entry))
             )
             .filter(Boolean);
     }
     const cache = conn.lidMappingStore.cache;
     const out = new Set();
     for (const entry of owners) {
-        const num = Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.id ?? entry);
+        const num = Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.lid ?? entry);
         const jid = toJid(num);
         if (!jid) continue;
         out.add(jid);
@@ -222,14 +222,14 @@ export async function handler(chatUpdate) {
         (m.isGroup
             ? participants.find(
                   (u) =>
-                      this.decodeJid(u.id) === senderId ||
-                      this.decodeJid(u.phoneNumber) === senderId
+                      this.decodeJid(u.lid) === senderId ||
+                      this.decodeJid(u.id) === senderId
               )
             : {}) || {};
     const bot =
         (m.isGroup
             ? participants.find(
-                  (u) => this.decodeJid(u.id) === botId || this.decodeJid(u.phoneNumber) === botId
+                  (u) => this.decodeJid(u.lid) === botId || this.decodeJid(u.id) === botId
               )
             : {}) || {};
     const isRAdmin = user?.admin === "superadmin";
@@ -242,6 +242,15 @@ export async function handler(chatUpdate) {
         if (!plugin || plugin.disabled) continue;
 
         const __filename = join(___dirname, name);
+        
+        if (typeof plugin.before === "function") {
+            try {
+                const stop = await plugin.before.call(this, m, { conn: this, filename: __filename, dirname: ___dirname });
+                if (stop) continue;
+            } catch (e) {
+                console.error(e);
+            }
+        }
 
         if (typeof plugin.all === "function") {
             await safe(() =>
@@ -335,24 +344,13 @@ export async function handler(chatUpdate) {
                 __filename,
             };
 
-            if (typeof plugin.before === "function") {
-                const stop = await safe(() => plugin.before.call(this, m, extra), false);
-                if (stop) continue;
-            }
-
             await (async () => {
                 try {
                     await plugin.call(this, m, extra);
                 } catch (e) {
                     console.error(e);
                     if (e && settings?.noerror) {
-                        await safe(() =>
-                            m.reply(
-                                `┌─[SYSTEM ERROR]──────
-│  Something went wrong.
-└──────────────────`
-                            )
-                        );
+                        await safe(() => m.reply(`Upss.. Something went wrong.`));
                     } else if (e) {
                         await reportPluginError(this, m, plugin, chat, e);
                     }

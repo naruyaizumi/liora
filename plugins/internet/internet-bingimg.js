@@ -1,7 +1,7 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text)
         return m.reply(
-            `Usage: ${usedPrefix + command} <query>\n› Example: ${usedPrefix + command} cyberpunk city`
+            `Usage: ${usedPrefix + command} <query>\n› Example: ${usedPrefix + command} city`
         );
 
     try {
@@ -20,10 +20,10 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             caption: `Result ${i + 1}/${data.result.length}`,
         }));
 
-        await conn.sendAlbum(m.chat, album, { quoted: m });
+        await conn.sendMessage(m.chat, { album }, { quoted: m });
     } catch (err) {
         console.error(err);
-        m.reply("Error: Failed to fetch Bing image results.");
+        m.reply(`Error: Failed to fetch Bing image results.`);
     } finally {
         await global.loading(m, conn, true);
     }

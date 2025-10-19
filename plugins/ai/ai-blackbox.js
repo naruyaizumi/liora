@@ -14,18 +14,7 @@ let handler = async (m, { conn, text }) => {
         const json = await response.json();
         if (!json.message) return m.reply("No response received from Blackbox AI.");
 
-        const timestamp = new Date().toTimeString().split(" ")[0];
-        const output = [
-            "```",
-            `┌─[${timestamp}]────────────`,
-            `│  BLACKBOX AI RESPONSE`,
-            "└──────────────────────",
-            json.message.trim(),
-            "───────────────────────",
-            "```",
-        ].join("\n");
-
-        await conn.sendMessage(m.chat, { text: output }, { quoted: m });
+        await conn.sendMessage(m.chat, { text: json.message.trim() }, { quoted: m });
     } catch (error) {
         console.error(error);
         m.reply("Error: " + error.message);

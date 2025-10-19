@@ -16,19 +16,20 @@
     },
     "dependencies": {
         "async-mutex": "^0.5.0",
-        "audio-decode": "^2.2.3",
-        "baileys": "7.0.0-rc.5",
+        "awesome-phonenumber": "^7.5.0",
+        "baileys": "npm:@itsukichan/baileys@^7.3.2",
         "better-sqlite3": "^12.4.1",
         "canvas": "^3.2.0",
         "chalk": "^5.6.2",
+        "cheerio": "^1.1.2",
         "file-type": "^21.0.0",
         "liora-lib": "^1.0.24",
-        "pino": "^10.0.0",
+        "pino": "^10.1.0",
         "sharp": "^0.34.4"
     },
     "devDependencies": {
-        "@eslint/js": "^9.37.0",
-        "eslint": "^9.37.0",
+        "@eslint/js": "^9.38.0",
+        "eslint": "^9.38.0",
         "globals": "^16.4.0",
         "prettier": "^3.6.2"
     },

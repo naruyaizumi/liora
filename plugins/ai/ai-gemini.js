@@ -12,20 +12,14 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             return conn.sendMessage(
                 m.chat,
                 {
-                    text: [
-                        "```",
-                        "┌─[GEMINI AI HELP]────────────",
-                        "│  Available modes:",
-                        "│  1. Text   : " + `${usedPrefix + command} What is relativity?`,
-                        "│  2. Audio  : reply to an audio with " +
-                            `${usedPrefix + command} Transcribe this audio`,
-                        "│  3. Image  : reply to an image with " +
-                            `${usedPrefix + command} Describe this image`,
-                        "│  4. Video  : reply to a video with " +
-                            `${usedPrefix + command} Analyze this video`,
-                        "└─────────────────────────────",
-                        "```",
-                    ].join("\n"),
+                    text: `
+┌─[ GEMINI AI ]
+│  Available modes:
+│  1. Text : ${usedPrefix + command} What is relativity?
+│  2. Audio : reply to an audio with ${usedPrefix + command}
+│  3. Image : reply to an image with ${usedPrefix + command}
+│  4. Video : reply to a video with ${usedPrefix + command}
+└───`,
                     contextInfo: {
                         externalAdReply: {
                             title: "Gemini AI",
@@ -109,18 +103,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             resultText = safeString(json?.message || "No response from Gemini.");
         }
 
-        const timestamp = new Date().toTimeString().split(" ")[0];
-        const output = [
-            "```",
-            `┌─[${timestamp}]────────────`,
-            `│  GEMINI AI RESPONSE`,
-            "└──────────────────────",
-            resultText.trim(),
-            "───────────────────────",
-            "```",
-        ].join("\n");
-
-        await conn.sendMessage(m.chat, { text: output }, { quoted: m });
+        await conn.sendMessage(m.chat, { text: resultText.trim() }, { quoted: m });
     } catch (e) {
         console.error(e);
         m.reply("Error: " + e.message);

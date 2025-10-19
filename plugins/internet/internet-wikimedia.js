@@ -21,7 +21,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             caption: `Result ${i + 1}/${limited.length}`,
         }));
 
-        await conn.sendAlbum(m.chat, album, { quoted: m });
+        await conn.sendMessage(m.chat, { album }, { quoted: m });
     } catch (error) {
         console.error(error);
         m.reply("Error: Failed to retrieve data from Wikimedia.");

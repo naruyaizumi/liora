@@ -1,29 +1,28 @@
-import { uploader3 } from "../../lib/uploader.js";
 import { sticker, fetch } from "liora-lib";
+import { uploader3 } from "../../lib/uploader.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-    await global.loading(m, conn);
     try {
-        if (!args[0])
-            return m.reply(
-                `Enter top and bottom text for meme (use | separator).\n› Example: ${usedPrefix + command} Top|Bottom`
-            );
-
-        const q = m.quoted ? m.quoted : m;
+        const q = m.quoted ?? m;
         const mime = (q.msg || q).mimetype || "";
-        if (!mime || !/image\/(jpeg|png)/.test(mime))
-            return m.reply("Reply to a JPG or PNG image to make a meme sticker.");
+        if (!mime || !/image\/(jpeg|png|webp)/.test(mime))
+            return m.reply("Only JPEG, PNG, or WEBP images are supported.");
 
+        const [textT = "", textB = ""] = args.join(" ").split("|");
+        if (!textT && !textB) return m.reply(
+            `Please provide meme text.\n› Example: ${usedPrefix + command} top|bottom`);
+
+        await global.loading(m, conn);
         const media = await q.download();
-        const up = await uploader3(media).catch(() => null);
-        if (!up) return m.reply("Failed to upload image to server. Try again later.");
+        const uploaded = await uploader3(media);
+        if (!uploaded) throw new Error("Failed to upload image.");
 
-        const [top, bottom] = args.join(" ").split("|");
-        const apiUrl = `https://api.memegen.link/images/custom/${encodeURIComponent(
-            top || "_"
-        )}/${encodeURIComponent(bottom || "_")}.png?background=${encodeURIComponent(up)}`;
+        const api = `https://api.nekolabs.my.id/canvas/meme?imageUrl=${encodeURIComponent(uploaded)}&textT=${encodeURIComponent(textT)}&textB=${encodeURIComponent(textB)}`;
+        const res = await fetch(api);
+        if (!res.ok) throw new Error("Failed to contact Meme API.");
 
-        const buffer = Buffer.from(await (await fetch(apiUrl)).arrayBuffer());
+        const buffer = Buffer.from(await res.arrayBuffer());
+
         const stickerImage = await sticker(buffer, {
             packName: global.config.stickpack || "",
             authorName: global.config.stickauth || "",
@@ -31,13 +30,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         await conn.sendMessage(
             m.chat,
-            {
-                sticker: stickerImage,
-            },
+            { sticker: stickerImage },
             { quoted: m }
         );
     } catch (e) {
-        console.error(e);
         m.reply("Error: " + e.message);
     } finally {
         await global.loading(m, conn, true);

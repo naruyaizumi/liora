@@ -1,5 +1,4 @@
 import { fetch, convert } from "liora-lib";
-import decode from "audio-decode";
 
 const languages = {
     1: ["id-ID", "🇮🇩 Indonesia"],
@@ -65,22 +64,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                   : converted?.data
                     ? Buffer.from(converted.data)
                     : Buffer.from(converted);
-        const audioData = await decode(finalBuffer);
-        const channelData = audioData.getChannelData(0);
-        const bars = 64;
-        const blockSize = Math.floor(channelData.length / bars);
-        const waveform = new Uint8Array(
-            Array.from({ length: bars }, (_, i) => {
-                const start = i * blockSize;
-                const slice = channelData.subarray(start, start + blockSize);
-                let peak = 0;
-                for (let j = 0; j < slice.length; j++) {
-                    const val = Math.abs(slice[j]);
-                    if (val > peak) peak = val;
-                }
-                return Math.round(255 * peak);
-            })
-        );
 
         await conn.sendMessage(
             m.chat,
@@ -88,7 +71,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                 audio: finalBuffer,
                 mimetype: "audio/ogg; codecs=opus",
                 ptt: true,
-                waveform,
             },
             { quoted: m }
         );

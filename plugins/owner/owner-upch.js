@@ -1,40 +1,42 @@
 let handler = async (m, { conn, text }) => {
-    try {
-        const q = m.quoted ? m.quoted : m;
-        const mime = q.mimetype || "";
+  try {
+    const q = m.quoted ? m.quoted : m
+    const mime = q.mimetype || ""
 
-        await global.loading(m, conn);
-        if (/image|video|audio/.test(mime)) {
-            const media = await q.download();
-            if (!Buffer.isBuffer(media)) throw new Error("Invalid media buffer");
-            const caption = text ? text.trim() : "";
-            await conn.sendFile(
-                "120363417411850319@newsletter",
-                media,
-                "upload",
-                caption,
-                m,
-                /audio/.test(mime),
-                { mimetype: mime }
-            );
-        } else if (text) {
-            await conn.sendMessage("120363417411850319@newsletter", { text });
-        } else {
-            return m.reply("Provide a media file or text to send.");
-        }
+    await global.loading(m, conn)
 
-        await m.reply("Message successfully sent to channel.");
-    } catch (err) {
-        console.error(err);
-        await m.reply("Failed to send message to channel.");
-    } finally {
-        await global.loading(m, conn, true);
+    const jid = "120363417411850319@newsletter"
+    const caption = text ? text.trim() : ""
+
+    if (/image|video|audio/.test(mime)) {
+      const media = await q.download()
+      if (!Buffer.isBuffer(media)) throw new Error("Invalid media buffer")
+
+      const message = /audio/.test(mime)
+        ? { audio: media, mimetype: mime, ptt: true, caption }
+        : /video/.test(mime)
+        ? { video: media, mimetype: mime, caption }
+        : { image: media, mimetype: mime, caption }
+
+      await conn.sendMessage(jid, message, { quoted: m })
+    } else if (text) {
+      await conn.sendMessage(jid, { text }, { quoted: m })
+    } else {
+      return m.reply("Provide media or text to send.")
     }
-};
 
-handler.help = ["upch"];
-handler.tags = ["owner"];
-handler.command = /^(ch|upch)$/i;
-handler.owner = true;
+    await m.reply("Message successfully sent to channel.")
+  } catch (err) {
+    console.error(err)
+    await m.reply("Failed to send message to channel.")
+  } finally {
+    await global.loading(m, conn, true)
+  }
+}
 
-export default handler;
+handler.help = ["upch"]
+handler.tags = ["owner"]
+handler.command = /^(ch|upch)$/i
+handler.owner = true
+
+export default handler

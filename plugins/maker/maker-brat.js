@@ -8,7 +8,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         await global.loading(m, conn);
 
         const res = await fetch(
-            global.API("btz", "/api/maker/brat", { text: args.join(" ") }, "apikey")
+            `https://api.nekolabs.my.id/canvas/brat/v1?text=${encodeURIComponent(args.join(" "))}`
         );
         if (!res.ok) throw new Error("Failed to fetch Brat API.");
 

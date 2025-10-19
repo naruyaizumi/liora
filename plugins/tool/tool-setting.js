@@ -3,6 +3,8 @@ const features = [
     { key: "detect", scope: "chat", name: "Detect" },
     { key: "notifgempa", scope: "chat", name: "Notif Gempa" },
     { key: "antiLinks", scope: "chat", name: "Anti Link" },
+    { key: "antiStatus", scope: "chat", name: "Anti Status Mention" },
+    { key: "antiInteractive", scope: "chat", name: "Anti Interactive" },
     { key: "antiSticker", scope: "chat", name: "Anti Sticker" },
     { key: "antiAudio", scope: "chat", name: "Anti Audio" },
     { key: "antiFile", scope: "chat", name: "Anti File" },
