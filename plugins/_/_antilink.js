@@ -1,4 +1,4 @@
-const linkRegex = /\b((https?|ftp):\/\/[^\s]+|www\.[^\s]+|[a-z0-9-]+\.[a-z]{2,})(\/[^\s]*)?)/gi;
+const linkRegex = /\b((https?|ftp):\/\/[^\s]+|www\.[^\s]+|[a-z0-9-]+\.[a-z]{2,}(\/[^\s]*)?)/gi;
 
 export async function before(m) {
     const toJid = (n) => {
@@ -26,28 +26,28 @@ export async function before(m) {
             if (!lid) {
                 try {
                     lid = await conn.lidMappingStore.getLIDForPN(jid);
-                } catch {}
+                } catch {/* Jawa */}
             }
             if (lid) {
                 out.add(lid);
                 try {
                     cache?.set(jid, lid);
                     cache?.set(lid, jid);
-                } catch {}
+                } catch {/* Jawa */}
             }
             if (lid) {
                 let back = cache?.get(lid);
                 if (!back) {
                     try {
                         back = await conn.lidMappingStore.getPNForLID(lid);
-                    } catch {}
+                    } catch {/* Jawa */}
                 }
                 if (back) {
                     out.add(back);
                     try {
                         cache?.set(lid, back);
                         cache?.set(back, lid);
-                    } catch {}
+                    } catch {/* Jawa */}
                 }
             }
         }

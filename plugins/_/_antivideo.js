@@ -24,28 +24,28 @@ export async function before(m) {
             if (!lid) {
                 try {
                     lid = await conn.lidMappingStore.getLIDForPN(jid);
-                } catch {}
+                } catch {/* Jawa */}
             }
             if (lid) {
                 out.add(lid);
                 try {
                     cache?.set(jid, lid);
                     cache?.set(lid, jid);
-                } catch {}
+                } catch {/* Jawa */}
             }
             if (lid) {
                 let back = cache?.get(lid);
                 if (!back) {
                     try {
                         back = await conn.lidMappingStore.getPNForLID(lid);
-                    } catch {}
+                    } catch {/* Jawa */}
                 }
                 if (back) {
                     out.add(back);
                     try {
                         cache?.set(lid, back);
                         cache?.set(back, lid);
-                    } catch {}
+                    } catch {/* Jawa */}
                 }
             }
         }
@@ -96,7 +96,7 @@ export async function before(m) {
                     participant: m.key.participant || m.sender,
                 },
             });
-        } catch (e) {
+        } catch {
             // Jawa
         }
     }

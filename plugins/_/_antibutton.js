@@ -19,7 +19,7 @@ export async function before(m) {
                     participant: m.key.participant || m.sender,
                 },
             });
-        } catch (e) {
+        } catch {
             // Jawa
         }
     }

@@ -1,6 +1,7 @@
+import { uploader3 } from "../../lib/uploader.js";
 import { fetch } from "liora-lib";
 
-let handler = async (m, { conn, args }) => {
+let handler = async (m, { conn }) => {
     try {
         await global.loading(m, conn);
 
