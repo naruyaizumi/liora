@@ -1,5 +1,5 @@
 export async function before(m, { conn }) {
-        const toJid = (n) => {
+    const toJid = (n) => {
         const raw = Array.isArray(n) ? n[0] : (n?.num ?? n?.lid ?? n);
         const digits = String(raw ?? "").replace(/[^0-9]/g, "");
         return digits ? digits + "@s.whatsapp.net" : "";
@@ -24,28 +24,36 @@ export async function before(m, { conn }) {
             if (!lid) {
                 try {
                     lid = await conn.lidMappingStore.getLIDForPN(jid);
-                } catch {/* Jawa */}
+                } catch {
+                    /* Jawa */
+                }
             }
             if (lid) {
                 out.add(lid);
                 try {
                     cache?.set(jid, lid);
                     cache?.set(lid, jid);
-                } catch {/* Jawa */}
+                } catch {
+                    /* Jawa */
+                }
             }
             if (lid) {
                 let back = cache?.get(lid);
                 if (!back) {
                     try {
                         back = await conn.lidMappingStore.getPNForLID(lid);
-                    } catch {/* Jawa */}
+                    } catch {
+                        /* Jawa */
+                    }
                 }
                 if (back) {
                     out.add(back);
                     try {
                         cache?.set(lid, back);
                         cache?.set(back, lid);
-                    } catch {/* Jawa */}
+                    } catch {
+                        /* Jawa */
+                    }
                 }
             }
         }
