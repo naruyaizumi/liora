@@ -97,33 +97,6 @@ We take security, stability, and the comfort of contributors very seriously.
 
 <details>
   <summary>
-    <span style="display:inline; color:#FFC0CB; font-weight:bold;">
-      📌 Changelog
-    </span>
-  </summary>
-
-  <p align="center">
-    <a href="https://keepachangelog.com/">
-      <img src="https://img.shields.io/badge/Keep_a-Changelog-FFC0CB?style=for-the-badge&logo=none&labelColor=2F2F2F" alt="Keep a Changelog"/>
-    </a>
-    <a href="https://semver.org/">
-      <img src="https://img.shields.io/badge/SemVer-2.0.0-FFC0CB?style=for-the-badge&logo=semver&logoColor=white&labelColor=2F2F2F" alt="Semantic Versioning"/>
-    </a>
-    <a href="https://github.com/naruyaizumi/liora/releases">
-      <img src="https://img.shields.io/github/v/release/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="GitHub Releases"/>
-    </a>
-  </p>
-
-This project follows
-<a href="https://semver.org/"><b>Semantic Versioning</b></a>
-to manage releases.  
- All new features, improvements, bug fixes, and deprecated changes are documented in detail in
-<a href="https://github.com/naruyaizumi/liora/blob/main/.github/CHANGELOG.md"><b>CHANGELOG.md</b></a>.
-
-</details>
-
-<details>
-  <summary>
     <span style="display:inline; color:#FF69B4; font-weight:bold;">
       🍧 Liora – WhatsApp Bot
     </span>
