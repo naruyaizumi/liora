@@ -22,7 +22,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                     image: { url: img },
                     caption: `Slide ${i + 1} of ${data.images.length}`,
                 }));
-                await conn.sendAlbum(m.chat, album, { quoted: m });
+                await conn.sendMessage(m.chat, { album }, { quoted: m });
             }
         } else if (data.play) {
             await conn.sendMessage(

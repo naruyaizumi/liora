@@ -9,14 +9,15 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         await global.loading(m, conn);
 
-        const apiUrl = global.API("btz", "/api/search/openai-chat", { text }, "apikey");
+        const apiUrl = `https://api.nekolabs.my.id/ai/ai4chat?text=${encodeURIComponent(text)}`;
         const response = await fetch(apiUrl);
+
         if (!response.ok) return m.reply("Request failed. Please try again later.");
 
         const json = await response.json();
-        if (!json.message) return m.reply("No response received from OpenAI.");
+        if (!json.result) return m.reply("No response received from the API.");
 
-        await conn.sendMessage(m.chat, { text: json.message.trim() }, { quoted: m });
+        await conn.sendMessage(m.chat, { text: json.result.trim() }, { quoted: m });
     } catch (e) {
         console.error(e);
         m.reply("Error: " + e.message);

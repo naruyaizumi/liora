@@ -1,29 +1,39 @@
 import { fetch } from "liora-lib";
 
 let handler = async (m, { conn, text }) => {
-    if (!text || typeof text !== "string") return m.reply("Enter a valid query for Copilot AI!");
+    if (!text || typeof text !== "string") {
+        return m.reply("Please provide a valid query for Copilot AI.");
+    }
 
     try {
         await global.loading(m, conn);
 
-        const apiUrl = global.API("btz", "/api/search/bing-chat", { text }, "apikey");
-
+        const apiUrl = `https://api.nekolabs.my.id/ai/copilot?text=${encodeURIComponent(text)}`;
         const response = await fetch(apiUrl);
-        if (!response.ok) return m.reply("Failed to connect to Copilot AI. Try again later.");
+        if (!response.ok) {
+            return m.reply("Unable to connect to Copilot AI. Please try again later.");
+        }
 
         const json = await response.json();
-        if (!json.message) return m.reply("No response received from Copilot AI.");
+        const replyText = json?.result?.text;
+        if (!replyText) {
+            return m.reply("Copilot AI did not return a response.");
+        }
 
-        await conn.sendMessage(m.chat, { text: json.message.trim() }, { quoted: m });
+        await conn.sendMessage(
+            m.chat,
+            { text: `Copilot AI:\n${replyText.trim()}` },
+            { quoted: m }
+        );
     } catch (error) {
         console.error(error);
-        m.reply("Error: " + error.message);
+        m.reply(`An error occurred: ${error.message}`);
     } finally {
         await global.loading(m, conn, true);
     }
 };
 
-handler.help = ["copilot"];
+handler.help = ["copilot <query>"];
 handler.tags = ["ai"];
 handler.command = /^(copilot)$/i;
 
