@@ -6,7 +6,6 @@ import "./config.js";
 import "./global.js";
 import { naruyaizumi, protoType, serialize } from "./lib/message.js";
 import { SQLiteAuth, SQLiteKeyStore } from "./lib/auth.js";
-import { schedule } from "liora-lib";
 import { Browsers, fetchLatestBaileysVersion } from "baileys";
 import { readdir, stat } from "fs/promises";
 import { join } from "path";
@@ -35,7 +34,6 @@ async function IZUMI() {
         printQRInTerminal: !pairingAuth,
         browser: Browsers.ubuntu("Safari"),
         emitOwnEvents: true,
-        syncFullHistory: false,
         auth: {
             creds: state.creds,
             keys: SQLiteKeyStore(),
@@ -56,19 +54,6 @@ async function IZUMI() {
             }
         }, 2500);
     }
-
-    schedule(
-        "db-flush",
-        () => {
-            try {
-                global.sqlite.prepare("PRAGMA wal_checkpoint(FULL);").run();
-                global.sqlite.prepare("PRAGMA optimize;").run();
-            } catch (e) {
-                console.error("DB checkpoint:", e.message);
-            }
-        },
-        { intervalSeconds: 600 }
-    );
 
     let isInit = true;
     let handler = await import("./handler.js");

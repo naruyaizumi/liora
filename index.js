@@ -16,15 +16,13 @@ const pkgData = await readFile(pkgPath, "utf8").catch((err) => {
 const { name } = JSON.parse(pkgData);
 
 async function ensureDirs() {
-    const dirs = [join(__dirname, "tmp"), join(__dirname, "database")];
-    for (const dir of dirs) {
-        try {
-            await mkdir(dir, { recursive: true });
-        } catch (err) {
-            console.warn(
-                chalk.yellow(`[supervisor] Cannot create folder "${dir}": ${err.message}`)
-            );
-        }
+    const dir = join(__dirname, "database");
+    try {
+        await mkdir(dir, { recursive: true });
+    } catch (err) {
+        console.warn(
+            chalk.yellow(`Cannot create folder "${dir}": ${err.message}`)
+        );
     }
 }
 await ensureDirs();

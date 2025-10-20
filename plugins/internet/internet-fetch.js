@@ -1,6 +1,3 @@
-import { mkdtemp, open, stat, rm } from "fs/promises";
-import os from "os";
-import path from "path";
 import { fileTypeFromBuffer } from "file-type";
 import { fetch } from "liora-lib";
 
@@ -13,8 +10,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     await global.loading(m, conn);
 
     const timestamp = new Date().toTimeString().split(" ")[0];
-    const tmpDir = await mkdtemp(path.join(os.tmpdir(), "fetch-"));
-    const tmpFile = path.join(tmpDir, "result.bin");
 
     let result, buffer, mime, ext, sizeMB;
     let headersRaw = "";
@@ -25,12 +20,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         buffer = Buffer.isBuffer(result.body) ? result.body : Buffer.from(result.body);
         ok = true;
 
-        const handle = await open(tmpFile, "wx");
-        await handle.writeFile(buffer);
-        await handle.close();
-
-        const stats = await stat(tmpFile);
-        sizeMB = (stats.size / (1024 * 1024)).toFixed(2);
+        sizeMB = (buffer.length / (1024 * 1024)).toFixed(2);
 
         const type = await fileTypeFromBuffer(buffer).catch(() => null);
         const headerMime = (result.headers?.["content-type"]?.[0] || "")
@@ -59,21 +49,16 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const isVideo = /^video\//.test(mime);
     const isAudio = /^audio\//.test(mime);
 
-    let caption = [
-        "```",
-        `┌─[${timestamp}]─────────────`,
-        `│  Debug Fetch Log`,
-        "└────────────────────────────",
-        `URL : ${text}`,
-        `Status : ${ok ? "OK" : "ERROR"}`,
-        `Size : ${sizeMB || "0.00"} MB`,
-        `MIME : ${mime}`,
-        `Output : result.${ext}`,
-        "────────────────────────────",
-        "HEADERS (Top 10):",
-        headersRaw.split("\n").slice(0, 10).join("\n") || "(no headers)",
-        "```",
-    ].join("\n");
+    let caption = `
+┌─[${timestamp}]─────────────
+│  Fetch Log
+└────────────────────────────
+URL : ${text}
+Status : ${ok ? "OK" : "ERROR"}
+Size : ${sizeMB || "0.00"} MB
+MIME : ${mime}
+Output : result.${ext}
+────────────────────────────`;
 
     let msg;
 
@@ -86,7 +71,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 /* ignore */
             }
         }
-        if (content.length > 5000) content = content.slice(0, 5000) + "\n\n[ truncated :v ]";
 
         caption += `\n────────────────────────────\nPreview:\n\`\`\`\n${content}\n\`\`\``;
 
@@ -108,7 +92,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             await conn.sendMessage(m.chat, { text: caption }, { quoted: m });
         });
 
-    await rm(tmpDir, { recursive: true, force: true }).catch(() => {});
     await global.loading(m, conn, true);
 };
 
