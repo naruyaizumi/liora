@@ -27,7 +27,7 @@ const handler = async (m, { args }) => {
         }
         const q = m.quoted;
         const mime = q.mimetype || q.mediaType || "";
-        if (!q?.download || !/^image|video|audio|application/.test(mime))
+        if (!q?.download || !/^(image|video|audio|application)/.test(mime))
             return m.reply("Quoted message must be a media or document file.");
         const buffer = await q.download().catch(() => null);
         if (!buffer?.length) return m.reply("Failed to download the quoted media.");
