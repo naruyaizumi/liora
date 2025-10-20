@@ -12,7 +12,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const timestamp = new Date().toTimeString().split(" ")[0];
 
     let result, buffer, mime, ext, sizeMB;
-    let headersRaw = "";
     let ok = false;
 
     try {
@@ -29,18 +28,11 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             .toLowerCase();
         mime = type?.mime || headerMime || "application/octet-stream";
         ext = type?.ext || mime.split("/")[1] || "bin";
-
-        if (result.headers && typeof result.headers === "object") {
-            headersRaw = Object.entries(result.headers)
-                .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
-                .join("\n");
-        }
-    } catch (err) {
+    } catch {
         ok = false;
         buffer = Buffer.alloc(0);
         mime = "text/plain";
         ext = "txt";
-        headersRaw = err?.message || "Fetch failed.";
     }
 
     const isJson = mime === "application/json";
@@ -59,7 +51,6 @@ Size : ${sizeMB || "0.00"} MB
 MIME : ${mime}
 Output : result.${ext}
 ────────────────────────────`;
-
     let msg;
 
     if (isJson || isText) {

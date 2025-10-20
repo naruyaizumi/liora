@@ -1,76 +1,35 @@
-![header](https://capsule-render.vercel.app/api?type=waving&color=0:FFC0CB,50:FFE4E1,100:E6E6FA&height=250&section=header&text=Liora%20WhatsApp%20Bot&fontSize=55&fontAlignY=35&animation=twinkling&fontColor=ffffff)
+![header](https://capsule-render.vercel.app/api?type=waving&color=0:0B3D91,50:1A1F71,100:4B0082&height=250&section=header&text=Liora%20WhatsApp%20Bot&fontSize=55&fontAlignY=35&animation=twinkling&fontColor=ffffff)
 
 <div align="center">
-  
-![Liora](https://files.cloudkuimages.guru/images/405de5beff26.jpg)
 
-<img src="https://raw.githubusercontent.com/innng/innng/master/assets/kyubey.gif" width="150" height="150" />
+![Liora](https://qu.ax/qHNvM.png)
 
 <p align="center">
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/node.js.yml">
-  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/node.js.yml?label=Node.js%20CI&style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Node.js CI"/>
+  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/node.js.yml?label=Node.js%20CI&style=for-the-badge&logo=github&logoColor=white&color=1A1F71&labelColor=2F2F2F" alt="Node.js CI"/>
 </a>
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/eslint.yml">
-  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/eslint.yml?label=ESLint&style=for-the-badge&logo=eslint&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="ESLint CI"/>
+  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/eslint.yml?label=ESLint&style=for-the-badge&logo=eslint&logoColor=white&color=1A1F71&labelColor=2F2F2F" alt="ESLint CI"/>
 </a>
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/prettier.yml">
-  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/prettier.yml?label=Prettier&style=for-the-badge&logo=prettier&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Prettier CI"/>
+  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/prettier.yml?label=Prettier&style=for-the-badge&logo=prettier&logoColor=white&color=1A1F71&labelColor=2F2F2F" alt="Prettier CI"/>
 </a>
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/codeql.yml">
-  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/codeql.yml?label=CodeQL&style=for-the-badge&logo=github&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="CodeQL Scan"/>
+  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/codeql.yml?label=CodeQL&style=for-the-badge&logo=github&logoColor=white&color=1A1F71&labelColor=2F2F2F" alt="CodeQL Scan"/>
 </a>
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/dependency-review.yml">
-  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/dependency-review.yml?label=Dependency%20Review&style=for-the-badge&logo=dependabot&logoColor=white&color=FFC0CB&labelColor=2F2F2F" alt="Dependency Review"/>
+  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/dependency-review.yml?label=Dependency%20Review&style=for-the-badge&logo=dependabot&logoColor=white&color=1A1F71&labelColor=2F2F2F" alt="Dependency Review"/>
 </a>
 
 <a href="https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03">
-  <img src="https://img.shields.io/badge/WhatsApp-Channel-FFC0CB?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F" alt="WhatsApp Channel"/>
+  <img src="https://img.shields.io/badge/WhatsApp-Channel-1A1F71?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F" alt="WhatsApp Channel"/>
 </a>
 <a href="https://instagram.com/naruyaizumi">
-  <img src="https://img.shields.io/badge/Instagram-@naruyaizumi-FFC0CB?style=for-the-badge&logo=instagram&logoColor=white&labelColor=2F2F2F" alt="Instagram"/>
+  <img src="https://img.shields.io/badge/Instagram-@naruyaizumi-1A1F71?style=for-the-badge&logo=instagram&logoColor=white&labelColor=2F2F2F" alt="Instagram"/>
 </a>
 </p>
 
 </div>
-
----
-
-<details>
-  <summary>
-    <span style="display:inline; color:#FFC0CB; font-weight:bold;">
-      🛡️ Security & Bug Reports
-    </span>
-  </summary>
-
-  <p align="center">
-    <a href="SECURITY.md">
-      <img src="https://img.shields.io/badge/Report-Security_Issue-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Report Security Issue"/>
-    </a>
-    <a href="../../issues/new/choose">
-      <img src="https://img.shields.io/badge/Report-Bug-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Report Bug"/>
-    </a>
-  </p>
-
-We take security, stability, and the comfort of contributors very seriously.  
- If you discover a **vulnerability** or a **bug**, please report it responsibly through the following:
-
-<details>
-  <summary><b><span style="color:#FFC0CB;">Security Issues</span></b></summary>
-  <a href="https://github.com/naruyaizumi/liora/blob/main/.github/SECURITY.md">
-    <img src="https://img.shields.io/badge/Security-Policy-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Security Policy"/>
-  </a>
-</details>
-
-  <details>
-    <summary><b><span style="color:#FFC0CB;">Bug Reports</span></b></summary>
-    <a href="../../issues/new?template=bug-report-id.md">
-      <img src="https://img.shields.io/badge/Bug_Report-ID-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Bug Report ID"/>
-    </a>  
-    <a href="../../issues/new?template=bug-report-us.md">
-      <img src="https://img.shields.io/badge/Bug_Report-EN-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F" alt="Bug Report EN"/>
-    </a>
-  </details>
-</details>
 
 ---
 
@@ -97,180 +56,111 @@ We take security, stability, and the comfort of contributors very seriously.
 
 <details>
   <summary>
-    <span style="display:inline; color:#FF69B4; font-weight:bold;">
-      🍧 Liora – WhatsApp Bot
+    <span style="display:inline; color:#1A1F71; font-weight:bold;">
+      🌌 Liora – WhatsApp Bot
     </span>
   </summary>
 
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500&family=Pacifico&display=swap" rel="stylesheet">
 
-  <div align="center" style="font-family: 'Pacifico', cursive; color:#FF69B4; font-size:34px; font-weight:bold; margin:15px 0;">
-    <img src="https://readme-typing-svg.herokuapp.com?size=28&duration=3500&color=FFC0CB&center=true&vCenter=true&width=600&lines=🌸+Liora+–+Advanced+WhatsApp+Bot" alt="Typing SVG" />
+  <div align="center" style="font-family: 'Pacifico', cursive; color:#1A1F71; font-size:34px; font-weight:bold; margin:15px 0;">
+    <img src="https://readme-typing-svg.herokuapp.com?size=28&duration=3500&color=1A1F71&center=true&vCenter=true&width=600&lines=🌌+Liora+–+WhatsApp+Bot" alt="Typing SVG" />
   </div>
 
   <p align="center" style="font-family: 'Fira Code', monospace; font-size:16px; color:#eaeaea;">
-    Liora is a modern, high-performance WhatsApp automation framework.  
-    It combines <b>pure JavaScript (ESM)</b> with <b>Liora-lib</b>, a native bridge that handles all heavy media and network tasks —  
-    no extra tools or manual builds required.
+    Liora is not your average WhatsApp bot.  
+    It’s a technically demanding, low-level automation framework built for developers who crave control.  
+    Even renaming a command can be confusing if you don’t understand the architecture — and that’s by design.
   </p>
 
   <p style="font-family: 'Fira Code', monospace; font-size:15px; color:#d1d1d1;">
-    Built for developers who want flexibility and stability without complex setup. Liora provides:
+    Liora is engineered for precision and performance. It offers:
   </p>
 
   <ul style="font-family: 'Fira Code', monospace; font-size:15px; color:#f5f5f5; list-style:none;">
     <li>
       <img src="https://img.icons8.com/color/24/lightning-bolt--v1.png" width="20" style="vertical-align:middle;"/>
-      <b>Native Performance</b> — powered by <code>liora-lib</code> with prebuilt Linux binaries
+      <b>Native Performance</b> — powered by <code>liora-lib</code> with C++ modules for media, fetch, and conversion
     </li>
     <li>
       <img src="https://img.icons8.com/color/24/code-fork.png" width="20" style="vertical-align:middle;"/>
-      <b>Modular Architecture</b> — every feature isolated, easy to extend or replace
+      <b>Modular Architecture</b> — every handler, plugin, and persona is isolated and hot-reloadable
     </li>
     <li>
       <img src="https://img.icons8.com/color/24/lock--v1.png" width="20" style="vertical-align:middle;"/>
-      <b>Secure and Reliable</b> — designed for production-grade WhatsApp bots
+      <b>Zero Overhead</b> — no JSON parsing, no disk I/O, pure buffer-based memory flow
     </li>
     <li>
       <img src="https://img.icons8.com/color/24/mind-map.png" width="20" style="vertical-align:middle;"/>
-      <b>Developer Friendly</b> — simple commands, strong defaults, and clean configuration
+      <b>Developer-Only</b> — not for casual use, but for those who want to build runtime-level control
     </li>
   </ul>
 
   <p align="center" style="font-family: 'Fira Code', monospace; font-size:14px; color:#bfbfbf; font-style:italic;">
-    No compiling. No external tools. Just install, configure, and run.
+    No compiling. No external tools. No mercy. Just code, control, and chaos.
   </p>
 </details>
 
 <details>
   <summary>
-    <span style="display:inline; color:#FFC0CB; font-weight:bold;">
-      🍃 Features
+    <span style="display:inline; color:#1A1F71; font-weight:bold;">
+      🌑 Features
     </span>
   </summary>
 
   <ul>
     <li>
       <img src="https://img.icons8.com/color/48/unlock-2.png" width="20" style="vertical-align:middle;"/>
-      <b>Fully Open Source</b> — no encryption, no obfuscation. Every part of the system is transparent and easy to audit.
+      <b>Fully Open Source</b> — no encryption, no obfuscation. Every line is visible, traceable, and modifiable.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/puzzle.png" width="20" style="vertical-align:middle;"/>
-      <b>Modular Architecture</b> — each module is self-contained and replaceable, allowing simple or advanced customization.
+      <b>Modular by Design</b> — each handler, plugin, and persona is isolated, hot-reloadable, and built for extension.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/lightning-bolt.png" width="20" style="vertical-align:middle;"/>
-      <b>Optimized Performance</b> — powered by <code>liora-lib</code> native bindings for fast media and network operations.
+      <b>Native Acceleration</b> — powered by <code>liora-lib</code> C++ bindings for media, fetch, and conversion.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/document.png" width="20" style="vertical-align:middle;"/>
-      <b>Modern JavaScript (ESM)</b> — built on a clean asynchronous design for maintainability and future compatibility.
+      <b>Pure ESM JavaScript</b> — async-first, zero legacy, and built for modern runtimes.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/nodejs.png" width="20" style="vertical-align:middle;"/>
-      <b>Node.js v22+ Ready</b> — fully compatible with the latest Node runtime and event loop improvements.
+      <b>Node.js v22+ Ready</b> — tuned for the latest event loop and V8 enhancements.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/database.png" width="20" style="vertical-align:middle;"/>
-      <b>Integrated SQLite Storage</b> — persistent, high-speed data caching with minimal setup.
+      <b>SQLite-Backed State</b> — atomic, persistent, and blazing fast via <code>better-sqlite3</code>.
     </li>
     <li>
       <img src="https://img.icons8.com/color/48/idea.png" width="20" style="vertical-align:middle;"/>
-      <b>Actively Evolving</b> — regular updates focused on stability, performance, and developer experience.
+      <b>Developer-Centric</b> — built for those who want full control, not plug-and-play illusions.
     </li>
   </ul>
 
-  <p style="font-family:'Fira Code', monospace; font-size:14px; color:#cfcfcf; text-align:center;">
-    Liora focuses on reliability and simplicity — everything you need to build scalable WhatsApp automation without the extra complexity.
+  <p style="font-family:'Fira Code', monospace; font-size:14px; color:#bfbfbf; text-align:center;">
+    Liora isn’t made to be easy — it’s made to be yours.  
+    If you’re not ready to dive deep, you’re not ready for Liora.
   </p>
 </details>
 
 <details>
-  <summary>
-    <span style="color:#FFC0CB; font-weight:bold;">
-      🔐 Setting API Key & Whitelist IP – BetaBotz
-    </span>
-  </summary>
+  <summary><span style="color:#1A1F71; font-weight:bold;">💣 Thanks & Credits</span></summary>
 
-**Getting Started**
-
-  <ol>
-    <li>Visit: <a href="https://api.betabotz.eu.org">api.betabotz.eu.org</a></li>
-    <li>Log in with your registered phone number + email.</li>
-  </ol>
+We sincerely thank the following parties who have been instrumental in the development and continuity of <strong>Liora</strong> — a project that demands precision, patience, and deep technical understanding.
 
   <details>
-    <summary><span style="color:#FFC0CB; font-weight:bold;">Obtain Your API Key</span></summary>
-    <ol>
-      <li>Go to the <b>Profile</b> menu.</li>
-      <li>Copy the <code>Apikey</code> value, e.g. <code>liora</code>.</li>
-    </ol>
-  </details>
-
-  <details>
-    <summary><span style="color:#FFC0CB; font-weight:bold;">Whitelist IP (Required)</span></summary>
-
-   <details>
-     <summary><span style="color:#FFC0CB; font-weight:bold;">Step 1 – Go to Dashboard</span></summary>
-     <img src="https://files.catbox.moe/l0j028.jpg" width="600"/><br/>
-     Log in at <a href="https://betabotz.eu.org">Betabotz Dashboard</a>, then click the profile icon (top-right).
-   </details>
-
-   <details>
-     <summary><span style="color:#FFC0CB; font-weight:bold;">Step 2 – Open Settings</span></summary>
-     <img src="https://files.catbox.moe/8rgwhf.jpg" width="600"/><br/>
-     Scroll down, find <b>Settings</b>, then click the <b>Choose an option</b> dropdown.
-   </details>
-
-   <details>
-     <summary><span style="color:#FFC0CB; font-weight:bold;">Step 3 – Select “Whitelist IP”</span></summary>
-     <img src="https://files.catbox.moe/o7y7xk.jpg" width="600"/><br/>
-     From the options, select <b>Whitelist IP</b> (bottom).
-   </details>
-
-   <details>
-     <summary><span style="color:#FFC0CB; font-weight:bold;">Step 4 – Enter Your IP Address</span></summary>
-     <img src="https://files.catbox.moe/j5rj89.jpg" width="600"/><br/>
-     Enter your VPS IP, e.g. <code>103.145.13.42</code>. You can add up to <b>5</b> IP addresses.
-   </details>
-
-   <details>
-     <summary><span style="color:#FFC0CB; font-weight:bold;">Step 5 – Add to Whitelist</span></summary>
-     <img src="https://files.catbox.moe/qfddyc.jpg" width="600"/><br/>
-     Click the green <b>Add to Whitelist</b> button. If successful, you’ll see:
-     <blockquote><i>IP successfully added to whitelist</i></blockquote>
-   </details>
-  </details>
-
-  <details>
-    <summary><span style="color:#FFC0CB; font-weight:bold;">Tips</span></summary>
-    <ul>
-      <li>Check IPv4: <code>curl -s ipv4.icanhazip.com</code></li>
-      <li>Check IPv6: <code>curl -s ipv6.icanhazip.com</code></li>
-      <li>Max allowed: <b>5 IPs</b></li>
-      <li>Need more? Contact BetaBotz admin.</li>
-      <li>IPv4 example: <code>103.145.13.42</code></li>
-      <li>IPv6 example: <code>2401:db00:3020:xxxx:xxxx:xxxx:xxxx:xxxx</code></li>
-    </ul>
-  </details>
-</details>
-
-<details>
-  <summary><span style="color:#FFC0CB; font-weight:bold;">💝 Thanks & Credits</span></summary>
-
-We sincerely thank the following parties who have been instrumental in the development and continuity of **Liora**:
-
-  <details>
-    <summary><span style="color:#FFC0CB; font-weight:bold;">Project Roles</span></summary>
+    <summary><span style="color:#1A1F71; font-weight:bold;">Project Roles</span></summary>
     <p align="center">
       <a href="https://linkbio.co/naruyaizumi">
-        <img src="https://img.shields.io/badge/Founder-Naruya%20Izumi-FFC0CB?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F"/>
+        <img src="https://img.shields.io/badge/Owner-Naruya%20Izumi-1A1F71?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F"/>
       </a>
       <a href="https://wa.me/6281398961382">
-        <img src="https://img.shields.io/badge/Owner-SXZnightmar-FFC0CB?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F"/>
+        <img src="https://img.shields.io/badge/Developer-SXZnightmar-1A1F71?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F"/>
       </a>
       <a href="https://wa.me/6287831816747">
-        <img src="https://img.shields.io/badge/Developer-Alfi%20Dev-FFC0CB?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F"/>
+        <img src="https://img.shields.io/badge/Developer-Alfi%20Dev-1A1F71?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F"/>
       </a>
     </p>
   </details>
@@ -278,28 +168,29 @@ We sincerely thank the following parties who have been instrumental in the devel
 
 <details>
   <summary>
-    <span style="color:#FFC0CB; font-weight:bold;">
-      📜 License
+    <span style="color:#1A1F71; font-weight:bold;">
+      🔪 License
     </span>
   </summary>
 
   <p style="font-family: 'Fira Code', monospace; color:#eaeaea;">
     This project is licensed under the 
-    <b><a href="https://opensource.org/licenses/Apache-2.0" style="color:#FF69B4;">Apache License 2.0</a></b> — 
-    see the <a href="LICENSE" style="color:#FF69B4;">LICENSE</a> file for details.  
+    <b><a href="https://opensource.org/licenses/Apache-2.0" style="color:#1A1F71;">Apache License 2.0</a></b> — 
+    see the <a href="LICENSE" style="color:#1A1F71;">LICENSE</a> file for full terms.
     (OSI Approved License)
   </p>
 
-  <blockquote style="font-family: 'Fira Code', monospace; color:#d1d1d1;">
-    Please remember to give proper <b>credit to contributors</b>  
-    and <b>do not rebrand or resell</b> this project as your own.
+  <blockquote style="font-family: 'Fira Code', monospace; color:#bfbfbf;">
+    You are free to use, modify, and distribute —
+    but <b>credit must be preserved</b> and <b>rebranding is strictly discouraged</b>.  
+    Liora is a technical framework, not a template.
   </blockquote>
 </details>
 
 <details>
   <summary>
-    <span style="color:#FFC0CB; font-weight:bold;">
-      💖 Support
+    <span style="color:#1A1F71; font-weight:bold;">
+      🩸 Support
     </span>
   </summary>
 
@@ -320,8 +211,8 @@ We sincerely thank the following parties who have been instrumental in the devel
   </p>
 
   <p align="center">
-    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=FF69B4&center=true&vCenter=true&width=500&lines=Your+support+keeps+this+project+alive!;Thank+you+for+helping+me+grow" alt="Support Typing Animation"/>
+    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=1A1F71&center=true&vCenter=true&width=500&lines=Your+support+keeps+this+project+alive!;Thank+you+for+helping+me+grow" alt="Support Typing Animation"/>
   </p>
 </details>
 
-![footer](https://capsule-render.vercel.app/api?type=waving&color=0:FFC0CB,50:FFE4E1,100:E6E6FA&height=150&section=footer)
+![footer](https://capsule-render.vercel.app/api?type=waving&color=0:0B3D91,50:1A1F71,100:4B0082&height=150&section=footer)
