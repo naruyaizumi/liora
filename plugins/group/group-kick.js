@@ -8,8 +8,8 @@ let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
     if (!target && args[0]) {
         const raw = args[0].replace(/[^0-9]/g, "");
         const lid = raw + "@lid";
-    if (participants.some(p => p.lid === lid)) {
-        target = lid;
+        if (participants.some((p) => p.lid === lid)) {
+            target = lid;
         }
     }
 

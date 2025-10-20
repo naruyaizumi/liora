@@ -11,13 +11,13 @@ import { readdir, stat } from "fs/promises";
 import { join } from "path";
 import chalk from "chalk";
 import P from "pino";
-import { EventEmitter } from 'events'
+import { EventEmitter } from "events";
 import { initReload, initCron, DisconnectReason } from "./lib/connection.js";
 
 const pairingAuth = global.config.pairingAuth;
 const pairingNumber = global.config.pairingNumber;
 
-EventEmitter.defaultMaxListeners = 0
+EventEmitter.defaultMaxListeners = 0;
 
 protoType();
 serialize();

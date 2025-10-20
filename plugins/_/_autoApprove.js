@@ -21,11 +21,11 @@ export async function before(m, { conn }) {
         const abusePattern = /^(212|994|90)/;
 
         const rejectList = requests
-            .filter(r => abusePattern.test(r.phone_number?.split('@')[0] || ''))
-            .flatMap(r => [r.phone_number, r.jid].filter(Boolean));
+            .filter((r) => abusePattern.test(r.phone_number?.split("@")[0] || ""))
+            .flatMap((r) => [r.phone_number, r.jid].filter(Boolean));
         const approveList = requests
-            .filter(r => !abusePattern.test(r.phone_number?.split('@')[0] || ''))
-            .flatMap(r => [r.phone_number, r.jid].filter(Boolean));
+            .filter((r) => !abusePattern.test(r.phone_number?.split("@")[0] || ""))
+            .flatMap((r) => [r.phone_number, r.jid].filter(Boolean));
         await delay(2000);
         if (rejectList.length) {
             await conn.groupRequestParticipantsUpdate(jid, rejectList, "reject");
@@ -41,5 +41,5 @@ export async function before(m, { conn }) {
 }
 
 function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
