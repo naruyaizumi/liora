@@ -20,9 +20,7 @@ async function ensureDirs() {
     try {
         await mkdir(dir, { recursive: true });
     } catch (err) {
-        console.warn(
-            chalk.yellow(`Cannot create folder "${dir}": ${err.message}`)
-        );
+        console.warn(chalk.yellow(`Cannot create folder "${dir}": ${err.message}`));
     }
 }
 await ensureDirs();
