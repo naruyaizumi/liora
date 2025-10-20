@@ -27,13 +27,13 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         let sources = "";
         if (Array.isArray(result?.sourcesRaw) && result.sourcesRaw.length > 0) {
-            sources = "\n\n*Sources:*\n" + result.sourcesRaw
-                .map((url, i) => `${i + 1}. ${url}`)
-                .join("\n");
+            sources =
+                "\n\n*Sources:*\n" +
+                result.sourcesRaw.map((url, i) => `${i + 1}. ${url}`).join("\n");
         }
         let followUps = "";
         if (Array.isArray(result?.followUpQuestions) && result.followUpQuestions.length > 0) {
-            const questions = result.followUpQuestions.map(q => q.question).join(", ");
+            const questions = result.followUpQuestions.map((q) => q.question).join(", ");
             followUps = `\n\n*Related Questions:* ${questions}`;
         }
 
@@ -42,7 +42,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             { text: `Ayesoul AI:\n${replyText.trim()}${sources}${followUps}` },
             { quoted: m }
         );
-
     } catch (error) {
         console.error(error);
         m.reply("An error occurred: " + error.message);

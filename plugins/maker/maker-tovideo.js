@@ -22,7 +22,10 @@ const oc = {
             },
         });
 
-        if (!res.ok) throw Error(`Upload failed: ${res.status} ${res.statusText}\n${await res.text() || null}`);
+        if (!res.ok)
+            throw Error(
+                `Upload failed: ${res.status} ${res.statusText}\n${(await res.text()) || null}`
+            );
         return await res.text();
     },
 
@@ -38,7 +41,10 @@ const oc = {
                         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36",
                 },
             });
-            if (!r.ok) throw Error(`Progress check failed: ${r.status} ${r.statusText}\n${await r.text() || null}`);
+            if (!r.ok)
+                throw Error(
+                    `Progress check failed: ${r.status} ${r.statusText}\n${(await r.text()) || null}`
+                );
             status = await r.text();
 
             if (status === "i") throw Error(`Too many requests. Cooldown for 1 hour.`);

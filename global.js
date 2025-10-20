@@ -203,12 +203,12 @@ global.db = db;
 global.sqlite = sqlite;
 
 global.loading = async (m, conn, back = false) => {
-  return conn.sendMessage(m.chat, {
-    react: {
-      text: back ? "" : "🍥",
-      key: m.key,
-    },
-  });
+    return conn.sendMessage(m.chat, {
+        react: {
+            text: back ? "" : "🍥",
+            key: m.key,
+        },
+    });
 };
 
 global.dfail = (type, m, conn) => {

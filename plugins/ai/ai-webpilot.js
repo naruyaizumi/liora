@@ -27,9 +27,11 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         let sources = "";
         if (Array.isArray(result?.source) && result.source.length > 0) {
-            sources = "\n\n*Sources:*\n" + result.source
-                .map((src, i) => `${i + 1}. ${src.title || "Untitled"}\n${src.link}`)
-                .join("\n\n");
+            sources =
+                "\n\n*Sources:*\n" +
+                result.source
+                    .map((src, i) => `${i + 1}. ${src.title || "Untitled"}\n${src.link}`)
+                    .join("\n\n");
         }
 
         await conn.sendMessage(
@@ -37,7 +39,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             { text: `WebPilot AI:\n${replyText.trim()}${sources}` },
             { quoted: m }
         );
-
     } catch (error) {
         console.error(error);
         m.reply("An error occurred: " + error.message);

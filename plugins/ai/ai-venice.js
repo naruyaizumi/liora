@@ -24,12 +24,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             return m.reply("No response received from Venice AI.");
         }
 
-        await conn.sendMessage(
-            m.chat,
-            { text: `Venice AI:\n${replyText.trim()}` },
-            { quoted: m }
-        );
-
+        await conn.sendMessage(m.chat, { text: `Venice AI:\n${replyText.trim()}` }, { quoted: m });
     } catch (error) {
         console.error(error);
         m.reply("An error occurred: " + error.message);

@@ -24,12 +24,14 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         if (!replyText) {
             return m.reply("No response received from Felo AI.");
         }
-        
+
         let sources = "";
         if (Array.isArray(result?.sources) && result.sources.length > 0) {
-            sources = "\n\n*Sources:*\n" + result.sources
-                .map(src => `${src.index}. ${src.title || "Untitled"}\n${src.url}`)
-                .join("\n\n");
+            sources =
+                "\n\n*Sources:*\n" +
+                result.sources
+                    .map((src) => `${src.index}. ${src.title || "Untitled"}\n${src.url}`)
+                    .join("\n\n");
         }
 
         await conn.sendMessage(
@@ -37,7 +39,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             { text: `Felo AI:\n${replyText.trim()}${sources}` },
             { quoted: m }
         );
-
     } catch (error) {
         console.error(error);
         m.reply("An error occurred: " + error.message);

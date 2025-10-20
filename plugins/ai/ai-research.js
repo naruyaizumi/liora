@@ -24,20 +24,15 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             return m.reply("No report was returned from Copilot AI.");
         }
 
-        await conn.sendMessage(
-            m.chat,
-            { text: `AI Research:\n${report}` },
-            { quoted: m }
-        );
+        await conn.sendMessage(m.chat, { text: `AI Research:\n${report}` }, { quoted: m });
 
         if (Array.isArray(images) && images.length > 0) {
             const album = images.map((url, i) => ({
                 image: { url },
-                caption: `Report Image (${i + 1}/${images.length})`
+                caption: `Report Image (${i + 1}/${images.length})`,
             }));
             await conn.sendMessage(m.chat, { album }, { quoted: m });
         }
-
     } catch (error) {
         console.error(error);
         m.reply("An error occurred: " + error.message);

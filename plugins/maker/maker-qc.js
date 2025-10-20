@@ -12,16 +12,10 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 `Usage:\n› ${usedPrefix + command} <text> Or reply to a message you want to turn into a quote.`
             );
 
-        const name =
-            m.quoted?.name ||
-            m.pushName ||
-            m.name ||
-            "Anonymous";
+        const name = m.quoted?.name || m.pushName || m.name || "Anonymous";
 
         const senderJid = m.quoted?.sender || m.sender;
-        const profile = await conn
-            .profilePictureUrl(senderJid, "image")
-            .catch(() => null);
+        const profile = await conn.profilePictureUrl(senderJid, "image").catch(() => null);
 
         const avatar = profile || "https://qu.ax/yqEpZ.jpg";
 
@@ -29,9 +23,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         const api = `https://api.nekolabs.my.id/canvas/quote-chat?text=${encodeURIComponent(
             cleanText
-        )}&name=${encodeURIComponent(name)}&profile=${encodeURIComponent(
-            avatar
-        )}&color=%23000000`;
+        )}&name=${encodeURIComponent(name)}&profile=${encodeURIComponent(avatar)}&color=%23000000`;
 
         const res = await fetch(api);
         if (!res.ok) throw new Error("Failed to contact Quote Chat API.");
