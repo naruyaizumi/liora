@@ -1,6 +1,6 @@
 {
     "name": "liora",
-    "version": "7.4.0",
+    "version": "7.4.1",
     "type": "module",
     "engines": {
         "node": ">=22.0.0"
@@ -24,6 +24,7 @@
         "cheerio": "^1.1.2",
         "file-type": "^21.0.0",
         "liora-lib": "^1.0.24",
+        "node-cron": "^4.2.1",
         "pino": "^10.1.0",
         "sharp": "^0.34.4"
     },
