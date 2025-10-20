@@ -5,8 +5,15 @@ let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
         const num = args[0].replace(/[^0-9]/g, "");
         target = await conn.lidMappingStore.getLIDForPN(num + "@s.whatsapp.net");
     }
+    if (!target && args[0]) {
+        const raw = args[0].replace(/[^0-9]/g, "");
+        const lid = raw + "@lid";
+    if (participants.some(p => p.lid === lid)) {
+        target = lid;
+        }
+    }
 
-    if (!target || !participants.some((p) => p.id === target))
+    if (!target || !participants.some((p) => p.lid === target))
         return m.reply(
             `Specify one valid member to remove.\n› Example: ${usedPrefix + command} @628xxxx`
         );

@@ -16,7 +16,6 @@
     },
     "dependencies": {
         "async-mutex": "^0.5.0",
-        "awesome-phonenumber": "^7.5.0",
         "baileys": "npm:@itsukichan/baileys@^7.3.2",
         "better-sqlite3": "^12.4.1",
         "canvas": "^3.2.0",
@@ -24,7 +23,6 @@
         "cheerio": "^1.1.2",
         "file-type": "^21.0.0",
         "liora-lib": "^1.0.24",
-        "node-cron": "^4.2.1",
         "pino": "^10.1.0",
         "sharp": "^0.34.4"
     },

@@ -8,9 +8,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         );
 
     await global.loading(m, conn);
-
-    const timestamp = new Date().toTimeString().split(" ")[0];
-
     let result, buffer, mime, ext, sizeMB;
     let ok = false;
 
@@ -40,11 +37,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const isImage = /^image\//.test(mime);
     const isVideo = /^video\//.test(mime);
     const isAudio = /^audio\//.test(mime);
-
     let caption = `
-┌─[${timestamp}]─────────────
-│  Fetch Log
-└────────────────────────────
 URL : ${text}
 Status : ${ok ? "OK" : "ERROR"}
 Size : ${sizeMB || "0.00"} MB
@@ -89,6 +82,5 @@ Output : result.${ext}
 handler.help = ["fetch"];
 handler.tags = ["internet"];
 handler.command = /^(fetch|get)$/i;
-handler.mods = true;
 
 export default handler;

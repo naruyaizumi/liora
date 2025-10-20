@@ -1,4 +1,5 @@
 import { load } from "cheerio";
+import { fetch } from "liora-lib";
 
 let handler = async (m, { text, usedPrefix, command, conn }) => {
     try {

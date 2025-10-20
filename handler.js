@@ -381,62 +381,63 @@ export async function participantsUpdate({ id, participants, action }) {
 
     if (!groupMetadata || !participants?.length) return;
 
-    for (const user of participants) {
-        if (!chat.detect) continue;
+    for (const u of participants) {
+    const user = typeof u === "string" ? u : u?.id || "";
+    if (!user) continue;
 
-        const pp =
-            (await conn.profilePictureUrl(user, "image").catch(() => null)) ||
-            "https://qu.ax/jVZhH.jpg";
+    if (!chat.detect) continue;
 
-        const img = await canvas(pp).catch(() => null);
-        const groupName = await conn.getName(id);
-        const desc = groupMetadata.desc?.toString() || "-";
+    const pp =
+        (await conn.profilePictureUrl(user, "image").catch(() => null)) ||
+        "https://qu.ax/jVZhH.jpg";
 
-        let text = "";
-        let title = "";
-        let body = "";
+    const img = await canvas(pp).catch(() => null);
+    const groupName = await conn.getName(id);
+    const desc = groupMetadata.desc?.toString() || "-";
 
-        switch (action) {
-            case "add":
-                text = (chat.sWelcome || conn.welcome || "Welcome, @user")
-                    .replace("@subject", groupName)
-                    .replace("@desc", desc)
-                    .replace("@user", "@" + user.split("@")[0]);
+    let text = "";
+    let title = "";
+    let body = "";
 
-                title = "[ SYSTEM NOTICE ] User Joined";
-                body = `+ Total members: ${groupMetadata.participants.length}`;
+    switch (action) {
+        case "add":
+            text = (chat.sWelcome || conn.welcome || "Welcome, @user")
+                .replace("@subject", groupName)
+                .replace("@desc", desc)
+                .replace("@user", "@" + user.split("@")[0]);
 
-                break;
+            title = "[ SYSTEM NOTICE ] User Joined";
+            body = `+ Total members: ${groupMetadata.participants.length}`;
+            break;
 
-            case "remove":
-                text = (chat.sBye || conn.bye || "Goodbye, @user")
-                    .replace("@subject", groupName)
-                    .replace("@desc", desc)
-                    .replace("@user", "@" + user.split("@")[0]);
+        case "remove":
+            text = (chat.sBye || conn.bye || "Goodbye, @user")
+                .replace("@subject", groupName)
+                .replace("@desc", desc)
+                .replace("@user", "@" + user.split("@")[0]);
 
-                title = "[ SYSTEM NOTICE ] User Left";
-                body = `- Members remaining: ${groupMetadata.participants.length}`;
+            title = "[ SYSTEM NOTICE ] User Left";
+            body = `- Members remaining: ${groupMetadata.participants.length}`;
+            break;
 
-                break;
-
-            default:
-                continue;
-        }
-
-        await conn.sendMessage(id, {
-            text: text.trim(),
-            mentions: [user],
-            contextInfo: {
-                externalAdReply: {
-                    title,
-                    body,
-                    thumbnail: img,
-                    mediaType: 1,
-                    renderLargerThumbnail: true,
-                },
-            },
-        });
+        default:
+            continue;
     }
+
+    await conn.sendMessage(id, {
+        text: text.trim(),
+        mentions: [user],
+        contextInfo: {
+            externalAdReply: {
+                title,
+                body,
+                thumbnail: img,
+                mediaType: 1,
+                renderLargerThumbnail: true,
+            },
+        },
+    });
+}
 }
 
 const file = global.__filename(import.meta.url, true);

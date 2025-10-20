@@ -1,21 +1,21 @@
 let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
-    let target;
+    let target = m.mentionedJid?.[0] || m.quoted?.sender || null;
 
-    if (m.mentionedJid?.length) target = m.mentionedJid[0];
-    else if (m.quoted?.sender) target = m.quoted.sender;
-    else if (args[0]) {
+    if (!target && args[0] && /^\d{5,}$/.test(args[0])) {
         const num = args[0].replace(/[^0-9]/g, "");
-        if (num) target = await conn.lidMappingStore.getLIDForPN(num + "@s.whatsapp.net");
+        target = await conn.lidMappingStore.getLIDForPN(num + "@s.whatsapp.net");
     }
-
-    if (!target)
+    if (!target && args[0]) {
+        const raw = args[0].replace(/[^0-9]/g, "");
+        const lid = raw + "@lid";
+        if (participants.some(p => p.lid === lid)) {
+            target = lid;
+        }
+    }
+    if (!target || !participants.some((p) => p.lid === target))
         return m.reply(
             `Specify one valid member to promote.\n› Example: ${usedPrefix + command} @628xxxx`
         );
-
-    const exists = participants.some((p) => p.id === target);
-    if (!exists) return m.reply("User is not a member of this group.");
-
     try {
         await conn.groupParticipantsUpdate(m.chat, [target], "promote");
         await conn.sendMessage(

@@ -1,4 +1,4 @@
-import { uploader } from "../../lib/uploader.js";
+import { uploader3 } from "../../lib/uploader.js";
 import { fetch } from "liora-lib";
 
 let handler = async (m, { conn, args, command }) => {
@@ -15,7 +15,7 @@ let handler = async (m, { conn, args, command }) => {
         if (!media || !(media instanceof Buffer))
             return m.reply("Failed to download media or unrecognized format.");
 
-        const url = await uploader(media).catch(() => null);
+        const url = await uploader3(media).catch(() => null);
         if (!url) return m.reply("Failed to upload image. Try again later.");
 
         const endpointMap = {
