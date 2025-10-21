@@ -1,7 +1,7 @@
 import DB from "better-sqlite3";
 import path from "path";
 
-let handler = async (m, { conn }) => {
+let handler = async (m) => {
     const dbPath = path.resolve(process.cwd(), "database/auth.db");
     const db = new DB(dbPath);
     const groups = Object.keys(global.conn.chats || {}).filter((j) => j.endsWith("@g.us"));

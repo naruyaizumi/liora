@@ -17,7 +17,6 @@ const features = [
     { key: "noprint", scope: "bot", name: "No Print" },
     { key: "autoread", scope: "bot", name: "Auto Read" },
     { key: "restrict", scope: "bot", name: "Restrict" },
-    { key: "cleartmp", scope: "bot", name: "Clear Tmp" },
     { key: "anticall", scope: "bot", name: "Anti Call" },
     { key: "adReply", scope: "bot", name: "Ad Reply" },
     { key: "noerror", scope: "bot", name: "Hide Error" },

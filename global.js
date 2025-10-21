@@ -124,12 +124,10 @@ ensureTable(
   gconly INTEGER DEFAULT 0,
   autoread INTEGER DEFAULT 0,
   restrict INTEGER DEFAULT 0,
-  cleartmp INTEGER DEFAULT 1,
   anticall INTEGER DEFAULT 0,
   adReply INTEGER DEFAULT 0,
   noprint INTEGER DEFAULT 0,
-  noerror INTEGER DEFAULT 1,
-  maintenance INTEGER DEFAULT 0
+  noerror INTEGER DEFAULT 1
   `
 );
 
