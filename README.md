@@ -17,9 +17,6 @@
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/codeql.yml">
   <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/codeql.yml?label=CodeQL&style=for-the-badge&logo=github&logoColor=white&color=1A1F71&labelColor=2F2F2F" alt="CodeQL Scan"/>
 </a>
-<a href="https://github.com/naruyaizumi/liora/actions/workflows/dependency-review.yml">
-  <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/dependency-review.yml?label=Dependency%20Review&style=for-the-badge&logo=dependabot&logoColor=white&color=1A1F71&labelColor=2F2F2F" alt="Dependency Review"/>
-</a>
 
 <a href="https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03">
   <img src="https://img.shields.io/badge/WhatsApp-Channel-1A1F71?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F" alt="WhatsApp Channel"/>
@@ -37,14 +34,6 @@
 > **Do not publicly disclose vulnerabilities or internal bugs.**  
 > If you discover a security issue, report it responsibly through the official issue templates or via direct contact.  
 > This process preserves the **integrity, stability, and trust** of the Liora ecosystem.
-
-> [!TIP]  
-> **Installation Guide**
->
-> Choose your preferred installation method:
->
-> - [Install via Pterodactyl](.github/INSTALLATION/PTERODACTYL.md)
-> - [Install via PM2](.github/INSTALLATION/PM2.md)
 
 > [!WARNING]
 > **Unauthorized modification, credit removal, or commercial distribution is strictly forbidden.**

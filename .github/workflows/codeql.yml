@@ -1,35 +1,33 @@
-name: 🍕 CodeQL Security Scan
+name: CodeQL
 
 on:
     push:
         branches: ["main"]
     pull_request:
         branches: ["main"]
-    schedule:
-        - cron: "0 0 * * 0"
 
 jobs:
     analyze:
-        name: 🍜 Analyze JavaScript
+        name: Analyze JavaScript
         runs-on: ubuntu-latest
         permissions:
             contents: read
             security-events: write
 
         steps:
-            - name: 🍱 Checkout repository
+            - name: Checkout repository
               uses: actions/checkout@v4
 
-            - name: 🍵 Setup Node.js
+            - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
                   node-version: 24.x
 
-            - name: 🍰 Initialize CodeQL
+            - name: Initialize CodeQL
               uses: github/codeql-action/init@v3
               with:
                   languages: javascript
                   queries: security-extended,security-and-quality
 
-            - name: 🍔 Perform CodeQL Analysis
+            - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v3

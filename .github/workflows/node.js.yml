@@ -1,4 +1,4 @@
-name: 🍱 Node.js CI
+name: CI
 
 on:
     push:
@@ -15,24 +15,21 @@ jobs:
                 node-version: [22.x, 24.x]
 
         steps:
-            - name: 🍙 Checkout Repository
+            - name: Checkout Repository
               uses: actions/checkout@v4
 
-            - name: 🍜 Setup Node.js ${{ matrix.node-version }}
+            - name: Setup Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node-version }}
 
-            - name: 🍡 Setup pnpm
+            - name: Setup pnpm
               uses: pnpm/action-setup@v4
               with:
                   run_install: false
 
-            - name: 🍡 Install Dependencies
+            - name: Install Dependencies
               run: pnpm install --ignore-scripts
 
-            - name: 🍰 Audit Dependencies
-              run: pnpm audit || true
-
-            - name: 🍧 Run Tests
+            - name: Run Tests
               run: pnpm test
