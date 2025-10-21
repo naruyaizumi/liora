@@ -1,7 +1,7 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     let num = args[0].replace(/\D/g, "");
-    if (!num || num.length < 5) 
-    return m.reply(`Specify one valid number.\n› Example: ${usedPrefix + command} 628xxxx`);
+    if (!num || num.length < 5)
+        return m.reply(`Specify one valid number.\n› Example: ${usedPrefix + command} 628xxxx`);
     const target = num + "@s.whatsapp.net";
     try {
         const result = await conn.groupParticipantsUpdate(m.chat, [target], "add");
@@ -27,8 +27,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                         name: groupName,
                         caption: `I could not add you directly. Please join using this invite link.`,
                         code: addReq.code,
-                        expiration: Number(addReq.expiration)
-                    }
+                        expiration: Number(addReq.expiration),
+                    },
                 });
 
                 return conn.sendMessage(
