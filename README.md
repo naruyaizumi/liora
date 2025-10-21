@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Liora](https://qu.ax/qHNvM.png)
+![Liora](https://qu.ax/SUDjH.png)
 
 <p align="center">
 <a href="https://github.com/naruyaizumi/liora/actions/workflows/node.js.yml">

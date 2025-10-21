@@ -1,11 +1,10 @@
 import DB from "better-sqlite3";
 import path from "path";
 
-let handler = async (m) => {
+let handler = async (m, { conn }) => {
     const dbPath = path.resolve(process.cwd(), "database/auth.db");
     const db = new DB(dbPath);
     const groups = Object.keys(global.conn.chats || {}).filter((j) => j.endsWith("@g.us"));
-
     let totalSenderKeys = 0;
     let totalSessions = 0;
     let totalAppState = 0;
