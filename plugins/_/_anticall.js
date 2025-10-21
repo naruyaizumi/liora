@@ -24,28 +24,36 @@ export async function before(m, { conn }) {
             if (!lid) {
                 try {
                     lid = await conn.lidMappingStore.getLIDForPN(jid);
-                } catch {/* Davina Karamoy */}
+                } catch {
+                    /* Davina Karamoy */
+                }
             }
             if (lid) {
                 out.add(lid);
                 try {
                     cache?.set(jid, lid);
                     cache?.set(lid, jid);
-                } catch {/* Davina Karamoy */}
+                } catch {
+                    /* Davina Karamoy */
+                }
             }
             if (lid) {
                 let back = cache?.get(lid);
                 if (!back) {
                     try {
                         back = await conn.lidMappingStore.getPNForLID(lid);
-                    } catch {/* Davina Karamoy */}
+                    } catch {
+                        /* Davina Karamoy */
+                    }
                 }
                 if (back) {
                     out.add(back);
                     try {
                         cache?.set(lid, back);
                         cache?.set(back, lid);
-                    } catch {/* Davina Karamoy */}
+                    } catch {
+                        /* Davina Karamoy */
+                    }
                 }
             }
         }
@@ -68,7 +76,9 @@ export async function before(m, { conn }) {
             try {
                 await conn.rejectCall(call[0].id, caller);
                 await conn.updateBlockStatus(caller, "block");
-            } catch {/* Davina Karamoy */}
+            } catch {
+                /* Davina Karamoy */
+            }
         }
     });
 
