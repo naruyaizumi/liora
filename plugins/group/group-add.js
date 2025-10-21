@@ -1,31 +1,48 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-    let target;
-
-    if (m.mentionedJid?.[0]) target = m.mentionedJid[0];
-    else if (m.quoted?.sender) target = m.quoted.sender;
-    else if (args[0] && /^\d{5,}$/.test(args[0])) {
-        const num = args[0].replace(/[^0-9]/g, "");
-        target = await conn.lidMappingStore.getLIDForPN(num + "@s.whatsapp.net");
-    }
-
-    if (!target)
-        return m.reply(
-            `Specify one valid number or mention to add.\n› Example: ${usedPrefix + command} 628xxxx`
-        );
-
+    let num = args[0].replace(/\D/g, "");
+    if (!num || num.length < 5) 
+    return m.reply(`Specify one valid number.\n› Example: ${usedPrefix + command} 628xxxx`);
+    const target = num + "@s.whatsapp.net";
     try {
-        await conn.groupParticipantsUpdate(m.chat, [target], "add");
-        await conn.sendMessage(
-            m.chat,
-            {
-                text: `Successfully added @${target.split("@")[0]} to the group.`,
-                mentions: [target],
-            },
-            { quoted: m }
-        );
+        const result = await conn.groupParticipantsUpdate(m.chat, [target], "add");
+        const userResult = result[0];
+        if (userResult.status === "200") {
+            return conn.sendMessage(
+                m.chat,
+                { text: `Successfully added to the group.` },
+                { quoted: m }
+            );
+        }
+
+        if (userResult.status === "403") {
+            const addReq = userResult.content?.content?.[0]?.attrs;
+            const phoneNumber = userResult.content?.attrs?.phone_number || target;
+
+            if (addReq?.code && addReq?.expiration) {
+                const groupName = await conn.getName(m.chat);
+
+                await conn.sendMessage(phoneNumber, {
+                    groupInvite: {
+                        jid: m.chat,
+                        name: groupName,
+                        caption: `I could not add you directly. Please join using this invite link.`,
+                        code: addReq.code,
+                        expiration: Number(addReq.expiration)
+                    }
+                });
+
+                return conn.sendMessage(
+                    m.chat,
+                    { text: `Unable to add user directly. Invitation has been sent, please wait.` },
+                    { quoted: m }
+                );
+            }
+        }
+
+        return m.reply("Failed to add the specified member.");
     } catch (err) {
         console.error(`Add failed for ${target}:`, err);
-        m.reply("Failed to add the specified member.");
+        return m.reply("Failed to add the specified member.");
     }
 };
 
