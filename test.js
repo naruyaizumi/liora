@@ -41,7 +41,7 @@ async function collectFiles() {
 }
 
 async function checkFiles() {
-    logger.info('Starting source validation...');
+    logger.info("Starting source validation...");
 
     const files = await collectFiles();
     let passed = 0;
@@ -63,14 +63,12 @@ async function checkFiles() {
     }
 
     logger.info("───────────────────────────────────────────");
-    logger.info(
-        'Completed — ${passed} passed, ${failed} failed'
-    );
+    logger.info("Completed — ${passed} passed, ${failed} failed");
 
     if (failed === 0) {
-        logger.info('All files validated successfully.');
+        logger.info("All files validated successfully.");
     } else {
-        logger.warn('Some files failed validation.');
+        logger.warn("Some files failed validation.");
     }
 }
 

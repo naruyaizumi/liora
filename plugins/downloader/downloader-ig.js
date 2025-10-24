@@ -44,7 +44,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         } else m.reply("No valid media files found.");
     } catch (e) {
         conn.logger.error(e);
-        m.reply(`Error: ${e.message}`);;
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

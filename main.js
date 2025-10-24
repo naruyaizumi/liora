@@ -36,9 +36,7 @@ serialize();
 async function IZUMI() {
     const { state, saveCreds } = SQLiteAuth();
     const { version: baileysVersion } = await fetchLatestBaileysVersion();
-    logger.info(
-        `[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}`
-    );
+    logger.info(`[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}`);
 
     const connectionOptions = {
         version: baileysVersion,

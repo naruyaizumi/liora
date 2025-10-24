@@ -86,7 +86,10 @@ function ensureTable(tableName, schema) {
                     sqlite.exec(`ALTER TABLE ${tableName} ADD COLUMN ${colDef}`);
                     conn.logger.info({ module: "DB" }, `Added column ${col} to ${tableName}`);
                 } catch (e) {
-                    conn.logger.error({ module: "DB", column: col, error: e.message }, `Failed to add column`);
+                    conn.logger.error(
+                        { module: "DB", column: col, error: e.message },
+                        `Failed to add column`
+                    );
                 }
             }
         }
@@ -180,11 +183,16 @@ class DataWrapper {
                                     obj[prop] = value;
                                     return true;
                                 } catch (e) {
-                                    conn.logger.error({ module: 'DB', table, prop }, `[DB] Update failed on ${table}.${prop}: ${e.message}`);
+                                    conn.logger.error(
+                                        { module: "DB", table, prop },
+                                        `[DB] Update failed on ${table}.${prop}: ${e.message}`
+                                    );
                                     return false;
                                 }
                             }
-                            conn.logger.warn(`[DB] Tried to set unknown column ${prop} on ${table}`);
+                            conn.logger.warn(
+                                `[DB] Tried to set unknown column ${prop} on ${table}`
+                            );
                             return false;
                         },
                     });

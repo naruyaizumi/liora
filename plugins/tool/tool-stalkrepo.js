@@ -24,7 +24,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         const updated = new Date(repo.updatedAt).toLocaleDateString("id-ID");
         const pushed = new Date(repo.pushedAt).toLocaleDateString("id-ID");
 
-const caption = `
+        const caption = `
 GitHub Repository: ${repo.fullNameRepo}
 
 Author

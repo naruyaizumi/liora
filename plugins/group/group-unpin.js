@@ -8,8 +8,8 @@ let handler = async (m, { conn }) => {
         await conn.sendMessage(chat, {
             pin: {
                 type: 2,
-                key: quotedMsg.key
-            }
+                key: quotedMsg.key,
+            },
         });
         m.reply("Message unpinned successfully.");
     } catch (e) {

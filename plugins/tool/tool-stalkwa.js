@@ -53,7 +53,9 @@ User: @${userJid.split("@")[0]}
 LID: ${lid || "-"}
 Status: ${about}
 Updated: ${lastUpdate}
-${title === "WhatsApp Business" ? `
+${
+    title === "WhatsApp Business"
+        ? `
 Business Info
 Description: ${bisnis?.description || "-"}
 Category: ${Array.isArray(bisnis?.category) ? bisnis.category.join(", ") : bisnis?.category || "-"}
@@ -62,7 +64,9 @@ Website: ${bisnis?.website?.join(", ") || "-"}
 Address: ${bisnis?.address || "-"}
 Work Hours: 
 ${businessHours}
-` : ""}
+`
+        : ""
+}
 `;
 
         await conn.sendMessage(

@@ -3,7 +3,9 @@ import { open } from "fs/promises";
 
 let handler = async (m, { conn, args, __dirname, usedPrefix, command }) => {
     if (!args.length)
-        return m.reply(`Enter the target file path.\n› Example: ${usedPrefix + command} plugins owner owner-sf\n`);
+        return m.reply(
+            `Enter the target file path.\n› Example: ${usedPrefix + command} plugins owner owner-sf\n`
+        );
 
     try {
         let target = join(...args);

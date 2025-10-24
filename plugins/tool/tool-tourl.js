@@ -1,10 +1,4 @@
-import {
-    uploader,
-    uploader2,
-    uploader3,
-    uploader4,
-    uploader5,
-} from "../../lib/uploader.js";
+import { uploader, uploader2, uploader3, uploader4, uploader5 } from "../../lib/uploader.js";
 
 const uploaders = {
     1: { name: "Catbox.moe", fn: uploader },

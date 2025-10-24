@@ -3,7 +3,7 @@ let handler = async (m, { conn, args }) => {
 
     const quotedMsg = m.quoted.copy();
     const { chat } = quotedMsg;
-    let duration = 86400; 
+    let duration = 86400;
 
     if (args[0]) {
         const input = args[0].toLowerCase();
@@ -17,8 +17,8 @@ let handler = async (m, { conn, args }) => {
             pin: {
                 type: 1,
                 time: duration,
-                key: quotedMsg.key
-            }
+                key: quotedMsg.key,
+            },
         });
         m.reply(`Message pinned for ${duration} seconds.`);
     } catch (e) {

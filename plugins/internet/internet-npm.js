@@ -3,7 +3,9 @@ import { fetch } from "liora-lib";
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
         if (!text) {
-            return m.reply(`Usage: ${usedPrefix + command} <package>\nExample: ${usedPrefix + command} sharp`);
+            return m.reply(
+                `Usage: ${usedPrefix + command} <package>\nExample: ${usedPrefix + command} sharp`
+            );
         }
 
         await global.loading(m, conn);

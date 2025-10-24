@@ -19,7 +19,7 @@ let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
                 `Specify one valid WhatsApp number to ${command}.\n› Example: ${usedPrefix + command} @628xxxx`
             );
 
-        const isBlocked = await conn.fetchBlocklist().then(list => list.includes(target));
+        const isBlocked = await conn.fetchBlocklist().then((list) => list.includes(target));
 
         if (command === "block" && isBlocked)
             return m.reply(`@${target.split("@")[0]} is already blocked.`);

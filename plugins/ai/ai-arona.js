@@ -11,17 +11,13 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
             conn.arona[m.chat] = {
                 active: true,
             };
-            m.reply(
-                "Arona has been activated!\nNow you can chat directly with her, Sensei~ >w<"
-            );
+            m.reply("Arona has been activated!\nNow you can chat directly with her, Sensei~ >w<");
             return;
         }
 
         if (args[0].toLowerCase() === "off") {
             delete conn.arona[m.chat];
-            m.reply(
-                "Arona is turned off.\nShe will take a break from her duties as an assistant."
-            );
+            m.reply("Arona is turned off.\nShe will take a break from her duties as an assistant.");
             return;
         }
 
