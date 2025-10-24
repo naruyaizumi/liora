@@ -4,9 +4,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0]) {
         return m.reply(
             `Specify duration.\n\nExamples:\n` +
-            `› ${usedPrefix + command} 1 = 1 day\n` +
-            `› ${usedPrefix + command} 2 = 7 days\n` +
-            `› ${usedPrefix + command} 3 = 30 days`
+                `› ${usedPrefix + command} 1 = 1 day\n` +
+                `› ${usedPrefix + command} 2 = 7 days\n` +
+                `› ${usedPrefix + command} 3 = 30 days`
         );
     }
 
@@ -15,9 +15,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     const input = args[0];
     const durations = {
-        "1": { seconds: 86400, label: "1 day" },
-        "2": { seconds: 604800, label: "7 days" },
-        "3": { seconds: 2592000, label: "30 days" },
+        1: { seconds: 86400, label: "1 day" },
+        2: { seconds: 604800, label: "7 days" },
+        3: { seconds: 2592000, label: "30 days" },
     };
 
     const selected = durations[input];

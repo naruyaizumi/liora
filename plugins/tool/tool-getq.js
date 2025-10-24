@@ -19,10 +19,12 @@ handler.mods = true;
 export default handler;
 
 function isByteArray(obj) {
-    return typeof obj === "object" &&
+    return (
+        typeof obj === "object" &&
         obj !== null &&
-        Object.keys(obj).every(k => /^\d+$/.test(k)) &&
-        Object.values(obj).every(v => typeof v === "number" && v >= 0 && v <= 255);
+        Object.keys(obj).every((k) => /^\d+$/.test(k)) &&
+        Object.values(obj).every((v) => typeof v === "number" && v >= 0 && v <= 255)
+    );
 }
 
 function inspect(obj, depth = 0, seen = new WeakSet()) {
@@ -40,13 +42,13 @@ function inspect(obj, depth = 0, seen = new WeakSet()) {
             let value = desc?.get ? desc.get.call(obj) : obj[key];
 
             if (Buffer.isBuffer(value)) {
-                const hex = BufferJSON.toJSON(value).data
-                    .map(v => v.toString(16).padStart(2, "0"))
+                const hex = BufferJSON.toJSON(value)
+                    .data.map((v) => v.toString(16).padStart(2, "0"))
                     .join("");
                 result[key] = `<Buffer ${hex}>`;
             } else if (isByteArray(value)) {
                 const hex = Object.values(value)
-                    .map(v => v.toString(16).padStart(2, "0"))
+                    .map((v) => v.toString(16).padStart(2, "0"))
                     .join("");
                 result[key] = `<ByteArray ${hex}>`;
             } else if (typeof value === "function") {

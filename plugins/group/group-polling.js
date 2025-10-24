@@ -6,7 +6,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         );
 
     const [title, optionsRaw] = input.split("|");
-    const options = optionsRaw.split(",").map(v => v.trim()).filter(Boolean);
+    const options = optionsRaw
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean);
 
     if (!title || options.length < 2)
         return m.reply("Poll must have a title and at least 2 options.");
