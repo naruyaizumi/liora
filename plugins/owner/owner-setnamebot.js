@@ -1,27 +1,21 @@
 let handler = async (m, { conn, text, command, usedPrefix }) => {
-    if (!text) return m.reply(`Enter the new bot name.\n› Example: ${usedPrefix + command} Liora`);
+  if (!text) {
+    return m.reply(`Enter the new bot name.\nExample: ${usedPrefix + command} Liora`);
+  }
 
-    const timestamp = new Date().toTimeString().split(" ")[0];
+  try {
+    await conn.updateProfileName(text);
 
-    try {
-        await conn.updateProfileName(text);
-        const response = [
-            "```",
-            `┌─[${timestamp}]────────────`,
-            `│  Name Update`,
-            "└──────────────────────",
-            `Status : Success`,
-            `New Name: ${text}`,
-            "───────────────────────",
-            "WhatsApp bot name updated successfully.",
-            "```",
-        ].join("\n");
+    const response = `
+New Name: ${text}
+WhatsApp bot name updated successfully.
+`.trim();
 
-        m.reply(response);
-    } catch (e) {
-        conn.logger.error(e);
-        m.reply(`Error: ${e.message}`);
-    }
+    m.reply(response);
+  } catch (e) {
+    conn.logger.error(e);
+    m.reply(`Error: ${e.message}`);
+  }
 };
 
 handler.help = ["setnamebot"];

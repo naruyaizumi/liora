@@ -1,6 +1,6 @@
 {
     "name": "liora",
-    "version": "7.4.2",
+    "version": "7.4.3",
     "type": "module",
     "engines": {
         "node": ">=22.0.0"

@@ -1,26 +1,26 @@
 let handler = async (m, { conn }) => {
-    if (!m.quoted) return m.reply("Reply a message to unpin.");
+    if (!m.quoted) return m.reply("Reply a message to unkeep.");
 
     const quotedMsg = m.quoted.copy();
     const { chat } = quotedMsg;
 
     try {
         await conn.sendMessage(chat, {
-            pin: {
+            keep: {
                 type: 2,
                 key: quotedMsg.key,
             },
         });
-        m.reply("Message unpinned successfully.");
+        m.reply("Message unkept successfully.");
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
     }
 };
 
-handler.help = ["unpin"];
+handler.help = ["unkeep"];
 handler.tags = ["group"];
-handler.command = /^(unpin)$/i;
+handler.command = /^(unkeep)$/i;
 handler.group = true;
 handler.admin = true;
 handler.botAdmin = true;

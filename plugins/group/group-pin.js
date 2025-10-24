@@ -1,26 +1,37 @@
-let handler = async (m, { conn, args }) => {
+let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!m.quoted) return m.reply("Reply a message to pin.");
+
+    if (!args[0]) {
+        return m.reply(
+            `Specify duration.\n\nExamples:\n` +
+            `› ${usedPrefix + command} 1 = 1 day\n` +
+            `› ${usedPrefix + command} 2 = 7 days\n` +
+            `› ${usedPrefix + command} 3 = 30 days`
+        );
+    }
 
     const quotedMsg = m.quoted.copy();
     const { chat } = quotedMsg;
-    let duration = 86400;
 
-    if (args[0]) {
-        const input = args[0].toLowerCase();
-        if (input.endsWith("d")) duration = parseInt(input) * 86400;
-        else if (input.endsWith("h")) duration = parseInt(input) * 3600;
-        else if (input.endsWith("m")) duration = parseInt(input) * 60;
-    }
+    const input = args[0];
+    const durations = {
+        "1": { seconds: 86400, label: "1 day" },
+        "2": { seconds: 604800, label: "7 days" },
+        "3": { seconds: 2592000, label: "30 days" },
+    };
+
+    const selected = durations[input];
+    if (!selected) return m.reply("Invalid option. Use 1, 2, or 3 only.");
 
     try {
         await conn.sendMessage(chat, {
             pin: {
                 type: 1,
-                time: duration,
+                time: selected.seconds,
                 key: quotedMsg.key,
             },
         });
-        m.reply(`Message pinned for ${duration} seconds.`);
+        m.reply(`Message pinned for ${selected.label}.`);
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
@@ -29,7 +40,7 @@ let handler = async (m, { conn, args }) => {
 
 handler.help = ["pin"];
 handler.tags = ["group"];
-handler.command = /^pin$/i;
+handler.command = /^(pin)$/i;
 handler.group = true;
 handler.admin = true;
 handler.botAdmin = true;

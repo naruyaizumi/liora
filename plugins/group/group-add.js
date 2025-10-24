@@ -1,15 +1,33 @@
-let handler = async (m, { conn, args, usedPrefix, command }) => {
-    let num = args[0].replace(/\D/g, "");
-    if (!num || num.length < 5)
-        return m.reply(`Specify one valid number.\n› Example: ${usedPrefix + command} 628xxxx`);
-    const target = num + "@s.whatsapp.net";
+let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
     try {
+        let target = m.mentionedJid?.[0] || m.quoted?.sender || null;
+
+        if (!target && args[0] && /^\d{5,}$/.test(args[0])) {
+            const num = args[0].replace(/[^0-9]/g, "");
+            target = await conn.lidMappingStore.getLIDForPN(num + "@s.whatsapp.net");
+        }
+
+        if (!target && args[0]) {
+            const raw = args[0].replace(/[^0-9]/g, "");
+            const lid = raw + "@lid";
+            if (participants.some((p) => p.lid === lid)) {
+                target = lid;
+            }
+        }
+
+        if (!target)
+            throw `Specify one valid member to add.\n› Example: ${usedPrefix + command} @628xxxx`;
+
         const result = await conn.groupParticipantsUpdate(m.chat, [target], "add");
         const userResult = result[0];
+
         if (userResult.status === "200") {
-            await conn.sendMessage(
+            return await conn.sendMessage(
                 m.chat,
-                { text: `Successfully added to the group.` },
+                {
+                    text: `Successfully added @${target.split("@")[0]}.`,
+                    mentions: [target],
+                },
                 { quoted: m }
             );
         }
@@ -31,15 +49,18 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                     },
                 });
 
-                await conn.sendMessage(
+                return await conn.sendMessage(
                     m.chat,
-                    { text: `Unable to add user directly. Invitation has been sent, please wait.` },
+                    {
+                        text: `Unable to add user directly. Invitation has been sent, please wait.`,
+                        mentions: [target],
+                    },
                     { quoted: m }
                 );
             }
         }
 
-        m.reply("Failed to add the specified member.");
+        throw `Failed to add the specified member.`;
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
