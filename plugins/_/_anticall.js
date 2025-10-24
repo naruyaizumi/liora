@@ -76,7 +76,7 @@ export async function before(m, { conn }) {
             try {
                 await conn.rejectCall(call[0].id, caller);
                 await conn.updateBlockStatus(caller, "block");
-            } catch {
+            } catch (e) {
                 conn.logger.error(e);
             }
         }

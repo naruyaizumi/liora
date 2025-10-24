@@ -2,7 +2,7 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { spawn } from "child_process";
 import { createInterface } from "readline";
-import { readFile, mkdir } from "fs/promises";
+import { mkdir } from "fs/promises";
 import pino from "pino";
 
 const logger = pino({
@@ -19,12 +19,6 @@ const logger = pino({
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rl = createInterface({ input: process.stdin, output: process.stdout });
-
-const pkgPath = join(__dirname, "./package.json");
-const pkgData = await readFile(pkgPath, "utf8").catch((e) => {
-    logger.error(e.message);
-    process.exit(1);
-});
 
 async function ensureDirs() {
     const dir = join(__dirname, "database");

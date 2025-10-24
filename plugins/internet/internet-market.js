@@ -34,7 +34,7 @@ let handler = async (m, { args, usedPrefix, command, conn }) => {
     try {
         let logo = await loadImage(info.url_logo_png);
         ctx.drawImage(logo, canvas.width - 100, 20, 48, 48);
-    } catch {}
+    } catch {/* Davina Karamoy */}
 
     let drawItem = (x, y, label, value) => {
         ctx.fillStyle = "rgba(255,255,255,0.12)";

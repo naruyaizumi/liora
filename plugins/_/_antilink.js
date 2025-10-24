@@ -1,6 +1,6 @@
 const linkRegex = /\b((https?|ftp):\/\/[^\s]+|www\.[^\s]+|[a-z0-9-]+\.[a-z]{2,}(\/[^\s]*)?)/gi;
 
-export async function before(m) {
+export async function before(m, { conn }) {
     const toJid = (n) => {
         const raw = Array.isArray(n) ? n[0] : (n?.num ?? n?.lid ?? n);
         const digits = String(raw ?? "").replace(/[^0-9]/g, "");
@@ -116,7 +116,7 @@ export async function before(m) {
                     participant: m.key.participant || m.sender,
                 },
             });
-        } catch {
+        } catch (e) {
             conn.logger.error(e);
         }
     }

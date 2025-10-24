@@ -1,4 +1,4 @@
-export async function before(m) {
+export async function before(m, { conn }) {
     if (!m.isGroup) return true;
 
     const toJid = (n) => {
@@ -104,7 +104,7 @@ export async function before(m) {
                     participant: m.key.participant || m.sender,
                 },
             });
-        } catch {
+        } catch (e) {
             conn.logger.error(e);
         }
     }

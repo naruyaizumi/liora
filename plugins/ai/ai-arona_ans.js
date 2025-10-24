@@ -1,4 +1,4 @@
-export async function before(m) {
+export async function before(m, { conn }) {
     this.arona = this.arona || {};
     let chatId = m.chat;
     let sender = m.sender;

@@ -1,4 +1,4 @@
-let handler = async (m, { text, usedPrefix, command }) => {
+let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
         let chat = global.db.data.chats[m.chat];
         if (!chat) chat = global.db.data.chats[m.chat] = {};

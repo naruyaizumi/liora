@@ -63,7 +63,7 @@ async function checkFiles() {
     }
 
     logger.info("───────────────────────────────────────────");
-    logger.info("Completed — ${passed} passed, ${failed} failed");
+    logger.info(`Completed — ${passed} passed, ${failed} failed`);
 
     if (failed === 0) {
         logger.info("All files validated successfully.");

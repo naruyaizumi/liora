@@ -44,8 +44,6 @@ let handler = async (m, { conn, text }) => {
         const title =
             bisnis?.description || bisnis?.category ? "WhatsApp Business" : "WhatsApp User";
 
-        const timestamp = new Date().toTimeString().split(" ")[0];
-
         const caption = `
 ${title} Profile
 

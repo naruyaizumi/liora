@@ -1,4 +1,4 @@
-/* global conn */ // eslint-disable-line no-unused-vars
+/* global conn */
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 import "./global.js";
 import { smsg } from "./lib/message.js";

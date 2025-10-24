@@ -1,4 +1,4 @@
-let handler = async (m) => {
+let handler = async (m, { conn }) => {
     if (!m.quoted) return m.reply("Reply to a message to debug its structure.");
     try {
         const output = inspectDeep(m.quoted);

@@ -33,7 +33,7 @@ export async function before(m, { conn }) {
         if (approveList.length) {
             await conn.groupRequestParticipantsUpdate(jid, approveList, "approve");
         }
-    } catch {
+    } catch (e) {
         conn.logger.error(e);
     }
 

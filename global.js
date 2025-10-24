@@ -1,3 +1,4 @@
+/* global conn */
 import { createRequire } from "module";
 import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";

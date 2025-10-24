@@ -1,6 +1,6 @@
 /* global conn */
-process.on("uncaughtException", (err) => logger.error(e));
-process.on("unhandledRejection", (err) => logger.error(e));
+process.on("uncaughtException", (e) => logger.error(e));
+process.on("unhandledRejection", (e) => logger.error(e));
 
 import "./config.js";
 import "./global.js";
