@@ -28,9 +28,9 @@ let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
             },
             { quoted: m }
         );
-    } catch (err) {
-        console.error(`Remove failed for ${target}:`, err);
-        m.reply("Failed to remove the specified member.");
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 

@@ -30,7 +30,7 @@ export async function before(m) {
         await this.reply(chatId, json.result, m);
     } catch (e) {
         await this.sendPresenceUpdate("paused", chatId);
-        console.error(e);
+        conn.logger.error(e);
         await this.reply(
             chatId,
             "Arona is charging her nimbus energy...\nTry calling her again later, Sensei~"

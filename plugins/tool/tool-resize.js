@@ -31,15 +31,15 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const caption = [
             "Image Resize",
             `Original : ${before.width}×${before.height}px`,
-            `Resized  : ${after.width}×${after.height}px`,
-            `Mode     : ${fitMode.toUpperCase()}`,
+            `Resized : ${after.width}×${after.height}px`,
+            `Mode : ${fitMode.toUpperCase()}`,
             "Resize completed successfully.",
         ].join("\n");
 
         await conn.sendMessage(m.chat, { image: resized, caption }, { quoted: m });
     } catch (e) {
-        console.error(e);
-        await m.reply(`Error: ${e.message}`);
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

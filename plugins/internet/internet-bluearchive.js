@@ -1,3 +1,5 @@
+import { fetch } from "liora-lib";
+
 let handler = async (m, { conn }) => {
     try {
         await global.loading(m, conn);
@@ -12,8 +14,8 @@ let handler = async (m, { conn }) => {
             { quoted: m }
         );
     } catch (e) {
-        console.error(e);
-        await m.reply(`Error: ${e.message || e}`);
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

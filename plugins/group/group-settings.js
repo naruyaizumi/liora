@@ -1,18 +1,23 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-    const arg = (args[0] || "").toLowerCase();
-    const isClose = { open: "not_announcement", close: "announcement" }[arg];
+    try {
+        const arg = (args[0] || "").toLowerCase();
+        const isClose = { open: "not_announcement", close: "announcement" }[arg];
 
-    if (isClose === undefined) {
-        return m.reply(
-            `Usage: ${usedPrefix + command} open | close\n\nopen  → allow members to send messages\nclose → only admins can send messages`
-        );
+        if (isClose === undefined) {
+            return m.reply(
+                `Usage: ${usedPrefix + command} open | close\n\nopen  → allow members to send messages\nclose → only admins can send messages`
+            );
+        }
+
+        await conn.groupSettingUpdate(m.chat, isClose);
+
+        const status =
+            arg === "open" ? "Group opened (members can chat)" : "Group closed (admins only)";
+        return m.reply(`Status: ${status}`);
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
-
-    await conn.groupSettingUpdate(m.chat, isClose);
-
-    const status =
-        arg === "open" ? "Group opened (members can chat)" : "Group closed (admins only)";
-    return m.reply(`Status: ${status}`);
 };
 
 handler.help = ["group"];

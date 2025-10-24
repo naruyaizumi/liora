@@ -42,9 +42,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         } else if (album.length) {
             await conn.sendMessage(m.chat, { album }, { quoted: m });
         } else m.reply("No valid media files found.");
-    } catch (err) {
-        console.error(err);
-        m.reply(`Error: ${err.message}`);
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);;
     } finally {
         await global.loading(m, conn, true);
     }

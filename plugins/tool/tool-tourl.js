@@ -4,9 +4,6 @@ import {
     uploader3,
     uploader4,
     uploader5,
-    uploader6,
-    uploader7,
-    uploader8,
 } from "../../lib/uploader.js";
 
 const uploaders = {
@@ -15,9 +12,6 @@ const uploaders = {
     3: { name: "Qu.ax", fn: uploader3 },
     4: { name: "Put.icu", fn: uploader4 },
     5: { name: "Tmpfiles.org", fn: uploader5 },
-    6: { name: "Betabotz", fn: uploader6 },
-    7: { name: "Yupra CDN", fn: uploader7 },
-    8: { name: "CloudkuImages", fn: uploader8 },
 };
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -50,14 +44,14 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const caption = [
             `File uploaded successfully`,
             `Server : ${server.name}`,
-            `Size   : ${sizeKB} KB`,
-            `URL    : ${url}`,
+            `Size : ${sizeKB} KB`,
+            `URL : ${url}`,
         ].join("\n");
 
         await conn.sendMessage(m.chat, { text: caption }, { quoted: m });
     } catch (e) {
-        console.error(e);
-        await m.reply(`Upload failed: ${e.message}`);
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

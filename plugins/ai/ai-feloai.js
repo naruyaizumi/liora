@@ -39,9 +39,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             { text: `Felo AI:\n${replyText.trim()}${sources}` },
             { quoted: m }
         );
-    } catch (error) {
-        console.error(error);
-        m.reply("An error occurred: " + error.message);
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

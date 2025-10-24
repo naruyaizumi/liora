@@ -70,9 +70,9 @@ ${others}`,
             },
             { quoted: m }
         );
-    } catch (err) {
-        console.error(err);
-        m.reply("An error occurred while processing your request.");
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

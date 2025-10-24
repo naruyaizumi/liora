@@ -3,24 +3,35 @@ import { fileURLToPath } from "url";
 import { spawn } from "child_process";
 import { createInterface } from "readline";
 import { readFile, mkdir } from "fs/promises";
-import chalk from "chalk";
+import pino from "pino";
+
+const logger = pino({
+    level: "debug",
+    transport: {
+        target: "pino-pretty",
+        options: {
+            colorize: true,
+            translateTime: "HH:MM",
+            ignore: "pid,hostname",
+        },
+    },
+});
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rl = createInterface({ input: process.stdin, output: process.stdout });
 
 const pkgPath = join(__dirname, "./package.json");
-const pkgData = await readFile(pkgPath, "utf8").catch((err) => {
-    console.error(chalk.redBright(`[supervisor] FATAL: cannot read package.json (${err.message})`));
+const pkgData = await readFile(pkgPath, "utf8").catch((e) => {
+    logger.error(e.message);
     process.exit(1);
 });
-const { name } = JSON.parse(pkgData);
 
 async function ensureDirs() {
     const dir = join(__dirname, "database");
     try {
         await mkdir(dir, { recursive: true });
-    } catch (err) {
-        console.warn(chalk.yellow(`Cannot create folder "${dir}": ${err.message}`));
+    } catch (e) {
+        logger.error(e.message);
     }
 }
 await ensureDirs();
@@ -38,20 +49,18 @@ async function start(file) {
             stdio: ["inherit", "inherit", "inherit", "ipc"],
         });
 
-        const time = () => new Date().toISOString().split("T")[1].split(".")[0];
-
         childProcess.on("message", (msg) => {
             if (msg === "uptime") childProcess.send(process.uptime());
         });
 
         childProcess.on("exit", (code, signal) => {
             if (code !== 0 && !shuttingDown)
-                console.warn(chalk.yellow(`[${time()}] ${name}: exited (${code || signal})`));
+                logger.warn(`Child process exited (${code || signal})`);
             resolve(code);
         });
 
-        childProcess.on("error", (err) => {
-            console.error(chalk.red(`[${time()}] ${name}: process error (${err.message})`));
+        childProcess.on("error", (e) => {
+            logger.error(e.message);
             childProcess?.kill("SIGTERM");
             resolve(1);
         });
@@ -67,13 +76,10 @@ async function start(file) {
 async function stopChild(signal = "SIGINT") {
     if (shuttingDown || !childProcess) return;
     shuttingDown = true;
-
-    const time = () => new Date().toISOString().split("T")[1].split(".")[0];
-    console.log(chalk.gray(`[${time()}] ${name}: shutting down (${signal})`));
+    logger.info(`Shutting down (${signal})`);
     childProcess.kill(signal);
-
     const timeout = setTimeout(() => {
-        console.warn(chalk.red(`[${time()}] ${name}: force kill unresponsive process`));
+        logger.warn(`Force killing unresponsive process`);
         childProcess.kill("SIGKILL");
     }, 10000);
 
@@ -84,7 +90,7 @@ async function stopChild(signal = "SIGINT") {
         });
     });
 
-    console.log(chalk.green(`[${time()}] ${name}: shutdown complete`));
+    logger.info(`Shutdown complete`);
     process.exit(0);
 }
 
@@ -99,8 +105,8 @@ async function supervise() {
         else crashCount = 1;
         lastCrash = now;
 
-        if (crashCount >= 5) {
-            console.warn(chalk.red(`Too many crashes. Cooling down 5 min...`));
+        if (crashCount >= 1) {
+            logger.warn(`Too many crashes. Cooling down for 5 minutes...`);
             await new Promise((r) => setTimeout(r, 300000));
             crashCount = 0;
         } else {
@@ -111,12 +117,12 @@ async function supervise() {
 
 process.on("SIGINT", () => stopChild("SIGINT"));
 process.on("SIGTERM", () => stopChild("SIGTERM"));
-process.on("uncaughtException", (err) => {
-    console.error(chalk.red(`[supervisor] Uncaught Exception: ${err.message}`));
+process.on("uncaughtException", (e) => {
+    logger.error(e.message);
     stopChild("SIGTERM");
 });
 
-supervise().catch((err) => {
-    console.error(chalk.red(`[supervisor] FATAL: ${err.message}`));
+supervise().catch((e) => {
+    logger.fatal(e.message);
     process.exit(1);
 });

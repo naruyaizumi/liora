@@ -89,7 +89,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
             { quoted: m }
         );
     } catch (e) {
-        console.error(e);
+        conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);

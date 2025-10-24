@@ -36,8 +36,8 @@ let handler = async (m, { conn, text }) => {
 
         m.reply(`Status mention sent to ${groups.length} group(s).`);
     } catch (e) {
-        console.error(e);
-        m.reply("Error: Failed to send status mentions.\n" + e.message);
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 

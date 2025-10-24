@@ -1,3 +1,5 @@
+import { fetch } from "liora-lib";
+
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
         if (!text)
@@ -15,19 +17,15 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         const { username, description, likes, followers, following, totalPosts, profile } =
             json.result;
 
-        const caption = `\`\`\`
-┌─[TIKTOK STALKER]────────────
-│  @${username}
-└──────────────────────
-Bio        : ${description || "-"}
-───────────────────────
-Followers  : ${followers}
-Following  : ${following}
-Likes      : ${likes}
-Posts      : ${totalPosts}
-───────────────────────
-Profile info fetched successfully.
-\`\`\``;
+        const caption = `
+TikTok Profile: @${username}
+
+Bio: ${description || "-"}
+Followers: ${followers}
+Following: ${following}
+Likes: ${likes}
+Posts: ${totalPosts}
+`;
 
         await conn.sendMessage(
             m.chat,
@@ -39,8 +37,8 @@ Profile info fetched successfully.
             { quoted: m }
         );
     } catch (e) {
-        console.error(e);
-        m.reply("Failed to fetch TikTok profile. Possibly invalid or unreachable.");
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

@@ -27,13 +27,14 @@ let handler = async (m, { conn }) => {
             { quoted: m }
         );
     } catch (e) {
-        m.reply(`An error occurred.\n${e.message || e}`);
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }
 };
 
-handler.help = ["toanime"];
+handler.help = ["noclothes"];
 handler.tags = ["maker"];
 handler.command = /^(noclothes)$/i;
 handler.owner = true;

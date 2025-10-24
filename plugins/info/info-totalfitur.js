@@ -3,17 +3,14 @@ let handler = async (m, { conn }) => {
     const totalCommands = plugins.reduce((sum, p) => sum + (p.help ? p.help.length : 0), 0);
     const totalTags = [...new Set(plugins.flatMap((v) => v.tags || []))].length;
     const totalPlugins = plugins.length;
-    const timestamp = new Date().toTimeString().split(" ")[0];
 
-    const text = [
-        "```",
-        `[${timestamp}] Liora Plugin Statistics`,
-        "────────────────────────────",
-        `Total Features : ${totalCommands}`,
-        `Total Categories: ${totalTags}`,
-        `Total Plugins : ${totalPlugins}`,
-        "```",
-    ].join("\n");
+    const text = `
+Liora Plugin Statistics
+
+Total Features: ${totalCommands}
+Total Categories: ${totalTags}
+Total Plugins: ${totalPlugins}
+    `.trim();
 
     await conn.sendMessage(m.chat, { text }, { quoted: m });
 };

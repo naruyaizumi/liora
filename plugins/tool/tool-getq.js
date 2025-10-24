@@ -4,8 +4,8 @@ let handler = async (m) => {
         const output = inspectDeep(m.quoted);
         await m.reply(output);
     } catch (e) {
-        console.error(e);
-        await m.reply("Error: " + e.message);
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 

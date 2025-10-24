@@ -15,9 +15,9 @@ let handler = async (m, { conn, text }) => {
         if (!json.message) return m.reply("No response received from Blackbox AI.");
 
         await conn.sendMessage(m.chat, { text: json.message.trim() }, { quoted: m });
-    } catch (error) {
-        console.error(error);
-        m.reply("Error: " + error.message);
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

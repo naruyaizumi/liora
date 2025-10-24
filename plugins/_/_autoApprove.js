@@ -34,7 +34,7 @@ export async function before(m, { conn }) {
             await conn.groupRequestParticipantsUpdate(jid, approveList, "approve");
         }
     } catch {
-        // Jawa
+        conn.logger.error(e);
     }
 
     return true;

@@ -33,9 +33,9 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
         }
 
         m.reply("No downloadable content found for this Threads link.");
-    } catch (err) {
-        console.error(err);
-        m.reply(`An error occurred: ${err.message}`);
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

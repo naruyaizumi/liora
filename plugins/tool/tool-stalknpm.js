@@ -1,3 +1,5 @@
+import { fetch } from "liora-lib";
+
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
         if (!text)
@@ -17,35 +19,31 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         const created = new Date(result.time?.created).toLocaleDateString("id-ID");
         const modified = new Date(result.time?.modified).toLocaleDateString("id-ID");
 
-        const caption = `\`\`\`
-┌─[NPM PACKAGE STALKER]────────────
-│  ${data.name}
-└──────────────────────
-Version     : ${data.version}
-Description : ${data.description || "-"}
-Main File   : ${data.main || "-"}
-───────────────────────
-Author      : ${data.author?.name || "-"}
-License     : ${data.license || "-"}
-───────────────────────
-Repository  : ${data.repository?.url?.replace(/^git\+/, "").replace(/\.git$/, "") || "-"}
-Homepage    : ${data.homepage || "-"}
-Bug Tracker : ${data.bugs?.url || "-"}
-───────────────────────
-Dependencies : ${Object.keys(data.dependencies || {}).join(", ") || "-"}
-───────────────────────
+        const caption = `
+NPM Package: ${data.name}
+
+Version: ${data.version}
+Description: ${data.description || "-"}
+Main File: ${data.main || "-"}
+
+Author: ${data.author?.name || "-"}
+License: ${data.license || "-"}
+Repository: ${data.repository?.url?.replace(/^git\+/, "").replace(/\.git$/, "") || "-"}
+Homepage: ${data.homepage || "-"}
+Bug Tracker: ${data.bugs?.url || "-"}
+
+Dependencies: ${Object.keys(data.dependencies || {}).join(", ") || "-"}
+
 NPM User
-Name  : ${data._npmUser?.name || "-"}
-Email : ${data._npmUser?.email || "-"}
-───────────────────────
-Maintainers
+Name: ${data._npmUser?.name || "-"}
+Email: ${data._npmUser?.email || "-"}
+
+Maintainers:
 ${(result.maintainers || []).map((v) => `• ${v.name} (${v.email})`).join("\n") || "-"}
-───────────────────────
-Created  : ${created}
-Modified : ${modified}
-───────────────────────
-Package info fetched successfully.
-\`\`\``;
+
+Created: ${created}
+Modified: ${modified}
+`;
 
         await conn.sendMessage(
             m.chat,
@@ -55,8 +53,8 @@ Package info fetched successfully.
             { quoted: m }
         );
     } catch (e) {
-        console.error(e);
-        m.reply("Failed to fetch NPM package information. Possibly invalid or unreachable.");
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

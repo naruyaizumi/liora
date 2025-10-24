@@ -28,9 +28,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         } else {
             return m.reply("No downloadable media found in this URL.");
         }
-    } catch (err) {
-        console.error(err);
-        m.reply(`An error occurred: ${err.message}`);
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

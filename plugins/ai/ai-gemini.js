@@ -105,8 +105,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         await conn.sendMessage(m.chat, { text: resultText.trim() }, { quoted: m });
     } catch (e) {
-        console.error(e);
-        m.reply("Error: " + e.message);
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

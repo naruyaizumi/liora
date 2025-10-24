@@ -39,8 +39,8 @@ Image metadata retrieved successfully.
             { quoted: m }
         );
     } catch (e) {
-        console.error(e);
-        m.reply(`Error reading image resolution.\n${e.message}`);
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 

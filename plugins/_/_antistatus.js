@@ -105,7 +105,7 @@ export async function before(m) {
                 },
             });
         } catch {
-            // Jawa
+            conn.logger.error(e);
         }
     }
 

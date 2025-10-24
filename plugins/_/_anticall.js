@@ -77,7 +77,7 @@ export async function before(m, { conn }) {
                 await conn.rejectCall(call[0].id, caller);
                 await conn.updateBlockStatus(caller, "block");
             } catch {
-                /* Davina Karamoy */
+                conn.logger.error(e);
             }
         }
     });

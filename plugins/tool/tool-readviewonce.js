@@ -24,9 +24,9 @@ let handler = async (m, { conn }) => {
             },
             { quoted: m }
         );
-    } catch (err) {
-        console.error(err);
-        m.reply("Error: unable to load media.");
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 

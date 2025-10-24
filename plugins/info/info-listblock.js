@@ -12,10 +12,10 @@ let handler = async (m, { conn }) => {
             list,
         ].join("\n");
 
-        await conn.reply(m.chat, output, m, { mentions: data });
-    } catch (err) {
-        console.error(err);
-        m.reply("Failed to fetch blocked number list.");
+        await conn.sendMessage(m.chat, output, m, { mentions: data });
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 

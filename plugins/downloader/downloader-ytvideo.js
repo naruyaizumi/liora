@@ -30,9 +30,9 @@ let handler = async (m, { conn, args }) => {
             },
             { quoted: m }
         );
-    } catch (err) {
-        console.error(err);
-        m.reply(`Error: ${err.message}`);
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

@@ -1,6 +1,6 @@
 /* global conn */
-process.on("uncaughtException", console.error);
-process.on("unhandledRejection", console.error);
+process.on("uncaughtException", (err) => logger.error(e));
+process.on("unhandledRejection", (err) => logger.error(e));
 
 import "./config.js";
 import "./global.js";
@@ -9,10 +9,21 @@ import { SQLiteAuth, SQLiteKeyStore } from "./lib/auth.js";
 import { Browsers, fetchLatestBaileysVersion } from "baileys";
 import { readdir, stat } from "fs/promises";
 import { join } from "path";
-import chalk from "chalk";
-import P from "pino";
 import { EventEmitter } from "events";
 import { initReload, initCron, DisconnectReason } from "./lib/connection.js";
+import pino from "pino";
+
+const logger = pino({
+    level: "debug",
+    transport: {
+        target: "pino-pretty",
+        options: {
+            colorize: true,
+            translateTime: "HH:MM",
+            ignore: "pid,hostname",
+        },
+    },
+});
 
 const pairingAuth = global.config.pairingAuth;
 const pairingNumber = global.config.pairingNumber;
@@ -25,15 +36,13 @@ serialize();
 async function IZUMI() {
     const { state, saveCreds } = SQLiteAuth();
     const { version: baileysVersion } = await fetchLatestBaileysVersion();
-    console.log(
-        chalk.cyan(
-            `\n[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}\n`
-        )
+    logger.info(
+        `[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}`
     );
 
     const connectionOptions = {
         version: baileysVersion,
-        logger: P({ level: "silent" }),
+        logger: pino({ level: "error" }),
         printQRInTerminal: !pairingAuth,
         browser: Browsers.ubuntu("Safari"),
         emitOwnEvents: true,
@@ -51,9 +60,9 @@ async function IZUMI() {
             try {
                 let code = await conn.requestPairingCode(pairingNumber, conn.Pairing);
                 code = code?.match(/.{1,4}/g)?.join("-") || code;
-                console.log(chalk.green(`Pairing code for ${pairingNumber}: ${code}`));
-            } catch (err) {
-                console.error("Pairing code error:", err.message);
+                logger.info(`Pairing code for ${pairingNumber}: ${code}`);
+            } catch (e) {
+                logger.error(e.message);
             }
         }, 2500);
     }
@@ -70,7 +79,7 @@ async function IZUMI() {
                 handler = HandlerModule;
             }
         } catch (e) {
-            console.error(`Reload failed: ${e.message}`);
+            logger.error(e.message);
         }
 
         if (restartConn) {
@@ -132,8 +141,8 @@ async function IZUMI() {
                 if (stats.isDirectory()) results.push(...(await getAllPlugins(filepath)));
                 else if (/\.js$/.test(file)) results.push(filepath);
             }
-        } catch (err) {
-            console.error("Failed to read plugin folder:", err.message);
+        } catch (e) {
+            logger.error(e.message);
         }
         return results;
     }

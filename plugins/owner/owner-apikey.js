@@ -31,9 +31,9 @@ let handler = async (m, { conn }) => {
         ].join("\n");
 
         await conn.sendMessage(m.chat, { text: message }, { quoted: m });
-    } catch (error) {
-        console.error("Error:", error);
-        await m.reply(`An error occurred.\nDetail: ${error.message}`);
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

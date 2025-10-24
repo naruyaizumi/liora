@@ -1,3 +1,5 @@
+import { fetch } from "liora-lib";
+
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
         if (!text)
@@ -22,45 +24,44 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         const updated = new Date(repo.updatedAt).toLocaleDateString("id-ID");
         const pushed = new Date(repo.pushedAt).toLocaleDateString("id-ID");
 
-        const caption = `\`\`\`
-┌─[GITHUB REPOSITORY STALKER]────────────
-│  ${repo.fullNameRepo}
-└──────────────────────
+const caption = `
+GitHub Repository: ${repo.fullNameRepo}
+
 Author
-Username   : ${author.username}
-User ID    : ${author.id_user}
-URL        : ${author.user_github_url}
-Type       : ${author.type}
-Site Admin : ${author.isSiteAdmin ? "Yes" : "No"}
-───────────────────────
+Username: ${author.username}
+User ID: ${author.id_user}
+URL: ${author.user_github_url}
+Type: ${author.type}
+Site Admin: ${author.isSiteAdmin ? "Yes" : "No"}
+
 Repository
-ID          : ${repo.id}
-Node ID     : ${repo.nodeId}
-Name        : ${repo.nameRepo}
-Full Name   : ${repo.fullNameRepo}
-Description : ${repo.description || "-"}
-───────────────────────
-Stars    : ${repo.stargazers}
-Watchers : ${repo.watchers}
-Forks    : ${repo.forks}
-───────────────────────
-Branch   : ${repo.defaultBranch}
-Private  : ${repo.isPrivate ? "Yes" : "No"}
-Fork     : ${repo.isFork ? "Yes" : "No"}
-───────────────────────
-URL       : ${repo.url_repo}
-Git URL   : ${repo.git_url}
-SSH URL   : ${repo.ssh_url}
-Clone URL : ${repo.clone_url}
-SVN URL   : ${repo.svn_url}
-Homepage  : ${repo.homepage || "-"}
-───────────────────────
-Created : ${created}
-Updated : ${updated}
-Pushed  : ${pushed}
-───────────────────────
-Repository info fetched successfully.
-\`\`\``;
+ID: ${repo.id}
+Node ID: ${repo.nodeId}
+Name: ${repo.nameRepo}
+Full Name: ${repo.fullNameRepo}
+Description: ${repo.description || "-"}
+
+Stars: ${repo.stargazers}
+Watchers: ${repo.watchers}
+Forks: ${repo.forks}
+
+Branch: ${repo.defaultBranch}
+Private: ${repo.isPrivate ? "Yes" : "No"}
+Fork: ${repo.isFork ? "Yes" : "No"}
+
+URLs
+Repo URL: ${repo.url_repo}
+Git URL: ${repo.git_url}
+SSH URL: ${repo.ssh_url}
+Clone URL: ${repo.clone_url}
+SVN URL: ${repo.svn_url}
+Homepage: ${repo.homepage || "-"}
+
+Timestamps
+Created: ${created}
+Updated: ${updated}
+Pushed: ${pushed}
+`;
 
         await conn.sendMessage(
             m.chat,
@@ -72,8 +73,8 @@ Repository info fetched successfully.
             { quoted: m }
         );
     } catch (e) {
-        console.error(e);
-        m.reply("Failed to fetch repository information. Possibly invalid or unreachable.");
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

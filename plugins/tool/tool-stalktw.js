@@ -1,3 +1,5 @@
+import { fetch } from "liora-lib";
+
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
         if (!text)
@@ -30,23 +32,20 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         const joined = new Date(createdAt).toLocaleDateString("id-ID");
 
-        const caption = `\`\`\`
-┌─[TWITTER STALKER]────────────
-│  @${username}
-└──────────────────────
-Name       : ${fullName}
-Bio        : ${bio || "-"}
-───────────────────────
-Followers  : ${follower.toLocaleString()}
-Following  : ${following.toLocaleString()}
-Tweets     : ${totalPosts}
-Likes      : ${favoritCount}
-───────────────────────
-Location   : ${location || "-"}
-Joined     : ${joined}
-───────────────────────
-Profile info fetched successfully.
-\`\`\``;
+        const caption = `
+Twitter Profile: @${username}
+
+Name: ${fullName}
+Bio: ${bio || "-"}
+
+Followers: ${follower.toLocaleString()}
+Following: ${following.toLocaleString()}
+Tweets: ${totalPosts}
+Likes: ${favoritCount}
+
+Location: ${location || "-"}
+Joined: ${joined}
+`;
 
         await conn.sendMessage(
             m.chat,
@@ -58,8 +57,8 @@ Profile info fetched successfully.
             { quoted: m }
         );
     } catch (e) {
-        console.error(e);
-        m.reply("Failed to fetch Twitter profile. Possibly invalid or unreachable.");
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

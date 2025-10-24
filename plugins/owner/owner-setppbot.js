@@ -12,8 +12,8 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         await conn.updateProfilePicture(bot, img);
         m.reply("Bot profile picture updated successfully.");
     } catch (e) {
-        console.error(e);
-        m.reply("Failed to update bot profile picture.");
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 

@@ -37,7 +37,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
         await conn.sendMessage(m.chat, { text: result }, { quoted: m });
     } catch (e) {
-        console.error(e);
+        conn.logger.error(e);
         await m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);

@@ -26,9 +26,9 @@ let handler = async (m, { conn, text }) => {
         }
 
         await m.reply("Message successfully sent to channel.");
-    } catch (err) {
-        console.error(err);
-        await m.reply("Failed to send message to channel.");
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

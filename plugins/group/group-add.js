@@ -7,7 +7,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const result = await conn.groupParticipantsUpdate(m.chat, [target], "add");
         const userResult = result[0];
         if (userResult.status === "200") {
-            return conn.sendMessage(
+            await conn.sendMessage(
                 m.chat,
                 { text: `Successfully added to the group.` },
                 { quoted: m }
@@ -31,7 +31,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                     },
                 });
 
-                return conn.sendMessage(
+                await conn.sendMessage(
                     m.chat,
                     { text: `Unable to add user directly. Invitation has been sent, please wait.` },
                     { quoted: m }
@@ -39,10 +39,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             }
         }
 
-        return m.reply("Failed to add the specified member.");
-    } catch (err) {
-        console.error(`Add failed for ${target}:`, err);
-        return m.reply("Failed to add the specified member.");
+        m.reply("Failed to add the specified member.");
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 

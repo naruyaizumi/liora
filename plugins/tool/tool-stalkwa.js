@@ -46,28 +46,24 @@ let handler = async (m, { conn, text }) => {
 
         const timestamp = new Date().toTimeString().split(" ")[0];
 
-        const caption = `\`\`\`
-┌─[${timestamp}]────────────
-│  ${title}
-└──────────────────────
-User : @${userJid.split("@")[0]}
-LID : ${lid || "-"}
-Status : ${about}
-Updated : ${lastUpdate}
-${
-    title === "WhatsApp Business"
-        ? `Business : ${bisnis?.description || "-"}
-Category : ${Array.isArray(bisnis?.category) ? bisnis.category.join(", ") : bisnis?.category || "-"}
-Email : ${bisnis?.email || "-"}
-Website : ${bisnis?.website?.join(", ") || "-"}
-Address : ${bisnis?.address || "-"}
-Work Hours : 
-${businessHours}\n`
-        : ""
-}
-───────────────────────
-Profile info fetched successfully.
-\`\`\``;
+        const caption = `
+${title} Profile
+
+User: @${userJid.split("@")[0]}
+LID: ${lid || "-"}
+Status: ${about}
+Updated: ${lastUpdate}
+${title === "WhatsApp Business" ? `
+Business Info
+Description: ${bisnis?.description || "-"}
+Category: ${Array.isArray(bisnis?.category) ? bisnis.category.join(", ") : bisnis?.category || "-"}
+Email: ${bisnis?.email || "-"}
+Website: ${bisnis?.website?.join(", ") || "-"}
+Address: ${bisnis?.address || "-"}
+Work Hours: 
+${businessHours}
+` : ""}
+`;
 
         await conn.sendMessage(
             m.chat,
@@ -79,8 +75,8 @@ Profile info fetched successfully.
             { quoted: m }
         );
     } catch (e) {
-        console.error(e);
-        m.reply("Failed to fetch profile info. Possibly hidden or invalid.");
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

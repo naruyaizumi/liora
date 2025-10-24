@@ -6,7 +6,6 @@ import { format } from "util";
 import { fileURLToPath } from "url";
 import path, { join } from "path";
 import { watch } from "fs";
-import chalk from "chalk";
 import printMessage from "./lib/logger.js";
 import { canvas } from "./lib/canvas.js";
 
@@ -151,7 +150,7 @@ const sendAccessDenied = async (conn, m) => {
     );
 };
 
-const reportPluginError = async (conn, m, pluginRef, chatRef, err) => {
+const reportPluginError = async (conn, m, pluginRef, chatRef, e) => {
     const hideKeys = (s) => {
         if (!s) return s;
         let t = String(s);
@@ -163,7 +162,7 @@ const reportPluginError = async (conn, m, pluginRef, chatRef, err) => {
     };
 
     const ts = new Date().toISOString().replace("T", " ").split(".")[0];
-    const text = hideKeys(format(err));
+    const text = hideKeys(format(e));
 
     const msg = [
         "```",
@@ -199,7 +198,7 @@ const reportPluginError = async (conn, m, pluginRef, chatRef, err) => {
 
 export async function handler(chatUpdate) {
     if (!chatUpdate) return;
-    this.pushMessage(chatUpdate.messages).catch(console.error);
+    this.pushMessage(chatUpdate.messages).catch(conn.logger.error);
     const last = chatUpdate.messages?.[chatUpdate.messages.length - 1];
     if (!last) return;
     let m = smsg(this, last) || last;
@@ -250,7 +249,7 @@ export async function handler(chatUpdate) {
                 });
                 if (stop) continue;
             } catch (e) {
-                console.error(e);
+                conn.logger.error(e);
             }
         }
 
@@ -350,7 +349,7 @@ export async function handler(chatUpdate) {
                 try {
                     await plugin.call(this, m, extra);
                 } catch (e) {
-                    console.error(e);
+                    conn.logger.error(e);
                     if (e && settings?.noerror) {
                         await safe(() => m.reply(`Upss.. Something went wrong.`));
                     } else if (e) {
@@ -443,10 +442,10 @@ export async function participantsUpdate({ id, participants, action }) {
 const file = global.__filename(import.meta.url, true);
 watch(file, async (eventType) => {
     if (eventType !== "change") return;
-    console.log(chalk.cyan.bold("[ SYSTEM ] handler.js updated — reloading modules..."));
+    conn.logger.info("handler.js updated — reloading modules");
     try {
         if (global.reloadHandler) await global.reloadHandler();
-    } catch (err) {
-        console.error(chalk.red("[ SYSTEM ] Reload failed:"), err);
+    } catch (e) {
+        conn.logger.error(e);
     }
 });

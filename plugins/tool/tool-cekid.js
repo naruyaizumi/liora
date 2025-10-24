@@ -55,8 +55,8 @@ Use the button below to copy.
             { quoted: m }
         );
     } catch (e) {
-        console.error(e);
-        m.reply("Error: Unable to fetch information from the provided link.");
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 

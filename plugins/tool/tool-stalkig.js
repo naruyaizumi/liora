@@ -1,3 +1,5 @@
+import { fetch } from "liora-lib";
+
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
         if (!text)
@@ -12,19 +14,16 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         if (json.code !== 200 || !json.result) return m.reply("Instagram account not found.");
 
         const ig = json.result;
-        const caption = `\`\`\`
-┌─[INSTAGRAM STALKER]────────────
-│  ${ig.username}
-└──────────────────────
-Full Name  : ${ig.fullName || "-"}
-Bio        : ${ig.bio || "-"}
-───────────────────────
-Followers  : ${ig.followers}
-Following  : ${ig.following}
-Posts      : ${ig.postsCount}
-───────────────────────
-Profile info fetched successfully.
-\`\`\``;
+        const caption = `
+Instagram Profile: ${ig.username}
+
+Full Name: ${ig.fullName || "-"}
+Bio: ${ig.bio || "-"}
+
+Followers: ${ig.followers}
+Following: ${ig.following}
+Posts: ${ig.postsCount}
+`;
 
         await conn.sendMessage(
             m.chat,
@@ -36,8 +35,8 @@ Profile info fetched successfully.
             { quoted: m }
         );
     } catch (e) {
-        console.error(e);
-        m.reply("Failed to fetch Instagram profile. Possibly invalid or unreachable.");
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

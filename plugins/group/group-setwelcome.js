@@ -1,22 +1,27 @@
 let handler = async (m, { text, usedPrefix, command }) => {
-    let chat = global.db.data.chats[m.chat];
-    if (!chat) chat = global.db.data.chats[m.chat] = {};
+    try {
+        let chat = global.db.data.chats[m.chat];
+        if (!chat) chat = global.db.data.chats[m.chat] = {};
 
-    if (!text) {
-        if (chat.sWelcome) {
-            chat.sWelcome = "";
-            return m.reply(
-                "Welcome message has been reset.\nNo active greeting message in this group."
-            );
-        } else {
-            return m.reply(
-                `Enter the welcome text.\n› Example: ${usedPrefix + command} Hello @user, welcome to @subject\n\nAvailable placeholders:\n• @user = mention\n• @subject = group name\n• @desc = group description`
-            );
+        if (!text) {
+            if (chat.sWelcome) {
+                chat.sWelcome = "";
+                m.reply(
+                    "Welcome message has been reset.\nNo active greeting message in this group."
+                );
+            } else {
+                m.reply(
+                    `Enter the welcome text.\n› Example: ${usedPrefix + command} Hello @user, welcome to @subject\n\nAvailable placeholders:\n• @user = mention\n• @subject = group name\n• @desc = group description`
+                );
+            }
         }
-    }
 
-    chat.sWelcome = text;
-    return m.reply("Welcome message successfully updated.");
+        chat.sWelcome = text;
+        m.reply("Welcome message successfully updated.");
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
+    }
 };
 
 handler.help = ["setwelcome"];

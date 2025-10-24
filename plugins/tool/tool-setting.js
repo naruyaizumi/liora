@@ -33,43 +33,48 @@ function listFeatures(isOwner, chat, bot) {
 }
 
 let handler = async (m, { conn, isOwner, isAdmin, args, usedPrefix, command }) => {
-    const chat = global.db.data.chats[m.chat];
-    const bot = global.db.data.settings[conn.user.jid] || {};
+    try {
+        const chat = global.db.data.chats[m.chat];
+        const bot = global.db.data.settings[conn.user.jid] || {};
 
-    if (!args[0]) {
-        const daftar = listFeatures(isOwner, chat, bot);
-        return m.reply(
-            `=== Feature Toggle ===
+        if (!args[0]) {
+            const daftar = listFeatures(isOwner, chat, bot);
+            return m.reply(
+                `=== Feature Toggle ===
 ${daftar}
 
 Usage:
 › ${usedPrefix + command} 1 2 3 => enable multiple features
 › ${usedPrefix + (command === "on" ? "off" : "on")} 4 5 6 => disable features`
-        );
-    }
-
-    const enable = command === "on";
-    const indexes = args.map((n) => parseInt(n)).filter((n) => !isNaN(n));
-
-    if (!indexes.length) return m.reply("Invalid feature number.");
-
-    const results = [];
-    for (const i of indexes) {
-        const fitur = (isOwner ? features : features.filter((f) => f.scope === "chat"))[i - 1];
-        if (!fitur) continue;
-
-        if (fitur.scope === "chat") {
-            if (!(isAdmin || isOwner)) continue;
-            chat[fitur.key] = enable;
-        } else if (fitur.scope === "bot") {
-            if (!isOwner) continue;
-            bot[fitur.key] = enable;
+            );
         }
-        results.push(`${fitur.name}: ${enable ? "ON" : "OFF"}`);
-    }
 
-    if (!results.length) return m.reply("No features were modified.");
-    return m.reply(`Updated features:\n${results.join("\n")}`);
+        const enable = command === "on";
+        const indexes = args.map((n) => parseInt(n)).filter((n) => !isNaN(n));
+
+        if (!indexes.length) return m.reply("Invalid feature number.");
+
+        const results = [];
+        for (const i of indexes) {
+            const fitur = (isOwner ? features : features.filter((f) => f.scope === "chat"))[i - 1];
+            if (!fitur) continue;
+
+            if (fitur.scope === "chat") {
+                if (!(isAdmin || isOwner)) continue;
+                chat[fitur.key] = enable;
+            } else if (fitur.scope === "bot") {
+                if (!isOwner) continue;
+                bot[fitur.key] = enable;
+            }
+            results.push(`${fitur.name}: ${enable ? "ON" : "OFF"}`);
+        }
+
+        if (!results.length) return m.reply("No features were modified.");
+        return m.reply(`Updated features:\n${results.join("\n")}`);
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
+    }
 };
 
 handler.help = ["on", "off"];

@@ -3,11 +3,7 @@ import { open } from "fs/promises";
 
 let handler = async (m, { conn, args, __dirname, usedPrefix, command }) => {
     if (!args.length)
-        return m.reply(
-            `Enter the target file path.\n` +
-                `› Example: ${usedPrefix + command} plugins owner owner-sf\n` +
-                `› Example: ${usedPrefix + command} package.json`
-        );
+        return m.reply(`Enter the target file path.\n› Example: ${usedPrefix + command} plugins owner owner-sf\n`);
 
     try {
         let target = join(...args);
@@ -17,6 +13,7 @@ let handler = async (m, { conn, args, __dirname, usedPrefix, command }) => {
         const fileBuffer = await handle.readFile();
         await handle.close();
         const fileName = target.split("/").pop();
+
         await conn.sendMessage(
             m.chat,
             {
@@ -26,8 +23,9 @@ let handler = async (m, { conn, args, __dirname, usedPrefix, command }) => {
             },
             { quoted: m }
         );
-    } catch (err) {
-        await m.reply(`Error: ${err.message}`);
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 

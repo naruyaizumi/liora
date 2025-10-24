@@ -41,8 +41,8 @@ let handler = async (m, { conn, text }) => {
 
         await conn.sendMessage(m.chat, { sticker: result }, { quoted: m });
     } catch (e) {
-        console.error(e);
-        m.reply(`Failed to apply watermark.\nError: ${e.message}`);
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

@@ -1,3 +1,5 @@
+import { fetch } from "liora-lib";
+
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text)
         return m.reply(
@@ -20,9 +22,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         }));
 
         await conn.sendMessage(m.chat, { album }, { quoted: m });
-    } catch (err) {
-        console.error(err);
-        m.reply("Error: Failed to fetch Pinterest results.");
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }
@@ -30,6 +32,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
 handler.help = ["pinterest"];
 handler.tags = ["internet"];
-handler.command = /^(pinterest|pin)$/i;
+handler.command = /^(pinterest)$/i;
 
 export default handler;

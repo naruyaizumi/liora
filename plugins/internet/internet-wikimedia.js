@@ -22,9 +22,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         }));
 
         await conn.sendMessage(m.chat, { album }, { quoted: m });
-    } catch (error) {
-        console.error(error);
-        m.reply("Error: Failed to retrieve data from Wikimedia.");
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

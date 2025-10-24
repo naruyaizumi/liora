@@ -6,9 +6,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             `Please enter a search keyword.\nExample: ${usedPrefix + command} supranatural`
         );
 
-    try {
-        await global.loading(m, conn);
+    await global.loading(m, conn);
 
+    try {
         const search = await yts(text);
         const results = search.videos;
 
@@ -45,6 +45,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             },
             { quoted: m }
         );
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

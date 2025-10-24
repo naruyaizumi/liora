@@ -30,8 +30,8 @@ Source: BMKG (Meteorology, Climatology and Geophysics Agency)
             caption: text,
         });
     } catch (e) {
-        console.error(e);
-        await m.reply(`Error: ${e.message}`);
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

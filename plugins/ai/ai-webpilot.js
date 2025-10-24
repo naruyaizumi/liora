@@ -39,15 +39,15 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             { text: `WebPilot AI:\n${replyText.trim()}${sources}` },
             { quoted: m }
         );
-    } catch (error) {
-        console.error(error);
-        m.reply("An error occurred: " + error.message);
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }
 };
 
-handler.help = ["webpilotai <query>"];
+handler.help = ["webpilotai"];
 handler.tags = ["ai"];
 handler.command = /^(webpilotai)$/i;
 

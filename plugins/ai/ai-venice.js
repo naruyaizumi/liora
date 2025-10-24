@@ -25,15 +25,15 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         }
 
         await conn.sendMessage(m.chat, { text: `Venice AI:\n${replyText.trim()}` }, { quoted: m });
-    } catch (error) {
-        console.error(error);
-        m.reply("An error occurred: " + error.message);
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }
 };
 
-handler.help = ["veniceai <message>"];
+handler.help = ["veniceai"];
 handler.tags = ["ai"];
 handler.command = /^(veniceai)$/i;
 

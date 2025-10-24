@@ -1,4 +1,5 @@
 import { uploader } from "../../lib/uploader.js";
+import { fetch } from "liora-lib";
 
 let handler = async (m, { conn, usedPrefix, command }) => {
     try {
@@ -49,8 +50,8 @@ Result generated from the image you sent.
             { quoted: q.id ? q : m }
         );
     } catch (e) {
-        console.error(e);
-        m.reply(`Technical error occurred.\nDetails: ${e.message}`);
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

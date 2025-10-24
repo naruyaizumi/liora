@@ -1,6 +1,6 @@
 {
     "name": "liora",
-    "version": "7.4.1",
+    "version": "7.4.2",
     "type": "module",
     "engines": {
         "node": ">=22.0.0"
@@ -19,12 +19,13 @@
         "baileys": "npm:@itsukichan/baileys@^7.3.2",
         "better-sqlite3": "^12.4.1",
         "canvas": "^3.2.0",
-        "chalk": "^5.6.2",
         "cheerio": "^1.1.2",
         "file-type": "^21.0.0",
-        "liora-lib": "^1.0.24",
+        "liora-lib": "^1.2.3",
         "pino": "^10.1.0",
-        "sharp": "^0.34.4"
+        "pino-pretty": "^13.1.2",
+        "sharp": "^0.34.4",
+        "yt-search": "^2.13.1"
     },
     "devDependencies": {
         "@eslint/js": "^9.38.0",
@@ -32,5 +33,5 @@
         "globals": "^16.4.0",
         "prettier": "^3.6.2"
     },
-    "packageManager": "pnpm@10.18.3"
+    "packageManager": "pnpm@10.19.0"
 }

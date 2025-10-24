@@ -1,3 +1,5 @@
+import { fetch } from "liora-lib";
+
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
         if (!text)
@@ -17,34 +19,30 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         const created = new Date(user.createdAt).toLocaleDateString("id-ID");
         const updated = new Date(user.updatedAt).toLocaleDateString("id-ID");
 
-        const caption = `\`\`\`
-┌─[GITHUB STALKER]────────────
-│  ${user.username}
-└──────────────────────
-Name       : ${user.name || "-"}
-User ID    : ${user.idUser}
-Node ID    : ${user.nodeId}
-Type       : ${user.type}
-Site Admin : ${user.isSiteAdmin ? "Yes" : "No"}
-───────────────────────
-Company    : ${user.company || "-"}
-Blog       : ${user.blog || "-"}
-Email      : ${user.email || "-"}
-Hireable   : ${user.hireable ? "Yes" : "No"}
-Bio        : ${user.bio || "-"}
-───────────────────────
-Public Repos : ${user.publicRepos}
-Public Gists : ${user.publicGists}
-Followers    : ${user.followers}
-Following    : ${user.following}
-───────────────────────
-Created    : ${created}
-Updated    : ${updated}
-URL        : ${user.githubUrl}
-───────────────────────
-Profile info fetched successfully.
-\`\`\``;
+        const caption = `
+GitHub Profile: ${user.username}
 
+Name: ${user.name || "-"}
+User ID: ${user.idUser}
+Node ID: ${user.nodeId}
+Type: ${user.type}
+Site Admin: ${user.isSiteAdmin ? "Yes" : "No"}
+
+Company: ${user.company || "-"}
+Blog: ${user.blog || "-"}
+Email: ${user.email || "-"}
+Hireable: ${user.hireable ? "Yes" : "No"}
+Bio: ${user.bio || "-"}
+
+Public Repos: ${user.publicRepos}
+Public Gists: ${user.publicGists}
+Followers: ${user.followers}
+Following: ${user.following}
+
+Created: ${created}
+Updated: ${updated}
+URL: ${user.githubUrl}
+`;
         await conn.sendMessage(
             m.chat,
             {
@@ -55,8 +53,8 @@ Profile info fetched successfully.
             { quoted: m }
         );
     } catch (e) {
-        console.error(e);
-        m.reply("Failed to fetch GitHub profile. Possibly invalid or unreachable.");
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

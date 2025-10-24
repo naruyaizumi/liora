@@ -14,10 +14,8 @@ let handler = async (m, { conn }) => {
             },
         });
     } catch (e) {
-        console.error(e);
-        return m.reply(
-            "Failed to delete message — it may already be gone or not belong to another user."
-        );
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 

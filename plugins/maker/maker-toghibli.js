@@ -38,7 +38,8 @@ let handler = async (m, { conn, args, command, usedPrefix }) => {
             { quoted: m }
         );
     } catch (e) {
-        m.reply(`An error occurred.\n${e.message || e}`);
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

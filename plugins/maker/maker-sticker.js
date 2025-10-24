@@ -49,8 +49,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         await conn.sendMessage(m.chat, { sticker: result }, { quoted: m });
     } catch (e) {
-        console.error(e);
-        await m.reply("Error: " + e.message);
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }

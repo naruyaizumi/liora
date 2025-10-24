@@ -21,15 +21,15 @@ let handler = async (m, { conn, text }) => {
         }
 
         await conn.sendMessage(m.chat, { text: `Copilot AI:\n${replyText.trim()}` }, { quoted: m });
-    } catch (error) {
-        console.error(error);
-        m.reply(`An error occurred: ${error.message}`);
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }
 };
 
-handler.help = ["copilot <query>"];
+handler.help = ["copilot"];
 handler.tags = ["ai"];
 handler.command = /^(copilot)$/i;
 

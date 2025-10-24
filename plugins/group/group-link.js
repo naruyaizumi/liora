@@ -29,10 +29,8 @@ Use the button below to copy the link.
             { quoted: m }
         );
     } catch (e) {
-        console.error(e);
-        m.reply(
-            "Error: Unable to retrieve group link. Ensure the bot is admin and the group is not private."
-        );
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 

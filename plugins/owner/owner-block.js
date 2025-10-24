@@ -1,54 +1,45 @@
-let handler = async (m, { text, conn, usedPrefix, command }) => {
-    const timestamp = new Date().toTimeString().split(" ")[0];
-    const args = text ? text.trim().split(/\s+/) : [];
+let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
+    try {
+        let target = m.mentionedJid?.[0] || m.quoted?.sender || null;
 
-    if (!args.length && !m.mentionedJid?.length && !m.quoted)
-        return m.reply(
-            `Enter one or more WhatsApp numbers to ${command}.\n› Example: ${usedPrefix + command} 62812xxxx 62813xxxx`
-        );
-
-    let targets = [];
-    if (m.mentionedJid?.length) targets.push(...m.mentionedJid);
-    if (m.quoted?.sender) targets.push(m.quoted.sender);
-    for (const arg of args) {
-        if (/^\d{5,}$/.test(arg)) targets.push(arg.replace(/[^0-9]/g, "") + "@s.whatsapp.net");
-    }
-
-    targets = [...new Set(targets)];
-    if (!targets.length)
-        return m.reply(
-            `Enter one or more WhatsApp numbers to ${command}.\n› Example: ${usedPrefix + command} 62812xxxx 62813xxxx`
-        );
-
-    const results = [];
-    for (const who of targets) {
-        try {
-            if (command === "block") await conn.updateBlockStatus(who, "block");
-            else if (command === "unblock") await conn.updateBlockStatus(who, "unblock");
-            results.push({ who, ok: true });
-        } catch (err) {
-            results.push({ who, ok: false, err });
+        if (!target && args[0] && /^\d{5,}$/.test(args[0])) {
+            const num = args[0].replace(/[^0-9]/g, "");
+            target = await conn.lidMappingStore.getLIDForPN(num + "@s.whatsapp.net");
         }
+        if (!target && args[0]) {
+            const raw = args[0].replace(/[^0-9]/g, "");
+            const lid = raw + "@lid";
+            if (participants.some((p) => p.lid === lid)) {
+                target = lid;
+            }
+        }
+
+        if (!target)
+            return m.reply(
+                `Specify one valid WhatsApp number to ${command}.\n› Example: ${usedPrefix + command} @628xxxx`
+            );
+
+        const isBlocked = await conn.fetchBlocklist().then(list => list.includes(target));
+
+        if (command === "block" && isBlocked)
+            return m.reply(`@${target.split("@")[0]} is already blocked.`);
+        if (command === "unblock" && !isBlocked)
+            return m.reply(`@${target.split("@")[0]} is not blocked.`);
+
+        await conn.updateBlockStatus(target, command === "block" ? "block" : "unblock");
+
+        await conn.sendMessage(
+            m.chat,
+            {
+                text: `${command.toUpperCase()} successful for @${target.split("@")[0]}`,
+                mentions: [target],
+            },
+            { quoted: m }
+        );
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
-
-    const success = results.filter((r) => r.ok).map((r) => "@" + r.who.split("@")[0]);
-    const failed = results.filter((r) => !r.ok);
-
-    let textOut = [
-        "```",
-        `┌─[${timestamp}]────────────`,
-        `│  ${command.toUpperCase()}`,
-        "└──────────────────────",
-        success.length ? `Success : ${success.join(", ")}` : "",
-        failed.length ? `Failed  : ${failed.map((r) => "@" + r.who.split("@")[0]).join(", ")}` : "",
-        failed.length ? "───────────────────────" : "",
-        ...failed.map((r) => `! ${r.err.message || r.err}`),
-        "```",
-    ]
-        .filter(Boolean)
-        .join("\n");
-
-    await conn.sendMessage(m.chat, { text: textOut, mentions: targets }, { quoted: m });
 };
 
 handler.help = ["block", "unblock"];

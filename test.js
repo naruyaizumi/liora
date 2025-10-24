@@ -3,16 +3,24 @@ import path, { dirname } from "path";
 import assert from "assert";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
-import chalk from "chalk";
+import pino from "pino";
+
+const logger = pino({
+    level: "debug",
+    transport: {
+        target: "pino-pretty",
+        options: {
+            colorize: true,
+            translateTime: "HH:MM",
+            ignore: "pid,hostname",
+        },
+    },
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const require = createRequire(__dirname);
 const pkg = require(path.join(__dirname, "./package.json"));
-
-function timestamp() {
-    return chalk.gray(new Date().toISOString().replace("T", " ").split(".")[0]);
-}
 
 async function collectFiles() {
     const folders = [".", ...(pkg.directories ? Object.values(pkg.directories) : [])];
@@ -33,7 +41,7 @@ async function collectFiles() {
 }
 
 async function checkFiles() {
-    console.log(chalk.cyan(`\n[${timestamp()}] [liora] Starting source validation...`));
+    logger.info('Starting source validation...');
 
     const files = await collectFiles();
     let passed = 0;
@@ -45,32 +53,28 @@ async function checkFiles() {
             const src = await readFile(file, "utf8");
             if (!src.trim()) throw new Error("Empty or invalid file content.");
             assert.ok(file);
-            console.log(chalk.green(`[${timestamp()}] [OK] ${file}`));
+            logger.info(`[OK] ${file}`);
             passed++;
-        } catch (err) {
-            console.error(chalk.red(`[${timestamp()}] [FAIL] ${file} → ${err.message}`));
+        } catch (e) {
+            logger.error(`[FAIL] ${file} → ${e.message}`);
             failed++;
             process.exitCode = 1;
         }
     }
 
-    console.log(chalk.gray("───────────────────────────────────────────"));
-    console.log(
-        chalk.cyanBright(
-            `[${timestamp()}] [liora] Completed — ${chalk.green(`${passed} passed`)}, ${chalk.red(`${failed} failed`)}`
-        )
+    logger.info("───────────────────────────────────────────");
+    logger.info(
+        'Completed — ${passed} passed, ${failed} failed'
     );
 
     if (failed === 0) {
-        console.log(
-            chalk.greenBright(`[${timestamp()}] [liora] All files validated successfully.`)
-        );
+        logger.info('All files validated successfully.');
     } else {
-        console.warn(chalk.yellow(`[${timestamp()}] [liora] Some files failed validation.`));
+        logger.warn('Some files failed validation.');
     }
 }
 
-checkFiles().catch((err) => {
-    console.error(chalk.red(`[${timestamp()}] [liora] FATAL: ${err.message}`));
+checkFiles().catch((e) => {
+    logger.fatal(e.message);
     process.exit(1);
 });

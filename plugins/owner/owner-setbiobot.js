@@ -22,19 +22,8 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
 
         m.reply(response);
     } catch (e) {
-        console.error(e);
-        const errorMsg = [
-            "```",
-            `┌─[${timestamp}]────────────`,
-            `│  Bio Update`,
-            "└──────────────────────",
-            `Status : Failed`,
-            `Reason : ${e.message}`,
-            "───────────────────────",
-            "Failed to update WhatsApp bio. Try again later.",
-            "```",
-        ].join("\n");
-        m.reply(errorMsg);
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 

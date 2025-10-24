@@ -36,9 +36,9 @@ let handler = async (m, { args, usedPrefix, command }) => {
         ].join("\n");
 
         await m.reply(result);
-    } catch (err) {
-        console.error(err);
-        m.reply("Error: Unable to fetch IP information.");
+    } catch (e) {
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 
