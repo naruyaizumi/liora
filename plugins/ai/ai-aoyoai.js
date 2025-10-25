@@ -10,7 +10,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
         await global.loading(m, conn);
 
-        const apiUrl = `https://api.nekolabs.my.id/ai/aoyoai?text=${encodeURIComponent(text)}`;
+        const apiUrl = `https://api.nekolabs.web.id/ai/aoyoai?text=${encodeURIComponent(text)}`;
         const response = await fetch(apiUrl, { method: "GET" });
 
         if (!response.ok) {

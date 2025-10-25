@@ -18,7 +18,7 @@ let handler = async (m, { conn }) => {
         const uploaded = await uploader3(media);
         if (!uploaded) throw new Error("Failed to upload image.");
 
-        const api = `https://api.nekolabs.my.id/canvas/brave-pink-hero-green?imageUrl=${encodeURIComponent(uploaded)}`;
+        const api = `https://api.nekolabs.web.id/canvas/brave-pink-hero-green?imageUrl=${encodeURIComponent(uploaded)}`;
         const res = await fetch(api);
         if (!res.ok) throw new Error("Failed to contact BPHG API.");
 

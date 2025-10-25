@@ -12,7 +12,7 @@ let handler = async (m, { conn }) => {
         const uploaded = await uploader3(media);
         if (!uploaded) throw new Error("Failed to upload image. Please try again later.");
 
-        const api = `https://api.nekolabs.my.id/tools/convert/tocyberpunk?imageUrl=${encodeURIComponent(uploaded)}`;
+        const api = `https://api.nekolabs.web.id/tools/convert/tocyberpunk?imageUrl=${encodeURIComponent(uploaded)}`;
         const res = await fetch(api);
         if (!res.ok) throw new Error("Failed to contact API.");
 

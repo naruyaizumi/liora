@@ -19,7 +19,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const uploaded = await uploader3(media);
         if (!uploaded) throw new Error("Failed to upload image.");
 
-        const api = `https://api.nekolabs.my.id/canvas/meme?imageUrl=${encodeURIComponent(uploaded)}&textT=${encodeURIComponent(textT)}&textB=${encodeURIComponent(textB)}`;
+        const api = `https://api.nekolabs.web.id/canvas/meme?imageUrl=${encodeURIComponent(uploaded)}&textT=${encodeURIComponent(textT)}&textB=${encodeURIComponent(textB)}`;
         const res = await fetch(api);
         if (!res.ok) throw new Error("Failed to contact Meme API.");
 

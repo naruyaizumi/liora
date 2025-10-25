@@ -21,7 +21,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         await global.loading(m, conn);
 
-        const api = `https://api.nekolabs.my.id/canvas/quote-chat?text=${encodeURIComponent(
+        const api = `https://api.nekolabs.web.id/canvas/quote-chat?text=${encodeURIComponent(
             cleanText
         )}&name=${encodeURIComponent(name)}&profile=${encodeURIComponent(avatar)}&color=%23000000`;
 

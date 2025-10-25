@@ -8,7 +8,7 @@ let handler = async (m, { conn, text }) => {
     try {
         await global.loading(m, conn);
 
-        const apiUrl = `https://api.nekolabs.my.id/ai/copilot?text=${encodeURIComponent(text)}`;
+        const apiUrl = `https://api.nekolabs.web.id/ai/copilot?text=${encodeURIComponent(text)}`;
         const response = await fetch(apiUrl);
         if (!response.ok) {
             return m.reply("Unable to connect to Copilot AI. Please try again later.");

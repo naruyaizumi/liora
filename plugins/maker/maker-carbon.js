@@ -10,7 +10,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         await global.loading(m, conn);
 
-        const api = `https://api.nekolabs.my.id/canvas/carbonify?code=${encodeURIComponent(code)}`;
+        const api = `https://api.nekolabs.web.id/canvas/carbonify?code=${encodeURIComponent(code)}`;
         const res = await fetch(api);
         if (!res.ok) throw new Error("Failed to contact Carbon API.");
 

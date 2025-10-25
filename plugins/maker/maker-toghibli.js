@@ -20,7 +20,7 @@ let handler = async (m, { conn, args, command, usedPrefix }) => {
         if (!uploaded) throw new Error("Failed to upload image. Please try again later.");
 
         const version = args[0];
-        const api = `https://api.nekolabs.my.id/tools/convert/toghibli/v${version}?imageUrl=${encodeURIComponent(uploaded)}`;
+        const api = `https://api.nekolabs.web.id/tools/convert/toghibli/v${version}?imageUrl=${encodeURIComponent(uploaded)}`;
         const res = await fetch(api);
         if (!res.ok) throw new Error("Failed to contact API.");
 

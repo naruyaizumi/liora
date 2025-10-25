@@ -21,7 +21,7 @@ export async function before(m, { conn }) {
         await this.readMessages([m.key]);
         await this.sendPresenceUpdate("composing", chatId);
 
-        let url = `https://api.nekolabs.my.id/ai/char/arona?text=${encodeURIComponent(text)}&sessionId=${encodeURIComponent(sender)}`;
+        let url = `https://api.nekolabs.web.id/ai/char/arona?text=${encodeURIComponent(text)}&sessionId=${encodeURIComponent(sender)}`;
         let res = await fetch(url);
         let json = await res.json();
 

@@ -9,7 +9,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         await global.loading(m, conn);
 
-        const apiUrl = `https://api.nekolabs.my.id/ai/ai4chat?text=${encodeURIComponent(text)}`;
+        const apiUrl = `https://api.nekolabs.web.id/ai/ai4chat?text=${encodeURIComponent(text)}`;
         const response = await fetch(apiUrl);
 
         if (!response.ok) return m.reply("Request failed. Please try again later.");

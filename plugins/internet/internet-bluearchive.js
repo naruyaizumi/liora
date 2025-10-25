@@ -3,7 +3,7 @@ import { fetch } from "liora-lib";
 let handler = async (m, { conn }) => {
     try {
         await global.loading(m, conn);
-        const apiUrl = "https://api.nekolabs.my.id/random/blue-archive";
+        const apiUrl = "https://api.nekolabs.web.id/random/blue-archive";
         const res = await fetch(apiUrl);
         if (!res.ok) throw new Error(`Status ${res.status}`);
 

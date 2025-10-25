@@ -7,7 +7,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     await global.loading(m, conn);
     try {
         const res = await fetch(
-            "https://api.nekolabs.my.id/downloader/youtube/play/v1?q=" +
+            "https://api.nekolabs.web.id/downloader/youtube/play/v1?q=" +
                 encodeURIComponent(args.join(" ").trim())
         );
         const json = await res.json();
