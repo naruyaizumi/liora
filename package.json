@@ -7,7 +7,8 @@
     },
     "scripts": {
         "start": "node index.js",
-        "test": "node test.js"
+        "test": "node test.js",
+        "format": "prettier --write ."
     },
     "license": "Apache-2.0",
     "author": {
@@ -33,5 +34,25 @@
         "globals": "^16.4.0",
         "prettier": "^3.6.2"
     },
-    "packageManager": "pnpm@10.19.0"
+    "packageManager": "pnpm@10.19.0",
+    "prettier": {
+        "printWidth": 100,
+        "tabWidth": 4,
+        "useTabs": false,
+        "semi": true,
+        "singleQuote": false,
+        "trailingComma": "es5",
+        "bracketSpacing": true,
+        "arrowParens": "always",
+        "endOfLine": "lf",
+        "bracketSameLine": false,
+        "overrides": [
+            {
+                "files": "*.js",
+                "options": {
+                    "commentPreserveAll": true
+                }
+            }
+        ]
+    }
 }

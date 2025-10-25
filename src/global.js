@@ -44,7 +44,7 @@ global.API = (name, path = "/", query = {}, apikeyqueryname) =>
 global.timestamp = { start: new Date() };
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = path.join(__dirname, "./database/database.db");
+const DB_PATH = path.join(__dirname, "../database/database.db");
 
 const sqlite = new Database(DB_PATH, { timeout: 5000 });
 

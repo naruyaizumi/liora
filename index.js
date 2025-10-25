@@ -99,9 +99,9 @@ async function supervise() {
         else crashCount = 1;
         lastCrash = now;
 
-        if (crashCount >= 1) {
-            logger.warn(`Too many crashes. Cooling down for 5 minutes...`);
-            await new Promise((r) => setTimeout(r, 300000));
+        if (crashCount >= 5) {
+            logger.warn(`Too many crashes (${crashCount}). Cooling down for 1 minute...`);
+            await new Promise((r) => setTimeout(r, 60000));
             crashCount = 0;
         } else {
             await new Promise((r) => setTimeout(r, 2000));

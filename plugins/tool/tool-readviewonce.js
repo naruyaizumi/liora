@@ -1,7 +1,7 @@
 let handler = async (m, { conn }) => {
-    const q = m.quoted || m;
+    const q = m.quoted;
     try {
-        const msg = q?.msg?.message?.viewOnceMessageV2?.message || q.msg || q.message || {};
+        const msg = q?.msg?.message?.viewOnceMessageV2?.message || q?.msg || q?.message || {};
         const mediaMsg =
             msg.imageMessage || msg.videoMessage || msg.audioMessage || msg.documentMessage;
 
@@ -17,20 +17,25 @@ let handler = async (m, { conn }) => {
               ? "video"
               : mime.startsWith("audio/")
                 ? "audio"
-                : mime.startsWith("application/")
-                  ? "document"
-                  : null;
+                : null;
 
         if (!type) return m.reply("Unsupported media type.");
+
+        const caption = mediaMsg.caption || q.text || "";
+        const contextInfo = {};
+        if (mediaMsg.contextInfo?.mentionedJid) {
+            contextInfo.mentionedJid = mediaMsg.contextInfo.mentionedJid;
+        }
 
         await conn.sendMessage(
             m.chat,
             {
                 [type]: buffer,
                 mimetype: mime,
-                caption: mediaMsg.caption || q.text || "",
+                caption,
+                contextInfo,
             },
-            { quoted: m }
+            { quoted: q.fakeObj }
         );
     } catch (e) {
         conn.logger.error(e);

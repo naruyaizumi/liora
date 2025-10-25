@@ -2,7 +2,6 @@
 # DEPENDENCIES & BUILD
 # -------------------------
 node_modules/
-build/
 .cache/
 .tmp/
 pnpm-lock.yaml

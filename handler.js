@@ -1,6 +1,6 @@
 /* global conn */
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
-import "./global.js";
+import "./src/global.js";
 import { smsg } from "./lib/message.js";
 import { format } from "util";
 import { fileURLToPath } from "url";
