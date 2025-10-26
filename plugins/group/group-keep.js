@@ -1,3 +1,4 @@
+/* todo: Please use the appropriate modified Baileys fork, because the original Baileys does not support it.
 let handler = async (m, { conn }) => {
     if (!m.quoted) return m.reply("Reply a message to keep.");
 
@@ -26,3 +27,4 @@ handler.admin = true;
 handler.botAdmin = true;
 
 export default handler;
+*/

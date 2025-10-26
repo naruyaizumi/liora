@@ -31,7 +31,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 image: { url },
                 caption: `Report Image (${i + 1}/${images.length})`,
             }));
-            await conn.sendMessage(m.chat, { album }, { quoted: m });
+            await conn.sendAlbum(m.chat, album, { quoted: m });
         }
     } catch (e) {
         conn.logger.error(e);

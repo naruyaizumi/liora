@@ -2,7 +2,7 @@ const linkRegex = /\b((https?|ftp):\/\/[^\s]+|www\.[^\s]+)/gi;
 
 export async function before(m, { conn }) {
   const toJid = (n) => {
-    const raw = Array.isArray(n) ? n[0] : (n?.num ?? n?.lid ?? n);
+    const raw = Array.isArray(n) ? n[0] : (n?.num ?? n?.id ?? n);
     const digits = String(raw ?? "").replace(/[^0-9]/g, "");
     return digits ? digits + "@s.whatsapp.net" : "";
   };
@@ -11,14 +11,14 @@ export async function before(m, { conn }) {
     if (!conn?.lidMappingStore) {
       return owners
         .map((entry) =>
-          toJid(Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.lid ?? entry))
+          toJid(Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.id ?? entry))
         )
         .filter(Boolean);
     }
     const cache = conn.lidMappingStore.cache;
     const out = new Set();
     for (const entry of owners) {
-      const num = Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.lid ?? entry);
+      const num = Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.id ?? entry);
       const jid = toJid(num);
       if (!jid) continue;
       out.add(jid);
@@ -26,28 +26,28 @@ export async function before(m, { conn }) {
       if (!lid) {
         try {
           lid = await conn.lidMappingStore.getLIDForPN(jid);
-        } catch {}
+        } catch {/* Davina Karamoy */}
       }
       if (lid) {
         out.add(lid);
         try {
           cache?.set(jid, lid);
           cache?.set(lid, jid);
-        } catch {}
+        } catch {/* Davina Karamoy */}
       }
       if (lid) {
         let back = cache?.get(lid);
         if (!back) {
           try {
             back = await conn.lidMappingStore.getPNForLID(lid);
-          } catch {}
+          } catch {/* Davina Karamoy */}
         }
         if (back) {
           out.add(back);
           try {
             cache?.set(lid, back);
             cache?.set(back, lid);
-          } catch {}
+          } catch {/* Davina Karamoy */}
         }
       }
     }
@@ -68,18 +68,20 @@ export async function before(m, { conn }) {
   const groupMetadata =
     (m.isGroup ? conn.chats?.[m.chat]?.metadata || (await conn.groupMetadata(m.chat)) : {}) || {};
   const participants = m.isGroup ? groupMetadata.participants || [] : [];
-  const senderId = conn.decodeJid(m.sender);
-  const botId = conn.decodeJid(conn.user.id);
-  const user =
-    participants.find(
-      (u) => conn.decodeJid(u.lid) === senderId || conn.decodeJid(u.id) === senderId
+  const jid = (id) => id?.replace(/:\d+@/, "@");
+    const senderId = jid(this.decodeJid(m.sender));
+    const botId = jid(this.decodeJid(this.user.id));
+    const user = participants.find(
+        u => jid(u.id) === senderId || jid(u.phoneNumber) === senderId
     ) || {};
-  const bot =
-    participants.find(
-      (u) => conn.decodeJid(u.lid) === botId || conn.decodeJid(u.id) === botId
+    const bot = participants.find(
+        u => u.id === this.user.id || jid(u.id) === botId || jid(u
+            .phoneNumber) === botId
     ) || {};
-  const isAdmin = user?.admin === "admin" || user?.admin === "superadmin";
-  const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
+    const isRAdmin = user?.admin === "superadmin";
+    const isAdmin = isRAdmin || user?.admin === "admin";
+    const isBotAdmin = bot?.admin === "admin" || bot?.admin ===
+    "superadmin";
 
   if (isAdmin) return true;
   const chat = global.db.data.chats[m.chat];

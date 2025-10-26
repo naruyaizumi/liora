@@ -1,6 +1,6 @@
 export async function before(m, { conn }) {
     const toJid = (n) => {
-        const raw = Array.isArray(n) ? n[0] : (n?.num ?? n?.lid ?? n);
+        const raw = Array.isArray(n) ? n[0] : (n?.num ?? n?.id ?? n);
         const digits = String(raw ?? "").replace(/[^0-9]/g, "");
         return digits ? digits + "@s.whatsapp.net" : "";
     };
@@ -9,14 +9,14 @@ export async function before(m, { conn }) {
         if (!conn?.lidMappingStore) {
             return owners
                 .map((entry) =>
-                    toJid(Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.lid ?? entry))
+                    toJid(Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.id ?? entry))
                 )
                 .filter(Boolean);
         }
         const cache = conn.lidMappingStore.cache;
         const out = new Set();
         for (const entry of owners) {
-            const num = Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.lid ?? entry);
+            const num = Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.id ?? entry);
             const jid = toJid(num);
             if (!jid) continue;
             out.add(jid);

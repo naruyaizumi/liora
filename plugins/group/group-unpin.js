@@ -1,3 +1,4 @@
+/* todo: Please use the appropriate modified Baileys fork, because the original Baileys does not support it yet.
 let handler = async (m, { conn }) => {
     if (!m.quoted) return m.reply("Reply a message to unpin.");
 
@@ -7,7 +8,7 @@ let handler = async (m, { conn }) => {
     try {
         await conn.sendMessage(chat, {
             pin: {
-                type: 2,
+                type: 0,
                 key: quotedMsg.key,
             },
         });
@@ -26,3 +27,4 @@ handler.admin = true;
 handler.botAdmin = true;
 
 export default handler;
+*/

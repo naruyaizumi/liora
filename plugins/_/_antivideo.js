@@ -1,6 +1,6 @@
 export async function before(m, { conn }) {
     const toJid = (n) => {
-        const raw = Array.isArray(n) ? n[0] : (n?.num ?? n?.lid ?? n);
+        const raw = Array.isArray(n) ? n[0] : (n?.num ?? n?.id ?? n);
         const digits = String(raw ?? "").replace(/[^0-9]/g, "");
         return digits ? digits + "@s.whatsapp.net" : "";
     };
@@ -9,14 +9,14 @@ export async function before(m, { conn }) {
         if (!conn?.lidMappingStore) {
             return owners
                 .map((entry) =>
-                    toJid(Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.lid ?? entry))
+                    toJid(Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.id ?? entry))
                 )
                 .filter(Boolean);
         }
         const cache = conn.lidMappingStore.cache;
         const out = new Set();
         for (const entry of owners) {
-            const num = Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.lid ?? entry);
+            const num = Array.isArray(entry) ? entry[0] : (entry?.num ?? entry?.id ?? entry);
             const jid = toJid(num);
             if (!jid) continue;
             out.add(jid);
@@ -76,19 +76,20 @@ export async function before(m, { conn }) {
         (m.isGroup ? this.chats?.[m.chat]?.metadata || (await this.groupMetadata(m.chat)) : {}) ||
         {};
     const participants = m.isGroup ? groupMetadata.participants || [] : [];
-    const senderId = this.decodeJid(m.sender);
-    const botId = this.decodeJid(this.user.id);
-    const user =
-        participants.find(
-            (u) => this.decodeJid(u.lid) === senderId || this.decodeJid(u.id) === senderId
-        ) || {};
-    const bot =
-        participants.find(
-            (u) => this.decodeJid(u.lid) === botId || this.decodeJid(u.id) === botId
-        ) || {};
+    const jid = (id) => id?.replace(/:\d+@/, "@");
+    const senderId = jid(this.decodeJid(m.sender));
+    const botId = jid(this.decodeJid(this.user.id));
+    const user = participants.find(
+        u => jid(u.id) === senderId || jid(u.phoneNumber) === senderId
+    ) || {};
+    const bot = participants.find(
+        u => u.id === this.user.id || jid(u.id) === botId || jid(u
+            .phoneNumber) === botId
+    ) || {};
     const isRAdmin = user?.admin === "superadmin";
     const isAdmin = isRAdmin || user?.admin === "admin";
-    const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
+    const isBotAdmin = bot?.admin === "admin" || bot?.admin ===
+    "superadmin";
     if (isAdmin) return true;
     let chat = global.db.data.chats[m.chat];
     if (!chat) return true;

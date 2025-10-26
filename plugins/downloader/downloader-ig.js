@@ -40,7 +40,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                 { quoted: m }
             );
         } else if (album.length) {
-            await conn.sendMessage(m.chat, { album }, { quoted: m });
+            await conn.sendAlbum(m.chat, album, { quoted: m });
         } else m.reply("No valid media files found.");
     } catch (e) {
         conn.logger.error(e);

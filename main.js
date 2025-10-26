@@ -4,7 +4,8 @@ process.on("unhandledRejection", (e) => logger.error(e));
 
 import "./src/config.js";
 import "./src/global.js";
-import { naruyaizumi, protoType, serialize } from "./lib/message.js";
+import { protoType, serialize } from "./lib/message.js";
+import { naruyaizumi } from "./lib/socket.js";
 import { SQLiteAuth, SQLiteKeyStore } from "./lib/auth.js";
 import { Browsers, fetchLatestBaileysVersion } from "baileys";
 import { readdir, stat } from "fs/promises";

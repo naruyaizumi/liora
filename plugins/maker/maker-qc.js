@@ -12,7 +12,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 `Usage:\n› ${usedPrefix + command} <text> Or reply to a message you want to turn into a quote.`
             );
 
-        const name = m.quoted?.name || m.pushName || m.name || "Anonymous";
+        const name = (await m.quoted?.name) || m.pushName || (await m.name) || "Anonymous";
 
         const senderJid = m.quoted?.sender || m.sender;
         const profile = await conn.profilePictureUrl(senderJid, "image").catch(() => null);

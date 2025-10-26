@@ -10,12 +10,12 @@ let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
         if (!target && args[0]) {
             const raw = args[0].replace(/[^0-9]/g, "");
             const lid = raw + "@lid";
-            if (participants.some((p) => p.lid === lid)) {
+            if (participants.some((p) => p.id === lid)) {
                 target = lid;
             }
         }
 
-        if (!target || !participants.some((p) => p.lid === target))
+        if (!target || !participants.some((p) => p.id === target))
             throw `Specify one valid member to promote.\n› Example: ${usedPrefix + command} @628xxxx`;
 
         await conn.groupParticipantsUpdate(m.chat, [target], "promote");
