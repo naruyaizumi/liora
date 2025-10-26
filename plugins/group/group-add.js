@@ -9,7 +9,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
 
     if (!target || !target.endsWith("@s.whatsapp.net")) {
-        return m.reply(`Specify one valid member to add.\n› Example: ${usedPrefix + command} 6281234567890`);
+        return m.reply(
+            `Specify one valid member to add.\n› Example: ${usedPrefix + command} 6281234567890`
+        );
     }
 
     try {

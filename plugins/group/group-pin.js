@@ -1,12 +1,12 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!m.quoted) return m.reply("Reply a message to pin.");
-    
+
     if (!args[0]) {
         return m.reply(
             `Specify duration.\n\nExamples:\n` +
-            `› ${usedPrefix + command} 1 = 1 day\n` +
-            `› ${usedPrefix + command} 2 = 7 days\n` +
-            `› ${usedPrefix + command} 3 = 30 days`
+                `› ${usedPrefix + command} 1 = 1 day\n` +
+                `› ${usedPrefix + command} 2 = 7 days\n` +
+                `› ${usedPrefix + command} 3 = 30 days`
         );
     }
 
@@ -25,7 +25,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         await conn.sendMessage(m.chat, {
             pin: quotedKey,
             type: 1,
-            time: selected.seconds
+            time: selected.seconds,
         });
         m.reply(`Message pinned for ${selected.label}.`);
     } catch (e) {

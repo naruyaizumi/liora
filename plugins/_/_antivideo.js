@@ -79,17 +79,15 @@ export async function before(m, { conn }) {
     const jid = (id) => id?.replace(/:\d+@/, "@");
     const senderId = jid(this.decodeJid(m.sender));
     const botId = jid(this.decodeJid(this.user.id));
-    const user = participants.find(
-        u => jid(u.id) === senderId || jid(u.phoneNumber) === senderId
-    ) || {};
-    const bot = participants.find(
-        u => u.id === this.user.id || jid(u.id) === botId || jid(u
-            .phoneNumber) === botId
-    ) || {};
+    const user =
+        participants.find((u) => jid(u.id) === senderId || jid(u.phoneNumber) === senderId) || {};
+    const bot =
+        participants.find(
+            (u) => u.id === this.user.id || jid(u.id) === botId || jid(u.phoneNumber) === botId
+        ) || {};
     const isRAdmin = user?.admin === "superadmin";
     const isAdmin = isRAdmin || user?.admin === "admin";
-    const isBotAdmin = bot?.admin === "admin" || bot?.admin ===
-    "superadmin";
+    const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
     if (isAdmin) return true;
     let chat = global.db.data.chats[m.chat];
     if (!chat) return true;

@@ -6,12 +6,11 @@ export async function before(m, { conn }) {
     const participants = m.isGroup ? groupMetadata.participants || [] : [];
     const jid = (id) => id?.replace(/:\d+@/, "@");
     const botId = jid(this.decodeJid(this.user.id));
-    const bot = participants.find(
-        u => u.id === this.user.id || jid(u.id) === botId || jid(u
-            .phoneNumber) === botId
-    ) || {};
-    const isBotAdmin = bot?.admin === "admin" || bot?.admin ===
-    "superadmin";
+    const bot =
+        participants.find(
+            (u) => u.id === this.user.id || jid(u.id) === botId || jid(u.phoneNumber) === botId
+        ) || {};
+    const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
     let chat = global.db.data.chats[m.chat];
     if (!chat) return true;
     if (!chat?.autoApprove || !isBotAdmin) return true;
