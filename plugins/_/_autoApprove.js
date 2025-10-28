@@ -15,37 +15,60 @@ export async function before(m, { conn, isBotAdmin }) {
         const approveList = [];
 
         for (const r of requests) {
-            const participantId = r.jid || r.phone_number;
+            const participantId = r.jid;
             if (!participantId) continue;
-            const number = r.phone_number?.split("@")[0] || "";
-            const pn = parsePhoneNumber(number);
-            let region = pn.isValid() ? pn.getRegionCode() : null;
+            const numberMatch = participantId.match(/^(\d+)@/);
+            if (!numberMatch) {
+                conn.logger.warn(`Could not extract number from JID: ${participantId}`);
+                approveList.push(participantId);
+                continue;
+            }
+            const number = numberMatch[1];
+            const pn = parsePhoneNumber(`+${number}`);
+            const isValid = pn?.valid === true;
+            const region = isValid ? pn.regionCode : null;
             const continentFilterDisabled =
-                !global.config.continent ||
+                !Array.isArray(global.config.continent) ||
                 global.config.continent.length === 0 ||
                 global.config.continent === "-";
+
             if (continentFilterDisabled) {
                 approveList.push(participantId);
             } else if (region && global.config.continent.includes(region)) {
                 approveList.push(participantId);
             } else {
                 rejectList.push(participantId);
+                conn.logger.info(`Rejecting ${participantId} - Region: ${region || 'unknown'}`);
             }
         }
-        await delay(3000);
+
+        if (rejectList.length > 0 || approveList.length > 0) {
+            await delay(2000);
+        }
         if (rejectList.length > 0) {
-            await conn.groupRequestParticipantsUpdate(jid, rejectList, "reject");
+            try {
+                await conn.groupRequestParticipantsUpdate(jid, rejectList, "reject");
+            } catch (e) {
+                conn.logger.error(e);
+            }
+        }
+        if (rejectList.length > 0 && approveList.length > 0) {
+            await delay(1000);
         }
         if (approveList.length > 0) {
-            await conn.groupRequestParticipantsUpdate(jid, approveList, "approve");
+            try {
+                await conn.groupRequestParticipantsUpdate(jid, approveList, "approve");
+            } catch (e) {
+                conn.logger.error(e);
+            }
         }
     } catch (e) {
-        conn.logger.error("Error in auto-approve:", e);
+        conn.logger.error(e);
     }
 
     return true;
 }
 
 function delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
