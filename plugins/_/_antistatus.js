@@ -1,5 +1,6 @@
 export async function before(m, { conn, isOwner, isMods, isAdmin, isBotAdmin }) {
     if (!m.isGroup) return true;
+    if (isOwner || isMods) return true;
     if (isAdmin) return true;
     let chat = global.db.data.chats[m.chat];
     if (!chat) return true;

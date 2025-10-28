@@ -1,6 +1,6 @@
 import { parsePhoneNumber } from "awesome-phonenumber";
 
-export async function before(m, { conn, isAdmin, isBotAdmin }) {
+export async function before(m, { conn, isBotAdmin }) {
     if (!m.isGroup) return true;
     let chat = global.db.data.chats[m.chat];
     if (!chat) return true;
