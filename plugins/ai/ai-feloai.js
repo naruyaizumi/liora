@@ -29,7 +29,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         if (Array.isArray(result?.sources) && result.sources.length > 0) {
             sources =
                 "\n\n*Sources:*\n" +
-                result.sources.slice(0, 10)
+                result.sources
+                    .slice(0, 10)
                     .map((src) => `${src.index}. ${src.title || "Untitled"}\n${src.url}`)
                     .join("\n\n");
         }

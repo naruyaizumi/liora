@@ -84,15 +84,15 @@ async function start(file) {
 async function stopChild(signal = "SIGINT") {
     if (shuttingDown) return;
     shuttingDown = true;
-    
+
     if (!childProcess) {
         logger.info("No child process to stop");
         cleanup();
         return;
     }
-    
+
     logger.info(`Shutting down (${signal})`);
-    
+
     const timeout = setTimeout(() => {
         if (childProcess) {
             logger.warn(`Force killing unresponsive process`);
@@ -110,7 +110,7 @@ async function stopChild(signal = "SIGINT") {
                 resolve();
             }
         }, 100);
-        
+
         setTimeout(() => {
             clearInterval(checkInterval);
             clearTimeout(timeout);
@@ -134,7 +134,7 @@ async function supervise() {
         if (shuttingDown) {
             break;
         }
-        
+
         if (code === 0) {
             logger.info("Child process exited cleanly");
             break;

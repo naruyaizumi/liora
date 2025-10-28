@@ -1,4 +1,4 @@
-import { parsePhoneNumber } from 'awesome-phonenumber'
+import { parsePhoneNumber } from "awesome-phonenumber";
 
 export async function before(m, { conn, isAdmin, isBotAdmin }) {
     if (!m.isGroup) return true;
@@ -20,9 +20,9 @@ export async function before(m, { conn, isAdmin, isBotAdmin }) {
             const number = r.phone_number?.split("@")[0] || "";
             const pn = parsePhoneNumber(number);
             let region = pn.isValid() ? pn.getRegionCode() : null;
-            const continentFilterDisabled = 
-                !global.config.continent || 
-                global.config.continent.length === 0 || 
+            const continentFilterDisabled =
+                !global.config.continent ||
+                global.config.continent.length === 0 ||
                 global.config.continent === "-";
             if (continentFilterDisabled) {
                 approveList.push(participantId);
@@ -40,7 +40,7 @@ export async function before(m, { conn, isAdmin, isBotAdmin }) {
             await conn.groupRequestParticipantsUpdate(jid, approveList, "approve");
         }
     } catch (e) {
-        conn.logger.error('Error in auto-approve:', e);
+        conn.logger.error("Error in auto-approve:", e);
     }
 
     return true;

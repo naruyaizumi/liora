@@ -22,12 +22,30 @@ let handler = async (m, { conn, command, usedPrefix }) => {
 
         const encoded = encodeURIComponent(url);
         const attempts = [
-            { name: "ihancer", url: `https://api.nekolabs.web.id/tools/ihancer?imageUrl=${encoded}=high` },
-            { name: "pxpic upscale", url: `https://api.nekolabs.web.id/tools/pxpic/upscale?imageUrl=${encoded}` },
-            { name: "Real-ESRGAN v1 (scale 5)", url: `https://api.nekolabs.web.id/tools/real-esrgan/v1?imageUrl=${encoded}&scale=5` },
-            { name: "Real-ESRGAN v1 (scale 10)", url: `https://api.nekolabs.web.id/tools/real-esrgan/v1?imageUrl=${encoded}&scale=10` },
-            { name: "Real-ESRGAN v2 (scale 5)", url: `https://api.nekolabs.web.id/tools/real-esrgan/v2?imageUrl=${encoded}&scale=5` },
-            { name: "Real-ESRGAN v2 (scale 10)", url: `https://api.nekolabs.web.id/tools/real-esrgan/v2?imageUrl=${encoded}&scale=10` },
+            {
+                name: "ihancer",
+                url: `https://api.nekolabs.web.id/tools/ihancer?imageUrl=${encoded}=high`,
+            },
+            {
+                name: "pxpic upscale",
+                url: `https://api.nekolabs.web.id/tools/pxpic/upscale?imageUrl=${encoded}`,
+            },
+            {
+                name: "Real-ESRGAN v1 (scale 5)",
+                url: `https://api.nekolabs.web.id/tools/real-esrgan/v1?imageUrl=${encoded}&scale=5`,
+            },
+            {
+                name: "Real-ESRGAN v1 (scale 10)",
+                url: `https://api.nekolabs.web.id/tools/real-esrgan/v1?imageUrl=${encoded}&scale=10`,
+            },
+            {
+                name: "Real-ESRGAN v2 (scale 5)",
+                url: `https://api.nekolabs.web.id/tools/real-esrgan/v2?imageUrl=${encoded}&scale=5`,
+            },
+            {
+                name: "Real-ESRGAN v2 (scale 10)",
+                url: `https://api.nekolabs.web.id/tools/real-esrgan/v2?imageUrl=${encoded}&scale=10`,
+            },
         ];
 
         let resultUrl = null;

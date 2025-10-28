@@ -19,9 +19,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             return m.reply("No matching issues found.");
 
         const limited = json.result.slice(0, 25);
-        const list = limited
-            .map((i, idx) => `${idx + 1}. ${i.title}\nURL: ${i.url}`)
-            .join("\n\n");
+        const list = limited.map((i, idx) => `${idx + 1}. ${i.title}\nURL: ${i.url}`).join("\n\n");
 
         await conn.sendMessage(
             m.chat,

@@ -17,9 +17,13 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const { media } = json.result;
         for (const item of media) {
             if (item.type === "photo") {
-                const photos = media.filter(m => m.type === "photo").map(m => m.url);
+                const photos = media.filter((m) => m.type === "photo").map((m) => m.url);
                 if (photos.length === 1) {
-                    await conn.sendMessage(m.chat, { image: { url: photos[0] }, caption: null }, { quoted: m });
+                    await conn.sendMessage(
+                        m.chat,
+                        { image: { url: photos[0] }, caption: null },
+                        { quoted: m }
+                    );
                 } else if (photos.length > 1) {
                     const album = photos.map((img, i) => ({
                         image: { url: img },
@@ -28,7 +32,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                     await conn.sendAlbum(m.chat, album, { quoted: m });
                 }
                 break;
-            } else if (item.type === "video" && Array.isArray(item.variants) && item.variants.length) {
+            } else if (
+                item.type === "video" &&
+                Array.isArray(item.variants) &&
+                item.variants.length
+            ) {
                 const high = item.variants[item.variants.length - 1];
                 await conn.sendMessage(
                     m.chat,

@@ -1,10 +1,7 @@
 import { fetch } from "liora-lib";
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-    if (!text)
-        return m.reply(
-            `Please enter a query\n› Example: ${usedPrefix + command} supra mk4`
-        );
+    if (!text) return m.reply(`Please enter a query\n› Example: ${usedPrefix + command} supra mk4`);
 
     try {
         await global.loading(m, conn);

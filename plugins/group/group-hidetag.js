@@ -21,14 +21,23 @@ let handler = async (m, { text, participants, conn }) => {
 
             if (/image/.test(mime)) messageContent.image = media;
             else if (/video/.test(mime)) messageContent.video = media;
-            else if (/audio/.test(mime)) { messageContent.audio = media; messageContent.ptt = true; }
-            else if (/document/.test(mime)) { messageContent.document = media; messageContent.mimetype = mime; messageContent.fileName = "file"; }
-            else return m.reply("Unsupported media type.");
+            else if (/audio/.test(mime)) {
+                messageContent.audio = media;
+                messageContent.ptt = true;
+            } else if (/document/.test(mime)) {
+                messageContent.document = media;
+                messageContent.mimetype = mime;
+                messageContent.fileName = "file";
+            } else return m.reply("Unsupported media type.");
 
             if (finalText) messageContent.caption = finalText;
             await conn.sendMessage(m.chat, messageContent, sendOpts);
         } else if (finalText) {
-            await conn.sendMessage(m.chat, { text: finalText, mentions: sendOpts.mentions }, sendOpts);
+            await conn.sendMessage(
+                m.chat,
+                { text: finalText, mentions: sendOpts.mentions },
+                sendOpts
+            );
         } else {
             m.reply("Please provide media or text, or reply to a message.");
         }

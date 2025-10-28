@@ -2,7 +2,9 @@ import { fetch } from "liora-lib";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (args.length === 0) {
-        return m.reply(`Please provide a URL.\nExample: ${usedPrefix + command} https://example.com`);
+        return m.reply(
+            `Please provide a URL.\nExample: ${usedPrefix + command} https://example.com`
+        );
     }
 
     const url = args.join(" ");

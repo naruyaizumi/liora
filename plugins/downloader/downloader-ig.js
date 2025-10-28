@@ -14,7 +14,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     await global.loading(m, conn);
     try {
-        const res = await fetch(`https://api.nekolabs.web.id/downloader/instagram?url=${encodeURIComponent(url)}`);
+        const res = await fetch(
+            `https://api.nekolabs.web.id/downloader/instagram?url=${encodeURIComponent(url)}`
+        );
         if (!res.ok) throw new Error(`Failed to contact API. Status: ${res.status}`);
         const json = await res.json();
 

@@ -13,9 +13,10 @@ let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
             if (participants.some((p) => p.lid === lid)) target = lid;
         }
 
-        if (!target) return m.reply(
-            `Specify one valid WhatsApp number to ${command}.\n› Example: ${usedPrefix + command} @628xxxx`
-        );
+        if (!target)
+            return m.reply(
+                `Specify one valid WhatsApp number to ${command}.\n› Example: ${usedPrefix + command} @628xxxx`
+            );
 
         const decoded = conn.decodeJid(target);
         const blocklist = await conn.fetchBlocklist();
@@ -36,7 +37,6 @@ let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
             },
             { quoted: m }
         );
-
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
