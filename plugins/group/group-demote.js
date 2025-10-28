@@ -3,15 +3,15 @@ let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
         let target = m.mentionedJid?.[0] || m.quoted?.sender || null;
 
         if (!target && args[0] && /^\d{5,}$/.test(args[0])) {
-            const num = args[0].replace(/[^0-9]/g, "");
-            target = await conn.lidMappingStore.getLIDForPN(num + "@s.whatsapp.net");
+            const pn = args[0].replace(/[^0-9]/g, "") + "@s.whatsapp.net";
+            const lid = await conn.signalRepository.lidMapping.getLIDForPN(pn);
+            if (lid) target = lid;
         }
 
         if (!target && args[0]) {
-            const raw = args[0].replace(/[^0-9]/g, "");
-            const lid = raw + "@lid";
-            if (participants.some((p) => p.id === lid)) {
-                target = lid;
+            const raw = args[0].replace(/[^0-9]/g, "") + "@lid";
+            if (participants.some((p) => p.id === raw)) {
+                target = raw;
             }
         }
 

@@ -5,41 +5,18 @@ import { fileURLToPath, pathToFileURL } from "url";
 import { platform } from "process";
 import Database from "better-sqlite3";
 
-global.__filename = function filename(pathURL = import.meta.url, rmPrefix = platform !== "win32") {
-    return rmPrefix
-        ? /file:\/\/\//.test(pathURL)
-            ? fileURLToPath(pathURL)
-            : pathURL
-        : pathToFileURL(pathURL).toString();
+global.__filename = function filename(pathURL = import.meta.url, rmPrefix =
+    platform !== "win32") {
+    return rmPrefix ?
+        /file:\/\/\//.test(pathURL) ?
+        fileURLToPath(pathURL) :
+        pathURL :
+        pathToFileURL(pathURL).toString();
 };
 
 global.__dirname = function dirname(pathURL) {
     return path.dirname(global.__filename(pathURL, true));
 };
-
-global.__require = function require(dir = import.meta.url) {
-    return createRequire(dir);
-};
-
-global.API = (name, path = "/", query = {}, apikeyqueryname) =>
-    (name in global.config.APIs ? global.config.APIs[name] : name) +
-    path +
-    (query || apikeyqueryname
-        ? "?" +
-          new URLSearchParams(
-              Object.entries({
-                  ...query,
-                  ...(apikeyqueryname
-                      ? {
-                            [apikeyqueryname]:
-                                global.config.APIKeys[
-                                    name in global.config.APIs ? global.config.APIs[name] : name
-                                ],
-                        }
-                      : {}),
-              })
-          )
-        : "");
 
 global.timestamp = { start: new Date() };
 
@@ -65,7 +42,7 @@ function ensureTable(tableName, schema) {
     const exists = sqlite
         .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
         .get(tableName);
-
+    
     if (!exists) {
         sqlite.exec(`CREATE TABLE ${tableName} (${schema})`);
     } else {
@@ -84,11 +61,13 @@ function ensureTable(tableName, schema) {
                         .split(",")
                         .map((x) => x.trim())
                         .find((x) => x.startsWith(col));
-                    sqlite.exec(`ALTER TABLE ${tableName} ADD COLUMN ${colDef}`);
-                    conn.logger.info({ module: "DB" }, `Added column ${col} to ${tableName}`);
+                    sqlite.exec(
+                    `ALTER TABLE ${tableName} ADD COLUMN ${colDef}`);
+                    conn.logger.info({ module: "DB" },
+                        `Added column ${col} to ${tableName}`);
                 } catch (e) {
-                    conn.logger.error(
-                        { module: "DB", column: col, error: e.message },
+                    conn.logger.error({ module: "DB", column: col, error: e
+                                .message },
                         `Failed to add column`
                     );
                 }
@@ -153,53 +132,66 @@ class DataWrapper {
             settings: this.createProxy("settings"),
         };
     }
-
+    
     createProxy(table) {
-        return new Proxy(
-            {},
-            {
-                get: (_, jid) => {
-                    let row = sqlite.prepare(`SELECT * FROM ${table} WHERE jid = ?`).get(jid);
-                    if (!row) {
-                        sqlite.prepare(`INSERT INTO ${table} (jid) VALUES (?)`).run(jid);
-                        row = sqlite.prepare(`SELECT * FROM ${table} WHERE jid = ?`).get(jid);
+        return new Proxy({},
+        {
+            get: (_, jid) => {
+                let row = sqlite.prepare(
+                        `SELECT * FROM ${table} WHERE jid = ?`)
+                    .get(jid);
+                if (!row) {
+                    sqlite.prepare(
+                        `INSERT INTO ${table} (jid) VALUES (?)`
+                        ).run(jid);
+                    row = sqlite.prepare(
+                        `SELECT * FROM ${table} WHERE jid = ?`
+                        ).get(jid);
+                }
+                
+                for (const k in row) {
+                    try {
+                        const parsed = JSON.parse(row[k]);
+                        if (typeof parsed === "object") row[k] =
+                            parsed;
+                    } catch {
+                        /* Jawa */
                     }
-
-                    for (const k in row) {
-                        try {
-                            const parsed = JSON.parse(row[k]);
-                            if (typeof parsed === "object") row[k] = parsed;
-                        } catch {
-                            /* Jawa */
-                        }
-                    }
-
-                    return new Proxy(row, {
-                        set: (obj, prop, value) => {
-                            if (Object.prototype.hasOwnProperty.call(row, prop)) {
-                                try {
-                                    sqlite
-                                        .prepare(`UPDATE ${table} SET ${prop} = ? WHERE jid = ?`)
-                                        .run(normalizeValue(value), jid);
-                                    obj[prop] = value;
-                                    return true;
-                                } catch (e) {
-                                    conn.logger.error(
-                                        { module: "DB", table, prop },
-                                        `[DB] Update failed on ${table}.${prop}: ${e.message}`
-                                    );
-                                    return false;
-                                }
+                }
+                
+                return new Proxy(row, {
+                    set: (obj, prop, value) => {
+                        if (Object.prototype
+                            .hasOwnProperty.call(
+                                row, prop)) {
+                            try {
+                                sqlite
+                                    .prepare(
+                                        `UPDATE ${table} SET ${prop} = ? WHERE jid = ?`
+                                        )
+                                    .run(
+                                        normalizeValue(
+                                            value),
+                                        jid);
+                                obj[prop] = value;
+                                return true;
+                            } catch (e) {
+                                conn.logger.error({ module: "DB",
+                                        table,
+                                        prop },
+                                    `[DB] Update failed on ${table}.${prop}: ${e.message}`
+                                );
+                                return false;
                             }
-                            conn.logger.warn(
-                                `[DB] Tried to set unknown column ${prop} on ${table}`
-                            );
-                            return false;
-                        },
-                    });
-                },
-            }
-        );
+                        }
+                        conn.logger.warn(
+                            `[DB] Tried to set unknown column ${prop} on ${table}`
+                        );
+                        return false;
+                    },
+                });
+            },
+        });
     }
 }
 
@@ -244,10 +236,10 @@ Grant admin access to the bot to continue.
 [ACCESS BLOCKED]
 This feature is currently restricted or disabled by configuration.
 \`\`\``,
-    }[type];
-
+    } [type];
+    
     if (!msg) return;
-
+    
     conn.sendMessage(
         m.chat,
         {
@@ -255,13 +247,13 @@ This feature is currently restricted or disabled by configuration.
             contextInfo: {
                 externalAdReply: {
                     title: "ACCESS CONTROL SYSTEM",
-                    body: global.config.watermark || "Liora Secure Environment",
+                    body: global.config.watermark ||
+                        "Liora Secure Environment",
                     mediaType: 1,
                     thumbnailUrl: "https://qu.ax/DdwBH.jpg",
                     renderLargerThumbnail: true,
                 },
             },
-        },
-        { quoted: m }
+        }, { quoted: m }
     );
 };

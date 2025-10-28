@@ -16,6 +16,7 @@ import pino from "pino";
 
 const logger = pino({
     level: "debug",
+    base: { module: "MAIN INITIALIZER" },
     transport: {
         target: "pino-pretty",
         options: {

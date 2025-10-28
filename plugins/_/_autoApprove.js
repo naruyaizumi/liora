@@ -1,41 +1,46 @@
-export async function before(m, { conn }) {
+import { parsePhoneNumber } from 'awesome-phonenumber'
+
+export async function before(m, { conn, isAdmin, isBotAdmin }) {
     if (!m.isGroup) return true;
-    const groupMetadata =
-        (m.isGroup ? this.chats?.[m.chat]?.metadata || (await this.groupMetadata(m.chat)) : {}) ||
-        {};
-    const participants = m.isGroup ? groupMetadata.participants || [] : [];
-    const jid = (id) => id?.replace(/:\d+@/, "@");
-    const botId = jid(this.decodeJid(this.user.id));
-    const bot =
-        participants.find(
-            (u) => u.id === this.user.id || jid(u.id) === botId || jid(u.phoneNumber) === botId
-        ) || {};
-    const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
     let chat = global.db.data.chats[m.chat];
     if (!chat) return true;
     if (!chat?.autoApprove || !isBotAdmin) return true;
+
     try {
         const jid = m.chat;
         const requests = await conn.groupRequestParticipantsList(jid);
         if (!requests || requests.length === 0) return true;
 
-        const abusePattern = /^(212|994|90)/;
+        const rejectList = [];
+        const approveList = [];
 
-        const rejectList = requests
-            .filter((r) => abusePattern.test(r.phone_number?.split("@")[0] || ""))
-            .flatMap((r) => [r.phone_number, r.jid].filter(Boolean));
-        const approveList = requests
-            .filter((r) => !abusePattern.test(r.phone_number?.split("@")[0] || ""))
-            .flatMap((r) => [r.phone_number, r.jid].filter(Boolean));
-        await delay(2000);
-        if (rejectList.length) {
+        for (const r of requests) {
+            const participantId = r.jid || r.phone_number;
+            if (!participantId) continue;
+            const number = r.phone_number?.split("@")[0] || "";
+            const pn = parsePhoneNumber(number);
+            let region = pn.isValid() ? pn.getRegionCode() : null;
+            const continentFilterDisabled = 
+                !global.config.continent || 
+                global.config.continent.length === 0 || 
+                global.config.continent === "-";
+            if (continentFilterDisabled) {
+                approveList.push(participantId);
+            } else if (region && global.config.continent.includes(region)) {
+                approveList.push(participantId);
+            } else {
+                rejectList.push(participantId);
+            }
+        }
+        await delay(3000);
+        if (rejectList.length > 0) {
             await conn.groupRequestParticipantsUpdate(jid, rejectList, "reject");
         }
-        if (approveList.length) {
+        if (approveList.length > 0) {
             await conn.groupRequestParticipantsUpdate(jid, approveList, "approve");
         }
     } catch (e) {
-        conn.logger.error(e);
+        conn.logger.error('Error in auto-approve:', e);
     }
 
     return true;

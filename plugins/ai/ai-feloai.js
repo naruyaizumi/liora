@@ -11,7 +11,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         await global.loading(m, conn);
 
         const apiUrl = `https://api.nekolabs.web.id/ai/feloai?text=${encodeURIComponent(text)}`;
-        const response = await fetch(apiUrl, { method: "GET" });
+        const response = await fetch(apiUrl);
 
         if (!response.ok) {
             return m.reply("Failed to connect to Felo AI. Please try again later.");
@@ -29,7 +29,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         if (Array.isArray(result?.sources) && result.sources.length > 0) {
             sources =
                 "\n\n*Sources:*\n" +
-                result.sources
+                result.sources.slice(0, 10)
                     .map((src) => `${src.index}. ${src.title || "Untitled"}\n${src.url}`)
                     .join("\n\n");
         }

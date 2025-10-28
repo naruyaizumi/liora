@@ -1,32 +1,46 @@
 import { fetch } from "liora-lib";
 
-let handler = async (m, { conn, args }) => {
-    if (!args[0]) return m.reply("Please provide a valid YouTube video link.");
-    const url = args[0];
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+    if (args.length < 2)
+        return m.reply(
+            `Please specify the format and YouTube video link.\n› Example: ${usedPrefix + command} 720 https://youtu.be\n\nAvailable formats: 144, 240, 360, 480, 720, 1080`
+        );
+
+    const format = args[0];
+    const url = args[1];
+    const validFormats = ["144", "240", "360", "480", "720", "1080"];
+    if (!validFormats.includes(format))
+        return m.reply(`Invalid format.\nAvailable formats: ${validFormats.join(", ")}`);
+
     const youtubeRegex =
-        /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|shorts\/|live\/)|youtu\.be\/)[\w-]+(\S+)?$/i;
+        /^(https?:\/\/)?((www|m)\.)?(youtube(-nocookie)?\.com\/(watch\?v=|shorts\/|live\/)|youtu\.be\/)[\w-]+(\S+)?$/i;
     if (!youtubeRegex.test(url))
-        return m.reply("Invalid URL! Please provide a valid YouTube link.");
+        return m.reply("Invalid URL. Only standard YouTube video links are supported.");
 
     await global.loading(m, conn);
 
     try {
-        const res = await fetch(global.API("btz", "/api/download/ytmp4", { url }, "apikey"));
-        if (!res.ok) throw new Error(`Failed to contact API. Status: ${res.status}`);
+        const apiUrl = `https://api.nekolabs.web.id/downloader/youtube/v1?url=${encodeURIComponent(
+            url
+        )}&format=${encodeURIComponent(format)}`;
+        const res = await fetch(apiUrl);
+        if (!res.ok) throw new Error(`Failed to reach API. Status: ${res.status}`);
 
         const json = await res.json();
-        if (!json.status || !json.result?.mp4)
-            throw new Error("Failed to process YouTube video. Please try again.");
+        if (!json.success || !json.result?.downloadUrl)
+            throw new Error("Failed to process the video. Please try again later.");
+        if (json.result.type !== "video")
+            throw new Error("This link appears to contain audio content only. Use .ytmp3 instead.");
 
-        const { mp4, title } = json.result;
+        const { title, downloadUrl, quality } = json.result;
 
         await conn.sendMessage(
             m.chat,
             {
-                video: { url: mp4 },
-                caption: title,
+                video: { url: downloadUrl },
+                caption: `${title}\nQuality: ${quality}p`,
                 mimetype: "video/mp4",
-                fileName: `${title}.mp4`,
+                fileName: `${title}-${quality}p.mp4`,
             },
             { quoted: m }
         );

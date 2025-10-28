@@ -3,24 +3,26 @@ import { fetch } from "liora-lib";
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0] || !args[0].startsWith("http"))
         return m.reply(
-            `Please provide a valid Spotify track URL.\n› Example: ${usedPrefix + command} https://open.spotify.com/track/...`
+            `Please provide a valid Spotify track URL.\n› Example: ${usedPrefix + command} https://open.spotify.com`
         );
+
     await global.loading(m, conn);
+
     try {
-        const res = await fetch(
-            global.API("btz", "/api/download/spotify", { url: args[0] }, "apikey")
-        );
+        const apiUrl = `https://api.nekolabs.web.id/downloader/spotify/v1?url=${encodeURIComponent(args[0])}`;
+        const res = await fetch(apiUrl);
         if (!res.ok) throw new Error(`Failed to contact API. Status: ${res.status}`);
         const json = await res.json();
-        if (!json.status || !json.result?.data?.url)
-            throw new Error("Failed to download track from Spotify.");
-        const { title, url } = json.result.data;
+        if (!json.success || !json.result?.downloadUrl)
+            throw new Error("Failed to process Spotify track.");
+        const { downloadUrl } = json.result;
+
         await conn.sendMessage(
             m.chat,
             {
-                audio: { url },
+                audio: { url: downloadUrl },
                 mimetype: "audio/mpeg",
-                fileName: `${title || "spotify_track"}.mp3`,
+                fileName: "spotify.mp3",
             },
             { quoted: m }
         );
@@ -34,6 +36,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
 handler.help = ["spotifydl"];
 handler.tags = ["downloader"];
-handler.command = /^(spotifydl|spdl)$/i;
+handler.command = /^(spotifydl)$/i;
 
 export default handler;

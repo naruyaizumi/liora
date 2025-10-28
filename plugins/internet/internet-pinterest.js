@@ -3,25 +3,25 @@ import { fetch } from "liora-lib";
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text)
         return m.reply(
-            `Usage: ${usedPrefix + command} <query>\n› Example: ${usedPrefix + command} art`
+            `Please enter a query\n› Example: ${usedPrefix + command} supra mk4`
         );
 
     try {
         await global.loading(m, conn);
 
-        const apiUrl = global.API("btz", "/api/search/pinterest", { text1: text }, "apikey");
+        const apiUrl = `https://api.nekolabs.web.id/discovery/pinterest/search?q=${encodeURIComponent(text)}`;
         const res = await fetch(apiUrl);
         if (!res.ok) throw new Error(`API Error: ${res.status} ${res.statusText}`);
         const data = await res.json();
-        if (!data.result || data.result.length === 0)
+        if (!data.success || !data.result || data.result.length === 0)
             return m.reply(`No results found for "${text}".`);
-        const results = data.result.slice(0, 30);
-        const album = results.map((img, i) => ({
-            image: { url: img },
-            caption: `Pinterest Result (${i + 1}/${results.length})`,
+
+        const album = data.result.map((img, i) => ({
+            image: { url: img.imageUrl },
+            caption: `Slide ${i + 1} of ${data.result.length}`,
         }));
 
-        await conn.sendMessage(m.chat, { album }, { quoted: m });
+        await conn.sendAlbum(m.chat, album, { quoted: m });
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);

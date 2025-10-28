@@ -1,47 +1,51 @@
-import { fileTypeFromBuffer } from "file-type";
 import { fetch } from "liora-lib";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     const url = args[0];
     if (!url)
         return m.reply(
-            `Please provide a valid Instagram URL.\n› Example: ${usedPrefix + command} https://www.instagram.com/p/...`
+            `Please provide a valid Instagram URL.\n› Example: ${usedPrefix + command} https://www.instagram.com`
         );
+
     if (!/^https?:\/\/(www\.)?instagram\.com\//i.test(url))
         return m.reply("Invalid URL. Please send a proper Instagram link.");
+    if (/\/stories\//i.test(url))
+        return m.reply("Instagram stories are not supported. Please provide a post or reel URL.");
 
     await global.loading(m, conn);
     try {
-        const json = await fetch(
-            global.API("btz", "/api/download/igdowloader", { url }, "apikey")
-        ).then((r) => r.json());
-        if (!json.status || !json.message?.length) return m.reply("No media found.");
+        const res = await fetch(`https://api.nekolabs.web.id/downloader/instagram?url=${encodeURIComponent(url)}`);
+        if (!res.ok) throw new Error(`Failed to contact API. Status: ${res.status}`);
+        const json = await res.json();
 
-        const album = [];
-        let video = null;
+        if (!json.success || !json.result) return m.reply("No media found.");
 
-        for (const i of json.message) {
-            if (!i._url) continue;
-            const res = await fetch(i._url);
-            const buf = Buffer.from(await res.arrayBuffer());
-            const type = await fileTypeFromBuffer(buf);
-            if (!type) continue;
+        const data = json.result;
+        const mediaUrls = data.url || data.downloadUrl || [];
+        const urls = Array.isArray(mediaUrls) ? mediaUrls : [mediaUrls];
 
-            if (type.mime.startsWith("image"))
-                album.push({ image: buf, filename: `ig_${Date.now()}.jpg`, mime: type.mime });
-            else if (type.mime.startsWith("video"))
-                video = { video: buf, filename: `ig_${Date.now()}.mp4`, mime: type.mime };
-        }
+        if (!urls.length) return m.reply("No downloadable media found.");
 
-        if (video) {
+        if (data.metadata?.isVideo) {
             await conn.sendMessage(
                 m.chat,
-                { video: video.video, mimetype: video.mime, fileName: video.filename },
+                {
+                    video: { url: urls[0] },
+                    caption: null,
+                    fileName: "instagram.mp4",
+                },
                 { quoted: m }
             );
-        } else if (album.length) {
-            await conn.sendAlbum(m.chat, album, { quoted: m });
-        } else m.reply("No valid media files found.");
+        } else {
+            const album = urls.map((u, i) => ({
+                image: { url: u },
+                fileName: `${data.metadata?.username || "instagram"}_${i + 1}.jpg`,
+            }));
+            await conn.sendAlbum(m.chat, album, {
+                quoted: m,
+                caption: null,
+            });
+        }
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
@@ -52,6 +56,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
 handler.help = ["instagram"];
 handler.tags = ["downloader"];
-handler.command = /^(instagram|ig|igdl)$/i;
+handler.command = /^(instagram|ig)$/i;
 
 export default handler;

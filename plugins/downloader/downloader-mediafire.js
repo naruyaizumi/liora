@@ -13,12 +13,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     try {
         await global.loading(m, conn);
 
-        const apiUrl = global.API("btz", "/api/download/mediafire", { url }, "apikey");
+        const apiUrl = `https://api.nekolabs.web.id/downloader/mediafire?url=${encodeURIComponent(url)}`;
         const res = await fetch(apiUrl);
         if (!res.ok) throw new Error(`Failed to contact API. Status: ${res.status}`);
 
         const json = await res.json();
-        if (!json.status || !json.result?.download_url)
+        if (!json.success || !json.result?.download_url)
             throw new Error("Unable to retrieve file information from MediaFire.");
 
         const { filename, mimetype, download_url } = json.result;
@@ -42,6 +42,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
 handler.help = ["mediafire"];
 handler.tags = ["downloader"];
-handler.command = /^(mediafire|mf)$/i;
+handler.command = /^(mediafire)$/i;
 
 export default handler;

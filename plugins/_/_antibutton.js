@@ -17,7 +17,7 @@ export async function before(m, { conn }) {
         "eventMessage",
     ];
 
-    const botId = conn.decodeJid(conn.user.id);
+    const botId = conn.decodeJid(conn.user.lid);
     const senderId = conn.decodeJid(m.sender);
 
     if (interactiveTypes.includes(m.mtype) && senderId !== botId) {

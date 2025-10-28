@@ -1,61 +1,66 @@
 import { uploader3 } from "../../lib/uploader.js";
 import { fetch } from "liora-lib";
 
-let handler = async (m, { conn, args, command }) => {
-    const version = ["1", "2", "3", "4"].includes(args[0]) ? args[0] : "1";
+let handler = async (m, { conn, command, usedPrefix }) => {
     const q = m.quoted && m.quoted.mimetype ? m.quoted : m;
+    const mime = (q.msg || q).mimetype || "";
 
-    if (!q || typeof q.download !== "function" || !/image/.test(q.mimetype || ""))
-        return m.reply(`Send or reply to an image first.\n› Example: .${command} 2`);
+    if (!q || typeof q.download !== "function" || !/image\/(jpe?g|png|webp)/i.test(mime)) {
+        return m.reply(
+            `Please send or reply to an image before using this command.\nExample: ${usedPrefix}${command} < reply to image or ${usedPrefix}${command} < send image with caption`
+        );
+    }
 
     try {
         await global.loading(m, conn);
 
         const media = await q.download().catch(() => null);
-        if (!media || !(media instanceof Buffer))
-            return m.reply("Failed to download media or unrecognized format.");
+        if (!media || !(media instanceof Buffer)) return;
 
         const url = await uploader3(media).catch(() => null);
-        if (!url) return m.reply("Failed to upload image. Try again later.");
+        if (!url) return;
 
-        const endpointMap = {
-            1: "/api/tools/remini",
-            2: "/api/tools/remini-v2",
-            3: "/api/tools/remini-v3",
-            4: "/api/tools/remini-v4",
-        };
+        const encoded = encodeURIComponent(url);
+        const attempts = [
+            { name: "ihancer", url: `https://api.nekolabs.web.id/tools/ihancer?imageUrl=${encoded}=high` },
+            { name: "pxpic upscale", url: `https://api.nekolabs.web.id/tools/pxpic/upscale?imageUrl=${encoded}` },
+            { name: "Real-ESRGAN v1 (scale 5)", url: `https://api.nekolabs.web.id/tools/real-esrgan/v1?imageUrl=${encoded}&scale=5` },
+            { name: "Real-ESRGAN v1 (scale 10)", url: `https://api.nekolabs.web.id/tools/real-esrgan/v1?imageUrl=${encoded}&scale=10` },
+            { name: "Real-ESRGAN v2 (scale 5)", url: `https://api.nekolabs.web.id/tools/real-esrgan/v2?imageUrl=${encoded}&scale=5` },
+            { name: "Real-ESRGAN v2 (scale 10)", url: `https://api.nekolabs.web.id/tools/real-esrgan/v2?imageUrl=${encoded}&scale=10` },
+        ];
 
-        const params =
-            version === "3"
-                ? { url, resolusi: 4 }
-                : version === "4"
-                  ? { url, resolusi: 16 }
-                  : { url };
+        let resultUrl = null;
+        let methodUsed = null;
 
-        const api = global.API("btz", endpointMap[version], params, "apikey");
-        const res = await fetch(api);
-        if (!res.ok) throw new Error("Failed to process image.");
+        for (const attempt of attempts) {
+            const res = await fetch(attempt.url).catch(() => null);
+            const json = await res?.json().catch(() => null);
+            if (json?.success && json?.result) {
+                resultUrl = json.result;
+                methodUsed = attempt.name;
+                break;
+            }
+        }
 
-        const json = await res.json();
-        if (!json.status || !json.url) throw new Error("Invalid response from server.");
+        if (!resultUrl) throw new Error("All enhancement methods failed.");
 
         await conn.sendMessage(
             m.chat,
             {
-                image: { url: json.url },
-                caption: `Image processed successfully using ${command.toUpperCase()} (v${version})`,
+                image: { url: resultUrl },
+                caption: `Enhanced using: ${methodUsed}`,
             },
             { quoted: m }
         );
     } catch (e) {
         conn.logger.error(e);
-        m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
     }
 };
 
-handler.help = ["remini"];
+handler.help = ["hd"];
 handler.tags = ["tools"];
 handler.command = /^(remini|hd)$/i;
 

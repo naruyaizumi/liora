@@ -7,6 +7,7 @@ import pino from "pino";
 
 const logger = pino({
     level: "debug",
+    base: { module: "PROCESS MANAGER" },
     transport: {
         target: "pino-pretty",
         options: {
@@ -24,10 +25,13 @@ async function ensureDirs() {
     const dir = join(__dirname, "database");
     try {
         await mkdir(dir, { recursive: true });
+        logger.debug(`Ensured directory exists: ${dir}`);
     } catch (e) {
         logger.error(e.message);
+        throw e;
     }
 }
+
 await ensureDirs();
 
 let childProcess = null;
@@ -44,47 +48,82 @@ async function start(file) {
         });
 
         childProcess.on("message", (msg) => {
-            if (msg === "uptime") childProcess.send(process.uptime());
+            if (msg === "uptime") {
+                childProcess.send(process.uptime());
+            }
         });
 
         childProcess.on("exit", (code, signal) => {
-            if (code !== 0 && !shuttingDown)
-                logger.warn(`Child process exited (${code || signal})`);
+            const exitInfo = code !== null ? code : signal;
+            if (code !== 0 && !shuttingDown) {
+                logger.warn(`Child process exited (${exitInfo})`);
+            }
+            childProcess = null;
             resolve(code);
         });
 
         childProcess.on("error", (e) => {
             logger.error(e.message);
-            childProcess?.kill("SIGTERM");
+            if (childProcess) {
+                childProcess.kill("SIGTERM");
+                childProcess = null;
+            }
             resolve(1);
         });
 
         if (!rl.listenerCount("line")) {
             rl.on("line", (line) => {
-                if (childProcess?.connected) childProcess.send(line.trim());
+                if (childProcess?.connected) {
+                    childProcess.send(line.trim());
+                }
             });
         }
     });
 }
 
 async function stopChild(signal = "SIGINT") {
-    if (shuttingDown || !childProcess) return;
+    if (shuttingDown) return;
     shuttingDown = true;
+    
+    if (!childProcess) {
+        logger.info("No child process to stop");
+        cleanup();
+        return;
+    }
+    
     logger.info(`Shutting down (${signal})`);
-    childProcess.kill(signal);
+    
     const timeout = setTimeout(() => {
-        logger.warn(`Force killing unresponsive process`);
-        childProcess.kill("SIGKILL");
+        if (childProcess) {
+            logger.warn(`Force killing unresponsive process`);
+            childProcess.kill("SIGKILL");
+        }
     }, 10000);
 
-    await new Promise((r) => {
-        childProcess.once("exit", () => {
+    childProcess.kill(signal);
+
+    await new Promise((resolve) => {
+        const checkInterval = setInterval(() => {
+            if (!childProcess) {
+                clearInterval(checkInterval);
+                clearTimeout(timeout);
+                resolve();
+            }
+        }, 100);
+        
+        setTimeout(() => {
+            clearInterval(checkInterval);
             clearTimeout(timeout);
-            r();
-        });
+            resolve();
+        }, 11000);
     });
 
-    logger.info(`Shutdown complete`);
+    cleanup();
+}
+
+function cleanup() {
+    logger.info("Shutdown complete");
+    rl.close();
     process.exit(0);
 }
 
@@ -92,11 +131,21 @@ async function supervise() {
     while (true) {
         const code = await start("main.js");
 
-        if (shuttingDown || code === 0) break;
+        if (shuttingDown) {
+            break;
+        }
+        
+        if (code === 0) {
+            logger.info("Child process exited cleanly");
+            break;
+        }
 
         const now = Date.now();
-        if (now - lastCrash < 60000) crashCount++;
-        else crashCount = 1;
+        if (now - lastCrash < 60000) {
+            crashCount++;
+        } else {
+            crashCount = 1;
+        }
         lastCrash = now;
 
         if (crashCount >= 5) {
@@ -104,19 +153,43 @@ async function supervise() {
             await new Promise((r) => setTimeout(r, 60000));
             crashCount = 0;
         } else {
+            logger.info(`Restarting in 2 seconds... (crash count: ${crashCount})`);
             await new Promise((r) => setTimeout(r, 2000));
         }
     }
 }
 
-process.on("SIGINT", () => stopChild("SIGINT"));
-process.on("SIGTERM", () => stopChild("SIGTERM"));
+process.on("SIGINT", () => {
+    stopChild("SIGINT").catch((e) => {
+        logger.error(e.message);
+        process.exit(1);
+    });
+});
+
+process.on("SIGTERM", () => {
+    stopChild("SIGTERM").catch((e) => {
+        logger.error(e.message);
+        process.exit(1);
+    });
+});
+
 process.on("uncaughtException", (e) => {
     logger.error(e.message);
-    stopChild("SIGTERM");
+    logger.error(e.stack);
+    stopChild("SIGTERM").catch(() => {
+        process.exit(1);
+    });
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+    logger.error(`Unhandled rejection at ${promise}: ${reason}`);
+    stopChild("SIGTERM").catch(() => {
+        process.exit(1);
+    });
 });
 
 supervise().catch((e) => {
     logger.fatal(e.message);
+    logger.fatal(e.stack);
     process.exit(1);
 });
