@@ -107,27 +107,6 @@ global.config = {
      */
     continent: [], // Empty array allows all countries
 
-    /*============== API ==============*/
-    /**
-     * API endpoints configuration
-     * Add your API base URLs here
-     */
-    APIs: {
-        btz: "https://api.betabotz.eu.org",
-        // Add more APIs as needed
-        // example: "https://api.example.com",
-    },
-
-    /**
-     * API Keys configuration
-     * Map API URLs to their respective keys
-     */
-    APIKeys: {
-        "https://api.betabotz.eu.org": "API_KEY", // Replace with actual API key
-        // Add more API keys as needed
-        // "https://api.example.com": "your_api_key_here",
-    },
-
     /*============== MESSAGES ==============*/
     /** Bot watermark/branding */
     watermark: "𝙇͢𝙞𝙤𝙧𝙖",
