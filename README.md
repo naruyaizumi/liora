@@ -36,7 +36,7 @@
 
 > [!CAUTION]
 > **Do not publicly disclose vulnerabilities or internal bugs.**
-> 
+>
 > If you discover a security issue, report it responsibly through the official issue templates or via direct contact. This process preserves the **integrity, stability, and trust** of the Liora ecosystem.
 
 > [!WARNING]

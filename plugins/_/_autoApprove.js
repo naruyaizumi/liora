@@ -38,7 +38,7 @@ export async function before(m, { conn, isBotAdmin }) {
                 approveList.push(participantId);
             } else {
                 rejectList.push(participantId);
-                conn.logger.info(`Rejecting ${participantId} - Region: ${region || 'unknown'}`);
+                conn.logger.info(`Rejecting ${participantId} - Region: ${region || "unknown"}`);
             }
         }
 
@@ -70,5 +70,5 @@ export async function before(m, { conn, isBotAdmin }) {
 }
 
 function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }

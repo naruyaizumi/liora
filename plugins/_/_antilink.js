@@ -96,7 +96,9 @@ async function filterResolvableLinks(urls) {
                     try {
                         const ok = await isValidUrlWithNetwork(u);
                         if (ok) out.push(u);
-                    } catch {/* ignore */}
+                    } catch {
+                        /* ignore */
+                    }
                 }
             })()
         );
