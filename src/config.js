@@ -59,7 +59,7 @@ global.config = {
      *   - Example: "1234567890"
      */
     pairingNumber: "", // Bot number
-    
+
     /*============= APPROVE =============*/
     /**
      * Auto-approve configuration based on country codes

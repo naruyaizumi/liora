@@ -1,9 +1,9 @@
 function checkMessage(obj, interactiveTypes) {
-    if (!obj || typeof obj !== "object") return {interactive: false, forwarded: false};
+    if (!obj || typeof obj !== "object") return { interactive: false, forwarded: false };
     let interactive = false;
     let forwarded = false;
     const visited = new Set();
-    
+
     function traverse(o, skipQuoted = false) {
         if (!o || typeof o !== "object" || visited.has(o)) return;
         visited.add(o);
@@ -17,7 +17,7 @@ function checkMessage(obj, interactiveTypes) {
     }
 
     traverse(obj, true);
-    return {interactive, forwarded};
+    return { interactive, forwarded };
 }
 
 export async function before(m, { conn, isOwner, isMods, isAdmin, isBotAdmin }) {
@@ -45,7 +45,7 @@ export async function before(m, { conn, isOwner, isMods, isAdmin, isBotAdmin }) 
     const botId = conn.decodeJid(conn.user.lid);
     const senderId = conn.decodeJid(m.sender);
 
-    const {interactive, forwarded} = checkMessage(m.message, interactiveTypes);
+    const { interactive, forwarded } = checkMessage(m.message, interactiveTypes);
 
     if ((interactive || forwarded) && senderId !== botId) {
         try {
