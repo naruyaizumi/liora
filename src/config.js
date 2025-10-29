@@ -56,16 +56,10 @@ global.config = {
      *
      * pairingNumber:
      *   - Bot's phone number for pairing (without '+' or spaces)
-     *   - Set to null or empty string for dynamic assignment
      *   - Example: "1234567890"
-     *
-     * pairingAuth:
-     *   - true  → Use verification code (manual input required)
-     *   - false → Use QR code scanning for authentication
      */
-    pairingNumber: "", // Bot number (leave empty for QR mode or dynamic assignment)
-    pairingAuth: false, // false: QR Code | true: Verification Code
-
+    pairingNumber: "", // Bot number
+    
     /*============= APPROVE =============*/
     /**
      * Auto-approve configuration based on country codes

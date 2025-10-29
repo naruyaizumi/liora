@@ -27,7 +27,6 @@ const logger = pino({
     },
 });
 
-const pairingAuth = global.config.pairingAuth;
 const pairingNumber = global.config.pairingNumber;
 
 EventEmitter.defaultMaxListeners = 0;
@@ -54,9 +53,7 @@ async function IZUMI() {
                 },
             },
         }),
-        printQRInTerminal: !pairingAuth,
         browser: Browsers.ubuntu("Safari"),
-        emitOwnEvents: true,
         auth: {
             creds: state.creds,
             keys: SQLiteKeyStore(),
@@ -66,7 +63,7 @@ async function IZUMI() {
     global.conn = naruyaizumi(connectionOptions);
     conn.isInit = false;
 
-    if (pairingAuth && !conn.authState.creds.registered) {
+    if (!conn.authState.creds.registered) {
         setTimeout(async () => {
             try {
                 let code = await conn.requestPairingCode(pairingNumber, conn.Pairing);

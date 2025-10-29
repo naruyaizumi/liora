@@ -34,32 +34,43 @@ const parsePrefix = (connPrefix, pluginPrefix) => {
 };
 
 const matchPrefix = (prefix, text) => {
-    if (prefix instanceof RegExp) return [[prefix.exec(text), prefix]];
+    if (prefix instanceof RegExp) return [
+        [prefix.exec(text), prefix]
+    ];
     if (Array.isArray(prefix)) {
         return prefix.map((p) => {
             const re =
-                p instanceof RegExp ? p : new RegExp(p.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&"));
+                p instanceof RegExp ? p : new RegExp(p.replace(
+                    /[|\\{}()[\]^$+*?.]/g, "\\$&"));
             return [re.exec(text), re];
         });
     }
     if (typeof prefix === "string") {
         const safe = prefix.replace(/[^a-zA-Z0-9_-]/g, "\\$&");
         const esc = new RegExp(`^${safe}`, "i");
-        return [[esc.exec(text), esc]];
+        return [
+            [esc.exec(text), esc]
+        ];
     }
-    return [[[], new RegExp()]];
+    return [
+        [
+            [], new RegExp()
+        ]
+    ];
 };
 
 const isCmdAccepted = (cmd, rule) => {
     if (rule instanceof RegExp) return rule.test(cmd);
     if (Array.isArray(rule))
-        return rule.some((r) => (r instanceof RegExp ? r.test(cmd) : r === cmd));
+        return rule.some((r) => (r instanceof RegExp ? r.test(cmd) : r ===
+            cmd));
     if (typeof rule === "string") return rule === cmd;
     return false;
 };
 
 const sendAccessDenied = async (conn, m) => {
-    const userName = await safe(() => conn.getName(m.sender), "unknown");
+    const userName = await safe(() => conn.getName(m.sender),
+        "unknown");
     return conn.sendMessage(
         m.chat,
         {
@@ -84,8 +95,7 @@ const sendAccessDenied = async (conn, m) => {
                     renderLargerThumbnail: true,
                 },
             },
-        },
-        { quoted: m }
+        }, { quoted: m }
     );
 };
 
@@ -93,16 +103,17 @@ const reportPluginError = async (conn, m, pluginRef, chatRef, e) => {
     const hideKeys = (s) => {
         if (!s) return s;
         let t = String(s);
-        for (const key of Object.values(global.config.APIKeys || {})) {
+        for (const key of Object.values(global.config.APIKeys ||
+            {})) {
             if (!key) continue;
             t = t.replace(new RegExp(key, "g"), "#HIDDEN#");
         }
         return t;
     };
-
+    
     const ts = new Date().toISOString().replace("T", " ").split(".")[0];
     const text = hideKeys(format(e));
-
+    
     const msg = [
         "```",
         `┌─[${ts}]─[ERROR]`,
@@ -110,13 +121,13 @@ const reportPluginError = async (conn, m, pluginRef, chatRef, e) => {
         `│ ChatID : ${chatRef}`,
         "├─TRACEBACK────────────────────",
         ...text
-            .trim()
-            .split("\n")
-            .map((line) => `│ ${line}`),
+        .trim()
+        .split("\n")
+        .map((line) => `│ ${line}`),
         "└──────────────────────────────",
         "```",
     ].join("\n");
-
+    
     return conn.sendMessage(
         m.chat,
         {
@@ -130,8 +141,7 @@ const reportPluginError = async (conn, m, pluginRef, chatRef, e) => {
                     renderLargerThumbnail: true,
                 },
             },
-        },
-        { quoted: m }
+        }, { quoted: m }
     );
 };
 
@@ -144,27 +154,34 @@ export async function handler(chatUpdate) {
     if (m.isBaileys || m.fromMe) return;
     const settings = getSettings(this.user.jid);
     let senderLid = m.sender;
-    if (!senderLid.endsWith("@lid")) {
-        try {
-            const pn = senderLid.split("@")[0];
-            senderLid = await conn.signalRepository.lidMapping.getLIDForPN(pn);
-        } catch {
+    if (senderLid.endsWith("@lid")) {
+        senderLid = senderLid.split("@")[0];
+    }
+    else if (senderLid.endsWith("@s.whatsapp.net")) {
+        const resolved = await conn.signalRepository.lidMapping.getLIDForPN(
+            senderLid);
+        if (resolved) {
+            senderLid = typeof resolved === "string" && resolved.endsWith(
+                    "@lid") ?
+                resolved.split("@")[0] :
+                resolved;
+        } else {
             senderLid = senderLid.split("@")[0];
         }
     } else {
         senderLid = senderLid.split("@")[0];
     }
     const devOwners = global.config.owner
-        .filter(([lid, , isDev]) => lid && isDev)
-        .map(([lid]) => lid);
+        .filter(([id, , isDev]) => id && isDev)
+        .map(([id]) => id.toString().split("@")[0]);
     const regOwners = global.config.owner
-        .filter(([lid, , isDev]) => lid && !isDev)
-        .map(([lid]) => lid);
+        .filter(([id, , isDev]) => id && !isDev)
+        .map(([id]) => id.toString().split("@")[0]);
     const isMods = devOwners.includes(senderLid);
     const isOwner = m.fromMe || isMods || regOwners.includes(senderLid);
-    const groupMetadata = m.isGroup
-        ? this.chats?.[m.chat]?.metadata || (await safe(() => this.groupMetadata(m.chat), null))
-        : {};
+    const groupMetadata = m.isGroup ?
+        this.chats?.[m.chat]?.metadata || (await safe(() => this
+            .groupMetadata(m.chat), null)) : {};
     const participants = groupMetadata?.participants || [];
     const map = Object.fromEntries(participants.map((p) => [p.id, p]));
     const senderId = m.sender;
@@ -173,15 +190,17 @@ export async function handler(chatUpdate) {
     const bot = map[botId] || {};
     const isRAdmin = user?.admin === "superadmin";
     const isAdmin = isRAdmin || user?.admin === "admin";
-    const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
-    const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), "./plugins");
-
+    const isBotAdmin = bot?.admin === "admin" || bot?.admin ===
+        "superadmin";
+    const ___dirname = path.join(path.dirname(fileURLToPath(import.meta
+        .url)), "./plugins");
+    
     for (const name in global.plugins) {
         const plugin = global.plugins[name];
         if (!plugin || plugin.disabled) continue;
-
+        
         const __filename = join(___dirname, name);
-
+        
         if (typeof plugin.before === "function") {
             try {
                 const stop = await plugin.before.call(this, m, {
@@ -204,7 +223,7 @@ export async function handler(chatUpdate) {
                 conn.logger.error(e);
             }
         }
-
+        
         if (typeof plugin.all === "function") {
             await safe(() =>
                 plugin.all.call(this, m, {
@@ -214,15 +233,15 @@ export async function handler(chatUpdate) {
                 })
             );
         }
-
+        
         if (!settings?.restrict && plugin.tags?.includes("admin")) continue;
-
+        
         const prefix = parsePrefix(this.prefix, plugin.customPrefix);
         const body = typeof m.text === "string" ? m.text : "";
         const match = matchPrefix(prefix, body).find((p) => p[1]);
-
+        
         if (typeof plugin !== "function") continue;
-
+        
         let usedPrefix;
         if ((usedPrefix = (match?.[0] || "")[0])) {
             const noPrefix = body.replace(usedPrefix, "");
@@ -240,14 +259,14 @@ export async function handler(chatUpdate) {
                 await sendAccessDenied(this, m);
                 return;
             }
-
+            
             if (!isAdmin && !isMods && !isOwner && chat?.adminOnly) return;
             if (!isMods && !isOwner && chat?.mute) return;
-
+            
             if (settings?.autoread) {
                 await safe(() => this.readMessages([m.key]));
             }
-
+            
             const fail = plugin.fail || global.dfail;
             if (plugin.mods && !isMods) {
                 fail("mods", m, this);
@@ -273,7 +292,7 @@ export async function handler(chatUpdate) {
                 fail("admin", m, this);
                 continue;
             }
-
+            
             const extra = {
                 match,
                 usedPrefix,
@@ -296,28 +315,30 @@ export async function handler(chatUpdate) {
                 __dirname: ___dirname,
                 __filename,
             };
-
+            
             await (async () => {
                 try {
                     await plugin.call(this, m, extra);
                 } catch (e) {
                     conn.logger.error(e);
                     if (e && settings?.noerror) {
-                        await safe(() => m.reply(`Upss.. Something went wrong.`));
+                        await safe(() => m.reply(
+                            `Upss.. Something went wrong.`));
                     } else if (e) {
-                        await reportPluginError(this, m, plugin, chat, e);
+                        await reportPluginError(this, m, plugin,
+                            chat, e);
                     }
                 }
             })();
-
+            
             if (typeof plugin.after === "function") {
                 await safe(() => plugin.after.call(this, m, extra));
             }
-
+            
             break;
         }
     }
-
+    
     if (!getSettings(this.user.jid)?.noprint) {
         await safe(() => printMessage(m, this));
     }
@@ -325,56 +346,60 @@ export async function handler(chatUpdate) {
 
 export async function participantsUpdate({ id, participants, action }) {
     if (this.isInit) return;
-
+    
     const conn = this;
     const chat = global.db.data.chats[id] || {};
-    const groupMetadata = (await conn.groupMetadata(id)) || (conn.chats[id] || {}).metadata;
-
+    const groupMetadata = (await conn.groupMetadata(id)) || (conn.chats[
+        id] || {}).metadata;
+    
     if (!groupMetadata || !participants?.length) return;
-
+    
     for (const u of participants) {
         const user = typeof u === "string" ? u : u?.id || "";
         if (!user) continue;
-
+        
         if (!chat.detect) continue;
-
+        
         const pp =
-            (await conn.profilePictureUrl(user, "image").catch(() => null)) ||
+            (await conn.profilePictureUrl(user, "image").catch(() =>
+                null)) ||
             "https://qu.ax/jVZhH.jpg";
-
+        
         const img = await canvas(pp).catch(() => null);
         const groupName = await conn.getName(id);
         const desc = groupMetadata.desc?.toString() || "-";
-
+        
         let text = "";
         let title = "";
         let body = "";
-
+        
         switch (action) {
             case "add":
                 text = (chat.sWelcome || conn.welcome || "Welcome, @user")
                     .replace("@subject", groupName)
                     .replace("@desc", desc)
                     .replace("@user", "@" + user.split("@")[0]);
-
+                
                 title = "[ SYSTEM NOTICE ] User Joined";
-                body = `+ Total members: ${groupMetadata.participants.length}`;
+                body =
+                    `+ Total members: ${groupMetadata.participants.length}`;
                 break;
-
+                
             case "remove":
                 text = (chat.sBye || conn.bye || "Goodbye, @user")
                     .replace("@subject", groupName)
                     .replace("@desc", desc)
                     .replace("@user", "@" + user.split("@")[0]);
-
+                
                 title = "[ SYSTEM NOTICE ] User Left";
-                body = `- Members remaining: ${groupMetadata.participants.length}`;
+                body =
+                    `- Members remaining: ${groupMetadata.participants.length}`;
                 break;
-
+                
             default:
                 continue;
         }
-
+        
         await conn.sendMessage(id, {
             text: text.trim(),
             mentions: [user],
