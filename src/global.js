@@ -89,9 +89,7 @@ ensureTable(
   antiSticker INTEGER DEFAULT 0,
   antiStatus INTEGER DEFAULT 0,
   antiInteractive INTEGER DEFAULT 0,
-  autoApprove INTEGER DEFAULT 0,
-  notifgempa INTEGER DEFAULT 0,
-  gempaDateTime TEXT DEFAULT ''
+  autoApprove INTEGER DEFAULT 0
   `
 );
 

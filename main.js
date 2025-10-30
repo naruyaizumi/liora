@@ -11,7 +11,8 @@ import { Browsers, fetchLatestBaileysVersion } from "baileys";
 import { readdir, stat } from "fs/promises";
 import { join } from "path";
 import { EventEmitter } from "events";
-import { initReload, initCron, DisconnectReason } from "./lib/connection.js";
+import { DisconnectReason } from "./lib/connection.js";
+import { initReload } from "./lib/loader.js";
 import pino from "pino";
 
 const logger = pino({
@@ -35,10 +36,12 @@ protoType();
 serialize();
 
 async function IZUMI() {
-    const { state, saveCreds } = SQLiteAuth();
+    const { state, saveCreds } = await SQLiteAuth();
     const { version: baileysVersion } = await fetchLatestBaileysVersion();
-    logger.info(`[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}`);
-
+    logger.info(
+        `[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}`
+    );
+    
     const connectionOptions = {
         version: baileysVersion,
         logger: pino({
@@ -59,105 +62,205 @@ async function IZUMI() {
             keys: SQLiteKeyStore(),
         },
     };
-
+    
     global.conn = naruyaizumi(connectionOptions);
     conn.isInit = false;
-
-    if (!conn.authState.creds.registered) {
-        setTimeout(async () => {
+    
+    if (!state.creds.registered && pairingNumber) {
+        const waitForConnection = new Promise((resolve) => {
+            const checkConnection = setInterval(() => {
+                if (conn.user || conn.ws?.readyState ===
+                    1) {
+                    clearInterval(checkConnection);
+                    resolve();
+                }
+            }, 100);
+            
+            setTimeout(() => {
+                clearInterval(checkConnection);
+                resolve();
+            }, 10000);
+        });
+        
+        await waitForConnection;
+        
+        try {
+            let code = await conn.requestPairingCode(pairingNumber, conn
+                .Pairing);
+            code = code?.match(/.{1,4}/g)?.join("-") || code;
+            logger.info(`Pairing code for ${pairingNumber}: ${code}`);
+        } catch (e) {
+            logger.error(e.message);
+        }
+    }
+    
+    const maintenanceInterval = setInterval(async () => {
+        if (!global.sqlite) {
+            logger.warn(
+                "SQLite instance not available for maintenance"
+                );
+            return;
+        }
+        
+        try {
+            const checkpoint = global.sqlite.prepare(
+                "PRAGMA wal_checkpoint(FULL);");
+            checkpoint.run();
+            
+            const optimize = global.sqlite.prepare(
+                "PRAGMA optimize;");
+            optimize.run();
+            
+            logger.debug("SQLite maintenance completed");
+        } catch (e) {
+            logger.error(e.message);
+        }
+    }, 600 * 1000);
+    
+    process.on("SIGINT", () => {
+        clearInterval(maintenanceInterval);
+        if (global.sqlite) {
             try {
-                let code = await conn.requestPairingCode(pairingNumber, conn.Pairing);
-                code = code?.match(/.{1,4}/g)?.join("-") || code;
-                logger.info(`Pairing code for ${pairingNumber}: ${code}`);
+                global.sqlite.close();
             } catch (e) {
                 logger.error(e.message);
             }
-        }, 2500);
-    }
-
+        }
+        process.exit(0);
+    });
+    
     let isInit = true;
     let handler = await import("./handler.js");
-
-    global.reloadHandler = async function (restartConn = false) {
+    
+    global.reloadHandler = async function(restartConn = false) {
         try {
-            const HandlerModule = await import(`./handler.js?update=${Date.now()}`).catch(
-                () => null
-            );
-            if (HandlerModule && typeof HandlerModule.handler === "function") {
+            const HandlerModule = await import(
+                `./handler.js?update=${Date.now()}`
+            ).catch((e) => {
+                logger.error(e.message);
+                return null;
+            });
+            
+            if (HandlerModule && typeof HandlerModule.handler ===
+                "function") {
                 handler = HandlerModule;
+                logger.info("Handler module reloaded successfully");
             }
         } catch (e) {
             logger.error(e.message);
         }
-
+        
         if (restartConn) {
             const oldChats = global.conn?.chats || {};
             try {
                 global.conn.ws?.close();
-            } catch {
-                /* ignore */
+            } catch (e) {
+                logger.debug(
+                    `Error closing WebSocket: ${e.message}`);
             }
-            conn.ev.removeAllListeners();
-            global.conn = naruyaizumi(connectionOptions, { chats: oldChats });
+            
+            if (conn.ev) {
+                conn.ev.removeAllListeners();
+            }
+            
+            global.conn = naruyaizumi(
+            connectionOptions, { chats: oldChats });
             isInit = true;
         }
-
+        
         if (!isInit && conn.ev) {
-            for (const [ev, fn] of [
+            const events = [
                 ["messages.upsert", conn.handler],
-                ["group-participants.update", conn.participantsUpdate],
-                ["message.delete", conn.onDelete],
+                ["group-participants.update", conn
+                    .participantsUpdate
+                ],
+                ["messages.delete", conn.onDelete],
                 ["connection.update", conn.connectionUpdate],
                 ["creds.update", conn.credsUpdate],
-            ]) {
-                if (typeof fn === "function") conn.ev.off(ev, fn);
+            ];
+            
+            for (const [ev, fn] of events) {
+                if (typeof fn === "function") {
+                    conn.ev.off(ev, fn);
+                }
             }
         }
-
-        conn.handler = handler?.handler?.bind(global.conn) || (() => {});
-        conn.participantsUpdate = handler?.participantsUpdate?.bind(global.conn) || (() => {});
-        conn.onDelete = handler?.deleteUpdate?.bind(global.conn) || (() => {});
-        conn.connectionUpdate = DisconnectReason?.bind(global.conn) || (() => {});
-        conn.credsUpdate = saveCreds?.bind(global.conn) || (() => {});
-
+        
+        conn.handler = handler?.handler?.bind(global.conn) || (
+    () => {});
+        conn.participantsUpdate = handler?.participantsUpdate?.bind(
+            global.conn) || (() => {});
+        conn.onDelete = handler?.deleteUpdate?.bind(global.conn) ||
+            (() => {});
+        conn.connectionUpdate = DisconnectReason?.bind(global
+            .conn) || (() => {});
+        conn.credsUpdate = saveCreds?.bind(global.conn) || (
+        () => {});
+        
         if (conn.ev) {
-            if (typeof conn.handler === "function") conn.ev.on("messages.upsert", conn.handler);
-            if (typeof conn.participantsUpdate === "function")
-                conn.ev.on("group-participants.update", conn.participantsUpdate);
-            if (typeof conn.onDelete === "function") conn.ev.on("message.delete", conn.onDelete);
-            if (typeof conn.connectionUpdate === "function")
-                conn.ev.on("connection.update", conn.connectionUpdate);
-            if (typeof conn.credsUpdate === "function")
+            if (typeof conn.handler === "function") {
+                conn.ev.on("messages.upsert", conn.handler);
+            }
+            if (typeof conn.participantsUpdate === "function") {
+                conn.ev.on("group-participants.update", conn
+                    .participantsUpdate);
+            }
+            if (typeof conn.onDelete === "function") {
+                conn.ev.on("messages.delete", conn.onDelete);
+            }
+            if (typeof conn.connectionUpdate === "function") {
+                conn.ev.on("connection.update", conn
+                    .connectionUpdate);
+            }
+            if (typeof conn.credsUpdate === "function") {
                 conn.ev.on("creds.update", conn.credsUpdate);
+            }
         }
-
+        
         isInit = false;
         return true;
     };
-
+    
     const pluginFolder = global.__dirname(
         join(global.__dirname(import.meta.url), "./plugins/index")
     );
-
+    
     async function getAllPlugins(dir) {
         const results = [];
         try {
             const files = await readdir(dir);
             for (const file of files) {
                 const filepath = join(dir, file);
-                const stats = await stat(filepath);
-                if (stats.isDirectory()) results.push(...(await getAllPlugins(filepath)));
-                else if (/\.js$/.test(file)) results.push(filepath);
+                try {
+                    const stats = await stat(filepath);
+                    if (stats.isDirectory()) {
+                        results.push(...(await getAllPlugins(
+                        filepath)));
+                    } else if (/\.js$/.test(file)) {
+                        results.push(filepath);
+                    }
+                } catch (e) {
+                    logger.warn(
+                        `Cannot access ${filepath}: ${e.message}`);
+                }
             }
         } catch (e) {
             logger.error(e.message);
         }
         return results;
     }
-
-    await initReload(conn, pluginFolder, getAllPlugins);
-    initCron();
-    await global.reloadHandler();
+    
+    try {
+        await initReload(conn, pluginFolder, getAllPlugins);
+        await global.reloadHandler();
+        logger.info("Bot initialization completed successfully");
+    } catch (e) {
+        logger.error(e.message);
+        throw e;
+    }
 }
 
-IZUMI();
+IZUMI().catch((e) => {
+    logger.fatal(e.message);
+    process.exit(1);
+});

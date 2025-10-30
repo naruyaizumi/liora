@@ -32,65 +32,56 @@
 
 ---
 
-## ⚠️ Security & Ethical Use
+## 🛡️ Security & Compliance
 
-> [!CAUTION]
-> **Do not publicly disclose vulnerabilities or internal bugs.**
->
-> If you discover a security issue, report it responsibly through the official issue templates or via direct contact. This process preserves the **integrity, stability, and trust** of the Liora ecosystem.
+> **Responsible Disclosure**  
+> If you discover a vulnerability, exploit, or internal bug, report it privately via issue templates or direct contact.  
+> This ensures the integrity and stability of the Liora ecosystem.
 
-> [!WARNING]
-> **Unauthorized modification, credit removal, or commercial distribution is strictly forbidden.**
->
-> - Keep all author and contributor credits intact (README, configuration headers, and embedded metadata).
-> - Redistribution, reselling, or rebranding for personal gain is a direct violation of project terms.
->
-> Credits represent **respect, transparency, and acknowledgment** — not decoration.
+> **License Integrity**  
+> Unauthorized modification, credit removal, or commercial redistribution is strictly prohibited.  
+> - Preserve all author and contributor credits  
+> - No rebranding, reselling, or license tampering  
+>  
+> Liora is a technical framework — not a commercial template.
 
 ---
 
-## 🌌 About Liora
+## 🧭 About Liora
 
 <div align="center">
 
-![Typing Animation](https://readme-typing-svg.herokuapp.com?size=28&duration=3500&color=1A1F71&center=true&vCenter=true&width=600&lines=🌌+Liora+–+WhatsApp+Bot;Built+for+Developers;Precision+%26+Performance)
+![Typing Animation](https://readme-typing-svg.herokuapp.com?size=28&duration=3500&color=1A1F71&center=true&vCenter=true&width=600&lines=🧭+Liora+–+WhatsApp+Bot;Built+for+Developers;Precision+%26+Performance)
 
 </div>
 
-**Liora** is not your average WhatsApp bot. It's a technically demanding, low-level automation framework built for developers who crave control. Even renaming a command can be confusing if you don't understand the architecture — and that's by design.
-
-Liora is engineered for precision and performance. It offers:
-
-### ⚡ Core Features
-
-- **⚡ Native Performance** — Powered by `liora-lib` with C++ modules for media, fetch, and conversion
-- **🔧 Modular Architecture** — Every handler, plugin, and persona is isolated and hot-reloadable
-- **🔒 Zero Overhead** — No JSON parsing, no disk I/O, pure buffer-based memory flow
-- **🧠 Developer-Only** — Not for casual use, but for those who want runtime-level control
-
-> **Note:** No compiling. No external tools. No mercy. Just code, control, and chaos.
+**Liora** is an enterprise-grade WhatsApp automation framework engineered for developers who demand precision, modularity, and runtime-level control.  
+It is not plug-and-play. It is not beginner-friendly. It is unapologetically low-level.
 
 ---
 
-## 🌑 Technical Features
+## 🧱 Core Capabilities
 
-- **🔓 Fully Open Source** — No encryption, no obfuscation. Every line is visible, traceable, and modifiable
-- **🧩 Modular by Design** — Each handler, plugin, and persona is isolated, hot-reloadable, and built for extension
-- **⚡ Native Acceleration** — Powered by `liora-lib` C++ bindings for media, fetch, and conversion
-- **📜 Pure ESM JavaScript** — Async-first, zero legacy, and built for modern runtimes
-- **🟢 Node.js v22+ Ready** — Tuned for the latest event loop and V8 enhancements
+- **🛠️ Native Performance** — Powered by `liora-lib` with C++ bindings for media, fetch, and conversion
+- **🧩 Modular Architecture** — Hot-reloadable handlers, plugins, and personas
+- **📈 Zero Overhead** — No JSON parsing, no disk I/O, pure buffer-based memory flow
+- **🧠 Developer-Only** — Built for runtime control, not UI abstraction
+
+---
+
+## 📐 Technical Highlights
+
+- **🔓 Fully Open Source** — No encryption, no obfuscation. Every line is traceable and auditable
+- **📦 Pure ESM JavaScript** — Async-first, zero legacy, tuned for modern runtimes
+- **🟢 Node.js v22+ Ready** — Optimized for latest V8 and event loop enhancements
 - **💾 SQLite-Backed State** — Atomic, persistent, and blazing fast via `better-sqlite3`
-- **💡 Developer-Centric** — Built for those who want full control, not plug-and-play illusions
-
-> **Philosophy:** Liora isn't made to be easy — it's made to be yours. If you're not ready to dive deep, you're not ready for Liora.
+- **🧬 Extensible by Design** — Every module is isolated, composable, and override-friendly
 
 ---
 
-## 💣 Thanks & Credits
+## 🤝 Credits & Contributors
 
-We sincerely thank the following parties who have been instrumental in the development and continuity of **Liora** — a project that demands precision, patience, and deep technical understanding.
-
-### 👥 Project Team
+We honor the developers who shaped Liora into a precision-grade framework.
 
 <p align="center">
   <a href="https://linkbio.co/naruyaizumi">
@@ -101,21 +92,21 @@ We sincerely thank the following parties who have been instrumental in the devel
     <img src="https://img.shields.io/badge/Developer-SXZnightmar-1A1F71?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F" alt="Developer: SXZnightmar"/>
   </a>
   <a href="https://wa.me/6287831816747">
-    <img src="https://img.shields.io/badge/Developer-Alfi%20Dev-1A1F71?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F" alt="Developer: Alfi Dev"/>
+    <img src="https://img.shields.io/badge/Developer-Alfi%20Dev-1A1F71?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F" alt="Developer: Alfi"/>
   </a>
 </p>
 
 ---
 
-## 🔪 License
+## 📄 License
 
-This project is licensed under the **[Apache License 2.0](https://opensource.org/licenses/Apache-2.0)** (OSI Approved License) — see the [LICENSE](LICENSE) file for full terms.
-
-> **Terms:** You are free to use, modify, and distribute — but **credit must be preserved** and **rebranding is strictly discouraged**. Liora is a technical framework, not a template.
+Licensed under the **[Apache License 2.0](https://opensource.org/licenses/Apache-2.0)**  
+You are free to use, modify, and distribute — but credit must be preserved.  
+Rebranding is discouraged. Liora is a framework, not a template.
 
 ---
 
-## 🩸 Support
+## 💙 Support the Project
 
 <p align="center">
   <a href="https://ko-fi.com/naruyaizumi" target="_blank">

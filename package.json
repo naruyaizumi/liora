@@ -1,6 +1,6 @@
 {
     "name": "liora",
-    "version": "7.4.6",
+    "version": "7.4.7",
     "type": "module",
     "engines": {
         "node": ">=22.0.0"
@@ -35,7 +35,7 @@
         "globals": "^16.4.0",
         "prettier": "^3.6.2"
     },
-    "packageManager": "pnpm@10.19.0",
+    "packageManager": "pnpm@10.20.0",
     "prettier": {
         "printWidth": 100,
         "tabWidth": 4,
