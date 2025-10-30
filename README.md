@@ -39,10 +39,11 @@
 > This ensures the integrity and stability of the Liora ecosystem.
 
 > **License Integrity**  
-> Unauthorized modification, credit removal, or commercial redistribution is strictly prohibited.  
-> - Preserve all author and contributor credits  
-> - No rebranding, reselling, or license tampering  
->  
+> Unauthorized modification, credit removal, or commercial redistribution is strictly prohibited.
+>
+> - Preserve all author and contributor credits
+> - No rebranding, reselling, or license tampering
+>
 > Liora is a technical framework — not a commercial template.
 
 ---
