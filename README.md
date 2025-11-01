@@ -203,18 +203,26 @@ Licensed under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
 <div align="center">
 
-[![Ko-fi](https://storage.ko-fi.com/cdn/kofi3.png?v=3)](https://ko-fi.com/naruyaizumi)
-[![Trakteer](https://trakteer.id/images/mix/navbar-logo-lite.png)](https://trakteer.id/naruyaizumi)
-[![Saweria](https://user-images.githubusercontent.com/26188697/180601310-e82c63e4-412b-4c36-b7b5-7ba713c80380.png)](https://saweria.co/naruyaizumi)
+<a href="https://ko-fi.com/naruyaizumi">
+    <img src="https://storage.ko-fi.com/cdn/kofi3.png?v=3" alt="Ko-fi" height="32" />
+</a>
+<a href="https://trakteer.id/naruyaizumi">
+    <img src="https://trakteer.id/images/mix/navbar-logo-lite.png" alt="Trakteer" height="32" />
+</a>
+<a href="https://saweria.co/naruyaizumi">
+    <img src="https://user-images.githubusercontent.com/26188697/180601310-e82c63e4-412b-4c36-b7b5-7ba713c80380.png" alt="Saweria" height="32" />
+</a>
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=1000&color=0B3D91&center=true&vCenter=true&width=500&lines=Your+support+keeps+this+project+alive!;Thank+you+for+helping+us+grow" alt="Support message" />
+<br><br>
+
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=18&duration=3000&pause=1000&color=0B3D91&center=true&vCenter=true&width=400&lines=Your+support+keeps+this+project+alive!;Thank+you+for+helping+us+grow" alt="Support message" />
 
 </div>
 
 **Why Support?**
-- 🚀 Accelerates new features
-- 🐛 Enables faster fixes
-- 📚 Supports better documentation
+- 🚀 Accelerates new features  
+- 🐛 Enables faster fixes  
+- 📚 Supports better documentation  
 - 🌍 Maintains free open-source access
 
 ---
