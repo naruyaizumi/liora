@@ -20,12 +20,10 @@
 [![Prettier](https://img.shields.io/badge/Prettier-Enabled-0B3D91?style=for-the-badge&logo=prettier&logoColor=white&labelColor=2F2F2F)](https://prettier.io/)
 [![Release](https://img.shields.io/github/v/release/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&color=0B3D91&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/releases)
 [![License](https://img.shields.io/badge/License-Apache%202.0-0B3D91?style=for-the-badge&logo=apache&logoColor=white&labelColor=2F2F2F)](https://www.apache.org/licenses/LICENSE-2.0)
-
 [![JavaScript](https://img.shields.io/badge/JavaScript-ESM-0B3D91?style=for-the-badge&logo=javascript&logoColor=black&labelColor=2F2F2F)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20Only-0B3D91?style=for-the-badge&logo=linux&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora#requirements)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%20LTS-0B3D91?style=for-the-badge&logo=ubuntu&logoColor=white&labelColor=2F2F2F)](https://ubuntu.com/download/desktop)
 [![Debian](https://img.shields.io/badge/Debian-12-0B3D91?style=for-the-badge&logo=debian&logoColor=white&labelColor=2F2F2F)](https://www.debian.org/releases/bookworm/)
-
 [![WhatsApp Channel](https://img.shields.io/badge/WhatsApp-Changelog-0B3D91?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F)](https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03)
 [![Instagram](https://img.shields.io/badge/Instagram-@naruyaizumi-0B3D91?style=for-the-badge&logo=instagram&logoColor=white&labelColor=2F2F2F)](https://instagram.com/naruyaizumi)
 [![WhatsApp Group](https://img.shields.io/badge/WhatsApp-Discussion-0B3D91?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F)](https://chat.whatsapp.com/FtMSX1EsGHTJeynu8QmjpG)
@@ -80,7 +78,8 @@
 <div align="center">
 
 [![Security Policy](https://img.shields.io/badge/Security-Policy-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/SECURITY.md)
-[![Contributing](https://img.shields.io/badge/Contribution-Guide-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/CONTRIBUTING.md)
+[![Contribution Guide](https://img.shields.io/badge/Contribution-Guide-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/CONTRIBUTING.md)
+[![Open Issue](https://img.shields.io/badge/Open-Issue-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](../../issues/new/choose)
 
 </div>
 
