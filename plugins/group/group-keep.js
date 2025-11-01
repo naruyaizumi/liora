@@ -2,15 +2,13 @@
 let handler = async (m, { conn }) => {
     if (!m.quoted) return m.reply("Reply a message to keep.");
 
-    const quotedMsg = m.quoted.copy();
-    const { chat } = quotedMsg;
+    const quotedKey = m.quoted?.vM?.key;
+    if (!quotedKey) return m.reply("Cannot keep: quoted message key not found");
 
     try {
-        await conn.sendMessage(chat, {
-            keep: {
-                type: 1,
-                key: quotedMsg.key,
-            },
+        await conn.sendMessage(m.chat, {
+            keep: quotedKey,
+            type: 1,
         });
         m.reply("Message marked as keep.");
     } catch (e) {

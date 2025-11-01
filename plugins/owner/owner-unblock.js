@@ -7,22 +7,22 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       const lid = await conn.signalRepository.lidMapping.getLIDForPN(pn);
       target = lid || pn;
     }
-
+    
     if (!target && args[0]) {
       const raw = args[0].replace(/[^0-9]/g, "") + "@lid";
       target = raw;
     }
 
     if (!target) {
-      throw `Specify one valid JID to block.\n› Example: ${usedPrefix + command} @628xxxx`;
+      throw `Specify one valid JID to unblock.\n› Example: ${usedPrefix + command} @628xxxx`;
     }
 
-    await conn.updateBlockStatus(target, "block");
+    await conn.updateBlockStatus(target, "unblock");
 
     await conn.sendMessage(
       m.chat,
       {
-        text: `Successfully blocked @${target.split("@")[0]}.`,
+        text: `Successfully unblocked @${target.split("@")[0]}.`,
         mentions: [target],
       },
       { quoted: m }
@@ -33,9 +33,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   }
 };
 
-handler.help = ["block"];
+handler.help = ["unblock"];
 handler.tags = ["owner"];
-handler.command = /^block$/i;
+handler.command = /^unblock$/i;
 handler.owner = true;
 
 export default handler;

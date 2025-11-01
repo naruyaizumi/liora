@@ -25,7 +25,6 @@ async function ensureDirs() {
     const dir = join(__dirname, "database");
     try {
         await mkdir(dir, { recursive: true });
-        logger.debug(`Ensured directory exists: ${dir}`);
     } catch (e) {
         logger.error(e.message);
         throw e;

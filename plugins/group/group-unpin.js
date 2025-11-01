@@ -1,18 +1,15 @@
-/* todo: Please use the appropriate modified Baileys fork, because the original Baileys does not support it yet.
 let handler = async (m, { conn }) => {
     if (!m.quoted) return m.reply("Reply a message to unpin.");
 
-    const quotedMsg = m.quoted.copy();
-    const { chat } = quotedMsg;
+    const quotedKey = m.quoted?.vM?.key;
+    if (!quotedKey) return m.reply("Cannot unpin: quoted message key not found");
 
     try {
-        await conn.sendMessage(chat, {
-            pin: {
-                type: 0,
-                key: quotedMsg.key,
-            },
+        await conn.sendMessage(m.chat, {
+            pin: quotedKey,
+            type: 2,
         });
-        m.reply("Message unpinned successfully.");
+        m.reply(`Message unpinned.`);
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
@@ -27,4 +24,3 @@ handler.admin = true;
 handler.botAdmin = true;
 
 export default handler;
-*/

@@ -1,6 +1,6 @@
 {
     "name": "liora",
-    "version": "7.4.7",
+    "version": "7.4.8",
     "type": "module",
     "engines": {
         "node": ">=22.0.0"
@@ -8,7 +8,9 @@
     "scripts": {
         "start": "node index.js",
         "test": "node test.js",
-        "format": "prettier --write ."
+        "format": "prettier --write .",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix"
     },
     "license": "Apache-2.0",
     "author": {
@@ -17,14 +19,13 @@
     },
     "dependencies": {
         "async-mutex": "^0.5.0",
-        "audio-decode": "^2.2.3",
         "awesome-phonenumber": "^7.5.0",
         "baileys": "^7.0.0-rc.6",
         "better-sqlite3": "^12.4.1",
         "canvas": "^3.2.0",
+        "cheerio": "^1.1.2",
         "file-type": "^21.0.0",
-        "link-preview-js": "^3.1.0",
-        "liora-lib": "^1.2.6",
+        "liora-lib": "^1.2.12",
         "pino": "^10.1.0",
         "pino-pretty": "^13.1.2",
         "sharp": "^0.34.4"
@@ -34,6 +35,18 @@
         "eslint": "^9.38.0",
         "globals": "^16.4.0",
         "prettier": "^3.6.2"
+    },
+    "peerDependencies": {
+        "audio-decode": "^2.2.3",
+        "link-preview-js": "^3.1.0"
+    },
+    "peerDependenciesMeta": {
+        "audio-decode": {
+            "optional": true
+        },
+        "link-preview-js": {
+            "optional": true
+        }
     },
     "packageManager": "pnpm@10.20.0",
     "prettier": {
@@ -48,12 +61,11 @@
         "endOfLine": "lf",
         "bracketSameLine": false,
         "overrides": [
-            {
-                "files": "*.js",
-                "options": {
-                    "commentPreserveAll": true
-                }
+        {
+            "files": "*.js",
+            "options": {
+                "commentPreserveAll": true
             }
-        ]
+        }]
     }
 }

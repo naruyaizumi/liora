@@ -96,9 +96,6 @@ async function IZUMI() {
     
     const maintenanceInterval = setInterval(async () => {
         if (!global.sqlite) {
-            logger.warn(
-                "SQLite instance not available for maintenance"
-                );
             return;
         }
         
@@ -106,12 +103,9 @@ async function IZUMI() {
             const checkpoint = global.sqlite.prepare(
                 "PRAGMA wal_checkpoint(FULL);");
             checkpoint.run();
-            
             const optimize = global.sqlite.prepare(
                 "PRAGMA optimize;");
             optimize.run();
-            
-            logger.debug("SQLite maintenance completed");
         } catch (e) {
             logger.error(e.message);
         }
@@ -155,8 +149,7 @@ async function IZUMI() {
             try {
                 global.conn.ws?.close();
             } catch (e) {
-                logger.debug(
-                    `Error closing WebSocket: ${e.message}`);
+                logger.error(e.message);
             }
             
             if (conn.ev) {

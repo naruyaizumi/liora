@@ -1,22 +1,25 @@
 let handler = async (m, { conn }) => {
-    try {
-        const data = await conn.fetchBlocklist();
-        if (!data || !data.length) return m.reply("No blocked numbers found.");
+  try {
+    const data = await conn.fetchBlocklist();
+    if (!data || !data.length) return m.reply("No blocked numbers found.");
 
-        const list = data.map((jid, i) => `${i + 1}. @${jid.split("@")[0]}`).join("\n");
+    const list = data.map((jid, i) => {
+      const user = jid.split("@")[0];
+      return `${i + 1}. @${user}`;
+    }).join("\n");
 
-        const output = [
-            "=== Blocked Numbers ===",
-            `Total: ${data.length}`,
-            "──────────────────────",
-            list,
-        ].join("\n");
+    const output = [
+      "=== Blocked Numbers ===",
+      `Total: ${data.length}`,
+      "──────────────────────",
+      list,
+    ].join("\n");
 
-        await conn.sendMessage(m.chat, output, m, { mentions: data });
-    } catch (e) {
-        conn.logger.error(e);
-        m.reply(`Error: ${e.message}`);
-    }
+    await conn.sendMessage(m.chat, { text: output, mentions: data }, { quoted: m });
+  } catch (e) {
+    conn.logger.error(e);
+    m.reply(`Error: ${e.message}`);
+  }
 };
 
 handler.help = ["listblock"];
