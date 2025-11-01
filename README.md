@@ -211,69 +211,103 @@ Built for developers who understand event loops, buffer management, and asynchro
 
 ## 💝 Acknowledgements
 
+This project is more than just code — it's a living ecosystem shaped by thoughtful architecture, collaborative development, and community-driven values.
+We recognize everyone who contributes to Liora’s growth, stability, and philosophy.
+
+---
+
 ### 👥 Project Team
 
-<div align="center">
+The people behind Liora — from architectural vision to hands-on development — are the foundation of its success.
 
 [![Owner](https://img.shields.io/badge/Owner-Naruya%20Izumi-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://linkbio.co/naruyaizumi)
-[![Developer](https://img.shields.io/badge/Developer-SXZnightmar-0B3D91?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F)](https://wa.me/6281398961382)
-[![Developer](https://img.shields.io/badge/Developer-Alfi-0B3D91?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F)](https://wa.me/6287831816747)
+Naruya Izumi is the technical architect and ecosystem builder of Liora. They define modular standards, mentor contributors, and shape the community through scalable documentation, onboarding tools, and resilient automation.
 
-</div>
+[![Developer](https://img.shields.io/badge/Developer-SXZnightmar-0B3D91?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F)](https://wa.me/6281398961382)
+SXZnightmar contributes to backend logic, feature implementation, and performance optimization. Their work strengthens Liora’s reliability and responsiveness.
+
+---
 
 ### 📚 Core Libraries
 
-<div align="center">
+These libraries power Liora’s core functionality and enable seamless interaction with WhatsApp.
 
 [![Baileys](https://img.shields.io/badge/Baileys-WhiskeySockets-0B3D91?style=for-the-badge&logo=npm&logoColor=white&labelColor=2F2F2F)](https://www.npmjs.com/package/baileys)
+Baileys is the WhatsApp Web API wrapper used by Liora to handle messaging, media, and session management. Maintained by WhiskeySockets, it’s the backbone of Liora’s communication layer.
 
-</div>
+---
 
 ### 🌐 API Providers
 
-<div align="center">
+External APIs that enrich Liora’s features with dynamic content, media processing, and utility endpoints.
 
 [![NekoLabs API](https://img.shields.io/badge/NekoLabs_API-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://api.nekolabs.my.id)
+NekoLabs provides a wide range of endpoints for anime data, image generation, and other creative utilities. It enhances Liora’s expressiveness and user engagement.
 
-</div>
+---
 
 ### 🤖 AI Assistance
 
-<div align="center">
+Intelligent tools that support development, documentation, and creative ideation across the Liora ecosystem.
 
-[![ChatGPT](https://img.shields.io/badge/ChatGPT-0B3D91?style=for-the-badge&logo=openai&logoColor=white&labelColor=2F2F2F)](https://chat.openai.com)
-![Copilot](https://img.shields.io/badge/Copilot-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)
-![Gemini](https://img.shields.io/badge/Gemini-0B3D91?style=for-the-badge&logo=google&logoColor=white&labelColor=2F2F2F)
-![Claude](https://img.shields.io/badge/Claude-0B3D91?style=for-the-badge&logo=anthropic&logoColor=white&labelColor=2F2F2F)
+[![ChatGPT](https://img.shields.io/badge/ChatGPT-0B3D91?style=for-the-badge&logo=openai&logoColor=white&labelColor=2F2F2F)](https://chat.openai.com)  
+Used for drafting documentation, refining onboarding flows, and generating scalable templates.
 
-</div>
+![Copilot](https://img.shields.io/badge/Copilot-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)  
+Supports code suggestions, modular refactoring, and contributor onboarding.
+
+![Gemini](https://img.shields.io/badge/Gemini-0B3D91?style=for-the-badge&logo=google&logoColor=white&labelColor=2F2F2F)  
+Assists with multilingual documentation and semantic search tasks.
+
+![Claude](https://img.shields.io/badge/Claude-0B3D91?style=for-the-badge&logo=anthropic&logoColor=white&labelColor=2F2F2F)  
+Used for ethical policy drafting, contributor guidelines, and inclusive language review.
+
+---
 
 ### 💖 Personal Thanks
 
-- **🙏 God Almighty** — for blessings and guidance
-- **👨‍👩‍👧‍👦 Family** — for unconditional support
-- **🌟 Community** — for feedback and inspiration
-- **🤝 Contributors** — for improvements
+- **🙏 God Almighty** — for blessings, clarity, and purpose  
+- **👨‍👩‍👧‍👦 Family** — for unconditional support and encouragement  
+- **🌟 Community** — for feedback, inspiration, and shared learning  
+- **🤝 Contributors** — for every improvement, idea, and act of collaboration
+
+Liora is built not just with code, but with care, clarity, and community. Thank you for being part of it.
 
 ---
 
 ## 📜 License
 
-<div align="center">
-
 [![Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-0B3D91?style=for-the-badge&logo=apache&logoColor=white&labelColor=2F2F2F)](https://opensource.org/licenses/Apache-2.0)
 
-</div>
+This project is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).  
+For full legal terms, see the [LICENSE](LICENSE) file in the repository.
 
-Licensed under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0) — see [LICENSE](LICENSE) for details.
+---
 
-**Key Terms:**
+### 🔍 Summary of Terms
 
-- ✅ Commercial use, modification, distribution allowed
-- ⚠️ Trademark use NOT allowed
-- ⚠️ No liability or warranty
-- 📝 License notice required
-- 📝 Changes must be documented
+The Apache 2.0 license is a permissive open-source license that allows broad usage, with a few important conditions:
+
+- ✅ **Commercial Use Allowed**
+  You may use this project in commercial applications, products, or services.
+
+- ✅ **Modification & Distribution Permitted**
+  You can fork, modify, and redistribute the code freely.
+
+- ⚠️ **Trademark Use Prohibited**
+  You may not use the project name or branding in a way that implies endorsement or affiliation.
+
+- ⚠️ **No Warranty or Liability**
+  The project is provided "as is" without warranties. The maintainers are not liable for any damages.
+
+- 📝 **License Notice Required**
+  You must include a copy of the Apache 2.0 license and retain notices in any redistributed version.
+
+- 📝 **Documented Changes Required**
+  If you modify the code, you must clearly document those changes.
+
+By using or contributing to this project, you agree to abide by these terms.
+We encourage responsible use and transparent collaboration.
 
 ---
 
@@ -281,15 +315,11 @@ Licensed under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
 <div align="center">
 
-<a href="https://ko-fi.com/naruyaizumi">
-    <img src="https://storage.ko-fi.com/cdn/kofi3.png?v=3" alt="Ko-fi" height="32" />
-</a>
-<a href="https://trakteer.id/naruyaizumi">
-    <img src="https://trakteer.id/images/mix/navbar-logo-lite.png" alt="Trakteer" height="32" />
-</a>
-<a href="https://saweria.co/naruyaizumi">
-    <img src="https://user-images.githubusercontent.com/26188697/180601310-e82c63e4-412b-4c36-b7b5-7ba713c80380.png" alt="Saweria" height="32" />
-</a>
+[![Ko-fi](https://storage.ko-fi.com/cdn/kofi3.png?v=3)](https://ko-fi.com/naruyaizumi)
+&nbsp;
+[![Trakteer](https://trakteer.id/images/mix/navbar-logo-lite.png)](https://trakteer.id/naruyaizumi)
+&nbsp;
+[![Saweria](https://user-images.githubusercontent.com/26188697/180601310-e82c63e4-412b-4c36-b7b5-7ba713c80380.png)](https://saweria.co/naruyaizumi)
 
 <br><br>
 
@@ -297,12 +327,27 @@ Licensed under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
 </div>
 
-**Why Support?**
+Your support helps sustain the development of Liora — not just as a bot, but as a community-driven ecosystem.  
+Every contribution, no matter how small, fuels our mission to build tools that are modular, ethical, and empowering.
 
-- 🚀 Accelerates feature development
-- 🐛 Enables faster bug fixes
-- 📚 Supports better documentation
-- 🌍 Maintains free and open-source access
+---
+
+### 🌟 Why Support?
+
+- 🚀 **Accelerate Feature Development**  
+  Help us ship new capabilities faster, from automation to contributor tooling.
+
+- 🐛 **Enable Faster Bug Fixes**  
+  Support time and resources to investigate, test, and resolve issues more efficiently.
+
+- 📚 **Improve Documentation & Onboarding**  
+  Fund better guides, multilingual support, and contributor-friendly templates.
+
+- 🌍 **Keep It Free & Open Source**  
+  Ensure Liora remains accessible to everyone, without paywalls or restrictions.
+
+If Liora has helped you, inspired you, or made your work easier — consider giving back.  
+Your support means the world to us 💙
 
 ---
 
