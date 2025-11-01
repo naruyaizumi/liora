@@ -64,8 +64,8 @@ For code, documentation, or feature contributions, refer to our [Contribution Gu
 
 ## 🚀 Pull Requests
 
-[![Pull Request Template in Indonesian](https://img.shields.io/badge/Pull_Request_Template-Indonesian-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/.github/PULL_REQUEST_TEMPLATE/pull-request-id.md)
-[![Pull Request Template in English](https://img.shields.io/badge/Pull_Request_Template-English-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/.github/PULL_REQUEST_TEMPLATE/pull-request-us.md)
+[![Pull Request Template in Indonesian](https://img.shields.io/badge/Pull_Request_Template-Indonesian-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/.github/PULL_REQUEST_TEMPLATE/pull-request-id.yml)
+[![Pull Request Template in English](https://img.shields.io/badge/Pull_Request_Template-English-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/.github/PULL_REQUEST_TEMPLATE/pull-request-us.yml)
 
 We welcome all contributions — whether you're fixing bugs, adding features, or improving documentation.  
 To ensure consistency and clarity, please refer to the appropriate pull request template before submitting.

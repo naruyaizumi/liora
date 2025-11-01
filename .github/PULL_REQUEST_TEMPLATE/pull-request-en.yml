@@ -1,0 +1,46 @@
+name: 🍭 Pull Request (EN)
+description: Submit changes or feature additions to the repository
+title: "[PR] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 🍰 Description of Changes
+      description: Briefly describe what this PR introduces.
+      placeholder: 'Example: "Added fallback API for .hd feature"'
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: change-type
+    attributes:
+      label: 🍡 Type of Change
+      description: Select what applies
+      options:
+        - label: 🐞 Bug fix
+        - label: ✨ New feature
+        - label: 🧹 Code refactor / cleanup
+        - label: 📚 Documentation update
+        - label: 🔧 Config / setup change
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 🧁 Checklist
+      description: Make sure you've done the following
+      options:
+        - label: Code tested and works as expected
+          required: true
+        - label: No build/run errors
+          required: true
+        - label: Follows Liora coding style
+          required: true
+        - label: Documentation updated if needed
+
+  - type: textarea
+    id: additional-notes
+    attributes:
+      label: 🍬 Additional Notes
+      description: Any important context or notes
+      placeholder: 'Example: "This PR touches auth.js, please review carefully."'
