@@ -240,27 +240,14 @@ External APIs that enrich Liora's features with dynamic content, media processin
 
 [![NekoLabs API](https://img.shields.io/badge/NekoLabs_API-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://api.nekolabs.my.id)
 
-NekoLabs provides a wide range of endpoints for anime data, image generation, and other creative utilities. It enhances Liora's expressiveness and user engagement.
-
 ### 🤖 AI Assistance
 
 Intelligent tools that support development, documentation, and creative ideation across the Liora ecosystem.
 
 [![ChatGPT](https://img.shields.io/badge/ChatGPT-0B3D91?style=for-the-badge&logo=openai&logoColor=white&labelColor=2F2F2F)](https://chat.openai.com)
-
-Used for drafting documentation, refining onboarding flows, and generating scalable templates.
-
 [![Copilot](https://img.shields.io/badge/Copilot-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/features/copilot)
-
-Supports code suggestions, modular refactoring, and contributor onboarding.
-
 [![Gemini](https://img.shields.io/badge/Gemini-0B3D91?style=for-the-badge&logo=google&logoColor=white&labelColor=2F2F2F)](https://gemini.google.com)
-
-Assists with multilingual documentation and semantic search tasks.
-
 [![Claude](https://img.shields.io/badge/Claude-0B3D91?style=for-the-badge&logo=anthropic&logoColor=white&labelColor=2F2F2F)](https://www.anthropic.com/claude)
-
-Used for ethical policy drafting, contributor guidelines, and inclusive language review.
 
 ### 💖 Personal Thanks
 
@@ -277,31 +264,6 @@ Liora is built not just with code, but with care, clarity, and community. Thank 
 
 This project is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 For full legal terms, see the [LICENSE](LICENSE) file in the repository.
-
-### 🔍 Summary of Terms
-
-The Apache 2.0 license is a permissive open-source license that allows broad usage, with a few important conditions:
-
-- ✅ **Commercial Use Allowed**  
-  You may use this project in commercial applications, products, or services.
-
-- ✅ **Modification & Distribution Permitted**  
-  You can fork, modify, and redistribute the code freely.
-
-- ⚠️ **Trademark Use Prohibited**  
-  You may not use the project name or branding in a way that implies endorsement or affiliation.
-
-- ⚠️ **No Warranty or Liability**  
-  The project is provided "as is" without warranties. The maintainers are not liable for any damages.
-
-- 📝 **License Notice Required**  
-  You must include a copy of the Apache 2.0 license and retain notices in any redistributed version.
-
-- 📝 **Documented Changes Required**  
-  If you modify the code, you must clearly document those changes.
-
-By using or contributing to this project, you agree to abide by these terms.  
-We encourage responsible use and transparent collaboration.
 
 ## 💖 Support the Project
 
@@ -327,23 +289,6 @@ We encourage responsible use and transparent collaboration.
 
 Your support helps sustain the development of Liora — not just as a bot, but as a community-driven ecosystem.  
 Every contribution, no matter how small, fuels our mission to build tools that are modular, ethical, and empowering.
-
-### 🌟 Why Support?
-
-- 🚀 **Accelerate Feature Development**  
-  Help us ship new capabilities faster, from automation to contributor tooling.
-
-- 🐛 **Enable Faster Bug Fixes**  
-  Support time and resources to investigate, test, and resolve issues more efficiently.
-
-- 📚 **Improve Documentation & Onboarding**  
-  Fund better guides, multilingual support, and contributor-friendly templates.
-
-- 🌍 **Keep It Free & Open Source**  
-  Ensure Liora remains accessible to everyone, without paywalls or restrictions.
-
-If Liora has helped you, inspired you, or made your work easier — consider giving back.  
-Your support means the world to us 💙
 
 ## 🌸 Thank You!
 
