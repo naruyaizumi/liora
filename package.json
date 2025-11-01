@@ -9,7 +9,8 @@
         "automation",
         "baileys",
         "nodejs",
-        "liora"
+        "liora",
+        "naruyaizumi"
     ],
     "type": "module",
     "engines": {
