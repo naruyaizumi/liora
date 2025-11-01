@@ -178,34 +178,56 @@ We welcome all contributions — whether you're fixing bugs, adding features, or
 
 </div>
 
-**Liora** is an enterprise-grade WhatsApp automation framework for developers who demand precision, modularity, and runtime-level control.
-
-**Not beginner-friendly. Not plug-and-play. Unapologetically low-level.**
-
-Built for developers who understand event loops, buffer management, and asynchronous architectures.
+**Liora** is an enterprise-grade WhatsApp automation framework built for developers who demand precision, modularity, and runtime-level control.  
+It is not beginner-friendly, not plug-and-play, and unapologetically low-level — designed for those who understand event loops, buffer management, and asynchronous architectures.
 
 ---
 
 ## 🧱 Core Capabilities
 
-- **🛠️ Native Performance** — C++ bindings for media processing
-- **🧩 Modular Architecture** — Hot-reloadable handlers
-- **📈 Zero Overhead** — Pure buffer-based memory flow
-- **🧠 Developer-Centric** — Runtime control
-- **🔄 Hot Reload** — Update modules without restart
-- **🗃️ State Management** — SQLite-backed atomic operations
+- **🛠️ Native Performance** — Powered by C++ bindings for media processing, enabling fast and memory-efficient operations.
+- **🧩 Modular Architecture** — Each handler is hot-reloadable and isolated, allowing runtime updates without restarting the bot.
+- **📈 Zero Overhead** — Pure buffer-based memory flow avoids unnecessary abstractions for maximum throughput.
+- **🧠 Developer-Centric** — Built for those who want full control over execution, memory, and concurrency.
+- **🔄 Hot Reload** — Update commands, plugins, or logic in real time without downtime.
+- **🗃️ State Management** — SQLite-backed atomic operations ensure consistent session and data handling.
 
 ---
 
 ## 📐 Technical Highlights
 
-- **🔓 Fully Open Source** — No obfuscation
-- **📦 Pure ESM** — Async-first architecture
-- **🟢 Node.js v22+** — Latest V8 optimizations
-- **💾 SQLite-Backed** — Atomic transactions
-- **🧬 Extensible** — Isolated, composable modules
-- **🔌 Plugin System** — Dynamic loading
-- **⚡ Baileys Integration** — Stable multi-device support
+- **🔓 Fully Open Source** — Transparent, auditable, and free from obfuscation.
+- **📦 Pure ESM** — Built entirely in ECMAScript Modules with async-first design.
+- **🟢 Node.js v22+** — Optimized for the latest V8 engine and top-level await.
+- **💾 SQLite-Backed** — Fast, embedded database with atomic transaction support.
+- **🧬 Extensible** — Composable modules with clear boundaries and runtime injection.
+- **🔌 Plugin System** — Dynamically load and manage features without bloating the core.
+- **⚡ Baileys Integration** — Stable multi-device WhatsApp support via WhiskeySockets.
+
+---
+
+## 🔥 Hardcore Engineering
+
+Liora is not just modular — it’s engineered for raw performance and full-stack control.  
+Every component is chosen for its speed, precision, and ability to operate close to the metal:
+
+- **🎯 `liora-lib` (C++)**
+  A custom native module that handles sticker conversion, media fetching, and binary manipulation. Built in C++ for low-level access to buffers and optimized for minimal memory overhead, it enables high-throughput media processing without relying on slow, high-level wrappers.
+
+- **🖼️ `sharp`**
+  Used for image compression, resizing, and format conversion. It ensures that image-based commands like `.compress`, `.resolution`, and `.resize` execute quickly and efficiently, even under heavy load.
+
+- **🧵 `canvas`**
+  Enables dynamic rendering of banners, profile cards, and UI-like visuals. With pixel-level control, it powers features that require text overlays, image composition, and custom graphics generation.
+
+- **🗄️ `better-sqlite3`**
+  A high-performance, synchronous SQLite engine used for session management, authentication, and plugin-bound data stores. It supports atomic transactions and prepared statements, ensuring data consistency across concurrent operations without the complexity of external databases.
+
+- **📊 `pino` + `pino-pretty`**
+  A blazing-fast, structured logging stack that provides clean, readable logs with near-zero overhead. Used across all layers — from command execution to plugin loading — it enables real-time debugging and production-grade observability.
+
+Liora doesn’t just automate WhatsApp — it gives developers a canvas to build resilient, high-performance bots with surgical control over every byte and tick.  
+If you think in buffers, not just functions — welcome home.
 
 ---
 
@@ -221,9 +243,11 @@ We recognize everyone who contributes to Liora’s growth, stability, and philos
 The people behind Liora — from architectural vision to hands-on development — are the foundation of its success.
 
 [![Owner](https://img.shields.io/badge/Owner-Naruya%20Izumi-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://linkbio.co/naruyaizumi)
+
 Naruya Izumi is the technical architect and ecosystem builder of Liora. They define modular standards, mentor contributors, and shape the community through scalable documentation, onboarding tools, and resilient automation.
 
 [![Developer](https://img.shields.io/badge/Developer-SXZnightmar-0B3D91?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F)](https://wa.me/6281398961382)
+
 SXZnightmar contributes to backend logic, feature implementation, and performance optimization. Their work strengthens Liora’s reliability and responsiveness.
 
 ---
@@ -233,6 +257,7 @@ SXZnightmar contributes to backend logic, feature implementation, and performanc
 These libraries power Liora’s core functionality and enable seamless interaction with WhatsApp.
 
 [![Baileys](https://img.shields.io/badge/Baileys-WhiskeySockets-0B3D91?style=for-the-badge&logo=npm&logoColor=white&labelColor=2F2F2F)](https://www.npmjs.com/package/baileys)
+
 Baileys is the WhatsApp Web API wrapper used by Liora to handle messaging, media, and session management. Maintained by WhiskeySockets, it’s the backbone of Liora’s communication layer.
 
 ---
@@ -242,6 +267,7 @@ Baileys is the WhatsApp Web API wrapper used by Liora to handle messaging, media
 External APIs that enrich Liora’s features with dynamic content, media processing, and utility endpoints.
 
 [![NekoLabs API](https://img.shields.io/badge/NekoLabs_API-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://api.nekolabs.my.id)
+
 NekoLabs provides a wide range of endpoints for anime data, image generation, and other creative utilities. It enhances Liora’s expressiveness and user engagement.
 
 ---
@@ -250,16 +276,20 @@ NekoLabs provides a wide range of endpoints for anime data, image generation, an
 
 Intelligent tools that support development, documentation, and creative ideation across the Liora ecosystem.
 
-[![ChatGPT](https://img.shields.io/badge/ChatGPT-0B3D91?style=for-the-badge&logo=openai&logoColor=white&labelColor=2F2F2F)](https://chat.openai.com)  
+[![ChatGPT](https://img.shields.io/badge/ChatGPT-0B3D91?style=for-the-badge&logo=openai&logoColor=white&labelColor=2F2F2F)](https://chat.openai.com)
+
 Used for drafting documentation, refining onboarding flows, and generating scalable templates.
 
-![Copilot](https://img.shields.io/badge/Copilot-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)  
+![Copilot](https://img.shields.io/badge/Copilot-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)
+
 Supports code suggestions, modular refactoring, and contributor onboarding.
 
-![Gemini](https://img.shields.io/badge/Gemini-0B3D91?style=for-the-badge&logo=google&logoColor=white&labelColor=2F2F2F)  
+![Gemini](https://img.shields.io/badge/Gemini-0B3D91?style=for-the-badge&logo=google&logoColor=white&labelColor=2F2F2F)
+
 Assists with multilingual documentation and semantic search tasks.
 
-![Claude](https://img.shields.io/badge/Claude-0B3D91?style=for-the-badge&logo=anthropic&logoColor=white&labelColor=2F2F2F)  
+![Claude](https://img.shields.io/badge/Claude-0B3D91?style=for-the-badge&logo=anthropic&logoColor=white&labelColor=2F2F2F)
+
 Used for ethical policy drafting, contributor guidelines, and inclusive language review.
 
 ---
@@ -315,11 +345,17 @@ We encourage responsible use and transparent collaboration.
 
 <div align="center">
 
-[![Ko-fi](https://storage.ko-fi.com/cdn/kofi3.png?v=3)](https://ko-fi.com/naruyaizumi)
+<a href="https://ko-fi.com/naruyaizumi">
+  <img src="https://storage.ko-fi.com/cdn/kofi3.png?v=3" alt="Ko-fi" height="32" />
+</a>
 &nbsp;
-[![Trakteer](https://trakteer.id/images/mix/navbar-logo-lite.png)](https://trakteer.id/naruyaizumi)
+<a href="https://trakteer.id/naruyaizumi">
+  <img src="https://trakteer.id/images/mix/navbar-logo-lite.png" alt="Trakteer" height="32" />
+</a>
 &nbsp;
-[![Saweria](https://user-images.githubusercontent.com/26188697/180601310-e82c63e4-412b-4c36-b7b5-7ba713c80380.png)](https://saweria.co/naruyaizumi)
+<a href="https://saweria.co/naruyaizumi">
+  <img src="https://user-images.githubusercontent.com/26188697/180601310-e82c63e4-412b-4c36-b7b5-7ba713c80380.png" alt="Saweria" height="32" />
+</a>
 
 <br><br>
 
@@ -327,9 +363,27 @@ We encourage responsible use and transparent collaboration.
 
 </div>
 
-Your support helps sustain the development of Liora — not just as a bot, but as a community-driven ecosystem.  
+Your support helps sustain the development of Liora — not just as a bot, but as a community-driven ecosystem.
 Every contribution, no matter how small, fuels our mission to build tools that are modular, ethical, and empowering.
 
+---
+
+### 🌟 Why Support?
+
+- 🚀 **Accelerate Feature Development**
+  Help us ship new capabilities faster, from automation to contributor tooling.
+
+- 🐛 **Enable Faster Bug Fixes**
+  Support time and resources to investigate, test, and resolve issues more efficiently.
+
+- 📚 **Improve Documentation & Onboarding**
+  Fund better guides, multilingual support, and contributor-friendly templates.
+
+- 🌍 **Keep It Free & Open Source**
+  Ensure Liora remains accessible to everyone, without paywalls or restrictions.
+
+If Liora has helped you, inspired you, or made your work easier — consider giving back.
+Your support means the world to us 💙
 ---
 
 ### 🌟 Why Support?
