@@ -63,22 +63,3 @@ handler.tags = ["info"];
 handler.command = /^(script|sc)$/i;
 
 export default handler;
-
-
-await conn.sendMessage(
-    m.chat, 
-    { 
-       image: {
-          url: 'https://qu.ax/WGRQE.jpg'
-       },    
-       caption: 'Body',
-       title: 'Title', 
-       subtitle: 'Subtitle', 
-       footer: 'Footer',
-       shop: {
-          surface: 1, // 2 | 3 | 4
-          id: 'https://example.com'
-       }, 
-       hasMediaAttachment: true,
-    }
-)
