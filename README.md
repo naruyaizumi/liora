@@ -4,7 +4,7 @@
 
 ![Liora Bot Banner](https://qu.ax/SUDjH.png)
 
-<img src="https://raw.githubusercontent.com/innng/innng/master/assets/kyubey.gif" width="150" height="150" alt="Kyubey mascot" />
+<img src="https://raw.githubusercontent.com/innng/innng/master/assets/kyubey.gif" width="150" height="150" alt="Kyubey mascot animation" />
 
 </div>
 
@@ -30,48 +30,38 @@
 
 </div>
 
----
-
 ## 📊 GitHub Statistics
 
 <div align="center">
 
-<img width="49%" src="https://github-readme-stats.vercel.app/api?username=naruyaizumi&show_icons=true&hide_border=true&bg_color=0D1117&title_color=0B3D91&text_color=FFE4E1&icon_color=FFB6C1" alt="GitHub Stats" />
-<img width="49%" src="https://github-readme-stats.vercel.app/api/top-langs/?username=naruyaizumi&layout=compact&hide_border=true&bg_color=0D1117&title_color=0B3D91&text_color=FFE4E1&icon_color=FFB6C1" alt="Top Languages" />
+<img width="49%" src="https://github-readme-stats.vercel.app/api?username=naruyaizumi&show_icons=true&hide_border=true&bg_color=0D1117&title_color=0B3D91&text_color=FFE4E1&icon_color=FFB6C1" alt="Naruya Izumi's GitHub statistics showing contributions and activity" />
+<img width="49%" src="https://github-readme-stats.vercel.app/api/top-langs/?username=naruyaizumi&layout=compact&hide_border=true&bg_color=0D1117&title_color=0B3D91&text_color=FFE4E1&icon_color=FFB6C1" alt="Most used programming languages in Naruya Izumi's repositories" />
 
 </div>
-
----
 
 ## 🔥 GitHub Streak
 
 <div align="center">
 
-<img width="49%" src="https://streak-stats.demolab.com?user=naruyaizumi&hide_border=true&background=0D1117&ring=0B3D91&fire=FFB6C1&currStreakNum=FFFFFF&sideNums=FFFFFF&currStreakLabel=0B3D91&sideLabels=0B3D91&dates=FFE4E1" alt="GitHub Streak" />
+<img width="49%" src="https://streak-stats.demolab.com?user=naruyaizumi&hide_border=true&background=0D1117&ring=0B3D91&fire=FFB6C1&currStreakNum=FFFFFF&sideNums=FFFFFF&currStreakLabel=0B3D91&sideLabels=0B3D91&dates=FFE4E1" alt="GitHub contribution streak statistics for Naruya Izumi" />
 
 </div>
-
----
 
 ## 🏆 GitHub Trophies
 
 <div align="center">
 
-<img src="https://github-profile-trophy.vercel.app/?username=naruyaizumi&theme=juicyfresh&no-frame=true&margin-w=10&column=7" alt="GitHub Trophies" />
+<img src="https://github-profile-trophy.vercel.app/?username=naruyaizumi&theme=juicyfresh&no-frame=true&margin-w=10&column=7" alt="GitHub achievement trophies for Naruya Izumi" />
 
 </div>
-
----
 
 ## 📈 Activity Graph
 
 <div align="center">
 
-<img src="https://github-readme-activity-graph.vercel.app/graph?username=naruyaizumi&bg_color=0D1117&hide_border=true&color=0B3D91&line=FFB6C1&point=FFD1DC&area=FFE4E1" alt="Activity Graph" />
+<img src="https://github-readme-activity-graph.vercel.app/graph?username=naruyaizumi&bg_color=0D1117&hide_border=true&color=0B3D91&line=FFB6C1&point=FFD1DC&area=FFE4E1" alt="GitHub contribution activity graph showing commits over time" />
 
 </div>
-
----
 
 ## 🛡️ Security & Bug Reports
 
@@ -79,7 +69,7 @@
 
 [![Security Policy](https://img.shields.io/badge/Security-Policy-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/SECURITY.md)
 [![Contribution Guide](https://img.shields.io/badge/Contribution-Guide-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/CONTRIBUTING.md)
-[![Open Issue](https://img.shields.io/badge/Open-Issue-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](../../issues/new/choose)
+[![Open Issue](https://img.shields.io/badge/Open-Issue-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/issues/new/choose)
 
 </div>
 
@@ -93,8 +83,6 @@ For security vulnerabilities, follow our [Security Policy](https://github.com/na
 
 For contributions, refer to our [Contribution Guide](https://github.com/naruyaizumi/liora/blob/main/CONTRIBUTING.md) before submitting.
 
----
-
 ## 🚀 Pull Requests
 
 <div align="center">
@@ -107,8 +95,6 @@ For contributions, refer to our [Contribution Guide](https://github.com/naruyaiz
 We welcome all contributions — whether you're fixing bugs, adding features, or improving documentation.
 
 📎 [View Contribution Guide](https://github.com/naruyaizumi/liora/blob/main/CONTRIBUTING.md)
-
----
 
 ## 🐛 Bug Reports
 
@@ -131,8 +117,8 @@ We welcome all contributions — whether you're fixing bugs, adding features, or
 >
 > Deploy Liora using your preferred environment:
 >
-> - [Pterodactyl Installation Guide](https://github.com/naruyaizumi/liora/blob/main/.github/INSTALLATION/PTERODACTYL.md)
-> - [PM2 Installation Guide](https://github.com/naruyaizumi/liora/blob/main/.github/INSTALLATION/PM2.md)
+> - [Pterodactyl Installation Guide](https://github.com/naruyaizumi/liora/blob/main/.github/INSTALLATION/pterodactyl.md)
+> - [PM2 Installation Guide](https://github.com/naruyaizumi/liora/blob/main/.github/INSTALLATION/pm2.md)
 >
 > **System Requirements:**
 >
@@ -174,14 +160,12 @@ We welcome all contributions — whether you're fixing bugs, adding features, or
 
 <div align="center">
 
-<img src="https://readme-typing-svg.herokuapp.com?size=28&duration=3500&color=0B3D91&center=true&vCenter=true&width=600&lines=🌸+Liora+–+Advanced+WhatsApp+Bot" alt="Liora Bot" />
+<img src="https://readme-typing-svg.herokuapp.com?size=28&duration=3500&color=0B3D91&center=true&vCenter=true&width=600&lines=🌸+Liora+–+Advanced+WhatsApp+Bot" alt="Liora Bot animated title" />
 
 </div>
 
 **Liora** is an enterprise-grade WhatsApp automation framework built for developers who demand precision, modularity, and runtime-level control.  
 It is not beginner-friendly, not plug-and-play, and unapologetically low-level — designed for those who understand event loops, buffer management, and asynchronous architectures.
-
----
 
 ## 🧱 Core Capabilities
 
@@ -191,8 +175,6 @@ It is not beginner-friendly, not plug-and-play, and unapologetically low-level �
 - **🧠 Developer-Centric** — Built for those who want full control over execution, memory, and concurrency.
 - **🔄 Hot Reload** — Update commands, plugins, or logic in real time without downtime.
 - **🗃️ State Management** — SQLite-backed atomic operations ensure consistent session and data handling.
-
----
 
 ## 📐 Technical Highlights
 
@@ -204,11 +186,9 @@ It is not beginner-friendly, not plug-and-play, and unapologetically low-level �
 - **🔌 Plugin System** — Dynamically load and manage features without bloating the core.
 - **⚡ Baileys Integration** — Stable multi-device WhatsApp support via WhiskeySockets.
 
----
-
 ## 🔥 Hardcore Engineering
 
-Liora is not just modular — it’s engineered for raw performance and full-stack control.  
+Liora is not just modular — it's engineered for raw performance and full-stack control.  
 Every component is chosen for its speed, precision, and ability to operate close to the metal:
 
 - **🎯 `liora-lib` (C++)**
@@ -226,17 +206,13 @@ Every component is chosen for its speed, precision, and ability to operate close
 - **📊 `pino` + `pino-pretty`**
   A blazing-fast, structured logging stack that provides clean, readable logs with near-zero overhead. Used across all layers — from command execution to plugin loading — it enables real-time debugging and production-grade observability.
 
-Liora doesn’t just automate WhatsApp — it gives developers a canvas to build resilient, high-performance bots with surgical control over every byte and tick.  
+Liora doesn't just automate WhatsApp — it gives developers a canvas to build resilient, high-performance bots with surgical control over every byte and tick.  
 If you think in buffers, not just functions — welcome home.
-
----
 
 ## 💝 Acknowledgements
 
 This project is more than just code — it's a living ecosystem shaped by thoughtful architecture, collaborative development, and community-driven values.
-We recognize everyone who contributes to Liora’s growth, stability, and philosophy.
-
----
+We recognize everyone who contributes to Liora's growth, stability, and philosophy.
 
 ### 👥 Project Team
 
@@ -248,29 +224,23 @@ Naruya Izumi is the technical architect and ecosystem builder of Liora. They def
 
 [![Developer](https://img.shields.io/badge/Developer-SXZnightmar-0B3D91?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=2F2F2F)](https://wa.me/6281398961382)
 
-SXZnightmar contributes to backend logic, feature implementation, and performance optimization. Their work strengthens Liora’s reliability and responsiveness.
-
----
+SXZnightmar contributes to backend logic, feature implementation, and performance optimization.
 
 ### 📚 Core Libraries
 
-These libraries power Liora’s core functionality and enable seamless interaction with WhatsApp.
+These libraries power Liora's core functionality and enable seamless interaction with WhatsApp.
 
 [![Baileys](https://img.shields.io/badge/Baileys-WhiskeySockets-0B3D91?style=for-the-badge&logo=npm&logoColor=white&labelColor=2F2F2F)](https://www.npmjs.com/package/baileys)
 
-Baileys is the WhatsApp Web API wrapper used by Liora to handle messaging, media, and session management. Maintained by WhiskeySockets, it’s the backbone of Liora’s communication layer.
-
----
+Baileys is the WhatsApp Web API wrapper used by Liora to handle messaging, media, and session management. Maintained by WhiskeySockets, it's the backbone of Liora's communication layer.
 
 ### 🌐 API Providers
 
-External APIs that enrich Liora’s features with dynamic content, media processing, and utility endpoints.
+External APIs that enrich Liora's features with dynamic content, media processing, and utility endpoints.
 
 [![NekoLabs API](https://img.shields.io/badge/NekoLabs_API-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://api.nekolabs.my.id)
 
-NekoLabs provides a wide range of endpoints for anime data, image generation, and other creative utilities. It enhances Liora’s expressiveness and user engagement.
-
----
+NekoLabs provides a wide range of endpoints for anime data, image generation, and other creative utilities. It enhances Liora's expressiveness and user engagement.
 
 ### 🤖 AI Assistance
 
@@ -280,112 +250,100 @@ Intelligent tools that support development, documentation, and creative ideation
 
 Used for drafting documentation, refining onboarding flows, and generating scalable templates.
 
-![Copilot](https://img.shields.io/badge/Copilot-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)
+[![Copilot](https://img.shields.io/badge/Copilot-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/features/copilot)
 
 Supports code suggestions, modular refactoring, and contributor onboarding.
 
-![Gemini](https://img.shields.io/badge/Gemini-0B3D91?style=for-the-badge&logo=google&logoColor=white&labelColor=2F2F2F)
+[![Gemini](https://img.shields.io/badge/Gemini-0B3D91?style=for-the-badge&logo=google&logoColor=white&labelColor=2F2F2F)](https://gemini.google.com)
 
 Assists with multilingual documentation and semantic search tasks.
 
-![Claude](https://img.shields.io/badge/Claude-0B3D91?style=for-the-badge&logo=anthropic&logoColor=white&labelColor=2F2F2F)
+[![Claude](https://img.shields.io/badge/Claude-0B3D91?style=for-the-badge&logo=anthropic&logoColor=white&labelColor=2F2F2F)](https://www.anthropic.com/claude)
 
 Used for ethical policy drafting, contributor guidelines, and inclusive language review.
 
----
-
 ### 💖 Personal Thanks
 
-- **🙏 God Almighty** — for blessings, clarity, and purpose  
-- **👨‍👩‍👧‍👦 Family** — for unconditional support and encouragement  
-- **🌟 Community** — for feedback, inspiration, and shared learning  
+- **🙏 God Almighty** — for blessings, clarity, and purpose
+- **👨‍👩‍👧‍👦 Family** — for unconditional support and encouragement
+- **🌟 Community** — for feedback, inspiration, and shared learning
 - **🤝 Contributors** — for every improvement, idea, and act of collaboration
 
 Liora is built not just with code, but with care, clarity, and community. Thank you for being part of it.
-
----
 
 ## 📜 License
 
 [![Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-0B3D91?style=for-the-badge&logo=apache&logoColor=white&labelColor=2F2F2F)](https://opensource.org/licenses/Apache-2.0)
 
-This project is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).  
+This project is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 For full legal terms, see the [LICENSE](LICENSE) file in the repository.
-
----
 
 ### 🔍 Summary of Terms
 
 The Apache 2.0 license is a permissive open-source license that allows broad usage, with a few important conditions:
 
-- ✅ **Commercial Use Allowed**
+- ✅ **Commercial Use Allowed**  
   You may use this project in commercial applications, products, or services.
 
-- ✅ **Modification & Distribution Permitted**
+- ✅ **Modification & Distribution Permitted**  
   You can fork, modify, and redistribute the code freely.
 
-- ⚠️ **Trademark Use Prohibited**
+- ⚠️ **Trademark Use Prohibited**  
   You may not use the project name or branding in a way that implies endorsement or affiliation.
 
-- ⚠️ **No Warranty or Liability**
+- ⚠️ **No Warranty or Liability**  
   The project is provided "as is" without warranties. The maintainers are not liable for any damages.
 
-- 📝 **License Notice Required**
+- 📝 **License Notice Required**  
   You must include a copy of the Apache 2.0 license and retain notices in any redistributed version.
 
-- 📝 **Documented Changes Required**
+- 📝 **Documented Changes Required**  
   If you modify the code, you must clearly document those changes.
 
-By using or contributing to this project, you agree to abide by these terms.
+By using or contributing to this project, you agree to abide by these terms.  
 We encourage responsible use and transparent collaboration.
-
----
 
 ## 💖 Support the Project
 
 <div align="center">
 
 <a href="https://ko-fi.com/naruyaizumi">
-  <img src="https://storage.ko-fi.com/cdn/kofi3.png?v=3" alt="Ko-fi" height="32" />
+  <img src="https://storage.ko-fi.com/cdn/kofi3.png?v=3" alt="Support on Ko-fi" height="32" />
 </a>
 &nbsp;
 <a href="https://trakteer.id/naruyaizumi">
-  <img src="https://trakteer.id/images/mix/navbar-logo-lite.png" alt="Trakteer" height="32" />
+  <img src="https://trakteer.id/images/mix/navbar-logo-lite.png" alt="Support on Trakteer" height="32" />
 </a>
 &nbsp;
 <a href="https://saweria.co/naruyaizumi">
-  <img src="https://user-images.githubusercontent.com/26188697/180601310-e82c63e4-412b-4c36-b7b5-7ba713c80380.png" alt="Saweria" height="32" />
+  <img src="https://user-images.githubusercontent.com/26188697/180601310-e82c63e4-412b-4c36-b7b5-7ba713c80380.png" alt="Support on Saweria" height="32" />
 </a>
 
 <br><br>
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=18&duration=3000&pause=1000&color=0B3D91&center=true&vCenter=true&width=400&lines=Your+support+keeps+this+project+alive!;Thank+you+for+helping+us+grow" alt="Thank you" />
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=18&duration=3000&pause=1000&color=0B3D91&center=true&vCenter=true&width=400&lines=Your+support+keeps+this+project+alive!;Thank+you+for+helping+us+grow" alt="Support message animation" />
 
 </div>
 
-Your support helps sustain the development of Liora — not just as a bot, but as a community-driven ecosystem.
+Your support helps sustain the development of Liora — not just as a bot, but as a community-driven ecosystem.  
 Every contribution, no matter how small, fuels our mission to build tools that are modular, ethical, and empowering.
-
----
 
 ### 🌟 Why Support?
 
-- 🚀 **Accelerate Feature Development**
+- 🚀 **Accelerate Feature Development**  
   Help us ship new capabilities faster, from automation to contributor tooling.
 
-- 🐛 **Enable Faster Bug Fixes**
+- 🐛 **Enable Faster Bug Fixes**  
   Support time and resources to investigate, test, and resolve issues more efficiently.
 
-- 📚 **Improve Documentation & Onboarding**
+- 📚 **Improve Documentation & Onboarding**  
   Fund better guides, multilingual support, and contributor-friendly templates.
 
-- 🌍 **Keep It Free & Open Source**
+- 🌍 **Keep It Free & Open Source**  
   Ensure Liora remains accessible to everyone, without paywalls or restrictions.
 
-If Liora has helped you, inspired you, or made your work easier — consider giving back.
+If Liora has helped you, inspired you, or made your work easier — consider giving back.  
 Your support means the world to us 💙
-
----
 
 ## 🌸 Thank You!
 
@@ -401,7 +359,7 @@ Your support means the world to us 💙
 
 <div align="center">
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=16&duration=3000&pause=1000&color=0B3D91&center=true&vCenter=true&width=600&lines=Made+with+%E2%9D%A4%EF%B8%8F+and+lots+of+%E2%98%95;Happy+Coding!+%F0%9F%8C%B8" alt="Footer" />
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=16&duration=3000&pause=1000&color=0B3D91&center=true&vCenter=true&width=600&lines=Made+with+%E2%9D%A4%EF%B8%8F+and+lots+of+%E2%98%95;Happy+Coding!+%F0%9F%8C%B8" alt="Footer message animation" />
 
 </div>
 
