@@ -384,24 +384,6 @@ Every contribution, no matter how small, fuels our mission to build tools that a
 
 If Liora has helped you, inspired you, or made your work easier — consider giving back.
 Your support means the world to us 💙
----
-
-### 🌟 Why Support?
-
-- 🚀 **Accelerate Feature Development**  
-  Help us ship new capabilities faster, from automation to contributor tooling.
-
-- 🐛 **Enable Faster Bug Fixes**  
-  Support time and resources to investigate, test, and resolve issues more efficiently.
-
-- 📚 **Improve Documentation & Onboarding**  
-  Fund better guides, multilingual support, and contributor-friendly templates.
-
-- 🌍 **Keep It Free & Open Source**  
-  Ensure Liora remains accessible to everyone, without paywalls or restrictions.
-
-If Liora has helped you, inspired you, or made your work easier — consider giving back.  
-Your support means the world to us 💙
 
 ---
 
