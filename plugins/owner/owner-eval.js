@@ -21,11 +21,9 @@ let handler = async (m, { conn, noPrefix, isMods }) => {
             : inspect(_return, { depth: null, maxArrayLength: null });
 
     const formatted = [
-        "```",
         `${m.text.startsWith("=>") ? "=>" : ">"} ${_text}`,
         "────────────────────────",
         output,
-        "```",
     ].join("\n");
 
     await conn.sendMessage(m.chat, { text: formatted });

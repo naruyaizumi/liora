@@ -40,27 +40,29 @@ let lastCrash = 0;
 
 async function start(file) {
     const args = [join(__dirname, file), ...process.argv.slice(2)];
-
+    
     return new Promise((resolve) => {
         childProcess = spawn(process.argv[0], args, {
             stdio: ["inherit", "inherit", "inherit", "ipc"],
         });
-
+        
         childProcess.on("message", (msg) => {
             if (msg === "uptime") {
                 childProcess.send(process.uptime());
             }
         });
-
+        
         childProcess.on("exit", (code, signal) => {
             const exitInfo = code !== null ? code : signal;
             if (code !== 0 && !shuttingDown) {
-                logger.warn(`Child process exited (${exitInfo})`);
+                logger.warn(
+                    `Child process exited (${exitInfo})`
+                    );
             }
             childProcess = null;
             resolve(code);
         });
-
+        
         childProcess.on("error", (e) => {
             logger.error(e.message);
             if (childProcess) {
@@ -69,7 +71,7 @@ async function start(file) {
             }
             resolve(1);
         });
-
+        
         if (!rl.listenerCount("line")) {
             rl.on("line", (line) => {
                 if (childProcess?.connected) {
@@ -83,24 +85,20 @@ async function start(file) {
 async function stopChild(signal = "SIGINT") {
     if (shuttingDown) return;
     shuttingDown = true;
-
     if (!childProcess) {
-        logger.info("No child process to stop");
         cleanup();
         return;
     }
-
     logger.info(`Shutting down (${signal})`);
-
     const timeout = setTimeout(() => {
         if (childProcess) {
             logger.warn(`Force killing unresponsive process`);
             childProcess.kill("SIGKILL");
         }
-    }, 10000);
-
+    }, 5000);
+    
     childProcess.kill(signal);
-
+    
     await new Promise((resolve) => {
         const checkInterval = setInterval(() => {
             if (!childProcess) {
@@ -109,14 +107,14 @@ async function stopChild(signal = "SIGINT") {
                 resolve();
             }
         }, 100);
-
+        
         setTimeout(() => {
             clearInterval(checkInterval);
             clearTimeout(timeout);
             resolve();
-        }, 11000);
+        }, 7000);
     });
-
+    
     cleanup();
 }
 
@@ -129,16 +127,13 @@ function cleanup() {
 async function supervise() {
     while (true) {
         const code = await start("main.js");
-
+        
         if (shuttingDown) {
             break;
         }
-
         if (code === 0) {
-            logger.info("Child process exited cleanly");
             break;
         }
-
         const now = Date.now();
         if (now - lastCrash < 60000) {
             crashCount++;
@@ -146,13 +141,17 @@ async function supervise() {
             crashCount = 1;
         }
         lastCrash = now;
-
+        
         if (crashCount >= 5) {
-            logger.warn(`Too many crashes (${crashCount}). Cooling down for 1 minute...`);
+            logger.warn(
+                `Too many crashes (${crashCount}). Cooling down for 1 minute...`
+                );
             await new Promise((r) => setTimeout(r, 60000));
             crashCount = 0;
         } else {
-            logger.info(`Restarting in 2 seconds... (crash count: ${crashCount})`);
+            logger.info(
+                `Restarting in 2 seconds... (crash count: ${crashCount})`
+                );
             await new Promise((r) => setTimeout(r, 2000));
         }
     }

@@ -26,9 +26,10 @@ const handler = async (m, { conn, isMods, command, text }) => {
 
     if (dangerousCommands.some((cmd) => text.trim().startsWith(cmd))) {
         return conn.sendMessage(m.chat, {
-            text: ["```", "Command blocked for security reasons.", `> ${text.trim()}`, "```"].join(
-                "\n"
-            ),
+            text: [
+                "Command blocked for security reasons.",
+                `> ${text.trim()}`,
+            ].join("\n"),
         });
     }
 
@@ -42,11 +43,9 @@ const handler = async (m, { conn, isMods, command, text }) => {
     const { stdout, stderr } = output;
     const result = stdout || stderr || "(no output)";
     const message = [
-        "```",
         `$ ${command.trim()} ${text.trim()}`,
         "────────────────────────────",
         result.trim(),
-        "```",
     ].join("\n");
 
     await conn.sendMessage(m.chat, { text: message });

@@ -1,4 +1,4 @@
-import { fetch } from "liora-lib";
+import { tiktok } from "#tiktok";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     const url = args[0];
@@ -8,30 +8,29 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         );
     if (!/^https?:\/\/(www\.)?(vm\.|vt\.|m\.)?tiktok\.com\/.+/i.test(url))
         return m.reply("Invalid URL. Please provide a proper TikTok link.");
+
     await global.loading(m, conn);
+
     try {
-        const res = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
-        const json = await res.json();
-        if (!json?.data) throw new Error("Invalid API response.");
-        const data = json.data;
-        if (Array.isArray(data.images) && data.images.length) {
-            if (data.images.length === 1) {
-                await conn.sendMessage(m.chat, { image: { url: data.images[0] } }, { quoted: m });
+        const { success, type, images, videoUrl, error } = await tiktok(url);
+        if (!success) throw new Error(error || "Failed to fetch media.");
+
+        if (type === "images") {
+            if (images.length === 1) {
+                await conn.sendMessage(m.chat, { image: { url: images[0] } }, { quoted: m });
             } else {
-                const album = data.images.map((img, i) => ({
+                const album = images.map((img, i) => ({
                     image: { url: img },
-                    caption: `Slide ${i + 1} of ${data.images.length}`,
+                    caption: `Slide ${i + 1} of ${images.length}`,
                 }));
                 await conn.sendAlbum(m.chat, album, { quoted: m });
             }
-        } else if (data.play) {
+        } else if (type === "video") {
             await conn.sendMessage(
                 m.chat,
-                { video: { url: data.play }, mimetype: "video/mp4" },
+                { video: { url: videoUrl }, mimetype: "video/mp4" },
                 { quoted: m }
             );
-        } else {
-            await m.reply("No downloadable media found.");
         }
     } catch (e) {
         conn.logger.error(e);

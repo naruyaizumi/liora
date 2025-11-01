@@ -1,12 +1,12 @@
 /* global conn */
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 import "./src/global.js";
-import { smsg } from "./lib/message.js";
+import { smsg } from "./lib/core/message.js";
 import { format } from "util";
 import { fileURLToPath } from "url";
 import path, { join } from "path";
 import { watch } from "fs";
-import printMessage from "./lib/logger.js";
+import printMessage from "./lib/console.js";
 import { canvas } from "./lib/canvas.js";
 
 const CMD_PREFIX_RE = /^[/!.]/;
@@ -58,13 +58,13 @@ const isCmdAccepted = (cmd, rule) => {
     return false;
 };
 
-const sendAccessDenied = async (conn, m) => {
-    const userName = await safe(() => conn.getName(m.sender), "unknown");
+const sendDenied = async (conn, m) => {
+    const userName = await safe(() => conn.getName(m.sender),
+    "unknown");
     return conn.sendMessage(
         m.chat,
         {
             text: [
-                "```",
                 `┌─[ACCESS DENIED]────────────`,
                 `│  Private chat is currently disabled.`,
                 "└────────────────────────────",
@@ -73,7 +73,6 @@ const sendAccessDenied = async (conn, m) => {
                 `Group  : ${global.config.group}`,
                 "────────────────────────────",
                 "Join the group to continue using the bot.",
-                "```",
             ].join("\n"),
             contextInfo: {
                 externalAdReply: {
@@ -84,39 +83,37 @@ const sendAccessDenied = async (conn, m) => {
                     renderLargerThumbnail: true,
                 },
             },
-        },
-        { quoted: m }
+        }, { quoted: m }
     );
 };
 
-const reportPluginError = async (conn, m, pluginRef, chatRef, e) => {
+const traceError = async (conn, m, pluginRef, chatRef, e) => {
     const hideKeys = (s) => {
         if (!s) return s;
         let t = String(s);
-        for (const key of Object.values(global.config.APIKeys || {})) {
+        for (const key of Object.values(global.config.APIKeys ||
+            {})) {
             if (!key) continue;
             t = t.replace(new RegExp(key, "g"), "#HIDDEN#");
         }
         return t;
     };
-
+    
     const ts = new Date().toISOString().replace("T", " ").split(".")[0];
     const text = hideKeys(format(e));
-
+    
     const msg = [
-        "```",
         `┌─[${ts}]─[ERROR]`,
         `│ Plugin : ${pluginRef}`,
         `│ ChatID : ${chatRef}`,
         "├─TRACEBACK────────────────────",
         ...text
-            .trim()
-            .split("\n")
-            .map((line) => `│ ${line}`),
+        .trim()
+        .split("\n")
+        .map((line) => `│ ${line}`),
         "└──────────────────────────────",
-        "```",
     ].join("\n");
-
+    
     return conn.sendMessage(
         m.chat,
         {
@@ -130,10 +127,9 @@ const reportPluginError = async (conn, m, pluginRef, chatRef, e) => {
                     renderLargerThumbnail: true,
                 },
             },
-        },
-        { quoted: m }
+        }, { quoted: m }
     );
-};
+};;
 
 export async function handler(chatUpdate) {
     if (!chatUpdate) return;
@@ -242,7 +238,7 @@ export async function handler(chatUpdate) {
             const chat = global.db?.data?.chats?.[m.chat];
             if (!m.fromMe && settings?.self && !isMods && !isOwner) return;
             if (settings?.gconly && !m.isGroup && !isMods && !isOwner) {
-                await sendAccessDenied(this, m);
+                await sendDenied(this, m);
                 return;
             }
 
@@ -310,7 +306,7 @@ export async function handler(chatUpdate) {
                     if (e && settings?.noerror) {
                         await safe(() => m.reply(`Upss.. Something went wrong.`));
                     } else if (e) {
-                        await reportPluginError(this, m, plugin, chat, e);
+                        await traceError(this, m, plugin, chat, e);
                     }
                 }
             })();

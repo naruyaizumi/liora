@@ -1,5 +1,4 @@
-import { uploader3 } from "../../lib/uploader.js";
-import { fetch } from "liora-lib";
+import { remini } from "#remini";
 
 let handler = async (m, { conn, command, usedPrefix }) => {
     const q = m.quoted && m.quoted.mimetype ? m.quoted : m;
@@ -7,7 +6,7 @@ let handler = async (m, { conn, command, usedPrefix }) => {
 
     if (!q || typeof q.download !== "function" || !/image\/(jpe?g|png|webp)/i.test(mime)) {
         return m.reply(
-            `Please send or reply to an image before using this command.\nExample: ${usedPrefix}${command} < reply to image or ${usedPrefix}${command} < send image with caption`
+            `Please send or reply to an image before using this command.\nExample: ${usedPrefix}${command} < reply to image or send image with caption`
         );
     }
 
@@ -17,62 +16,22 @@ let handler = async (m, { conn, command, usedPrefix }) => {
         const media = await q.download().catch(() => null);
         if (!media || !(media instanceof Buffer)) return;
 
-        const url = await uploader3(media).catch(() => null);
-        if (!url) return;
-
-        const encoded = encodeURIComponent(url);
-        const attempts = [
-            {
-                name: "ihancer",
-                url: `https://api.nekolabs.web.id/tools/ihancer?imageUrl=${encoded}=high`,
-            },
-            {
-                name: "pxpic upscale",
-                url: `https://api.nekolabs.web.id/tools/pxpic/upscale?imageUrl=${encoded}`,
-            },
-            {
-                name: "Real-ESRGAN v1 (scale 5)",
-                url: `https://api.nekolabs.web.id/tools/real-esrgan/v1?imageUrl=${encoded}&scale=5`,
-            },
-            {
-                name: "Real-ESRGAN v1 (scale 10)",
-                url: `https://api.nekolabs.web.id/tools/real-esrgan/v1?imageUrl=${encoded}&scale=10`,
-            },
-            {
-                name: "Real-ESRGAN v2 (scale 5)",
-                url: `https://api.nekolabs.web.id/tools/real-esrgan/v2?imageUrl=${encoded}&scale=5`,
-            },
-            {
-                name: "Real-ESRGAN v2 (scale 10)",
-                url: `https://api.nekolabs.web.id/tools/real-esrgan/v2?imageUrl=${encoded}&scale=10`,
-            },
-        ];
-
-        let resultUrl = null;
-        let methodUsed = null;
-
-        for (const attempt of attempts) {
-            const res = await fetch(attempt.url).catch(() => null);
-            const json = await res?.json().catch(() => null);
-            if (json?.success && json?.result) {
-                resultUrl = json.result;
-                methodUsed = attempt.name;
-                break;
-            }
-        }
-
-        if (!resultUrl) throw new Error("All enhancement methods failed.");
+        const { success, resultUrl, resultBuffer, error } = await remini(media);
+        if (!success) throw new Error(error || "Enhancement failed");
 
         await conn.sendMessage(
             m.chat,
             {
-                image: { url: resultUrl },
-                caption: `Enhanced using: ${methodUsed}`,
+                image: resultBuffer
+                    ? { buffer: resultBuffer }
+                    : { url: resultUrl },
+                caption: "Image enhancement successful.",
             },
             { quoted: m }
         );
     } catch (e) {
         conn.logger.error(e);
+        m.reply("Failed to enhance image.");
     } finally {
         await global.loading(m, conn, true);
     }

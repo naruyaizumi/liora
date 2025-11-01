@@ -1,18 +1,36 @@
 {
     "name": "liora",
     "version": "7.4.8",
+    "description": "Liora is a modern, modular, and efficient WhatsApp bot framework built on Baileys.",
+    "keywords": [
+        "whatsapp",
+        "whatsapp-bot",
+        "bot-framework",
+        "automation",
+        "baileys",
+        "nodejs",
+        "liora"
+    ],
     "type": "module",
     "engines": {
         "node": ">=22.0.0"
     },
     "scripts": {
-        "start": "node index.js",
-        "test": "node test.js",
+        "start": "node ./src/index.js",
+        "test": "node ./src/test.js",
         "format": "prettier --write .",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix"
     },
     "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/naruyaizumi/liora.git"
+    },
+    "bugs": {
+        "url": "https://github.com/naruyaizumi/liora/issues"
+    },
+    "homepage": "https://github.com/naruyaizumi/liora#readme",
     "author": {
         "name": "Naruya Izumi",
         "url": "https://linkbio.co/naruyaizumi"
@@ -47,6 +65,11 @@
         "link-preview-js": {
             "optional": true
         }
+    },
+    "imports": {
+        "#tiktok": "./lib/api/tiktok.js",
+        "#removebg": "./lib/api/removebg.js",
+        "#remini": "./lib/api/remini.js"
     },
     "packageManager": "pnpm@10.20.0",
     "prettier": {

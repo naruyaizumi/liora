@@ -20,7 +20,7 @@ const logger = pino({
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const require = createRequire(__dirname);
-const pkg = require(path.join(__dirname, "./package.json"));
+const pkg = require(path.join(__dirname, "../package.json"));
 
 async function collectFiles() {
     const folders = [".", ...(pkg.directories ? Object.values(pkg.directories) : [])];

@@ -2,17 +2,17 @@
 process.on("uncaughtException", (e) => logger.error(e));
 process.on("unhandledRejection", (e) => logger.error(e));
 
-import "./src/config.js";
-import "./src/global.js";
-import { protoType, serialize } from "./lib/message.js";
-import { naruyaizumi } from "./lib/socket.js";
-import { SQLiteAuth, SQLiteKeyStore } from "./lib/auth.js";
+import "./config.js";
+import "./global.js";
+import { protoType, serialize } from "../lib/core/message.js";
+import { naruyaizumi } from "../lib/core/socket.js";
+import { SQLiteAuth, SQLiteKeyStore } from "../lib/auth.js";
 import { Browsers, fetchLatestBaileysVersion } from "baileys";
 import { readdir, stat } from "fs/promises";
 import { join } from "path";
 import { EventEmitter } from "events";
-import { DisconnectReason } from "./lib/connection.js";
-import { initReload } from "./lib/loader.js";
+import { DisconnectReason } from "../lib/core/connection.js";
+import { initReload } from "../lib/core/loader-plugins.js";
 import pino from "pino";
 
 const logger = pino({
@@ -30,7 +30,7 @@ const logger = pino({
 
 const pairingNumber = global.config.pairingNumber;
 
-EventEmitter.defaultMaxListeners = 0;
+EventEmitter.defaultMaxListeners = 50;
 
 protoType();
 serialize();
@@ -79,7 +79,7 @@ async function IZUMI() {
             setTimeout(() => {
                 clearInterval(checkConnection);
                 resolve();
-            }, 10000);
+            }, 3000);
         });
         
         await waitForConnection;
@@ -124,12 +124,12 @@ async function IZUMI() {
     });
     
     let isInit = true;
-    let handler = await import("./handler.js");
+    let handler = await import("../handler.js");
     
     global.reloadHandler = async function(restartConn = false) {
         try {
             const HandlerModule = await import(
-                `./handler.js?update=${Date.now()}`
+                `../handler.js?update=${Date.now()}`
             ).catch((e) => {
                 logger.error(e.message);
                 return null;
@@ -138,7 +138,6 @@ async function IZUMI() {
             if (HandlerModule && typeof HandlerModule.handler ===
                 "function") {
                 handler = HandlerModule;
-                logger.info("Handler module reloaded successfully");
             }
         } catch (e) {
             logger.error(e.message);
@@ -215,7 +214,7 @@ async function IZUMI() {
     };
     
     const pluginFolder = global.__dirname(
-        join(global.__dirname(import.meta.url), "./plugins/index")
+        join(global.__dirname(import.meta.url), "../plugins/index")
     );
     
     async function getAllPlugins(dir) {
@@ -233,8 +232,7 @@ async function IZUMI() {
                         results.push(filepath);
                     }
                 } catch (e) {
-                    logger.warn(
-                        `Cannot access ${filepath}: ${e.message}`);
+                    logger.warn(e.message);
                 }
             }
         } catch (e) {
@@ -246,7 +244,6 @@ async function IZUMI() {
     try {
         await initReload(conn, pluginFolder, getAllPlugins);
         await global.reloadHandler();
-        logger.info("Bot initialization completed successfully");
     } catch (e) {
         logger.error(e.message);
         throw e;
