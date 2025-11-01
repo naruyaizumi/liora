@@ -1,4 +1,5 @@
 blank_issues_enabled: false
+
 contact_links:
   - name: 🍭 Tanya / Diskusi (ID)
     url: https://github.com/naruyaizumi/liora/discussions
@@ -6,3 +7,9 @@ contact_links:
   - name: 🍭 Ask / Discuss (EN)
     url: https://github.com/naruyaizumi/liora/discussions
     about: Use discussions for questions, ideas, or casual talk 🍬
+
+pull_request_templates:
+  - name: 🍭 Pull Request (Bahasa Indonesia)
+    path: .github/PULL_REQUEST_TEMPLATE/pull-request-id.md
+  - name: 🍭 Pull Request (English)
+    path: .github/PULL_REQUEST_TEMPLATE/pull-request-en.md

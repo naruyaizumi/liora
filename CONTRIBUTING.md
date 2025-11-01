@@ -39,7 +39,7 @@ Liora follows a clean, modular structure. Please adhere to the following guideli
 
 ### Code Organization
 - **Separate concerns**: Keep handlers, logic, and fallback chains distinct
-- **Use utilities**: Leverage `liora-lib` utilities where applicable
+- **Use utilities**: Leverage shared utilities from the `src/` directory where applicable
 - **Avoid hardcoding**: No hardcoded paths or file I/O (except for required persistence like auth/store)
 - **Fallback chains**: Use fallback API chains for request-based features
 
@@ -140,9 +140,9 @@ Closes #123
 - Add **screenshots** or **examples** if applicable
 
 ### Templates
-📎 [![Pull Request Template in Indonesian](https://img.shields.io/badge/Pull_Request_Template-Indonesian-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/.github/PULL_REQUEST_TEMPLATE/pull-request-id.yml)
+📎 [![Pull Request Template in Indonesian](https://img.shields.io/badge/Pull_Request_Template-Indonesian-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/.github/pull_request_template/pull-request-id.md)
 
-📎 [![Pull Request Template in English](https://img.shields.io/badge/Pull_Request_Template-English-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/.github/PULL_REQUEST_TEMPLATE/pull-request-us.yml)
+📎 [![Pull Request Template in English](https://img.shields.io/badge/Pull_Request_Template-English-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/.github/pull_request_template/pull-request-us.md)
 
 ---
 
@@ -155,14 +155,15 @@ Closes #123
 4. **Actual behavior**: What actually happens
 5. **Environment details**:
    - Node.js version (`node --version`)
-   - OS (Linux)
+   - OS (Linux, Windows, macOS)
    - Bot version
 6. **Logs/Screenshots**: Any relevant error messages or screenshots
 7. **Additional context**: Any other relevant information
 
 ### Templates
-📎 [Bug Report (Indonesian)](https://github.com/naruyaizumi/liora/issues/new?assignees=&labels=bug&projects=&template=bug-report-id.md&title=%5BBUG%5D)
-📎 [Bug Report (English)](https://github.com/naruyaizumi/liora/issues/new?assignees=&labels=bug&projects=&template=bug-report-us.md&title=%5BBUG%5D)
+📎 [![Bug Report (Indonesian)](https://img.shields.io/badge/Bug_Report-Indonesian-DC143C?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/issues/new?assignees=&labels=bug&template=bug-report-id.md&title=%5BBUG%5D)
+
+📎 [![Bug Report (English)](https://img.shields.io/badge/Bug_Report-English-DC143C?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/issues/new?assignees=&labels=bug&template=bug-report-us.md&title=%5BBUG%5D)
 
 ---
 
@@ -176,7 +177,10 @@ We welcome feature suggestions! When proposing a new feature:
 4. **Provide examples** or mockups if possible
 5. **Consider implementation** complexity and maintainability
 
-Use the [Feature Request template](https://github.com/naruyaizumi/liora/issues/new?assignees=&labels=enhancement&template=feature-request.md&title=%5BFEATURE%5D) to submit your idea.
+### Templates
+📎 [![Feature Request (Indonesian)](https://img.shields.io/badge/Feature_Request-Indonesian-32CD32?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/issues/new?assignees=&labels=enhancement&template=feature-request-id.md&title=%5BFEATURE%5D)
+
+📎 [![Feature Request (English)](https://img.shields.io/badge/Feature_Request-English-32CD32?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/issues/new?assignees=&labels=enhancement&template=feature-request-us.md&title=%5BFEATURE%5D)
 
 ---
 
@@ -193,15 +197,15 @@ Documentation improvements are always welcome!
 - Support **both English and Indonesian** where applicable
 
 ### Documentation Structure
-```markdown
+````markdown
 ## 🎯 Feature Name
 
 Brief description of the feature.
 
 ### Usage
-\`\`\`javascript
+```javascript
 // Example code
-\`\`\`
+```
 
 ### Parameters
 - `param1` (string): Description
@@ -209,7 +213,7 @@ Brief description of the feature.
 
 ### Returns
 Description of return value
-```
+````
 
 ---
 
