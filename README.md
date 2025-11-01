@@ -47,19 +47,28 @@
 
 ## 🛡️ Security & Bug Reports
 
-[![Security Policy](https://img.shields.io/badge/Security-Policy-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/.github/SECURITY.md)
-[![Report Bug](https://img.shields.io/badge/Report-Bug-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/issues/new/choose)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/SECURITY.md)
+[![Contribution Guide](https://img.shields.io/badge/Contribution-Guide-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/blob/main/CONTRIBUTING.md)
 
-We take security, stability, and contributor comfort very seriously. If you discover a **vulnerability** or a **bug**, please report it responsibly.
+We take security, stability, and contributor comfort very seriously. If you discover a **vulnerability** or a **bug**, please report it responsibly. If you'd like to contribute to Liora, please follow our guidelines to ensure consistency and maintainability.
 
 ### 🔒 Security Issues
 
-For security vulnerabilities, follow our [Security Policy](https://github.com/naruyaizumi/liora/blob/main/.github/SECURITY.md) to report issues privately.
+For security vulnerabilities, follow our [Security Policy](https://github.com/naruyaizumi/liora/blob/main/SECURITY.md) to report issues privately.
+
+### 🤝 Contribution Guide
+
+For code, documentation, or feature contributions, refer to our [Contribution Guide](https://github.com/naruyaizumi/liora/blob/main/CONTRIBUTING.md) before submitting.
 
 ### 🐛 Bug Reports
 
 [![Bug Report (Indonesian)](https://img.shields.io/badge/Bug_Report-Indonesian-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/issues/new?assignees=&labels=bug&projects=&template=bug-report-id.md&title=%5BBUG%5D)
 [![Bug Report (English)](https://img.shields.io/badge/Bug_Report-English-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/issues/new?assignees=&labels=bug&projects=&template=bug-report-us.md&title=%5BBUG%5D)
+
+### 🚀 Pull Requests
+
+[![Pull Request (Indonesian)](https://img.shields.io/badge/Pull_Request-Indonesian-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/compare?expand=1&template=pull-request-id.md)
+[![Pull Request (English)](https://img.shields.io/badge/Pull_Request-English-0B3D91?style=for-the-badge&logo=github&logoColor=white&labelColor=2F2F2F)](https://github.com/naruyaizumi/liora/compare?expand=1&template=pull-request-us.md)
 
 ---
 
