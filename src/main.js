@@ -4,9 +4,10 @@ process.on("unhandledRejection", (e) => logger.error(e));
 
 import "./config.js";
 import "./global.js";
-import { protoType, serialize } from "../lib/core/message.js";
+import { serialize } from "../lib/core/message.js";
+import { protoType } from "../lib/core/prototype.js";
 import { naruyaizumi } from "../lib/core/socket.js";
-import { SQLiteAuth, SQLiteKeyStore } from "../lib/auth.js";
+import { SQLiteAuth, SQLiteKeyStore } from "../lib/utils/auth.js";
 import { Browsers, fetchLatestBaileysVersion } from "baileys";
 import { readdir, stat } from "fs/promises";
 import { join } from "path";
@@ -30,7 +31,7 @@ const logger = pino({
 
 const pairingNumber = global.config.pairingNumber;
 
-EventEmitter.defaultMaxListeners = 50;
+EventEmitter.defaultMaxListeners = 0;
 
 protoType();
 serialize();

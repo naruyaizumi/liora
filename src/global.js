@@ -23,11 +23,11 @@ const DB_PATH = path.join(__dirname, "../database/database.db");
 
 const sqlite = new Database(DB_PATH, { timeout: 5000 });
 
-sqlite.pragma("journal_mode = WAL");
-sqlite.pragma("synchronous = NORMAL");
-sqlite.pragma("cache_size = -128000");
-sqlite.pragma("temp_store = MEMORY");
-sqlite.pragma("mmap_size = 30000000000");
+sqlite.pragma("journal_mode = WAL"); // Write-Ahead Logging for better concurrency
+sqlite.pragma("synchronous = NORMAL"); // Balance between safety and speed
+sqlite.pragma("cache_size = -128000"); // 128MB cache size (negative = KB)
+sqlite.pragma("temp_store = MEMORY"); // Store temporary tables in memory
+sqlite.pragma("mmap_size = 30000000000"); // 30GB memory-mapped I/O size
 
 function normalizeValue(val) {
     if (val === undefined) return null;
@@ -40,7 +40,6 @@ function ensureTable(tableName, schema) {
     const exists = sqlite
         .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
         .get(tableName);
-
     if (!exists) {
         sqlite.exec(`CREATE TABLE ${tableName} (${schema})`);
     } else {
@@ -48,10 +47,12 @@ function ensureTable(tableName, schema) {
             .prepare(`PRAGMA table_info(${tableName})`)
             .all()
             .map((c) => c.name);
+        
         const wanted = schema
             .split(",")
             .map((x) => x.trim().split(" ")[0])
             .filter(Boolean);
+        
         for (const col of wanted) {
             if (!columns.includes(col)) {
                 try {
@@ -59,6 +60,7 @@ function ensureTable(tableName, schema) {
                         .split(",")
                         .map((x) => x.trim())
                         .find((x) => x.startsWith(col));
+                    
                     sqlite.exec(`ALTER TABLE ${tableName} ADD COLUMN ${colDef}`);
                     conn.logger.info({ module: "DB" }, `Added column ${col} to ${tableName}`);
                 } catch (e) {
@@ -82,6 +84,7 @@ ensureTable(
   sWelcome TEXT DEFAULT '',
   sBye TEXT DEFAULT '',
   antiLinks INTEGER DEFAULT 0,
+  antidelete INTEGER DEFAULT 0,
   antiAudio INTEGER DEFAULT 0,
   antiFile INTEGER DEFAULT 0,
   antiFoto INTEGER DEFAULT 0,
@@ -137,13 +140,13 @@ class DataWrapper {
                         sqlite.prepare(`INSERT INTO ${table} (jid) VALUES (?)`).run(jid);
                         row = sqlite.prepare(`SELECT * FROM ${table} WHERE jid = ?`).get(jid);
                     }
-
+                    
                     for (const k in row) {
                         try {
                             const parsed = JSON.parse(row[k]);
                             if (typeof parsed === "object") row[k] = parsed;
                         } catch {
-                            /* Jawa */
+                            /* Ignore parsing errors for non-JSON values */
                         }
                     }
 
@@ -154,6 +157,7 @@ class DataWrapper {
                                     sqlite
                                         .prepare(`UPDATE ${table} SET ${prop} = ? WHERE jid = ?`)
                                         .run(normalizeValue(value), jid);
+                                        
                                     obj[prop] = value;
                                     return true;
                                 } catch (e) {
@@ -218,9 +222,8 @@ Grant admin access to the bot to continue.
 This feature is currently restricted or disabled by configuration.
 \`\`\``,
     }[type];
-
     if (!msg) return;
-
+    
     conn.sendMessage(
         m.chat,
         {

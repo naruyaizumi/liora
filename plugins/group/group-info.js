@@ -1,12 +1,9 @@
 let handler = async (m, { conn }) => {
     try {
         await global.loading(m, conn);
-        let row = conn[Symbol.for("liora.store.db")]?.ps.groupGet.get(m.chat);
         let groupMeta;
 
-        if (row) {
-            groupMeta = JSON.parse(row.data);
-        } else if (conn.chats[m.chat]?.metadata) {
+        if (conn.chats[m.chat]?.metadata) {
             groupMeta = conn.chats[m.chat].metadata;
         } else {
             return m.reply("Group metadata is not available. Please run groupUp first.");

@@ -1,4 +1,4 @@
-import { fetch } from "liora-lib";
+import { ytmp3 } from "#ytmp3";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0])
@@ -15,20 +15,14 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     await global.loading(m, conn);
 
     try {
-        const apiUrl = `https://api.nekolabs.web.id/downloader/youtube/v1?url=${encodeURIComponent(url)}`;
-        const res = await fetch(apiUrl);
-        if (!res.ok) throw new Error(`Failed to reach API. Status: ${res.status}`);
-
-        const json = await res.json();
-        if (!json.success || !json.result?.downloadUrl)
-            return m.reply("Failed to process request. Please try again later.");
+        const { success, downloadUrl, error } = await ytmp3(url);
+        if (!success) throw new Error(error);
 
         await conn.sendMessage(
             m.chat,
             {
-                audio: { url: json.result.downloadUrl },
+                audio: { url: downloadUrl },
                 mimetype: "audio/mpeg",
-                fileName: `${json.result.title || "track"}.mp3`,
             },
             { quoted: m }
         );

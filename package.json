@@ -69,6 +69,13 @@
     },
     "imports": {
         "#tiktok": "./lib/api/tiktok.js",
+        "#instagram": "./lib/api/instagram.js",
+        "#twitter": "./lib/api/twitter.js",
+        "#play": "./lib/api/play.js",
+        "#spotify": "./lib/api/spotify.js",
+        "#ytmp3": "./lib/api/ytmp3.js",
+        "#ytmp4": "./lib/api/ytmp4.js",
+        "#spotifydl": "./lib/api/spotifydl.js",
         "#removebg": "./lib/api/removebg.js",
         "#remini": "./lib/api/remini.js"
     },

@@ -1,28 +1,27 @@
-import { fetch } from "liora-lib";
+import { spotifydl } from "#spotifydl";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-    if (!args[0] || !args[0].startsWith("http"))
+    if (!args[0])
         return m.reply(
-            `Please provide a valid Spotify track URL.\n› Example: ${usedPrefix + command} https://open.spotify.com`
+            `Please provide a valid Spotify track URL.\n› Example: ${usedPrefix + command} https://open.spotify.com/track/...`
         );
+
+    const url = args[0];
+    const spotifyRegex = /^https?:\/\/open\.spotify\.com\/track\/[\w-]+(\?.*)?$/i;
+    if (!spotifyRegex.test(url))
+        return m.reply("Invalid URL! Please provide a valid Spotify track link.");
 
     await global.loading(m, conn);
 
     try {
-        const apiUrl = `https://api.nekolabs.web.id/downloader/spotify/v1?url=${encodeURIComponent(args[0])}`;
-        const res = await fetch(apiUrl);
-        if (!res.ok) throw new Error(`Failed to contact API. Status: ${res.status}`);
-        const json = await res.json();
-        if (!json.success || !json.result?.downloadUrl)
-            throw new Error("Failed to process Spotify track.");
-        const { downloadUrl } = json.result;
+        const { success, downloadUrl, error } = await spotifydl(url);
+        if (!success) throw new Error(error);
 
         await conn.sendMessage(
             m.chat,
             {
                 audio: { url: downloadUrl },
                 mimetype: "audio/mpeg",
-                fileName: "spotify.mp3",
             },
             { quoted: m }
         );

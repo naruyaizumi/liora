@@ -114,8 +114,3 @@ global.config = {
     /** Sticker pack author/copyright */
     stickauth: "© 𝙉͢𝙖𝙧𝙪𝙮𝙖 𝙄͢𝙯𝙪𝙢𝙞",
 };
-
-/**
- * Configuration validation
- * Validates the configuration object to prevent runtime errors
- */

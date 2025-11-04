@@ -2,6 +2,7 @@ const features = [
     { key: "adminOnly", scope: "chat", name: "Admin Only" },
     { key: "detect", scope: "chat", name: "Detect" },
     { key: "antiLinks", scope: "chat", name: "Anti Link" },
+    { key: "antidelete", scope: "chat", name: "Anti Delete" },
     { key: "antiStatus", scope: "chat", name: "Anti Status Mention" },
     { key: "antiInteractive", scope: "chat", name: "Anti Interactive" },
     { key: "antiSticker", scope: "chat", name: "Anti Sticker" },

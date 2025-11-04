@@ -40,29 +40,23 @@ let lastCrash = 0;
 
 async function start(file) {
     const args = [join(__dirname, file), ...process.argv.slice(2)];
-    
     return new Promise((resolve) => {
         childProcess = spawn(process.argv[0], args, {
             stdio: ["inherit", "inherit", "inherit", "ipc"],
         });
-        
+
         childProcess.on("message", (msg) => {
-            if (msg === "uptime") {
-                childProcess.send(process.uptime());
-            }
+            if (msg === "uptime") childProcess.send(process.uptime());
         });
-        
+
         childProcess.on("exit", (code, signal) => {
             const exitInfo = code !== null ? code : signal;
-            if (code !== 0 && !shuttingDown) {
-                logger.warn(
-                    `Child process exited (${exitInfo})`
-                    );
-            }
+            if (code !== 0 && !shuttingDown)
+                logger.warn(`Child process exited (${exitInfo})`);
             childProcess = null;
             resolve(code);
         });
-        
+
         childProcess.on("error", (e) => {
             logger.error(e.message);
             if (childProcess) {
@@ -71,12 +65,10 @@ async function start(file) {
             }
             resolve(1);
         });
-        
+
         if (!rl.listenerCount("line")) {
             rl.on("line", (line) => {
-                if (childProcess?.connected) {
-                    childProcess.send(line.trim());
-                }
+                if (childProcess?.connected) childProcess.send(line.trim());
             });
         }
     });
@@ -85,20 +77,19 @@ async function start(file) {
 async function stopChild(signal = "SIGINT") {
     if (shuttingDown) return;
     shuttingDown = true;
-    if (!childProcess) {
-        cleanup();
-        return;
-    }
+    if (!childProcess) return cleanup();
+
     logger.info(`Shutting down (${signal})`);
+    
     const timeout = setTimeout(() => {
         if (childProcess) {
             logger.warn(`Force killing unresponsive process`);
             childProcess.kill("SIGKILL");
         }
-    }, 5000);
-    
+    }, 1000);
+
     childProcess.kill(signal);
-    
+
     await new Promise((resolve) => {
         const checkInterval = setInterval(() => {
             if (!childProcess) {
@@ -106,15 +97,15 @@ async function stopChild(signal = "SIGINT") {
                 clearTimeout(timeout);
                 resolve();
             }
-        }, 100);
-        
+        }, 50);
+
         setTimeout(() => {
             clearInterval(checkInterval);
             clearTimeout(timeout);
             resolve();
-        }, 7000);
+        }, 2000);
     });
-    
+
     cleanup();
 }
 
@@ -127,63 +118,38 @@ function cleanup() {
 async function supervise() {
     while (true) {
         const code = await start("main.js");
-        
-        if (shuttingDown) {
-            break;
-        }
-        if (code === 0) {
-            break;
-        }
+        if (shuttingDown || code === 0) break;
+
         const now = Date.now();
-        if (now - lastCrash < 60000) {
-            crashCount++;
-        } else {
-            crashCount = 1;
-        }
+        crashCount = now - lastCrash < 60000 ? crashCount + 1 : 1;
         lastCrash = now;
-        
+
         if (crashCount >= 5) {
-            logger.warn(
-                `Too many crashes (${crashCount}). Cooling down for 1 minute...`
-                );
-            await new Promise((r) => setTimeout(r, 60000));
+            logger.warn(`Too many crashes (${crashCount}). Cooling down briefly...`);
+            await new Promise((r) => setTimeout(r, 10000));
             crashCount = 0;
         } else {
-            logger.info(
-                `Restarting in 2 seconds... (crash count: ${crashCount})`
-                );
-            await new Promise((r) => setTimeout(r, 2000));
+            await new Promise((r) => setTimeout(r, 500));
         }
     }
 }
 
-process.on("SIGINT", () => {
-    stopChild("SIGINT").catch((e) => {
-        logger.error(e.message);
-        process.exit(1);
-    });
-});
-
-process.on("SIGTERM", () => {
-    stopChild("SIGTERM").catch((e) => {
-        logger.error(e.message);
-        process.exit(1);
-    });
-});
-
+process.on("SIGINT", () => stopChild("SIGINT").catch((e) => {
+    logger.error(e.message);
+    process.exit(1);
+}));
+process.on("SIGTERM", () => stopChild("SIGTERM").catch((e) => {
+    logger.error(e.message);
+    process.exit(1);
+}));
 process.on("uncaughtException", (e) => {
     logger.error(e.message);
     logger.error(e.stack);
-    stopChild("SIGTERM").catch(() => {
-        process.exit(1);
-    });
+    stopChild("SIGTERM").catch(() => process.exit(1));
 });
-
 process.on("unhandledRejection", (reason, promise) => {
     logger.error(`Unhandled rejection at ${promise}: ${reason}`);
-    stopChild("SIGTERM").catch(() => {
-        process.exit(1);
-    });
+    stopChild("SIGTERM").catch(() => process.exit(1));
 });
 
 supervise().catch((e) => {
