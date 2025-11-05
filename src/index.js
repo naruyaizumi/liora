@@ -51,8 +51,7 @@ async function start(file) {
 
         childProcess.on("exit", (code, signal) => {
             const exitInfo = code !== null ? code : signal;
-            if (code !== 0 && !shuttingDown)
-                logger.warn(`Child process exited (${exitInfo})`);
+            if (code !== 0 && !shuttingDown) logger.warn(`Child process exited (${exitInfo})`);
             childProcess = null;
             resolve(code);
         });
@@ -80,7 +79,7 @@ async function stopChild(signal = "SIGINT") {
     if (!childProcess) return cleanup();
 
     logger.info(`Shutting down (${signal})`);
-    
+
     const timeout = setTimeout(() => {
         if (childProcess) {
             logger.warn(`Force killing unresponsive process`);
@@ -134,14 +133,18 @@ async function supervise() {
     }
 }
 
-process.on("SIGINT", () => stopChild("SIGINT").catch((e) => {
-    logger.error(e.message);
-    process.exit(1);
-}));
-process.on("SIGTERM", () => stopChild("SIGTERM").catch((e) => {
-    logger.error(e.message);
-    process.exit(1);
-}));
+process.on("SIGINT", () =>
+    stopChild("SIGINT").catch((e) => {
+        logger.error(e.message);
+        process.exit(1);
+    })
+);
+process.on("SIGTERM", () =>
+    stopChild("SIGTERM").catch((e) => {
+        logger.error(e.message);
+        process.exit(1);
+    })
+);
 process.on("uncaughtException", (e) => {
     logger.error(e.message);
     logger.error(e.stack);

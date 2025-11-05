@@ -134,6 +134,7 @@ We welcome all contributions — whether you're fixing bugs, adding features, or
 > This modular approach keeps Liora lightweight by default while allowing users to install enhancements as needed.
 >
 > **Installation:**
+>
 > ```bash
 > npm install audio-decode link-preview-js
 > ```
@@ -180,24 +181,24 @@ Every component is chosen for its speed, precision, and ability to operate close
 ### Core Technologies
 
 - **🎯 `liora-lib` (C++)**
-  
-  A custom native module that handles sticker conversion, media fetching, and binary manipulation. Built in C++ for low-level access to buffers and optimized for minimal memory overhead, it enables high-throughput media processing without relying on slow, high-level wrappers or external services.
+
+    A custom native module that handles sticker conversion, media fetching, and binary manipulation. Built in C++ for low-level access to buffers and optimized for minimal memory overhead, it enables high-throughput media processing without relying on slow, high-level wrappers or external services.
 
 - **🖼️ `sharp`**
-  
-  Used for image compression, resizing, and format conversion with hardware acceleration support. It ensures that image-based commands like `.compress`, `.resolution`, and `.resize` execute quickly and efficiently, even under heavy concurrent load.
+
+    Used for image compression, resizing, and format conversion with hardware acceleration support. It ensures that image-based commands like `.compress`, `.resolution`, and `.resize` execute quickly and efficiently, even under heavy concurrent load.
 
 - **🧵 `canvas`**
-  
-  Enables dynamic rendering of banners, profile cards, and UI-like visuals with pixel-perfect precision. With low-level pixel manipulation, it powers features that require text overlays, image composition, and custom graphics generation.
+
+    Enables dynamic rendering of banners, profile cards, and UI-like visuals with pixel-perfect precision. With low-level pixel manipulation, it powers features that require text overlays, image composition, and custom graphics generation.
 
 - **🗄️ `better-sqlite3`**
-  
-  A high-performance, synchronous SQLite engine used for session management, authentication, and plugin-bound data stores. It supports atomic transactions and prepared statements, ensuring data consistency across concurrent operations without the complexity or overhead of external databases.
+
+    A high-performance, synchronous SQLite engine used for session management, authentication, and plugin-bound data stores. It supports atomic transactions and prepared statements, ensuring data consistency across concurrent operations without the complexity or overhead of external databases.
 
 - **📊 `pino` + `pino-pretty`**
-  
-  A blazing-fast, structured logging stack that provides clean, readable logs with near-zero performance overhead. Used across all layers — from command execution to plugin loading — it enables real-time debugging and production-grade observability without sacrificing speed.
+
+    A blazing-fast, structured logging stack that provides clean, readable logs with near-zero performance overhead. Used across all layers — from command execution to plugin loading — it enables real-time debugging and production-grade observability without sacrificing speed.
 
 Liora doesn't just automate WhatsApp — it gives developers a canvas to build resilient, high-performance bots with surgical control over every byte and execution tick.
 
@@ -321,7 +322,7 @@ Every contribution, no matter how small, fuels our mission to build tools that a
 - 📚 [Documentation](https://github.com/naruyaizumi/liora/wiki) — Comprehensive guides and API reference
 
 > Written with **coding enthusiasm** ⚡ and **open-source spirit** 🌟
-> 
+>
 > Remember to take breaks, stay hydrated, and keep coding! 🍓✨
 
 ---

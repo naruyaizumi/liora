@@ -26,10 +26,7 @@ const handler = async (m, { conn, isMods, command, text }) => {
 
     if (dangerousCommands.some((cmd) => text.trim().startsWith(cmd))) {
         return conn.sendMessage(m.chat, {
-            text: [
-                "Command blocked for security reasons.",
-                `> ${text.trim()}`,
-            ].join("\n"),
+            text: ["Command blocked for security reasons.", `> ${text.trim()}`].join("\n"),
         });
     }
 

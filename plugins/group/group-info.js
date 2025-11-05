@@ -10,45 +10,50 @@ let handler = async (m, { conn }) => {
         }
 
         const participants = groupMeta.participants || [];
-        const groupAdmins = participants.filter(p => p.admin);
-        const owner = groupMeta.owner ||
-            groupAdmins.find(p => p.admin === "superadmin")?.id ||
+        const groupAdmins = participants.filter((p) => p.admin);
+        const owner =
+            groupMeta.owner ||
+            groupAdmins.find((p) => p.admin === "superadmin")?.id ||
             m.chat.split`-`[0] + "@s.whatsapp.net";
 
-        const listAdmin = groupAdmins
-            .map((v, i) => `${i + 1}. @${v.id.split("@")[0]}`)
-            .join("\n") || "-";
+        const listAdmin =
+            groupAdmins.map((v, i) => `${i + 1}. @${v.id.split("@")[0]}`).join("\n") || "-";
 
         const sWelcome = global.db.data.chats[m.chat]?.sWelcome || "(none)";
         const sBye = global.db.data.chats[m.chat]?.sBye || "(none)";
 
         const ephemeralTime = (() => {
-            switch(groupMeta.ephemeralDuration) {
-                case 86400: return "24 hours";
-                case 604800: return "7 days";
-                case 2592000: return "30 days";
-                case 7776000: return "90 days";
-                default: return "None";
+            switch (groupMeta.ephemeralDuration) {
+                case 86400:
+                    return "24 hours";
+                case 604800:
+                    return "7 days";
+                case 2592000:
+                    return "30 days";
+                case 7776000:
+                    return "90 days";
+                default:
+                    return "None";
             }
         })();
 
         const creationDate = groupMeta.creation
-            ? new Date(groupMeta.creation * 1000).toLocaleString("en-US", { 
-                timeZone: "UTC", 
-                dateStyle: "medium", 
-                timeStyle: "short" 
+            ? new Date(groupMeta.creation * 1000).toLocaleString("en-US", {
+                  timeZone: "UTC",
+                  dateStyle: "medium",
+                  timeStyle: "short",
               })
             : "(unknown)";
 
         const desc = groupMeta.desc || "(none)";
         let pp = null;
         try {
-            pp = await conn.profilePictureUrl(m.chat, 'image');
+            pp = await conn.profilePictureUrl(m.chat, "image");
         } catch (e) {
             conn.logger.warn(`No profile picture for group ${m.chat}: ${e.message}`);
         }
 
-        const mentions = [...new Set([...groupAdmins.map(v => v.id), owner])];
+        const mentions = [...new Set([...groupAdmins.map((v) => v.id), owner])];
 
         const text = `
 『 Group Information 』
@@ -84,7 +89,6 @@ Announcement Only: ${groupMeta.announce ? "Yes" : "No"}
                 mentions: mentions,
             });
         }
-
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);

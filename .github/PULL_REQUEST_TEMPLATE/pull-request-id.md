@@ -22,11 +22,11 @@ _Contoh: `api/hd.js`, `lib/fallback.js`, `handler/media.js`_
 
 Pilih yang sesuai:
 
-- [ ] 🐞 Perbaikan bug — perbaikan non-breaking untuk error yang dilaporkan  
-- [ ] ✨ Fitur baru — menambahkan fungsionalitas baru  
-- [ ] 🧹 Refactor / pembersihan kode — memperbaiki struktur tanpa mengubah perilaku  
-- [ ] 📚 Pembaruan dokumentasi — menambah atau memperbaiki dokumentasi  
-- [ ] 🔧 Perubahan konfigurasi / setup — memengaruhi build, CI/CD, atau lingkungan  
+- [ ] 🐞 Perbaikan bug — perbaikan non-breaking untuk error yang dilaporkan
+- [ ] ✨ Fitur baru — menambahkan fungsionalitas baru
+- [ ] 🧹 Refactor / pembersihan kode — memperbaiki struktur tanpa mengubah perilaku
+- [ ] 📚 Pembaruan dokumentasi — menambah atau memperbaiki dokumentasi
+- [ ] 🔧 Perubahan konfigurasi / setup — memengaruhi build, CI/CD, atau lingkungan
 
 ---
 
@@ -41,12 +41,12 @@ _Contoh: "Jalankan perintah `.hd` dengan input media dan pastikan fallback aktif
 
 Pastikan kamu sudah melakukan hal berikut:
 
-- [x] Kode sudah diuji dan berjalan sesuai harapan  
-- [x] Tidak ada error saat build atau dijalankan  
-- [x] Mengikuti gaya penulisan dan struktur modular Liora  
-- [x] Dokumentasi diperbarui jika diperlukan  
-- [x] Judul PR diawali `[PR]` dan jelas  
-- [x] Issue terkait dilampirkan (jika ada)  
+- [x] Kode sudah diuji dan berjalan sesuai harapan
+- [x] Tidak ada error saat build atau dijalankan
+- [x] Mengikuti gaya penulisan dan struktur modular Liora
+- [x] Dokumentasi diperbarui jika diperlukan
+- [x] Judul PR diawali `[PR]` dan jelas
+- [x] Issue terkait dilampirkan (jika ada)
 
 ---
 
