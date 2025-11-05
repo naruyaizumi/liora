@@ -22,11 +22,11 @@ _Example: `api/hd.js`, `lib/fallback.js`, `handler/media.js`_
 
 Select what applies:
 
-- [ ] 🐞 Bug fix — non-breaking fix for a reported issue  
-- [ ] ✨ New feature — introduces new functionality  
-- [ ] 🧹 Code refactor / cleanup — improves structure without changing behavior  
-- [ ] 📚 Documentation update — improves or adds docs  
-- [ ] 🔧 Config / setup change — affects build, CI/CD, or environment  
+- [ ] 🐞 Bug fix — non-breaking fix for a reported issue
+- [ ] ✨ New feature — introduces new functionality
+- [ ] 🧹 Code refactor / cleanup — improves structure without changing behavior
+- [ ] 📚 Documentation update — improves or adds docs
+- [ ] 🔧 Config / setup change — affects build, CI/CD, or environment
 
 ---
 
@@ -41,12 +41,12 @@ _Example: "Run `.hd` command with media input and verify fallback triggers when 
 
 Make sure you've done the following:
 
-- [x] Code tested and works as expected  
-- [x] No build/run errors  
-- [x] Follows Liora coding style and modular structure  
-- [x] Documentation updated if needed  
-- [x] PR title starts with `[PR]` and is descriptive  
-- [x] Related issues linked (if any)  
+- [x] Code tested and works as expected
+- [x] No build/run errors
+- [x] Follows Liora coding style and modular structure
+- [x] Documentation updated if needed
+- [x] PR title starts with `[PR]` and is descriptive
+- [x] Related issues linked (if any)
 
 ---
 

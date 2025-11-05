@@ -47,12 +47,12 @@ function ensureTable(tableName, schema) {
             .prepare(`PRAGMA table_info(${tableName})`)
             .all()
             .map((c) => c.name);
-        
+
         const wanted = schema
             .split(",")
             .map((x) => x.trim().split(" ")[0])
             .filter(Boolean);
-        
+
         for (const col of wanted) {
             if (!columns.includes(col)) {
                 try {
@@ -60,7 +60,7 @@ function ensureTable(tableName, schema) {
                         .split(",")
                         .map((x) => x.trim())
                         .find((x) => x.startsWith(col));
-                    
+
                     sqlite.exec(`ALTER TABLE ${tableName} ADD COLUMN ${colDef}`);
                     conn.logger.info({ module: "DB" }, `Added column ${col} to ${tableName}`);
                 } catch (e) {
@@ -140,7 +140,7 @@ class DataWrapper {
                         sqlite.prepare(`INSERT INTO ${table} (jid) VALUES (?)`).run(jid);
                         row = sqlite.prepare(`SELECT * FROM ${table} WHERE jid = ?`).get(jid);
                     }
-                    
+
                     for (const k in row) {
                         try {
                             const parsed = JSON.parse(row[k]);
@@ -157,7 +157,7 @@ class DataWrapper {
                                     sqlite
                                         .prepare(`UPDATE ${table} SET ${prop} = ? WHERE jid = ?`)
                                         .run(normalizeValue(value), jid);
-                                        
+
                                     obj[prop] = value;
                                     return true;
                                 } catch (e) {
@@ -223,7 +223,7 @@ This feature is currently restricted or disabled by configuration.
 \`\`\``,
     }[type];
     if (!msg) return;
-    
+
     conn.sendMessage(
         m.chat,
         {

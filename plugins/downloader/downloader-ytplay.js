@@ -7,7 +7,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     await global.loading(m, conn);
     try {
-        const { success, title, channel, cover, url, downloadUrl, error } = await play(args.join(" "));
+        const { success, title, channel, cover, url, downloadUrl, error } = await play(
+            args.join(" ")
+        );
         if (!success) throw new Error(error);
 
         const audioRes = await fetch(downloadUrl);

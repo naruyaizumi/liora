@@ -32,10 +32,10 @@ Before starting, make sure your server and Pterodactyl environment meet these re
 4. Upload the previously downloaded `liora.zip`.
 5. Once uploaded, select it and **Extract/Unarchive**.
 6. Confirm files are extracted properly:
-   - `index.js`
-   - `main.js`
-   - `package.json`
-   - `/lib`, `/plugins`, `/src`, etc.
+    - `index.js`
+    - `main.js`
+    - `package.json`
+    - `/lib`, `/plugins`, `/src`, etc.
 
 ---
 
@@ -47,11 +47,11 @@ We need to install dependencies first.
 1. Go to **Startup** section.
 2. Change startup command from:
 
-   npm start
+    npm start
 
-   to:
+    to:
 
-   npm install
+    npm install
 
 3. Save changes.
 
@@ -73,11 +73,11 @@ After dependencies are installed:
 1. Go back to **Startup**.
 2. Change startup command from:
 
-   npm install
+    npm install
 
-   back to:
+    back to:
 
-   npm start
+    npm start
 
 3. Save.
 

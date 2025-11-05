@@ -15,11 +15,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         if (videos.length > 0) {
             const videoUrl = videos[videos.length - 1];
-            await conn.sendMessage(
-                m.chat,
-                { video: { url: videoUrl }, caption },
-                { quoted: m }
-            );
+            await conn.sendMessage(m.chat, { video: { url: videoUrl }, caption }, { quoted: m });
         } else if (images.length > 0) {
             if (images.length === 1) {
                 await conn.sendMessage(

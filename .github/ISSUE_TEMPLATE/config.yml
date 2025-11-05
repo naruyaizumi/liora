@@ -1,9 +1,9 @@
 blank_issues_enabled: false
 
 contact_links:
-  - name: 🍭 Tanya / Diskusi (ID)
-    url: https://github.com/naruyaizumi/liora/discussions
-    about: Gunakan forum diskusi kalau ingin bertanya, berbagi ide, atau ngobrol santai 🍬
-  - name: 🍭 Ask / Discuss (EN)
-    url: https://github.com/naruyaizumi/liora/discussions
-    about: Use discussions for questions, ideas, or casual talk 🍬
+    - name: 🍭 Tanya / Diskusi (ID)
+      url: https://github.com/naruyaizumi/liora/discussions
+      about: Gunakan forum diskusi kalau ingin bertanya, berbagi ide, atau ngobrol santai 🍬
+    - name: 🍭 Ask / Discuss (EN)
+      url: https://github.com/naruyaizumi/liora/discussions
+      about: Use discussions for questions, ideas, or casual talk 🍬

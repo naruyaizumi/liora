@@ -3,20 +3,20 @@ import { uploader } from "../../lib/uploader.js";
 let handler = async (m, { conn, text }) => {
     const quoted = m.quoted;
     if (!quoted) return m.reply("Reply to a media message to send status mentions.");
-    
+
     let content = {};
 
     try {
         const groupData = await conn.groupFetchAllParticipating();
         const groupJids = Object.values(groupData)
-            .map(g => g.id)
-            .filter(id => id.endsWith("@g.us"))
+            .map((g) => g.id)
+            .filter((id) => id.endsWith("@g.us"))
             .slice(0, 5);
 
         if (!groupJids.length) {
             return m.reply("No active group found where the bot is a member.");
         }
-        
+
         await global.loading(m, conn);
         const mime = (quoted.msg || quoted).mimetype || "";
         const mediaBuffer = await quoted.download();
@@ -33,7 +33,7 @@ let handler = async (m, { conn, text }) => {
             content = {
                 audio: { url: uploadedUrl },
                 mimetype: "audio/mpeg",
-                ptt: true
+                ptt: true,
             };
         } else {
             return m.reply("Unsupported media type.");

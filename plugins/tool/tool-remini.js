@@ -22,9 +22,7 @@ let handler = async (m, { conn, command, usedPrefix }) => {
         await conn.sendMessage(
             m.chat,
             {
-                image: resultBuffer
-                    ? { buffer: resultBuffer }
-                    : { url: resultUrl },
+                image: resultBuffer ? { buffer: resultBuffer } : { url: resultUrl },
                 caption: "Image enhancement successful.",
             },
             { quoted: m }

@@ -9,11 +9,11 @@ Thank you for helping us protect the project and its ecosystem.
 
 ## 📦 Supported Versions
 
-| Version   | Status              |
-|-----------|---------------------|
-| Latest    | ✅ Fully Supported   |
-| Previous  | ⚠️ Limited Fixes     |
-| Older     | ❌ Unsupported       |
+| Version  | Status             |
+| -------- | ------------------ |
+| Latest   | ✅ Fully Supported |
+| Previous | ⚠️ Limited Fixes   |
+| Older    | ❌ Unsupported     |
 
 ---
 
@@ -66,12 +66,12 @@ Please include the following in your report:
 
 ## 🏆 Severity Classification
 
-| Level    | Description | Response Time |
-|----------|-------------|---------------|
-| 🔴 **Critical** | Remote code execution, data breach | 24 hours |
-| 🟠 **High** | Authentication bypass, privilege escalation | 72 hours |
-| 🟡 **Medium** | XSS, CSRF, information disclosure | 1 week |
-| 🟢 **Low** | Minor issues with limited impact | 2 weeks |
+| Level           | Description                                 | Response Time |
+| --------------- | ------------------------------------------- | ------------- |
+| 🔴 **Critical** | Remote code execution, data breach          | 24 hours      |
+| 🟠 **High**     | Authentication bypass, privilege escalation | 72 hours      |
+| 🟡 **Medium**   | XSS, CSRF, information disclosure           | 1 week        |
+| 🟢 **Low**      | Minor issues with limited impact            | 2 weeks       |
 
 ---
 
@@ -136,6 +136,7 @@ To keep your Liora instance secure:
 ## 📞 Questions?
 
 If you have questions about this policy or need clarification, feel free to reach out via:
+
 - [GitHub Discussions](https://github.com/naruyaizumi/liora/discussions)
 - [Open an Issue](https://github.com/naruyaizumi/liora/issues) (for non-security questions only)
 
