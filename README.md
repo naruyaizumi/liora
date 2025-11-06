@@ -240,18 +240,17 @@ These libraries power Liora's core functionality and enable seamless interaction
 
 External APIs that enrich Liora's features with dynamic content, media processing, and utility endpoints.
 
-[![NekoLabs API](https://img.shields.io/badge/NekoLabs_API-Provider-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://api.nekolabs.my.id)
+[![NekoLabs API](https://img.shields.io/badge/NekoLabs_API-Provider-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://api.nekolabs.my.id)  
+[![Siputzx API](https://img.shields.io/badge/Siputzx_API-Provider-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://api.siputzx.my.id)  
+[![Ootaizumi API](https://img.shields.io/badge/Ootaizumi_API-Provider-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://api.ootaizumi.web.id)  
+[![Anabot API](https://img.shields.io/badge/Anabot_API-Provider-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://anabot.my.id)  
+[![ElrayyXML API](https://img.shields.io/badge/ElrayyXML_API-Provider-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://api.elrayyxml.web.id)  
+[![Zenzxz API](https://img.shields.io/badge/Zenzxz_API-Provider-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://api.zenzxz.my.id)  
+[![Rikishop API](https://img.shields.io/badge/Rikishop_API-Provider-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://api.rikishop.my.id)  
+[![FAA API](https://img.shields.io/badge/FAA_API-Provider-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://api-faa.my.id)  
+[![Kyyokatsurest API](https://img.shields.io/badge/Kyyokatsurest_API-Provider-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://kyyokatsurestapi.my.id)
 
-1. https://api.siputzx.my.id
-2. https://api.ootaizumi.web.id
-3. https://anabot.my.id
-4. https://api.nekolabs.web.id
-5. https://api.elrayyxml.web.id
-6. https://api.zenzxz.my.id
-7. https://api.rikishop.my.id
-8. https://api-faa.my.id
-9. https://kyyokatsurestapi.my.id
- </div>
+</div>
 
 ### 🤖 AI Assistance
 

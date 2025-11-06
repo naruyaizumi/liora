@@ -22,7 +22,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const rl = createInterface({ input: process.stdin, output: process.stdout });
 
 async function ensureDirs() {
-    const dir = join(__dirname, "database");
+    const dir = join(process.cwd(), "database");
     try {
         await mkdir(dir, { recursive: true });
     } catch (e) {
