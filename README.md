@@ -241,6 +241,7 @@ These libraries power Liora's core functionality and enable seamless interaction
 External APIs that enrich Liora's features with dynamic content, media processing, and utility endpoints.
 
 [![NekoLabs API](https://img.shields.io/badge/NekoLabs_API-Provider-0B3D91?style=for-the-badge&logo=swagger&logoColor=white&labelColor=2F2F2F)](https://api.nekolabs.my.id)
+
 1. https://api.siputzx.my.id
 2. https://api.ootaizumi.web.id
 3. https://anabot.my.id
@@ -250,7 +251,7 @@ External APIs that enrich Liora's features with dynamic content, media processin
 7. https://api.rikishop.my.id
 8. https://api-faa.my.id
 9. https://kyyokatsurestapi.my.id
-</div>
+ </div>
 
 ### 🤖 AI Assistance
 
