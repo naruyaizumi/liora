@@ -1,6 +1,6 @@
 {
     "name": "liora",
-    "version": "7.4.9",
+    "version": "7.4.10",
     "description": "Liora is a modern, modular, and efficient WhatsApp bot framework built on Baileys.",
     "keywords": [
         "whatsapp",
@@ -73,6 +73,7 @@
         "#tiktok": "./lib/api/tiktok.js",
         "#instagram": "./lib/api/instagram.js",
         "#twitter": "./lib/api/twitter.js",
+        "#threads": "./lib/api/threads.js",
         "#play": "./lib/api/play.js",
         "#spotify": "./lib/api/spotify.js",
         "#ytmp3": "./lib/api/ytmp3.js",

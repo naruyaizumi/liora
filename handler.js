@@ -158,7 +158,6 @@ export async function handler(chatUpdate) {
     if (senderLid.endsWith("@lid")) {
         senderLid = senderLid.split("@")[0];
     } else if (senderLid.endsWith("@s.whatsapp.net")) {
-        // Resolve phone number to LID if available
         const resolved = await conn.signalRepository.lidMapping.getLIDForPN(senderLid);
         if (resolved) {
             senderLid =
@@ -241,7 +240,6 @@ export async function handler(chatUpdate) {
 
         let usedPrefix;
         if ((usedPrefix = (match?.[0] || "")[0])) {
-            // Remove prefix from message
             const noPrefix = body.replace(usedPrefix, "");
             const parts = noPrefix.trim().split(/\s+/);
             const [rawCmd, ...argsArr] = parts;
