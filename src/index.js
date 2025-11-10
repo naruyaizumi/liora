@@ -1,7 +1,4 @@
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
-import { spawn } from "child_process";
-import { createInterface } from "readline";
+import { join } from "path";
 import { mkdir } from "fs/promises";
 import pino from "pino";
 
@@ -12,19 +9,19 @@ const logger = pino({
         target: "pino-pretty",
         options: {
             colorize: true,
-            translateTime: "HH:MM",
+            translateTime: "HH:MM:ss",
             ignore: "pid,hostname",
         },
     },
 });
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const rl = createInterface({ input: process.stdin, output: process.stdout });
+const rootDir = process.cwd();
 
 async function ensureDirs() {
-    const dir = join(process.cwd(), "database");
+    const dbDir = join(rootDir, "database");
     try {
-        await mkdir(dir, { recursive: true });
+        await mkdir(dbDir, { recursive: true });
+        logger.debug(`Database directory ensured: ${dbDir}`);
     } catch (e) {
         logger.error(e.message);
         throw e;
@@ -37,126 +34,197 @@ let childProcess = null;
 let shuttingDown = false;
 let crashCount = 0;
 let lastCrash = 0;
+const MAX_CRASHES = 5;
+const CRASH_WINDOW = 60000;
+const COOLDOWN_TIME = 10000;
+const RESTART_DELAY = 2000;
 
 async function start(file) {
-    const args = [join(__dirname, file), ...process.argv.slice(2)];
+    if (shuttingDown) return 1;
+
+    const scriptPath = join(rootDir, "src", file);
+    const args = [scriptPath, ...process.argv.slice(2)];
+    
     return new Promise((resolve) => {
-        childProcess = spawn(process.argv[0], args, {
-            stdio: ["inherit", "inherit", "inherit", "ipc"],
-        });
+        try {
+            childProcess = Bun.spawn({
+                cmd: ["bun", ...args],
+                cwd: rootDir,
+                stdin: "inherit",
+                stdout: "inherit",
+                stderr: "inherit",
+                env: process.env,
+                onExit(proc, exitCode, signalCode, error) {
+                    if (error) {
+                        logger.error(error.message);
+                    }
 
-        childProcess.on("message", (msg) => {
-            if (msg === "uptime") childProcess.send(process.uptime());
-        });
+                    if (!shuttingDown) {
+                        if (exitCode !== 0) {
+                            logger.warn(
+                                `Child process exited with code ${exitCode}${
+                                    signalCode ? ` (signal: ${signalCode})` : ""
+                                }`
+                            );
+                        } else {
+                            logger.info("Child process exited normally");
+                        }
+                    }
 
-        childProcess.on("exit", (code, signal) => {
-            const exitInfo = code !== null ? code : signal;
-            if (code !== 0 && !shuttingDown) logger.warn(`Child process exited (${exitInfo})`);
-            childProcess = null;
-            resolve(code);
-        });
-
-        childProcess.on("error", (e) => {
-            logger.error(e.message);
-            if (childProcess) {
-                childProcess.kill("SIGTERM");
-                childProcess = null;
-            }
-            resolve(1);
-        });
-
-        if (!rl.listenerCount("line")) {
-            rl.on("line", (line) => {
-                if (childProcess?.connected) childProcess.send(line.trim());
+                    childProcess = null;
+                    resolve(exitCode || 0);
+                },
             });
+
+            logger.info(`Child process started (PID: ${childProcess.pid})`);
+
+            if (childProcess.resourceUsage) {
+                childProcess.exited.then(() => {
+                    try {
+                        const usage = childProcess.resourceUsage();
+                        logger.debug(
+                            `Process stats - Max RSS: ${Math.round(usage.maxRSS / 1024 / 1024)}MB, ` +
+                                `CPU (user): ${Math.round(usage.cpuTime.user / 1000)}ms, ` +
+                                `CPU (system): ${Math.round(usage.cpuTime.system / 1000)}ms`
+                        );
+                    } catch {
+                        // Ignore errors when getting resource usage
+                    }
+                });
+            }
+        } catch (e) {
+            logger.error(e.message);
+            childProcess = null;
+            resolve(1);
         }
     });
 }
 
-async function stopChild(signal = "SIGINT") {
+async function stopChild(signal = "SIGTERM") {
     if (shuttingDown) return;
     shuttingDown = true;
-    if (!childProcess) return cleanup();
 
-    logger.info(`Shutting down (${signal})`);
+    if (!childProcess) {
+        logger.debug("No child process to stop");
+        return cleanup();
+    }
 
+    logger.info(`Shutting down gracefully (signal: ${signal})...`);
+
+    const controller = new AbortController();
     const timeout = setTimeout(() => {
-        if (childProcess) {
-            logger.warn(`Force killing unresponsive process`);
-            childProcess.kill("SIGKILL");
-        }
-    }, 1000);
-
-    childProcess.kill(signal);
-
-    await new Promise((resolve) => {
-        const checkInterval = setInterval(() => {
-            if (!childProcess) {
-                clearInterval(checkInterval);
-                clearTimeout(timeout);
-                resolve();
+        if (childProcess && !childProcess.killed) {
+            logger.warn("Child process unresponsive after 8s, force killing...");
+            try {
+                childProcess.kill("SIGKILL");
+            } catch (e) {
+                logger.error(e.message);
             }
-        }, 50);
+        }
+        controller.abort();
+    }, 8000);
 
-        setTimeout(() => {
-            clearInterval(checkInterval);
-            clearTimeout(timeout);
-            resolve();
-        }, 2000);
-    });
+    try {
+        childProcess.kill(signal);
+        logger.info(`Sent ${signal} to child process (PID: ${childProcess.pid})`);
+
+        await Promise.race([
+            childProcess.exited,
+            new Promise((resolve) => setTimeout(resolve, 10000)),
+        ]);
+
+        clearTimeout(timeout);
+
+        if (childProcess) {
+            logger.warn("Child process still running after max wait time");
+        } else {
+            logger.info("Child process exited gracefully");
+        }
+    } catch (e) {
+        logger.error(e.message);
+    } finally {
+        clearTimeout(timeout);
+    }
 
     cleanup();
 }
 
 function cleanup() {
-    logger.info("Shutdown complete");
-    rl.close();
-    process.exit(0);
+    logger.info("Cleanup complete, exiting...");
+
+    setTimeout(() => {
+        process.exit(0);
+    }, 100);
 }
 
 async function supervise() {
     while (true) {
+        if (shuttingDown) break;
+
         const code = await start("main.js");
-        if (shuttingDown || code === 0) break;
+
+        if (shuttingDown || code === 0) {
+            logger.info("Supervisor shutting down");
+            break;
+        }
 
         const now = Date.now();
-        crashCount = now - lastCrash < 60000 ? crashCount + 1 : 1;
+        if (now - lastCrash < CRASH_WINDOW) {
+            crashCount++;
+        } else {
+            crashCount = 1;
+        }
         lastCrash = now;
 
-        if (crashCount >= 5) {
-            logger.warn(`Too many crashes (${crashCount}). Cooling down briefly...`);
-            await new Promise((r) => setTimeout(r, 10000));
+        if (crashCount >= MAX_CRASHES) {
+            logger.warn(
+                `Too many crashes (${crashCount}/${MAX_CRASHES} in ${CRASH_WINDOW / 1000}s). ` +
+                    `Cooling down for ${COOLDOWN_TIME / 1000}s...`
+            );
+            await Bun.sleep(COOLDOWN_TIME);
             crashCount = 0;
         } else {
-            await new Promise((r) => setTimeout(r, 500));
+            logger.info(
+                `Restarting after crash (${crashCount}/${MAX_CRASHES})... ` +
+                    `Waiting ${RESTART_DELAY / 1000}s`
+            );
+            await Bun.sleep(RESTART_DELAY);
         }
     }
 }
 
-process.on("SIGINT", () =>
+process.once("SIGINT", () => {
+    logger.info("Received SIGINT (Ctrl+C)");
     stopChild("SIGINT").catch((e) => {
         logger.error(e.message);
         process.exit(1);
-    })
-);
-process.on("SIGTERM", () =>
+    });
+});
+
+process.once("SIGTERM", () => {
+    logger.info("Received SIGTERM");
     stopChild("SIGTERM").catch((e) => {
         logger.error(e.message);
         process.exit(1);
-    })
-);
-process.on("uncaughtException", (e) => {
-    logger.error(e.message);
-    logger.error(e.stack);
-    stopChild("SIGTERM").catch(() => process.exit(1));
+    });
 });
-process.on("unhandledRejection", (reason, promise) => {
-    logger.error(`Unhandled rejection at ${promise}: ${reason}`);
+
+process.on("uncaughtException", (e) => {
+    logger.error(`Uncaught exception: ${e.message}`);
+    if (e.stack) logger.error(e.stack);
     stopChild("SIGTERM").catch(() => process.exit(1));
 });
 
+process.on("unhandledRejection", (reason) => {
+    logger.error(e.message);
+    stopChild("SIGTERM").catch(() => process.exit(1));
+});
+
+logger.info(`Liora Process Manager starting in ${rootDir}`);
+logger.info(`Node: ${process.version} | Bun: ${Bun.version}`);
+
 supervise().catch((e) => {
     logger.fatal(e.message);
-    logger.fatal(e.stack);
+    if (e.stack) logger.fatal(e.stack);
     process.exit(1);
 });

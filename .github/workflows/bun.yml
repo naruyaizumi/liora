@@ -1,4 +1,4 @@
-name: ESLint
+name: CI
 
 on:
   push:
@@ -7,20 +7,20 @@ on:
     branches: ["main"]
 
 jobs:
-  eslint:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Bun
+      - name: Install Bun
         uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: bun install --no-save
 
-      - name: Run ESLint
-        run: bunx eslint .
+      - name: Run Tests
+        run: bun test

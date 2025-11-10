@@ -1,0 +1,48 @@
+smol = false
+logLevel = "error"
+
+[console]
+depth = 5
+
+[loader]
+".js" = "js"
+
+[install]
+optional = true
+dev = true
+peer = true
+production = false
+exact = false
+saveTextLockfile = true
+auto = "auto"
+frozenLockfile = false
+dryRun = false
+registry = "https://registry.npmjs.org"
+linker = "hoisted"
+linkWorkspacePackages = true
+globalDir = "~/.bun/install/global"
+globalBinDir = "~/.bun/bin"
+
+[install.cache]
+dir = "~/.bun/install/cache"
+disable = false
+disableManifest = false
+
+[install.lockfile]
+save = true
+
+# print = "yarn"
+
+[run]
+shell = "bun"
+bun = true
+silent = false
+
+[test]
+root = "."
+smol = false
+coverage = false
+coverageSkipTestFiles = false
+coverageReporter = ["text"]
+coverageDir = "coverage"
+telemetry = false

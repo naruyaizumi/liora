@@ -1,4 +1,3 @@
-import { readFile } from "fs/promises";
 import os from "os";
 
 const CATEGORIES = ["ai", "downloader", "group", "info", "internet", "maker", "owner", "tools"];
@@ -19,8 +18,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
     try {
         let pkg;
         try {
-            const data = await readFile("./package.json", "utf8");
-            pkg = JSON.parse(data);
+            pkg = await Bun.file("./package.json").json();
         } catch {
             pkg = {
                 name: "Unknown",
@@ -52,6 +50,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
             const list = CATEGORIES.map(
                 (v, i) => `${String(i + 1).padStart(2, "0")}. ${MENU_META[v]}`
             ).join("\n");
+
             const vcard = `BEGIN:VCARD
 VERSION:3.0
 N:;ttname;;;
@@ -73,6 +72,7 @@ END:VCARD`;
                     },
                 },
             };
+
             const text = [
                 "```",
                 `[${timestamp}] Liora Environment`,
@@ -81,7 +81,7 @@ END:VCARD`;
                 `Version    : ${pkg.version}`,
                 `License    : ${pkg.license}`,
                 `Type       : ${pkg.type}`,
-                `NodeJS     : ${process.version}`,
+                `Runtime    : Bun ${Bun.version}`,
                 `VPS Uptime : ${uptimeSys}`,
                 `Bot Uptime : ${uptimeBot}`,
                 "",
@@ -99,9 +99,7 @@ END:VCARD`;
             return conn.sendMessage(
                 m.chat,
                 {
-                    video: { url: "https://qu.ax/CzQEC.mp4" },
-                    caption: text,
-                    gifPlayback: true,
+                    text,
                     contextInfo: {
                         forwardingScore: 999,
                         isForwarded: true,
@@ -146,6 +144,7 @@ END:VCARD`;
                       "```",
                   ].join("\n")
                 : `No commands found for ${MENU_META[category]} category.`;
+
         const vcard = `BEGIN:VCARD
 VERSION:3.0
 N:;ttname;;;
@@ -194,6 +193,7 @@ END:VCARD`;
 };
 
 handler.help = ["menu"];
+handler.tags = ["info"];
 handler.command = /^(menu|help)$/i;
 
 export default handler;

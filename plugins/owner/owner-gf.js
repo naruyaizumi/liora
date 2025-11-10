@@ -1,19 +1,17 @@
 import { join, extname } from "path";
-import { open } from "fs/promises";
 
-let handler = async (m, { conn, args, __dirname, usedPrefix, command }) => {
+let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args.length)
         return m.reply(
-            `Enter the target file path.\n› Example: ${usedPrefix + command} plugins owner owner-sf\n`
+            `Enter the target file path.\n› Example: ${usedPrefix + command} plugins/owner/owner-sf`
         );
 
     try {
         let target = join(...args);
         if (!extname(target)) target += ".js";
-        const filepath = join(__dirname, "../", target);
-        const handle = await open(filepath, "r");
-        const fileBuffer = await handle.readFile();
-        await handle.close();
+        const filepath = join(process.cwd(), target);
+        
+        const fileBuffer = Buffer.from(await Bun.file(filepath).arrayBuffer());
         const fileName = target.split("/").pop();
 
         await conn.sendMessage(
@@ -21,7 +19,7 @@ let handler = async (m, { conn, args, __dirname, usedPrefix, command }) => {
             {
                 document: fileBuffer,
                 fileName,
-                mimetype: "application/octet-stream",
+                mimetype: "application/javascript",
             },
             { quoted: m }
         );

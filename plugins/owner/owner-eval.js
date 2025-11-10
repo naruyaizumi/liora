@@ -1,5 +1,3 @@
-import { inspect } from "util";
-
 let handler = async (m, { conn, noPrefix, isMods }) => {
     if (!isMods) return;
     let _text = noPrefix;
@@ -15,10 +13,14 @@ let handler = async (m, { conn, noPrefix, isMods }) => {
         _return = e;
     }
 
-    const output =
-        typeof _return === "string"
-            ? _return
-            : inspect(_return, { depth: null, maxArrayLength: null });
+    let output;
+    if (Array.isArray(_return) && _return.every(item => item && typeof item === "object" && !Array.isArray(item))) {
+        output = Bun.inspect.table(_return);
+    } else if (typeof _return === "string") {
+        output = _return;
+    } else {
+        output = Bun.inspect(_return, { depth: null, maxArrayLength: null });
+    }
 
     const formatted = [
         `${m.text.startsWith("=>") ? "=>" : ">"} ${_text}`,

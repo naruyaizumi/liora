@@ -1,21 +1,18 @@
 /* global conn */
-process.on("uncaughtException", (e) => logger.error(e));
-process.on("unhandledRejection", (e) => logger.error(e));
-
-import "./config.js";
-import "./global.js";
-import { serialize } from "../lib/core/message.js";
-import { protoType } from "../lib/core/prototype.js";
-import { naruyaizumi } from "../lib/core/socket.js";
-import { SQLiteAuth } from "../lib/utils/sqlite/sqlite-auth.js";
-import { SQLiteKeyStore } from "../lib/utils/sqlite/sqlite-keystore.js";
+import "#config";
+import "#global";
+import { serialize } from "#message";
+import { naruyaizumi } from "#socket";
+import { SQLiteAuth } from "#sqlite-auth";
+import { SQLiteKeyStore } from "#sqlite-keystore";
 import { Browsers, fetchLatestBaileysVersion } from "baileys";
 import { readdir, stat } from "fs/promises";
 import { join } from "path";
-import { EventEmitter } from "events";
-import { DisconnectReason } from "../lib/core/connection.js";
-import { initReload } from "../lib/core/loader-plugins.js";
+import EventEmitter from "eventemitter3";
+import { initReload } from "#loader-plugins";
 import pino from "pino";
+import { CleanupManager, registerProcessHandlers } from "#cleaner";
+import { EventManager, setupMaintenanceIntervals } from "#event";
 
 const logger = pino({
     level: "debug",
@@ -32,16 +29,90 @@ const logger = pino({
 
 const pairingNumber = global.config.pairingNumber;
 
-EventEmitter.defaultMaxListeners = 0;
+EventEmitter.defaultMaxListeners = 20;
 
-protoType();
 serialize();
+
+const CM = new CleanupManager();
+const EM = new EventManager();
+
+registerProcessHandlers(CM, logger);
+
+let pluginCache = null;
+let pluginCacheTime = 0;
+const CACHE_TTL = 5000;
+
+async function getAllPlugins(dir, skipCache = false) {
+    const now = Date.now();
+    
+    if (!skipCache && pluginCache && (now - pluginCacheTime) < CACHE_TTL) {
+        return pluginCache;
+    }
+    
+    const results = [];
+    try {
+        const files = await readdir(dir);
+        const filePromises = files.map(async (file) => {
+            const filepath = join(dir, file);
+            try {
+                const stats = await stat(filepath);
+                if (stats.isDirectory()) {
+                    return await getAllPlugins(filepath, true);
+                } else if (/\.js$/.test(file)) {
+                    return [filepath];
+                }
+                return [];
+            } catch (e) {
+                logger.warn(e.message);
+                return [];
+            }
+        });
+        
+        const nestedResults = await Promise.all(filePromises);
+        results.push(...nestedResults.flat());
+    } catch (e) {
+        logger.error(e.message);
+    }
+    
+    pluginCache = results;
+    pluginCacheTime = now;
+    
+    return results;
+}
+
+async function setupPairingCode(conn) {
+    const waitForConnection = new Promise((resolve) => {
+        const checkConnection = setInterval(() => {
+            if (conn.user || conn.ws?.readyState === 1) {
+                clearInterval(checkConnection);
+                resolve();
+            }
+        }, 100);
+        
+        setTimeout(() => {
+            clearInterval(checkConnection);
+            resolve();
+        }, 3000);
+    });
+    
+    await waitForConnection;
+    
+    try {
+        let code = await conn.requestPairingCode(pairingNumber, conn.Pairing);
+        code = code?.match(/.{1,4}/g)?.join("-") || code;
+        logger.info(`Pairing code for ${pairingNumber}: ${code}`);
+    } catch (e) {
+        logger.error(e.message);
+    }
+}
 
 async function IZUMI() {
     const { state, saveCreds } = await SQLiteAuth();
     const { version: baileysVersion } = await fetchLatestBaileysVersion();
-    logger.info(`[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}`);
-
+    logger.info(
+        `[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}`
+    );
+    
     const connectionOptions = {
         version: baileysVersion,
         logger: pino({
@@ -62,177 +133,50 @@ async function IZUMI() {
             keys: SQLiteKeyStore(),
         },
     };
-
+    
     global.conn = naruyaizumi(connectionOptions);
     conn.isInit = false;
-
+    
     if (!state.creds.registered && pairingNumber) {
-        const waitForConnection = new Promise((resolve) => {
-            const checkConnection = setInterval(() => {
-                if (conn.user || conn.ws?.readyState === 1) {
-                    clearInterval(checkConnection);
-                    resolve();
-                }
-            }, 100);
-
-            setTimeout(() => {
-                clearInterval(checkConnection);
-                resolve();
-            }, 3000);
-        });
-
-        await waitForConnection;
-
-        try {
-            let code = await conn.requestPairingCode(pairingNumber, conn.Pairing);
-            code = code?.match(/.{1,4}/g)?.join("-") || code;
-            logger.info(`Pairing code for ${pairingNumber}: ${code}`);
-        } catch (e) {
-            logger.error(e.message);
-        }
+        await setupPairingCode(conn);
     }
-
-    const maintenanceInterval = setInterval(async () => {
-        if (!global.sqlite) {
-            return;
-        }
-
-        try {
-            const checkpoint = global.sqlite.prepare("PRAGMA wal_checkpoint(FULL);");
-            checkpoint.run();
-            const optimize = global.sqlite.prepare("PRAGMA optimize;");
-            optimize.run();
-        } catch (e) {
-            logger.error(e.message);
-        }
-    }, 600 * 1000);
-
-    process.on("SIGINT", () => {
-        clearInterval(maintenanceInterval);
-        if (global.sqlite) {
-            try {
-                global.sqlite.close();
-            } catch (e) {
-                logger.error(e.message);
-            }
-        }
-        process.exit(0);
-    });
-
-    let isInit = true;
+    
+    setupMaintenanceIntervals(CM, logger);
+    
     let handler = await import("../handler.js");
-
-    global.reloadHandler = async function (restartConn = false) {
-        try {
-            const HandlerModule = await import(`../handler.js?update=${Date.now()}`).catch((e) => {
-                logger.error(e.message);
-                return null;
-            });
-
-            if (HandlerModule && typeof HandlerModule.handler === "function") {
-                handler = HandlerModule;
-            }
-        } catch (e) {
-            logger.error(e.message);
-        }
-
-        if (restartConn) {
-            const oldChats = global.conn?.chats || {};
-            try {
-                global.conn.ws?.close();
-            } catch (e) {
-                logger.error(e.message);
-            }
-
-            if (conn.ev) {
-                conn.ev.removeAllListeners();
-            }
-
-            global.conn = naruyaizumi(connectionOptions, { chats: oldChats });
-            isInit = true;
-        }
-
-        if (!isInit && conn.ev) {
-            const events = [
-                ["messages.upsert", conn.handler],
-                ["group-participants.update", conn.participantsUpdate],
-                ["messages.delete", conn.onDelete],
-                ["connection.update", conn.connectionUpdate],
-                ["creds.update", conn.credsUpdate],
-            ];
-
-            for (const [ev, fn] of events) {
-                if (typeof fn === "function") {
-                    conn.ev.off(ev, fn);
-                }
-            }
-        }
-
-        conn.handler = handler?.handler?.bind(global.conn) || (() => {});
-        conn.participantsUpdate = handler?.participantsUpdate?.bind(global.conn) || (() => {});
-        conn.onDelete = handler?.deleteUpdate?.bind(global.conn) || (() => {});
-        conn.connectionUpdate = DisconnectReason?.bind(global.conn) || (() => {});
-        conn.credsUpdate = saveCreds?.bind(global.conn) || (() => {});
-
-        if (conn.ev) {
-            if (typeof conn.handler === "function") {
-                conn.ev.on("messages.upsert", conn.handler);
-            }
-            if (typeof conn.participantsUpdate === "function") {
-                conn.ev.on("group-participants.update", conn.participantsUpdate);
-            }
-            if (typeof conn.onDelete === "function") {
-                conn.ev.on("messages.delete", conn.onDelete);
-            }
-            if (typeof conn.connectionUpdate === "function") {
-                conn.ev.on("connection.update", conn.connectionUpdate);
-            }
-            if (typeof conn.credsUpdate === "function") {
-                conn.ev.on("creds.update", conn.credsUpdate);
-            }
-        }
-
-        isInit = false;
-        return true;
-    };
-
+    EM.setHandler(handler);
+    
+    global.reloadHandler = await EM.createReloadHandler(
+        connectionOptions,
+        saveCreds,
+        CM,
+        import.meta.url
+    );
+    
     const pluginFolder = global.__dirname(
         join(global.__dirname(import.meta.url), "../plugins/index")
     );
-
-    async function getAllPlugins(dir) {
-        const results = [];
-        try {
-            const files = await readdir(dir);
-            for (const file of files) {
-                const filepath = join(dir, file);
-                try {
-                    const stats = await stat(filepath);
-                    if (stats.isDirectory()) {
-                        results.push(...(await getAllPlugins(filepath)));
-                    } else if (/\.js$/.test(file)) {
-                        results.push(filepath);
-                    }
-                } catch (e) {
-                    logger.warn(e.message);
-                }
-            }
-        } catch (e) {
-            logger.error(e.message);
-        }
-        return results;
-    }
-
+    
     try {
-        await initReload(conn, pluginFolder, getAllPlugins);
+        const reloadCleanup = await initReload(conn, pluginFolder, getAllPlugins);
+        
+        if (typeof reloadCleanup === 'function') {
+            CM.addCleanup(reloadCleanup);
+        }
+        
         await global.reloadHandler();
+        
+        logger.info("Bot initialized successfully");
+        
     } catch (e) {
         logger.error(e.message);
+        if (e?.stack) logger.error(e.stack);
         throw e;
     }
 }
 
 IZUMI().catch((e) => {
     logger.fatal(e.message);
+    if (e?.stack) logger.fatal(e.stack);
     process.exit(1);
 });

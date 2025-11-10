@@ -1,4 +1,4 @@
-import fs from "fs/promises";
+import { readdir, mkdir } from "node:fs/promises";
 import path from "path";
 
 const handler = async (m, { args, conn }) => {
@@ -7,7 +7,7 @@ const handler = async (m, { args, conn }) => {
         target = path.resolve(target);
 
         if (!m.quoted) {
-            const items = await fs.readdir(target, { withFileTypes: true }).catch(() => null);
+            const items = await readdir(target, { withFileTypes: true }).catch(() => null);
             if (!items) return m.reply(`Folder not found: ${target}`);
 
             const list =
@@ -37,13 +37,10 @@ const handler = async (m, { args, conn }) => {
 
         const ext = mime?.split("/")[1] || path.extname(q.fileName || "")?.slice(1) || "bin";
         const baseName = q.fileName ? path.basename(q.fileName) : `file-${Date.now()}.${ext}`;
-        const baseDir = process.cwd();
-        const fullpath = path.resolve(baseDir, target, baseName);
-
-        await fs.mkdir(path.dirname(fullpath), { recursive: true });
-        await fs.writeFile(fullpath, buffer);
-
-        return m.reply(`Saved as: ${path.relative(baseDir, fullpath)}`);
+        const fullpath = path.resolve(target, baseName);
+        await mkdir(path.dirname(fullpath), { recursive: true });
+        await Bun.write(fullpath, buffer);
+        return m.reply(`Saved as: ${path.relative(process.cwd(), fullpath)}`);
     } catch (e) {
         conn.logger.error(e);
         return m.reply(`Error: ${e.message}`);
