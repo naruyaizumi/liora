@@ -25,8 +25,8 @@ globalBinDir = "~/.bun/bin"
 
 [install.cache]
 dir = "~/.bun/install/cache"
-disable = false
-disableManifest = false
+disable = true
+disableManifest = true
 
 [install.lockfile]
 save = true
