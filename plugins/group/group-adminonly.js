@@ -20,7 +20,9 @@ let handler = async (m, { text, usedPrefix, command, conn }) => {
             case "disable":
                 if (!chat.adminOnly) return m.reply("Admin-only mode is already DISABLED.");
                 chat.adminOnly = false;
-                return m.reply("Admin-only mode is now DISABLED. All members can use bot features.");
+                return m.reply(
+                    "Admin-only mode is now DISABLED. All members can use bot features."
+                );
 
             default:
                 return m.reply(`Invalid parameter.\nUsage: ${usedPrefix + command} on | off`);

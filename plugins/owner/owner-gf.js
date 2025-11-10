@@ -10,7 +10,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         let target = join(...args);
         if (!extname(target)) target += ".js";
         const filepath = join(process.cwd(), target);
-        
+
         const fileBuffer = Buffer.from(await Bun.file(filepath).arrayBuffer());
         const fileName = target.split("/").pop();
 

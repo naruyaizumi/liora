@@ -44,11 +44,11 @@ const CACHE_TTL = 5000;
 
 async function getAllPlugins(dir, skipCache = false) {
     const now = Date.now();
-    
-    if (!skipCache && pluginCache && (now - pluginCacheTime) < CACHE_TTL) {
+
+    if (!skipCache && pluginCache && now - pluginCacheTime < CACHE_TTL) {
         return pluginCache;
     }
-    
+
     const results = [];
     try {
         const files = await readdir(dir);
@@ -67,16 +67,16 @@ async function getAllPlugins(dir, skipCache = false) {
                 return [];
             }
         });
-        
+
         const nestedResults = await Promise.all(filePromises);
         results.push(...nestedResults.flat());
     } catch (e) {
         logger.error(e.message);
     }
-    
+
     pluginCache = results;
     pluginCacheTime = now;
-    
+
     return results;
 }
 
@@ -88,15 +88,15 @@ async function setupPairingCode(conn) {
                 resolve();
             }
         }, 100);
-        
+
         setTimeout(() => {
             clearInterval(checkConnection);
             resolve();
         }, 3000);
     });
-    
+
     await waitForConnection;
-    
+
     try {
         let code = await conn.requestPairingCode(pairingNumber, conn.Pairing);
         code = code?.match(/.{1,4}/g)?.join("-") || code;
@@ -109,10 +109,8 @@ async function setupPairingCode(conn) {
 async function IZUMI() {
     const { state, saveCreds } = await SQLiteAuth();
     const { version: baileysVersion } = await fetchLatestBaileysVersion();
-    logger.info(
-        `[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}`
-    );
-    
+    logger.info(`[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}`);
+
     const connectionOptions = {
         version: baileysVersion,
         logger: pino({
@@ -133,41 +131,40 @@ async function IZUMI() {
             keys: SQLiteKeyStore(),
         },
     };
-    
+
     global.conn = naruyaizumi(connectionOptions);
     conn.isInit = false;
-    
+
     if (!state.creds.registered && pairingNumber) {
         await setupPairingCode(conn);
     }
-    
+
     setupMaintenanceIntervals(CM, logger);
-    
+
     let handler = await import("../handler.js");
     EM.setHandler(handler);
-    
+
     global.reloadHandler = await EM.createReloadHandler(
         connectionOptions,
         saveCreds,
         CM,
         import.meta.url
     );
-    
+
     const pluginFolder = global.__dirname(
         join(global.__dirname(import.meta.url), "../plugins/index")
     );
-    
+
     try {
         const reloadCleanup = await initReload(conn, pluginFolder, getAllPlugins);
-        
-        if (typeof reloadCleanup === 'function') {
+
+        if (typeof reloadCleanup === "function") {
             CM.addCleanup(reloadCleanup);
         }
-        
+
         await global.reloadHandler();
-        
+
         logger.info("Bot initialized successfully");
-        
     } catch (e) {
         logger.error(e.message);
         if (e?.stack) logger.error(e.stack);

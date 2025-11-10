@@ -53,14 +53,14 @@ It's not plug-and-play—it's designed for those who understand event loops, buf
 
 ## ✨ Core Capabilities
 
-| Feature | Description |
-|---------|-------------|
-| **⚡ Native Speed** | Powered by C++ bindings for ultra-fast media handling |
-| **🧩 Modular Design** | Hot-reloadable handlers with clean isolation and runtime injection |
-| **🎯 Zero Overhead** | Pure buffer-based memory flow for maximum throughput |
-| **🧠 Dev-Centric** | Full control over execution, memory, and concurrency |
-| **🔄 Hot Reload** | Update logic and plugins live without restarting |
-| **🗃️ SQLite Sessions** | Atomic operations for consistent state and data handling |
+| Feature                | Description                                                        |
+| ---------------------- | ------------------------------------------------------------------ |
+| **⚡ Native Speed**    | Powered by C++ bindings for ultra-fast media handling              |
+| **🧩 Modular Design**  | Hot-reloadable handlers with clean isolation and runtime injection |
+| **🎯 Zero Overhead**   | Pure buffer-based memory flow for maximum throughput               |
+| **🧠 Dev-Centric**     | Full control over execution, memory, and concurrency               |
+| **🔄 Hot Reload**      | Update logic and plugins live without restarting                   |
+| **🗃️ SQLite Sessions** | Atomic operations for consistent state and data handling           |
 
 ---
 
@@ -100,10 +100,10 @@ Liora is more than just code—it's a living ecosystem built with love, collabor
 
 <div align="center">
 
-| Role | Name | Contact |
-|------|------|---------|
-| **Owner** | Naruya Izumi | [![Profile](https://img.shields.io/badge/Profile-FF69B4?style=flat-square&logo=linktree&logoColor=white)](https://linkbio.co/naruyaizumi) |
-| **Developer** | SXZnightmar | [![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?style=flat-square&logo=whatsapp&logoColor=white)](https://wa.me/6281398961382) |
+| Role          | Name         | Contact                                                                                                                                   |
+| ------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **Owner**     | Naruya Izumi | [![Profile](https://img.shields.io/badge/Profile-FF69B4?style=flat-square&logo=linktree&logoColor=white)](https://linkbio.co/naruyaizumi) |
+| **Developer** | SXZnightmar  | [![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?style=flat-square&logo=whatsapp&logoColor=white)](https://wa.me/6281398961382)  |
 
 </div>
 

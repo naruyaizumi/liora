@@ -315,8 +315,7 @@ const STMTS = {
     deleteCached: sqlite.query("DELETE FROM binary_cache WHERE table_name = ? AND jid = ?"),
     getRow: (table) => sqlite.query(`SELECT * FROM ${table} WHERE jid = ?`),
     insertRow: (table) => sqlite.query(`INSERT OR IGNORE INTO ${table} (jid) VALUES (?)`),
-    updateCol: (table, col) =>
-        sqlite.query(`UPDATE ${table} SET ${col} = ? WHERE jid = ?`),
+    updateCol: (table, col) => sqlite.query(`UPDATE ${table} SET ${col} = ? WHERE jid = ?`),
 };
 
 class CacheManager {
@@ -397,10 +396,7 @@ class CacheManager {
                     STMTS.setCached.run(table, jid, encoded, checksum);
                 } catch (e) {
                     if (logger) {
-                        logger.error(
-                            { table, jid, error: e.message },
-                            "Cache flush failed"
-                        );
+                        logger.error({ table, jid, error: e.message }, "Cache flush failed");
                     }
                 }
             }
@@ -483,10 +479,7 @@ class DataWrapper {
                         return true;
                     } catch (e) {
                         if (logger) {
-                            logger.error(
-                                { table, jid, error: e.message },
-                                "Delete failed"
-                            );
+                            logger.error({ table, jid, error: e.message }, "Delete failed");
                         }
                         return false;
                     }
@@ -505,8 +498,7 @@ class DataWrapper {
                     return false;
                 }
 
-                const normalizedValue =
-                    typeof value === "boolean" ? (value ? 1 : 0) : value;
+                const normalizedValue = typeof value === "boolean" ? (value ? 1 : 0) : value;
 
                 try {
                     const updateStmt = STMTS.updateCol(table, prop);
@@ -520,10 +512,7 @@ class DataWrapper {
                     return true;
                 } catch (e) {
                     if (logger) {
-                        logger.error(
-                            { table, prop, error: e.message },
-                            "Update failed"
-                        );
+                        logger.error({ table, prop, error: e.message }, "Update failed");
                     }
                     return false;
                 }

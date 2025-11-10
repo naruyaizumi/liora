@@ -13,19 +13,19 @@ function parseFlags(text) {
         method: "GET",
         body: null,
         contentType: null,
-        sendHeaders: {}
+        sendHeaders: {},
     };
 
     for (let i = 1; i < parts.length; i++) {
         const flag = parts[i];
         const lowerFlag = flag.toLowerCase();
-        
+
         if (lowerFlag === "--verbose" || lowerFlag === "-v") flags.verbose = true;
         if (lowerFlag === "--debug" || lowerFlag === "-d") flags.debug = true;
         if (lowerFlag === "--headers" || lowerFlag === "-h") flags.headers = true;
         if (lowerFlag === "--no-redirect") flags.redirect = "manual";
         if (lowerFlag === "--stream" || lowerFlag === "-s") flags.stream = true;
-        
+
         if (lowerFlag.startsWith("--timeout=")) {
             flags.timeout = parseInt(flag.split("=")[1]) || 30000;
         }
@@ -75,12 +75,13 @@ function formatHeaders(headers) {
 
 function getBrowserHeaders() {
     return {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9",
         "Accept-Encoding": "gzip, deflate, br",
         "Cache-Control": "no-cache",
-        "Pragma": "no-cache",
+        Pragma: "no-cache",
         "Sec-Ch-Ua": '"Not_A Brand";v="8", "Chromium";v="120"',
         "Sec-Ch-Ua-Mobile": "?0",
         "Sec-Ch-Ua-Platform": '"Windows"',
@@ -88,7 +89,7 @@ function getBrowserHeaders() {
         "Sec-Fetch-Mode": "navigate",
         "Sec-Fetch-Site": "none",
         "Sec-Fetch-User": "?1",
-        "Upgrade-Insecure-Requests": "1"
+        "Upgrade-Insecure-Requests": "1",
     };
 }
 
@@ -100,26 +101,26 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         if (!text || !/^https?:\/\//i.test(text.trim().split(/\s+/)[0])) {
             return m.reply(
                 `\`\`\`Invalid URL format.\n\n` +
-                `Usage:\n` +
-                `${usedPrefix + command} <url> [flags]\n\n` +
-                `Available Flags:\n` +
-                `  --verbose, -v  : Verbose output\n` +
-                `  --debug, -d  : Debug mode\n` +
-                `  --headers, -h  : Show response headers\n` +
-                `  --no-redirect  : Don't follow redirects\n` +
-                `  --stream, -s  : Use stream mode\n` +
-                `  --timeout=<ms>  : Set timeout (default: 30000)\n` +
-                `  --method=<METHOD>  : HTTP method (GET, POST, PUT, DELETE, PATCH)\n` +
-                `  --body=<data>  : Request body (for POST/PUT/PATCH)\n` +
-                `  --data=<data>  : Alias for --body\n` +
-                `  --json=<data>  : JSON body (auto sets Content-Type)\n` +
-                `  --content-type=<type>  : Set Content-Type header\n` +
-                `  --header=<key:value>  : Add custom header\n\n` +
-                `Examples:\n` +
-                `${usedPrefix + command} https://example --verbose\n` +
-                `${usedPrefix + command} https://api.com/users --method=POST --json={"name":"izumi"}\n` +
-                `${usedPrefix + command} https://api.com/data --method=PUT --body=test --content-type=text/plain\n` +
-                `${usedPrefix + command} https://api.com --header=Authorization:api_token\`\`\``
+                    `Usage:\n` +
+                    `${usedPrefix + command} <url> [flags]\n\n` +
+                    `Available Flags:\n` +
+                    `  --verbose, -v  : Verbose output\n` +
+                    `  --debug, -d  : Debug mode\n` +
+                    `  --headers, -h  : Show response headers\n` +
+                    `  --no-redirect  : Don't follow redirects\n` +
+                    `  --stream, -s  : Use stream mode\n` +
+                    `  --timeout=<ms>  : Set timeout (default: 30000)\n` +
+                    `  --method=<METHOD>  : HTTP method (GET, POST, PUT, DELETE, PATCH)\n` +
+                    `  --body=<data>  : Request body (for POST/PUT/PATCH)\n` +
+                    `  --data=<data>  : Alias for --body\n` +
+                    `  --json=<data>  : JSON body (auto sets Content-Type)\n` +
+                    `  --content-type=<type>  : Set Content-Type header\n` +
+                    `  --header=<key:value>  : Add custom header\n\n` +
+                    `Examples:\n` +
+                    `${usedPrefix + command} https://example --verbose\n` +
+                    `${usedPrefix + command} https://api.com/users --method=POST --json={"name":"izumi"}\n` +
+                    `${usedPrefix + command} https://api.com/data --method=PUT --body=test --content-type=text/plain\n` +
+                    `${usedPrefix + command} https://api.com --header=Authorization:api_token\`\`\``
             );
         }
 
@@ -133,7 +134,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             method: flags.method,
             headers: getBrowserHeaders(),
             redirect: flags.redirect,
-            signal: AbortSignal.timeout(flags.timeout)
+            signal: AbortSignal.timeout(flags.timeout),
         };
 
         if (Object.keys(flags.sendHeaders).length > 0) {
@@ -142,27 +143,38 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         }
 
         if (flags.body && ["POST", "PUT", "PATCH", "DELETE"].includes(flags.method)) {
-            if (flags.contentType === "application/json" || 
-                (flags.body.startsWith("{") || flags.body.startsWith("["))) {
+            if (
+                flags.contentType === "application/json" ||
+                flags.body.startsWith("{") ||
+                flags.body.startsWith("[")
+            ) {
                 try {
                     const parsed = JSON.parse(flags.body);
                     fetchOptions.body = JSON.stringify(parsed);
                     fetchOptions.headers["Content-Type"] = "application/json";
                     debugLog.push(`[BODY] Type: JSON`);
-                    debugLog.push(`[BODY] Content: ${fetchOptions.body.substring(0, 200)}${fetchOptions.body.length > 200 ? "..." : ""}`);
+                    debugLog.push(
+                        `[BODY] Content: ${fetchOptions.body.substring(0, 200)}${fetchOptions.body.length > 200 ? "..." : ""}`
+                    );
                 } catch {
                     fetchOptions.body = flags.body;
                     fetchOptions.headers["Content-Type"] = flags.contentType || "text/plain";
                     debugLog.push(`[BODY] Type: ${fetchOptions.headers["Content-Type"]}`);
-                    debugLog.push(`[BODY] Content: ${flags.body.substring(0, 200)}${flags.body.length > 200 ? "..." : ""}`);
+                    debugLog.push(
+                        `[BODY] Content: ${flags.body.substring(0, 200)}${flags.body.length > 200 ? "..." : ""}`
+                    );
                 }
             } else {
                 fetchOptions.body = flags.body;
                 if (flags.contentType) {
                     fetchOptions.headers["Content-Type"] = flags.contentType;
                 }
-                debugLog.push(`[BODY] Type: ${fetchOptions.headers["Content-Type"] || "text/plain"}`);
-                debugLog.push(`[BODY] Content: ${flags.body.substring(0, 200)}${flags.body.length > 200 ? "..." : ""}`);
+                debugLog.push(
+                    `[BODY] Type: ${fetchOptions.headers["Content-Type"] || "text/plain"}`
+                );
+                debugLog.push(
+                    `[BODY] Content: ${flags.body.substring(0, 200)}${flags.body.length > 200 ? "..." : ""}`
+                );
             }
         }
 
@@ -179,32 +191,32 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         debugLog.push(`[RESPONSE] Time: ${fetchTime}ms`);
         debugLog.push(`[RESPONSE] Type: ${response.type}`);
         debugLog.push(`[RESPONSE] Redirected: ${response.redirected}`);
-        
+
         if (response.redirected) {
             debugLog.push(`[RESPONSE] Final URL: ${response.url}`);
         }
 
         const contentType = response.headers.get("content-type") || "application/octet-stream";
         const contentLength = response.headers.get("content-length");
-        
+
         debugLog.push(`[HEADERS] Content-Type: ${contentType}`);
         debugLog.push(`[HEADERS] Content-Length: ${contentLength || "unknown"}`);
 
         if (!response.ok) {
             const errorText = await response.text();
             debugLog.push(`[ERROR] Response Body: ${errorText.substring(0, 500)}`);
-            
+
             let errorMsg = `\`\`\`HTTP Error ${response.status}\n\n`;
             errorMsg += `URL: ${url}\n`;
             errorMsg += `Status: ${response.status} ${response.statusText}\n`;
             errorMsg += `Time: ${fetchTime}ms\n`;
-            
+
             if (flags.verbose || flags.debug) {
                 errorMsg += `\nDebug Info:\n${debugLog.join("\n")}`;
             }
-            
+
             errorMsg += `\`\`\``;
-            
+
             return m.reply(errorMsg);
         }
 
@@ -236,7 +248,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                     debugLog.push(`[STREAM] Processing as FormData`);
                     const boundary = contentType.match(/boundary=([^;]+)/)?.[1];
                     processedData = await Bun.readableStreamToFormData(stream, boundary);
-                    buffer = Buffer.from(JSON.stringify(Object.fromEntries(processedData), null, 2));
+                    buffer = Buffer.from(
+                        JSON.stringify(Object.fromEntries(processedData), null, 2)
+                    );
                     mime = "application/json";
                     ext = "json";
                 } else {
@@ -285,12 +299,15 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         }
 
         const isJson = mime === "application/json" || mime.includes("json");
-        const isText = mime.startsWith("text/") || mime.includes("xml") || mime.includes("javascript");
+        const isText =
+            mime.startsWith("text/") || mime.includes("xml") || mime.includes("javascript");
         const isImage = mime.startsWith("image/");
         const isVideo = mime.startsWith("video/");
         const isAudio = mime.startsWith("audio/");
 
-        debugLog.push(`[CATEGORY] JSON: ${isJson}, Text: ${isText}, Image: ${isImage}, Video: ${isVideo}, Audio: ${isAudio}`);
+        debugLog.push(
+            `[CATEGORY] JSON: ${isJson}, Text: ${isText}, Image: ${isImage}, Video: ${isVideo}, Audio: ${isAudio}`
+        );
 
         const totalTime = Date.now() - startTime;
         let caption = `\`\`\`Fetch Success\n\n`;
@@ -301,11 +318,11 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         caption += `MIME: ${mime}\n`;
         caption += `Extension: .${ext}\n`;
         caption += `Time: ${totalTime}ms (Fetch: ${fetchTime}ms, Process: ${processingTime}ms)\n`;
-        
+
         if (flags.body) {
             caption += `Request Body: ${flags.body.substring(0, 100)}${flags.body.length > 100 ? "..." : ""}\n`;
         }
-        
+
         if (response.redirected) {
             caption += `Redirected: Yes\n`;
             caption += `Final URL: ${response.url}\n`;
@@ -324,7 +341,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         if (isJson || isText) {
             let preview = buffer.toString("utf-8");
-            
+
             if (isJson) {
                 try {
                     const parsed = JSON.parse(preview);
@@ -348,7 +365,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 document: buffer,
                 mimetype: mime,
                 fileName: fileName,
-                caption: caption
+                caption: caption,
             };
         } else if (isImage) {
             caption += `\`\`\``;
@@ -365,7 +382,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 document: buffer,
                 mimetype: mime,
                 fileName: fileName,
-                caption: caption
+                caption: caption,
             };
         }
 
@@ -375,11 +392,11 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         } catch (sendError) {
             debugLog.push(`[SEND] Error: ${sendError.message}`);
             debugLog.push(`[SEND] Attempting text fallback...`);
-            
+
             await conn.sendMessage(
                 m.chat,
-                { 
-                    text: `\`\`\`${caption}\n\nCould not send media. Error: ${sendError.message}\`\`\``
+                {
+                    text: `\`\`\`${caption}\n\nCould not send media. Error: ${sendError.message}\`\`\``,
                 },
                 { quoted: m }
             );
@@ -389,26 +406,25 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             const verboseMsg = `\`\`\`Verbose Output:\n\n${debugLog.join("\n")}\`\`\``;
             await conn.sendMessage(m.chat, { text: verboseMsg }, { quoted: m });
         }
-
     } catch (e) {
         debugLog.push(`[ERROR] ${e.name}: ${e.message}`);
         debugLog.push(`[ERROR] Stack: ${e.stack}`);
-        
+
         conn.logger?.error(e);
-        
+
         let errorMsg = `\`\`\`Error occurred\n\n`;
         errorMsg += `Type: ${e.name}\n`;
         errorMsg += `Message: ${e.message}\n`;
         errorMsg += `Time: ${Date.now() - startTime}ms\n\n`;
-        
+
         if (e.name === "TimeoutError") {
             errorMsg += `Request timeout. Try increasing timeout with --timeout=<ms>\n`;
         } else if (e.name === "TypeError" && e.message.includes("fetch")) {
             errorMsg += `Network error. Check URL and connection.\n`;
         }
-        
+
         errorMsg += `\nDebug Info:\n${debugLog.join("\n")}\`\`\``;
-        
+
         m.reply(errorMsg);
     } finally {
         await global.loading(m, conn, true);
@@ -418,6 +434,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 handler.help = ["fetch"];
 handler.tags = ["internet"];
 handler.command = /^(fetch|get)$/i;
-handler.owner = true
+handler.owner = true;
 
 export default handler;

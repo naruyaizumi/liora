@@ -22,23 +22,23 @@ const handler = async (m, { conn, isMods }) => {
     if (!isMods) return;
     const fullText = m.text || "";
     if (!fullText.startsWith("$ ")) return;
-    
+
     let cmdText = fullText.slice(2).trim();
     if (!cmdText) return;
-    
+
     const flags = {
         cwd: null,
         env: {},
         quiet: true,
         timeout: null,
     };
-    
+
     // Format: $ --cwd=/tmp --env=KEY=VALUE --timeout=5000 command
     const flagRegex = /^--(\w+)(?:=(.+?))?(?:\s+|$)/;
     while (flagRegex.test(cmdText)) {
         const match = cmdText.match(flagRegex);
         const [fullMatch, flag, value] = match;
-        
+
         if (flag === "cwd") {
             flags.cwd = value;
         } else if (flag === "env") {
@@ -49,10 +49,10 @@ const handler = async (m, { conn, isMods }) => {
         } else if (flag === "verbose") {
             flags.quiet = false;
         }
-        
+
         cmdText = cmdText.slice(fullMatch.length);
     }
-    
+
     if (blocked.some((cmd) => cmdText.startsWith(cmd))) {
         return conn.sendMessage(m.chat, {
             text: ["Command blocked for security reasons.", `> ${cmdText}`].join("\n"),
@@ -82,7 +82,7 @@ const handler = async (m, { conn, isMods }) => {
         const exitCode = result.exitCode;
         const output = stdout || stderr || "(no output)";
         const parts = [`$ ${cmdText}`, "────────────────────────────"];
-        
+
         if (output.trim()) {
             parts.push(output.trim());
         }
@@ -93,11 +93,11 @@ const handler = async (m, { conn, isMods }) => {
         if (flags.cwd) {
             footer.push(`📁 ${flags.cwd}`);
         }
-        
+
         if (footer.length > 0) {
             parts.push("", footer.join(" • "));
         }
-        
+
         resultText = parts.join("\n");
     } catch (err) {
         resultText = [

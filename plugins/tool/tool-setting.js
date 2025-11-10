@@ -24,7 +24,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         if (!args[0]) {
             return m.reply(
-`=== Feature Toggle ===
+                `=== Feature Toggle ===
 ${daftar}
 
 Usage:
@@ -34,7 +34,7 @@ Usage:
         }
 
         const enable = command === "on";
-        const indexes = args.map(n => parseInt(n)).filter(n => !isNaN(n));
+        const indexes = args.map((n) => parseInt(n)).filter((n) => !isNaN(n));
         if (!indexes.length) return m.reply("Invalid feature number.");
 
         const results = [];

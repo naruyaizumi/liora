@@ -14,7 +14,10 @@ let handler = async (m, { conn, noPrefix, isMods }) => {
     }
 
     let output;
-    if (Array.isArray(_return) && _return.every(item => item && typeof item === "object" && !Array.isArray(item))) {
+    if (
+        Array.isArray(_return) &&
+        _return.every((item) => item && typeof item === "object" && !Array.isArray(item))
+    ) {
         output = Bun.inspect.table(_return);
     } else if (typeof _return === "string") {
         output = _return;

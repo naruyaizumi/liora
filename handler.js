@@ -23,15 +23,15 @@ const safe = async (fn, fallback = undefined) => {
 
 const resolveLID = async (sender) => {
     let senderLid = sender;
-    
-    if (!senderLid || typeof senderLid !== 'string') {
+
+    if (!senderLid || typeof senderLid !== "string") {
         return null;
     }
-    
+
     if (senderLid.endsWith("@lid")) {
         return senderLid.split("@")[0];
     }
-    
+
     if (senderLid.endsWith("@s.whatsapp.net")) {
         const resolved = await safe(async () => {
             if (!conn.signalRepository?.lidMapping?.getLIDForPN) {
@@ -39,16 +39,16 @@ const resolveLID = async (sender) => {
             }
             return await conn.signalRepository.lidMapping.getLIDForPN(senderLid);
         });
-        
+
         if (resolved) {
-            return typeof resolved === "string" && resolved.endsWith("@lid") ?
-                resolved.split("@")[0] :
-                String(resolved).split("@")[0];
+            return typeof resolved === "string" && resolved.endsWith("@lid")
+                ? resolved.split("@")[0]
+                : String(resolved).split("@")[0];
         }
-        
+
         return senderLid.split("@")[0];
     }
-    
+
     return senderLid.split("@")[0];
 };
 
@@ -65,7 +65,7 @@ const commandQueue = new PQueue({
     interval: 1000,
     intervalCap: 5,
     timeout: 120000, // 2 minutes
-    throwOnTimeout: false
+    throwOnTimeout: false,
 });
 
 const userRateLimits = new Map();
@@ -76,28 +76,28 @@ const MAX_COMMANDS_PER_WINDOW = 5;
 const checkRateLimit = (userId) => {
     const now = Date.now();
     const userLimit = userRateLimits.get(userId);
-    
+
     if (!userLimit) {
         userRateLimits.set(userId, { count: 1, timestamp: now });
         return true;
     }
-    
+
     if (now - userLimit.timestamp > RATE_LIMIT_WINDOW) {
         userRateLimits.set(userId, { count: 1, timestamp: now });
         return true;
     }
-    
+
     if (userLimit.count >= MAX_COMMANDS_PER_WINDOW) {
         return false;
     }
-    
+
     userLimit.count++;
     return true;
 };
 
 const cleanupCaches = () => {
     const now = Date.now();
-    
+
     try {
         for (const [userId, data] of userRateLimits.entries()) {
             if (now - data.timestamp > RATE_LIMIT_WINDOW) {
@@ -120,35 +120,36 @@ const parsePrefix = (connPrefix, pluginPrefix) => {
 };
 
 const matchPrefix = (prefix, text) => {
-    if (!text || typeof text !== 'string') return [[[], new RegExp()]];
-    
+    if (!text || typeof text !== "string") return [[[], new RegExp()]];
+
     if (prefix instanceof RegExp) return [[prefix.exec(text), prefix]];
-    
+
     if (Array.isArray(prefix)) {
         return prefix.map((p) => {
             const re = p instanceof RegExp ? p : new RegExp(escapeRegExp(p));
             return [re.exec(text), re];
         });
     }
-    
+
     if (typeof prefix === "string") {
         const esc = new RegExp(`^${escapeRegExp(prefix)}`, "i");
         return [[esc.exec(text), esc]];
     }
-    
+
     return [[[], new RegExp()]];
 };
 
 const isCmdAccepted = (cmd, rule) => {
     if (rule instanceof RegExp) return rule.test(cmd);
-    if (Array.isArray(rule)) return rule.some((r) => (r instanceof RegExp ? r.test(cmd) : r === cmd));
+    if (Array.isArray(rule))
+        return rule.some((r) => (r instanceof RegExp ? r.test(cmd) : r === cmd));
     if (typeof rule === "string") return rule === cmd;
     return false;
 };
 
 const sendDenied = async (conn, m) => {
     const userName = await safe(() => conn.getName(m.sender), "unknown");
-    
+
     return conn.sendMessage(
         m.chat,
         {
@@ -158,7 +159,7 @@ const sendDenied = async (conn, m) => {
                 "└─────────────────────",
                 `User   : ${userName}`,
                 `Action : Blocked private access`,
-                `Group  : ${global.config.group || 'N/A'}`,
+                `Group  : ${global.config.group || "N/A"}`,
                 "─────────────────────",
                 "Join the group to continue using the bot.",
             ].join("\n"),
@@ -186,19 +187,23 @@ const traceError = async (connInstance, m, pluginRef, chatRef, e) => {
         }
         return t;
     };
-    
+
     const ts = new Date().toISOString().replace("T", " ").split(".")[0];
     const text = hideKeys(String(e?.stack || e));
-    
+
     const msg = [
         `┌─[${ts}]─[ERROR]`,
         `│ Plugin : ${pluginRef}`,
         `│ ChatID : ${chatRef}`,
         "├─TRACEBACK─────────────",
-        ...text.trim().split("\n").slice(0, 10).map((line) => `│ ${line}`),
+        ...text
+            .trim()
+            .split("\n")
+            .slice(0, 10)
+            .map((line) => `│ ${line}`),
         "└───────────────────────",
     ].join("\n");
-    
+
     return connInstance.sendMessage(
         m.chat,
         {
@@ -219,54 +224,55 @@ const traceError = async (connInstance, m, pluginRef, chatRef, e) => {
 
 export async function handler(chatUpdate) {
     if (!chatUpdate) return;
-    
+
     await safe(() => this.pushMessage(chatUpdate.messages));
     const last = chatUpdate.messages?.[chatUpdate.messages.length - 1];
     if (!last) return;
-    
+
     let m = smsg(this, last) || last;
     if (m.isBaileys || m.isChannel || (m.key?.fromMe && !m.isCommand)) return;
-    
+
     const settings = getSettings(this.user.jid);
     const senderLid = await resolveLID(m.sender);
-    
+
     if (!senderLid) {
-        this.logger?.warn('Could not resolve sender LID');
+        this.logger?.warn("Could not resolve sender LID");
         return;
     }
-    
+
     const devOwners = global.config.owner
         .filter(([id, , isDev]) => id && isDev)
         .map(([id]) => id.toString().split("@")[0]);
     const regOwners = global.config.owner
         .filter(([id, , isDev]) => id && !isDev)
         .map(([id]) => id.toString().split("@")[0]);
-    
+
     const isMods = devOwners.includes(senderLid);
     const isOwner = isMods || regOwners.includes(senderLid);
-    
-    const groupMetadata = m.isGroup ?
-        this.chats?.[m.chat]?.metadata || (await safe(() => this.groupMetadata(m.chat), null)) : {};
+
+    const groupMetadata = m.isGroup
+        ? this.chats?.[m.chat]?.metadata || (await safe(() => this.groupMetadata(m.chat), null))
+        : {};
     const participants = groupMetadata?.participants || [];
     const map = Object.fromEntries(participants.map((p) => [p.id, p]));
-    
+
     const senderId = m.sender;
     const botId = this.decodeJid(this.user.lid);
     const user = map[senderId] || {};
     const bot = map[botId] || {};
-    
+
     const isRAdmin = user?.admin === "superadmin";
     const isAdmin = isRAdmin || user?.admin === "admin";
     const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
-    
+
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), "./plugins");
-    
+
     for (const name in global.plugins) {
         const plugin = global.plugins[name];
         if (!plugin || plugin.disabled) continue;
-        
+
         const __filename = join(___dirname, name);
-        
+
         if (typeof plugin.all === "function") {
             await safe(() =>
                 plugin.all.call(this, m, {
@@ -277,7 +283,7 @@ export async function handler(chatUpdate) {
             );
         }
     }
-    
+
     if (!settings?.restrict) {
         const adminPlugins = Object.entries(global.plugins).filter(([, p]) =>
             p.tags?.includes("admin")
@@ -286,30 +292,30 @@ export async function handler(chatUpdate) {
             delete global.plugins[name];
         }
     }
-    
+
     const chat = global.db?.data?.chats?.[m.chat];
-    
+
     if (!m.fromMe && settings?.self && !isMods && !isOwner) return;
-    
+
     if (settings?.gconly && !m.isGroup && !isMods && !isOwner) {
         await sendDenied(this, m);
         return;
     }
-    
+
     if (!isAdmin && !isMods && !isOwner && chat?.adminOnly) return;
     if (!isMods && !isOwner && chat?.mute) return;
-    
+
     if (!isOwner && !isMods) {
         if (!checkRateLimit(m.sender)) {
             await safe(() => m.reply("Too many commands! Please slow down."));
             return;
         }
     }
-    
+
     if (settings?.autoread) {
         await safe(() => this.readMessages([m.key]));
     }
-    
+
     let targetPlugin = null;
     let targetName = null;
     let usedPrefix = null;
@@ -319,20 +325,20 @@ export async function handler(chatUpdate) {
     let _args = [];
     let text = "";
     let match = null;
-    
+
     for (const name in global.plugins) {
         const plugin = global.plugins[name];
         if (!plugin || plugin.disabled) continue;
         if (typeof plugin !== "function") continue;
         if (!plugin.command) continue;
-        
+
         const prefix = parsePrefix(this.prefix, plugin.customPrefix);
         const body = typeof m.text === "string" ? m.text : "";
         const prefixMatch = matchPrefix(prefix, body).find((p) => p[1]);
-        
+
         if (prefixMatch && prefixMatch[0]) {
             usedPrefix = (prefixMatch[0] || "")[0];
-            
+
             if (usedPrefix) {
                 noPrefix = body.replace(usedPrefix, "");
                 const parts = noPrefix.trim().split(/\s+/);
@@ -340,9 +346,9 @@ export async function handler(chatUpdate) {
                 const cmd = (rawCmd || "").toLowerCase();
                 _args = parts.slice(1);
                 text = _args.join(" ");
-                
+
                 const isAccept = isCmdAccepted(cmd, plugin.command);
-                
+
                 if (isAccept) {
                     targetPlugin = plugin;
                     targetName = name;
@@ -355,11 +361,11 @@ export async function handler(chatUpdate) {
             }
         }
     }
-    
+
     if (!targetPlugin) return;
-    
+
     const fail = targetPlugin.fail || global.dfail;
-    
+
     if (targetPlugin.mods && !isMods) {
         fail("mods", m, this);
         return;
@@ -384,7 +390,7 @@ export async function handler(chatUpdate) {
         fail("admin", m, this);
         return;
     }
-    
+
     const extra = {
         match,
         usedPrefix,
@@ -407,9 +413,9 @@ export async function handler(chatUpdate) {
         __dirname: ___dirname,
         __filename: join(___dirname, targetName),
     };
-    
+
     const connInstance = this;
-    
+
     await commandQueue.add(async () => {
         try {
             await targetPlugin.call(connInstance, m, extra);
@@ -420,7 +426,9 @@ export async function handler(chatUpdate) {
         } catch (e) {
             if (e?.message?.includes("Promise timed out") || e?.name === "TimeoutError") {
                 connInstance.logger?.warn(`Task "${targetName}" timed out`);
-                await safe(() => m.reply(`Task "${targetName}" timed out, please try again later.`));
+                await safe(() =>
+                    m.reply(`Task "${targetName}" timed out, please try again later.`)
+                );
             } else {
                 connInstance.logger?.error(e.message);
                 if (settings?.noerror) {
@@ -431,7 +439,7 @@ export async function handler(chatUpdate) {
             }
         }
     });
-    
+
     if (!getSettings(this.user.jid)?.noprint) {
         await safe(() => printMessage(m, this));
     }
@@ -448,23 +456,23 @@ try {
         ignoreInitial: true,
         awaitWriteFinish: {
             stabilityThreshold: 500,
-            pollInterval: 100
+            pollInterval: 100,
         },
-        atomic: true
+        atomic: true,
     });
-    
-    watcher.on('change', async () => {
+
+    watcher.on("change", async () => {
         if (reloadLock) {
             return;
         }
 
         reloadLock = true;
-        
+
         const instance = global.conn || conn;
         if (instance?.logger) {
             instance.logger.info("handler.js updated — reloading modules");
         }
-        
+
         try {
             if (global.reloadHandler) {
                 await global.reloadHandler();
@@ -481,7 +489,7 @@ try {
         }
     });
 
-    watcher.on('error', (error) => {
+    watcher.on("error", (error) => {
         const instance = global.conn || conn;
         if (instance?.logger) {
             instance.logger.error(error.message);
@@ -504,15 +512,14 @@ const cleanup = () => {
 
         commandQueue.clear();
         userRateLimits.clear();
-
     } catch (e) {
         console.error(e.message);
     }
 };
 
-process.once('SIGINT', cleanup);
-process.once('SIGTERM', cleanup);
-process.on('exit', (code) => {
+process.once("SIGINT", cleanup);
+process.once("SIGTERM", cleanup);
+process.on("exit", (code) => {
     cleanup();
     console.log(`Process exiting with code: ${code}`);
 });

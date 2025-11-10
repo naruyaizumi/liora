@@ -1,26 +1,26 @@
 name: CI
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main"]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    build:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
 
-      - name: Install Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+            - name: Install Bun
+              uses: oven-sh/setup-bun@v1
+              with:
+                  bun-version: latest
 
-      - name: Install Dependencies
-        run: bun install --no-save
+            - name: Install Dependencies
+              run: bun install --no-save
 
-      - name: Run Tests
-        run: bun test
+            - name: Run Tests
+              run: bun test

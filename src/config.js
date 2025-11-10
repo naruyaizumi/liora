@@ -44,13 +44,13 @@ global.config = {
         // Add other owners/moderators below, same format
         // ["LOCAL_IDENTIFIER", "Owner Name", false], // Example: owner without moderator rights
     ],
-    
+
     /** WhatsApp group invite link (optional) - used for bot's official group */
     group: "https://chat.whatsapp.com/FtMSX1EsGHTJeynu8QmjpG", // Full WhatsApp group invitation URL
-    
+
     /** Website URL (optional) - used for external links and branding */
     website: "https://linkbio.co/naruyaizumi", // Official website or link tree
-    
+
     /*============= PAIRING =============*/
     /**
      * Pairing configuration for bot connection
@@ -60,17 +60,17 @@ global.config = {
      *   - Example: "1234567890"
      */
     pairingNumber: "212691444178", // Bot's phone number used for WhatsApp pairing authentication
-    
+
     /*============== MESSAGES ==============*/
     /** Bot watermark/branding - appears in stickers and messages */
     watermark: "𝙇͢𝙞𝙤𝙧𝙖", // Bot's display name with special Unicode formatting
-    
+
     /** Author name - identifies the creator in various outputs */
     author: "𝙉͢𝙖𝙧𝙪𝙮𝙖 𝙄͢𝙯𝙪𝙢𝙞", // Creator's name with special Unicode formatting
-    
+
     /** Sticker pack name - appears when creating stickers */
     stickpack: "𝙇͢𝙞𝙤𝙧𝙖", // Pack name for stickers created by the bot
-    
+
     /** Sticker pack author/copyright - appears in sticker metadata */
     stickauth: "© 𝙉͢𝙖𝙧𝙪𝙮𝙖 𝙄͢𝙯𝙪𝙢𝙞", // Copyright notice for stickers
 };
@@ -78,7 +78,7 @@ global.config = {
 /**
  * Global loading indicator function
  * Simulates typing/composing status in WhatsApp to show bot activity
- * 
+ *
  * @param {Object} m - Message object containing chat context
  * @param {Object} conn - WhatsApp connection instance
  * @param {Boolean} back - If true, clears the status; if false, shows typing indicator
@@ -100,7 +100,7 @@ global.loading = async (m, conn, back = false) => {
 /**
  * Global default failure handler
  * Sends standardized error messages when command execution fails due to permission/context issues
- * 
+ *
  * @param {String} type - Type of failure (owner, mods, group, admin, botAdmin, restrict)
  * @param {Object} m - Message object containing chat context
  * @param {Object} conn - WhatsApp connection instance

@@ -26,7 +26,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                     .map(([num, { name, info }]) => `${num}. ${name} - ${info}`)
                     .join("\n");
                 return m.reply(
-`No media detected.
+                    `No media detected.
 Reply to a media file or select upload server by number.
 
 Available servers:
@@ -49,8 +49,7 @@ Tip: Reply to media and use .upload for automatic fallback!`
 
             const result = await uploaderAuto(buffer);
             if (result && result.success) {
-                const caption =
-`File uploaded successfully
+                const caption = `File uploaded successfully
 
 Server : ${result.provider}
 File Size : ${sizeDisplay}
@@ -61,7 +60,9 @@ ${result.url}`;
                 return conn.sendMessage(m.chat, { text: caption }, { quoted: m });
             }
 
-            return m.reply(`Upload failed on all servers.\nFile size: ${sizeDisplay}\nPlease try again later or use a different file.`);
+            return m.reply(
+                `Upload failed on all servers.\nFile size: ${sizeDisplay}\nPlease try again later or use a different file.`
+            );
         }
 
         if (isNaN(args[0]) || !uploaders[args[0]]) {
@@ -69,7 +70,7 @@ ${result.url}`;
                 .map(([num, { name, info }]) => `${num}. ${name} - ${info}`)
                 .join("\n");
             return m.reply(
-`Select upload server by number.
+                `Select upload server by number.
 Example: ${usedPrefix + command} 1
 
 Available servers:
@@ -107,8 +108,7 @@ Tip: Reply to media and use .upload for automatic fallback!`
 
             result = await uploaderAuto(buffer);
             if (result && result.success) {
-                const caption =
-`File uploaded successfully
+                const caption = `File uploaded successfully
 
 Primary Server : ${server.name} (Failed)
 Fallback Server : ${result.provider}
@@ -121,8 +121,7 @@ ${result.url}`;
         }
 
         if (result && typeof result === "object" && result.success) {
-            const caption =
-`File uploaded successfully
+            const caption = `File uploaded successfully
 
 Server : ${result.provider}
 File Size : ${sizeDisplay}
@@ -134,15 +133,16 @@ ${result.url}`;
         }
 
         if (result && typeof result === "string") {
-            const caption =
-`File uploaded successfully
+            const caption = `File uploaded successfully
 Server : ${server.name}
 File Size : ${sizeDisplay}
 URL: ${result}`;
             return conn.sendMessage(m.chat, { text: caption }, { quoted: m });
         }
 
-        return m.reply(`Upload failed on all servers.\nFile size: ${sizeDisplay}\nPlease try again later or use a different file.`);
+        return m.reply(
+            `Upload failed on all servers.\nFile size: ${sizeDisplay}\nPlease try again later or use a different file.`
+        );
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);

@@ -18,7 +18,7 @@ async function getOSPrettyName() {
         const info = Object.fromEntries(
             text
                 .split("\n")
-                .map(line => line.split("="))
+                .map((line) => line.split("="))
                 .filter(([key, val]) => key && val)
                 .map(([key, val]) => [key.trim(), val.replace(/"/g, "")])
         );
@@ -52,7 +52,11 @@ function getCPUInfo() {
 function getCPUUsageSinceBoot() {
     try {
         const result = Bun.spawnSync({
-            cmd: ["sh", "-c", "awk '/^cpu /{idle=$5; total=0; for(i=2;i<=NF;i++) total+=$i} END{print (total-idle)*100/total}' /proc/stat"],
+            cmd: [
+                "sh",
+                "-c",
+                "awk '/^cpu /{idle=$5; total=0; for(i=2;i<=NF;i++) total+=$i} END{print (total-idle)*100/total}' /proc/stat",
+            ],
             stdout: "pipe",
         });
         const usage = parseFloat(new TextDecoder().decode(result.stdout).trim());
@@ -74,7 +78,11 @@ async function getRAMInfo() {
         const swapUsed = meminfo["SwapTotal"] - meminfo["SwapFree"];
         const totalUsed = ramUsed + swapUsed;
         const totalMemory = meminfo["MemTotal"] + meminfo["SwapTotal"];
-        return { ramUsed: ramUsed * 1024, totalUsed: totalUsed * 1024, totalMemory: totalMemory * 1024 };
+        return {
+            ramUsed: ramUsed * 1024,
+            totalUsed: totalUsed * 1024,
+            totalMemory: totalMemory * 1024,
+        };
     } catch {
         return { ramUsed: 0, totalUsed: 0, totalMemory: 0 };
     }
@@ -82,7 +90,10 @@ async function getRAMInfo() {
 
 function getDiskUsage() {
     try {
-        const result = Bun.spawnSync({ cmd: ["df", "-k", "--output=size,used,target", "/"], stdout: "pipe" });
+        const result = Bun.spawnSync({
+            cmd: ["df", "-k", "--output=size,used,target", "/"],
+            stdout: "pipe",
+        });
         const output = new TextDecoder().decode(result.stdout).trim().split("\n")[1];
         const parts = output.trim().split(/\s+/);
         const size = parseInt(parts[0]) * 1024;

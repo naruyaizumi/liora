@@ -44,7 +44,7 @@ async function start(file) {
 
     const scriptPath = join(rootDir, "src", file);
     const args = [scriptPath, ...process.argv.slice(2)];
-    
+
     return new Promise((resolve) => {
         try {
             childProcess = Bun.spawn({

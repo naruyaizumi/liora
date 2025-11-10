@@ -1,0 +1,57 @@
+{
+    "name": "@cacheable/utils",
+    "version": "2.2.0",
+    "description": "Cacheable Utilities for Caching Libraries",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "require": "./dist/index.cjs",
+            "import": "./dist/index.js"
+        }
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jaredwray/cacheable.git",
+        "directory": "packages/utils"
+    },
+    "author": "Jared Wray <me@jaredwray.com>",
+    "license": "MIT",
+    "private": false,
+    "devDependencies": {
+        "@biomejs/biome": "^2.3.0",
+        "@faker-js/faker": "^10.1.0",
+        "@types/node": "^24.9.1",
+        "@vitest/coverage-v8": "^4.0.3",
+        "lru-cache": "^11.2.2",
+        "rimraf": "^6.0.1",
+        "tsup": "^8.5.0",
+        "typescript": "^5.9.3",
+        "vitest": "^4.0.3"
+    },
+    "keywords": [
+        "cacheable",
+        "caching",
+        "utilities",
+        "hashing",
+        "keyv",
+        "cache utils"
+    ],
+    "files": [
+        "dist",
+        "LICENSE"
+    ],
+    "dependencies": {
+        "keyv": "^5.5.3"
+    },
+    "scripts": {
+        "build": "rimraf ./dist && tsup src/index.ts --format cjs,esm --dts --clean",
+        "prepublish": "pnpm build",
+        "lint": "biome check --write --error-on-warnings",
+        "test": "pnpm lint && vitest run --coverage",
+        "test:ci": "biome check --error-on-warnings && vitest run --coverage",
+        "clean": "rimraf ./dist ./coverage ./node_modules"
+    }
+}
