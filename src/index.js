@@ -215,7 +215,7 @@ process.on("uncaughtException", (e) => {
     stopChild("SIGTERM").catch(() => process.exit(1));
 });
 
-process.on("unhandledRejection", (reason) => {
+process.on("unhandledRejection", (e) => {
     logger.error(e.message);
     stopChild("SIGTERM").catch(() => process.exit(1));
 });

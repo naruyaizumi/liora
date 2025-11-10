@@ -1,4 +1,3 @@
-/* global conn */
 import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { platform } from "process";

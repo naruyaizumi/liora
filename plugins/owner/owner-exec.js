@@ -33,7 +33,7 @@ const handler = async (m, { conn, isMods }) => {
         timeout: null,
     };
 
-    // Format: $ --cwd=/tmp --env=KEY=VALUE --timeout=5000 command
+    // $ --cwd=/tmp --env=KEY=VALUE --timeout=5000 command
     const flagRegex = /^--(\w+)(?:=(.+?))?(?:\s+|$)/;
     while (flagRegex.test(cmdText)) {
         const match = cmdText.match(flagRegex);
@@ -60,8 +60,6 @@ const handler = async (m, { conn, isMods }) => {
     }
 
     let resultText;
-    const startTime = Date.now();
-
     try {
         let command = $`bash -c ${cmdText}`;
         if (flags.cwd) {
