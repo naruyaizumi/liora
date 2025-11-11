@@ -160,7 +160,6 @@ async function IZUMI() {
         }
 
         await global.reloadHandler();
-        
     } catch (e) {
         logger.error(e.message);
         if (e?.stack) logger.error(e.stack);

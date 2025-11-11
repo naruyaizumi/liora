@@ -228,7 +228,7 @@ export async function handler(chatUpdate) {
         this.logger?.warn("Could not resolve sender LID");
         return;
     }
-    
+
     const regOwners = global.config.owner
         .filter(([id, , isDev]) => id && !isDev)
         .map(([id]) => id.toString().split("@")[0]);

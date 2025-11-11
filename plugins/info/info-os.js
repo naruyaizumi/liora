@@ -104,7 +104,7 @@ async function getRAMInfo() {
         const swapUsed = swapTotal - swapFree;
         const totalUsed = ramUsed + swapUsed;
         const totalMemory = ramTotal + swapTotal;
-        
+
         return {
             ramUsed,
             ramTotal,
@@ -194,8 +194,9 @@ async function getNetworkStats() {
     try {
         const text = await Bun.file("/proc/net/dev").text();
         const lines = text.split("\n").slice(2);
-        let totalRx = 0, totalTx = 0;
-        
+        let totalRx = 0,
+            totalTx = 0;
+
         for (const line of lines) {
             if (!line.trim()) continue;
             const parts = line.trim().split(/\s+/);
@@ -203,7 +204,7 @@ async function getNetworkStats() {
             totalRx += parseInt(parts[1]) || 0;
             totalTx += parseInt(parts[9]) || 0;
         }
-        
+
         return { rx: totalRx, tx: totalTx };
     } catch {
         return { rx: 0, tx: 0 };
@@ -258,7 +259,7 @@ function getWarnings(cpu, ram, disk, inodes, heap) {
     if (heap.external > 200 * 1024 * 1024) {
         warnings.push("⚠︎ INFO: High external memory (>200MB) - Lots of external buffers/data");
     }
-    
+
     return warnings;
 }
 
@@ -292,12 +293,13 @@ let handler = async (m, { conn }) => {
     const heapBar = makeBar(heap.rss, ram.ramTotal);
     const uptimeBot = formatTime(process.uptime());
     const uptimeSys = formatTime(os.uptime());
-    
+
     const warnings = getWarnings(cpu, ram, disk, inodes, heap);
-    const warningSection = warnings.length > 0 
-        ? `\n────────────────────────────\nSYSTEM WARNINGS\n${warnings.join("\n")}\n`
-        : "";
-    
+    const warningSection =
+        warnings.length > 0
+            ? `\n────────────────────────────\nSYSTEM WARNINGS\n${warnings.join("\n")}\n`
+            : "";
+
     const message = `
 \`\`\`
 ━━━ SYSTEM INFORMATION ━━━
