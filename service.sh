@@ -3,7 +3,7 @@
 set -e
 
 SERVICE_NAME="liora"
-SERVICEFILE="/etc/systemd/system/${SERVICENAME}.service"
+SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 HELPER_FILE="/usr/local/bin/bot"
 WORK_DIR="/root/liora"
 BUN_PATH="/root/.bun/bin/bun"
@@ -30,7 +30,7 @@ print_info() {
     echo -e "${YELLOW}${INFO_ICON} $1${NC}"
 }
 
-cleanuponerror() {
+cleanup_on_error() {
     print_error "Installation failed. Cleaning up..."
     systemctl stop "$SERVICE_NAME" 2>/dev/null || true
     systemctl disable "$SERVICE_NAME" 2>/dev/null || true
@@ -39,7 +39,7 @@ cleanuponerror() {
     exit 1
 }
 
-trap cleanuponerror ERR
+trap cleanup_on_error ERR
 
 print_info "Validating OS compatibility..."
 
@@ -49,24 +49,24 @@ if [ ! -f /etc/os-release ]; then
 fi
 
 OS_ID=$(grep '^ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
-OSVERSIONID=$(grep '^VERSION_ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
+OS_VERSION_ID=$(grep '^VERSION_ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
 
 if [[ "$OS_ID" != "ubuntu" && "$OS_ID" != "debian" ]]; then
     print_error "Unsupported OS: $OS_ID. Only Ubuntu 24.04 or Debian 12 are supported."
     exit 1
 fi
 
-if [[ "$OS_ID" == "ubuntu" && "$OSVERSIONID" != "24.04" ]]; then
-    print_error "Ubuntu version $OSVERSIONID is not supported. Use Ubuntu 24.04."
+if [[ "$OS_ID" == "ubuntu" && "$OS_VERSION_ID" != "24.04" ]]; then
+    print_error "Ubuntu version $OS_VERSION_ID is not supported. Use Ubuntu 24.04."
     exit 1
 fi
 
-if [[ "$OS_ID" == "debian" && "$OSVERSIONID" != "12" ]]; then
-    print_error "Debian version $OSVERSIONID is not supported. Use Debian 12."
+if [[ "$OS_ID" == "debian" && "$OS_VERSION_ID" != "12" ]]; then
+    print_error "Debian version $OS_VERSION_ID is not supported. Use Debian 12."
     exit 1
 fi
 
-print_success "OS validation passed: $OS_ID $OSVERSIONID"
+print_success "OS validation passed: $OS_ID $OS_VERSION_ID"
 
 print_info "Installing system dependencies..."
 
@@ -107,7 +107,7 @@ if [ -d "$HOME/.bun" ]; then
     export BUN_INSTALL="$HOME/.bun"
     export PATH="$BUN_INSTALL/bin:$PATH"
 else
-    curl -fsSL  | bash || {
+    curl -fsSL https://bun.sh/install | bash || {
         print_error "Failed to install Bun"
         exit 1
     }
@@ -125,8 +125,8 @@ if ! "$BUN_PATH" --version &>/dev/null; then
     exit 1
 fi
 
-BUNVERSION=$("$BUN_PATH" --version)
-print_success "Bun installed successfully (version: $BUNVERSION)"
+BUN_VERSION=$("$BUN_PATH" --version)
+print_success "Bun installed successfully (version: $BUN_VERSION)"
 
 print_info "Upgrading Bun to latest version..."
 "$BUN_PATH" upgrade || print_info "Bun upgrade failed, continuing with current version..."
@@ -147,7 +147,7 @@ if [ -d "$WORK_DIR" ]; then
     }
 else
     print_info "Cloning Liora repository..."
-    git clone  "$WORK_DIR" || {
+    git clone https://github.com/naruyaizumi/liora.git "$WORK_DIR" || {
         print_error "Failed to clone Liora repository"
         exit 1
     }
@@ -181,7 +181,7 @@ StartLimitBurst=5
 Type=simple
 User=root
 WorkingDirectory=${WORK_DIR}
-ExecStart=${BUN_PATH} ${WORKDIR}/src/index.js
+ExecStart=${BUN_PATH} ${WORK_DIR}/src/index.js
 KillMode=mixed
 KillSignal=SIGTERM
 FinalKillSignal=SIGKILL
@@ -191,10 +191,10 @@ RestartSec=5s
 Restart=always
 Environment=NODE_ENV=production
 Environment=TZ=${TIME_ZONE}
-Environment=UVTHREADPOOLSIZE=16
-Environment=UNDICICONNECTTIMEOUT=600000
-Environment=UNDICIREQUESTTIMEOUT=600000
-Environment=UNDICIHEADERSTIMEOUT=600000
+Environment=UV_THREADPOOL_SIZE=16
+Environment=UNDICI_CONNECT_TIMEOUT=600000
+Environment=UNDICI_REQUEST_TIMEOUT=600000
+Environment=UNDICI_HEADERS_TIMEOUT=600000
 Environment=PATH=${BUN_INSTALL}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 StandardOutput=journal
 StandardError=journal
@@ -234,55 +234,55 @@ print_success "Systemd service created and enabled"
 
 print_info "Creating helper CLI tool..."
 
-cat > "$HELPER_FILE" <<EOL
+cat > "$HELPER_FILE" <<'EOL'
 #!/bin/bash
 
-SERVICE="$SERVICE_NAME"
-WORKDIR="$WORKDIR"
-BUNPATH="$BUNPATH"
+SERVICE="liora"
+WORK_DIR="/root/liora"
+BUN_PATH="/root/.bun/bin/bun"
 
-Colors
+# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-case "\$1" in
+case "$1" in
     log)
-        echo -e "\${YELLOW}Showing logs (Ctrl+C to exit)...\${NC}"
-        journalctl -u \$SERVICE -f -o cat
+        echo -e "${YELLOW}Showing logs (Ctrl+C to exit)...${NC}"
+        journalctl -u $SERVICE -f -o cat
         ;;
     start)
-        echo -e "\${BLUE}Starting bot...\${NC}"
-        systemctl start \$SERVICE && echo -e "\${GREEN}Bot started!\${NC}" || echo -e "\${RED}Failed to start bot\${NC}"
+        echo -e "${BLUE}Starting bot...${NC}"
+        systemctl start $SERVICE && echo -e "${GREEN}Bot started!${NC}" || echo -e "${RED}Failed to start bot${NC}"
         ;;
     stop)
-        echo -e "\${BLUE}Stopping bot...\${NC}"
-        systemctl stop \$SERVICE && echo -e "\${GREEN}Bot stopped!\${NC}" || echo -e "\${RED}Failed to stop bot\${NC}"
+        echo -e "${BLUE}Stopping bot...${NC}"
+        systemctl stop $SERVICE && echo -e "${GREEN}Bot stopped!${NC}" || echo -e "${RED}Failed to stop bot${NC}"
         ;;
     restart)
-        echo -e "\${BLUE}Restarting bot...\${NC}"
-        systemctl restart \$SERVICE && echo -e "\${GREEN}Bot restarted!\${NC}" || echo -e "\${RED}Failed to restart bot\${NC}"
+        echo -e "${BLUE}Restarting bot...${NC}"
+        systemctl restart $SERVICE && echo -e "${GREEN}Bot restarted!${NC}" || echo -e "${RED}Failed to restart bot${NC}"
         ;;
     status)
-        systemctl status \$SERVICE --no-pager
+        systemctl status $SERVICE --no-pager
         ;;
     update)
-        echo -e "\${YELLOW}Updating Liora...\${NC}"
-        cd "\$WORK_DIR" || { echo -e "\${RED}Failed to change directory\${NC}"; exit 1; }
-        CURRENT_BRANCH=\$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
-        git stash push -m "Auto-stash before update \$(date +%Y%m%d_%H%M%S)" 2>/dev/null || true
-        git pull origin "\$CURRENT_BRANCH" || { echo -e "\${RED}Git pull failed\${NC}"; exit 1; }
-        "\$BUN_PATH" install || { echo -e "\${RED}Dependency installation failed\${NC}"; exit 1; }
-        systemctl restart \$SERVICE && echo -e "\${GREEN}Bot updated and restarted!\${NC}" || echo -e "\${RED}Failed to restart bot\${NC}"
+        echo -e "${YELLOW}Updating Liora...${NC}"
+        cd "$WORK_DIR" || { echo -e "${RED}Failed to change directory${NC}"; exit 1; }
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
+        git stash push -m "Auto-stash before update $(date +%Y%m%d_%H%M%S)" 2>/dev/null || true
+        git pull origin "$CURRENT_BRANCH" || { echo -e "${RED}Git pull failed${NC}"; exit 1; }
+        "$BUN_PATH" install || { echo -e "${RED}Dependency installation failed${NC}"; exit 1; }
+        systemctl restart $SERVICE && echo -e "${GREEN}Bot updated and restarted!${NC}" || echo -e "${RED}Failed to restart bot${NC}"
         ;;
     logs)
-        echo -e "\${YELLOW}Showing last 100 log lines...\${NC}"
-        journalctl -u \$SERVICE -n 100 --no-pager
+        echo -e "${YELLOW}Showing last 100 log lines...${NC}"
+        journalctl -u $SERVICE -n 100 --no-pager
         ;;
     *)
-        echo -e "\${BLUE}Liora Bot Management CLI\${NC}"
+        echo -e "${BLUE}Liora Bot Management CLI${NC}"
         echo ""
         echo "Usage: bot {start|stop|restart|log|logs|status|update}"
         echo ""
@@ -306,5 +306,5 @@ chmod +x "$HELPER_FILE" || {
 
 print_success "Helper CLI created"
 
-echo -e "${GREEN}Liora bot installed successfully!${NC}"
-echo -e "${YELLOW}To start the bot, run: bot restart${NC}"
+echo -e "${GREEN}${SUCCESS_ICON} Liora bot installed successfully!${NC}"
+echo -e "${YELLOW}${INFO_ICON} To start the bot, run: bot restart${NC}"
