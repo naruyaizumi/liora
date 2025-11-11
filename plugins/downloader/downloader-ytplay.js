@@ -1,4 +1,4 @@
-import { convert } from "#converter";
+import { convert } from "#add-on";
 import { play } from "#play";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {

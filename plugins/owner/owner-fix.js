@@ -123,7 +123,7 @@ class SessionCleaner {
 
             try {
                 db.exec("REINDEX idx_key_prefix");
-            } catch (e) {
+            } catch {
                 //
             }
 

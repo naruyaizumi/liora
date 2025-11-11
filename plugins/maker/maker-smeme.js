@@ -1,4 +1,4 @@
-import { sticker } from "#sticker";
+import { sticker } from "#add-on";
 import { uploader } from "../../lib/uploader.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {

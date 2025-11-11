@@ -1,4 +1,4 @@
-import { sticker } from "#sticker";
+import { sticker } from "#add-on";
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {

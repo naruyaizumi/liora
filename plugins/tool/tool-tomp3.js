@@ -1,4 +1,4 @@
-import { convert } from "#converter";
+import { convert } from "#add-on";
 
 let handler = async (m, { conn, usedPrefix, command }) => {
     try {

@@ -1,8 +1,7 @@
-let handler = async (m, { conn, isOwner }) => {
+let handler = async (m, { conn }) => {
     if (!m.quoted) return m.reply("No quoted message found to delete.");
     const { chat, id, participant, sender, fromMe } = m.quoted;
     if (m.isBaileys || m.fromMe) return true;
-    if (isOwner) return m.reply("Cannot delete message from Owner/Developer!");
     const quotedSender = participant || sender;
     if (!quotedSender) return m.reply("Could not identify quoted sender.");
     if (fromMe) return m.reply("Cannot delete messages sent by the bot.");
