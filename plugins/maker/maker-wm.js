@@ -1,4 +1,4 @@
-import { addExif, sticker } from "#sticker";
+import { addExif, sticker } from "#add-on";
 
 let handler = async (m, { conn, text }) => {
     const q = m.quoted ? m.quoted : m;
