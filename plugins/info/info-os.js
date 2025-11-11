@@ -165,7 +165,9 @@ async function getInodeUsage() {
                 available: parseInt(parts[3]) || 0,
             };
         }
-    } catch {/* naruyaizumi */}
+    } catch {
+        /* naruyaizumi */
+    }
     return { total: 0, used: 0, available: 0 };
 }
 
