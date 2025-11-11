@@ -6,7 +6,7 @@ import { Buffer } from "node:buffer";
 import pino from "pino";
 
 const logger = pino({
-    level: "info",
+    level: "debug",
     transport: {
         target: "pino-pretty",
         options: {
@@ -262,10 +262,6 @@ function ensureTable(tableName, schema) {
                 sqlite.exec(idx);
             }
         }
-
-        if (logger) {
-            logger.info({ module: "DB" }, `Created table: ${tableName}`);
-        }
     } else {
         const existingCols = sqlite
             .query(`PRAGMA table_info(${tableName})`)
@@ -276,9 +272,6 @@ function ensureTable(tableName, schema) {
             if (!existingCols.includes(col)) {
                 try {
                     sqlite.exec(`ALTER TABLE ${tableName} ADD COLUMN ${col} ${def}`);
-                    if (logger) {
-                        logger.info({ module: "DB" }, `Added column ${col} to ${tableName}`);
-                    }
                 } catch (e) {
                     if (logger) {
                         logger.error(

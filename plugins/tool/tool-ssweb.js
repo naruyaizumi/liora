@@ -1,5 +1,3 @@
-import { fetch } from "liora-lib";
-
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (args.length === 0) {
         return m.reply(
@@ -12,7 +10,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     await global.loading(m, conn);
 
     try {
-        const apiUrl = `https://api.nekolabs.web.id/tools/ssweb?url=${encodeURIComponent(url)}&device=desktop&fullPage=true`;
+        const apiUrl = `https://api.nekolabs.web.id/tools/ssweb?url=${encodeURIComponent(url)}&device=desktop&fullPage=false`;
 
         const res = await fetch(apiUrl);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);

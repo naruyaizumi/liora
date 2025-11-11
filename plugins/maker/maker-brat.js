@@ -1,4 +1,4 @@
-import { sticker, fetch } from "liora-lib";
+import { sticker } from "#sticker";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     try {

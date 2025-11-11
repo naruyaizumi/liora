@@ -1,14 +1,13 @@
 {
     "name": "liora",
-    "version": "7.4.11-beta",
-    "description": "Liora is a modern, modular, and efficient WhatsApp bot framework built on Baileys.",
+    "version": "7.4.11-beta.1",
+    "description": "Liora is a modern, modular, and efficient WhatsApp bot built on Baileys.",
     "keywords": [
         "whatsapp",
         "whatsapp-bot",
-        "bot-framework",
         "automation",
         "baileys",
-        "nodejs",
+        "bun",
         "liora",
         "naruyaizumi"
     ],
@@ -17,11 +16,7 @@
         "bun": ">=1.3.1"
     },
     "scripts": {
-        "start": "bun ./src/index.js",
-        "test": "bun ./src/test.js",
-        "format": "prettier --write .",
-        "lint": "eslint . --ext .js",
-        "lint:fix": "eslint . --ext .js --fix"
+        "start": "bun ./src/index.js"
     },
     "license": "Apache-2.0",
     "repository": {
@@ -43,7 +38,6 @@
         "chokidar": "^4.0.3",
         "eventemitter3": "^5.0.1",
         "file-type": "^21.0.0",
-        "liora-lib": "^1.3.8",
         "p-queue": "^9.0.0",
         "pino": "^10.1.0",
         "pino-pretty": "^13.1.2",
@@ -71,6 +65,8 @@
         "#global": "./src/global.js",
         "#message": "./lib/core/message.js",
         "#socket": "./lib/core/socket.js",
+        "#sticker": "./lib/ffi/sticker.js",
+        "#converter": "./lib/ffi/converter.js",
         "#sqlite-auth": "./lib/utils/sqlite/sqlite-auth.js",
         "#sqlite-keystore": "./lib/utils/sqlite/sqlite-keystore.js",
         "#loader-plugins": "./lib/core/loader-plugins.js",
@@ -99,7 +95,6 @@
     },
     "trustedDependencies": [
         "baileys",
-        "liora-lib",
         "protobufjs",
         "sharp"
     ]

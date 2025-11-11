@@ -1,4 +1,4 @@
-import { convert } from "liora-lib";
+import { convert } from "#converter";
 
 let handler = async (m, { conn, usedPrefix, command }) => {
     try {

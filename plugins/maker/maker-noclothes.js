@@ -1,5 +1,4 @@
-import { uploader3 } from "../../lib/uploader.js";
-import { fetch } from "liora-lib";
+import { uploader } from "../../lib/uploader.js";
 
 let handler = async (m, { conn }) => {
     try {
@@ -9,7 +8,7 @@ let handler = async (m, { conn }) => {
             return m.reply("Failed to download media or format not recognized.");
         await global.loading(m, conn);
         const media = await q.download();
-        const uploaded = await uploader3(media);
+        const uploaded = await uploader(media);
         if (!uploaded) throw new Error("Failed to upload image. Please try again later.");
 
         const api = `https://api.nekolabs.web.id/tools/convert/remove-clothes?imageUrl=${encodeURIComponent(uploaded)}`;

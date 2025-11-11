@@ -1,5 +1,5 @@
-import { sticker, fetch } from "liora-lib";
-import { uploader3 } from "../../lib/uploader.js";
+import { sticker } from "#sticker";
+import { uploader } from "../../lib/uploader.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     try {
@@ -16,7 +16,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         await global.loading(m, conn);
         const media = await q.download();
-        const uploaded = await uploader3(media);
+        const uploaded = await uploader(media);
         if (!uploaded) throw new Error("Failed to upload image.");
 
         const api = `https://api.nekolabs.web.id/canvas/meme?imageUrl=${encodeURIComponent(uploaded)}&textT=${encodeURIComponent(textT)}&textB=${encodeURIComponent(textB)}`;

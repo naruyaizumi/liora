@@ -18,8 +18,8 @@ const blocked = [
     ">:(){ :|: & };:",
 ];
 
-const handler = async (m, { conn, isMods }) => {
-    if (!isMods) return;
+const handler = async (m, { conn, isOwner }) => {
+    if (!isOwner) return;
     const fullText = m.text || "";
     if (!fullText.startsWith("$ ")) return;
 

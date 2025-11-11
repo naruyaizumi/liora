@@ -2,7 +2,7 @@ smol = false
 logLevel = "error"
 
 [console]
-depth = 5
+depth = 10
 
 [loader]
 ".js" = "js"

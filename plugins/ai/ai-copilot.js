@@ -1,5 +1,3 @@
-import { fetch } from "liora-lib";
-
 let handler = async (m, { conn, text }) => {
     if (!text || typeof text !== "string") {
         return m.reply("Please provide a valid query for Copilot AI.");

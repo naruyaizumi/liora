@@ -1,5 +1,4 @@
-import { uploader3 } from "../../lib/uploader.js";
-import { fetch } from "liora-lib";
+import { uploader } from "../../lib/uploader.js";
 
 let handler = async (m, { conn, args, command, usedPrefix }) => {
     try {
@@ -16,7 +15,7 @@ let handler = async (m, { conn, args, command, usedPrefix }) => {
 
         await global.loading(m, conn);
         const media = await q.download();
-        const uploaded = await uploader3(media);
+        const uploaded = await uploader(media);
         if (!uploaded) throw new Error("Failed to upload image. Please try again later.");
 
         const version = args[0];

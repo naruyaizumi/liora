@@ -1,4 +1,4 @@
-import { fetch, addExif, sticker } from "liora-lib";
+import { addExif, sticker } from "#sticker";
 
 let handler = async (m, { conn, text }) => {
     const q = m.quoted ? m.quoted : m;

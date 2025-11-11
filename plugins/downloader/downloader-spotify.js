@@ -1,4 +1,4 @@
-import { fetch, convert } from "liora-lib";
+import { convert } from "#converter";
 import { spotify } from "#spotify";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {

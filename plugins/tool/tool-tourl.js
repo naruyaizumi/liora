@@ -1,14 +1,14 @@
 import {
-    uploader,
+    uploader1,
     uploader2,
     uploader3,
     uploader4,
     uploader5,
-    uploaderAuto,
+    uploader,
 } from "../../lib/uploader.js";
 
 const uploaders = {
-    1: { name: "Catbox.moe", fn: uploader, info: "Permanent hosting" },
+    1: { name: "Catbox.moe", fn: uploader1, info: "Permanent hosting" },
     2: { name: "Uguu.se", fn: uploader2, info: "48 hours retention" },
     3: { name: "Qu.ax", fn: uploader3, info: "Temporary hosting" },
     4: { name: "Put.icu", fn: uploader4, info: "Direct upload" },
@@ -47,7 +47,7 @@ Tip: Reply to media and use .upload for automatic fallback!`
             const sizeMB = (buffer.length / 1024 / 1024).toFixed(2);
             const sizeDisplay = buffer.length > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
 
-            const result = await uploaderAuto(buffer);
+            const result = await uploader(buffer);
             if (result && result.success) {
                 const caption = `File uploaded successfully
 
@@ -106,7 +106,7 @@ Tip: Reply to media and use .upload for automatic fallback!`
                 { quoted: m }
             );
 
-            result = await uploaderAuto(buffer);
+            result = await uploader(buffer);
             if (result && result.success) {
                 const caption = `File uploaded successfully
 

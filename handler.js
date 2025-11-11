@@ -64,7 +64,7 @@ const commandQueue = new PQueue({
     concurrency: 3,
     interval: 1000,
     intervalCap: 5,
-    timeout: 120000, // 2 minutes
+    timeout: 500000,
     throwOnTimeout: false,
 });
 
@@ -178,19 +178,8 @@ const sendDenied = async (conn, m) => {
 };
 
 const traceError = async (connInstance, m, pluginRef, chatRef, e) => {
-    const hideKeys = (s) => {
-        if (!s) return s;
-        let t = String(s);
-        for (const key of Object.values(global.config.APIKeys || {})) {
-            if (!key) continue;
-            t = t.replace(new RegExp(escapeRegExp(key), "g"), "#HIDDEN#");
-        }
-        return t;
-    };
-
     const ts = new Date().toISOString().replace("T", " ").split(".")[0];
-    const text = hideKeys(String(e?.stack || e));
-
+    const text = String(e?.stack || e);
     const msg = [
         `┌─[${ts}]─[ERROR]`,
         `│ Plugin : ${pluginRef}`,
@@ -239,32 +228,23 @@ export async function handler(chatUpdate) {
         this.logger?.warn("Could not resolve sender LID");
         return;
     }
-
-    const devOwners = global.config.owner
-        .filter(([id, , isDev]) => id && isDev)
-        .map(([id]) => id.toString().split("@")[0]);
+    
     const regOwners = global.config.owner
         .filter(([id, , isDev]) => id && !isDev)
         .map(([id]) => id.toString().split("@")[0]);
-
-    const isMods = devOwners.includes(senderLid);
-    const isOwner = isMods || regOwners.includes(senderLid);
-
+    const isOwner = regOwners.includes(senderLid);
     const groupMetadata = m.isGroup
         ? this.chats?.[m.chat]?.metadata || (await safe(() => this.groupMetadata(m.chat), null))
         : {};
     const participants = groupMetadata?.participants || [];
     const map = Object.fromEntries(participants.map((p) => [p.id, p]));
-
     const senderId = m.sender;
     const botId = this.decodeJid(this.user.lid);
     const user = map[senderId] || {};
     const bot = map[botId] || {};
-
     const isRAdmin = user?.admin === "superadmin";
     const isAdmin = isRAdmin || user?.admin === "admin";
     const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
-
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), "./plugins");
 
     for (const name in global.plugins) {
@@ -295,17 +275,17 @@ export async function handler(chatUpdate) {
 
     const chat = global.db?.data?.chats?.[m.chat];
 
-    if (!m.fromMe && settings?.self && !isMods && !isOwner) return;
+    if (!m.fromMe && settings?.self && !isOwner) return;
 
-    if (settings?.gconly && !m.isGroup && !isMods && !isOwner) {
+    if (settings?.gconly && !m.isGroup && !isOwner) {
         await sendDenied(this, m);
         return;
     }
 
-    if (!isAdmin && !isMods && !isOwner && chat?.adminOnly) return;
-    if (!isMods && !isOwner && chat?.mute) return;
+    if (!isAdmin && !isOwner && chat?.adminOnly) return;
+    if (!isOwner && chat?.mute) return;
 
-    if (!isOwner && !isMods) {
+    if (!isOwner) {
         if (!checkRateLimit(m.sender)) {
             await safe(() => m.reply("Too many commands! Please slow down."));
             return;
@@ -366,10 +346,6 @@ export async function handler(chatUpdate) {
 
     const fail = targetPlugin.fail || global.dfail;
 
-    if (targetPlugin.mods && !isMods) {
-        fail("mods", m, this);
-        return;
-    }
     if (targetPlugin.owner && !isOwner) {
         fail("owner", m, this);
         return;
@@ -404,7 +380,6 @@ export async function handler(chatUpdate) {
         groupMetadata,
         user,
         bot,
-        isMods,
         isOwner,
         isRAdmin,
         isAdmin,

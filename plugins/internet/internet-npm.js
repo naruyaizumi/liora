@@ -1,5 +1,3 @@
-import { fetch } from "liora-lib";
-
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
         if (!text) {

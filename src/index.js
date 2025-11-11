@@ -9,7 +9,7 @@ const logger = pino({
         target: "pino-pretty",
         options: {
             colorize: true,
-            translateTime: "HH:MM:ss",
+            translateTime: "HH:MM",
             ignore: "pid,hostname",
         },
     },
@@ -21,7 +21,6 @@ async function ensureDirs() {
     const dbDir = join(rootDir, "database");
     try {
         await mkdir(dbDir, { recursive: true });
-        logger.debug(`Database directory ensured: ${dbDir}`);
     } catch (e) {
         logger.error(e.message);
         throw e;
@@ -66,32 +65,12 @@ async function start(file) {
                                     signalCode ? ` (signal: ${signalCode})` : ""
                                 }`
                             );
-                        } else {
-                            logger.info("Child process exited normally");
                         }
                     }
-
                     childProcess = null;
                     resolve(exitCode || 0);
                 },
             });
-
-            logger.info(`Child process started (PID: ${childProcess.pid})`);
-
-            if (childProcess.resourceUsage) {
-                childProcess.exited.then(() => {
-                    try {
-                        const usage = childProcess.resourceUsage();
-                        logger.debug(
-                            `Process stats - Max RSS: ${Math.round(usage.maxRSS / 1024 / 1024)}MB, ` +
-                                `CPU (user): ${Math.round(usage.cpuTime.user / 1000)}ms, ` +
-                                `CPU (system): ${Math.round(usage.cpuTime.system / 1000)}ms`
-                        );
-                    } catch {
-                        // Ignore errors when getting resource usage
-                    }
-                });
-            }
         } catch (e) {
             logger.error(e.message);
             childProcess = null;
@@ -105,7 +84,6 @@ async function stopChild(signal = "SIGTERM") {
     shuttingDown = true;
 
     if (!childProcess) {
-        logger.debug("No child process to stop");
         return cleanup();
     }
 
@@ -126,20 +104,11 @@ async function stopChild(signal = "SIGTERM") {
 
     try {
         childProcess.kill(signal);
-        logger.info(`Sent ${signal} to child process (PID: ${childProcess.pid})`);
-
         await Promise.race([
             childProcess.exited,
             new Promise((resolve) => setTimeout(resolve, 10000)),
         ]);
-
         clearTimeout(timeout);
-
-        if (childProcess) {
-            logger.warn("Child process still running after max wait time");
-        } else {
-            logger.info("Child process exited gracefully");
-        }
     } catch (e) {
         logger.error(e.message);
     } finally {
@@ -150,8 +119,6 @@ async function stopChild(signal = "SIGTERM") {
 }
 
 function cleanup() {
-    logger.info("Cleanup complete, exiting...");
-
     setTimeout(() => {
         process.exit(0);
     }, 100);
@@ -194,7 +161,6 @@ async function supervise() {
 }
 
 process.once("SIGINT", () => {
-    logger.info("Received SIGINT (Ctrl+C)");
     stopChild("SIGINT").catch((e) => {
         logger.error(e.message);
         process.exit(1);
@@ -202,7 +168,6 @@ process.once("SIGINT", () => {
 });
 
 process.once("SIGTERM", () => {
-    logger.info("Received SIGTERM");
     stopChild("SIGTERM").catch((e) => {
         logger.error(e.message);
         process.exit(1);
@@ -210,7 +175,7 @@ process.once("SIGTERM", () => {
 });
 
 process.on("uncaughtException", (e) => {
-    logger.error(`Uncaught exception: ${e.message}`);
+    logger.error(e.message);
     if (e.stack) logger.error(e.stack);
     stopChild("SIGTERM").catch(() => process.exit(1));
 });
@@ -219,9 +184,6 @@ process.on("unhandledRejection", (e) => {
     logger.error(e.message);
     stopChild("SIGTERM").catch(() => process.exit(1));
 });
-
-logger.info(`Liora Process Manager starting in ${rootDir}`);
-logger.info(`Node: ${process.version} | Bun: ${Bun.version}`);
 
 supervise().catch((e) => {
     logger.fatal(e.message);

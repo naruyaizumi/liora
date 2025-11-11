@@ -4,7 +4,7 @@
 node_modules/
 .cache/
 .tmp/
-pnpm-lock.yaml
+bun.lock
 
 # -------------------------
 # DATABASE / DATA FILES

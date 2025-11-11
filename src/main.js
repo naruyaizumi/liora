@@ -15,8 +15,7 @@ import { CleanupManager, registerProcessHandlers } from "#cleaner";
 import { EventManager, setupMaintenanceIntervals } from "#event";
 
 const logger = pino({
-    level: "debug",
-    base: { module: "MAIN INITIALIZER" },
+    level: "info",
     transport: {
         target: "pino-pretty",
         options: {
@@ -109,12 +108,10 @@ async function setupPairingCode(conn) {
 async function IZUMI() {
     const { state, saveCreds } = await SQLiteAuth();
     const { version: baileysVersion } = await fetchLatestBaileysVersion();
-    logger.info(`[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}`);
-
     const connectionOptions = {
         version: baileysVersion,
         logger: pino({
-            level: "error",
+            level: "fatal",
             base: { module: "BAILEYS" },
             transport: {
                 target: "pino-pretty",
@@ -163,8 +160,7 @@ async function IZUMI() {
         }
 
         await global.reloadHandler();
-
-        logger.info("Bot initialized successfully");
+        
     } catch (e) {
         logger.error(e.message);
         if (e?.stack) logger.error(e.stack);
