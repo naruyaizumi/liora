@@ -147,11 +147,11 @@ if [ -d "$WORK_DIR" ]; then
     }
 else
     print_info "Cloning Liora repository..."
-    git clone https://github.com/naruyaizumi/liora.git "$WORK_DIR" || {
+    git clone https://github.com/naruyaizumi/liora.git || {
         print_error "Failed to clone Liora repository"
         exit 1
     }
-    cd "$WORK_DIR" || {
+    cd "liora" || {
         print_error "Failed to change to Liora directory"
         exit 1
     }
