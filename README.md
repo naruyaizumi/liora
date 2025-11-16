@@ -10,9 +10,6 @@
   <a href="https://github.com/naruyaizumi/liora/stargazers">
     <img src="https://img.shields.io/github/stars/naruyaizumi/liora?style=for-the-badge&logo=starship&color=C9CBFF&logoColor=D9E0EE&labelColor=302D41" alt="stars">
   </a>
-  <a href="https://github.com/naruyaizumi/liora/issues">
-    <img src="https://img.shields.io/github/issues/naruyaizumi/liora?style=for-the-badge&logo=gitbook&color=B5E8E0&logoColor=D9E0EE&labelColor=302D41" alt="issues">
-  </a>
   <a href="https://github.com/naruyaizumi/liora/network/members">
     <img src="https://img.shields.io/github/forks/naruyaizumi/liora?style=for-the-badge&logo=git&color=F2CDCD&logoColor=D9E0EE&labelColor=302D41" alt="forks">
   </a>
@@ -31,12 +28,6 @@
   <a href="https://github.com/naruyaizumi/liora/commits/main">
     <img src="https://img.shields.io/github/last-commit/naruyaizumi/liora?style=for-the-badge&logo=git&color=4ECDC4&logoColor=white" alt="last commit">
   </a>
-  <a href="https://github.com/naruyaizumi/liora/graphs/contributors">
-    <img src="https://img.shields.io/github/contributors/naruyaizumi/liora?style=for-the-badge&logo=github&color=95E1D3&logoColor=white" alt="contributors">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora/pulse">
-    <img src="https://img.shields.io/github/commit-activity/m/naruyaizumi/liora?style=for-the-badge&logo=github&color=F38181&logoColor=white" alt="activity">
-  </a>
   <a href="https://github.com/naruyaizumi/liora/pulls">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=for-the-badge&logo=github-actions&logoColor=white" alt="prs">
   </a>
@@ -44,7 +35,6 @@
     <img src="https://img.shields.io/badge/WhatsApp-Channel-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="whatsapp">
   </a>
   <img src="https://img.shields.io/badge/ESM-Modules-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="esm">
-  <img src="https://img.shields.io/badge/Baileys-7.0.0_rc.6-00D9FF?style=for-the-badge&logo=whatsapp&logoColor=white" alt="baileys">
   <img src="https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="sqlite">
   <img src="https://img.shields.io/badge/Hot-Reload-FF4154?style=for-the-badge&logo=hotjar&logoColor=white" alt="hot reload">
 </p>
@@ -280,10 +270,6 @@ bun start
 
 ## 📁 Project Structure
 
-<table>
-<tr>
-<td width="50%">
-
 ```
 liora/
 ├── 📁 src/
@@ -332,10 +318,6 @@ liora/
 - 👑 Owner Commands
 - ℹ️ Information
 - 🌐 Internet Tools
-
-</td>
-</tr>
-</table>
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
@@ -551,10 +533,6 @@ export default handler;
 ⚡ PERFORMANCE METRICS ⚡
 ```
 
-<table>
-<tr>
-<td align="center" width="50%">
-
 ### 📈 Bot Statistics
 
 | Metric | Value | Status |
@@ -566,14 +544,9 @@ export default handler;
 | **Hot Reload** | Yes | ✅ Supported |
 | **Native Modules** | 2 | ✅ Optimized |
 
-</td>
-<td align="center" width="50%">
-
 ### 🎯 Technology Stack
 
 <img src="https://skillicons.dev/icons?i=bun,js,nodejs,cpp,sqlite,git,github,docker,linux,cmake" />
-
-<br><br>
 
 **Runtime Performance**
 ```yaml
@@ -582,10 +555,6 @@ Startup: < 3 seconds
 Memory: Optimized
 CPU: Efficient
 ```
-
-</td>
-</tr>
-</table>
 
 <img src="https://github-profile-trophy.vercel.app/?username=naruyaizumi&theme=tokyonight&no-frame=true&row=1&column=7" width="100%" />
 
@@ -609,10 +578,6 @@ All types of contributions are valuable - bug fixes, features, docs, or feedback
 
 <br>
 
-<table>
-<tr>
-<td width="50%" valign="top">
-
 ### 📝 How to Contribute
 
 ```bash
@@ -629,9 +594,6 @@ git checkout -b feature/YourFeature
 # - Update docs
 ```
 
-</td>
-<td width="50%" valign="top">
-
 ### 🚀 Submit Changes
 
 ```bash
@@ -644,10 +606,6 @@ git push origin feature/YourFeature
 # - Link issues
 # - Wait for review
 ```
-
-</td>
-</tr>
-</table>
 
 <div align="center">
 
@@ -776,73 +734,6 @@ Special thanks to AI assistants that helped in development:
   </a>
   <a href="https://claude.ai/">
     <img src="https://img.shields.io/badge/Claude-181818?style=for-the-badge&logo=anthropic&logoColor=white" alt="Claude" />
-  </a>
-</p>
-
-### 🌐 API Providers & Services
-
-Huge appreciation to all free public REST API providers:
-
-<table>
-<tr>
-<td valign="top" width="33%">
-
-**📱 Social Media APIs**
-- Instagram Downloader
-- TikTok Video API
-- Twitter/X Media API
-- Threads API
-- YouTube Data API
-
-</td>
-<td valign="top" width="33%">
-
-**🎵 Media & Entertainment**
-- Spotify Metadata
-- YouTube Music
-- SoundCloud
-- Apple Music API
-- Deezer API
-
-</td>
-<td valign="top" width="33%">
-
-**🖼️ Image Processing**
-- Remini Enhancement
-- Remove.bg API
-- Image Optimization
-- Format Converters
-- Filter Services
-
-</td>
-</tr>
-</table>
-
-### ✨ Design & Visualization
-
-Beautiful design elements powered by:
-
-<p align="left">
-  <a href="https://github.com/kyechan99/capsule-render">
-    <img src="https://img.shields.io/badge/Capsule_Render-FF6B6B?style=for-the-badge&logo=vercel&logoColor=white" alt="Capsule Render" />
-  </a>
-  <a href="https://github.com/DenverCoder1/readme-typing-svg">
-    <img src="https://img.shields.io/badge/Typing_SVG-4ECDC4?style=for-the-badge&logo=svg&logoColor=white" alt="Typing SVG" />
-  </a>
-  <a href="https://github.com/DenverCoder1/github-readme-streak-stats">
-    <img src="https://img.shields.io/badge/Streak_Stats-F38181?style=for-the-badge&logo=github&logoColor=white" alt="Streak Stats" />
-  </a>
-  <a href="https://github.com/ashutosh00710/github-readme-activity-graph">
-    <img src="https://img.shields.io/badge/Activity_Graph-95E1D3?style=for-the-badge&logo=github&logoColor=white" alt="Activity Graph" />
-  </a>
-  <a href="https://contrib.rocks">
-    <img src="https://img.shields.io/badge/Contrib_Rocks-DDB6F2?style=for-the-badge&logo=git&logoColor=white" alt="Contrib Rocks" />
-  </a>
-  <a href="https://github.com/ryo-ma/github-profile-trophy">
-    <img src="https://img.shields.io/badge/Profile_Trophy-C9CBFF?style=for-the-badge&logo=github&logoColor=white" alt="Profile Trophy" />
-  </a>
-  <a href="https://skillicons.dev">
-    <img src="https://img.shields.io/badge/Skill_Icons-B5E8E0?style=for-the-badge&logo=iconify&logoColor=white" alt="Skill Icons" />
   </a>
 </p>
 
