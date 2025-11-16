@@ -26,6 +26,6 @@ let handler = async (m, { args, usedPrefix, command, conn }) => {
 handler.help = ["deletefile"];
 handler.tags = ["owner"];
 handler.command = /^(df|deletefile)$/i;
-handler.mods = true;
+handler.owner = true;
 
 export default handler;

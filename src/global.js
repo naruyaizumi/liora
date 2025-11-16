@@ -1,6 +1,4 @@
-import path from "path";
-import { fileURLToPath, pathToFileURL } from "url";
-import { platform } from "process";
+import { join } from "path";
 import { Database } from "bun:sqlite";
 import { Buffer } from "node:buffer";
 import pino from "pino";
@@ -17,22 +15,9 @@ const logger = pino({
     },
 });
 
-global.__filename = function filename(pathURL = import.meta.url, rmPrefix = platform !== "win32") {
-    return rmPrefix
-        ? /file:\/\/\//.test(pathURL)
-            ? fileURLToPath(pathURL)
-            : pathURL
-        : pathToFileURL(pathURL).toString();
-};
-
-global.__dirname = function dirname(pathURL) {
-    return path.dirname(global.__filename(pathURL, true));
-};
-
 global.timestamp = { start: new Date() };
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = path.join(__dirname, "../database/database.db");
+const DB_PATH = join(process.cwd(), "database/database.db");
 
 const TYPE_NULL = 0x00;
 const TYPE_BOOLEAN_TRUE = 0x01;
@@ -275,7 +260,7 @@ function ensureTable(tableName, schema) {
                 } catch (e) {
                     if (logger) {
                         logger.error(
-                            { module: "DB", column: col, error: e.message },
+                            { column: col, error: e.message },
                             `Failed to add column`
                         );
                     }

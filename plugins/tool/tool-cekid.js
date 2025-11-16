@@ -1,7 +1,10 @@
+import pkg from 'baileys_helper';
+const { sendInteractiveMessage } = pkg;
+
 let handler = async (m, { conn, args, usedPrefix }) => {
     try {
         const text = args[0];
-        if (!text) return m.reply(`Usage: ${usedPrefix}cekid <link grup / channel WhatsApp>`);
+        if (!text) return m.reply(`Usage: ${usedPrefix}cekid <WhatsApp group or channel link>`);
 
         let url;
         try {
@@ -27,7 +30,20 @@ let handler = async (m, { conn, args, usedPrefix }) => {
             return m.reply("Unsupported link. Provide a valid group or channel link.");
         }
 
-        m.reply(id);
+        await sendInteractiveMessage(conn, m.chat, {
+            text: `Target ID: ${id}`,
+            footer: 'Use the button below to copy the ID',
+            interactiveButtons: [
+                {
+                    name: 'cta_copy',
+                    buttonParamsJson: JSON.stringify({
+                        display_text: 'Copy ID',
+                        copy_code: id
+                    })
+                }
+            ]
+        });
+
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);

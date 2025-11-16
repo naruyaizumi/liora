@@ -4,6 +4,10 @@ import {
     uploader3,
     uploader4,
     uploader5,
+    uploader6,
+    uploader7,
+    uploader8,
+    uploader9,
     uploader,
 } from "../../lib/uploader.js";
 
@@ -13,6 +17,10 @@ const uploaders = {
     3: { name: "Qu.ax", fn: uploader3, info: "Temporary hosting" },
     4: { name: "Put.icu", fn: uploader4, info: "Direct upload" },
     5: { name: "Tmpfiles.org", fn: uploader5, info: "1 hour retention" },
+    6: { name: "Nauval.cloud", fn: uploader6, info: "30 minutes default" },
+    7: { name: "Deline", fn: uploader7, info: "Deline uploader" },
+    8: { name: "Zenitsu", fn: uploader8, info: "Zenitsu uploader" },
+    9: { name: "CloudKuImages", fn: uploader9, info: "CloudKuImages uploader" },
 };
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {

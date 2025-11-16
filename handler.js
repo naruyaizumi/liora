@@ -6,12 +6,9 @@ import { smsg } from "./lib/core/smsg.js";
 import { fileURLToPath } from "url";
 import path, { join } from "path";
 import chokidar from "chokidar";
-import PQueue from "p-queue";
-import printMessage from "./lib/utils/console.js";
+import printMessage from "./lib/console.js";
 
-const escapeRegExp = (str) => {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-};
+const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const safe = async (fn, fallback = undefined) => {
     try {
@@ -22,22 +19,16 @@ const safe = async (fn, fallback = undefined) => {
 };
 
 const resolveLID = async (sender) => {
-    let senderLid = sender;
+    if (!sender || typeof sender !== "string") return null;
 
-    if (!senderLid || typeof senderLid !== "string") {
-        return null;
+    if (sender.endsWith("@lid")) {
+        return sender.split("@")[0];
     }
 
-    if (senderLid.endsWith("@lid")) {
-        return senderLid.split("@")[0];
-    }
-
-    if (senderLid.endsWith("@s.whatsapp.net")) {
+    if (sender.endsWith("@s.whatsapp.net")) {
         const resolved = await safe(async () => {
-            if (!conn.signalRepository?.lidMapping?.getLIDForPN) {
-                return null;
-            }
-            return await conn.signalRepository.lidMapping.getLIDForPN(senderLid);
+            if (!conn.signalRepository?.lidMapping?.getLIDForPN) return null;
+            return await conn.signalRepository.lidMapping.getLIDForPN(sender);
         });
 
         if (resolved) {
@@ -46,10 +37,10 @@ const resolveLID = async (sender) => {
                 : String(resolved).split("@")[0];
         }
 
-        return senderLid.split("@")[0];
+        return sender.split("@")[0];
     }
 
-    return senderLid.split("@")[0];
+    return sender.split("@")[0];
 };
 
 const getSettings = (jid) => {
@@ -60,56 +51,156 @@ const getSettings = (jid) => {
     }
 };
 
-const commandQueue = new PQueue({
-    concurrency: 3,
-    interval: 1000,
-    intervalCap: 5,
-    timeout: 500000,
-    throwOnTimeout: false,
-});
+class RateLimiter {
+    constructor(windowMs = 3000, maxRequests = 5) {
+        this.windowMs = windowMs;
+        this.maxRequests = maxRequests;
+        this.limits = new Map();
+        this.cleanupInterval = setInterval(() => this.cleanup(), 30000);
+    }
 
-const userRateLimits = new Map();
+    check(userId) {
+        const now = Date.now();
+        const userLimit = this.limits.get(userId);
 
-const RATE_LIMIT_WINDOW = 3000;
-const MAX_COMMANDS_PER_WINDOW = 5;
+        if (!userLimit) {
+            this.limits.set(userId, { count: 1, timestamp: now });
+            return true;
+        }
 
-const checkRateLimit = (userId) => {
-    const now = Date.now();
-    const userLimit = userRateLimits.get(userId);
+        if (now - userLimit.timestamp > this.windowMs) {
+            this.limits.set(userId, { count: 1, timestamp: now });
+            return true;
+        }
 
-    if (!userLimit) {
-        userRateLimits.set(userId, { count: 1, timestamp: now });
+        if (userLimit.count >= this.maxRequests) {
+            return false;
+        }
+
+        userLimit.count++;
         return true;
     }
 
-    if (now - userLimit.timestamp > RATE_LIMIT_WINDOW) {
-        userRateLimits.set(userId, { count: 1, timestamp: now });
-        return true;
-    }
-
-    if (userLimit.count >= MAX_COMMANDS_PER_WINDOW) {
-        return false;
-    }
-
-    userLimit.count++;
-    return true;
-};
-
-const cleanupCaches = () => {
-    const now = Date.now();
-
-    try {
-        for (const [userId, data] of userRateLimits.entries()) {
-            if (now - data.timestamp > RATE_LIMIT_WINDOW) {
-                userRateLimits.delete(userId);
+    cleanup() {
+        const now = Date.now();
+        for (const [userId, data] of this.limits.entries()) {
+            if (now - data.timestamp > this.windowMs) {
+                this.limits.delete(userId);
             }
         }
-    } catch {
-        // ngapain dekk...
     }
-};
 
-setInterval(cleanupCaches, 30000);
+    clear() {
+        clearInterval(this.cleanupInterval);
+        this.limits.clear();
+    }
+}
+
+class CacheManager {
+    constructor(ttl = 5000) {
+        this.ttl = ttl;
+        this.cache = new Map();
+        this.cleanupInterval = setInterval(() => this.cleanup(), 30000);
+    }
+
+    set(key, value) {
+        this.cache.set(key, { value, timestamp: Date.now() });
+    }
+
+    get(key) {
+        const entry = this.cache.get(key);
+        if (!entry) return null;
+
+        if (Date.now() - entry.timestamp > this.ttl) {
+            this.cache.delete(key);
+            return null;
+        }
+
+        return entry.value;
+    }
+
+    has(key) {
+        return this.get(key) !== null;
+    }
+
+    cleanup() {
+        const now = Date.now();
+        for (const [key, entry] of this.cache.entries()) {
+            if (now - entry.timestamp > this.ttl) {
+                this.cache.delete(key);
+            }
+        }
+    }
+
+    clear() {
+        clearInterval(this.cleanupInterval);
+        this.cache.clear();
+    }
+}
+
+class AsyncCommandProcessor {
+    constructor() {
+        this.processing = new Map();
+        this.maxConcurrent = 10;
+        this.commandTimeout = 120000;
+        this.cleanupInterval = setInterval(() => this.cleanup(), 30000);
+    }
+
+    async process(key, fn) {
+        if (this.processing.has(key)) {
+            const startTime = this.processing.get(key);
+            if (Date.now() - startTime > this.commandTimeout) {
+                this.processing.delete(key);
+            } else {
+                return false;
+            }
+        }
+
+        if (this.processing.size >= this.maxConcurrent) {
+            return false;
+        }
+
+        this.processing.set(key, Date.now());
+
+        try {
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Command execution timeout')), this.commandTimeout);
+            });
+
+            await Promise.race([fn(), timeoutPromise]);
+            return true;
+        } finally {
+            this.processing.delete(key);
+        }
+    }
+
+    isProcessing(key) {
+        return this.processing.has(key);
+    }
+
+    get size() {
+        return this.processing.size;
+    }
+
+    cleanup() {
+        const now = Date.now();
+        for (const [key, startTime] of this.processing.entries()) {
+            if (now - startTime > this.commandTimeout) {
+                this.processing.delete(key);
+            }
+        }
+    }
+
+    clear() {
+        clearInterval(this.cleanupInterval);
+        this.processing.clear();
+    }
+}
+
+const rateLimiter = new RateLimiter(3000, 5);
+const messageCache = new CacheManager(5000);
+const denialCache = new CacheManager(60000);
+const commandProcessor = new AsyncCommandProcessor();
 
 const CMD_PREFIX_RE = /^[/!.]/;
 
@@ -148,7 +239,11 @@ const isCmdAccepted = (cmd, rule) => {
 };
 
 const sendDenied = async (conn, m) => {
-    const userName = await safe(() => conn.getName(m.sender), "unknown");
+    const cacheKey = `denied_${m.sender}`;
+    if (denialCache.has(cacheKey)) return;
+
+    const userName = await safe(() => conn.getName(m.sender), "User");
+    denialCache.set(cacheKey, true);
 
     return conn.sendMessage(
         m.chat,
@@ -159,14 +254,14 @@ const sendDenied = async (conn, m) => {
                 "└─────────────────────",
                 `User   : ${userName}`,
                 `Action : Blocked private access`,
-                `Group  : ${global.config.group || "N/A"}`,
+                `Group  : ${global.config?.group || "N/A"}`,
                 "─────────────────────",
                 "Join the group to continue using the bot.",
             ].join("\n"),
             contextInfo: {
                 externalAdReply: {
                     title: "ACCESS DENIED",
-                    body: global.config.watermark || "Bot",
+                    body: global.config?.watermark || "Bot",
                     mediaType: 1,
                     thumbnailUrl: "https://qu.ax/DdwBH.jpg",
                     renderLargerThumbnail: true,
@@ -177,7 +272,7 @@ const sendDenied = async (conn, m) => {
     );
 };
 
-const traceError = async (connInstance, m, pluginRef, chatRef, e) => {
+const traceError = async (conn, m, pluginRef, chatRef, e) => {
     const ts = new Date().toISOString().replace("T", " ").split(".")[0];
     const text = String(e?.stack || e);
     const msg = [
@@ -193,7 +288,7 @@ const traceError = async (connInstance, m, pluginRef, chatRef, e) => {
         "└───────────────────────",
     ].join("\n");
 
-    return connInstance.sendMessage(
+    return conn.sendMessage(
         m.chat,
         {
             text: msg,
@@ -211,6 +306,28 @@ const traceError = async (connInstance, m, pluginRef, chatRef, e) => {
     );
 };
 
+const isFromSelf = (m, botUser) => {
+    if (!m || !botUser) return false;
+    if (m.key?.fromMe) return true;
+    
+    const botJid = botUser.jid || botUser.id;
+    if (!botJid) return false;
+    
+    const normalizedBotJid = botJid.split('@')[0];
+    
+    if (m.sender) {
+        const normalizedSender = m.sender.split('@')[0];
+        if (normalizedSender === normalizedBotJid) return true;
+    }
+    
+    if (m.key?.participant) {
+        const normalizedParticipant = m.key.participant.split('@')[0];
+        if (normalizedParticipant === normalizedBotJid) return true;
+    }
+    
+    return false;
+};
+
 export async function handler(chatUpdate) {
     if (!chatUpdate) return;
 
@@ -219,20 +336,34 @@ export async function handler(chatUpdate) {
     if (!last) return;
 
     let m = smsg(this, last) || last;
-    if (m.isBaileys || m.isChannel || (m.key?.fromMe && !m.isCommand)) return;
+    if (!m || m.isBaileys || m.isChannel) return;
 
-    const settings = getSettings(this.user.jid);
+    const settings = getSettings(this.user?.jid);
+    
+    const isSelfMessage = isFromSelf(m, this.user);
+    
+    if (isSelfMessage) {
+        const text = m.text || '';
+        if (!text.startsWith('!self')) {
+            return;
+        }
+    }
+
     const senderLid = await resolveLID(m.sender);
 
     if (!senderLid) {
         this.logger?.warn("Could not resolve sender LID");
         return;
     }
-
-    const regOwners = global.config.owner
-        .filter(([id, , isDev]) => id && !isDev)
-        .map(([id]) => id.toString().split("@")[0]);
+    
+    const regOwners = (global.config?.owner || [])
+        .filter(([id]) => id)
+        .map(([id]) => {
+            const idStr = String(id);
+            return idStr.split("@")[0];
+        });
     const isOwner = regOwners.includes(senderLid);
+
     const groupMetadata = m.isGroup
         ? this.chats?.[m.chat]?.metadata || (await safe(() => this.groupMetadata(m.chat), null))
         : {};
@@ -245,10 +376,11 @@ export async function handler(chatUpdate) {
     const isRAdmin = user?.admin === "superadmin";
     const isAdmin = isRAdmin || user?.admin === "admin";
     const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
+    
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), "./plugins");
 
-    for (const name in global.plugins) {
-        const plugin = global.plugins[name];
+    const pluginSnapshot = Object.entries(global.plugins || {});
+    for (const [name, plugin] of pluginSnapshot) {
         if (!plugin || plugin.disabled) continue;
 
         const __filename = join(___dirname, name);
@@ -264,30 +396,38 @@ export async function handler(chatUpdate) {
         }
     }
 
-    if (!settings?.restrict) {
-        const adminPlugins = Object.entries(global.plugins).filter(([, p]) =>
-            p.tags?.includes("admin")
-        );
-        for (const [name] of adminPlugins) {
-            delete global.plugins[name];
+    const availablePlugins = {};
+    const shouldRestrictAdmin = !settings?.restrict;
+    
+    for (const [name, plugin] of Object.entries(global.plugins || {})) {
+        if (!plugin || plugin.disabled) continue;
+        
+        if (shouldRestrictAdmin && plugin.tags?.includes("admin")) {
+            continue;
         }
+        
+        availablePlugins[name] = plugin;
     }
 
     const chat = global.db?.data?.chats?.[m.chat];
-
+    
     if (!m.fromMe && settings?.self && !isOwner) return;
-
+    
     if (settings?.gconly && !m.isGroup && !isOwner) {
         await sendDenied(this, m);
         return;
     }
-
+    
     if (!isAdmin && !isOwner && chat?.adminOnly) return;
     if (!isOwner && chat?.mute) return;
 
     if (!isOwner) {
-        if (!checkRateLimit(m.sender)) {
-            await safe(() => m.reply("Too many commands! Please slow down."));
+        if (!rateLimiter.check(m.sender)) {
+            const cacheKey = `ratelimit_${m.sender}`;
+            if (!messageCache.has(cacheKey)) {
+                messageCache.set(cacheKey, true);
+                await safe(() => m.reply("Too many commands! Please wait a moment."));
+            }
             return;
         }
     }
@@ -306,8 +446,8 @@ export async function handler(chatUpdate) {
     let text = "";
     let match = null;
 
-    for (const name in global.plugins) {
-        const plugin = global.plugins[name];
+    for (const name in availablePlugins) {
+        const plugin = availablePlugins[name];
         if (!plugin || plugin.disabled) continue;
         if (typeof plugin !== "function") continue;
         if (!plugin.command) continue;
@@ -389,38 +529,57 @@ export async function handler(chatUpdate) {
         __filename: join(___dirname, targetName),
     };
 
-    const connInstance = this;
+    const commandKey = `${m.sender}_${targetName}`;
+    const conn = this;
 
-    await commandQueue.add(async () => {
+    if (commandProcessor.isProcessing(commandKey)) {
+        await safe(() => m.reply("Please wait for the previous command to finish."));
+        return;
+    }
+
+    const processed = await commandProcessor.process(commandKey, async () => {
         try {
-            await targetPlugin.call(connInstance, m, extra);
+            await targetPlugin.call(conn, m, extra);
 
             if (typeof targetPlugin.after === "function") {
-                await safe(() => targetPlugin.after.call(connInstance, m, extra));
+                await safe(() => targetPlugin.after.call(conn, m, extra));
             }
         } catch (e) {
-            if (e?.message?.includes("Promise timed out") || e?.name === "TimeoutError") {
-                connInstance.logger?.warn(`Task "${targetName}" timed out`);
+            if (e?.message?.includes("timeout") || 
+                e?.message?.includes("timed out") || 
+                e?.name === "TimeoutError") {
+                conn.logger?.warn(`Command "${targetName}" timed out for user ${m.sender}`);
+                await safe(async () => {
+                    await m.reply(
+                        `Command timeout!\n\nThe command "${command}" took too long to execute.\nPlease try again later.`
+                    );
+                });
+            } else if (e?.message?.includes("rate limit") || e?.message?.includes("429")) {
                 await safe(() =>
-                    m.reply(`Task "${targetName}" timed out, please try again later.`)
+                    m.reply("Rate limit reached. Please wait a moment before trying again.")
                 );
             } else {
-                connInstance.logger?.error(e.message);
+                conn.logger?.error(`Error in ${targetName}:`, e.message);
+                conn.logger?.error(e.stack);
                 if (settings?.noerror) {
-                    await safe(() => m.reply(`Upss.. Something went wrong.`));
+                    await safe(() => m.reply(`An error occurred while executing the command.`));
                 } else {
-                    await traceError(connInstance, m, targetName, m.chat, e);
+                    await traceError(conn, m, targetName, m.chat, e);
                 }
             }
         }
     });
 
-    if (!getSettings(this.user.jid)?.noprint) {
+    if (!processed) {
+        await safe(() => m.reply("Bot is currently busy. Please try again in a moment."));
+    }
+
+    if (!settings?.noprint) {
         await safe(() => printMessage(m, this));
     }
 }
 
-const file = global.__filename(import.meta.url, true);
+const file = fileURLToPath(import.meta.url);
 let watcher;
 let reloadLock = false;
 let isCleaningUp = false;
@@ -437,9 +596,7 @@ try {
     });
 
     watcher.on("change", async () => {
-        if (reloadLock) {
-            return;
-        }
+        if (reloadLock) return;
 
         reloadLock = true;
 
@@ -454,7 +611,7 @@ try {
             }
         } catch (e) {
             if (instance?.logger) {
-                instance.logger.error(e.message);
+                instance.logger.error("Reload error:", e.message);
                 instance.logger.error(e.stack);
             }
         } finally {
@@ -467,17 +624,15 @@ try {
     watcher.on("error", (error) => {
         const instance = global.conn || conn;
         if (instance?.logger) {
-            instance.logger.error(error.message);
+            instance.logger.error("Watcher error:", error.message);
         }
     });
 } catch (e) {
-    console.error(e.message);
+    console.error("Watcher initialization error:", e.message);
 }
 
 const cleanup = () => {
-    if (isCleaningUp) {
-        return;
-    }
+    if (isCleaningUp) return;
     isCleaningUp = true;
 
     try {
@@ -485,10 +640,14 @@ const cleanup = () => {
             watcher.close();
         }
 
-        commandQueue.clear();
-        userRateLimits.clear();
+        rateLimiter.clear();
+        messageCache.clear();
+        denialCache.clear();
+        commandProcessor.clear();
+
+        console.log("Handler cleanup completed");
     } catch (e) {
-        console.error(e.message);
+        console.error("Cleanup error:", e.message);
     }
 };
 

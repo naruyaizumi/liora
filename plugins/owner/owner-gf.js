@@ -32,6 +32,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 handler.help = ["getfile"];
 handler.tags = ["owner"];
 handler.command = /^(getfile|gf)$/i;
-handler.mods = true;
+handler.owner = true;
 
 export default handler;

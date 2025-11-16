@@ -21,6 +21,6 @@ WhatsApp bot name updated successfully.
 handler.help = ["setnamebot"];
 handler.tags = ["owner"];
 handler.command = /^set(name(bot)?)$/i;
-handler.mods = true;
+handler.owner = true;
 
 export default handler;

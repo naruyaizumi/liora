@@ -1,18 +1,22 @@
 /* global conn */
 import "#config";
-import "#global";
 import { serialize } from "#message";
-import { naruyaizumi } from "#socket";
 import { SQLiteAuth } from "#sqlite-auth";
-import { SQLiteKeyStore } from "#sqlite-keystore";
-import { Browsers, fetchLatestBaileysVersion } from "baileys";
-import { readdir, stat } from "fs/promises";
-import { join } from "path";
-import EventEmitter from "eventemitter3";
-import { initReload } from "#loader-plugins";
+import { fileURLToPath } from "url";
+import path from "path";
 import pino from "pino";
-import { CleanupManager, registerProcessHandlers } from "#cleaner";
-import { EventManager, setupMaintenanceIntervals } from "#event";
+import {
+    BaileysVersion,
+    PluginCache,
+    getAllPlugins,
+    initReload,
+    createConnection,
+    EventManager,
+    CleanupManager,
+    registerProcess,
+    setupMaintenance
+} from "#connection";
+import { naruyaizumi } from "#socket";
 
 const logger = pino({
     level: "info",
@@ -26,58 +30,8 @@ const logger = pino({
     },
 });
 
+const pluginCache = new PluginCache(5000);
 const pairingNumber = global.config.pairingNumber;
-
-EventEmitter.defaultMaxListeners = 20;
-
-serialize();
-
-const CM = new CleanupManager();
-const EM = new EventManager();
-
-registerProcessHandlers(CM, logger);
-
-let pluginCache = null;
-let pluginCacheTime = 0;
-const CACHE_TTL = 5000;
-
-async function getAllPlugins(dir, skipCache = false) {
-    const now = Date.now();
-
-    if (!skipCache && pluginCache && now - pluginCacheTime < CACHE_TTL) {
-        return pluginCache;
-    }
-
-    const results = [];
-    try {
-        const files = await readdir(dir);
-        const filePromises = files.map(async (file) => {
-            const filepath = join(dir, file);
-            try {
-                const stats = await stat(filepath);
-                if (stats.isDirectory()) {
-                    return await getAllPlugins(filepath, true);
-                } else if (/\.js$/.test(file)) {
-                    return [filepath];
-                }
-                return [];
-            } catch (e) {
-                logger.warn(e.message);
-                return [];
-            }
-        });
-
-        const nestedResults = await Promise.all(filePromises);
-        results.push(...nestedResults.flat());
-    } catch (e) {
-        logger.error(e.message);
-    }
-
-    pluginCache = results;
-    pluginCacheTime = now;
-
-    return results;
-}
 
 async function setupPairingCode(conn) {
     const waitForConnection = new Promise((resolve) => {
@@ -105,12 +59,15 @@ async function setupPairingCode(conn) {
     }
 }
 
-async function IZUMI() {
-    const { state, saveCreds } = await SQLiteAuth();
-    const { version: baileysVersion } = await fetchLatestBaileysVersion();
-    const connectionOptions = {
-        version: baileysVersion,
-        logger: pino({
+async function LIORA() {
+    const auth = SQLiteAuth();
+    const version = new BaileysVersion();
+    const baileys = await version.fetchVersion();
+    logger.info({ version: baileys.join(".") }, "Baileys version loaded");
+    const connection = createConnection(
+        baileys,
+        auth,
+        pino({
             level: "fatal",
             base: { module: "BAILEYS" },
             transport: {
@@ -121,39 +78,39 @@ async function IZUMI() {
                     ignore: "pid,hostname",
                 },
             },
-        }),
-        browser: Browsers.ubuntu("Safari"),
-        auth: {
-            creds: state.creds,
-            keys: SQLiteKeyStore(),
-        },
-    };
+        })
+    );
 
-    global.conn = naruyaizumi(connectionOptions);
-    conn.isInit = false;
-
-    if (!state.creds.registered && pairingNumber) {
+    global.conn = naruyaizumi(connection);
+    global.conn.isInit = false;
+    
+    if (!auth.state.creds.registered && pairingNumber) {
         await setupPairingCode(conn);
     }
-
-    setupMaintenanceIntervals(CM, logger);
-
-    let handler = await import("../handler.js");
+    
+    const CM = new CleanupManager();
+    registerProcess(CM);
+    const EM = new EventManager();
+    setupMaintenance(CM);
+    const handler = await import("../handler.js");
     EM.setHandler(handler);
 
     global.reloadHandler = await EM.createReloadHandler(
-        connectionOptions,
-        saveCreds,
+        connection,
+        auth.saveCreds,
         CM,
         import.meta.url
     );
-
-    const pluginFolder = global.__dirname(
-        join(global.__dirname(import.meta.url), "../plugins/index")
-    );
+    const filename = fileURLToPath(import.meta.url);
+    const dirname  = path.dirname(filename);
+    const pluginFolder = path.join(dirname, "../plugins");
 
     try {
-        const reloadCleanup = await initReload(conn, pluginFolder, getAllPlugins);
+        const reloadCleanup = await initReload(
+            global.conn,
+            pluginFolder,
+            (dir, skipCache) => getAllPlugins(dir, pluginCache, skipCache)
+        );
 
         if (typeof reloadCleanup === "function") {
             CM.addCleanup(reloadCleanup);
@@ -161,14 +118,15 @@ async function IZUMI() {
 
         await global.reloadHandler();
     } catch (e) {
-        logger.error(e.message);
-        if (e?.stack) logger.error(e.stack);
+        logger.error({ error: e.message, stack: e.stack }, "Error loading plugins");
         throw e;
     }
+
+    serialize();
+
 }
 
-IZUMI().catch((e) => {
-    logger.fatal(e.message);
-    if (e?.stack) logger.fatal(e.stack);
+LIORA().catch((e) => {
+    logger.fatal({ error: e.message, stack: e.stack }, "Fatal initialization error");
     process.exit(1);
 });

@@ -14,7 +14,7 @@ let handler = async (m, { conn }) => {
 handler.help = ["debug"];
 handler.tags = ["tool"];
 handler.command = /^(getq|q|debug)$/i;
-handler.mods = true;
+handler.owner = true;
 
 export default handler;
 

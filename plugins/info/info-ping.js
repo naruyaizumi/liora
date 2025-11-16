@@ -1,5 +1,5 @@
 let handler = async (m, { conn }) => {
-    await conn.sendMessage(m.chat, { text: "PONG! 🏓" });
+    await conn.sendMessage(m.chat, { text: "PUNG! 🏓" });
 };
 
 handler.help = ["ping"];

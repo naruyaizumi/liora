@@ -1,6 +1,6 @@
 /*
  * Liora WhatsApp Bot
- * @description Open source WhatsApp bot based on Node.js and Baileys.
+ * @description Open source WhatsApp bot based on Bun and Baileys.
  *
  * @owner       Naruya Izumi <https://linkbio.co/naruyaizumi>
  * @developer   SXZnightmar <wa.me/6281398961382>
@@ -42,17 +42,15 @@ global.config = {
     ],
 
     group: "https://chat.whatsapp.com/FtMSX1EsGHTJeynu8QmjpG",
-    website: "https://linkbio.co/naruyaizumi",
-
+    
     /*============= PAIRING =============*/
     /**
      * pairingNumber:
      *   - Bot's phone number for pairing (without '+' or spaces)
      *   - Example: "1234567890"
      */
-    pairingNumber: "212691444178", // Bot's phone number used for WhatsApp pairing authentication
+    pairingNumber: "", // Bot's phone number used for WhatsApp pairing authentication
 
-    /*============== MESSAGES ==============*/
     watermark: "𝙇͢𝙞𝙤𝙧𝙖",
     author: "𝙉͢𝙖𝙧𝙪𝙮𝙖 𝙄͢𝙯𝙪𝙢𝙞",
     stickpack: "𝙇͢𝙞𝙤𝙧𝙖",

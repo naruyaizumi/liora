@@ -20,6 +20,6 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 handler.help = ["setppbot"];
 handler.tags = ["owner"];
 handler.command = /^setpp(bot)?$/i;
-handler.mods = true;
+handler.owner = true;
 
 export default handler;

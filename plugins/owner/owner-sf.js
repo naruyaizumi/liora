@@ -50,6 +50,6 @@ const handler = async (m, { args, conn }) => {
 handler.help = ["sf"];
 handler.tags = ["owner"];
 handler.command = /^(sf|savefile)$/i;
-handler.mods = true;
+handler.owner = true;
 
 export default handler;

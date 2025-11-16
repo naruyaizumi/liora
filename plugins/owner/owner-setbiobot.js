@@ -23,6 +23,6 @@ WhatsApp bot bio updated successfully.
 handler.help = ["setbiobot"];
 handler.tags = ["owner"];
 handler.command = /^set(bio(bot)?)$/i;
-handler.mods = true;
+handler.owner = true;
 
 export default handler;

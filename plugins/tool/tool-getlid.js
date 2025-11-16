@@ -1,3 +1,6 @@
+import pkg from 'baileys_helper';
+const { sendInteractiveMessage } = pkg;
+
 let handler = async (m, { conn, text }) => {
     try {
         await global.loading(m, conn);
@@ -19,7 +22,20 @@ let handler = async (m, { conn, text }) => {
             lid = raw.replace(/@lid$/, "");
         }
 
-        await conn.sendMessage(m.chat, { text: lid }, { quoted: m });
+        await sendInteractiveMessage(conn, m.chat, {
+            text: `Target LID: ${lid}`,
+            footer: 'Use the button below to copy the LID',
+            interactiveButtons: [
+                {
+                    name: 'cta_copy',
+                    buttonParamsJson: JSON.stringify({
+                        display_text: 'Copy LID',
+                        copy_code: lid
+                    })
+                }
+            ]
+        });
+
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);

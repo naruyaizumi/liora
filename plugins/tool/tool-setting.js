@@ -56,6 +56,6 @@ Usage:
 handler.help = ["on", "off"];
 handler.tags = ["tools"];
 handler.command = /^(on|off)$/i;
-handler.mods = true;
+handler.owner = true;
 
 export default handler;
