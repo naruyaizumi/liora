@@ -548,14 +548,6 @@ export default handler;
 
 <img src="https://skillicons.dev/icons?i=bun,js,nodejs,cpp,sqlite,git,github,docker,linux,cmake" />
 
-**Runtime Performance**
-```yaml
-Bun vs Node.js: 3x faster
-Startup: < 3 seconds
-Memory: Optimized
-CPU: Efficient
-```
-
 <img src="https://github-profile-trophy.vercel.app/?username=naruyaizumi&theme=tokyonight&no-frame=true&row=1&column=7" width="100%" />
 
 </div>
