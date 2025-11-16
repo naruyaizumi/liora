@@ -2,7 +2,9 @@
 
 ![Liora Banner](https://files.catbox.moe/uwutes.jpg)
 
-<img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=32&duration=2800&pause=2000&color=A9FEF7&center=true&vCenter=true&width=940&lines=Welcome+to+Liora+Bot+Framework!+%F0%9F%8C%B8;Modern+WhatsApp+Automation;Built+with+Baileys+%26+Bun+Runtime" alt="Typing SVG" />
+# 🌸 Liora
+
+### Modern WhatsApp Bot Framework built on Baileys with Bun Runtime
 
 <p align="center">
   <a href="https://github.com/naruyaizumi/liora/stargazers">
@@ -15,7 +17,7 @@
     <img src="https://img.shields.io/github/forks/naruyaizumi/liora?style=for-the-badge&logo=git&color=F2CDCD&logoColor=D9E0EE&labelColor=302D41" alt="forks">
   </a>
   <a href="https://github.com/naruyaizumi/liora">
-    <img src="https://img.shields.io/github/repo-size/naruyaizumi/liora?style=for-the-badge&logo=github&color=DDB6F2&logoColor=D9E0EE&labelColor=302D41" alt="repo size">
+    <img src="https://img.shields.io/github/languages/code-size/naruyaizumi/liora?style=for-the-badge&logo=github&color=DDB6F2&logoColor=D9E0EE&labelColor=302D41" alt="code size">
   </a>
 </p>
 
@@ -58,95 +60,139 @@
 
 <br>
 
-**[✨ Features](#-features) • [🚀 Quick Start](#-quick-start) • [📁 Structure](#-project-structure) • [📖 Documentation](#-documentation) • [💬 Community](#-community)**
+[✨ Features](#-features) • [🚀 Quick Start](#-quick-start) • [📁 Structure](#-project-structure) • [📖 Documentation](#-documentation) • [💬 Community](#-community)
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 </div>
 
-## 🎯 Why Liora?
+---
 
-<div align="center">
+## 🎯 Why Liora?
 
 > **Liora** is a modern, modular, and efficient WhatsApp bot framework built on **Baileys** and powered by **Bun runtime**. Designed for developers who demand **full control**, **performance**, and **flexibility** in their automation workflows.
 
 Built with pure ESM, hot-reloadable plugins, and native C++ addons for optimal performance.
 
-</div>
-
-<br>
-
-## 🎨 What Makes Liora Different?
+### 🎨 What Makes Liora Different?
 
 <table>
 <tr>
-<td width="50%" valign="top">
+<td width="50%">
 
-### 🚀 Baileys Integration
-Latest WhatsApp Web API with full feature support and real-time message handling
-
-### ⚡ Bun Runtime
-Ultra-fast JavaScript execution, 3x faster than Node.js with native TypeScript support
-
-### 🔥 Hot Reload
-Update plugins without restart, seamless development experience with zero downtime
-
-### 🧩 Modular Architecture
-Plugin-based design pattern for easy extensibility and maintainable codebase
+#### 🚀 **Baileys Integration**
+Latest WhatsApp Web API with full feature support
 
 </td>
-<td width="50%" valign="top">
+<td width="50%">
 
-### 🎯 Native Addons
-C++ modules for maximum performance optimization in image processing
+#### ⚡ **Bun Runtime**
+Ultra-fast JavaScript execution, 3x faster than Node.js
 
-### 🔒 SQLite Auth
-Persistent session management with atomic operations and transaction safety
+</td>
+</tr>
+<tr>
+<td width="50%">
 
-### 💎 Zero Config
-Works out of the box with sensible defaults, no complex setup required
+#### 🔥 **Hot Reload**
+Update plugins without restart, seamless development
 
-### 🎨 Clean Code
-Modern ESM, type-safe patterns, best practices, and comprehensive documentation
+</td>
+<td width="50%">
+
+#### 🧩 **Modular Architecture**
+Plugin-based design pattern for easy extensibility
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+#### 🎯 **Native Addons**
+C++ modules for maximum performance optimization
+
+</td>
+<td width="50%">
+
+#### 🔒 **SQLite Auth**
+Persistent session management with atomic operations
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+#### 💎 **Zero Config**
+Works out of the box with sensible defaults
+
+</td>
+<td width="50%">
+
+#### 🎨 **Clean Code**
+Modern ESM, type-safe patterns, best practices
 
 </td>
 </tr>
 </table>
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+
+---
 
 ## ✨ Features
 
 <table>
 <tr>
-<td width="50%" valign="top">
+<td width="50%">
 
-### 🤖 Bot Capabilities
+#### 🤖 **Bot Capabilities**
 
-| Feature | Description |
-|---------|-------------|
-| 🤖 **AI Integration** | OpenAI GPT, Felo AI support |
-| 📥 **Media Downloader** | TikTok, Instagram, YouTube, Spotify |
-| 🖼️ **Image Processing** | Remini HD, RemoveBG, filters |
-| 🎨 **Sticker Maker** | Custom watermark support |
-| 👥 **Group Management** | Admin tools, moderation |
-| 🔒 **Command Protection** | Owner/Admin only commands |
-| 💬 **Auto Response** | Smart message handling |
+- ✓ AI Integration (OpenAI, Felo AI)
+- ✓ Media Downloader (TikTok, IG, YT, Spotify)
+- ✓ Image Processing (Remini, RemoveBG)
+- ✓ Sticker Maker with Custom Watermark
+- ✓ Group Management & Moderation
+- ✓ Admin-Only Command Protection
+- ✓ Auto Message Response System
 
 </td>
-<td width="50%" valign="top">
+<td width="50%">
 
-### 🏗️ Architecture
+#### 🏗️ **Architecture**
 
-| Component | Technology |
-|-----------|------------|
-| 📦 **Module System** | Pure ESM Modules |
-| 🔌 **Plugin System** | Hot-reloadable |
-| 🎭 **Design Pattern** | Event-Driven |
-| ⚡ **Performance** | Native C++ Addons |
-| 💾 **Database** | SQLite Persistence |
-| 🔄 **Async Handling** | Async-First |
-| 🔗 **Imports** | Path Aliases |
+- ✓ Pure ESM Modules
+- ✓ Hot-Reloadable Plugin System
+- ✓ Event-Driven Design Pattern
+- ✓ Native C++ Performance Addons
+- ✓ SQLite Session Persistence
+- ✓ Async-First Architecture
+- ✓ Import Path Aliases Support
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+#### ⚡ **Performance**
+
+- ✓ Bun Runtime Optimizations
+- ✓ Native Image Processing Pipeline
+- ✓ Buffer-Based Memory Operations
+- ✓ Efficient Memory Management
+- ✓ Sub-3s Startup Time
+- ✓ Minimal External Dependencies
+
+</td>
+<td width="50%">
+
+#### 🔐 **Reliability**
+
+- ✓ SQLite Auth State Management
+- ✓ Automatic Reconnection Logic
+- ✓ Comprehensive Error Recovery
+- ✓ Transaction Safety Guarantees
+- ✓ Persistent State Synchronization
+- ✓ Graceful Shutdown Handling
 
 </td>
 </tr>
@@ -154,40 +200,26 @@ Modern ESM, type-safe patterns, best practices, and comprehensive documentation
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
+---
+
 ## 🚀 Quick Start
 
 ### 📋 Prerequisites
 
-<table>
-<tr>
-<td width="50%" valign="top">
+**System Requirements:**
 
-#### Required Dependencies
+```bash
+# Required
+- Bun >= 1.3.2
+- Linux (Debian/Ubuntu recommended)
+- FFmpeg
+- libwebp-dev
+- Build tools (gcc, g++, make)
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| **Bun** | >= 1.3.2 | JavaScript Runtime |
-| **FFmpeg** | Latest | Media Processing |
-| **libwebp-dev** | Latest | WebP Support |
-| **Build Tools** | Latest | Native Compilation |
-| **Git** | Latest | Version Control |
-
-</td>
-<td width="50%" valign="top">
-
-#### System Requirements
-
-| Resource | Minimum | Recommended |
-|----------|---------|-------------|
-| **OS** | Linux | Ubuntu 22.04 LTS |
-| **RAM** | 1GB | 2GB+ |
-| **Storage** | 2GB | 5GB+ |
-| **CPU** | 1 Core | 2+ Cores |
-| **Network** | Stable | High-speed |
-
-</td>
-</tr>
-</table>
+# Recommended
+- 2GB RAM minimum
+- 5GB disk space
+```
 
 ### ⚡ One-Line Installation
 
@@ -198,7 +230,7 @@ curl -sSL https://raw.githubusercontent.com/naruyaizumi/liora/main/service.sh | 
 ### 🔧 Manual Installation
 
 <details>
-<summary><b>📦 Step 1: Install System Dependencies</b></summary>
+<summary><b>Step 1: Install System Dependencies</b></summary>
 
 <br>
 
@@ -213,7 +245,7 @@ apt-get install -y ffmpeg libwebp-dev \
 </details>
 
 <details>
-<summary><b>⚡ Step 2: Install Bun Runtime</b></summary>
+<summary><b>Step 2: Install Bun Runtime</b></summary>
 
 <br>
 
@@ -224,7 +256,7 @@ curl -fsSL https://bun.sh/install | bash
 </details>
 
 <details>
-<summary><b>🌸 Step 3: Setup Liora</b></summary>
+<summary><b>Step 3: Setup Liora</b></summary>
 
 <br>
 
@@ -253,30 +285,68 @@ bun start
 
 </div>
 
+---
+
 ## 📁 Project Structure
 
 <table>
 <tr>
-<td width="33%" valign="top">
+<td width="50%">
 
-### 📂 Core Application
+```
+liora/
+├── 📁 src/
+│   ├── index.js         # Entry point
+│   ├── main.js          # Main logic
+│   ├── config.js        # Configuration
+│   └── global.js        # Global db
+│
+├── 📁 lib/
+│   ├── 📁 addon/        # C++ modules
+│   ├── 📁 api/          # API integrations
+│   ├── 📁 auth/         # Auth system
+│   ├── 📁 core/         # Core logic
+│   └── uploader.js      # File uploader
+│
+├── 📁 plugins/
+│   ├── 📁 ai/           # AI plugins
+│   ├── 📁 downloader/   # Downloaders
+│   ├── 📁 group/        # Group mgmt
+│   ├── 📁 maker/        # Media makers
+│   ├── 📁 tool/         # Utilities
+│   ├── 📁 owner/        # Owner cmds
+│   ├── 📁 info/         # Information
+│   └── 📁 internet/     # Web tools
+```
 
-| Path | Description |
-|------|-------------|
-| `src/index.js` | Entry point |
-| `src/main.js` | Main bot logic |
-| `src/config.js` | Configuration |
-| `src/global.js` | Global database |
+</td>
+<td width="50%">
 
-### 📚 Framework Libraries
+```
+├── 📁 database/
+│   ├── auth.db          # Auth state
+│   └── database.db      # Bot data
+│
+├── 📁 build/
+│   └── Release/
+│       ├── converter.node
+│       └── sticker.node
+│
+├── handler.js           # Plugin loader
+├── package.json         # Dependencies
+├── bunfig.toml          # Bun config
+└── binding.gyp          # Build config
+```
 
-| Path | Description |
-|------|-------------|
-| `lib/addon/` | C++ native modules |
-| `lib/api/` | API integrations |
-| `lib/auth/` | Authentication system |
-| `lib/core/` | Core WhatsApp logic |
-| `lib/uploader.js` | File uploader |
+**Plugin Categories:**
+- 🤖 AI Integration
+- ⬇️ Media Downloaders
+- 👥 Group Management
+- 🎨 Media Makers
+- 🛠️ Utility Tools
+- 👑 Owner Commands
+- ℹ️ Information
+- 🌐 Internet Tools
 
 </td>
 </tr>
@@ -284,12 +354,14 @@ bun start
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
+---
+
 ## 📖 Documentation
 
 ### 🔧 Configuration
 
 <details>
-<summary><b>⚙️ Basic Configuration (src/config.js)</b></summary>
+<summary><b>Basic Configuration (src/config.js)</b></summary>
 
 <br>
 
@@ -319,7 +391,7 @@ global.config = {
 </details>
 
 <details>
-<summary><b>🔗 Import Path Aliases (package.json)</b></summary>
+<summary><b>Import Path Aliases (package.json)</b></summary>
 
 <br>
 
@@ -330,12 +402,8 @@ global.config = {
     "#global": "./src/global.js",
     "#message": "./lib/core/message.js",
     "#socket": "./lib/core/socket.js",
-    "#connection": "./lib/core/connection.js",
-    "#sqlite-auth": "./lib/auth/sqlite-auth.js",
-    "#add-on": "./lib/addon/bridge.js",
-    "#tiktok": "./lib/api/tiktok.js",
-    "#instagram": "./lib/api/instagram.js",
-    "#remini": "./lib/api/remini.js"
+    "#connection": "./lib/core/connection.js"
+    // Add more aliases as needed
   }
 }
 ```
@@ -449,32 +517,40 @@ export default handler;
 
 ## 🛠️ Development Tools
 
+<div align="center">
+
+```ascii
+🔧 DEVELOPMENT ENVIRONMENT 🔧
+```
+
+</div>
+
 <table>
 <tr>
 <td width="50%" valign="top">
 
 ### 🔍 Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `bun start` | Start the bot |
-| `bun run build:addon` | Build native addons |
-| `bun run format` | Format code with Prettier |
-| `bun run lint` | Check code quality |
-| `bun run lint:fix` | Fix linting issues |
+| Command | Description | Icon |
+|---------|-------------|------|
+| `bun start` | Start the bot | 🚀 |
+| `bun run build:addon` | Build native addons | 🔨 |
+| `bun run format` | Format code (Prettier) | 🎨 |
+| `bun run lint` | Check code quality | 🔍 |
+| `bun run lint:fix` | Fix linting issues | ✨ |
 
 </td>
 <td width="50%" valign="top">
 
 ### ⚙️ Configuration Files
 
-| File | Purpose |
-|------|---------|
-| `bunfig.toml` | Bun runtime configuration |
-| `eslint.config.js` | ESLint rules |
-| `binding.gyp` | Native addon build config |
-| `package.json` | Project dependencies |
-| `.prettierrc` | Code formatting rules |
+| File | Purpose | Icon |
+|------|---------|------|
+| `bunfig.toml` | Bun runtime config | ⚡ |
+| `eslint.config.js` | ESLint rules | 📏 |
+| `binding.gyp` | Native addon build | 🔧 |
+| `package.json` | Dependencies | 📦 |
+| `.prettierrc` | Code formatting | 💅 |
 
 </td>
 </tr>
@@ -486,9 +562,13 @@ export default handler;
 
 <div align="center">
 
+```ascii
+⚡ PERFORMANCE METRICS ⚡
+```
+
 <table>
 <tr>
-<td align="center">
+<td align="center" width="50%">
 
 ### 📈 Bot Statistics
 
@@ -499,21 +579,30 @@ export default handler;
 | **Memory Usage** | ~80MB | ✅ Efficient |
 | **Response Time** | < 200ms | ✅ Quick |
 | **Hot Reload** | Yes | ✅ Supported |
+| **Native Modules** | 2 | ✅ Optimized |
 
 </td>
-<td align="center">
+<td align="center" width="50%">
 
-### 🏆 GitHub Stats
+### 🎯 Technology Stack
 
-<img src="https://github-readme-stats.vercel.app/api?username=naruyaizumi&show_icons=true&theme=tokyonight&hide_border=true&bg_color=1a1b27&title_color=70a5fd&icon_color=bf91f3&text_color=38bdae" width="100%" alt="GitHub Stats" />
+<img src="https://skillicons.dev/icons?i=bun,js,cpp,sqlite,git,github" />
+
+<br><br>
+
+**Runtime Performance**
+```yaml
+Bun vs Node.js: 3x faster
+Startup: < 3 seconds
+Memory: Optimized
+CPU: Efficient
+```
 
 </td>
 </tr>
 </table>
 
-<img src="https://github-readme-streak-stats.herokuapp.com?user=naruyaizumi&theme=tokyonight&hide_border=true&background=1A1B27&stroke=70A5FD&ring=BF91F3&fire=FF6E6C&currStreakLabel=70A5FD" width="100%" alt="GitHub Streak" />
-
-<img src="https://github-readme-activity-graph.vercel.app/graph?username=naruyaizumi&theme=tokyo-night&hide_border=true&bg_color=1a1b27&color=70a5fd&line=bf91f3&point=38bdae" width="100%" alt="Activity Graph" />
+<img src="https://github-profile-trophy.vercel.app/?username=naruyaizumi&theme=tokyonight&no-frame=true&row=1&column=7" width="100%" />
 
 </div>
 
@@ -522,6 +611,10 @@ export default handler;
 ## 🤝 Contributing
 
 <div align="center">
+
+```ascii
+🌟 CONTRIBUTION GUIDE 🌟
+```
 
 **Contributions are welcome!** 💖
 
@@ -537,37 +630,35 @@ All types of contributions are valuable - bug fixes, features, docs, or feedback
 
 ### 📝 How to Contribute
 
-1. **Fork & Clone**
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/liora.git
-   cd liora
-   ```
+```bash
+# 1. Fork & Clone
+git clone https://github.com/YOUR_USERNAME/liora.git
+cd liora
 
-2. **Create Branch**
-   ```bash
-   git checkout -b feature/YourFeature
-   ```
+# 2. Create Branch
+git checkout -b feature/YourFeature
 
-3. **Make Changes**
-   - Follow existing code style
-   - Test your changes
-   - Update documentation
+# 3. Make Changes
+# - Follow code style
+# - Test changes
+# - Update docs
+```
 
 </td>
 <td width="50%" valign="top">
 
 ### 🚀 Submit Changes
 
-4. **Commit & Push**
-   ```bash
-   git commit -m "✨ Add YourFeature"
-   git push origin feature/YourFeature
-   ```
+```bash
+# 4. Commit & Push
+git commit -m "✨ Add YourFeature"
+git push origin feature/YourFeature
 
-5. **Open Pull Request**
-   - Describe changes clearly
-   - Link related issues
-   - Wait for review
+# 5. Open Pull Request
+# - Describe changes
+# - Link issues
+# - Wait for review
+```
 
 </td>
 </tr>
@@ -581,6 +672,8 @@ All types of contributions are valuable - bug fixes, features, docs, or feedback
   <img src="https://contrib.rocks/image?repo=naruyaizumi/liora" alt="Contributors" />
 </a>
 
+<img src="https://repobeats.axiom.co/api/embed/your-repo-id-here.svg" alt="Repobeats analytics" />
+
 </div>
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
@@ -588,6 +681,10 @@ All types of contributions are valuable - bug fixes, features, docs, or feedback
 ## 💬 Community
 
 <div align="center">
+
+```ascii
+👥 JOIN OUR COMMUNITY 👥
+```
 
 **Join our growing community!**
 
@@ -599,10 +696,12 @@ All types of contributions are valuable - bug fixes, features, docs, or feedback
 
 ### 📢 Updates Channel
 
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Bell.png" width="50" />
+
 Get latest updates, releases,
 and announcements
 
-<br>
+<br><br>
 
 [![Join Channel](https://img.shields.io/badge/Join-Channel-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03)
 
@@ -611,10 +710,12 @@ and announcements
 
 ### 💭 Support Group
 
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Waving%20Hand.png" width="50" />
+
 Ask questions, share ideas,
 and get help from community
 
-<br>
+<br><br>
 
 [![Join Group](https://img.shields.io/badge/Join-Group-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FtMSX1EsGHTJeynu8QmjpG)
 
@@ -629,6 +730,10 @@ and get help from community
 ## 📜 License
 
 <div align="center">
+
+```ascii
+📄 LICENSE 📄
+```
 
 **Apache License 2.0**
 
@@ -667,11 +772,14 @@ Copyright 2024 Naruya Izumi
   <a href="https://ffmpeg.org/">
     <img src="https://img.shields.io/badge/FFmpeg-007808?style=for-the-badge&logo=ffmpeg&logoColor=white" alt="FFmpeg" />
   </a>
+  <a href="https://isocpp.org/">
+    <img src="https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=cplusplus&logoColor=white" alt="C++" />
+  </a>
 </p>
 
 ### 🤖 AI Assistants
 
-Special thanks to AI assistants that helped in development and problem-solving:
+Special thanks to AI assistants that helped in development:
 
 <p align="left">
   <a href="https://openai.com/chatgpt">
@@ -688,15 +796,15 @@ Special thanks to AI assistants that helped in development and problem-solving:
   </a>
 </p>
 
-### 🌐 API Providers
+### 🌐 API Providers & Services
 
-Huge appreciation to all free public REST API providers and services:
+Huge appreciation to all free public REST API providers:
 
 <table>
 <tr>
 <td valign="top" width="33%">
 
-#### 📱 Social Media APIs
+**📱 Social Media APIs**
 - Instagram Downloader
 - TikTok Video API
 - Twitter/X Media API
@@ -706,7 +814,7 @@ Huge appreciation to all free public REST API providers and services:
 </td>
 <td valign="top" width="33%">
 
-#### 🎵 Media & Entertainment
+**🎵 Media & Entertainment**
 - Spotify Metadata
 - YouTube Music
 - SoundCloud
@@ -716,7 +824,7 @@ Huge appreciation to all free public REST API providers and services:
 </td>
 <td valign="top" width="33%">
 
-#### 🖼️ Image Processing
+**🖼️ Image Processing**
 - Remini Enhancement
 - Remove.bg API
 - Image Optimization
@@ -727,16 +835,16 @@ Huge appreciation to all free public REST API providers and services:
 </tr>
 </table>
 
-### ✨ Design & Visualization Tools
+### ✨ Design & Visualization
 
-Beautiful design elements and visualizations powered by:
+Beautiful design elements powered by:
 
 <p align="left">
   <a href="https://github.com/kyechan99/capsule-render">
     <img src="https://img.shields.io/badge/Capsule_Render-FF6B6B?style=for-the-badge&logo=vercel&logoColor=white" alt="Capsule Render" />
   </a>
-  <a href="https://github.com/anuraghazra/github-readme-stats">
-    <img src="https://img.shields.io/badge/Readme_Stats-4ECDC4?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Stats" />
+  <a href="https://github.com/DenverCoder1/readme-typing-svg">
+    <img src="https://img.shields.io/badge/Typing_SVG-4ECDC4?style=for-the-badge&logo=svg&logoColor=white" alt="Typing SVG" />
   </a>
   <a href="https://github.com/DenverCoder1/github-readme-streak-stats">
     <img src="https://img.shields.io/badge/Streak_Stats-F38181?style=for-the-badge&logo=github&logoColor=white" alt="Streak Stats" />
@@ -747,3 +855,41 @@ Beautiful design elements and visualizations powered by:
   <a href="https://contrib.rocks">
     <img src="https://img.shields.io/badge/Contrib_Rocks-DDB6F2?style=for-the-badge&logo=git&logoColor=white" alt="Contrib Rocks" />
   </a>
+  <a href="https://github.com/ryo-ma/github-profile-trophy">
+    <img src="https://img.shields.io/badge/Profile_Trophy-C9CBFF?style=for-the-badge&logo=github&logoColor=white" alt="Profile Trophy" />
+  </a>
+  <a href="https://skillicons.dev">
+    <img src="https://img.shields.io/badge/Skill_Icons-B5E8E0?style=for-the-badge&logo=iconify&logoColor=white" alt="Skill Icons" />
+  </a>
+</p>
+
+### 🙏 Community & Contributors
+
+- 💚 All [contributors](https://github.com/naruyaizumi/liora/graphs/contributors) who made this possible
+- 🌍 The amazing open-source community
+- ⭐ Everyone who starred this repository
+- 🐛 Bug reporters and feature requesters
+- 📖 Documentation writers and translators
+- 🎨 Designers and UX contributors
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+
+---
+
+<div align="center">
+
+### 🌟 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=naruyaizumi/liora&type=Date)](https://star-history.com/#naruyaizumi/liora&Date)
+
+<br>
+
+**Made with 🍥 and ☕ by [Naruya Izumi](https://github.com/naruyaizumi)**
+
+<sub>Version 7.5.0 • Last Updated: November 2025</sub>
+
+<br>
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer&text=Thank%20You!&fontSize=40&fontColor=ffffff&animation=twinkling&fontAlignY=75" width="100%" alt="Footer Wave" />
+
+</div>
