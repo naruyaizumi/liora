@@ -2,9 +2,7 @@
 
 ![Liora Banner](https://files.catbox.moe/uwutes.jpg)
 
-# 🌸 Liora
-
-### Modern WhatsApp Bot Framework built on Baileys with Bun Runtime
+<img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=32&duration=2800&pause=2000&color=A9FEF7&center=true&vCenter=true&width=940&lines=Welcome+to+Liora+Bot+Framework!+%F0%9F%8C%B8;Modern+WhatsApp+Automation;Built+with+Baileys+%26+Bun+Runtime" alt="Typing SVG" />
 
 <p align="center">
   <a href="https://github.com/naruyaizumi/liora/stargazers">
@@ -17,7 +15,7 @@
     <img src="https://img.shields.io/github/forks/naruyaizumi/liora?style=for-the-badge&logo=git&color=F2CDCD&logoColor=D9E0EE&labelColor=302D41" alt="forks">
   </a>
   <a href="https://github.com/naruyaizumi/liora">
-    <img src="https://img.shields.io/github/languages/code-size/naruyaizumi/liora?style=for-the-badge&logo=github&color=DDB6F2&logoColor=D9E0EE&labelColor=302D41" alt="code size">
+    <img src="https://img.shields.io/github/repo-size/naruyaizumi/liora?style=for-the-badge&logo=github&color=DDB6F2&logoColor=D9E0EE&labelColor=302D41" alt="repo size">
   </a>
 </p>
 
@@ -60,93 +58,136 @@
 
 <br>
 
-[✨ Features](#-features) • [🚀 Quick Start](#-quick-start) • [📁 Structure](#-project-structure) • [📖 Documentation](#-documentation) • [💬 Community](#-community)
+**[✨ Features](#-features) • [🚀 Quick Start](#-quick-start) • [📁 Structure](#-project-structure) • [📖 Documentation](#-documentation) • [💬 Community](#-community)**
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 </div>
 
----
-
 ## 🎯 Why Liora?
+
+<div align="center">
 
 > **Liora** is a modern, modular, and efficient WhatsApp bot framework built on **Baileys** and powered by **Bun runtime**. Designed for developers who demand **full control**, **performance**, and **flexibility** in their automation workflows.
 
 Built with pure ESM, hot-reloadable plugins, and native C++ addons for optimal performance.
 
-### 🎨 What Makes Liora Different?
+</div>
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  🚀 Baileys Integration  │ Latest WhatsApp Web API           │
-│  ⚡ Bun Runtime          │ Ultra-fast JavaScript execution   │
-│  🔥 Hot Reload           │ Update plugins without restart    │
-│  🧩 Modular Architecture │ Plugin-based design pattern       │
-│  🎯 Native Addons        │ C++ modules for performance       │
-│  🔒 SQLite Auth          │ Persistent session management     │
-│  💎 Zero Config          │ Works out of the box              │
-└─────────────────────────────────────────────────────────────┘
-```
+<br>
 
----
+## 🎨 What Makes Liora Different?
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 🚀 Baileys Integration
+Latest WhatsApp Web API with full feature support and real-time message handling
+
+### ⚡ Bun Runtime
+Ultra-fast JavaScript execution, 3x faster than Node.js with native TypeScript support
+
+### 🔥 Hot Reload
+Update plugins without restart, seamless development experience with zero downtime
+
+### 🧩 Modular Architecture
+Plugin-based design pattern for easy extensibility and maintainable codebase
+
+</td>
+<td width="50%" valign="top">
+
+### 🎯 Native Addons
+C++ modules for maximum performance optimization in image processing
+
+### 🔒 SQLite Auth
+Persistent session management with atomic operations and transaction safety
+
+### 💎 Zero Config
+Works out of the box with sensible defaults, no complex setup required
+
+### 🎨 Clean Code
+Modern ESM, type-safe patterns, best practices, and comprehensive documentation
+
+</td>
+</tr>
+</table>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 ## ✨ Features
 
+<table>
+<tr>
+<td width="50%" valign="top">
+
 ### 🤖 Bot Capabilities
 
-- ✓ AI Integration
-- ✓ Media Downloader
-- ✓ Image Processing
-- ✓ Sticker Maker with Watermark
-- ✓ Group Management Tools
-- ✓ Only Commands
+| Feature | Description |
+|---------|-------------|
+| 🤖 **AI Integration** | OpenAI GPT, Felo AI support |
+| 📥 **Media Downloader** | TikTok, Instagram, YouTube, Spotify |
+| 🖼️ **Image Processing** | Remini HD, RemoveBG, filters |
+| 🎨 **Sticker Maker** | Custom watermark support |
+| 👥 **Group Management** | Admin tools, moderation |
+| 🔒 **Command Protection** | Owner/Admin only commands |
+| 💬 **Auto Response** | Smart message handling |
+
+</td>
+<td width="50%" valign="top">
 
 ### 🏗️ Architecture
 
-- ✓ Pure ESM Modules
-- ✓ Hot-Reloadable Plugins
-- ✓ Event-Driven Design
-- ✓ Native C++ Addons
-- ✓ SQLite Session Store
-- ✓ Async-First Approach
-- ✓ Import Path Aliases
+| Component | Technology |
+|-----------|------------|
+| 📦 **Module System** | Pure ESM Modules |
+| 🔌 **Plugin System** | Hot-reloadable |
+| 🎭 **Design Pattern** | Event-Driven |
+| ⚡ **Performance** | Native C++ Addons |
+| 💾 **Database** | SQLite Persistence |
+| 🔄 **Async Handling** | Async-First |
+| 🔗 **Imports** | Path Aliases |
 
-### ⚡ Performance
+</td>
+</tr>
+</table>
 
-- ✓ Bun Runtime Optimized
-- ✓ Native Image Processing
-- ✓ Buffer-Based Operations
-- ✓ Efficient Memory Usage
-- ✓ Fast Startup Time
-- ✓ Minimal Dependencies
-
-### 🔐 Reliability
-
-- ✓ SQLite Auth State
-- ✓ Auto-Reconnect Logic
-- ✓ Error Recovery System
-- ✓ Transaction Safety
-- ✓ State Persistence
-- ✓ Graceful Shutdown
-
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 ## 🚀 Quick Start
 
 ### 📋 Prerequisites
 
-**System Requirements:**
+<table>
+<tr>
+<td width="50%" valign="top">
 
-```bash
-# Required
-- Bun >= 1.3.2
-- Linux
-- FFmpeg
-- libwebp-dev
-- Build tools (gcc, g++, make)
+#### Required Dependencies
 
-# Recommended
-- 2GB RAM minimum
-- 5GB disk space
-```
+| Package | Version | Purpose |
+|---------|---------|---------|
+| **Bun** | >= 1.3.2 | JavaScript Runtime |
+| **FFmpeg** | Latest | Media Processing |
+| **libwebp-dev** | Latest | WebP Support |
+| **Build Tools** | Latest | Native Compilation |
+| **Git** | Latest | Version Control |
+
+</td>
+<td width="50%" valign="top">
+
+#### System Requirements
+
+| Resource | Minimum | Recommended |
+|----------|---------|-------------|
+| **OS** | Linux | Ubuntu 22.04 LTS |
+| **RAM** | 1GB | 2GB+ |
+| **Storage** | 2GB | 5GB+ |
+| **CPU** | 1 Core | 2+ Cores |
+| **Network** | Stable | High-speed |
+
+</td>
+</tr>
+</table>
 
 ### ⚡ One-Line Installation
 
@@ -157,7 +198,9 @@ curl -sSL https://raw.githubusercontent.com/naruyaizumi/liora/main/service.sh | 
 ### 🔧 Manual Installation
 
 <details>
-<summary><b>Step 1: Install System Dependencies</b></summary>
+<summary><b>📦 Step 1: Install System Dependencies</b></summary>
+
+<br>
 
 ```bash
 # Debian/Ubuntu
@@ -170,7 +213,9 @@ apt-get install -y ffmpeg libwebp-dev \
 </details>
 
 <details>
-<summary><b>Step 2: Install Bun Runtime</b></summary>
+<summary><b>⚡ Step 2: Install Bun Runtime</b></summary>
+
+<br>
 
 ```bash
 curl -fsSL https://bun.sh/install | bash
@@ -179,7 +224,9 @@ curl -fsSL https://bun.sh/install | bash
 </details>
 
 <details>
-<summary><b>Step 3: Setup Liora</b></summary>
+<summary><b>🌸 Step 3: Setup Liora</b></summary>
+
+<br>
 
 ```bash
 # Clone repository
@@ -200,116 +247,51 @@ bun start
 
 <div align="center">
 
-### 🎉 Bot is now running! use pairing code.
+### 🎉 Bot is now running! Use pairing code to connect.
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 </div>
 
----
-
 ## 📁 Project Structure
 
-```
-liora/
-├── 📁 src/                      # Core application
-│   ├── index.js                # Entry point
-│   ├── main.js                 # Main bot logic
-│   ├── config.js               # Bot configuration
-│   └── global.js               # Global databases
-│
-├── 📁 lib/                      # Framework libraries
-│   ├── 📁 addon/               # Native C++ modules
-│   │   ├── bridge.js           # JS-C++ bridge
-│   │   ├── converter.cpp       # Media converter
-│   │   └── sticker.cpp         # Sticker processor
-│   │
-│   ├── 📁 api/                 # External API integrations
-│   │   ├── tiktok.js           # TikTok downloader
-│   │   ├── instagram.js        # Instagram downloader
-│   │   ├── spotify.js          # Spotify metadata
-│   │   ├── remini.js           # Image enhancement
-│   │   └── ...                 # More APIs
-│   │
-│   ├── 📁 auth/                # Authentication system
-│   │   ├── sqlite-auth.js      # SQLite auth handler
-│   │   ├── database-core.js    # Database operations
-│   │   └── database-config.js  # DB configuration
-│   │
-│   ├── 📁 core/                # Core WhatsApp logic
-│   │   ├── socket.js           # Socket handler
-│   │   ├── connection.js       # Connection manager
-│   │   ├── message.js          # Message processor
-│   │   ├── smsg.js             # Simplified message
-│   │   └── store.js            # Data store
-│   │
-│   └── uploader.js             # File uploader utility
-│
-├── 📁 plugins/                  # Plugin system
-│   ├── 📁 ai/                  # AI plugins
-│   │   ├── ai-openai.js        # OpenAI GPT
-│   │   └── ai-feloai.js        # Felo AI
-│   │
-│   ├── 📁 downloader/          # Downloader plugins
-│   │   ├── downloader-ig.js    # Instagram
-│   │   ├── downloader-tiktok.js # TikTok
-│   │   ├── downloader-ytplay.js # YouTube Play
-│   │   └── ...                 # More downloaders
-│   │
-│   ├── 📁 group/               # Group management
-│   │   ├── group-add.js        # Add member
-│   │   ├── group-kick.js       # Kick member
-│   │   ├── group-promote.js    # Promote admin
-│   │   └── ...                 # More group tools
-│   │
-│   ├── 📁 maker/               # Media makers
-│   │   ├── maker-sticker.js    # Sticker creator
-│   │   ├── maker-smeme.js      # Sticker meme
-│   │   ├── maker-carbon.js         # Code to image
-│   │   └── ...                 # More makers
-│   │
-│   ├── 📁 tool/                # Utility tools
-│   │   ├── tool-remini.js      # HD enhancer
-│   │   ├── tool-removebg.js    # Background remover
-│   │   ├── tool-tourl.js       # File to URL
-│   │   └── ...                 # More tools
-│   │
-│   ├── 📁 owner/               # Owner commands
-│   │   ├── owner-eval.js       # Code evaluator
-│   │   ├── owner-exec.js       # Shell executor
-│   │   └── ...                 # More owner tools
-│   │
-│   ├── 📁 info/                # Information
-│   │   ├── info-menu.js        # Command menu
-│   │   ├── info-ping.js        # Ping test
-│   │   └── ...                 # More info
-│   │
-│   └── 📁 internet/            # Internet tools
-│       ├── internet-npm.js     # NPM search
-│       ├── internet-yts.js     # YouTube search
-│       └── ...                 # More tools
-│
-├── 📁 database/                 # Data storage
-│   ├── auth.db                 # Auth state
-│   └── database.db             # Bot database
-│
-├── 📁 build/                    # Native addon builds
-│   └── Release/
-│       ├── converter.node      # Media converter
-│       └── sticker.node        # Sticker maker
-│
-├── handler.js                   # Plugin loader
-├── package.json                 # Dependencies
-├── bunfig.toml                  # Bun configuration
-└── binding.gyp                  # Native build config
-```
+<table>
+<tr>
+<td width="33%" valign="top">
 
----
+### 📂 Core Application
+
+| Path | Description |
+|------|-------------|
+| `src/index.js` | Entry point |
+| `src/main.js` | Main bot logic |
+| `src/config.js` | Configuration |
+| `src/global.js` | Global database |
+
+### 📚 Framework Libraries
+
+| Path | Description |
+|------|-------------|
+| `lib/addon/` | C++ native modules |
+| `lib/api/` | API integrations |
+| `lib/auth/` | Authentication system |
+| `lib/core/` | Core WhatsApp logic |
+| `lib/uploader.js` | File uploader |
+
+</td>
+</tr>
+</table>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 ## 📖 Documentation
 
 ### 🔧 Configuration
 
 <details>
-<summary><b>Basic Configuration (src/config.js)</b></summary>
+<summary><b>⚙️ Basic Configuration (src/config.js)</b></summary>
+
+<br>
 
 ```javascript
 global.config = {
@@ -317,7 +299,7 @@ global.config = {
     owner: [
         ["113748182302861", "Naruya Izumi"],
         ["227551947555018", "SXZnightmar"],
-        // Add more owners: ["LOCAL_IDENTIFIER", "Owner Name"]
+        // Add more: ["LOCAL_IDENTIFIER", "Name"]
     ],
 
     // Bot Identity
@@ -327,7 +309,7 @@ global.config = {
     stickauth: "© 𝙉͢𝙖𝙧𝙪𝙮𝙖 𝙄͢𝙯𝙪𝙢𝙞",
 
     // WhatsApp Pairing
-    pairingNumber: "", // Phone number for pairing (e.g., "628123456789")
+    pairingNumber: "", // e.g., "628123456789"
 
     // Community
     group: "https://chat.whatsapp.com/FtMSX1EsGHTJeynu8QmjpG",
@@ -337,7 +319,9 @@ global.config = {
 </details>
 
 <details>
-<summary><b>Import Path Aliases (package.json)</b></summary>
+<summary><b>🔗 Import Path Aliases (package.json)</b></summary>
+
+<br>
 
 ```json
 {
@@ -361,7 +345,9 @@ global.config = {
 ### 🔌 Plugin Development
 
 <details>
-<summary><b>Simple Plugin Example</b></summary>
+<summary><b>💡 Simple Plugin Example</b></summary>
+
+<br>
 
 ```javascript
 // plugins/info/info-ping.js
@@ -380,7 +366,9 @@ export default handler;
 </details>
 
 <details>
-<summary><b>Advanced Plugin with Media Processing</b></summary>
+<summary><b>🎨 Advanced Plugin with Media Processing</b></summary>
+
+<br>
 
 ```javascript
 // plugins/tool/tool-remini.js
@@ -432,7 +420,9 @@ export default handler;
 </details>
 
 <details>
-<summary><b>Plugin Structure Reference</b></summary>
+<summary><b>📋 Plugin Structure Reference</b></summary>
+
+<br>
 
 ```javascript
 let handler = async (m, { conn, args, usedPrefix, command, isOwner, text }) => {
@@ -440,86 +430,94 @@ let handler = async (m, { conn, args, usedPrefix, command, isOwner, text }) => {
 };
 
 // Required exports
-handler.help = ["command1", "command2"];  // Command names for help
-handler.tags = ["category"];              // Plugin category
+handler.help = ["command1", "command2"];  // Command names
+handler.tags = ["category"];              // Category
 handler.command = /^(cmd1|cmd2)$/i;       // Regex pattern
 
 // Optional exports
-handler.owner = false;      // Owner only (default: false)
-handler.admin = false;      // Admin only (default: false)
-handler.group = false;      // Group only (default: false)
-handler.botAdmin = false;   // Bot needs admin (default: false)
+handler.owner = false;      // Owner only
+handler.admin = false;      // Admin only
+handler.group = false;      // Group only
+handler.botAdmin = false;   // Bot admin required
 
 export default handler;
 ```
 
 </details>
 
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 ## 🛠️ Development Tools
 
+<table>
+<tr>
+<td width="50%" valign="top">
+
 ### 🔍 Available Scripts
 
-```bash
-# Start bot
-bun start
+| Command | Description |
+|---------|-------------|
+| `bun start` | Start the bot |
+| `bun run build:addon` | Build native addons |
+| `bun run format` | Format code with Prettier |
+| `bun run lint` | Check code quality |
+| `bun run lint:fix` | Fix linting issues |
 
-# Build native addons
-bun run build:addon
+</td>
+<td width="50%" valign="top">
 
-# Code formatting
-bun run format
+### ⚙️ Configuration Files
 
-# Linting
-bun run lint
-bun run lint:fix
-```
+| File | Purpose |
+|------|---------|
+| `bunfig.toml` | Bun runtime configuration |
+| `eslint.config.js` | ESLint rules |
+| `binding.gyp` | Native addon build config |
+| `package.json` | Project dependencies |
+| `.prettierrc` | Code formatting rules |
 
-### ⚙️ Bun Configuration (bunfig.toml)
+</td>
+</tr>
+</table>
 
-```toml
-smol = false
-logLevel = "error"
-
-[loader]
-".js" = "js"
-
-[install]
-optional = true
-dev = true
-peer = true
-exact = false
-frozenLockfile = false
-registry = "https://registry.npmjs.org"
-
-[install.cache]
-disable = true
-disableManifest = true
-
-[run]
-shell = "bun"
-bun = true
-silent = false
-```
-
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 ## 📊 Performance & Stats
 
 <div align="center">
 
+<table>
+<tr>
+<td align="center">
+
+### 📈 Bot Statistics
+
 | Metric | Value | Status |
 |:------:|:-----:|:------:|
-| **Plugin Count** | 70+ | ✅ Extensive |
+| **Plugin Count** | 85+ | ✅ Extensive |
 | **Startup Time** | < 3s | ✅ Fast |
 | **Memory Usage** | ~80MB | ✅ Efficient |
 | **Response Time** | < 200ms | ✅ Quick |
 | **Hot Reload** | Yes | ✅ Supported |
 
+</td>
+<td align="center">
+
+### 🏆 GitHub Stats
+
+<img src="https://github-readme-stats.vercel.app/api?username=naruyaizumi&show_icons=true&theme=tokyonight&hide_border=true&bg_color=1a1b27&title_color=70a5fd&icon_color=bf91f3&text_color=38bdae" width="100%" alt="GitHub Stats" />
+
+</td>
+</tr>
+</table>
+
+<img src="https://github-readme-streak-stats.herokuapp.com?user=naruyaizumi&theme=tokyonight&hide_border=true&background=1A1B27&stroke=70A5FD&ring=BF91F3&fire=FF6E6C&currStreakLabel=70A5FD" width="100%" alt="GitHub Streak" />
+
+<img src="https://github-readme-activity-graph.vercel.app/graph?username=naruyaizumi&theme=tokyo-night&hide_border=true&bg_color=1a1b27&color=70a5fd&line=bf91f3&point=38bdae" width="100%" alt="Activity Graph" />
+
 </div>
 
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 ## 🤝 Contributing
 
@@ -531,7 +529,13 @@ All types of contributions are valuable - bug fixes, features, docs, or feedback
 
 </div>
 
-### 🌟 How to Contribute
+<br>
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 📝 How to Contribute
 
 1. **Fork & Clone**
    ```bash
@@ -547,7 +551,12 @@ All types of contributions are valuable - bug fixes, features, docs, or feedback
 3. **Make Changes**
    - Follow existing code style
    - Test your changes
-   - Update documentation if needed
+   - Update documentation
+
+</td>
+<td width="50%" valign="top">
+
+### 🚀 Submit Changes
 
 4. **Commit & Push**
    ```bash
@@ -556,9 +565,13 @@ All types of contributions are valuable - bug fixes, features, docs, or feedback
    ```
 
 5. **Open Pull Request**
-   - Describe your changes clearly
+   - Describe changes clearly
    - Link related issues
    - Wait for review
+
+</td>
+</tr>
+</table>
 
 <div align="center">
 
@@ -570,7 +583,7 @@ All types of contributions are valuable - bug fixes, features, docs, or feedback
 
 </div>
 
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 ## 💬 Community
 
@@ -578,14 +591,40 @@ All types of contributions are valuable - bug fixes, features, docs, or feedback
 
 **Join our growing community!**
 
-| 📢 Updates Channel | 💭 Support Group |
-|:------------------:|:----------------:|
-| Get latest updates, releases, and announcements | Ask questions, share ideas, and get help from community |
-| [![Join Channel](https://img.shields.io/badge/Join-Channel-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03) | [![Join Group](https://img.shields.io/badge/Join-Group-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FtMSX1EsGHTJeynu8QmjpG) |
+<br>
+
+<table>
+<tr>
+<td align="center" width="50%">
+
+### 📢 Updates Channel
+
+Get latest updates, releases,
+and announcements
+
+<br>
+
+[![Join Channel](https://img.shields.io/badge/Join-Channel-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03)
+
+</td>
+<td align="center" width="50%">
+
+### 💭 Support Group
+
+Ask questions, share ideas,
+and get help from community
+
+<br>
+
+[![Join Group](https://img.shields.io/badge/Join-Group-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FtMSX1EsGHTJeynu8QmjpG)
+
+</td>
+</tr>
+</table>
 
 </div>
 
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 ## 📜 License
 
@@ -593,8 +632,7 @@ All types of contributions are valuable - bug fixes, features, docs, or feedback
 
 **Apache License 2.0**
 
-Licensed under the Apache License, Version 2.0.
-See [LICENSE](LICENSE) for details.
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for details.
 
 ```
 Copyright 2024 Naruya Izumi
@@ -602,39 +640,110 @@ Copyright 2024 Naruya Izumi
 
 </div>
 
----
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 ## 💖 Acknowledgments
 
-<div align="center">
-
 **Built with passion by developers, for developers**
 
-| Runtime | API | Language |
-|:-------:|:---:|:--------:|
-| ![Bun](https://img.shields.io/badge/Powered_by-Bun-black?style=for-the-badge&logo=bun&logoColor=white) | ![Baileys](https://img.shields.io/badge/Built_with-Baileys-00D9FF?style=for-the-badge&logo=whatsapp&logoColor=white) | ![JavaScript](https://img.shields.io/badge/Language-JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black) |
-| Ultra-fast Runtime | WhatsApp Web API | Modern ES Modules |
+### 🚀 Core Technologies
 
-**Special Thanks:**
+<p align="left">
+  <a href="https://bun.sh">
+    <img src="https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun&logoColor=white" alt="Bun" />
+  </a>
+  <a href="https://github.com/WhiskeySockets/Baileys">
+    <img src="https://img.shields.io/badge/Baileys-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="Baileys" />
+  </a>
+  <a href="https://www.javascript.com/">
+    <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript" />
+  </a>
+  <a href="https://www.sqlite.org/">
+    <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />
+  </a>
+  <a href="https://sharp.pixelplumbing.com/">
+    <img src="https://img.shields.io/badge/Sharp-99CC00?style=for-the-badge&logo=sharp&logoColor=white" alt="Sharp" />
+  </a>
+  <a href="https://ffmpeg.org/">
+    <img src="https://img.shields.io/badge/FFmpeg-007808?style=for-the-badge&logo=ffmpeg&logoColor=white" alt="FFmpeg" />
+  </a>
+</p>
 
-- 🙏 All [contributors](https://github.com/naruyaizumi/liora/graphs/contributors)
-- 💚 Open-source community
-- ⚡ [Bun](https://bun.sh) team
-- 📱 [Baileys](https://github.com/WhiskeySockets/Baileys) developers
-- 🎨 Everyone who starred this repo
+### 🤖 AI Assistants
 
-</div>
+Special thanks to AI assistants that helped in development and problem-solving:
 
----
+<p align="left">
+  <a href="https://openai.com/chatgpt">
+    <img src="https://img.shields.io/badge/ChatGPT-74aa9c?style=for-the-badge&logo=openai&logoColor=white" alt="ChatGPT" />
+  </a>
+  <a href="https://github.com/features/copilot">
+    <img src="https://img.shields.io/badge/GitHub_Copilot-000000?style=for-the-badge&logo=github&logoColor=white" alt="Copilot" />
+  </a>
+  <a href="https://gemini.google.com/">
+    <img src="https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white" alt="Gemini" />
+  </a>
+  <a href="https://claude.ai/">
+    <img src="https://img.shields.io/badge/Claude-181818?style=for-the-badge&logo=anthropic&logoColor=white" alt="Claude" />
+  </a>
+</p>
 
-<div align="center">
+### 🌐 API Providers
 
-### 🌟 Star this project if it helps you!
+Huge appreciation to all free public REST API providers and services:
 
-[![Star History Chart](https://api.star-history.com/svg?repos=naruyaizumi/liora&type=Date)](https://star-history.com/#naruyaizumi/liora&Date)
+<table>
+<tr>
+<td valign="top" width="33%">
 
-**Made with 🍥 and ☕ by [Naruya Izumi](https://github.com/naruyaizumi)**
+#### 📱 Social Media APIs
+- Instagram Downloader
+- TikTok Video API
+- Twitter/X Media API
+- Threads API
+- YouTube Data API
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=100&section=footer" width="100%" alt="Footer Wave" />
+</td>
+<td valign="top" width="33%">
 
-</div>
+#### 🎵 Media & Entertainment
+- Spotify Metadata
+- YouTube Music
+- SoundCloud
+- Apple Music API
+- Deezer API
+
+</td>
+<td valign="top" width="33%">
+
+#### 🖼️ Image Processing
+- Remini Enhancement
+- Remove.bg API
+- Image Optimization
+- Format Converters
+- Filter Services
+
+</td>
+</tr>
+</table>
+
+### ✨ Design & Visualization Tools
+
+Beautiful design elements and visualizations powered by:
+
+<p align="left">
+  <a href="https://github.com/kyechan99/capsule-render">
+    <img src="https://img.shields.io/badge/Capsule_Render-FF6B6B?style=for-the-badge&logo=vercel&logoColor=white" alt="Capsule Render" />
+  </a>
+  <a href="https://github.com/anuraghazra/github-readme-stats">
+    <img src="https://img.shields.io/badge/Readme_Stats-4ECDC4?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Stats" />
+  </a>
+  <a href="https://github.com/DenverCoder1/github-readme-streak-stats">
+    <img src="https://img.shields.io/badge/Streak_Stats-F38181?style=for-the-badge&logo=github&logoColor=white" alt="Streak Stats" />
+  </a>
+  <a href="https://github.com/ashutosh00710/github-readme-activity-graph">
+    <img src="https://img.shields.io/badge/Activity_Graph-95E1D3?style=for-the-badge&logo=github&logoColor=white" alt="Activity Graph" />
+  </a>
+  <a href="https://contrib.rocks">
+    <img src="https://img.shields.io/badge/Contrib_Rocks-DDB6F2?style=for-the-badge&logo=git&logoColor=white" alt="Contrib Rocks" />
+  </a>
