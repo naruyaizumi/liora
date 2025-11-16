@@ -19,9 +19,6 @@
   <a href="https://github.com/naruyaizumi/liora">
     <img src="https://img.shields.io/github/languages/code-size/naruyaizumi/liora?style=for-the-badge&logo=github&color=DDB6F2&logoColor=D9E0EE&labelColor=302D41" alt="code size">
   </a>
-</p>
-
-<p align="center">
   <a href="https://bun.sh">
     <img src="https://img.shields.io/badge/Bun-%3E=1.3.2-black?style=for-the-badge&logo=bun&logoColor=white" alt="bun">
   </a>
@@ -34,9 +31,6 @@
   <a href="https://github.com/naruyaizumi/liora/commits/main">
     <img src="https://img.shields.io/github/last-commit/naruyaizumi/liora?style=for-the-badge&logo=git&color=4ECDC4&logoColor=white" alt="last commit">
   </a>
-</p>
-
-<p align="center">
   <a href="https://github.com/naruyaizumi/liora/graphs/contributors">
     <img src="https://img.shields.io/github/contributors/naruyaizumi/liora?style=for-the-badge&logo=github&color=95E1D3&logoColor=white" alt="contributors">
   </a>
@@ -49,9 +43,6 @@
   <a href="https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03">
     <img src="https://img.shields.io/badge/WhatsApp-Channel-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="whatsapp">
   </a>
-</p>
-
-<p align="center">
   <img src="https://img.shields.io/badge/ESM-Modules-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="esm">
   <img src="https://img.shields.io/badge/Baileys-7.0.0_rc.6-00D9FF?style=for-the-badge&logo=whatsapp&logoColor=white" alt="baileys">
   <img src="https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="sqlite">
@@ -317,12 +308,6 @@ liora/
 │   ├── 📁 owner/        # Owner cmds
 │   ├── 📁 info/         # Information
 │   └── 📁 internet/     # Web tools
-```
-
-</td>
-<td width="50%">
-
-```
 ├── 📁 database/
 │   ├── auth.db          # Auth state
 │   └── database.db      # Bot data
@@ -586,7 +571,7 @@ export default handler;
 
 ### 🎯 Technology Stack
 
-<img src="https://skillicons.dev/icons?i=bun,js,cpp,sqlite,git,github" />
+<img src="https://skillicons.dev/icons?i=bun,js,nodejs,cpp,sqlite,git,github,docker,linux,cmake" />
 
 <br><br>
 
@@ -671,8 +656,6 @@ git push origin feature/YourFeature
 <a href="https://github.com/naruyaizumi/liora/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=naruyaizumi/liora" alt="Contributors" />
 </a>
-
-<img src="https://repobeats.axiom.co/api/embed/your-repo-id-here.svg" alt="Repobeats analytics" />
 
 </div>
 
