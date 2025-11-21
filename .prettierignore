@@ -1,2 +1,2 @@
-# Ignore artifacts:
 node_modules
+.github/

@@ -133,7 +133,7 @@ jobs:
 
                   if [[ `git status --porcelain` ]]; then
                     git add .
-                    git commit -m "style: auto-format with Prettier before release [skip ci]"
+                    git commit -m "style: auto-format with Prettier"
                     git push origin main
                     echo "Prettier formatting applied and pushed."
                   else
