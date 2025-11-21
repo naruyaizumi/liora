@@ -7,19 +7,6 @@
 ### Modern WhatsApp Bot Framework built on Baileys with Bun Runtime
 
 <p align="center">
-  <!-- CI Badges -->
-  <a href="https://github.com/naruyaizumi/liora/actions/workflows/codeql.yml">
-    <img src="https://github.com/naruyaizumi/liora/actions/workflows/codeql.yml/badge.svg" alt="CodeQL Analysis">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora/actions/workflows/eslint.yml">
-    <img src="https://github.com/naruyaizumi/liora/actions/workflows/eslint.yml/badge.svg" alt="ESLint Check">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora/actions/workflows/prettier.yml">
-    <img src="https://github.com/naruyaizumi/liora/actions/workflows/prettier.yml/badge.svg" alt="Prettier Format">
-  </a>
-</p>
-
-<p align="center">
   <!-- GitHub Stats -->
   <a href="https://github.com/naruyaizumi/liora/stargazers">
     <img src="https://img.shields.io/github/stars/naruyaizumi/liora?style=for-the-badge&logo=starship&color=C9CBFF&logoColor=D9E0EE&labelColor=302D41" alt="stars">
