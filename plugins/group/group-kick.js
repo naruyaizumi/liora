@@ -38,6 +38,6 @@ handler.tags = ["group"];
 handler.command = /^(kick|k)$/i;
 handler.group = true;
 handler.botAdmin = true;
-handler.admin = false;
+handler.admin = true;
 
 export default handler;
