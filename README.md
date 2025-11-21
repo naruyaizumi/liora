@@ -1,10 +1,10 @@
 <div align="center">
 
-![Liora Banner](https://files.catbox.moe/uwutes.jpg)
+![Liora Banner](https://files.catbox.moe/zyvr4m.jpg)
 
 # 🌸 Liora
 
-### Modern WhatsApp Bot Framework built on Baileys with Bun Runtime
+### Modern WhatsApp Bot Framework built on Baileys
 
 <p align="center">
   <a href="https://github.com/naruyaizumi/liora/releases">
@@ -55,7 +55,7 @@ Built with pure ESM, hot-reloadable plugins, and native C++ addons for optimal p
 > **Unauthorized modification, credit removal, or commercial distribution is strictly forbidden.**
 >
 > - Keep all author and contributor credits intact (README, configuration headers, and embedded metadata).
-> - Redistribution, reselling, or rebranding for personal gain is a direct violation of project terms. FUCK YOU BITCH!
+> - Redistribution, reselling, or rebranding for personal gain is a direct violation of project terms. **FVCK U BITCH!**
 >
 > Credits represent **respect, transparency, and acknowledgment** — not decoration.
 
