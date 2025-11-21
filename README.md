@@ -7,19 +7,6 @@
 ### Modern WhatsApp Bot Framework built on Baileys with Bun Runtime
 
 <p align="center">
-  <!-- GitHub Stats -->
-  <a href="https://github.com/naruyaizumi/liora/stargazers">
-    <img src="https://img.shields.io/github/stars/naruyaizumi/liora?style=for-the-badge&logo=starship&color=C9CBFF&logoColor=D9E0EE&labelColor=302D41" alt="stars">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora/network/members">
-    <img src="https://img.shields.io/github/forks/naruyaizumi/liora?style=for-the-badge&logo=git&color=F2CDCD&logoColor=D9E0EE&labelColor=302D41" alt="forks">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora">
-    <img src="https://img.shields.io/github/languages/code-size/naruyaizumi/liora?style=for-the-badge&logo=github&color=DDB6F2&logoColor=D9E0EE&labelColor=302D41" alt="code size">
-  </a>
-</p>
-
-<p align="center">
   <a href="https://github.com/naruyaizumi/liora/releases">
     <img src="https://img.shields.io/github/v/release/naruyaizumi/liora?style=for-the-badge&logo=semantic-release&color=FF6B6B&logoColor=white" alt="release">
   </a>
@@ -29,10 +16,6 @@
   <a href="https://github.com/naruyaizumi/liora/pulls">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=for-the-badge&logo=github-actions&logoColor=white" alt="prs">
   </a>
-</p>
-
-<p align="center">
-  <!-- Tech Stack -->
   <a href="https://bun.sh">
     <img src="https://img.shields.io/badge/Bun-%3E=1.3.2-black?style=for-the-badge&logo=bun&logoColor=white" alt="bun">
   </a>
@@ -454,31 +437,6 @@ export default handler;
 
 ---
 
-## 📊 Performance & Stats
-
-### 📈 Bot Statistics
-
-| Metric | Value | Status |
-|:------:|:-----:|:------:|
-| **Plugin Count** | 85+ | ✅ Extensive |
-| **Startup Time** | < 3s | ✅ Fast |
-| **Memory Usage** | ~80MB | ✅ Efficient |
-| **Response Time** | < 200ms | ✅ Quick |
-| **Hot Reload** | Yes | ✅ Supported |
-| **Native Modules** | 2 | ✅ Optimized |
-
-### 🎯 Technology Stack
-
-<div align="center">
-
-**Core Technologies**
-
-<img src="https://skillicons.dev/icons?i=bun,js,nodejs,cpp,sqlite,git,github,docker,linux,cmake,eslint" />
-
-</div>
-
----
-
 ## 🤝 Contributing
 
 <div align="center">
@@ -700,49 +658,6 @@ Special thanks to AI assistants that helped in development:
   <a href="https://star-history.com/#naruyaizumi/liora&Date">
     <img src="https://api.star-history.com/svg?repos=naruyaizumi/liora&type=Date" width="700" alt="Star History Chart"/>
   </a>
-
-  <hr/>
-
-  <p><strong>📊 GitHub Stats</strong></p>
-  <img src="https://github-readme-stats.vercel.app/api?username=naruyaizumi&show_icons=true&theme=tokyonight" width="600" alt="GitHub Stats"/>
-
-  <hr/>
-
-  <p><strong>🔥 Streak Stats</strong></p>
-  <img src="https://github-readme-streak-stats.herokuapp.com?user=naruyaizumi&theme=tokyonight" width="600" alt="Streak Stats"/>
-
-  <hr/>
-
-  <p><strong>🧑‍💻 Languages & Code Stats</strong></p>
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=naruyaizumi&layout=compact&theme=tokyonight" width="500" alt="Top Languages"/>
-  <br/>
-  <a href="https://github.com/naruyaizumi/liora">
-    <img src="https://github-readme-activity-graph.vercel.app/graph?username=naruyaizumi&theme=tokyo-night" width="700" alt="Activity Graph"/>
-  </a>
-
-  <hr/>
-
-  <p><strong>🏆 Achievements</strong></p>
-  <a href="https://github.com/ryo-ma/github-profile-trophy">
-    <img src="https://github-profile-trophy.vercel.app/?username=naruyaizumi&theme=tokyonight&no-frame=true&row=1&column=7" width="700" alt="Trophy"/>
-  </a>
-
-  <hr/>
-
-  <p><strong>📦 Repo Card</strong></p>
-  <a href="https://github.com/naruyaizumi/liora">
-    <img src="https://github-readme-stats.vercel.app/api/pin/?username=naruyaizumi&repo=liora&theme=tokyonight" width="500" alt="Repo Card"/>
-  </a>
-
-  <hr/>
-
-  <p><strong>👀 Profile Views</strong></p>
-  <img src="https://komarev.com/ghpvc/?username=naruyaizumi&style=for-the-badge&color=blueviolet" alt="Profile Views"/>
-
-  <hr/>
-
-  <p><strong>📦 Release & Downloads</strong></p>
-  <img src="https://img.shields.io/github/downloads/naruyaizumi/liora/total?style=for-the-badge&color=4ECDC4&logo=github" alt="Downloads"/>
 
   <hr/>
 
