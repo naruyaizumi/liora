@@ -164,7 +164,10 @@ class AsyncCommandProcessor {
 
         try {
             const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Command execution timeout')), this.commandTimeout);
+                setTimeout(
+                    () => reject(new Error("Command execution timeout")),
+                    this.commandTimeout
+                );
             });
 
             await Promise.race([fn(), timeoutPromise]);
@@ -309,22 +312,22 @@ const traceError = async (conn, m, pluginRef, chatRef, e) => {
 const isFromSelf = (m, botUser) => {
     if (!m || !botUser) return false;
     if (m.key?.fromMe) return true;
-    
+
     const botJid = botUser.jid || botUser.id;
     if (!botJid) return false;
-    
-    const normalizedBotJid = botJid.split('@')[0];
-    
+
+    const normalizedBotJid = botJid.split("@")[0];
+
     if (m.sender) {
-        const normalizedSender = m.sender.split('@')[0];
+        const normalizedSender = m.sender.split("@")[0];
         if (normalizedSender === normalizedBotJid) return true;
     }
-    
+
     if (m.key?.participant) {
-        const normalizedParticipant = m.key.participant.split('@')[0];
+        const normalizedParticipant = m.key.participant.split("@")[0];
         if (normalizedParticipant === normalizedBotJid) return true;
     }
-    
+
     return false;
 };
 
@@ -339,12 +342,12 @@ export async function handler(chatUpdate) {
     if (!m || m.isBaileys || m.isChannel) return;
 
     const settings = getSettings(this.user?.jid);
-    
+
     const isSelfMessage = isFromSelf(m, this.user);
-    
+
     if (isSelfMessage) {
-        const text = m.text || '';
-        if (!text.startsWith('!self')) {
+        const text = m.text || "";
+        if (!text.startsWith("!self")) {
             return;
         }
     }
@@ -355,7 +358,7 @@ export async function handler(chatUpdate) {
         this.logger?.warn("Could not resolve sender LID");
         return;
     }
-    
+
     const regOwners = (global.config?.owner || [])
         .filter(([id]) => id)
         .map(([id]) => {
@@ -376,7 +379,7 @@ export async function handler(chatUpdate) {
     const isRAdmin = user?.admin === "superadmin";
     const isAdmin = isRAdmin || user?.admin === "admin";
     const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
-    
+
     const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), "./plugins");
 
     const pluginSnapshot = Object.entries(global.plugins || {});
@@ -398,26 +401,26 @@ export async function handler(chatUpdate) {
 
     const availablePlugins = {};
     const shouldRestrictAdmin = !settings?.restrict;
-    
+
     for (const [name, plugin] of Object.entries(global.plugins || {})) {
         if (!plugin || plugin.disabled) continue;
-        
+
         if (shouldRestrictAdmin && plugin.tags?.includes("admin")) {
             continue;
         }
-        
+
         availablePlugins[name] = plugin;
     }
 
     const chat = global.db?.data?.chats?.[m.chat];
-    
+
     if (!m.fromMe && settings?.self && !isOwner) return;
-    
+
     if (settings?.gconly && !m.isGroup && !isOwner) {
         await sendDenied(this, m);
         return;
     }
-    
+
     if (!isAdmin && !isOwner && chat?.adminOnly) return;
     if (!isOwner && chat?.mute) return;
 
@@ -545,9 +548,11 @@ export async function handler(chatUpdate) {
                 await safe(() => targetPlugin.after.call(conn, m, extra));
             }
         } catch (e) {
-            if (e?.message?.includes("timeout") || 
-                e?.message?.includes("timed out") || 
-                e?.name === "TimeoutError") {
+            if (
+                e?.message?.includes("timeout") ||
+                e?.message?.includes("timed out") ||
+                e?.name === "TimeoutError"
+            ) {
                 conn.logger?.warn(`Command "${targetName}" timed out for user ${m.sender}`);
                 await safe(async () => {
                     await m.reply(

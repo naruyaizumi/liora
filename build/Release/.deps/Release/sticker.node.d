@@ -1,0 +1,1 @@
+cmd_Release/sticker.node := ln -f "Release/obj.target/sticker.node" "Release/sticker.node" 2>/dev/null || (rm -rf "Release/sticker.node" && cp -af "Release/obj.target/sticker.node" "Release/sticker.node")

@@ -14,7 +14,7 @@ import {
     EventManager,
     CleanupManager,
     registerProcess,
-    setupMaintenance
+    setupMaintenance,
 } from "#connection";
 import { naruyaizumi } from "#socket";
 
@@ -83,11 +83,11 @@ async function LIORA() {
 
     global.conn = naruyaizumi(connection);
     global.conn.isInit = false;
-    
+
     if (!auth.state.creds.registered && pairingNumber) {
         await setupPairingCode(conn);
     }
-    
+
     const CM = new CleanupManager();
     registerProcess(CM);
     const EM = new EventManager();
@@ -102,14 +102,12 @@ async function LIORA() {
         import.meta.url
     );
     const filename = fileURLToPath(import.meta.url);
-    const dirname  = path.dirname(filename);
+    const dirname = path.dirname(filename);
     const pluginFolder = path.join(dirname, "../plugins");
 
     try {
-        const reloadCleanup = await initReload(
-            global.conn,
-            pluginFolder,
-            (dir, skipCache) => getAllPlugins(dir, pluginCache, skipCache)
+        const reloadCleanup = await initReload(global.conn, pluginFolder, (dir, skipCache) =>
+            getAllPlugins(dir, pluginCache, skipCache)
         );
 
         if (typeof reloadCleanup === "function") {
@@ -123,7 +121,6 @@ async function LIORA() {
     }
 
     serialize();
-
 }
 
 LIORA().catch((e) => {

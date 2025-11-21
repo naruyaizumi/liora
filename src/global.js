@@ -259,10 +259,7 @@ function ensureTable(tableName, schema) {
                     sqlite.exec(`ALTER TABLE ${tableName} ADD COLUMN ${col} ${def}`);
                 } catch (e) {
                     if (logger) {
-                        logger.error(
-                            { column: col, error: e.message },
-                            `Failed to add column`
-                        );
+                        logger.error({ column: col, error: e.message }, `Failed to add column`);
                     }
                 }
             }

@@ -1,8 +1,6 @@
 import os from "os";
 
-const CATEGORIES = ["ai", "downloader", "group", "info", "internet", "maker",
-    "owner", "tools"
-];
+const CATEGORIES = ["ai", "downloader", "group", "info", "internet", "maker", "owner", "tools"];
 
 const MENU_META = {
     ai: "AI",
@@ -17,35 +15,31 @@ const MENU_META = {
 
 let handler = async (m, { conn, usedPrefix, command, args }) => {
     await global.loading(m, conn);
-    
+
     try {
         const pkg = await getPackageInfo();
         const help = getPluginHelp();
         const input = (args[0] || "").toLowerCase();
         const timestamp = new Date().toTimeString().split(" ")[0];
-        
+
         if (input === "all") {
-            return await allCommands(conn, m, help, usedPrefix,
-                timestamp);
+            return await allCommands(conn, m, help, usedPrefix, timestamp);
         }
-        
+
         if (!input) {
-            return await mainMenu(conn, m, pkg, usedPrefix, command,
-                timestamp);
+            return await mainMenu(conn, m, pkg, usedPrefix, command, timestamp);
         }
-        
+
         const idx = parseInt(input) - 1;
-        const category = !isNaN(idx) && CATEGORIES[idx] ? CATEGORIES[
-            idx] : input;
-        
+        const category = !isNaN(idx) && CATEGORIES[idx] ? CATEGORIES[idx] : input;
+
         if (!CATEGORIES.includes(category)) {
             return m.reply(
                 `Invalid category. Use \`${usedPrefix + command}\` to see available categories.`
             );
         }
-        
-        return await category(conn, m, help, category, usedPrefix,
-            command, timestamp);
+
+        return await category(conn, m, help, category, usedPrefix, command, timestamp);
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
@@ -56,17 +50,20 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
 
 async function allCommands(conn, m, help, usedPrefix, timestamp) {
     const allCmds = CATEGORIES.map((cat) => {
-            const cmds = formatCommandList(help, cat, usedPrefix);
-            return cmds.length > 0 ?
-                `\n${MENU_META[cat]}\n${cmds.join("\n")}` : "";
-        })
+        const cmds = formatCommandList(help, cat, usedPrefix);
+        return cmds.length > 0 ? `\n${MENU_META[cat]}\n${cmds.join("\n")}` : "";
+    })
         .filter(Boolean)
         .join("\n");
-    
-    const text = ["```", `[${timestamp}] All Commands`,
-        "────────────────────────────", allCmds, "```"
+
+    const text = [
+        "```",
+        `[${timestamp}] All Commands`,
+        "────────────────────────────",
+        allCmds,
+        "```",
     ].join("\n");
-    
+
     return conn.sendMessage(
         m.chat,
         {
@@ -87,14 +84,15 @@ async function allCommands(conn, m, help, usedPrefix, timestamp) {
                     renderLargerThumbnail: true,
                 },
             },
-        }, { quoted: q() }
+        },
+        { quoted: q() }
     );
 }
 
 async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
     const uptimeBot = formatTime(process.uptime());
     const uptimeSys = formatTime(os.uptime());
-    
+
     const caption = [
         "```",
         `[${timestamp}] Liora Environment`,
@@ -113,26 +111,28 @@ async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
         "Select a category below to view commands",
         "```",
     ].join("\n");
-    
+
     const sections = [
-    {
-        title: "Command Categories",
-        rows: CATEGORIES.map((cat) => ({
-            title: MENU_META[cat],
-            description: `View ${MENU_META[cat]} commands`,
-            id: `${usedPrefix + command} ${cat}`,
-        })),
-    },
-    {
-        title: "Other Options",
-        rows: [
         {
-            title: "All Commands",
-            description: "View all commands at once",
-            id: `${usedPrefix + command} all`,
-        }, ],
-    }, ];
-    
+            title: "Command Categories",
+            rows: CATEGORIES.map((cat) => ({
+                title: MENU_META[cat],
+                description: `View ${MENU_META[cat]} commands`,
+                id: `${usedPrefix + command} ${cat}`,
+            })),
+        },
+        {
+            title: "Other Options",
+            rows: [
+                {
+                    title: "All Commands",
+                    description: "View all commands at once",
+                    id: `${usedPrefix + command} all`,
+                },
+            ],
+        },
+    ];
+
     return await conn.sendButton(
         m.chat,
         {
@@ -152,73 +152,77 @@ async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
             title: "Liora Menu",
             footer: global.config.watermark || "Liora WhatsApp Bot",
             buttons: [
-            {
-                name: "single_select",
-                buttonParamsJson: JSON.stringify({
-                    title: "Select Category",
-                    sections,
-                }),
-            },
-            {
-                name: "quick_reply",
-                buttonParamsJson: JSON.stringify({
-                    display_text: "Owner",
-                    id: `${usedPrefix}owner`,
-                }),
-            },
-            {
-                name: "cta_url",
-                buttonParamsJson: JSON.stringify({
-                    display_text: "Script",
-                    url: "https://github.com/naruyaizumi/liora",
-                }),
-            }, ],
+                {
+                    name: "single_select",
+                    buttonParamsJson: JSON.stringify({
+                        title: "Select Category",
+                        sections,
+                    }),
+                },
+                {
+                    name: "quick_reply",
+                    buttonParamsJson: JSON.stringify({
+                        display_text: "Owner",
+                        id: `${usedPrefix}owner`,
+                    }),
+                },
+                {
+                    name: "cta_url",
+                    buttonParamsJson: JSON.stringify({
+                        display_text: "Script",
+                        url: "https://github.com/naruyaizumi/liora",
+                    }),
+                },
+            ],
             hasMediaAttachment: false,
-        }, { quoted: q() }
+        },
+        { quoted: q() }
     );
 }
 
-async function category(conn, m, help, category, usedPrefix, command,
-    timestamp) {
+async function category(conn, m, help, category, usedPrefix, command, timestamp) {
     const cmds = formatCommandList(help, category, usedPrefix);
-    
+
     const text =
-        cmds.length > 0 ? [
-            "```",
-            `[${timestamp}] ${MENU_META[category]} Commands`,
-            "────────────────────────────",
-            cmds.join("\n"),
-            "────────────────────────────",
-            `Total: ${cmds.length} commands`,
-            "```",
-        ].join("\n") :
-        `No commands found for ${MENU_META[category]} category.`;
-    
+        cmds.length > 0
+            ? [
+                  "```",
+                  `[${timestamp}] ${MENU_META[category]} Commands`,
+                  "────────────────────────────",
+                  cmds.join("\n"),
+                  "────────────────────────────",
+                  `Total: ${cmds.length} commands`,
+                  "```",
+              ].join("\n")
+            : `No commands found for ${MENU_META[category]} category.`;
+
     const otherCategories = CATEGORIES.filter((cat) => cat !== category);
     const sections = [
-    {
-        title: "Other Categories",
-        rows: otherCategories.map((cat) => ({
-            title: MENU_META[cat],
-            description: `View ${MENU_META[cat]} commands`,
-            id: `${usedPrefix + command} ${cat}`,
-        })),
-    },
-    {
-        title: "Navigation",
-        rows: [
         {
-            title: "Main Menu",
-            description: "Back to main menu",
-            id: usedPrefix + command,
+            title: "Other Categories",
+            rows: otherCategories.map((cat) => ({
+                title: MENU_META[cat],
+                description: `View ${MENU_META[cat]} commands`,
+                id: `${usedPrefix + command} ${cat}`,
+            })),
         },
         {
-            title: "All Commands",
-            description: "View all commands",
-            id: `${usedPrefix + command} all`,
-        }, ],
-    }, ];
-    
+            title: "Navigation",
+            rows: [
+                {
+                    title: "Main Menu",
+                    description: "Back to main menu",
+                    id: usedPrefix + command,
+                },
+                {
+                    title: "All Commands",
+                    description: "View all commands",
+                    id: `${usedPrefix + command} all`,
+                },
+            ],
+        },
+    ];
+
     return await conn.sendButton(
         m.chat,
         {
@@ -238,15 +242,17 @@ async function category(conn, m, help, category, usedPrefix, command,
             title: MENU_META[category],
             footer: global.config.watermark || "Liora WhatsApp Bot",
             buttons: [
-            {
-                name: "single_select",
-                buttonParamsJson: JSON.stringify({
-                    title: "Other Categories",
-                    sections,
-                }),
-            }, ],
+                {
+                    name: "single_select",
+                    buttonParamsJson: JSON.stringify({
+                        title: "Other Categories",
+                        sections,
+                    }),
+                },
+            ],
             hasMediaAttachment: false,
-        }, { quoted: q() }
+        },
+        { quoted: q() }
     );
 }
 
@@ -261,8 +267,7 @@ function formatTime(sec) {
     const h = Math.floor(m / 60);
     const d = Math.floor(h / 24);
     return (
-        [d && `${d}d`, h % 24 && `${h % 24}h`, m % 60 && `${m % 60}m`]
-        .filter(Boolean).join(" ") ||
+        [d && `${d}d`, h % 24 && `${h % 24}h`, m % 60 && `${m % 60}m`].filter(Boolean).join(" ") ||
         "0m"
     );
 }
@@ -298,13 +303,13 @@ function formatCommandList(help, category, usedPrefix) {
         .filter((p) => p.tags.includes(category))
         .flatMap((p) =>
             p.help.map((cmd) => {
-                const badge = p.mods ?
-                    " (developer)" :
-                    p.owner ?
-                    " (owner)" :
-                    p.admin ?
-                    " (admin)" :
-                    "";
+                const badge = p.mods
+                    ? " (developer)"
+                    : p.owner
+                      ? " (owner)"
+                      : p.admin
+                        ? " (admin)"
+                        : "";
                 return `- ${usedPrefix + cmd}${badge}`;
             })
         );
@@ -318,7 +323,7 @@ FN:ttname
 item1.TEL;waid=13135550002:+1 (313) 555-0002
 item1.X-ABLabel:Ponsel
 END:VCARD`;
-    
+
     return {
         key: {
             fromMe: false,

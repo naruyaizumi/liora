@@ -48,16 +48,16 @@ Built with pure ESM, hot-reloadable plugins, and native C++ addons for optimal p
 
 ### 🎨 What Makes Liora Different?
 
-| Feature | Description |
-|---------|-------------|
-| 🚀 **Baileys Integration** | Latest WhatsApp Web API with full feature support |
-| ⚡ **Bun Runtime** | Ultra-fast JavaScript execution, up to 3x faster than Node.js |
-| 🔥 **Hot Reload** | Update plugins without restart, seamless development experience |
-| 🧩 **Modular Architecture** | Plugin-based design pattern for easy extensibility |
-| 🎯 **Native Addons** | C++ modules for maximum performance optimization |
-| 🔒 **SQLite Auth** | Persistent session management with atomic operations |
-| 💎 **Zero Config** | Works out of the box with sensible defaults |
-| 🎨 **Clean Code** | Modern ESM, type-safe patterns, and best practices |
+| Feature                     | Description                                                     |
+| --------------------------- | --------------------------------------------------------------- |
+| 🚀 **Baileys Integration**  | Latest WhatsApp Web API with full feature support               |
+| ⚡ **Bun Runtime**          | Ultra-fast JavaScript execution, up to 3x faster than Node.js   |
+| 🔥 **Hot Reload**           | Update plugins without restart, seamless development experience |
+| 🧩 **Modular Architecture** | Plugin-based design pattern for easy extensibility              |
+| 🎯 **Native Addons**        | C++ modules for maximum performance optimization                |
+| 🔒 **SQLite Auth**          | Persistent session management with atomic operations            |
+| 💎 **Zero Config**          | Works out of the box with sensible defaults                     |
+| 🎨 **Clean Code**           | Modern ESM, type-safe patterns, and best practices              |
 
 ---
 
@@ -196,13 +196,13 @@ global.config = {
 
 ```json
 {
-  "imports": {
-    "#config": "./src/config.js",
-    "#global": "./src/global.js",
-    "#message": "./lib/core/message.js",
-    "#socket": "./lib/core/socket.js",
-    "#connection": "./lib/core/connection.js"
-  }
+    "imports": {
+        "#config": "./src/config.js",
+        "#global": "./src/global.js",
+        "#message": "./lib/core/message.js",
+        "#socket": "./lib/core/socket.js",
+        "#connection": "./lib/core/connection.js"
+    }
 }
 ```
 
@@ -290,15 +290,15 @@ let handler = async (m, { conn, args, usedPrefix, command, isOwner, text }) => {
 };
 
 // Required exports
-handler.help = ["command1", "command2"];  // Command names
-handler.tags = ["category"];              // Category
-handler.command = /^(cmd1|cmd2)$/i;       // Regex pattern
+handler.help = ["command1", "command2"]; // Command names
+handler.tags = ["category"]; // Category
+handler.command = /^(cmd1|cmd2)$/i; // Regex pattern
 
 // Optional exports
-handler.owner = false;      // Owner only
-handler.admin = false;      // Admin only
-handler.group = false;      // Group only
-handler.botAdmin = false;   // Bot admin required
+handler.owner = false; // Owner only
+handler.admin = false; // Admin only
+handler.group = false; // Group only
+handler.botAdmin = false; // Bot admin required
 
 export default handler;
 ```
@@ -311,23 +311,23 @@ export default handler;
 
 ### 🔍 Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `bun start` | Start the bot |
-| `bun run build:addon` | Build native addons |
-| `bun run format` | Format code (Prettier) |
-| `bun run lint` | Check code quality |
-| `bun run lint:fix` | Fix linting issues |
+| Command               | Description            |
+| --------------------- | ---------------------- |
+| `bun start`           | Start the bot          |
+| `bun run build:addon` | Build native addons    |
+| `bun run format`      | Format code (Prettier) |
+| `bun run lint`        | Check code quality     |
+| `bun run lint:fix`    | Fix linting issues     |
 
 ### ⚙️ Configuration Files
 
-| File | Purpose |
-|------|---------|
-| `bunfig.toml` | Bun runtime config |
-| `eslint.config.js` | ESLint rules |
-| `binding.gyp` | Native addon build |
-| `package.json` | Dependencies |
-| `.prettierrc` | Code formatting |
+| File               | Purpose            |
+| ------------------ | ------------------ |
+| `bunfig.toml`      | Bun runtime config |
+| `eslint.config.js` | ESLint rules       |
+| `binding.gyp`      | Native addon build |
+| `package.json`     | Dependencies       |
+| `.prettierrc`      | Code formatting    |
 
 ---
 
@@ -437,15 +437,16 @@ and get help from community
 
 Liora is released under the **Apache License 2.0**, a permissive open-source license that allows you to:
 
-- Use the code freely for personal or commercial projects  
-- Modify and adapt it to fit your needs  
-- Distribute your own versions, as long as you include proper attribution  
-- Contribute improvements back to the community  
+- Use the code freely for personal or commercial projects
+- Modify and adapt it to fit your needs
+- Distribute your own versions, as long as you include proper attribution
+- Contribute improvements back to the community
 
-However, the license also ensures that:  
-- You must include a copy of the license in any distribution  
-- You cannot hold the authors liable for damages  
-- You must clearly state changes if you modify the code  
+However, the license also ensures that:
+
+- You must include a copy of the license in any distribution
+- You cannot hold the authors liable for damages
+- You must clearly state changes if you modify the code
 
 See the full license text in [LICENSE](LICENSE) for all details.
 
@@ -534,12 +535,12 @@ Special thanks to AI assistants that helped in development:
 
 ### 🙏 Community & Contributors
 
-- 💚 All [contributors](https://github.com/naruyaizumi/liora/graphs/contributors) who made this possible  
-- 🌍 The amazing open-source community  
-- ⭐ Everyone who starred this repository  
-- 🐛 Bug reporters and feature requesters  
-- 📖 Documentation writers and translators  
-- 🎨 Designers and UX contributors  
+- 💚 All [contributors](https://github.com/naruyaizumi/liora/graphs/contributors) who made this possible
+- 🌍 The amazing open-source community
+- ⭐ Everyone who starred this repository
+- 🐛 Bug reporters and feature requesters
+- 📖 Documentation writers and translators
+- 🎨 Designers and UX contributors
 
 ---
 
@@ -555,7 +556,7 @@ Special thanks to AI assistants that helped in development:
   <p><strong>Made with 🍥 and ☕ by <a href="https://github.com/naruyaizumi">Naruya Izumi</a></strong></p>
   <sub>Version 7.5.0 • Last Updated: December 2024</sub>
 
-  <br/><br/>
+<br/><br/>
 
   <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer&text=Thank%20You!&fontSize=40&fontColor=ffffff&animation=twinkling&fontAlignY=75" width="100%" alt="Footer"/>
 

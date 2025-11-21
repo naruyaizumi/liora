@@ -42,7 +42,7 @@ global.config = {
     ],
 
     group: "https://chat.whatsapp.com/FtMSX1EsGHTJeynu8QmjpG",
-    
+
     /*============= PAIRING =============*/
     /**
      * pairingNumber:
