@@ -1,1 +1,0 @@
-cmd_Release/obj.target/converter.node := g++ -o Release/obj.target/converter.node -shared -pthread -rdynamic -Wl,--as-needed -Wl,--gc-sections -m64  -Wl,-soname=converter.node -Wl,--start-group Release/obj.target/converter/lib/addon/converter.o Release/obj.target/node_modules/node-addon-api/nothing.a -Wl,--end-group -lavformat -lavcodec -lavutil -lswresample -lswscale

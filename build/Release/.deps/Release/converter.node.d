@@ -1,1 +1,0 @@
-cmd_Release/converter.node := ln -f "Release/obj.target/converter.node" "Release/converter.node" 2>/dev/null || (rm -rf "Release/converter.node" && cp -af "Release/obj.target/converter.node" "Release/converter.node")

@@ -34,9 +34,9 @@
     },
     "dependencies": {
         "async-mutex": "^0.5.0",
+        "baileys": "^7.0.0-rc.9",
         "chokidar": "^4.0.3",
         "file-type": "^21.0.0",
-        "naruyaizumi": "^26.0.10",
         "p-queue": "^9.0.1",
         "pino": "^10.1.0",
         "pino-pretty": "^13.1.2",
@@ -92,7 +92,7 @@
         ]
     },
     "trustedDependencies": [
-        "naruyaizumi",
+        "baileys",
         "protobufjs",
         "sharp"
     ]

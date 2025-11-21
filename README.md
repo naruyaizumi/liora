@@ -46,6 +46,19 @@
 
 Built with pure ESM, hot-reloadable plugins, and native C++ addons for optimal performance.
 
+> [!CAUTION]
+> **Do not publicly disclose vulnerabilities or internal bugs.**  
+> If you discover a security issue, report it responsibly through the official issue templates or via direct contact.  
+> This process preserves the **integrity, stability, and trust** of the Liora ecosystem.
+
+> [!WARNING]
+> **Unauthorized modification, credit removal, or commercial distribution is strictly forbidden.**
+>
+> - Keep all author and contributor credits intact (README, configuration headers, and embedded metadata).
+> - Redistribution, reselling, or rebranding for personal gain is a direct violation of project terms. FUCK YOU BITCH!
+>
+> Credits represent **respect, transparency, and acknowledgment** — not decoration.
+
 ### 🎨 What Makes Liora Different?
 
 | Feature                     | Description                                                     |
