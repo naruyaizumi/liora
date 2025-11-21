@@ -75,9 +75,12 @@ apt-get update -qq || {
     exit 1
 }
 
-apt-get install -y ffmpeg libwebp-dev \
-    libavformat-dev libavcodec-dev libavutil-dev libswresample-dev libswscale-dev \
-    build-essential python3 g++ git curl unzip || {
+sudo apt-get install -y \
+    ffmpeg libwebp-dev libavformat-dev \
+    libavcodec-dev libavutil-dev libswresample-dev \
+    libswscale-dev libavfilter-dev build-essential \
+    python3 g++ pkg-config \
+    cmake git curl unzip || {
     print_error "Failed to install system dependencies"
     exit 1
 }

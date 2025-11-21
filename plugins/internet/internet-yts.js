@@ -1,6 +1,4 @@
 import yts from "yt-search";
-import pkg from "baileys_helper";
-const { sendInteractiveMessage } = pkg;
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text) {
@@ -18,6 +16,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             return m.reply(`No results found for "${text}".`);
         }
 
+        const thumb = videos[0].thumbnail;
         const rows = videos.map((video, index) => ({
             header: `Result ${index + 1}`,
             title: video.title,
@@ -27,10 +26,12 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         const info = `Search results for: ${text}\nSelect a song below to play.`;
 
-        await sendInteractiveMessage(conn, m.chat, {
-            text: info,
-            footer: "YouTube Search",
-            interactiveButtons: [
+        await conn.sendButton(m.chat, {
+            image: { url: thumb },
+            caption: info,
+            title: "YouTube Search",
+            footer: "Select a song below",
+            buttons: [
                 {
                     name: "single_select",
                     buttonParamsJson: JSON.stringify({
@@ -44,8 +45,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                     }),
                 },
             ],
+            hasMediaAttachment: true,
         });
-
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);

@@ -7,6 +7,20 @@
 ### Modern WhatsApp Bot Framework built on Baileys with Bun Runtime
 
 <p align="center">
+  <!-- CI Badges -->
+  <a href="https://github.com/naruyaizumi/liora/actions/workflows/codeql.yml">
+    <img src="https://github.com/naruyaizumi/liora/actions/workflows/codeql.yml/badge.svg" alt="CodeQL Analysis">
+  </a>
+  <a href="https://github.com/naruyaizumi/liora/actions/workflows/eslint.yml">
+    <img src="https://github.com/naruyaizumi/liora/actions/workflows/eslint.yml/badge.svg" alt="ESLint Check">
+  </a>
+  <a href="https://github.com/naruyaizumi/liora/actions/workflows/prettier.yml">
+    <img src="https://github.com/naruyaizumi/liora/actions/workflows/prettier.yml/badge.svg" alt="Prettier Format">
+  </a>
+</p>
+
+<p align="center">
+  <!-- GitHub Stats -->
   <a href="https://github.com/naruyaizumi/liora/stargazers">
     <img src="https://img.shields.io/github/stars/naruyaizumi/liora?style=for-the-badge&logo=starship&color=C9CBFF&logoColor=D9E0EE&labelColor=302D41" alt="stars">
   </a>
@@ -16,12 +30,9 @@
   <a href="https://github.com/naruyaizumi/liora">
     <img src="https://img.shields.io/github/languages/code-size/naruyaizumi/liora?style=for-the-badge&logo=github&color=DDB6F2&logoColor=D9E0EE&labelColor=302D41" alt="code size">
   </a>
-  <a href="https://bun.sh">
-    <img src="https://img.shields.io/badge/Bun-%3E=1.3.2-black?style=for-the-badge&logo=bun&logoColor=white" alt="bun">
-  </a>
-  <a href="LICENSE">
-    <img src="https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge&logo=apache&logoColor=white" alt="license">
-  </a>
+</p>
+
+<p align="center">
   <a href="https://github.com/naruyaizumi/liora/releases">
     <img src="https://img.shields.io/github/v/release/naruyaizumi/liora?style=for-the-badge&logo=semantic-release&color=FF6B6B&logoColor=white" alt="release">
   </a>
@@ -31,23 +42,35 @@
   <a href="https://github.com/naruyaizumi/liora/pulls">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=for-the-badge&logo=github-actions&logoColor=white" alt="prs">
   </a>
+</p>
+
+<p align="center">
+  <!-- Tech Stack -->
+  <a href="https://bun.sh">
+    <img src="https://img.shields.io/badge/Bun-%3E=1.3.2-black?style=for-the-badge&logo=bun&logoColor=white" alt="bun">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge&logo=apache&logoColor=white" alt="license">
+  </a>
   <a href="https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03">
     <img src="https://img.shields.io/badge/WhatsApp-Channel-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="whatsapp">
   </a>
-  <img src="https://img.shields.io/badge/ESM-Modules-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="esm">
-  <img src="https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="sqlite">
-  <img src="https://img.shields.io/badge/Hot-Reload-FF4154?style=for-the-badge&logo=hotjar&logoColor=white" alt="hot reload">
+  <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules">
+    <img src="https://img.shields.io/badge/ESM-Modules-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="esm">
+  </a>
+  <a href="https://www.sqlite.org/index.html">
+    <img src="https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="sqlite">
+  </a>
+  <a href="https://bun.sh/docs/runtime/hot">
+    <img src="https://img.shields.io/badge/Hot-Reload-FF4154?style=for-the-badge&logo=hotjar&logoColor=white" alt="hot reload">
+  </a>
 </p>
-
-<br>
 
 [✨ Features](#-features) • [🚀 Quick Start](#-quick-start) • [📁 Structure](#-project-structure) • [📖 Documentation](#-documentation) • [💬 Community](#-community)
 
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+---
 
 </div>
-
----
 
 ## 🎯 Why Liora?
 
@@ -57,129 +80,66 @@ Built with pure ESM, hot-reloadable plugins, and native C++ addons for optimal p
 
 ### 🎨 What Makes Liora Different?
 
-<table>
-<tr>
-<td width="50%">
-
-#### 🚀 **Baileys Integration**
-Latest WhatsApp Web API with full feature support
-
-</td>
-<td width="50%">
-
-#### ⚡ **Bun Runtime**
-Ultra-fast JavaScript execution, 3x faster than Node.js
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-#### 🔥 **Hot Reload**
-Update plugins without restart, seamless development
-
-</td>
-<td width="50%">
-
-#### 🧩 **Modular Architecture**
-Plugin-based design pattern for easy extensibility
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-#### 🎯 **Native Addons**
-C++ modules for maximum performance optimization
-
-</td>
-<td width="50%">
-
-#### 🔒 **SQLite Auth**
-Persistent session management with atomic operations
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-#### 💎 **Zero Config**
-Works out of the box with sensible defaults
-
-</td>
-<td width="50%">
-
-#### 🎨 **Clean Code**
-Modern ESM, type-safe patterns, best practices
-
-</td>
-</tr>
-</table>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+| Feature | Description |
+|---------|-------------|
+| 🚀 **Baileys Integration** | Latest WhatsApp Web API with full feature support |
+| ⚡ **Bun Runtime** | Ultra-fast JavaScript execution, up to 3x faster than Node.js |
+| 🔥 **Hot Reload** | Update plugins without restart, seamless development experience |
+| 🧩 **Modular Architecture** | Plugin-based design pattern for easy extensibility |
+| 🎯 **Native Addons** | C++ modules for maximum performance optimization |
+| 🔒 **SQLite Auth** | Persistent session management with atomic operations |
+| 💎 **Zero Config** | Works out of the box with sensible defaults |
+| 🎨 **Clean Code** | Modern ESM, type-safe patterns, and best practices |
 
 ---
 
 ## ✨ Features
 
-<table>
-<tr>
-<td width="50%">
+### 🤖 Bot Capabilities
 
-#### 🤖 **Bot Capabilities**
+| Feature | Status |
+|---------|--------|
+| AI Integration | ✅ |
+| Media Downloader | ✅ |
+| Image Processing (Remini, RemoveBG) | ✅ |
+| Sticker Maker with Custom Watermark | ✅ |
+| Group Management & Moderation | ✅ |
+| Admin-Only Command Protection | ✅ |
+| Auto Message Response System | ✅ |
 
-- ✓ AI Integration (OpenAI, Felo AI)
-- ✓ Media Downloader (TikTok, IG, YT, Spotify)
-- ✓ Image Processing (Remini, RemoveBG)
-- ✓ Sticker Maker with Custom Watermark
-- ✓ Group Management & Moderation
-- ✓ Admin-Only Command Protection
-- ✓ Auto Message Response System
+### 🏗️ Architecture
 
-</td>
-<td width="50%">
+| Feature | Status |
+|---------|--------|
+| Pure ESM Modules | ✅ |
+| Hot-Reloadable Plugin System | ✅ |
+| Event-Driven Design Pattern | ✅ |
+| Native C++ Performance Addons | ✅ |
+| SQLite Session Persistence | ✅ |
+| Async-First Architecture | ✅ |
+| Import Path Aliases Support | ✅ |
 
-#### 🏗️ **Architecture**
+### ⚡ Performance
 
-- ✓ Pure ESM Modules
-- ✓ Hot-Reloadable Plugin System
-- ✓ Event-Driven Design Pattern
-- ✓ Native C++ Performance Addons
-- ✓ SQLite Session Persistence
-- ✓ Async-First Architecture
-- ✓ Import Path Aliases Support
+| Feature | Status |
+|---------|--------|
+| Bun Runtime Optimizations | ✅ |
+| Native Image Processing Pipeline | ✅ |
+| Buffer-Based Memory Operations | ✅ |
+| Efficient Memory Management | ✅ |
+| Sub-3s Startup Time | ✅ |
+| Minimal External Dependencies | ✅ |
 
-</td>
-</tr>
-<tr>
-<td width="50%">
+### 🔐 Reliability
 
-#### ⚡ **Performance**
-
-- ✓ Bun Runtime Optimizations
-- ✓ Native Image Processing Pipeline
-- ✓ Buffer-Based Memory Operations
-- ✓ Efficient Memory Management
-- ✓ Sub-3s Startup Time
-- ✓ Minimal External Dependencies
-
-</td>
-<td width="50%">
-
-#### 🔐 **Reliability**
-
-- ✓ SQLite Auth State Management
-- ✓ Automatic Reconnection Logic
-- ✓ Comprehensive Error Recovery
-- ✓ Transaction Safety Guarantees
-- ✓ Persistent State Synchronization
-- ✓ Graceful Shutdown Handling
-
-</td>
-</tr>
-</table>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+| Feature | Status |
+|---------|--------|
+| SQLite Auth State Management | ✅ |
+| Automatic Reconnection Logic | ✅ |
+| Comprehensive Error Recovery | ✅ |
+| Transaction Safety Guarantees | ✅ |
+| Persistent State Synchronization | ✅ |
+| Graceful Shutdown Handling | ✅ |
 
 ---
 
@@ -213,14 +173,12 @@ curl -sSL https://raw.githubusercontent.com/naruyaizumi/liora/main/service.sh | 
 <details>
 <summary><b>Step 1: Install System Dependencies</b></summary>
 
-<br>
-
 ```bash
 # Debian/Ubuntu
-apt-get install -y ffmpeg libwebp-dev \
-    libavformat-dev libavcodec-dev libavutil-dev \
-    libswresample-dev libswscale-dev \
-    build-essential python3 g++ git curl unzip
+sudo apt-get update
+sudo apt-get install -y ffmpeg libwebp-dev libavformat-dev libavcodec-dev libavutil-dev \
+    libswresample-dev libswscale-dev libavfilter-dev build-essential python3 g++ \
+    pkg-config cmake git curl unzip
 ```
 
 </details>
@@ -228,18 +186,35 @@ apt-get install -y ffmpeg libwebp-dev \
 <details>
 <summary><b>Step 2: Install Bun Runtime</b></summary>
 
-<br>
-
 ```bash
 curl -fsSL https://bun.sh/install | bash
+```
+
+> **Note for Linux users:** The `unzip` package is required to install Bun. Use `sudo apt install unzip` to install it. Kernel version 5.6 or higher is strongly recommended, but the minimum is 5.1. Use `uname -r` to check your Kernel version.
+
+```bash
+# Verify installation
+bun --version
+# Output: 1.x.y
+
+# See the precise commit of oven-sh/bun that you're using
+bun --revision
+# Output: 1.x.y+b7982ac13189
+```
+
+> **Troubleshooting:** If you've installed Bun but are seeing a "command not found" error, you may need to manually add the installation directory (`~/.bun/bin`) to your PATH.
+
+```bash
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+source ~/.bashrc  # or ~/.zshrc
 ```
 
 </details>
 
 <details>
 <summary><b>Step 3: Setup Liora</b></summary>
-
-<br>
 
 ```bash
 # Clone repository
@@ -261,8 +236,6 @@ bun start
 <div align="center">
 
 ### 🎉 Bot is now running! Use pairing code to connect.
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 </div>
 
@@ -294,6 +267,7 @@ liora/
 │   ├── 📁 owner/        # Owner cmds
 │   ├── 📁 info/         # Information
 │   └── 📁 internet/     # Web tools
+│
 ├── 📁 database/
 │   ├── auth.db          # Auth state
 │   └── database.db      # Bot data
@@ -311,15 +285,13 @@ liora/
 
 **Plugin Categories:**
 - 🤖 AI Integration
-- ⬇️ Media Downloaders
+- 📥 Media Downloaders
 - 👥 Group Management
 - 🎨 Media Makers
 - 🛠️ Utility Tools
 - 👑 Owner Commands
 - ℹ️ Information
 - 🌐 Internet Tools
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 ---
 
@@ -329,8 +301,6 @@ liora/
 
 <details>
 <summary><b>Basic Configuration (src/config.js)</b></summary>
-
-<br>
 
 ```javascript
 global.config = {
@@ -360,8 +330,6 @@ global.config = {
 <details>
 <summary><b>Import Path Aliases (package.json)</b></summary>
 
-<br>
-
 ```json
 {
   "imports": {
@@ -370,7 +338,6 @@ global.config = {
     "#message": "./lib/core/message.js",
     "#socket": "./lib/core/socket.js",
     "#connection": "./lib/core/connection.js"
-    // Add more aliases as needed
   }
 }
 ```
@@ -381,8 +348,6 @@ global.config = {
 
 <details>
 <summary><b>💡 Simple Plugin Example</b></summary>
-
-<br>
 
 ```javascript
 // plugins/info/info-ping.js
@@ -402,8 +367,6 @@ export default handler;
 
 <details>
 <summary><b>🎨 Advanced Plugin with Media Processing</b></summary>
-
-<br>
 
 ```javascript
 // plugins/tool/tool-remini.js
@@ -457,8 +420,6 @@ export default handler;
 <details>
 <summary><b>📋 Plugin Structure Reference</b></summary>
 
-<br>
-
 ```javascript
 let handler = async (m, { conn, args, usedPrefix, command, isOwner, text }) => {
     // Plugin logic here
@@ -480,58 +441,33 @@ export default handler;
 
 </details>
 
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+---
 
 ## 🛠️ Development Tools
 
-<div align="center">
-
-```ascii
-🔧 DEVELOPMENT ENVIRONMENT 🔧
-```
-
-</div>
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
 ### 🔍 Available Scripts
 
-| Command | Description | Icon |
-|---------|-------------|------|
-| `bun start` | Start the bot | 🚀 |
-| `bun run build:addon` | Build native addons | 🔨 |
-| `bun run format` | Format code (Prettier) | 🎨 |
-| `bun run lint` | Check code quality | 🔍 |
-| `bun run lint:fix` | Fix linting issues | ✨ |
-
-</td>
-<td width="50%" valign="top">
+| Command | Description |
+|---------|-------------|
+| `bun start` | Start the bot |
+| `bun run build:addon` | Build native addons |
+| `bun run format` | Format code (Prettier) |
+| `bun run lint` | Check code quality |
+| `bun run lint:fix` | Fix linting issues |
 
 ### ⚙️ Configuration Files
 
-| File | Purpose | Icon |
-|------|---------|------|
-| `bunfig.toml` | Bun runtime config | ⚡ |
-| `eslint.config.js` | ESLint rules | 📏 |
-| `binding.gyp` | Native addon build | 🔧 |
-| `package.json` | Dependencies | 📦 |
-| `.prettierrc` | Code formatting | 💅 |
+| File | Purpose |
+|------|---------|
+| `bunfig.toml` | Bun runtime config |
+| `eslint.config.js` | ESLint rules |
+| `binding.gyp` | Native addon build |
+| `package.json` | Dependencies |
+| `.prettierrc` | Code formatting |
 
-</td>
-</tr>
-</table>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+---
 
 ## 📊 Performance & Stats
-
-<div align="center">
-
-```ascii
-⚡ PERFORMANCE METRICS ⚡
-```
 
 ### 📈 Bot Statistics
 
@@ -546,29 +482,25 @@ export default handler;
 
 ### 🎯 Technology Stack
 
-<img src="https://skillicons.dev/icons?i=bun,js,nodejs,cpp,sqlite,git,github,docker,linux,cmake" />
+<div align="center">
 
-<img src="https://github-profile-trophy.vercel.app/?username=naruyaizumi&theme=tokyonight&no-frame=true&row=1&column=7" width="100%" />
+**Core Technologies**
+
+<img src="https://skillicons.dev/icons?i=bun,js,nodejs,cpp,sqlite,git,github,docker,linux,cmake,eslint" />
 
 </div>
 
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+---
 
 ## 🤝 Contributing
 
 <div align="center">
-
-```ascii
-🌟 CONTRIBUTION GUIDE 🌟
-```
 
 **Contributions are welcome!** 💖
 
 All types of contributions are valuable - bug fixes, features, docs, or feedback.
 
 </div>
-
-<br>
 
 ### 📝 How to Contribute
 
@@ -599,6 +531,14 @@ git push origin feature/YourFeature
 # - Wait for review
 ```
 
+### 📋 Pull Request Checklist
+
+- [ ] Code follows the project's style guidelines
+- [ ] Tests added/updated and passing
+- [ ] Documentation updated (if applicable)
+- [ ] Commit messages are clear and descriptive
+- [ ] Branch is up to date with main/master
+
 <div align="center">
 
 ### 🌟 Top Contributors
@@ -609,19 +549,13 @@ git push origin feature/YourFeature
 
 </div>
 
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+---
 
 ## 💬 Community
 
 <div align="center">
 
-```ascii
-👥 JOIN OUR COMMUNITY 👥
-```
-
 **Join our growing community!**
-
-<br>
 
 <table>
 <tr>
@@ -658,27 +592,31 @@ and get help from community
 
 </div>
 
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+---
 
 ## 📜 License
 
-<div align="center">
+Liora is released under the **Apache License 2.0**, a permissive open-source license that allows you to:
 
-```ascii
-📄 LICENSE 📄
-```
+- ✅ Use the code freely for personal or commercial projects  
+- ✅ Modify and adapt it to fit your needs  
+- ✅ Distribute your own versions, as long as you include proper attribution  
+- ✅ Contribute improvements back to the community  
 
-**Apache License 2.0**
+However, the license also ensures that:  
+- You must include a copy of the license in any distribution  
+- You cannot hold the authors liable for damages  
+- You must clearly state changes if you modify the code  
 
-Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for details.
+See the full license text in [LICENSE](LICENSE) for all details.
 
-```
-Copyright 2024 Naruya Izumi
-```
+---
 
-</div>
+**Copyright © 2024 Naruya Izumi**  
+Maintained by the Liora community.
+Contributions, forks, and pull requests are welcome!
 
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+---
 
 ## 💖 Acknowledgments
 
@@ -693,8 +631,14 @@ Copyright 2024 Naruya Izumi
   <a href="https://github.com/WhiskeySockets/Baileys">
     <img src="https://img.shields.io/badge/Baileys-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="Baileys" />
   </a>
+  <a href="https://www.whatsapp.com/">
+    <img src="https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp" />
+  </a>
   <a href="https://www.javascript.com/">
     <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript" />
+  </a>
+  <a href="https://nodejs.org/">
+    <img src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" />
   </a>
   <a href="https://www.sqlite.org/">
     <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />
@@ -707,6 +651,29 @@ Copyright 2024 Naruya Izumi
   </a>
   <a href="https://isocpp.org/">
     <img src="https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=cplusplus&logoColor=white" alt="C++" />
+  </a>
+  <a href="https://www.docker.com/">
+    <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  </a>
+  <a href="https://www.linux.org/">
+    <img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux" />
+  </a>
+</p>
+
+### 🛠️ Development Tools
+
+<p align="left">
+  <a href="https://eslint.org/">
+    <img src="https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=eslint&logoColor=white" alt="ESLint" />
+  </a>
+  <a href="https://prettier.io/">
+    <img src="https://img.shields.io/badge/Prettier-F7B93E?style=for-the-badge&logo=prettier&logoColor=black" alt="Prettier" />
+  </a>
+  <a href="https://codeql.github.com/">
+    <img src="https://img.shields.io/badge/CodeQL-2F4F4F?style=for-the-badge&logo=github&logoColor=white" alt="CodeQL" />
+  </a>
+  <a href="https://github.com/features/actions">
+    <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white" alt="GitHub Actions" />
   </a>
 </p>
 
@@ -731,31 +698,72 @@ Special thanks to AI assistants that helped in development:
 
 ### 🙏 Community & Contributors
 
-- 💚 All [contributors](https://github.com/naruyaizumi/liora/graphs/contributors) who made this possible
-- 🌍 The amazing open-source community
-- ⭐ Everyone who starred this repository
-- 🐛 Bug reporters and feature requesters
-- 📖 Documentation writers and translators
-- 🎨 Designers and UX contributors
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+- 💚 All [contributors](https://github.com/naruyaizumi/liora/graphs/contributors) who made this possible  
+- 🌍 The amazing open-source community  
+- ⭐ Everyone who starred this repository  
+- 🐛 Bug reporters and feature requesters  
+- 📖 Documentation writers and translators  
+- 🎨 Designers and UX contributors  
 
 ---
 
 <div align="center">
 
-### 🌟 Star History
+  <p><strong>🌟 Star History</strong></p>
+  <a href="https://star-history.com/#naruyaizumi/liora&Date">
+    <img src="https://api.star-history.com/svg?repos=naruyaizumi/liora&type=Date" width="700" alt="Star History Chart"/>
+  </a>
 
-[![Star History Chart](https://api.star-history.com/svg?repos=naruyaizumi/liora&type=Date)](https://star-history.com/#naruyaizumi/liora&Date)
+  <hr/>
 
-<br>
+  <p><strong>📊 GitHub Stats</strong></p>
+  <img src="https://github-readme-stats.vercel.app/api?username=naruyaizumi&show_icons=true&theme=tokyonight" width="600" alt="GitHub Stats"/>
 
-**Made with 🍥 and ☕ by [Naruya Izumi](https://github.com/naruyaizumi)**
+  <hr/>
 
-<sub>Version 7.5.0 • Last Updated: November 2025</sub>
+  <p><strong>🔥 Streak Stats</strong></p>
+  <img src="https://github-readme-streak-stats.herokuapp.com?user=naruyaizumi&theme=tokyonight" width="600" alt="Streak Stats"/>
 
-<br>
+  <hr/>
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer&text=Thank%20You!&fontSize=40&fontColor=ffffff&animation=twinkling&fontAlignY=75" width="100%" alt="Footer Wave" />
+  <p><strong>🧑‍💻 Languages & Code Stats</strong></p>
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=naruyaizumi&layout=compact&theme=tokyonight" width="500" alt="Top Languages"/>
+  <br/>
+  <a href="https://github.com/naruyaizumi/liora">
+    <img src="https://github-readme-activity-graph.vercel.app/graph?username=naruyaizumi&theme=tokyo-night" width="700" alt="Activity Graph"/>
+  </a>
+
+  <hr/>
+
+  <p><strong>🏆 Achievements</strong></p>
+  <a href="https://github.com/ryo-ma/github-profile-trophy">
+    <img src="https://github-profile-trophy.vercel.app/?username=naruyaizumi&theme=tokyonight&no-frame=true&row=1&column=7" width="700" alt="Trophy"/>
+  </a>
+
+  <hr/>
+
+  <p><strong>📦 Repo Card</strong></p>
+  <a href="https://github.com/naruyaizumi/liora">
+    <img src="https://github-readme-stats.vercel.app/api/pin/?username=naruyaizumi&repo=liora&theme=tokyonight" width="500" alt="Repo Card"/>
+  </a>
+
+  <hr/>
+
+  <p><strong>👀 Profile Views</strong></p>
+  <img src="https://komarev.com/ghpvc/?username=naruyaizumi&style=for-the-badge&color=blueviolet" alt="Profile Views"/>
+
+  <hr/>
+
+  <p><strong>📦 Release & Downloads</strong></p>
+  <img src="https://img.shields.io/github/downloads/naruyaizumi/liora/total?style=for-the-badge&color=4ECDC4&logo=github" alt="Downloads"/>
+
+  <hr/>
+
+  <p><strong>Made with 🍥 and ☕ by <a href="https://github.com/naruyaizumi">Naruya Izumi</a></strong></p>
+  <sub>Version 7.5.0 • Last Updated: December 2024</sub>
+
+  <br/><br/>
+
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer&text=Thank%20You!&fontSize=40&fontColor=ffffff&animation=twinkling&fontAlignY=75" width="100%" alt="Footer"/>
 
 </div>

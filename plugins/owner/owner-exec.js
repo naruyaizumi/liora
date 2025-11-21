@@ -79,7 +79,7 @@ const handler = async (m, { conn, isOwner }) => {
         const stderr = result.stderr?.toString() || "";
         const exitCode = result.exitCode;
         const output = stdout || stderr || "(no output)";
-        const parts = [`$ ${cmdText}`, "────────────────────────────"];
+        const parts = [`${cmdText}`, "────────────────────────────"];
 
         if (output.trim()) {
             parts.push(output.trim());
@@ -99,7 +99,7 @@ const handler = async (m, { conn, isOwner }) => {
         resultText = parts.join("\n");
     } catch (err) {
         resultText = [
-            `$ ${cmdText}`,
+            `${cmdText}`,
             "────────────────────────────",
             `Error: ${err.message || String(err)}`,
             "",

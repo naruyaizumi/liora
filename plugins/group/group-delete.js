@@ -24,7 +24,7 @@ handler.help = ["delete"];
 handler.tags = ["group"];
 handler.command = /^(d|delete)$/i;
 handler.group = true;
-handler.admin = true;
+handler.admin = false;
 handler.botAdmin = true;
 
 export default handler;

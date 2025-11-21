@@ -5,7 +5,7 @@ FN:Naruya Izumi
 ORG:Naruya Izumi
 TITLE:Epictetus, Enchiridion — Chapter 1 (verse 1)
 EMAIL;type=INTERNET:sexystyle088@gmail.com
-TEL;type=CELL;waid=31629155460:+31629155460
+TEL;type=CELL;waid=6283143663697:+6283143663697
 ADR;type=WORK:;;2-chōme-7-5 Fuchūchō;Izumi;Osaka;594-0071;Japan
 URL;type=WORK:https://www.instagram.com/naruyaizumi
 X-WA-BIZ-NAME:Naruya Izumi
@@ -35,10 +35,16 @@ END:VCARD`;
                 contacts: [{ vcard }],
             },
             contextInfo: {
+                forwardingScore: 999,
+                isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: "120363144038483540@newsletter",
+                    newsletterName: "mkfs.ext4 /dev/naruyaizumi",
+                },
                 externalAdReply: {
                     title: "© 2024–2025 Liora Project",
                     body: "Contact the Owner via WhatsApp",
-                    thumbnailUrl: "https://qu.ax/RFEvm.jpg",
+                    thumbnailUrl: "https://files.catbox.moe/8tw69l.jpeg",
                     mediaType: 1,
                     renderLargerThumbnail: true,
                 },

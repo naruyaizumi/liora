@@ -3,7 +3,7 @@ import { mkdir } from "fs/promises";
 import pino from "pino";
 
 const logger = pino({
-    level: "debug",
+    level: "info",
     transport: {
         target: "pino-pretty",
         options: {

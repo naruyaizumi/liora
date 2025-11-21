@@ -68,7 +68,7 @@ async function LIORA() {
         baileys,
         auth,
         pino({
-            level: "fatal",
+            level: "error",
             base: { module: "BAILEYS" },
             transport: {
                 target: "pino-pretty",

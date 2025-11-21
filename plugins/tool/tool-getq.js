@@ -1,4 +1,4 @@
-import { BufferJSON } from "baileys";
+import { BufferJSON } from "naruyaizumi";
 
 let handler = async (m, { conn }) => {
     if (!m.quoted) return m.reply("Reply to a message to debug its structure.");

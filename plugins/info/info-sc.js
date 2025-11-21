@@ -54,7 +54,7 @@ END:VCARD`;
                 forwardingScore: 999,
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
-                    newsletterJid: "120363417411850319@newsletter",
+                    newsletterJid: "120363144038483540@newsletter",
                     newsletterName: "mkfs.ext4 /dev/naruyaizumi",
                 },
             },

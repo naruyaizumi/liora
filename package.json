@@ -1,15 +1,12 @@
 {
     "name": "liora",
-    "version": "7.5.0",
+    "version": "7.6.0",
     "description": "Liora is a modern, modular, and efficient WhatsApp bot built on Baileys.",
     "keywords": [
         "whatsapp",
-        "whatsapp-bot",
         "automation",
         "baileys",
-        "bun",
-        "liora",
-        "naruyaizumi"
+        "bun"
     ],
     "type": "module",
     "engines": {
@@ -37,7 +34,7 @@
     },
     "dependencies": {
         "async-mutex": "^0.5.0",
-        "baileys": "npm:naruyaizumi",
+        "naruyaizumi": "^26.0.9",
         "chokidar": "^4.0.3",
         "file-type": "^21.0.0",
         "pino": "^10.1.0",
