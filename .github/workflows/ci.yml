@@ -103,6 +103,25 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Install native dependencies
+        if: steps.check_version_change.outputs.version_changed == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ffmpeg \
+            libwebp-dev \
+            libavformat-dev \
+            libavcodec-dev \
+            libavutil-dev \
+            libswresample-dev \
+            libswscale-dev \
+            libavfilter-dev \
+            build-essential \
+            python3 \
+            g++ \
+            pkg-config \
+            cmake
+
       - name: Run Prettier and Push
         if: steps.check_version_change.outputs.version_changed == 'true'
         run: |

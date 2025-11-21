@@ -36,8 +36,6 @@
   </a>
 </p>
 
-[✨ Features](#-features) • [🚀 Quick Start](#-quick-start) • [📁 Structure](#-project-structure) • [📖 Documentation](#-documentation) • [💬 Community](#-community)
-
 ---
 
 </div>
@@ -60,56 +58,6 @@ Built with pure ESM, hot-reloadable plugins, and native C++ addons for optimal p
 | 🔒 **SQLite Auth** | Persistent session management with atomic operations |
 | 💎 **Zero Config** | Works out of the box with sensible defaults |
 | 🎨 **Clean Code** | Modern ESM, type-safe patterns, and best practices |
-
----
-
-## ✨ Features
-
-### 🤖 Bot Capabilities
-
-| Feature | Status |
-|---------|--------|
-| AI Integration | ✅ |
-| Media Downloader | ✅ |
-| Image Processing (Remini, RemoveBG) | ✅ |
-| Sticker Maker with Custom Watermark | ✅ |
-| Group Management & Moderation | ✅ |
-| Admin-Only Command Protection | ✅ |
-| Auto Message Response System | ✅ |
-
-### 🏗️ Architecture
-
-| Feature | Status |
-|---------|--------|
-| Pure ESM Modules | ✅ |
-| Hot-Reloadable Plugin System | ✅ |
-| Event-Driven Design Pattern | ✅ |
-| Native C++ Performance Addons | ✅ |
-| SQLite Session Persistence | ✅ |
-| Async-First Architecture | ✅ |
-| Import Path Aliases Support | ✅ |
-
-### ⚡ Performance
-
-| Feature | Status |
-|---------|--------|
-| Bun Runtime Optimizations | ✅ |
-| Native Image Processing Pipeline | ✅ |
-| Buffer-Based Memory Operations | ✅ |
-| Efficient Memory Management | ✅ |
-| Sub-3s Startup Time | ✅ |
-| Minimal External Dependencies | ✅ |
-
-### 🔐 Reliability
-
-| Feature | Status |
-|---------|--------|
-| SQLite Auth State Management | ✅ |
-| Automatic Reconnection Logic | ✅ |
-| Comprehensive Error Recovery | ✅ |
-| Transaction Safety Guarantees | ✅ |
-| Persistent State Synchronization | ✅ |
-| Graceful Shutdown Handling | ✅ |
 
 ---
 
@@ -208,60 +156,6 @@ bun start
 ### 🎉 Bot is now running! Use pairing code to connect.
 
 </div>
-
----
-
-## 📁 Project Structure
-
-```
-liora/
-├── 📁 src/
-│   ├── index.js         # Entry point
-│   ├── main.js          # Main logic
-│   ├── config.js        # Configuration
-│   └── global.js        # Global db
-│
-├── 📁 lib/
-│   ├── 📁 addon/        # C++ modules
-│   ├── 📁 api/          # API integrations
-│   ├── 📁 auth/         # Auth system
-│   ├── 📁 core/         # Core logic
-│   └── uploader.js      # File uploader
-│
-├── 📁 plugins/
-│   ├── 📁 ai/           # AI plugins
-│   ├── 📁 downloader/   # Downloaders
-│   ├── 📁 group/        # Group mgmt
-│   ├── 📁 maker/        # Media makers
-│   ├── 📁 tool/         # Utilities
-│   ├── 📁 owner/        # Owner cmds
-│   ├── 📁 info/         # Information
-│   └── 📁 internet/     # Web tools
-│
-├── 📁 database/
-│   ├── auth.db          # Auth state
-│   └── database.db      # Bot data
-│
-├── 📁 build/
-│   └── Release/
-│       ├── converter.node
-│       └── sticker.node
-│
-├── handler.js           # Plugin loader
-├── package.json         # Dependencies
-├── bunfig.toml          # Bun config
-└── binding.gyp          # Build config
-```
-
-**Plugin Categories:**
-- 🤖 AI Integration
-- 📥 Media Downloaders
-- 👥 Group Management
-- 🎨 Media Makers
-- 🛠️ Utility Tools
-- 👑 Owner Commands
-- ℹ️ Information
-- 🌐 Internet Tools
 
 ---
 
@@ -543,10 +437,10 @@ and get help from community
 
 Liora is released under the **Apache License 2.0**, a permissive open-source license that allows you to:
 
-- ✅ Use the code freely for personal or commercial projects  
-- ✅ Modify and adapt it to fit your needs  
-- ✅ Distribute your own versions, as long as you include proper attribution  
-- ✅ Contribute improvements back to the community  
+- Use the code freely for personal or commercial projects  
+- Modify and adapt it to fit your needs  
+- Distribute your own versions, as long as you include proper attribution  
+- Contribute improvements back to the community  
 
 However, the license also ensures that:  
 - You must include a copy of the license in any distribution  
@@ -575,9 +469,6 @@ Contributions, forks, and pull requests are welcome!
   </a>
   <a href="https://github.com/WhiskeySockets/Baileys">
     <img src="https://img.shields.io/badge/Baileys-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="Baileys" />
-  </a>
-  <a href="https://www.whatsapp.com/">
-    <img src="https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp" />
   </a>
   <a href="https://www.javascript.com/">
     <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript" />

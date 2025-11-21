@@ -1,6 +1,6 @@
 {
     "name": "liora",
-    "version": "7.6.1",
+    "version": "7.6.2",
     "description": "Liora is a modern, modular, and efficient WhatsApp bot built on Baileys.",
     "keywords": [
         "whatsapp",
@@ -34,9 +34,10 @@
     },
     "dependencies": {
         "async-mutex": "^0.5.0",
-        "naruyaizumi": "^26.0.9",
         "chokidar": "^4.0.3",
         "file-type": "^21.0.0",
+        "naruyaizumi": "^26.0.10",
+        "p-queue": "^9.0.1",
         "pino": "^10.1.0",
         "pino-pretty": "^13.1.2",
         "sharp": "^0.34.4",
@@ -82,16 +83,15 @@
         "endOfLine": "lf",
         "bracketSameLine": false,
         "overrides": [
-            {
-                "files": "*.js",
-                "options": {
-                    "commentPreserveAll": true
-                }
+        {
+            "files": "*.js",
+            "options": {
+                "commentPreserveAll": true
             }
-        ]
+        }]
     },
     "trustedDependencies": [
-        "baileys",
+        "naruyaizumi",
         "protobufjs",
         "sharp"
     ]
