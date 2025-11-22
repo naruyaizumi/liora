@@ -9,27 +9,39 @@ Pull Req: https://github.com/naruyaizumi/liora/pulls
 
 © 2024 – 2025 Naruya Izumi • All Rights Reserved
     `.trim();
-    const vcard = `BEGIN:VCARD
-VERSION:3.0
-N:;ttname;;;
-FN:ttname
-item1.TEL;waid=13135550002:+1 (313) 555-0002
-item1.X-ABLabel:Ponsel
-END:VCARD`;
 
     const q = {
         key: {
             fromMe: false,
-            participant: "13135550002@s.whatsapp.net",
-            remoteJid: "status@broadcast",
+            participant: m.sender,
+            remoteJid: m.chat,
         },
         message: {
-            contactMessage: {
-                displayName: "𝗟 𝗜 𝗢 𝗥 𝗔",
-                vcard,
-            },
-        },
+            requestPaymentMessage: {
+                amount: {
+                    currencyCode: "USD",
+                    offset: 0,
+                    value: 99999999999
+                },
+                expiryTimestamp: Date.now() + (24 * 60 * 60 * 1000),
+                amount1000: 99999999999 * 1000,
+                currencyCodeIso4217: "USD",
+                requestFrom: m.sender,
+                noteMessage: {
+                    extendedTextMessage: {
+                        text: "𝗟 𝗜 𝗢 𝗥 𝗔"
+                    }
+                },
+                background: {
+                    placeholderArgb: 4278190080,
+                    textArgb: 4294967295,
+                    subtextArgb: 4294967295,
+                    type: 1
+                }
+            }
+        }
     };
+
     await conn.sendMessage(
         m.chat,
         {
