@@ -1,4 +1,3 @@
-
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     let target = m.quoted?.sender || null;
 
@@ -32,8 +31,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             const groupMetadata = await conn.groupMetadata(m.chat);
             const inviteCode = await conn.groupInviteCode(m.chat);
             const groupName = groupMetadata.subject || "Unknown Subject";
-            const inviteExpiration = Date.now() + (3 * 24 * 60 * 60 * 1000);
-            
+            const inviteExpiration = Date.now() + 3 * 24 * 60 * 60 * 1000;
+
             let jpegThumbnail = null;
             try {
                 const profilePic = await conn.profilePictureUrl(m.chat, "image").catch(() => null);

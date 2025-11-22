@@ -14,7 +14,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         }
 
         if (!target) {
-            return m.reply(`Specify one valid JID to unblock.\n› Example: ${usedPrefix + command} @628xxxx`);
+            return m.reply(
+                `Specify one valid JID to unblock.\n› Example: ${usedPrefix + command} @628xxxx`
+            );
         }
 
         await conn.updateBlockStatus(target, "unblock");

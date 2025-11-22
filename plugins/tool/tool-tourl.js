@@ -48,28 +48,25 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                     id: `${usedPrefix + command} ${num}`,
                 }));
 
-                return conn.sendButton(
-                    m.chat,
-                    {
-                        caption: "Select upload server below",
-                        title: "Upload Server Options",
-                        footer: "Choose one to continue",
-                        buttons: [
-                            {
-                                name: "single_select",
-                                buttonParamsJson: JSON.stringify({
-                                    title: "Select Server",
-                                    sections: [
-                                        {
-                                            title: "Upload Service List",
-                                            rows: rows,
-                                        },
-                                    ],
-                                }),
-                            },
-                        ],
-                    }
-                );
+                return conn.sendButton(m.chat, {
+                    caption: "Select upload server below",
+                    title: "Upload Server Options",
+                    footer: "Choose one to continue",
+                    buttons: [
+                        {
+                            name: "single_select",
+                            buttonParamsJson: JSON.stringify({
+                                title: "Select Server",
+                                sections: [
+                                    {
+                                        title: "Upload Service List",
+                                        rows: rows,
+                                    },
+                                ],
+                            }),
+                        },
+                    ],
+                });
             }
         }
 
@@ -95,8 +92,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         const sizeKB = (buffer.length / 1024).toFixed(2);
         const sizeMB = (buffer.length / 1024 / 1024).toFixed(2);
-        const sizeDisplay =
-            buffer.length > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
+        const sizeDisplay = buffer.length > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
 
         const serverNum = args[0];
         const server = uploaders[serverNum];
@@ -107,7 +103,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             await conn.sendMessage(
                 m.chat,
                 { text: `${server.name} failed. Trying fallback...` },
-                { quoted: m },
+                { quoted: m }
             );
 
             result = await uploader(buffer);
@@ -123,7 +119,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                                 name: "cta_copy",
                                 buttonParamsJson: JSON.stringify({
                                     display_text: "Copy URL",
-                                    copy_code: result.url
+                                    copy_code: result.url,
                                 }),
                             },
                         ],
@@ -145,7 +141,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                             name: "cta_copy",
                             buttonParamsJson: JSON.stringify({
                                 display_text: "Copy URL",
-                                copy_code: result.url
+                                copy_code: result.url,
                             }),
                         },
                     ],
@@ -166,7 +162,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                             name: "cta_copy",
                             buttonParamsJson: JSON.stringify({
                                 display_text: "Copy URL",
-                                copy_code: result
+                                copy_code: result,
                             }),
                         },
                     ],

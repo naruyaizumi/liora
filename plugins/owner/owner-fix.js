@@ -5,7 +5,7 @@ const cleanupMutex = new Mutex();
 
 let handler = async (m, { conn }) => {
     const release = await cleanupMutex.acquire();
-    
+
     try {
         const db = getAuthDatabase();
         if (!db || db.disposed) {
@@ -15,7 +15,7 @@ let handler = async (m, { conn }) => {
         if (!conn || !conn.chats) {
             return m.reply("Connection is not properly initialized");
         }
-        
+
         const groups = Object.keys(conn.chats).filter((j) => j.endsWith("@g.us"));
 
         let totalSenderKeys = 0;
@@ -32,17 +32,17 @@ let handler = async (m, { conn }) => {
         let totalMessageRetry = 0;
         let noiseKeys = 0;
         let peerDevice = 0;
-        
+
         await global.loading(m, conn);
         await db.flush();
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
         db.db.exec("BEGIN IMMEDIATE");
-        
+
         const deleteStmt = db.db.prepare(
             "DELETE FROM baileys_state WHERE key LIKE ? AND key NOT LIKE 'creds%'"
         );
-        
+
         for (const gid of groups) {
             totalSenderKeys += deleteStmt.run(`sender-key-%${gid}%`).changes;
             totalSessions += deleteStmt.run(`session-%${gid}%`).changes;
@@ -80,13 +80,13 @@ let handler = async (m, { conn }) => {
         db.db.exec("COMMIT");
         db.cache.clear();
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await new Promise((resolve) => setTimeout(resolve, 150));
 
         const maintenanceResults = {
             checkpoint: false,
             analyze: false,
             vacuum: false,
-            optimize: false
+            optimize: false,
         };
 
         db.db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
@@ -118,10 +118,10 @@ let handler = async (m, { conn }) => {
             peerDevice;
 
         const maintenanceStatus = `
-Checkpoint: ${maintenanceResults.checkpoint ? 'Success' : 'Failed'}
-Analyze: ${maintenanceResults.analyze ? 'Success' : 'Failed'}
-Vacuum: ${maintenanceResults.vacuum ? 'Success' : 'Failed'}
-Optimize: ${maintenanceResults.optimize ? 'Success' : 'Failed'}`.trim();
+Checkpoint: ${maintenanceResults.checkpoint ? "Success" : "Failed"}
+Analyze: ${maintenanceResults.analyze ? "Success" : "Failed"}
+Vacuum: ${maintenanceResults.vacuum ? "Success" : "Failed"}
+Optimize: ${maintenanceResults.optimize ? "Success" : "Failed"}`.trim();
 
         const cap = `
 Session Cleanup Complete
@@ -150,12 +150,11 @@ ${maintenanceStatus}
         `.trim();
 
         await m.reply(cap);
-        
     } catch (e) {
-        conn.logger.error({ 
-            err: e.message, 
-            stack: e.stack, 
-            context: "cleanup-handler-error" 
+        conn.logger.error({
+            err: e.message,
+            stack: e.stack,
+            context: "cleanup-handler-error",
         });
         await m.reply(`Cleanup failed: ${e.message}`);
     } finally {
