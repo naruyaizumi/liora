@@ -7,32 +7,17 @@
 ### Modern WhatsApp Bot Framework built on Baileys
 
 <p align="center">
-  <a href="https://github.com/naruyaizumi/liora/releases">
-    <img src="https://img.shields.io/github/v/release/naruyaizumi/liora?style=for-the-badge&logo=semantic-release&color=FF6B6B&logoColor=white" alt="release">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora/commits/main">
-    <img src="https://img.shields.io/github/last-commit/naruyaizumi/liora?style=for-the-badge&logo=git&color=4ECDC4&logoColor=white" alt="last commit">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora/pulls">
-    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=for-the-badge&logo=github-actions&logoColor=white" alt="prs">
-  </a>
   <a href="https://bun.sh">
     <img src="https://img.shields.io/badge/Bun-%3E=1.3.2-black?style=for-the-badge&logo=bun&logoColor=white" alt="bun">
   </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge&logo=apache&logoColor=white" alt="license">
   </a>
-  <a href="https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03">
-    <img src="https://img.shields.io/badge/WhatsApp-Channel-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="whatsapp">
-  </a>
   <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules">
     <img src="https://img.shields.io/badge/ESM-Modules-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="esm">
   </a>
   <a href="https://www.sqlite.org/index.html">
     <img src="https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="sqlite">
-  </a>
-  <a href="https://bun.sh/docs/runtime/hot">
-    <img src="https://img.shields.io/badge/Hot-Reload-FF4154?style=for-the-badge&logo=hotjar&logoColor=white" alt="hot reload">
   </a>
 </p>
 
