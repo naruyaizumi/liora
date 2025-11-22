@@ -188,12 +188,6 @@ global.config = {
         // Add more: ["LOCAL_IDENTIFIER", "Name"]
     ],
 
-    // Bot Identity
-    watermark: "𝙇͢𝙞𝙤𝙧𝙖",
-    author: "𝙉͢𝙖𝙧𝙪𝙮𝙖 𝙄͢𝙯𝙪𝙢𝙞",
-    stickpack: "𝙇͢𝙞𝙤𝙧𝙖",
-    stickauth: "© 𝙉͢𝙖𝙧𝙪𝙮𝙖 𝙄͢𝙯𝙪𝙢𝙞",
-
     // WhatsApp Pairing
     pairingNumber: "", // e.g., "628123456789"
 
