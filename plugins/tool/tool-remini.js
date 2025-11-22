@@ -12,21 +12,30 @@ let handler = async (m, { conn, command, usedPrefix }) => {
 
     try {
         await global.loading(m, conn);
-
         const media = await q.download().catch(() => null);
-        if (!media || !(media instanceof Buffer)) return;
-
+        if (!media || !Buffer.isBuffer(media)) return m.reply("Invalid image buffer.");
         const { success, resultUrl, resultBuffer, error } = await remini(media);
         if (!success) throw new Error(error || "Enhancement failed");
-
-        await conn.sendMessage(
-            m.chat,
-            {
-                image: resultBuffer ? { buffer: resultBuffer } : { url: resultUrl },
-                caption: "Image enhancement successful.",
-            },
-            { quoted: m }
-        );
+        
+        if (resultBuffer) {
+            await conn.sendMessage(
+                m.chat,
+                {
+                    image: resultBuffer,
+                    caption: "Image enhancement successful.",
+                },
+                { quoted: m }
+            );
+        } else {
+            await conn.sendMessage(
+                m.chat,
+                {
+                    image: { url: resultUrl },
+                    caption: "Image enhancement successful.",
+                },
+                { quoted: m }
+            );
+        }
     } catch (e) {
         conn.logger.error(e);
         m.reply("Failed to enhance image.");
