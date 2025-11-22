@@ -67,7 +67,9 @@ async function allCommands(conn, m, help, usedPrefix, timestamp) {
     return conn.sendMessage(
         m.chat,
         {
-            text,
+            video: { url: "https://files.catbox.moe/n7i84u.mp4" },
+            caption: text,
+            gifPlayback: true,
             contextInfo: {
                 forwardingScore: 999,
                 isForwarded: true,
