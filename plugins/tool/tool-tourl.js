@@ -8,8 +8,11 @@ import {
     uploader7,
     uploader8,
     uploader9,
+    uploader10,
     uploader,
 } from "../../lib/uploader.js";
+
+if (!global.uploadSession) global.uploadSession = {};
 
 const uploaders = {
     1: { name: "Catbox.moe", fn: uploader1, info: "Permanent hosting" },
@@ -21,139 +24,163 @@ const uploaders = {
     7: { name: "Deline", fn: uploader7, info: "Deline uploader" },
     8: { name: "Zenitsu", fn: uploader8, info: "Zenitsu uploader" },
     9: { name: "CloudKuImages", fn: uploader9, info: "CloudKuImages uploader" },
+    10: { name: "Nekohime", fn: uploader10, info: "Nekohime CDN Uploader" },
 };
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     try {
-        const q = m.quoted && (m.quoted.mimetype || m.quoted.mediaType) ? m.quoted : m;
-        const mime = (q.msg || q).mimetype || q.mediaType || "";
+        if (m.buttonId) args = m.buttonId.split(" ");
+
+        let q = m.quoted && (m.quoted.mimetype || m.quoted.mediaType) ? m.quoted : m;
+        let mime = (q.msg || q).mimetype || q.mediaType || "";
 
         if (!args[0]) {
-            if (!mime) {
-                const list = Object.entries(uploaders)
-                    .map(([num, { name, info }]) => `${num}. ${name} - ${info}`)
-                    .join("\n");
-                return m.reply(
-                    `No media detected.
-Reply to a media file or select upload server by number.
+            if (mime) {
+                global.uploadSession[m.sender] = {
+                    q,
+                    time: Date.now(),
+                };
 
-Available servers:
-${list}
+                const rows = Object.entries(uploaders).map(([num, { name, info }]) => ({
+                    header: `Server ${num}`,
+                    title: name,
+                    description: info,
+                    id: `${usedPrefix + command} ${num}`,
+                }));
 
-Tip: Reply to media and use .upload for automatic fallback!`
+                return conn.sendButton(
+                    m.chat,
+                    {
+                        caption: "Select upload server below",
+                        title: "Upload Server Options",
+                        footer: "Choose one to continue",
+                        buttons: [
+                            {
+                                name: "single_select",
+                                buttonParamsJson: JSON.stringify({
+                                    title: "Select Server",
+                                    sections: [
+                                        {
+                                            title: "Upload Service List",
+                                            rows: rows,
+                                        },
+                                    ],
+                                }),
+                            },
+                        ],
+                    }
                 );
             }
+        }
 
-            await global.loading(m, conn);
+        if (args[0]) args[0] = args[0].toString().trim().match(/\d+/)?.[0] || "";
 
-            const buffer = await q.download?.();
-            if (!Buffer.isBuffer(buffer) || !buffer.length) {
-                return m.reply("Failed to get media buffer.");
-            }
+        if (!mime) {
+            const sess = global.uploadSession[m.sender];
+            if (!sess) return m.reply("Send or reply to a media file to upload.");
 
-            const sizeKB = (buffer.length / 1024).toFixed(2);
-            const sizeMB = (buffer.length / 1024 / 1024).toFixed(2);
-            const sizeDisplay = buffer.length > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
-
-            const result = await uploader(buffer);
-            if (result && result.success) {
-                const caption = `File uploaded successfully
-
-Server : ${result.provider}
-File Size : ${sizeDisplay}
-Attempts : ${result.attempts.length}
-
-URL:
-${result.url}`;
-                return conn.sendMessage(m.chat, { text: caption }, { quoted: m });
-            }
-
-            return m.reply(
-                `Upload failed on all servers.\nFile size: ${sizeDisplay}\nPlease try again later or use a different file.`
-            );
+            q = sess.q;
+            mime = (q.msg || q).mimetype || q.mediaType || "";
         }
 
         if (isNaN(args[0]) || !uploaders[args[0]]) {
-            const list = Object.entries(uploaders)
-                .map(([num, { name, info }]) => `${num}. ${name} - ${info}`)
-                .join("\n");
-            return m.reply(
-                `Select upload server by number.
-Example: ${usedPrefix + command} 1
-
-Available servers:
-${list}
-
-Tip: Reply to media and use .upload for automatic fallback!`
-            );
-        }
-
-        if (!mime) {
-            return m.reply("Send or reply to a media file to upload.");
+            return m.reply("Invalid server. Use number only.");
         }
 
         await global.loading(m, conn);
 
         const buffer = await q.download?.();
-        if (!Buffer.isBuffer(buffer) || !buffer.length) {
+        if (!Buffer.isBuffer(buffer) || !buffer.length)
             return m.reply("Failed to get media buffer.");
-        }
 
         const sizeKB = (buffer.length / 1024).toFixed(2);
         const sizeMB = (buffer.length / 1024 / 1024).toFixed(2);
-        const sizeDisplay = buffer.length > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
+        const sizeDisplay =
+            buffer.length > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
 
         const serverNum = args[0];
         const server = uploaders[serverNum];
+
         let result = await server.fn(buffer);
 
         if (!result) {
             await conn.sendMessage(
                 m.chat,
-                { text: `${server.name} failed. Trying other servers...` },
-                { quoted: m }
+                { text: `${server.name} failed. Trying fallback...` },
+                { quoted: m },
             );
 
             result = await uploader(buffer);
+
             if (result && result.success) {
-                const caption = `File uploaded successfully
-
-Primary Server : ${server.name} (Failed)
-Fallback Server : ${result.provider}
-File Size : ${sizeDisplay}
-
-URL:
-${result.url}`;
-                return conn.sendMessage(m.chat, { text: caption }, { quoted: m });
+                delete global.uploadSession[m.sender];
+                return conn.sendButton(
+                    m.chat,
+                    {
+                        text: `Uploaded\nPrimary: ${server.name} (failed)\nFallback: ${result.provider}\nSize: ${sizeDisplay}`,
+                        buttons: [
+                            {
+                                name: "cta_copy",
+                                buttonParamsJson: JSON.stringify({
+                                    display_text: "Copy URL",
+                                    copy_code: result.url
+                                }),
+                            },
+                        ],
+                        hasMediaAttachment: false,
+                    },
+                    { quoted: m }
+                );
             }
         }
 
-        if (result && typeof result === "object" && result.success) {
-            const caption = `File uploaded successfully
-
-Server : ${result.provider}
-File Size : ${sizeDisplay}
-Attempts : ${result.attempts.length}
-
-URL:
-${result.url}`;
-            return conn.sendMessage(m.chat, { text: caption }, { quoted: m });
+        if (result && result.success) {
+            delete global.uploadSession[m.sender];
+            return conn.sendButton(
+                m.chat,
+                {
+                    text: `Uploaded\nServer: ${result.provider}\nSize: ${sizeDisplay}\nTries: ${result.attempts.length}`,
+                    buttons: [
+                        {
+                            name: "cta_copy",
+                            buttonParamsJson: JSON.stringify({
+                                display_text: "Copy URL",
+                                copy_code: result.url
+                            }),
+                        },
+                    ],
+                    hasMediaAttachment: false,
+                },
+                { quoted: m }
+            );
         }
 
-        if (result && typeof result === "string") {
-            const caption = `File uploaded successfully
-Server : ${server.name}
-File Size : ${sizeDisplay}
-URL: ${result}`;
-            return conn.sendMessage(m.chat, { text: caption }, { quoted: m });
+        if (typeof result === "string") {
+            delete global.uploadSession[m.sender];
+            return conn.sendButton(
+                m.chat,
+                {
+                    text: `Uploaded\nServer: ${server.name}\nSize: ${sizeDisplay}`,
+                    buttons: [
+                        {
+                            name: "cta_copy",
+                            buttonParamsJson: JSON.stringify({
+                                display_text: "Copy URL",
+                                copy_code: result
+                            }),
+                        },
+                    ],
+                    hasMediaAttachment: false,
+                },
+                { quoted: m }
+            );
         }
 
-        return m.reply(
-            `Upload failed on all servers.\nFile size: ${sizeDisplay}\nPlease try again later or use a different file.`
-        );
+        delete global.uploadSession[m.sender];
+        m.reply(`Upload failed.\nFile: ${sizeDisplay}`);
     } catch (e) {
         conn.logger.error(e);
-        m.reply(`Error: ${e.message}`);
+        m.reply("Error: " + e.message);
     } finally {
         await global.loading(m, conn, true);
     }
