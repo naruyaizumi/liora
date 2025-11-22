@@ -392,20 +392,6 @@ git push origin feature/YourFeature
 <tr>
 <td align="center" width="50%">
 
-### 📢 Updates Channel
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Bell.png" width="50" />
-
-Get latest updates, releases,
-and announcements
-
-<br><br>
-
-[![Join Channel](https://img.shields.io/badge/Join-Channel-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03)
-
-</td>
-<td align="center" width="50%">
-
 ### 💭 Support Group
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Waving%20Hand.png" width="50" />
