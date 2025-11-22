@@ -566,9 +566,8 @@ Special thanks to AI assistants that helped in development:
 
   <hr/>
 
-  <p><strong>Made with 🍥 and ☕ by <a href="https://github.com/naruyaizumi">Naruya Izumi</a></strong></p>
-  <sub>Version 7.5.0 • Last Updated: December 2024</sub>
-
+  <p><strong>Made with 💅🏻 and ☕ by <a href="https://github.com/naruyaizumi">Naruya Izumi</a></strong></p>
+  
 <br/><br/>
 
   <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer&text=Thank%20You!&fontSize=40&fontColor=ffffff&animation=twinkling&fontAlignY=75" width="100%" alt="Footer"/>

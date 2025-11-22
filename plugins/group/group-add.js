@@ -1,3 +1,4 @@
+
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     let target = m.quoted?.sender || null;
 
@@ -27,8 +28,45 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                 },
                 { quoted: m }
             );
+        } else if (userResult?.status === "403") {
+            const groupMetadata = await conn.groupMetadata(m.chat);
+            const inviteCode = await conn.groupInviteCode(m.chat);
+            const groupName = groupMetadata.subject || "Unknown Subject";
+            const inviteExpiration = Date.now() + (3 * 24 * 60 * 60 * 1000);
+            
+            let jpegThumbnail = null;
+            try {
+                const profilePic = await conn.profilePictureUrl(m.chat, "image").catch(() => null);
+                if (profilePic) {
+                    const response = await fetch(profilePic);
+                    const buffer = await response.arrayBuffer();
+                    jpegThumbnail = Buffer.from(buffer);
+                }
+            } catch (e) {
+                conn.logger.warn({ err: e.message }, "Failed to fetch group thumbnail");
+            }
+
+            await conn.sendInviteGroup(
+                m.chat,
+                target,
+                inviteCode,
+                inviteExpiration,
+                groupName,
+                `Cannot add you directly. Here is the invitation to join ${groupName}`,
+                jpegThumbnail,
+                { mentions: [target] }
+            );
+
+            return await conn.sendMessage(
+                m.chat,
+                {
+                    text: `Cannot add @${target.split("@")[0]} directly. Group invitation has been sent to their private chat.`,
+                    mentions: [target],
+                },
+                { quoted: m }
+            );
         } else {
-            return m.reply(`Failed to add the member.`);
+            return m.reply(`Failed to add the member. Status: ${userResult?.status || "unknown"}`);
         }
     } catch (e) {
         conn.logger.error(e);
