@@ -390,7 +390,7 @@ git push origin feature/YourFeature
 
 <table>
 <tr>
-<td align="center" width="33%">
+<td align="center" width="25%">
 
 ### 📢 GitHub Discussions
 
@@ -404,25 +404,39 @@ and announcements directly on GitHub
 [![Join Discussions](https://img.shields.io/badge/Join-Discussions-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/naruyaizumi/liora/discussions)
 
 </td>
-<td align="center" width="33%">
+<td align="center" width="25%">
 
-### 💭 Baileys Community
+### 💭 WhatsApp Group
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Bell.png" width="50" />
+
+Ask questions, share ideas,
+and get help from community
+
+<br><br>
+
+[![Join Group](https://img.shields.io/badge/Join-Group-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FtMSX1EsGHTJeynu8QmjpG)
+
+</td>
+<td align="center" width="25%">
+
+### 👥 Baileys Community
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Speech%20Balloon.png" width="50" />
 
-Ask questions, share ideas,
-and get help from Baileys devs
+Official Baileys developer hub
+on Discord
 
 <br><br>
 
 [![Join Discord](https://img.shields.io/badge/Join-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/baileys)
 
 </td>
-<td align="center" width="33%">
+<td align="center" width="25%">
 
-### 🌐 Owner Socials
+### ❤️ Owner Socials
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People%20and%20Body/Handshake.png" width="50" />
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People%20and%20Body/Busts%20in%20Silhouette.png" width="50" />
 
 Connect with me, follow updates,
 and explore my projects
