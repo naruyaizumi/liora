@@ -16,7 +16,7 @@ let handler = async (m, { conn, command, usedPrefix }) => {
         if (!media || !Buffer.isBuffer(media)) return m.reply("Invalid image buffer.");
         const { success, resultUrl, resultBuffer, error } = await remini(media);
         if (!success) throw new Error(error || "Enhancement failed");
-        
+
         if (resultBuffer) {
             await conn.sendMessage(
                 m.chat,

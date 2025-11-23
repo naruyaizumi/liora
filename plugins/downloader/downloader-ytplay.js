@@ -5,7 +5,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         return m.reply(`Please provide a song title.\n› Example: ${usedPrefix + command} Bye`);
 
     await global.loading(m, conn);
-    
+
     try {
         const { success, title, channel, cover, url, downloadUrl, error } = await play(
             args.join(" ")
@@ -17,26 +17,18 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
 
-        await conn.sendFile(
-            m.chat,
-            audioBuffer,
-            "audio.opus",
-            "",
-            m,
-            true,
-            {
-                contextInfo: {
-                    externalAdReply: {
-                        title,
-                        body: channel,
-                        thumbnailUrl: cover,
-                        mediaUrl: url,
-                        mediaType: 2,
-                        renderLargerThumbnail: true,
-                    },
+        await conn.sendFile(m.chat, audioBuffer, "audio.opus", "", m, true, {
+            contextInfo: {
+                externalAdReply: {
+                    title,
+                    body: channel,
+                    thumbnailUrl: cover,
+                    mediaUrl: url,
+                    mediaType: 2,
+                    renderLargerThumbnail: true,
                 },
-            }
-        );
+            },
+        });
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);

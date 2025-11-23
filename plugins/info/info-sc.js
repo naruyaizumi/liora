@@ -21,25 +21,25 @@ Pull Req: https://github.com/naruyaizumi/liora/pulls
                 amount: {
                     currencyCode: "USD",
                     offset: 0,
-                    value: 99999999999
+                    value: 99999999999,
                 },
-                expiryTimestamp: Date.now() + (24 * 60 * 60 * 1000),
+                expiryTimestamp: Date.now() + 24 * 60 * 60 * 1000,
                 amount1000: 99999999999 * 1000,
                 currencyCodeIso4217: "USD",
                 requestFrom: m.sender,
                 noteMessage: {
                     extendedTextMessage: {
-                        text: "𝗟 𝗜 𝗢 𝗥 𝗔"
-                    }
+                        text: "𝗟 𝗜 𝗢 𝗥 𝗔",
+                    },
                 },
                 background: {
                     placeholderArgb: 4278190080,
                     textArgb: 4294967295,
                     subtextArgb: 4294967295,
-                    type: 1
-                }
-            }
-        }
+                    type: 1,
+                },
+            },
+        },
     };
 
     await conn.sendMessage(
