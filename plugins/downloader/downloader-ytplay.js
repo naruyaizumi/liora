@@ -1,3 +1,4 @@
+import { convert } from "#add-on";
 import { play } from "#play";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -5,7 +6,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         return m.reply(`Please provide a song title.\n› Example: ${usedPrefix + command} Bye`);
 
     await global.loading(m, conn);
-    
     try {
         const { success, title, channel, cover, url, downloadUrl, error } = await play(
             args.join(" ")
@@ -17,14 +17,29 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
 
-        await conn.sendFile(
+        const converted = await convert(audioBuffer, {
+            format: "opus",
+            bitrate: "128k",
+            channels: 1,
+            sampleRate: 48000,
+            ptt: true,
+        });
+
+        const finalBuffer =
+            converted instanceof Buffer
+                ? converted
+                : converted?.buffer
+                  ? Buffer.from(converted.buffer)
+                  : converted?.data
+                    ? Buffer.from(converted.data)
+                    : Buffer.from(converted);
+
+        await conn.sendMessage(
             m.chat,
-            audioBuffer,
-            "audio.opus",
-            "",
-            m,
-            true,
             {
+                audio: finalBuffer,
+                mimetype: "audio/ogg; codecs=opus",
+                ptt: true,
                 contextInfo: {
                     externalAdReply: {
                         title,
@@ -35,7 +50,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                         renderLargerThumbnail: true,
                     },
                 },
-            }
+            },
+            { quoted: m }
         );
     } catch (e) {
         conn.logger.error(e);

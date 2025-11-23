@@ -31,15 +31,15 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
         }
 
         const idx = parseInt(input) - 1;
-        const category = !isNaN(idx) && CATEGORIES[idx] ? CATEGORIES[idx] : input;
+        const categoryName = !isNaN(idx) && CATEGORIES[idx] ? CATEGORIES[idx] : input;
 
-        if (!CATEGORIES.includes(category)) {
+        if (!CATEGORIES.includes(categoryName)) {
             return m.reply(
                 `Invalid category. Use \`${usedPrefix + command}\` to see available categories.`
             );
         }
 
-        return await category(conn, m, help, category, usedPrefix, command, timestamp);
+        return await showCategory(conn, m, help, categoryName, usedPrefix, command, timestamp);
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
@@ -182,7 +182,7 @@ async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
     );
 }
 
-async function category(conn, m, help, category, usedPrefix, command, timestamp) {
+async function showCategory(conn, m, help, category, usedPrefix, command, timestamp) {
     const cmds = formatCommandList(help, category, usedPrefix);
 
     const text =
