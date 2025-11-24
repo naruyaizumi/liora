@@ -160,7 +160,7 @@ export async function handler(chatUpdate) {
     const last = chatUpdate.messages?.[chatUpdate.messages.length - 1];
     if (!last) return;
     let m = smsg(this, last) || last;
-    //if (m.isBaileys || m.fromMe) return;
+    if (m.isBaileys || m.fromMe) return;
 
     const settings = getSettings(this.user.jid);
 
