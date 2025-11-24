@@ -51,7 +51,7 @@ async function setupPairingCode(conn) {
     await waitForConnection;
 
     try {
-        let code = await conn.requestPairingCode(pairingNumber, conn.Pairing);
+        let code = await conn.requestPairingCode(pairingNumber);
         code = code?.match(/.{1,4}/g)?.join("-") || code;
         logger.info(`Pairing code for ${pairingNumber}: ${code}`);
     } catch (e) {

@@ -39,7 +39,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
             );
         }
 
-        return await showCategory(conn, m, help, categoryName, usedPrefix, command, timestamp);
+        return await showCategory(conn, m, help, categoryName, usedPrefix, timestamp);
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
@@ -67,9 +67,7 @@ async function allCommands(conn, m, help, usedPrefix, timestamp) {
     return conn.sendMessage(
         m.chat,
         {
-            video: { url: "https://files.catbox.moe/n7i84u.mp4" },
-            caption: text,
-            gifPlayback: true,
+            text,
             contextInfo: {
                 forwardingScore: 999,
                 isForwarded: true,
@@ -162,13 +160,6 @@ async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
                     }),
                 },
                 {
-                    name: "quick_reply",
-                    buttonParamsJson: JSON.stringify({
-                        display_text: "Owner",
-                        id: `${usedPrefix}owner`,
-                    }),
-                },
-                {
                     name: "cta_url",
                     buttonParamsJson: JSON.stringify({
                         display_text: "Script",
@@ -182,7 +173,7 @@ async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
     );
 }
 
-async function showCategory(conn, m, help, category, usedPrefix, command, timestamp) {
+async function showCategory(conn, m, help, category, usedPrefix, timestamp) {
     const cmds = formatCommandList(help, category, usedPrefix);
 
     const text =
@@ -198,61 +189,26 @@ async function showCategory(conn, m, help, category, usedPrefix, command, timest
               ].join("\n")
             : `No commands found for ${MENU_META[category]} category.`;
 
-    const otherCategories = CATEGORIES.filter((cat) => cat !== category);
-    const sections = [
-        {
-            title: "Other Categories",
-            rows: otherCategories.map((cat) => ({
-                title: MENU_META[cat],
-                description: `View ${MENU_META[cat]} commands`,
-                id: `${usedPrefix + command} ${cat}`,
-            })),
-        },
-        {
-            title: "Navigation",
-            rows: [
-                {
-                    title: "Main Menu",
-                    description: "Back to main menu",
-                    id: usedPrefix + command,
-                },
-                {
-                    title: "All Commands",
-                    description: "View all commands",
-                    id: `${usedPrefix + command} all`,
-                },
-            ],
-        },
-    ];
-
-    return await conn.sendButton(
+    return conn.sendMessage(
         m.chat,
         {
-            product: {
-                productImage: { url: "https://files.catbox.moe/1moinz.jpg" },
-                productId: "25015941284694382",
-                title: MENU_META[category],
-                description: `${MENU_META[category]} Commands`,
-                currencyCode: "USD",
-                priceAmount1000: "0",
-                retailerId: global.config.author,
-                url: "https://wa.me/p/25015941284694382/6283143663697",
-                productImageCount: 1,
-            },
-            businessOwnerJid: "113748182302861@lid",
-            caption: text,
-            title: MENU_META[category],
-            footer: global.config.watermark || "Liora WhatsApp Bot",
-            buttons: [
-                {
-                    name: "single_select",
-                    buttonParamsJson: JSON.stringify({
-                        title: "Other Categories",
-                        sections,
-                    }),
+            text,
+            contextInfo: {
+                forwardingScore: 999,
+                isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: "120363144038483540@newsletter",
+                    newsletterName: "mkfs.ext4 /dev/naruyaizumi",
                 },
-            ],
-            hasMediaAttachment: false,
+                externalAdReply: {
+                    title: `${MENU_META[category]} Commands`,
+                    body: `${cmds.length} commands available`,
+                    thumbnailUrl: "https://qu.ax/TLqUB.png",
+                    sourceUrl: "https://linkbio.co/naruyaizumi",
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                },
+            },
         },
         { quoted: q() }
     );

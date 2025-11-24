@@ -8,7 +8,6 @@ import {
     uploader7,
     uploader8,
     uploader9,
-    uploader10,
     uploader,
 } from "../../lib/uploader.js";
 
@@ -20,13 +19,8 @@ const uploaders = {
     5: { name: "Tmpfiles.org", fn: uploader5, info: "1 hour retention" },
     6: { name: "Nauval.cloud", fn: uploader6, info: "30 minutes default" },
     7: { name: "Deline", fn: uploader7, info: "Deline uploader" },
-    8: { name: "Zenitsu", fn: uploader8, info: "Zenitsu uploader" },
-    9: {
-        name: "CloudKuImages",
-        fn: uploader9,
-        info: "CloudKuImages uploader",
-    },
-    10: { name: "Nekohime", fn: uploader10, info: "Nekohime CDN Uploader" },
+    8: { name: "CloudKuImages", fn: uploader8, info: "CloudKuImages uploader" },
+    9: { name: "Nekohime", fn: uploader9, info: "Nekohime CDN Uploader" },
 };
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
