@@ -5,7 +5,7 @@ use signal_hook_tokio::Signals;
 use std::env;
 use std::path::PathBuf;
 use std::process::Stdio;
-use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::process::{Child, Command};
@@ -206,7 +206,7 @@ impl Supervisor {
 
             let child_result = self.spawn_child().await;
 
-            let mut child = match child_result {
+            let child = match child_result {
                 Ok(c) => c,
                 Err(e) => {
                     error!("Failed to spawn child: {:?}", e);
@@ -364,7 +364,7 @@ async fn main() -> Result<()> {
     }
 
     let supervisor = Arc::new(Supervisor::new(bun_path, script_path, root_dir));
-
+    
     supervisor
         .ensure_directories()
         .await
