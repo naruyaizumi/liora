@@ -7,6 +7,7 @@ SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 HELPER_FILE="/usr/local/bin/bot"
 WORK_DIR="/root/liora"
 BUN_PATH="/root/.bun/bin/bun"
+SUPERVISOR_PATH="${WORK_DIR}/supervisor/target/release/liora-supervisor"
 TIME_ZONE="Asia/Jakarta"
 
 RED='\033[0;31m'
@@ -75,7 +76,7 @@ apt-get update -qq || {
     exit 1
 }
 
-sudo apt-get install -y \
+apt-get install -y \
     ffmpeg libwebp-dev libavformat-dev \
     libavcodec-dev libavutil-dev libswresample-dev \
     libswscale-dev libavfilter-dev build-essential \
@@ -102,6 +103,28 @@ if [[ "$FFMPEG_VERSION" != "5" && "$FFMPEG_VERSION" != "6" && "$FFMPEG_VERSION" 
 fi
 
 print_success "FFmpeg version $FFMPEG_VERSION detected"
+
+print_info "Installing Rust toolchain..."
+
+if ! command -v rustc &> /dev/null; then
+    print_info "Rust not found, installing..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y || {
+        print_error "Failed to install Rust"
+        exit 1
+    }
+    source "$HOME/.cargo/env"
+else
+    print_info "Rust already installed, ensuring latest stable..."
+    rustup update stable
+fi
+
+if ! command -v cargo &> /dev/null; then
+    print_error "Cargo not found after Rust installation"
+    exit 1
+fi
+
+RUST_VERSION=$(rustc --version | awk '{print $2}')
+print_success "Rust installed successfully (version: $RUST_VERSION)"
 
 print_info "Installing Bun..."
 
@@ -150,11 +173,11 @@ if [ -d "$WORK_DIR" ]; then
     }
 else
     print_info "Cloning Liora repository..."
-    git clone https://github.com/naruyaizumi/liora.git || {
+    git clone https://github.com/naruyaizumi/liora.git "$WORK_DIR" || {
         print_error "Failed to clone Liora repository"
         exit 1
     }
-    cd "liora" || {
+    cd "$WORK_DIR" || {
         print_error "Failed to change to Liora directory"
         exit 1
     }
@@ -167,6 +190,27 @@ print_info "Installing Liora dependencies..."
 }
 
 print_success "Liora dependencies installed"
+
+print_info "Building Rust supervisor..."
+
+cd "${WORK_DIR}/supervisor" || {
+    print_error "Supervisor directory not found"
+    exit 1
+}
+
+cargo build --release || {
+    print_error "Failed to build Rust supervisor"
+    exit 1
+}
+
+if [ ! -f "$SUPERVISOR_PATH" ]; then
+    print_error "Supervisor binary not found after build"
+    exit 1
+fi
+
+print_success "Rust supervisor built successfully"
+
+cd "$WORK_DIR" || exit 1
 
 print_success "Liora setup completed"
 
@@ -184,7 +228,7 @@ StartLimitBurst=5
 Type=simple
 User=root
 WorkingDirectory=${WORK_DIR}
-ExecStart=${BUN_PATH} ${WORK_DIR}/src/index.js
+ExecStart=${SUPERVISOR_PATH}
 KillMode=mixed
 KillSignal=SIGTERM
 FinalKillSignal=SIGKILL
@@ -194,11 +238,12 @@ RestartSec=5s
 Restart=always
 Environment=NODE_ENV=production
 Environment=TZ=${TIME_ZONE}
+Environment=BUN_PATH=${BUN_PATH}
 Environment=UV_THREADPOOL_SIZE=16
 Environment=UNDICI_CONNECT_TIMEOUT=600000
 Environment=UNDICI_REQUEST_TIMEOUT=600000
 Environment=UNDICI_HEADERS_TIMEOUT=600000
-Environment=PATH=${BUN_INSTALL}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=PATH=${BUN_INSTALL}/bin:${HOME}/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=liora-bot
@@ -237,12 +282,13 @@ print_success "Systemd service created and enabled"
 
 print_info "Creating helper CLI tool..."
 
-cat > "$HELPER_FILE" <<'EOL'
+cat > "$HELPER_FILE" <<'EOFHELPER'
 #!/bin/bash
 
 SERVICE="liora"
 WORK_DIR="/root/liora"
 BUN_PATH="/root/.bun/bin/bun"
+SUPERVISOR_PATH="${WORK_DIR}/supervisor/target/release/liora-supervisor"
 
 # Colors
 RED='\033[0;31m'
@@ -278,16 +324,27 @@ case "$1" in
         git stash push -m "Auto-stash before update $(date +%Y%m%d_%H%M%S)" 2>/dev/null || true
         git pull origin "$CURRENT_BRANCH" || { echo -e "${RED}Git pull failed${NC}"; exit 1; }
         "$BUN_PATH" install || { echo -e "${RED}Dependency installation failed${NC}"; exit 1; }
+        echo -e "${BLUE}Rebuilding Rust supervisor...${NC}"
+        cd "${WORK_DIR}/supervisor" || { echo -e "${RED}Supervisor directory not found${NC}"; exit 1; }
+        cargo build --release || { echo -e "${RED}Supervisor build failed${NC}"; exit 1; }
+        echo -e "${GREEN}Supervisor rebuilt successfully${NC}"
         systemctl restart $SERVICE && echo -e "${GREEN}Bot updated and restarted!${NC}" || echo -e "${RED}Failed to restart bot${NC}"
         ;;
     logs)
         echo -e "${YELLOW}Showing last 100 log lines...${NC}"
         journalctl -u $SERVICE -n 100 --no-pager
         ;;
+    rebuild)
+        echo -e "${BLUE}Rebuilding Rust supervisor...${NC}"
+        cd "${WORK_DIR}/supervisor" || { echo -e "${RED}Supervisor directory not found${NC}"; exit 1; }
+        cargo build --release || { echo -e "${RED}Build failed${NC}"; exit 1; }
+        echo -e "${GREEN}Supervisor rebuilt successfully${NC}"
+        echo -e "${YELLOW}Restart service to use new binary: bot restart${NC}"
+        ;;
     *)
         echo -e "${BLUE}Liora Bot Management CLI${NC}"
         echo ""
-        echo "Usage: bot {start|stop|restart|log|logs|status|update}"
+        echo "Usage: bot {start|stop|restart|log|logs|status|update|rebuild}"
         echo ""
         echo "Commands:"
         echo "  start   - Start the bot"
@@ -296,11 +353,12 @@ case "$1" in
         echo "  log     - Show real-time logs (live)"
         echo "  logs    - Show last 100 log entries"
         echo "  status  - Show service status"
-        echo "  update  - Update bot from git and restart"
+        echo "  update  - Update bot from git, rebuild supervisor, and restart"
+        echo "  rebuild - Rebuild Rust supervisor only (manual restart needed)"
         exit 1
         ;;
 esac
-EOL
+EOFHELPER
 
 chmod +x "$HELPER_FILE" || {
     print_error "Failed to make helper CLI executable"
@@ -309,5 +367,22 @@ chmod +x "$HELPER_FILE" || {
 
 print_success "Helper CLI created"
 
+echo ""
+echo -e "${GREEN}${SUCCESS_ICON}========================================${NC}"
 echo -e "${GREEN}${SUCCESS_ICON} Liora bot installed successfully!${NC}"
-echo -e "${YELLOW}${INFO_ICON} To start the bot, run: bot restart${NC}"
+echo -e "${GREEN}${SUCCESS_ICON}========================================${NC}"
+echo ""
+echo -e "${YELLOW}${INFO_ICON} Parent Process: Rust Supervisor${NC}"
+echo -e "${YELLOW}${INFO_ICON} Child Process: Bun + JavaScript${NC}"
+echo ""
+echo -e "${BLUE}To start the bot, run:${NC}"
+echo -e "  ${GREEN}bot restart${NC}"
+echo ""
+echo -e "${BLUE}Available commands:${NC}"
+echo -e "  bot start   - Start the bot"
+echo -e "  bot stop    - Stop the bot"
+echo -e "  bot restart - Restart the bot"
+echo -e "  bot log     - View live logs"
+echo -e "  bot status  - Check service status"
+echo -e "  bot update  - Update from git and restart"
+echo ""
