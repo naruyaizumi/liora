@@ -7,7 +7,7 @@ SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 HELPER_FILE="/usr/local/bin/bot"
 WORK_DIR="/root/liora"
 BUN_PATH="/root/.bun/bin/bun"
-SUPERVISOR_PATH="${WORK_DIR}/supervisor/target/release/liora-supervisor"
+SUPERVISOR_PATH="${WORK_DIR}/rs/target/release/liora-rs"
 TIME_ZONE="Asia/Jakarta"
 
 RED='\033[0;31m'
@@ -97,8 +97,8 @@ fi
 
 FFMPEG_VERSION=$(ffmpeg -version | head -n1 | awk '{print $3}' | cut -d. -f1)
 
-if [[ "$FFMPEG_VERSION" != "5" && "$FFMPEG_VERSION" != "6" && "$FFMPEG_VERSION" != "7" ]]; then
-    print_error "FFmpeg version $FFMPEG_VERSION detected. Only version 5, 6, or 7 are supported."
+if [[ "$FFMPEG_VERSION" != "5" && "$FFMPEG_VERSION" != "6" ]]; then
+    print_error "FFmpeg version $FFMPEG_VERSION detected. Only version 5, or 6 are supported."
     exit 1
 fi
 
@@ -193,7 +193,7 @@ print_success "Liora dependencies installed"
 
 print_info "Building Rust supervisor..."
 
-cd "${WORK_DIR}/supervisor" || {
+cd "${WORK_DIR}/rs" || {
     print_error "Supervisor directory not found"
     exit 1
 }
@@ -288,7 +288,7 @@ cat > "$HELPER_FILE" <<'EOFHELPER'
 SERVICE="liora"
 WORK_DIR="/root/liora"
 BUN_PATH="/root/.bun/bin/bun"
-SUPERVISOR_PATH="${WORK_DIR}/supervisor/target/release/liora-supervisor"
+SUPERVISOR_PATH="${WORK_DIR}/rs/target/release/liora-rs"
 
 # Colors
 RED='\033[0;31m'
@@ -325,7 +325,7 @@ case "$1" in
         git pull origin "$CURRENT_BRANCH" || { echo -e "${RED}Git pull failed${NC}"; exit 1; }
         "$BUN_PATH" install || { echo -e "${RED}Dependency installation failed${NC}"; exit 1; }
         echo -e "${BLUE}Rebuilding Rust supervisor...${NC}"
-        cd "${WORK_DIR}/supervisor" || { echo -e "${RED}Supervisor directory not found${NC}"; exit 1; }
+        cd "${WORK_DIR}/rs" || { echo -e "${RED}Supervisor directory not found${NC}"; exit 1; }
         cargo build --release || { echo -e "${RED}Supervisor build failed${NC}"; exit 1; }
         echo -e "${GREEN}Supervisor rebuilt successfully${NC}"
         systemctl restart $SERVICE && echo -e "${GREEN}Bot updated and restarted!${NC}" || echo -e "${RED}Failed to restart bot${NC}"
@@ -336,7 +336,7 @@ case "$1" in
         ;;
     rebuild)
         echo -e "${BLUE}Rebuilding Rust supervisor...${NC}"
-        cd "${WORK_DIR}/supervisor" || { echo -e "${RED}Supervisor directory not found${NC}"; exit 1; }
+        cd "${WORK_DIR}/rs" || { echo -e "${RED}Supervisor directory not found${NC}"; exit 1; }
         cargo build --release || { echo -e "${RED}Build failed${NC}"; exit 1; }
         echo -e "${GREEN}Supervisor rebuilt successfully${NC}"
         echo -e "${YELLOW}Restart service to use new binary: bot restart${NC}"

@@ -1,5 +1,8 @@
 let handler = async (m, { conn }) => {
-    await conn.sendMessage(m.chat, { text: "PUNG! 🏓" });
+    const start = performance.now();
+    const end = performance.now();
+    const ping = (end - start).toFixed(4);
+    await conn.sendMessage(m.chat, { text: `PONG: ${ping} ms` }, { quoted: m });
 };
 
 handler.help = ["ping"];
