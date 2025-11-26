@@ -167,10 +167,5 @@ jobs:
                   name: Release v${{ steps.check_release.outputs.release_version }}
                   body: |
                       🎉 Automatic release for version **v${{ steps.check_release.outputs.release_version }}**
-
-                      ✅ **Quality Checks Passed** (ESLint & CodeQL)
-                      ✨ **Code Formatted** (Prettier)
-
-                      📄 For full details, check the [Channel](https://whatsapp.com/channel/0029Vb5vz4oDjiOfUeW2Mt03)
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
