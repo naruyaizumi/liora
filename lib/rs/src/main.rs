@@ -91,6 +91,15 @@ impl Supervisor {
             config,
         }
     }
+
+    async fn ensure_directories(&self) -> Result<()> {
+        let db_dir = self.root_dir.join("database");
+        tokio::fs::create_dir_all(&db_dir)
+            .await
+            .context("Failed to create database directory")?;
+        debug!("Database directory ensured: {}", db_dir.display());
+        Ok(())
+    }
     
     async fn spawn_child(&self) -> Result<Child> {
         debug!("Spawning child process...");
