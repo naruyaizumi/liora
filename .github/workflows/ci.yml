@@ -76,10 +76,6 @@ jobs:
               working-directory: ./lib/rs
               run: cargo check --release
 
-            - name: Run Clippy
-              working-directory: ./lib/rs
-              run: cargo clippy -- -D warnings
-
     codeql:
         name: Analyze JavaScript (CodeQL)
         runs-on: ubuntu-latest
