@@ -1,7 +1,5 @@
 🚀 **Update 7.6.5**
 
-_[ ! ] DON'T SELL & DON'T CLAIM CREDIT, FVCK U BITCH!_
-
 We are pleased to share the latest improvements to **Liora**, now streamlined and optimized for Bun runtime:
 
 ### 🔧 Fixes

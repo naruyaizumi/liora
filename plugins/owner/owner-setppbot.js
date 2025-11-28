@@ -1,5 +1,5 @@
 let handler = async (m, { conn, usedPrefix, command }) => {
-    const bot = conn.user.jid;
+    const bot = conn.decodeJid(conn.user.id);
     const q = m.quoted ? m.quoted : m;
     const mime = (q.msg || q).mimetype || "";
 

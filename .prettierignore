@@ -1,2 +1,14 @@
-node_modules
+# Ignore dependencies
+node_modules/
+
+# Ignore version control / CI
 .github/
+
+# Ignore build artifacts
+build/
+target/
+dist/
+
+# Ignore temporary files
+*.log
+*.tmp

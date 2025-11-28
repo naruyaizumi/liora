@@ -31,7 +31,7 @@ function listFeatures(isOwner, chat, bot) {
 let handler = async (m, { conn, isOwner, isAdmin, args, usedPrefix, command }) => {
     try {
         const chat = global.db.data.chats[m.chat];
-        const bot = global.db.data.settings[conn.user.jid] || {};
+        const bot = global.db.data.settings[conn.user.lid] || {};
 
         if (!args[0]) {
             const daftar = listFeatures(isOwner, chat, bot);

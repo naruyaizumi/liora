@@ -10,59 +10,123 @@
       "-fdata-sections",
       "-ffunction-sections",
       "-fexceptions",
+      "-pthread",
+      "-Wall",
+      "-Wextra",
       "-Wno-deprecated-declarations",
-      "-Wno-reorder",
-      "-Wno-unused-variable",
       "-Wno-unused-parameter",
-      "-Wno-sign-compare",
-      "-Wno-stringop-overflow"
+      "-Wno-sign-compare"
     ],
     "common_ldflags": [
       "-Wl,--as-needed",
-      "-Wl,--gc-sections"
+      "-Wl,--gc-sections",
+      "-flto=auto",
+      "-pthread"
     ],
     "common_includes": [
       "<!@(node -p \"require('node-addon-api').include\")",
       "/usr/include",
-      "/usr/local/include"
+      "/usr/local/include",
+      "lib/cpp",
+      "lib/cpp/core"
+    ],
+    "common_libs": [
+      "-lwebp",
+      "-lwebpmux",
+      "-lwebpdemux",
+      "-lavformat",
+      "-lavcodec",
+      "-lavutil",
+      "-lswresample",
+      "-lswscale",
+      "-lpthread"
     ]
   },
 
   "targets": [
     {
-      "target_name": "sticker",
-      "sources": ["lib/addon/sticker.cpp"],
+      "target_name": "sticker_core",
+      "type": "static_library",
+      "sources": [
+        "lib/cpp/core/sticker_core.cpp"
+      ],
       "include_dirs": ["<@(common_includes)"],
-      "dependencies": ["<!(node -p \"require('node-addon-api').gyp\")"],
+      "cflags_cc": ["<@(common_cflags_cc)"],
+      "direct_dependent_settings": {
+        "include_dirs": ["<@(common_includes)"]
+      }
+    },
+    {
+      "target_name": "converter_core",
+      "type": "static_library",
+      "sources": [
+        "lib/cpp/core/converter_core.cpp"
+      ],
+      "include_dirs": ["<@(common_includes)"],
+      "cflags_cc": ["<@(common_cflags_cc)"],
+      "direct_dependent_settings": {
+        "include_dirs": ["<@(common_includes)"]
+      }
+    },
+    {
+      "target_name": "sticker",
+      "sources": [
+        "lib/cpp/bindings/sticker.cpp"
+      ],
+      "include_dirs": ["<@(common_includes)"],
+      "dependencies": [
+        "<!(node -p \"require('node-addon-api').gyp\")",
+        "sticker_core"
+      ],
       "cflags_cc": ["<@(common_cflags_cc)"],
       "ldflags": ["<@(common_ldflags)"],
       "defines": ["NAPI_CPP_EXCEPTIONS"],
-      "libraries": [
-        "-lwebp",
-        "-lwebpmux",
-        "-lwebpdemux",
-        "-lavformat",
-        "-lavcodec",
-        "-lavutil",
-        "-lswresample",
-        "-lswscale"
-      ]
+      "libraries": ["<@(common_libs)"]
     },
     {
       "target_name": "converter",
-      "sources": ["lib/addon/converter.cpp"],
+      "sources": [
+        "lib/cpp/bindings/converter.cpp"
+      ],
       "include_dirs": ["<@(common_includes)"],
-      "dependencies": ["<!(node -p \"require('node-addon-api').gyp\")"],
+      "dependencies": [
+        "<!(node -p \"require('node-addon-api').gyp\")",
+        "converter_core"
+      ],
       "cflags_cc": ["<@(common_cflags_cc)"],
       "ldflags": ["<@(common_ldflags)"],
       "defines": ["NAPI_CPP_EXCEPTIONS"],
-      "libraries": [
-        "-lavformat",
-        "-lavcodec",
-        "-lavutil",
-        "-lswresample",
-        "-lswscale"
-      ]
+      "libraries": ["<@(common_libs)"]
+    },
+    {
+      "target_name": "sticker_async",
+      "sources": [
+        "lib/cpp/bindings/sticker_async.cpp"
+      ],
+      "include_dirs": ["<@(common_includes)"],
+      "dependencies": [
+        "<!(node -p \"require('node-addon-api').gyp\")",
+        "sticker_core"
+      ],
+      "cflags_cc": ["<@(common_cflags_cc)"],
+      "ldflags": ["<@(common_ldflags)"],
+      "defines": ["NAPI_CPP_EXCEPTIONS"],
+      "libraries": ["<@(common_libs)"]
+    },
+    {
+      "target_name": "converter_async",
+      "sources": [
+        "lib/cpp/bindings/converter_async.cpp"
+      ],
+      "include_dirs": ["<@(common_includes)"],
+      "dependencies": [
+        "<!(node -p \"require('node-addon-api').gyp\")",
+        "converter_core"
+      ],
+      "cflags_cc": ["<@(common_cflags_cc)"],
+      "ldflags": ["<@(common_ldflags)"],
+      "defines": ["NAPI_CPP_EXCEPTIONS"],
+      "libraries": ["<@(common_libs)"]
     }
   ]
 }
