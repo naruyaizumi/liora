@@ -33,9 +33,6 @@
   <a href="https://nodejs.org">
     <img src="https://img.shields.io/badge/Compat-Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js Compatible">
   </a>
-  <a href="https://libwebp.com">
-    <img src="https://img.shields.io/badge/Images-WebP-0099FF?style=for-the-badge&logo=webp&logoColor=white" alt="WebP Support">
-  </a>
   <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">
     <img src="https://img.shields.io/badge/ES-Modules-yellow?style=for-the-badge&logo=javascript&logoColor=black" alt="ES Modules">
   </a>
@@ -108,16 +105,6 @@ graph TD
     RustSupervisor --> Monitoring
     BunRuntime --> Monitoring
 ```
-
-### ⚡ Performance First
-
-| Metric                | Value       | Comparison      |
-|:---------------------:|:-----------:|:---------------:|
-| **Startup Time**      | ~1.5s       | 40% faster      |
-| **Memory Usage**      | ~150MB base | 25% less        |
-| **Message Latency**   | <50ms avg   | 60% faster      |
-| **Cache Hit Rate**    | 85-95%      | Enterprise-tier |
-| **Connection Uptime** | 99.9%       | Auto-recovery   |
 
 > [!IMPORTANT]
 > **Breaking Changes in v8.0.0**  
