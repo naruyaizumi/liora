@@ -21,8 +21,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         for (let i = 0; i < Math.min(10, results.length); i++) {
             let item = results[i];
 
-            let sizeMB = item.size_nowm ? (item.size_nowm / (1024 * 1024)).toFixed(2) : "N/A";
-
             let caption = `
 Statistics:
 Views: ${item.stats?.views || 0}

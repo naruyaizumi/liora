@@ -1,4 +1,4 @@
-let handler = async (m, { conn, args, usedPrefix, groupMetadata }) => {
+let handler = async (m, { conn, args, usedPrefix }) => {
     try {
         const text = args[0];
         if (!text) return m.reply(`Usage: ${usedPrefix}cekid <WhatsApp group or channel link>`);
