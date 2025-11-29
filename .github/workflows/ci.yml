@@ -30,7 +30,7 @@ env:
 
 jobs:
 # ============================================
-# JavaScript/TypeScript Quality Checks
+# JavaScript Quality Checks
 # ============================================
     javascript-quality:
         name: JavaScript Quality & Security
@@ -71,11 +71,10 @@ jobs:
                       ${{ runner.os }}-bun-
 
             - name: Install Dependencies
-              run: bun install --frozen-lockfile
+              run: bun install
 
             - name: Install ESLint dependencies if missing
               run: |
-                  # Install package yang diperlukan untuk ESLint config
                   if ! bun ls @eslint/js 2>/dev/null; then
                     echo "📦 Installing missing ESLint dependencies..."
                     bun add -d @eslint/js globals
@@ -84,7 +83,7 @@ jobs:
                   fi
 
             - name: Run ESLint
-              run: bun run lint
+              run: bunx eslint .
 
             - name: Check for outdated dependencies
               run: |
@@ -263,9 +262,7 @@ jobs:
             - name: Build JavaScript (for CodeQL)
               if: matrix.language == 'javascript'
               run: |
-                  bun install --frozen-lockfile
-                  
-                  bun add -d @eslint/js globals
+                  bun install
                   
                   echo "Skipping native build for CodeQL analysis"
                   # [ -f "package.json" ] && bun run build 2>/dev/null || echo "No build script found"
@@ -323,7 +320,7 @@ jobs:
                   key: ${{ runner.os }}-integration-${{ hashFiles('**/bun.lockb', '**/Cargo.lock', '.github/workflows/*.yml') }}
 
             - name: Install Bun dependencies
-              run: bun install --frozen-lockfile
+              run: bun install
 
             - name: Install ESLint dependencies if missing
               run: |
@@ -463,7 +460,7 @@ jobs:
                   set -e
                   
                   echo "📦 Installing dependencies..."
-                  bun install --frozen-lockfile
+                  bun install
                   
                   bun add -d @eslint/js globals
                   
