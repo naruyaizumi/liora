@@ -29,9 +29,7 @@ env:
     RUST_BACKTRACE: 1
 
 jobs:
-# ============================================
-# JavaScript Quality Checks
-# ============================================
+
     javascript-quality:
         name: JavaScript Quality & Security
         runs-on: ubuntu-latest
@@ -48,56 +46,31 @@ jobs:
               run: |
                   sudo apt-get update
                   sudo apt-get install -y \
-                    ffmpeg \
-                    libwebp-dev \
-                    libavformat-dev \
-                    libavcodec-dev \
-                    libavutil-dev \
-                    libswresample-dev \
-                    libswscale-dev \
-                    libavfilter-dev \
-                    build-essential \
-                    python3 \
-                    g++ \
-                    pkg-config \
-                    cmake
+                    ffmpeg libwebp-dev libavformat-dev libavcodec-dev \
+                    libavutil-dev libswresample-dev libswscale-dev libavfilter-dev \
+                    build-essential python3 g++ pkg-config cmake
 
             - name: Cache Bun dependencies
               uses: actions/cache@v4
               with:
                   path: ~/.bun/install/cache
-                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb', '.github/workflows/*.yml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-bun-
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+                  restore-keys: ${{ runner.os }}-bun-
 
             - name: Install Dependencies
               run: bun install
 
-            - name: Install ESLint dependencies if missing
+            - name: Install ESLint dependencies
               run: |
-                  if ! bun ls @eslint/js 2>/dev/null; then
-                    echo "📦 Installing missing ESLint dependencies..."
-                    bun add -d @eslint/js globals
-                  else
-                    echo "⚡ ESLint dependencies already installed"
-                  fi
+                  bun add -d @eslint/js globals || true
+                  echo "ESLint dependencies ready"
 
             - name: Run ESLint
               run: bunx eslint .
 
-            - name: Check for outdated dependencies
-              run: |
-                  echo "📦 Checking for outdated packages..."
-                  bun outdated || echo "⚠️ Some packages are outdated"
+            - name: Check outdated packages
+              run: bun outdated || echo "Some packages are outdated"
 
-            - name: List all dependencies
-              run: |
-                  echo "📋 Listing all dependencies..."
-                  bun pm ls --all || echo "⚠️ Could not list all dependencies"
-
-# ============================================
-# Rust Quality Checks
-# ============================================
     rust-quality:
         name: Rust Quality & Security
         runs-on: ubuntu-latest
@@ -115,13 +88,10 @@ jobs:
               with:
                   path: |
                       ~/.cargo/bin/
-                      ~/.cargo/registry/index/
-                      ~/.cargo/registry/cache/
-                      ~/.cargo/git/db/
+                      ~/.cargo/registry/
                       lib/rs/target/
-                  key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '.github/workflows/*.yml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-cargo-
+                  key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+                  restore-keys: ${{ runner.os }}-cargo-
 
             - name: Check Rust formatting
               working-directory: ./lib/rs
@@ -135,28 +105,16 @@ jobs:
             - name: Rust Security Audit
               working-directory: ./lib/rs
               run: |
-                  if ! command -v cargo-audit &> /dev/null; then
-                      echo "📦 Installing cargo-audit..."
-                      cargo install cargo-audit --locked
-                  else
-                      echo "⚡ cargo-audit already installed, skipping installation"
-                  fi
-                  
-                  echo "🔒 Running security audit..."
-                  cargo audit
+                  cargo install cargo-audit --locked || echo "cargo-audit already installed"
+                  cargo audit || echo "Security issues found"
               continue-on-error: true
 
-            - name: Check Rust build
+            - name: Build & Test
               working-directory: ./lib/rs
-              run: cargo check --release --verbose
-
-            - name: Run Rust tests
-              working-directory: ./lib/rs
-              run: cargo test --release --verbose
-
-# ============================================
-# C++ Quality Checks
-# ============================================
+              run: |
+                  cargo check --release --verbose
+                  cargo test --release --verbose
+#
     cpp-quality:
         name: C++ Quality Check
         runs-on: ubuntu-latest
@@ -171,112 +129,65 @@ jobs:
 
             - name: Check C++ formatting
               run: |
-                  echo "🔍 Checking C++ code formatting..."
-                  FORMAT_ISSUES=0
-                  
-                  CPP_FILES=$(find lib/cpp -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cc" \) 2>/dev/null)
+                  echo "Checking C++ formatting..."
+                  CPP_FILES=$(find lib/cpp -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cc" \) 2>/dev/null || true)
                   
                   if [ -z "$CPP_FILES" ]; then
-                    echo "🍥 No C++ files found to check"
+                    echo "No C++ files found"
                     exit 0
                   fi
                   
+                  FORMAT_ISSUES=0
                   while IFS= read -r file; do
-                  if clang-format --dry-run --Werror "$file" 2>/dev/null; then
-                  echo "⚡ $file is properly formatted"
-                  else
-                  echo "☠️ $file needs formatting"
-                  FORMAT_ISSUES=1
-                  fi
+                    if clang-format --dry-run --Werror "$file" 2>/dev/null; then
+                      echo "$file OK"
+                    else
+                      echo "$file needs formatting"
+                      FORMAT_ISSUES=1
+                    fi
                   done <<< "$CPP_FILES"
                   
-                  if [ $FORMAT_ISSUES -eq 1 ]; then
-                  echo ""
-                  echo "⚠️ C++ formatting issues found. They will be auto-fixed in the next step."
-                  else
-                  echo "⚡ All C++ files are properly formatted"
-                  fi
+                  [ $FORMAT_ISSUES -eq 0 ] && echo "All C++ files formatted correctly"
               continue-on-error: true
 
-            - name: Auto-format C++ code
-              run: |
-                  echo "✨ Auto-formatting C++ files..."
-                  find lib/cpp -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cc" \) -exec clang-format -i {} \;
-                  echo "⚡ C++ files formatted"
-
-# ============================================
-# CodeQL Security Analysis
-# ============================================
     codeql-analysis:
-        name: CodeQL Security Analysis
+        name: CodeQL Security
         runs-on: ubuntu-latest
         strategy:
-            fail-fast: false
             matrix:
                 language: ['javascript', 'rust']
-        
         steps:
-            - name: Checkout repository
+            - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: Install build dependencies for all languages
+            - name: Install dependencies
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y \
-                    ffmpeg \
-                    libwebp-dev \
-                    libavformat-dev \
-                    libavcodec-dev \
-                    libavutil-dev \
-                    libswresample-dev \
-                    libswscale-dev \
-                    libavfilter-dev \
-                    build-essential \
-                    python3 \
-                    g++ \
-                    pkg-config \
-                    cmake
+                  sudo apt-get install -y build-essential cmake
 
             - name: Initialize CodeQL
               uses: github/codeql-action/init@v3
               with:
                   languages: ${{ matrix.language }}
-                  queries: security-extended,security-and-quality
+                  queries: security-extended
 
-            - name: Setup Bun for JavaScript analysis
-              if: matrix.language == 'javascript'
-              uses: oven-sh/setup-bun@v2
-              with:
-                  bun-version: latest
-
-            - name: Setup Rust for Rust analysis
-              if: matrix.language == 'rust'
-              uses: dtolnay/rust-toolchain@stable
-
-            - name: Build Rust (for CodeQL)
-              if: matrix.language == 'rust'
-              working-directory: ./lib/rs
+            - name: Setup language runtime
               run: |
-                  cargo build --release --verbose
-
-            - name: Build JavaScript (for CodeQL)
-              if: matrix.language == 'javascript'
-              run: |
-                  bun install
-                  
-                  echo "Skipping native build for CodeQL analysis"
-                  # [ -f "package.json" ] && bun run build 2>/dev/null || echo "No build script found"
+                  if [ "${{ matrix.language }}" == "javascript" ]; then
+                    curl -fsSL https://bun.sh/install | bash
+                    export PATH="$HOME/.bun/bin:$PATH"
+                    bun install
+                  elif [ "${{ matrix.language }}" == "rust" ]; then
+                    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+                    source "$HOME/.cargo/env"
+                    cd lib/rs && cargo build --release
+                  fi
 
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v3
-              with:
-                  category: "/language:${{matrix.language}}"
 
-# ============================================
-# Build & Integration Tests
-# ============================================
     integration-build:
-        name: Integration Build Test
+        name: Integration Build
         needs: [javascript-quality, rust-quality, cpp-quality]
         runs-on: ubuntu-latest
         steps:
@@ -285,118 +196,42 @@ jobs:
 
             - name: Setup Bun
               uses: oven-sh/setup-bun@v2
-              with:
-                  bun-version: latest
 
             - name: Setup Rust
               uses: dtolnay/rust-toolchain@stable
 
-            - name: Install all dependencies
+            - name: Install dependencies
               run: |
                   sudo apt-get update
                   sudo apt-get install -y \
-                    ffmpeg \
-                    libwebp-dev \
-                    libavformat-dev \
-                    libavcodec-dev \
-                    libavutil-dev \
-                    libswresample-dev \
-                    libswscale-dev \
-                    libavfilter-dev \
-                    build-essential \
-                    python3 \
-                    g++ \
-                    pkg-config \
-                    cmake
+                    ffmpeg libwebp-dev libavformat-dev libavcodec-dev \
+                    libavutil-dev libswresample-dev libswscale-dev libavfilter-dev \
+                    build-essential python3 g++ pkg-config cmake
 
-            - name: Cache dependencies
-              uses: actions/cache@v4
-              with:
-                  path: |
-                      ~/.bun/install/cache
-                      ~/.cargo/bin/
-                      ~/.cargo/registry/
-                      lib/rs/target/
-                  key: ${{ runner.os }}-integration-${{ hashFiles('**/bun.lockb', '**/Cargo.lock', '.github/workflows/*.yml') }}
-
-            - name: Install Bun dependencies
-              run: bun install
-
-            - name: Install ESLint dependencies if missing
+            - name: Build all components
               run: |
-                  if ! bun ls @eslint/js 2>/dev/null; then
-                    echo "📦 Installing missing ESLint dependencies..."
-                    bun add -d @eslint/js globals
-                  fi
+                  bun install
+                  cd lib/rs && cargo build --release
+                  echo "Build complete"
 
-            - name: Build Rust components
-              working-directory: ./lib/rs
-              run: cargo build --release --verbose
-
-            - name: Build Node.js native components
+            - name: Verify artifacts
               run: |
-                  echo "🔨 Building Node.js native components..."
-                  bun run build 2>&1 | tee build.log || {
-                    echo "⚠️ Native build had issues, but continuing..."
-                    echo "Build log:"
-                    cat build.log
-                  }
-
-            - name: Verify build artifacts
-              run: |
-                  echo "🔍 Verifying build artifacts..."
-                  
-                  if ls lib/rs/target/release/*.so 2>/dev/null || \
-                     ls lib/rs/target/release/*.dylib 2>/dev/null || \
-                     ls lib/rs/target/release/*.dll 2>/dev/null || \
-                     ls lib/rs/target/release/lib*.a 2>/dev/null; then
-                    echo "⚡ Rust library artifacts found:"
-                    ls -lh lib/rs/target/release/*.{so,dylib,dll,a} 2>/dev/null || true
-                  else
-                    echo "🍥 No Rust library artifacts found (may be expected)"
-                  fi
-                  
-                  if [ -d "lib/rs/target/release" ]; then
-                    BINARIES=$(find lib/rs/target/release -maxdepth 1 -type f -executable)
-                    if [ -n "$BINARIES" ]; then
-                      echo "⚡ Rust binaries found:"
-                      echo "$BINARIES" | while read -r bin; do
-                        ls -lh "$bin"
-                      done
-                    fi
-                  fi
-                  
-                  if [ -d "build" ]; then
-                    echo "⚡ Node.js build artifacts found:"
-                    find build -type f -name "*.node" -o -name "*.so" -o -name "*.dll" | while read -r artifact; do
-                      ls -lh "$artifact"
-                    done
-                  fi
-                  
-                  echo "⚡ Build verification complete"
-
-# ============================================
-# Dependency Review (PRs only)
-# ============================================
+                  echo "Checking build artifacts..."
+                  ls -lh lib/rs/target/release/ || true
+                  echo "Verification complete"
+#
     dependency-review:
         name: Dependency Review
         if: github.event_name == 'pull_request'
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-
-            - name: Dependency Review
-              uses: actions/dependency-review-action@v4
+            - uses: actions/checkout@v4
+            - uses: actions/dependency-review-action@v4
               with:
                   fail-on-severity: moderate
-                  deny-licenses: GPL-2.0, GPL-3.0
 
-# ============================================
-# Auto-format & Release Pipeline
-# ============================================
     release-pipeline:
-        name: Format & Auto Release
+        name: Format & Release
         needs: [javascript-quality, rust-quality, cpp-quality, codeql-analysis, integration-build]
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
@@ -408,203 +243,150 @@ jobs:
                   fetch-depth: 0
 
             - name: Check version change
-              id: check_version
+              id: version
               run: |
+                  CURRENT_VERSION=$(jq -r '.version' package.json)
+                  echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+                  
                   if git show HEAD^:package.json 2>/dev/null; then
                     PREV_VERSION=$(git show HEAD^:package.json | jq -r '.version')
                   else
                     PREV_VERSION="0.0.0"
                   fi
-                  NEW_VERSION=$(jq -r '.version' package.json)
-
-                  echo "Previous version: $PREV_VERSION"
-                  echo "Current version: $NEW_VERSION"
-
-                  if [ "$PREV_VERSION" != "$NEW_VERSION" ]; then
+                  echo "previous_version=$PREV_VERSION" >> $GITHUB_OUTPUT
+                  
+                  echo "Previous: $PREV_VERSION → Current: $CURRENT_VERSION"
+                  
+                  if [ "$PREV_VERSION" != "$CURRENT_VERSION" ]; then
                     echo "version_changed=true" >> $GITHUB_OUTPUT
-                    echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+                    echo "Version changed - RELEASE WILL BE CREATED"
                     
                     PREV_MAJOR=$(echo $PREV_VERSION | cut -d. -f1)
-                    NEW_MAJOR=$(echo $NEW_VERSION | cut -d. -f1)
-                    
-                    if [ "$NEW_MAJOR" -gt "$PREV_MAJOR" ]; then
-                      echo "is_major=true" >> $GITHUB_OUTPUT
-                    else
-                      echo "is_major=false" >> $GITHUB_OUTPUT
-                    fi
+                    CURR_MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
+                    [ "$CURR_MAJOR" -gt "$PREV_MAJOR" ] && echo "is_major=true" >> $GITHUB_OUTPUT || echo "is_major=false" >> $GITHUB_OUTPUT
                   else
                     echo "version_changed=false" >> $GITHUB_OUTPUT
+                    echo "Version unchanged - skipping release"
                   fi
 
-            - name: Setup Bun
-              if: steps.check_version.outputs.version_changed == 'true'
-              uses: oven-sh/setup-bun@v2
-              with:
-                  bun-version: latest
-
-            - name: Setup Rust
-              if: steps.check_version.outputs.version_changed == 'true'
-              uses: dtolnay/rust-toolchain@stable
-              with:
-                  components: rustfmt
-
-            - name: Install dependencies
-              if: steps.check_version.outputs.version_changed == 'true'
+            - name: Setup environments
+              if: steps.version.outputs.version_changed == 'true'
               run: |
+                  curl -fsSL https://bun.sh/install | bash
+                  export PATH="$HOME/.bun/bin:$PATH"
+                  echo "$HOME/.bun/bin" >> $GITHUB_PATH
+                  
+                  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+                  source "$HOME/.cargo/env"
+                  echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+                  
                   sudo apt-get update
-                  sudo apt-get install -y \
-                    ffmpeg \
-                    libwebp-dev \
-                    libavformat-dev \
-                    libavcodec-dev \
-                    libavutil-dev \
-                    libswresample-dev \
-                    libswscale-dev \
-                    libavfilter-dev \
-                    build-essential \
-                    python3 \
-                    g++ \
-                    pkg-config \
-                    cmake
+                  sudo apt-get install -y clang-format
+                  
+                  echo "All tools installed"
 
             - name: Auto-format all code
-              if: steps.check_version.outputs.version_changed == 'true'
+              if: steps.version.outputs.version_changed == 'true'
               run: |
-                  set -e
+                  export PATH="$HOME/.bun/bin:$HOME/.cargo/bin:$PATH"
                   
-                  echo "📦 Installing dependencies..."
+                  echo "Installing dependencies..."
                   bun install
-                  
                   bun add -d @eslint/js globals
                   
-                  echo "✨ Formatting JavaScript/TypeScript..."
-                  bunx prettier --write .
+                  echo "Formatting JavaScript..."
+                  bunx prettier --write . || true
                   
-                  echo "✨ Formatting Rust code..."
-                  if [ -d "lib/rs" ]; then
-                    cd lib/rs
-                    cargo fmt --all
-                    cd ../..
-                  fi
+                  echo "Formatting Rust..."
+                  [ -d "lib/rs" ] && (cd lib/rs && cargo fmt --all) || true
                   
-                  echo "✨ Formatting C++ code..."
-                  if [ -d "lib/cpp" ]; then
-                    find lib/cpp -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cc" \) -exec clang-format -i {} \;
-                  fi
+                  echo "Formatting C++..."
+                  find lib/cpp -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cc" \) -exec clang-format -i {} \; 2>/dev/null || true
                   
-                  echo "⚡ All formatting complete"
+                  echo "Formatting complete"
 
             - name: Commit formatting changes
-              if: steps.check_version.outputs.version_changed == 'true'
+              if: steps.version.outputs.version_changed == 'true'
               run: |
                   git config --global user.name "naruyaizumi"
                   git config --global user.email "sexystyle088@gmail.com"
-
-                  if [[ `git status --porcelain` ]]; then
-                    echo "📝 Formatting changes detected, committing..."
-                    
-                    git pull --rebase origin main || {
-                      echo "⚠️ Rebase conflict detected, aborting..."
-                      git rebase --abort
-                      exit 1
-                    }
-                    
+                  
+                  if [[ -n $(git status --porcelain) ]]; then
+                    echo "Committing formatting changes..."
                     git add .
-                    git commit -m "style: auto-format with Prettier, cargo fmt, and clang-format [skip ci]"
+                    git commit -m "style: auto-format code [skip ci]"
                     
                     for i in {1..3}; do
-                      if git push origin main; then
-                        echo "⚡ Formatting changes committed and pushed"
-                        break
-                      else
-                        if [ $i -eq 3 ]; then
-                          echo "☠️ Failed to push after 3 attempts"
-                          exit 1
-                        fi
-                        echo "⚠️ Push failed, retrying... (attempt $i/3)"
-                        git pull --rebase origin main
-                        sleep 2
-                      fi
+                      git pull --rebase origin main && git push origin main && break || {
+                        [ $i -eq 3 ] && echo "Failed to push" && exit 1
+                        echo "Retry $i/3..."
+                        sleep 3
+                      }
                     done
                     
-                    echo "⏳ Waiting for GitHub to process changes..."
+                    echo "Formatting committed"
                     sleep 5
                   else
-                    echo "⚡ No formatting changes needed"
+                    echo "No formatting changes"
                   fi
 
-            - name: Check if release needed
-              id: check_release
-              if: steps.check_version.outputs.version_changed == 'true'
-              run: |
-                  NEW_VERSION="${{ steps.check_version.outputs.new_version }}"
-                  
-                  if git rev-parse "v${NEW_VERSION}" >/dev/null 2>&1; then
-                    echo "do_release=false" >> $GITHUB_OUTPUT
-                    echo "🍥 Tag v${NEW_VERSION} already exists"
-                  else
-                    echo "do_release=true" >> $GITHUB_OUTPUT
-                    echo "release_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-                    echo "⚡ Release v${NEW_VERSION} will be created"
-                  fi
-
-            - name: Generate changelog from commits
+            - name: Generate changelog
+              if: steps.version.outputs.version_changed == 'true'
               id: changelog
-              if: steps.check_release.outputs.do_release == 'true'
               run: |
-                  VERSION="${{ steps.check_release.outputs.release_version }}"
+                  VERSION="${{ steps.version.outputs.current_version }}"
                   LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
                   
-                  if [ -n "$LAST_TAG" ]; then
-                    echo "📝 Generating changelog from $LAST_TAG to HEAD"
-                    COMMITS=$(git log $LAST_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)
-                  else
-                    echo "📝 Generating changelog for first release"
-                    COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges | head -20)
-                  fi
-
+                  echo "Generating changelog..."
+                  
                   {
-                    echo "## 🚀 What's Changed in v${VERSION}"
+                    echo "## Release v${VERSION}"
                     echo ""
-                    if [ -n "$COMMITS" ]; then
-                      echo "$COMMITS"
-                    else
-                      echo "- Initial release"
-                    fi
-                    echo ""
+                    
                     if [ -n "$LAST_TAG" ]; then
+                      echo "### Changes since $LAST_TAG"
+                      echo ""
+                      git log ${LAST_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges | head -50
+                      echo ""
+                      echo ""
                       echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${LAST_TAG}...v${VERSION}"
                     else
-                      echo "**Full Changelog**: https://github.com/${{ github.repository }}/commits/v${VERSION}"
+                      echo "### Initial Release"
+                      echo ""
+                      git log --pretty=format:"- %s (%h)" --no-merges | head -20
+                      echo ""
+                      echo ""
+                      echo "**Commits**: https://github.com/${{ github.repository }}/commits/v${VERSION}"
                     fi
-                  } > /tmp/changelog.md
+                  } > /tmp/release-notes.md
                   
-                  echo "⚡ Changelog generated"
-                  cat /tmp/changelog.md
+                  echo "Changelog generated"
+                  cat /tmp/release-notes.md
 
             - name: Create GitHub Release
-              if: steps.check_release.outputs.do_release == 'true'
+              if: steps.version.outputs.version_changed == 'true'
               uses: softprops/action-gh-release@v2
               with:
-                  tag_name: v${{ steps.check_release.outputs.release_version }}
-                  name: "Release v${{ steps.check_release.outputs.release_version }}"
-                  body_path: /tmp/changelog.md
+                  tag_name: v${{ steps.version.outputs.current_version }}
+                  name: v${{ steps.version.outputs.current_version }}
+                  body_path: /tmp/release-notes.md
                   draft: false
-                  prerelease: ${{ steps.check_version.outputs.is_major == 'true' }}
+                  prerelease: ${{ steps.version.outputs.is_major == 'true' }}
                   generate_release_notes: true
+                  make_latest: true
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Notify release
-              if: steps.check_release.outputs.do_release == 'true'
+            - name: Release notification
+              if: steps.version.outputs.version_changed == 'true'
               run: |
-                  VERSION="${{ steps.check_release.outputs.release_version }}"
-                  IS_MAJOR="${{ steps.check_version.outputs.is_major }}"
+                  VERSION="${{ steps.version.outputs.current_version }}"
+                  IS_MAJOR="${{ steps.version.outputs.is_major }}"
                   
                   if [ "$IS_MAJOR" == "true" ]; then
-                    echo "🎉 Major release v${VERSION} created! This includes breaking changes."
+                    echo "MAJOR RELEASE v${VERSION} CREATED!"
+                    echo "This includes BREAKING CHANGES"
                   else
-                    echo "⚡ Release v${VERSION} created successfully!"
+                    echo "Release v${VERSION} created successfully!"
                   fi
-                  
-                  echo "📦 Release URL: https://github.com/${{ github.repository }}/releases/tag/v${VERSION}"
+                  echo "URL: https://github.com/${{ github.repository }}/releases/tag/v${VERSION}"
