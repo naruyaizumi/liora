@@ -34,7 +34,7 @@ depth = 5
 optional = true
 dev = true
 peer = true
-production = true
+production = false
 exact = false
 saveTextLockfile = true
 # Auto-install mode: "auto" | "fallback" | "force"
