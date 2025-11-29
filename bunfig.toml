@@ -52,9 +52,9 @@ globalBinDir = "~/.bun/bin"
 # Install Cache Configuration
 # ============================================
 [install.cache]
-dir = "~/.bun/install/cache"
-disable = false
-disableManifest = false
+# dir = "~/.bun/install/cache"
+disable = true
+disableManifest = true
 
 # ============================================
 # Lockfile Configuration
