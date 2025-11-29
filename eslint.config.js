@@ -10,14 +10,17 @@ export default [
             "build/",
             "lib/rs/target/",
             ".cache/",
-            "~/.bun/",
+            "**/.bun/install/cache/**",
             ".github/",
             "*.log",
             "tmp/",
             "temp/",
             ".DS_Store",
             ".oven/",
-            "coverage/"
+            "coverage/",
+            "**/cache/**",
+            "**/dist/**",
+            "**/Release/**"
         ],
         languageOptions: {
             globals: {

@@ -64,77 +64,71 @@
 ### 🏗️ Modern Architecture
 
 ```mermaid
-graph TD
-    A[main.rs] --> B[main.js]
-    B --> C[connection.js]
-    C --> D[socket.js]
-    D --> E[Baileys WS]
-    E --> F[18 Events]
-    F --> G[Redis Cache]
+graph TB
+    %% Rust Supervisor Layer
+    RS[main.rs<br/>Rust Supervisor]
+    RS --> RS_HTTP[http.rs<br/>HTTP Server]
+    RS --> RS_AUTH[auth.rs<br/>Auth Service]
+    RS --> RS_CONF[config.rs<br/>Config Manager]
+
+    %% Bun Main Process Layer
+    BN[main.js<br/>Bun Main Process]
+    RS --> BN
     
-    B --> H[handler.js]
-    H --> I[Plugins/Commands]
-    H --> J[External APIs]
+    %% Connection & Socket Layer
+    BN --> CONN[connection.js<br/>Connection Manager]
+    CONN --> SOCK[socket.js<br/>WebSocket Client]
+    SOCK --> BAIL[Baileys<br/>WhatsApp WebSocket]
     
-    B --> K[auth.js]
-    K --> L[HTTP -> auth.rs]
-    L --> M[PostgreSQL]
+    %% Event Processing Layer
+    BAIL --> EVTS[18 Events<br/>Message/Chat/Group]
+    EVTS --> REDIS[Redis<br/>Event Cache & Pub/Sub]
+    EVTS --> HAND[handler.js<br/>Event Handler]
     
-    H --> N[bridge.js]
-    N --> O[sticker.cpp]
-    N --> P[converter.cpp]
-    O --> Q[Worker Pool]
-    P --> Q
+    %% Plugin & Command Layer
+    HAND --> PLUG[Plugins System<br/>Command Router]
+    PLUG --> CMDS[Commands<br/>Message Processing]
     
-    J --> R[instagram.js]
-    J --> S[spotify.js]
-    J --> T[tiktok.js]
-    J --> U[ytmp3/ytmp4.js]
+    %% External Services Layer
+    CMDS --> EXTS[External APIs<br/>Instagram/Spotify/TikTok]
+    EXTS --> EXT_IG[instagram.js]
+    EXTS --> EXT_SP[spotify.js]
+    EXTS --> EXT_TK[tiktok.js]
+    EXTS --> EXT_YT[ytmp3/ytmp4.js]
     
-    Q --> V[sticker-worker.js]
-    Q --> W[converter-worker.js]
+    %% Media Processing Layer
+    CMDS --> MEDIA[Media Processing]
+    MEDIA --> BRIDGE[bridge.js<br/>Native Bridge]
+    BRIDGE --> CPP_ST[sticker.cpp<br/>Sticker Converter]
+    BRIDGE --> CPP_CV[converter.cpp<br/>Audio Converter]
     
-    A --> X[http.rs]
-    A --> Y[config.rs]
+    %% Worker Pool Layer
+    CPP_ST --> WORKERS[Worker Pool<br/>Bun Workers]
+    CPP_CV --> WORKERS
+    WORKERS --> WRK_ST[sticker-worker.js]
+    WORKERS --> WRK_CV[converter-worker.js]
     
-    subgraph "Rust Supervisor"
-        A
-        X
-        Y
-        L
-    end
+    %% Database Layer
+    RS_AUTH --> PG[PostgreSQL<br/>Session Auth]
+    BN --> PG
+    HAND --> PG
     
-    subgraph "Bun Runtime"
-        B
-        C
-        D
-        K
-        H
-    end
+    %% Styling
+    classDef rust fill:#ff6b6b,color:#fff
+    classDef bun fill:#cbf0ff,color:#000
+    classDef cpp fill:#659ad2,color:#fff
+    classDef database fill:#52c41a,color:#fff
+    classDef external fill:#faad14,color:#000
+    classDef worker fill:#722ed1,color:#fff
+    classDef network fill:#13c2c2,color:#000
     
-    subgraph "C++ Addons"
-        O
-        P
-        N
-    end
-    
-    subgraph "External APIs"
-        R
-        S
-        T
-        U
-    end
-    
-    subgraph "Data Layer"
-        M
-        G
-    end
-    
-    subgraph "Worker System"
-        Q
-        V
-        W
-    end
+    class RS,RS_HTTP,RS_AUTH,RS_CONF rust
+    class BN,CONN,SOCK,HAND,PLUG,CMDS bun
+    class CPP_ST,CPP_CV,BRIDGE cpp
+    class PG,REDIS database
+    class EXTS,EXT_IG,EXT_SP,EXT_TK,EXT_YT external
+    class WORKERS,WRK_ST,WRK_CV worker
+    class BAIL,EVTS network
 ```
 
 > [!IMPORTANT]
