@@ -53,7 +53,7 @@ const sanitizeUrl = (url, fallback) => {
     try {
         if (!url) return fallback;
         const parsed = new URL(url);
-        if (parsed.protocol !== 'https:') {
+        if (parsed.protocol !== "https:") {
             console.warn(`[Config] Non-HTTPS URL detected, using fallback`);
             return fallback;
         }
@@ -68,11 +68,11 @@ const initializeConfig = () => {
     const owners = safeJSONParse(Bun.env.OWNERS, []);
     global.config = {};
     if (!Array.isArray(owners)) {
-        console.error('[Config] OWNERS must be an array, using empty array');
+        console.error("[Config] OWNERS must be an array, using empty array");
         global.config.owner = [];
     } else {
-        global.config.owner = owners.filter(owner => 
-            typeof owner === 'string' && owner.trim() !== ''
+        global.config.owner = owners.filter(
+            (owner) => typeof owner === "string" && owner.trim() !== ""
         );
     }
 
@@ -89,12 +89,9 @@ const initializeConfig = () => {
         author: (Bun.env.AUTHOR || "Naruya Izumi").trim(),
         stickpack: (Bun.env.STICKPACK || "Liora").trim(),
         stickauth: (Bun.env.STICKAUTH || "© Naruya Izumi").trim(),
-        
+
         /*============ INTERNAL =============*/
-        thumbnailUrl: sanitizeUrl(
-            Bun.env.THUMBNAIL_URL, 
-            DEFAULT_THUMBNAIL
-        ),
+        thumbnailUrl: sanitizeUrl(Bun.env.THUMBNAIL_URL, DEFAULT_THUMBNAIL),
     };
 };
 
@@ -127,24 +124,24 @@ global.loading = async (m, conn, back = false) => {
 const FAILURE_MESSAGES = {
     owner: {
         title: "[ACCESS DENIED]",
-        body: "This command is restricted to the system owner only.\nContact the administrator for permission."
+        body: "This command is restricted to the system owner only.\nContact the administrator for permission.",
     },
     group: {
         title: "[ACCESS DENIED]",
-        body: "This command can only be executed within a group context."
+        body: "This command can only be executed within a group context.",
     },
     admin: {
         title: "[ACCESS DENIED]",
-        body: "You must be a group administrator to perform this action."
+        body: "You must be a group administrator to perform this action.",
     },
     botAdmin: {
         title: "[ACCESS DENIED]",
-        body: "System privileges insufficient.\nGrant admin access to the bot to continue."
+        body: "System privileges insufficient.\nGrant admin access to the bot to continue.",
     },
     restrict: {
         title: "[ACCESS BLOCKED]",
-        body: "This feature is currently restricted or disabled by configuration."
-    }
+        body: "This feature is currently restricted or disabled by configuration.",
+    },
 };
 
 /**
@@ -162,7 +159,7 @@ global.dfail = async (type, m, conn) => {
     }
 
     const failureConfig = FAILURE_MESSAGES[type];
-    
+
     if (!failureConfig) {
         return;
     }
@@ -188,11 +185,7 @@ global.dfail = async (type, m, conn) => {
         );
     } catch {
         try {
-            await conn.sendMessage(
-                m.chat,
-                { text: messageText },
-                { quoted: m }
-            );
+            await conn.sendMessage(m.chat, { text: messageText }, { quoted: m });
         } catch {
             //
         }

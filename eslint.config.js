@@ -19,7 +19,7 @@ export default [
             "coverage/",
             "**/cache/**",
             "**/dist/**",
-            "**/Release/**"
+            "**/Release/**",
         ],
         languageOptions: {
             globals: {
