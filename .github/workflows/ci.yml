@@ -452,7 +452,20 @@ jobs:
               if: steps.check_version.outputs.version_changed == 'true'
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y clang-format
+                  sudo apt-get install -y \
+                    ffmpeg \
+                    libwebp-dev \
+                    libavformat-dev \
+                    libavcodec-dev \
+                    libavutil-dev \
+                    libswresample-dev \
+                    libswscale-dev \
+                    libavfilter-dev \
+                    build-essential \
+                    python3 \
+                    g++ \
+                    pkg-config \
+                    cmake
 
             - name: Auto-format all code
               if: steps.check_version.outputs.version_changed == 'true'
