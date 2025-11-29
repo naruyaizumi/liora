@@ -10,6 +10,7 @@ export default [
             "build/",
             "lib/rs/target/",
             ".cache/",
+            "~/.bun/",
             ".github/",
             "*.log",
             "tmp/",
