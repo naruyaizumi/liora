@@ -186,7 +186,7 @@ jobs:
                   echo "⚡ All C++ files are properly formatted"
                   fi
             - name: Auto-format C++ code
-            run: |
+              run: |
                 echo "✨ Auto-formatting C++ files..."
                 find lib/cpp -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cc" \) -exec clang-format -i {} \;
                 echo "⚡ C++ files formatted"
@@ -199,8 +199,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
-            matrix:
-                language: ["javascript"]
+            
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
