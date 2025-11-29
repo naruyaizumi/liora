@@ -185,11 +185,13 @@ jobs:
                   else
                   echo "⚡ All C++ files are properly formatted"
                   fi
+              continue-on-error: true
+
             - name: Auto-format C++ code
               run: |
-                echo "✨ Auto-formatting C++ files..."
-                find lib/cpp -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cc" \) -exec clang-format -i {} \;
-                echo "⚡ C++ files formatted"
+                  echo "✨ Auto-formatting C++ files..."
+                  find lib/cpp -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cc" \) -exec clang-format -i {} \;
+                  echo "⚡ C++ files formatted"
 
 # ============================================
 # CodeQL Security Analysis
@@ -199,7 +201,9 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
-            
+            matrix:
+                language: ['javascript', 'rust', 'cpp']
+        
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4

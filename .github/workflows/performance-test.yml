@@ -41,7 +41,7 @@ jobs:
                     python3 \
                     g++ \
                     pkg-config \
-                    cmake
+                    cmake \
                     bun install --frozen-lockfile
 
             - name: Run Rust benchmarks

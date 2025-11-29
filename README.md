@@ -48,15 +48,6 @@
 </p>
 
 <p align="center">
-  <a href="#-features">Features</a> •
-  <a href="#-quick-start">Quick Start</a> •
-  <a href="#-documentation">Documentation</a> •
-  <a href="#-architecture">Architecture</a> •
-  <a href="#-community">Community</a> •
-  <a href="#-contributing">Contributing</a>
-</p>
-
-<p align="center">
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge&logo=apache&logoColor=white" alt="Apache 2.0 License">
   </a>
@@ -78,22 +69,33 @@
 
 ### 🏗️ Modern Architecture
 
-```text
-┌─────────────────────────────────────────────────┐
-│          Rust Supervisor (Parent)               │
-│  • Crash recovery • Signal handling • Metrics   │
-└─────────────────┬───────────────────────────────┘
-                  │
-┌─────────────────▼───────────────────────────────┐
-│       Bun Runtime (Child Process)               │
-│  • Event processing • Plugin system • WebSocket │
-└──────┬──────────────────────────────────┬───────┘
-       │                                    │
-┌──────▼──────┐                    ┌───────▼───────┐
-│  PostgreSQL │                    │     Redis     │
-│  Sessions   │                    │  Cache Layer  │
-│  Auth State │                    │  18 Events    │
-└─────────────┘                    └───────────────┘
+```mermaid
+flowchart TD
+    subgraph RustSupervisor["Rust Supervisor (Parent)"]
+        RS_Crash["Crash recovery"]
+        RS_Signal["Signal handling"]
+        RS_Metrics["Metrics"]
+    end
+
+    subgraph BunRuntime["Bun Runtime (Child Process)"]
+        BR_Event["Event processing"]
+        BR_Plugin["Plugin system"]
+        BR_WS["WebSocket"]
+    end
+
+    subgraph PostgreSQL["PostgreSQL"]
+        PG_Session["Sessions"]
+        PG_Auth["Auth State"]
+    end
+
+    subgraph Redis["Redis"]
+        R_Cache["Cache Layer"]
+        R_Events["18 Events"]
+    end
+
+    RustSupervisor --> BunRuntime
+    BunRuntime --> PostgreSQL
+    BunRuntime --> Redis
 ```
 
 ### ⚡ Performance First
