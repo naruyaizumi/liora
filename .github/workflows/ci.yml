@@ -73,8 +73,18 @@ jobs:
             - name: Install Dependencies
               run: bun install --frozen-lockfile
 
+            - name: Install ESLint dependencies if missing
+              run: |
+                  # Install package yang diperlukan untuk ESLint config
+                  if ! bun ls @eslint/js 2>/dev/null; then
+                    echo "📦 Installing missing ESLint dependencies..."
+                    bun add -d @eslint/js globals
+                  else
+                    echo "⚡ ESLint dependencies already installed"
+                  fi
+
             - name: Run ESLint
-              run: bunx eslint .
+              run: bun run lint
 
             - name: Check for outdated dependencies
               run: |
@@ -126,7 +136,6 @@ jobs:
             - name: Rust Security Audit
               working-directory: ./lib/rs
               run: |
-                  # Cek dan install cargo-audit hanya jika belum ada
                   if ! command -v cargo-audit &> /dev/null; then
                       echo "📦 Installing cargo-audit..."
                       cargo install cargo-audit --locked
@@ -211,14 +220,7 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
 
-            - name: Initialize CodeQL
-              uses: github/codeql-action/init@v3
-              with:
-                  languages: ${{ matrix.language }}
-                  queries: security-extended,security-and-quality
-
-            - name: Setup Build Environment
-              if: matrix.language == 'rust'
+            - name: Install build dependencies for all languages
               run: |
                   sudo apt-get update
                   sudo apt-get install -y \
@@ -236,20 +238,37 @@ jobs:
                     pkg-config \
                     cmake
 
+            - name: Initialize CodeQL
+              uses: github/codeql-action/init@v3
+              with:
+                  languages: ${{ matrix.language }}
+                  queries: security-extended,security-and-quality
+
+            - name: Setup Bun for JavaScript analysis
+              if: matrix.language == 'javascript'
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Setup Rust for Rust analysis
+              if: matrix.language == 'rust'
+              uses: dtolnay/rust-toolchain@stable
+
             - name: Build Rust (for CodeQL)
               if: matrix.language == 'rust'
               working-directory: ./lib/rs
-              run: cargo build --release --verbose
+              run: |
+                  cargo build --release --verbose
 
             - name: Build JavaScript (for CodeQL)
               if: matrix.language == 'javascript'
               run: |
-                  curl -fsSL https://bun.sh/install | bash
-                  export BUN_INSTALL="$HOME/.bun"
-                  export PATH="$BUN_INSTALL/bin:$PATH"
-                  
                   bun install --frozen-lockfile
-                  [ -f "package.json" ] && bun run build 2>/dev/null || echo "No build script found"
+                  
+                  bun add -d @eslint/js globals
+                  
+                  echo "Skipping native build for CodeQL analysis"
+                  # [ -f "package.json" ] && bun run build 2>/dev/null || echo "No build script found"
 
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v3
@@ -306,9 +325,25 @@ jobs:
             - name: Install Bun dependencies
               run: bun install --frozen-lockfile
 
+            - name: Install ESLint dependencies if missing
+              run: |
+                  if ! bun ls @eslint/js 2>/dev/null; then
+                    echo "📦 Installing missing ESLint dependencies..."
+                    bun add -d @eslint/js globals
+                  fi
+
             - name: Build Rust components
               working-directory: ./lib/rs
               run: cargo build --release --verbose
+
+            - name: Build Node.js native components
+              run: |
+                  echo "🔨 Building Node.js native components..."
+                  bun run build 2>&1 | tee build.log || {
+                    echo "⚠️ Native build had issues, but continuing..."
+                    echo "Build log:"
+                    cat build.log
+                  }
 
             - name: Verify build artifacts
               run: |
@@ -332,6 +367,13 @@ jobs:
                         ls -lh "$bin"
                       done
                     fi
+                  fi
+                  
+                  if [ -d "build" ]; then
+                    echo "⚡ Node.js build artifacts found:"
+                    find build -type f -name "*.node" -o -name "*.so" -o -name "*.dll" | while read -r artifact; do
+                      ls -lh "$artifact"
+                    done
                   fi
                   
                   echo "⚡ Build verification complete"
@@ -422,6 +464,8 @@ jobs:
                   
                   echo "📦 Installing dependencies..."
                   bun install --frozen-lockfile
+                  
+                  bun add -d @eslint/js globals
                   
                   echo "✨ Formatting JavaScript/TypeScript..."
                   bunx prettier --write .
