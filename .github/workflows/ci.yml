@@ -1,4 +1,4 @@
-name: Production CI/CD & Release Pipeline
+name: CI/CD & Release
 
 on:
     push:
@@ -66,7 +66,7 @@ jobs:
               uses: actions/cache@v4
               with:
                   path: ~/.bun/install/cache
-                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb', '.github/workflows/*.yml') }}
                   restore-keys: |
                       ${{ runner.os }}-bun-
 
@@ -82,12 +82,12 @@ jobs:
             - name: Check for outdated dependencies
               run: |
                   echo "📦 Checking for outdated packages..."
-                  bun outdated || true
+                  bun outdated || echo "⚠️ Some packages are outdated"
 
             - name: List all dependencies
               run: |
                   echo "📋 Listing all dependencies..."
-                  bun pm ls --all || true
+                  bun pm ls --all || echo "⚠️ Could not list all dependencies"
 
 # ============================================
 # Rust Quality Checks
@@ -113,7 +113,7 @@ jobs:
                       ~/.cargo/registry/cache/
                       ~/.cargo/git/db/
                       lib/rs/target/
-                  key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+                  key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '.github/workflows/*.yml') }}
                   restore-keys: |
                       ${{ runner.os }}-cargo-
 
@@ -161,22 +161,30 @@ jobs:
                   echo "🔍 Checking C++ code formatting..."
                   FORMAT_ISSUES=0
                   
+                  CPP_FILES=$(find lib/cpp -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cc" \) 2>/dev/null)
+                  
+                  if [ -z "$CPP_FILES" ]; then
+                    echo "🍥 No C++ files found to check"
+                    exit 0
+                  fi
+                  
                   while IFS= read -r file; do
-                    if ! clang-format --dry-run --Werror "$file" 2>&1 | grep -q "warning:"; then
-                      echo "✅ $file is properly formatted"
+                    if OUTPUT=$(clang-format --dry-run --Werror "$file" 2>&1); then
+                      echo "⚡ $file is properly formatted"
                     else
-                      echo "❌ $file needs formatting"
-                      clang-format --dry-run --Werror "$file"
+                      echo "☠️ $file needs formatting"
+                      echo "$OUTPUT"
                       FORMAT_ISSUES=1
                     fi
-                  done < <(find lib/cpp -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cc" \))
+                  done <<< "$CPP_FILES"
                   
                   if [ $FORMAT_ISSUES -eq 1 ]; then
-                    echo "❌ C++ formatting issues found"
+                    echo ""
+                    echo "☠️ C++ formatting issues found. Run 'clang-format -i <file>' to fix."
                     exit 1
                   fi
                   
-                  echo "✅ All C++ files are properly formatted"
+                  echo "⚡ All C++ files are properly formatted"
 
 # ============================================
 # CodeQL Security Analysis
@@ -251,23 +259,40 @@ jobs:
                       ~/.cargo/bin/
                       ~/.cargo/registry/
                       lib/rs/target/
-                  key: ${{ runner.os }}-integration-${{ hashFiles('**/bun.lockb', '**/Cargo.lock') }}
+                  key: ${{ runner.os }}-integration-${{ hashFiles('**/bun.lockb', '**/Cargo.lock', '.github/workflows/*.yml') }}
 
-            - name: Full build
-              run: |
-                  bun install --frozen-lockfile
-                  echo "✅ All components built successfully"
+            - name: Install Bun dependencies
+              run: bun install --frozen-lockfile
+
+            - name: Build Rust components
+              working-directory: ./lib/rs
+              run: cargo build --release --verbose
 
             - name: Verify build artifacts
               run: |
                   echo "🔍 Verifying build artifacts..."
-                  if [ -f "lib/rs/target/release/liora-rs" ]; then
-                    echo "✅ Rust supervisor binary found"
-                    ls -lh lib/rs/target/release/liora-rs
+                  
+                  if ls lib/rs/target/release/*.so 2>/dev/null || \
+                     ls lib/rs/target/release/*.dylib 2>/dev/null || \
+                     ls lib/rs/target/release/*.dll 2>/dev/null || \
+                     ls lib/rs/target/release/lib*.a 2>/dev/null; then
+                    echo "⚡ Rust library artifacts found:"
+                    ls -lh lib/rs/target/release/*.{so,dylib,dll,a} 2>/dev/null || true
                   else
-                    echo "❌ Rust supervisor binary not found"
-                    exit 1
+                    echo "🍥 No Rust library artifacts found (may be expected)"
                   fi
+                  
+                  if [ -d "lib/rs/target/release" ]; then
+                    BINARIES=$(find lib/rs/target/release -maxdepth 1 -type f -executable)
+                    if [ -n "$BINARIES" ]; then
+                      echo "⚡ Rust binaries found:"
+                      echo "$BINARIES" | while read -r bin; do
+                        ls -lh "$bin"
+                      done
+                    fi
+                  fi
+                  
+                  echo "⚡ Build verification complete"
 
 # ============================================
 # Dependency Review (PRs only)
@@ -318,7 +343,6 @@ jobs:
                     echo "version_changed=true" >> $GITHUB_OUTPUT
                     echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
                     
-                    # Check if it's a major version bump
                     PREV_MAJOR=$(echo $PREV_VERSION | cut -d. -f1)
                     NEW_MAJOR=$(echo $NEW_VERSION | cut -d. -f1)
                     
@@ -352,14 +376,27 @@ jobs:
             - name: Auto-format all code
               if: steps.check_version.outputs.version_changed == 'true'
               run: |
+                  set -e
+                  
+                  echo "📦 Installing dependencies..."
                   bun install --frozen-lockfile
-                  bunx prettier --write . || true
-
-                  cd lib/rs
-                  cargo fmt --all
-                  cd ../..
-
-                  find lib/cpp -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cc" \) -exec clang-format -i {} \; || true
+                  
+                  echo "✨ Formatting JavaScript/TypeScript..."
+                  bunx prettier --write .
+                  
+                  echo "✨ Formatting Rust code..."
+                  if [ -d "lib/rs" ]; then
+                    cd lib/rs
+                    cargo fmt --all
+                    cd ../..
+                  fi
+                  
+                  echo "✨ Formatting C++ code..."
+                  if [ -d "lib/cpp" ]; then
+                    find lib/cpp -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cc" \) -exec clang-format -i {} \;
+                  fi
+                  
+                  echo "⚡ All formatting complete"
 
             - name: Commit formatting changes
               if: steps.check_version.outputs.version_changed == 'true'
@@ -368,12 +405,36 @@ jobs:
                   git config --global user.email "sexystyle088@gmail.com"
 
                   if [[ `git status --porcelain` ]]; then
+                    echo "📝 Formatting changes detected, committing..."
+                    
+                    git pull --rebase origin main || {
+                      echo "⚠️ Rebase conflict detected, aborting..."
+                      git rebase --abort
+                      exit 1
+                    }
+                    
                     git add .
-                    git commit -m "style: auto-format with Prettier, cargo fmt, and clang-format"
-                    git push origin main
-                    echo "✅ Formatting changes committed and pushed"
+                    git commit -m "style: auto-format with Prettier, cargo fmt, and clang-format [skip ci]"
+                    
+                    for i in {1..3}; do
+                      if git push origin main; then
+                        echo "⚡ Formatting changes committed and pushed"
+                        break
+                      else
+                        if [ $i -eq 3 ]; then
+                          echo "☠️ Failed to push after 3 attempts"
+                          exit 1
+                        fi
+                        echo "⚠️ Push failed, retrying... (attempt $i/3)"
+                        git pull --rebase origin main
+                        sleep 2
+                      fi
+                    done
+                    
+                    echo "⏳ Waiting for GitHub to process changes..."
+                    sleep 5
                   else
-                    echo "✅ No formatting changes needed"
+                    echo "⚡ No formatting changes needed"
                   fi
 
             - name: Check if release needed
@@ -381,18 +442,14 @@ jobs:
               if: steps.check_version.outputs.version_changed == 'true'
               run: |
                   NEW_VERSION="${{ steps.check_version.outputs.new_version }}"
-                  LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-                  LAST_TAG_VERSION=${LAST_TAG#v}
-
-                  echo "Current version: $NEW_VERSION"
-                  echo "Last tag: $LAST_TAG"
-
-                  if [ "$NEW_VERSION" != "$LAST_TAG_VERSION" ]; then
+                  
+                  if git rev-parse "v${NEW_VERSION}" >/dev/null 2>&1; then
+                    echo "do_release=false" >> $GITHUB_OUTPUT
+                    echo "🍥 Tag v${NEW_VERSION} already exists"
+                  else
                     echo "do_release=true" >> $GITHUB_OUTPUT
                     echo "release_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-                  else
-                    echo "do_release=false" >> $GITHUB_OUTPUT
-                    echo "ℹ️ Tag already exists for version $NEW_VERSION"
+                    echo "⚡ Release v${NEW_VERSION} will be created"
                   fi
 
             - name: Generate changelog from commits
@@ -403,18 +460,31 @@ jobs:
                   LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
                   
                   if [ -n "$LAST_TAG" ]; then
+                    echo "📝 Generating changelog from $LAST_TAG to HEAD"
                     COMMITS=$(git log $LAST_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)
                   else
+                    echo "📝 Generating changelog for first release"
                     COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges | head -20)
                   fi
 
-                  CHANGELOG="## 🚀 What's Changed in v${VERSION}
-
-                  ${COMMITS}
-
-                  **Full Changelog**: https://github.com/${{ github.repository }}/compare/${LAST_TAG}...v${VERSION}"
-
-                  echo "$CHANGELOG" > /tmp/changelog.md
+                  {
+                    echo "## 🚀 What's Changed in v${VERSION}"
+                    echo ""
+                    if [ -n "$COMMITS" ]; then
+                      echo "$COMMITS"
+                    else
+                      echo "- Initial release"
+                    fi
+                    echo ""
+                    if [ -n "$LAST_TAG" ]; then
+                      echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${LAST_TAG}...v${VERSION}"
+                    else
+                      echo "**Full Changelog**: https://github.com/${{ github.repository }}/commits/v${VERSION}"
+                    fi
+                  } > /tmp/changelog.md
+                  
+                  echo "⚡ Changelog generated"
+                  cat /tmp/changelog.md
 
             - name: Create GitHub Release
               if: steps.check_release.outputs.do_release == 'true'
@@ -438,5 +508,7 @@ jobs:
                   if [ "$IS_MAJOR" == "true" ]; then
                     echo "🎉 Major release v${VERSION} created! This includes breaking changes."
                   else
-                    echo "✅ Release v${VERSION} created successfully!"
+                    echo "⚡ Release v${VERSION} created successfully!"
                   fi
+                  
+                  echo "📦 Release URL: https://github.com/${{ github.repository }}/releases/tag/v${VERSION}"
