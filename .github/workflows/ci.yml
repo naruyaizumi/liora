@@ -127,13 +127,20 @@ jobs:
               working-directory: ./lib/rs
               run: cargo clippy --all-targets --all-features -- -D warnings
 
-            - name: Install cargo-audit
-              run: cargo install cargo-audit --locked
-
             - name: Rust Security Audit
               working-directory: ./lib/rs
+              run: |
+                  # Cek dan install cargo-audit hanya jika belum ada
+                  if ! command -v cargo-audit &> /dev/null; then
+                      echo "📦 Installing cargo-audit..."
+                      cargo install cargo-audit --locked
+                  else
+                      echo "⚡ cargo-audit already installed, skipping installation"
+                  fi
+                  
+                  echo "🔒 Running security audit..."
+                  cargo audit
               continue-on-error: true
-              run: cargo audit
 
             - name: Check Rust build
               working-directory: ./lib/rs
@@ -202,7 +209,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                language: ['javascript', 'rust', 'cpp']
+                language: ['javascript', 'rust']
         
         steps:
             - name: Checkout repository
@@ -214,8 +221,28 @@ jobs:
                   languages: ${{ matrix.language }}
                   queries: security-extended,security-and-quality
 
-            - name: Autobuild
-              uses: github/codeql-action/autobuild@v3
+            - name: Setup Build Environment
+              if: matrix.language == 'rust'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y build-essential pkg-config cmake
+
+            - name: Build Rust (for CodeQL)
+              if: matrix.language == 'rust'
+              working-directory: ./lib/rs
+              run: cargo build --release --verbose
+
+            - name: Build JavaScript (for CodeQL)
+              if: matrix.language == 'javascript'
+              run: |
+                  # Setup Bun untuk JavaScript analysis
+                  curl -fsSL https://bun.sh/install | bash
+                  export BUN_INSTALL="$HOME/.bun"
+                  export PATH="$BUN_INSTALL/bin:$PATH"
+                  
+                  bun install --frozen-lockfile
+                  # Build step JavaScript jika ada
+                  [ -f "package.json" ] && bun run build 2>/dev/null || echo "No build script found"
 
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v3

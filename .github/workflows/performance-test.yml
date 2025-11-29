@@ -1,13 +1,16 @@
-# ============================================
-# Performance regression testing
-# ============================================
 name: Performance Test
 
 on:
     push:
         branches: ["main"]
+        paths-ignore:
+            - "**.md"
+            - "docs/**"
     pull_request:
         branches: ["main"]
+        paths-ignore:
+            - "**.md"
+            - "docs/**"
 
 jobs:
     benchmark:
@@ -25,7 +28,7 @@ jobs:
             - name: Setup Rust
               uses: dtolnay/rust-toolchain@stable
 
-            - name: Install dependencies
+            - name: Install system dependencies
               run: |
                   sudo apt-get update
                   sudo apt-get install -y \
@@ -41,20 +44,47 @@ jobs:
                     python3 \
                     g++ \
                     pkg-config \
-                    cmake \
-                    bun install --frozen-lockfile
+                    cmake
+
+            - name: Install Bun dependencies
+              run: bun install --frozen-lockfile
+
+            - name: Cache Cargo
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.cargo/bin/
+                      ~/.cargo/registry/index/
+                      ~/.cargo/registry/cache/
+                      ~/.cargo/git/db/
+                      lib/rs/target/
+                  key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '.github/workflows/*.yml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-cargo-
 
             - name: Run Rust benchmarks
               working-directory: ./lib/rs
               run: |
+                  # Build benchmarks first
                   cargo bench --no-run
-                  cargo bench > ../../bench-results.txt || true
+                  
+                  # Run benchmarks and save results
+                  echo "🚀 Running performance benchmarks..."
+                  cargo bench 2>&1 | tee ../../bench-results.txt
+                  
+                  # Check if benchmarks ran successfully
+                  if [ ${PIPESTATUS[0]} -eq 0 ]; then
+                    echo "🔥 Benchmarks completed successfully"
+                  else
+                    echo "⚠️ Benchmarks had issues, but continuing..."
+                  fi
 
             - name: Upload benchmark results
               uses: actions/upload-artifact@v4
               with:
                   name: benchmark-results
                   path: bench-results.txt
+                  retention-days: 7
 
             - name: Comment PR with results
               if: github.event_name == 'pull_request'
@@ -62,11 +92,16 @@ jobs:
               with:
                   script: |
                       const fs = require('fs');
-                      const results = fs.readFileSync('bench-results.txt', 'utf8');
-                      
-                      await github.rest.issues.createComment({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        issue_number: context.issue.number,
-                        body: `## 📊 Performance Benchmark Results\n\n\`\`\`\n${results}\n\`\`\``
-                      });
+                      try {
+                          const results = fs.readFileSync('bench-results.txt', 'utf8');
+                          const shortResults = results.split('\n').slice(-50).join('\n'); // Ambil 50 baris terakhir
+                          
+                          await github.rest.issues.createComment({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            issue_number: context.issue.number,
+                            body: `## 📊 Performance Benchmark Results\n\n\`\`\`\n${shortResults}\n\`\`\`\n\n[View full results](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})`
+                          });
+                      } catch (error) {
+                          console.log('Could not read benchmark results:', error.message);
+                      }

@@ -70,7 +70,7 @@
 ### 🏗️ Modern Architecture
 
 ```mermaid
-flowchart TD
+graph TD
     subgraph RustSupervisor["Rust Supervisor (Parent)"]
         RS_Crash["Crash recovery"]
         RS_Signal["Signal handling"]
@@ -81,21 +81,35 @@ flowchart TD
         BR_Event["Event processing"]
         BR_Plugin["Plugin system"]
         BR_WS["WebSocket"]
+        BR_Plugin --> BR_PluginLoader["Plugin Loader"]
+        BR_Plugin --> BR_PluginRegistry["Plugin Registry"]
+        BR_Event --> BR_EventQueue["Event Queue"]
+        BR_Event --> BR_EventDispatcher["Event Dispatcher"]
     end
 
     subgraph PostgreSQL["PostgreSQL"]
         PG_Session["Sessions"]
         PG_Auth["Auth State"]
+        PG_Models["DB Models"]
     end
 
     subgraph Redis["Redis"]
         R_Cache["Cache Layer"]
-        R_Events["18 Events"]
+        R_Events["Event Stream"]
+        R_Subscribers["Subscribers"]
+    end
+
+    subgraph Monitoring["Monitoring & Metrics"]
+        M_Logs["Logs"]
+        M_Metrics["Metrics Store"]
+        M_Alerts["Alerts"]
     end
 
     RustSupervisor --> BunRuntime
     BunRuntime --> PostgreSQL
     BunRuntime --> Redis
+    RustSupervisor --> Monitoring
+    BunRuntime --> Monitoring
 ```
 
 ### ⚡ Performance First

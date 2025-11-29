@@ -38,8 +38,8 @@
         "format:rust": "cd lib/rs && cargo fmt --all",
         "format:cpp": "find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | xargs clang-format -i",
         "format:all": "bun run format && bun run format:rust && bun run format:cpp",
-        "lint": "bunx eslint . --ext .js",
-        "lint:fix": "bunx eslint . --ext .js --fix",
+        "lint": "bunx eslint .",
+        "lint:fix": "bunx eslint . --fix",
         "lint:rust": "cd lib/rs && cargo clippy --all-targets --all-features -- -D warnings",
         "audit": "bun pm ls --all",
         "audit:rust": "cd lib/rs && cargo audit",
@@ -140,21 +140,6 @@
         "proseWrap": "preserve",
         "htmlWhitespaceSensitivity": "css",
         "embeddedLanguageFormatting": "auto"
-    },
-    "eslintConfig": {
-        "env": {
-            "es2024": true,
-            "node": true
-        },
-        "parserOptions": {
-            "ecmaVersion": "latest",
-            "sourceType": "module"
-        },
-        "rules": {
-            "no-unused-vars": "warn",
-            "no-console": "off",
-            "prefer-const": "error"
-        }
     },
     "trustedDependencies": [
         "baileys",
