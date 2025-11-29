@@ -1,35 +1,55 @@
-# =========================
-# Bun
-# =========================
+# =========================  
+# Bun / Node  
+# =========================  
 node_modules/
+bun.lockb
 bun.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# =========================
-# Build artifacts
-# =========================
+# =========================  
+# Build artifacts  
+# =========================  
 build/
 target/
+dist/
 *.o
 *.so
 *.dll
 *.dylib
+*.obj
+*.pdb
+*.ilk
+*.pch
 
-# =========================
-# Rust
-# =========================
+# =========================  
+# C++ / CMake / Make  
+# =========================  
+CMakeFiles/
+cmake-build-*/
+CMakeCache.txt
+Makefile
+
+# =========================  
+# Rust  
+# =========================  
 *.rlib
 *.rmeta
+**/*.rs.bk
+/.cargo/
 
-# =========================
-# Logs
-# =========================
+# =========================  
+# Logs  
+# =========================  
 *.log
 logs/
 *.log.*
 
-# =========================
-# Cache / temp
-# =========================
+# =========================  
+# Cache / temp  
+# =========================  
 .cache/
 tmp/
 *.tmp
@@ -39,16 +59,53 @@ tmp/
 .DS_Store
 .vscode/
 .idea/
+*.tsbuildinfo
 
-# =========================
-# Environment
-# =========================
+# =========================  
+# Environment  
+# =========================  
 .env
 .env.local
 .env.*.local
 
-# =========================
-# OS / Misc
-# =========================
+# =========================  
+# OS / Misc  
+# =========================  
 Thumbs.db
 desktop.ini
+.pid
+*.pid.lock
+
+# =========================
+# Database (SQLite)
+# =========================
+database/
+database/*.db
+database/*.sqlite
+database/*.sqlite3
+*.db-wal
+*.db-shm
+
+# =========================
+# Secrets
+# =========================
+keys/
+secrets/
+*.key
+*.pem
+*.crt
+*.p12
+*.enc
+
+# =========================
+# Coverage / Testing  
+# =========================
+coverage/
+coverage-final.json
+.nyc_output/
+benchmark-results/
+
+# =========================
+# Rust lockfile
+# =========================
+Cargo.lock

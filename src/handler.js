@@ -7,10 +7,6 @@ import chokidar from "chokidar";
 import printMessage from "../lib/console.js";
 
 const CMD_PREFIX_RE = /^[/!.]/;
-const metadataCache = new Map();
-const METADATA_TTL = 300000;
-const lidCache = new Map();
-const LID_TTL = 600000;
 
 const safe = async (fn, fallback = undefined) => {
     try {
@@ -73,11 +69,6 @@ const isCmdAccepted = (cmd, rule) => {
 };
 
 const resolveSenderLid = async (sender) => {
-    const cached = lidCache.get(sender);
-    if (cached && Date.now() - cached.time < LID_TTL) {
-        return cached.lid;
-    }
-
     let senderLid = sender;
     if (senderLid.endsWith("@lid")) {
         senderLid = senderLid.split("@")[0];
@@ -96,17 +87,6 @@ const resolveSenderLid = async (sender) => {
     } else {
         senderLid = senderLid.split("@")[0];
     }
-
-    lidCache.set(sender, { lid: senderLid, time: Date.now() });
-    
-    if (lidCache.size > 500) {
-        const sortedEntries = Array.from(lidCache.entries())
-            .sort((a, b) => a[1].time - b[1].time);
-        for (let i = 0; i < 100; i++) {
-            lidCache.delete(sortedEntries[i][0]);
-        }
-    }
-
     return senderLid;
 };
 
@@ -190,7 +170,7 @@ class MessageTracker {
         this.shuttingDown = false;
     }
 
-    enter() {
+    async enter() {
         if (this.shuttingDown) {
             return false;
         }
@@ -229,53 +209,16 @@ if (global.cleanupTasks) {
     });
 }
 
-let ownerIds = null;
-const getOwnerIds = () => {
-    if (!ownerIds) {
-        ownerIds = global.config.owner
-            .filter(([id]) => id)
-            .map(([id]) => id.toString().split("@")[0]);
-    }
-    return ownerIds;
-};
-
-const getGroupMetadata = async (conn, chatId, isGroup) => {
-    if (!isGroup) return { participants: [] };
-    const cached = metadataCache.get(chatId);
-    if (cached && Date.now() - cached.time < METADATA_TTL) {
-        return cached.data;
-    }
-    
-    const chatData = conn.chats?.[chatId];
-    if (chatData?.metadata?.participants) {
-        const metadata = chatData.metadata;
-        metadataCache.set(chatId, { data: metadata, time: Date.now() });
-        return metadata;
-    }
-
-    try {
-        const metadata = await conn.groupMetadata(chatId);
-        if (metadata) {
-            metadataCache.set(chatId, { data: metadata, time: Date.now() });
-            return metadata;
-        }
-    } catch {
-        // return empty
-    }
-
-    return { participants: [] };
-};
-
 export async function handler(chatUpdate) {
-    const canProcess = messageTracker.enter();
+    const canProcess = await messageTracker.enter();
     if (!canProcess) {
         return;
     }
 
     try {
         if (!chatUpdate) return;
-        this.pushMessage(chatUpdate.messages).catch(() => {});
         
+        this.pushMessage(chatUpdate.messages).catch(conn.logger.error);
         const last = chatUpdate.messages?.[chatUpdate.messages.length - 1];
         if (!last) return;
         
@@ -283,46 +226,28 @@ export async function handler(chatUpdate) {
         if (m.isBaileys || m.fromMe) return;
         
         const settings = getSettings(this.user.lid);
-        if (!settings?.restrict && !m.fromMe) {
-            const body = typeof m.text === "string" ? m.text : "";
-            if (!body || body.length < 1) return;
-        }
-
         const senderLid = await resolveSenderLid(m.sender);
-        const regOwners = getOwnerIds();
+        const regOwners = global.config.owner
+            .filter(([id]) => id)
+            .map(([id]) => id.toString().split("@")[0]);
         const isOwner = m.fromMe || regOwners.includes(senderLid);
         
-        if (!m.fromMe && settings?.self && !isOwner) return;
-        if (settings?.gconly && !m.isGroup && !isOwner) {
-            await sendDenied(this, m);
-            return;
-        }
-
-        const groupMetadata = await getGroupMetadata(this, m.chat, m.isGroup);
-        const participants = groupMetadata.participants || [];
-        
+        const groupMetadata = m.isGroup ?
+            this.chats?.[m.chat]?.metadata || (await safe(() => this
+                .groupMetadata(m.chat), null)) :
+            {};
+        const participants = groupMetadata?.participants || [];
         const map = Object.fromEntries(participants.map((p) => [p.id, p]));
         const botId = conn.decodeJid(conn.user.lid);
         const user = map[m.sender] || {};
         const bot = map[botId] || {};
         const isRAdmin = user?.admin === "superadmin";
         const isAdmin = isRAdmin || user?.admin === "admin";
-        const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
-        
+        const isBotAdmin = bot?.admin === "admin" || bot?.admin ===
+        "superadmin";
         const ___dirname = path.join(path.dirname(Bun.fileURLToPath(import.meta
             .url)), "../plugins");
         
-        const chat = global.db?.data?.chats?.[m.chat];
-        
-        if (!isOwner && chat?.mute) return;
-        if (!isAdmin && !isOwner && chat?.adminOnly) return;
-        if (settings?.autoread) {
-            this.readMessages([m.key]).catch(() => {});
-        }
-
-        const body = typeof m.text === "string" ? m.text : "";
-        let commandMatched = false;
-
         for (const name in global.plugins) {
             const plugin = global.plugins[name];
             if (!plugin || plugin.disabled) continue;
@@ -352,18 +277,20 @@ export async function handler(chatUpdate) {
             }
             
             if (typeof plugin.all === "function") {
-                plugin.all.call(this, m, {
-                    chatUpdate,
-                    __dirname: ___dirname,
-                    __filename,
-                }).catch(() => {});
+                await safe(() =>
+                    plugin.all.call(this, m, {
+                        chatUpdate,
+                        __dirname: ___dirname,
+                        __filename,
+                    })
+                );
             }
             
             if (!settings?.restrict && plugin.tags?.includes("admin")) continue;
-            if (typeof plugin !== "function") continue;
-            
             const prefix = parsePrefix(this.prefix, plugin.customPrefix);
+            const body = typeof m.text === "string" ? m.text : "";
             const match = matchPrefix(prefix, body).find((p) => p[1]);
+            if (typeof plugin !== "function") continue;
             
             let usedPrefix;
             if ((usedPrefix = (match?.[0] || "")[0])) {
@@ -375,12 +302,19 @@ export async function handler(chatUpdate) {
                 const text = _args.join(" ");
                 const isAccept = isCmdAccepted(command, plugin.command);
                 if (!isAccept) continue;
-                
                 m.plugin = name;
-                commandMatched = true;
-                
+                const chat = global.db?.data?.chats?.[m.chat];
+                if (!m.fromMe && settings?.self && !isOwner) return;
+                if (settings?.gconly && !m.isGroup && !isOwner) {
+                    await sendDenied(this, m);
+                    return;
+                }
+                if (!isAdmin && !isOwner && chat?.adminOnly) return;
+                if (!isOwner && chat?.mute) return;
+                if (settings?.autoread) {
+                    await safe(() => this.readMessages([m.key]));
+                }
                 const fail = plugin.fail || global.dfail;
-                
                 if (plugin.owner && !isOwner) {
                     fail("owner", m, this);
                     continue;
@@ -423,28 +357,31 @@ export async function handler(chatUpdate) {
                     __dirname: ___dirname,
                     __filename,
                 };
-
-                try {
-                    await plugin.call(this, m, extra);
-                } catch (e) {
-                    conn.logger.error(e);
-                    if (e && settings?.noerror) {
-                        m.reply(`Upss.. Something went wrong.`).catch(() => {});
-                    } else if (e) {
-                        await traceError(this, m, name, m.chat, e);
+                
+                await (async () => {
+                    try {
+                        await plugin.call(this, m, extra);
+                    } catch (e) {
+                        conn.logger.error(e);
+                        if (e && settings?.noerror) {
+                            await safe(() => m.reply(
+                                `Upss.. Something went wrong.`));
+                        } else if (e) {
+                            await traceError(this, m, plugin, chat, e);
+                        }
                     }
-                }
+                })();
                 
                 if (typeof plugin.after === "function") {
-                    plugin.after.call(this, m, extra).catch(() => {});
+                    await safe(() => plugin.after.call(this, m, extra));
                 }
                 
                 break;
             }
         }
         
-        if (!settings?.noprint) {
-            printMessage(m, this).catch(() => {});
+        if (!getSettings(this.user.lif)?.noprint) {
+            await safe(() => printMessage(m, this));
         }
     } finally {
         messageTracker.exit();
@@ -492,18 +429,12 @@ if (global.cleanupTasks) {
         if (watcher) {
             await watcher.close();
         }
-        metadataCache.clear();
-        lidCache.clear();
     });
 }
 
 export function getHandlerStatus() {
     return {
         activeMessages: messageTracker.getActive(),
-        shuttingDown: messageTracker.shuttingDown,
-        cacheStats: {
-            metadata: metadataCache.size,
-            lid: lidCache.size
-        }
+        shuttingDown: messageTracker.shuttingDown
     };
 }

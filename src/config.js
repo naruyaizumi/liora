@@ -3,8 +3,6 @@
  * @description Open source WhatsApp bot based on Bun and Baileys.
  *
  * @owner       Naruya Izumi <https://linkbio.co/naruyaizumi>
- * @developer   SXZnightmar <wa.me/6281398961382>
- 
  * @copyright   © 2024 - 2025 Naruya Izumi
  * @license     Apache License 2.0
  *
@@ -23,90 +21,184 @@
  * - Do not remove or alter original credits under any circumstances.
  */
 
-global.config = {
-    /*============== STAFF ==============*/
-    /**
-     * Owner configuration
-     * Format: [local_identifier, display_name]
-     * - local_identifier: User's native LID, NOT phone number
-     * - display_name: Display name for the owner
-     *
-     * Notes:
-     * 1. Always use native LID from WhatsApp/WhiskeySocket to ensure consistency.
-     * 2. Do NOT use phone numbers, as JIDs can vary across environments.
-     */
-    owner: [
-        ["113748182302861", "Naruya Izumi"],
-        ["227551947555018", "SXZnightmar"],
-        // ["LOCAL_IDENTIFIER", "Owner Name"],
-    ],
+const PRESENCE_DELAY = 800;
+const DEFAULT_THUMBNAIL = "https://qu.ax/DdwBH.jpg";
 
-    group: "https://chat.whatsapp.com/FtMSX1EsGHTJeynu8QmjpG",
-
-    /*============= PAIRING =============*/
-    /**
-     * pairingNumber:
-     *   - Bot's phone number for pairing (without '+' or spaces)
-     *   - Example: "1234567890"
-     */
-    pairingNumber: "", // Bot's phone number used for WhatsApp pairing authentication
-
-    watermark: "𝙇͢𝙞𝙤𝙧𝙖",
-    author: "𝙉͢𝙖𝙧𝙪𝙮𝙖 𝙄͢𝙯𝙪𝙢𝙞",
-    stickpack: "𝙇͢𝙞𝙤𝙧𝙖",
-    stickauth: "© 𝙉͢𝙖𝙧𝙪𝙮𝙖 𝙄͢𝙯𝙪𝙢𝙞",
+/**
+ * Safely parse JSON with fallback
+ * @param {string} jsonString - JSON string to parse
+ * @param {any} fallback - Fallback value if parsing fails
+ * @returns {any} Parsed value or fallback
+ */
+const safeJSONParse = (jsonString, fallback) => {
+    try {
+        if (!jsonString || jsonString.trim() === "") {
+            return fallback;
+        }
+        const parsed = JSON.parse(jsonString);
+        return parsed ?? fallback;
+    } catch (error) {
+        console.error(`[Config] Failed to parse JSON: ${error.message}`);
+        return fallback;
+    }
 };
 
+/**
+ * Validate and sanitize URL
+ * @param {string} url - URL to validate
+ * @param {string} fallback - Fallback URL
+ * @returns {string} Valid URL or fallback
+ */
+const sanitizeUrl = (url, fallback) => {
+    try {
+        if (!url) return fallback;
+        const parsed = new URL(url);
+        if (parsed.protocol !== 'https:') {
+            console.warn(`[Config] Non-HTTPS URL detected, using fallback`);
+            return fallback;
+        }
+        return url;
+    } catch (error) {
+        console.error(`[Config] Invalid URL: ${error.message}`);
+        return fallback;
+    }
+};
+
+/**
+ * Initialize global configuration
+ */
+const initializeConfig = () => {
+    const owners = safeJSONParse(Bun.env.OWNERS, []);
+    
+    // Validate owners array
+    if (!Array.isArray(owners)) {
+        console.error('[Config] OWNERS must be an array, using empty array');
+        global.config.owner = [];
+    } else {
+        global.config.owner = owners.filter(owner => 
+            typeof owner === 'string' && owner.trim() !== ''
+        );
+    }
+
+    return {
+        /*============== STAFF ==============*/
+        owner: global.config.owner,
+        group: (Bun.env.GROUP_LINK || "").trim(),
+
+        /*============= PAIRING =============*/
+        pairingNumber: (Bun.env.PAIRING_NUMBER || "").trim(),
+
+        /*============== META ===============*/
+        watermark: (Bun.env.WATERMARK || "Liora").trim(),
+        author: (Bun.env.AUTHOR || "Naruya Izumi").trim(),
+        stickpack: (Bun.env.STICKPACK || "Liora").trim(),
+        stickauth: (Bun.env.STICKAUTH || "© Naruya Izumi").trim(),
+        
+        /*============ INTERNAL =============*/
+        thumbnailUrl: sanitizeUrl(
+            Bun.env.THUMBNAIL_URL, 
+            DEFAULT_THUMBNAIL
+        ),
+    };
+};
+
+global.config = initializeConfig();
+
+/**
+ * Send presence update with error handling
+ * @param {object} conn - WhatsApp connection object
+ * @param {string} m - Message object
+ * @param {boolean} back - Whether to return to available state
+ */
 global.loading = async (m, conn, back = false) => {
-    if (back) {
-        await conn.sendPresenceUpdate("paused", m.chat);
-        await Bun.sleep(800);
-        await conn.sendPresenceUpdate("available", m.chat);
+    if (!conn || !m || !m.chat) {
         return;
     }
-    await conn.sendPresenceUpdate("composing", m.chat);
+
+    try {
+        if (back) {
+            await conn.sendPresenceUpdate("paused", m.chat);
+            await Bun.sleep(PRESENCE_DELAY);
+            await conn.sendPresenceUpdate("available", m.chat);
+        } else {
+            await conn.sendPresenceUpdate("composing", m.chat);
+        }
+    } catch {
+        //
+    }
 };
 
-global.dfail = (type, m, conn) => {
-    const msg = {
-        owner: `\`\`\`
-[ACCESS DENIED]
-This command is restricted to the system owner only.
-Contact the administrator for permission.
-\`\`\``,
-        group: `\`\`\`
-[ACCESS DENIED]
-This command can only be executed within a group context.
-\`\`\``,
-        admin: `\`\`\`
-[ACCESS DENIED]
-You must be a group administrator to perform this action.
-\`\`\``,
-        botAdmin: `\`\`\`
-[ACCESS DENIED]
-System privileges insufficient.
-Grant admin access to the bot to continue.
-\`\`\``,
-        restrict: `\`\`\`
-[ACCESS BLOCKED]
-This feature is currently restricted or disabled by configuration.
-\`\`\``,
-    }[type];
-    if (!msg) return;
-    conn.sendMessage(
-        m.chat,
-        {
-            text: msg,
-            contextInfo: {
-                externalAdReply: {
-                    title: "ACCESS CONTROL SYSTEM",
-                    body: "Liora Secure Environment",
-                    mediaType: 1,
-                    thumbnailUrl: "https://qu.ax/DdwBH.jpg",
-                    renderLargerThumbnail: true,
+const FAILURE_MESSAGES = {
+    owner: {
+        title: "[ACCESS DENIED]",
+        body: "This command is restricted to the system owner only.\nContact the administrator for permission."
+    },
+    group: {
+        title: "[ACCESS DENIED]",
+        body: "This command can only be executed within a group context."
+    },
+    admin: {
+        title: "[ACCESS DENIED]",
+        body: "You must be a group administrator to perform this action."
+    },
+    botAdmin: {
+        title: "[ACCESS DENIED]",
+        body: "System privileges insufficient.\nGrant admin access to the bot to continue."
+    },
+    restrict: {
+        title: "[ACCESS BLOCKED]",
+        body: "This feature is currently restricted or disabled by configuration."
+    }
+};
+
+/**
+ * Send failure message based on type
+ * @param {string} type - Type of failure
+ * @param {object} m - Message object
+ * @param {object} conn - Connection object
+ */
+global.dfail = async (type, m, conn) => {
+    if (!type || !m || !conn) {
+        return;
+    }
+    if (!m.chat) {
+        return;
+    }
+
+    const failureConfig = FAILURE_MESSAGES[type];
+    
+    if (!failureConfig) {
+        return;
+    }
+
+    const messageText = `\`\`\`\n${failureConfig.title}\n${failureConfig.body}\n\`\`\``;
+
+    try {
+        await conn.sendMessage(
+            m.chat,
+            {
+                text: messageText,
+                contextInfo: {
+                    externalAdReply: {
+                        title: "ACCESS CONTROL SYSTEM",
+                        body: "Liora Secure Environment",
+                        mediaType: 1,
+                        thumbnailUrl: global.config.thumbnailUrl || DEFAULT_THUMBNAIL,
+                        renderLargerThumbnail: true,
+                    },
                 },
             },
-        },
-        { quoted: m }
-    );
+            { quoted: m }
+        );
+    } catch {
+        try {
+            await conn.sendMessage(
+                m.chat,
+                { text: messageText },
+                { quoted: m }
+            );
+        } catch {
+            //
+        }
+    }
 };

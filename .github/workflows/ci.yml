@@ -1,19 +1,39 @@
-name: Main CI/CD & Release
+name: Production CI/CD & Release Pipeline
 
 on:
     push:
         branches: ["main"]
+        paths-ignore:
+            - "**.md"
+            - "docs/**"
+            - ".gitignore"
     pull_request:
         branches: ["main"]
+        paths-ignore:
+            - "**.md"
+            - "docs/**"
+            - ".gitignore"
 
 permissions:
     contents: write
     security-events: write
     actions: read
+    pull-requests: write
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    CARGO_TERM_COLOR: always
+    RUST_BACKTRACE: 1
 
 jobs:
-    eslint:
-        name: ESLint Check
+# ============================================
+# JavaScript/TypeScript Quality Checks
+# ============================================
+    javascript-quality:
+        name: JavaScript Quality & Security
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
@@ -42,24 +62,47 @@ jobs:
                     pkg-config \
                     cmake
 
+            - name: Cache Bun dependencies
+              uses: actions/cache@v4
+              with:
+                  path: ~/.bun/install/cache
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+                  restore-keys: |
+                      ${{ runner.os }}-bun-
+
             - name: Install Dependencies
-              run: bun install --no-save
+              run: bun install --frozen-lockfile
+
+            - name: Check Prettier formatting
+              run: bun run format:check
 
             - name: Run ESLint
-              run: bunx eslint .
+              run: bun run lint
 
-    rust-check:
-        name: Rust Build Check
+            - name: Check for outdated dependencies
+              run: |
+                  echo "📦 Checking for outdated packages..."
+                  bun outdated || true
+
+            - name: List all dependencies
+              run: |
+                  echo "📋 Listing all dependencies..."
+                  bun pm ls --all || true
+
+# ============================================
+# Rust Quality Checks
+# ============================================
+    rust-quality:
+        name: Rust Quality & Security
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
 
             - name: Setup Rust
-              uses: actions-rs/toolchain@v1
+              uses: dtolnay/rust-toolchain@stable
               with:
-                  toolchain: stable
-                  override: true
+                  components: rustfmt, clippy
 
             - name: Cache Cargo
               uses: actions/cache@v4
@@ -69,70 +112,120 @@ jobs:
                       ~/.cargo/registry/index/
                       ~/.cargo/registry/cache/
                       ~/.cargo/git/db/
-                      rs/target/
+                      lib/rs/target/
                   key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-cargo-
 
-            - name: Check Rust code
+            - name: Check Rust formatting
               working-directory: ./lib/rs
-              run: cargo check --release
+              run: cargo fmt --all -- --check
 
-    codeql:
-        name: Analyze JavaScript (CodeQL)
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+            - name: Run Clippy
+              working-directory: ./lib/rs
+              run: cargo clippy --all-targets --all-features -- -D warnings
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 24.x
+            - name: Install cargo-audit
+              run: cargo install cargo-audit --locked
 
-            - name: Initialize CodeQL
-              uses: github/codeql-action/init@v3
-              with:
-                  languages: javascript
-                  queries: security-extended,security-and-quality
+            - name: Rust Security Audit
+              working-directory: ./lib/rs
+              continue-on-error: true
+              run: cargo audit
 
-            - name: Perform CodeQL Analysis
-              uses: github/codeql-action/analyze@v3
+            - name: Check Rust build
+              working-directory: ./lib/rs
+              run: cargo check --release --verbose
 
-    release-flow:
-        name: Prettier & Auto Release
-        needs: [eslint, rust-check, codeql]
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+            - name: Run Rust tests
+              working-directory: ./lib/rs
+              run: cargo test --release --verbose
+
+# ============================================
+# C++ Quality Checks
+# ============================================
+    cpp-quality:
+        name: C++ Quality Check
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
-              with:
-                  token: ${{ secrets.PAT_TOKEN }}
-                  fetch-depth: 0
 
-            - name: Check if package.json version changed
-              id: check_version_change
+            - name: Install clang-format
               run: |
-                  PREV_VERSION=$(git show HEAD^:package.json | jq -r '.version')
-                  NEW_VERSION=$(jq -r '.version' package.json)
+                  sudo apt-get update
+                  sudo apt-get install -y clang-format
 
-                  echo "Previous version: $PREV_VERSION"
-                  echo "New version: $NEW_VERSION"
-
-                  if [ "$PREV_VERSION" != "$NEW_VERSION" ]; then
-                    echo "version_changed=true" >> $GITHUB_OUTPUT
-                    echo "current_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-                  else
-                    echo "version_changed=false" >> $GITHUB_OUTPUT
+            - name: Check C++ formatting
+              run: |
+                  echo "🔍 Checking C++ code formatting..."
+                  FORMAT_ISSUES=0
+                  
+                  while IFS= read -r file; do
+                    if ! clang-format --dry-run --Werror "$file" 2>&1 | grep -q "warning:"; then
+                      echo "✅ $file is properly formatted"
+                    else
+                      echo "❌ $file needs formatting"
+                      clang-format --dry-run --Werror "$file"
+                      FORMAT_ISSUES=1
+                    fi
+                  done < <(find lib/cpp -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cc" \))
+                  
+                  if [ $FORMAT_ISSUES -eq 1 ]; then
+                    echo "❌ C++ formatting issues found"
+                    exit 1
                   fi
+                  
+                  echo "✅ All C++ files are properly formatted"
+
+# ============================================
+# CodeQL Security Analysis
+# ============================================
+    codeql-analysis:
+        name: CodeQL Security Analysis
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                language: ["javascript", "cpp"]
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Initialize CodeQL
+              uses: github/codeql-action/init@v3
+              with:
+                  languages: ${{ matrix.language }}
+                  queries: security-extended,security-and-quality
+
+            - name: Autobuild
+              uses: github/codeql-action/autobuild@v3
+
+            - name: Perform CodeQL Analysis
+              uses: github/codeql-action/analyze@v3
+              with:
+                  category: "/language:${{matrix.language}}"
+
+# ============================================
+# Build & Integration Tests
+# ============================================
+    integration-build:
+        name: Integration Build Test
+        needs: [javascript-quality, rust-quality, cpp-quality]
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
             - name: Setup Bun
-              if: steps.check_version_change.outputs.version_changed == 'true'
               uses: oven-sh/setup-bun@v2
               with:
                   bun-version: latest
 
-            - name: Install native dependencies
-              if: steps.check_version_change.outputs.version_changed == 'true'
+            - name: Setup Rust
+              uses: dtolnay/rust-toolchain@stable
+
+            - name: Install all dependencies
               run: |
                   sudo apt-get update
                   sudo apt-get install -y \
@@ -150,50 +243,200 @@ jobs:
                     pkg-config \
                     cmake
 
-            - name: Run Prettier and Push
-              if: steps.check_version_change.outputs.version_changed == 'true'
+            - name: Cache dependencies
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.bun/install/cache
+                      ~/.cargo/bin/
+                      ~/.cargo/registry/
+                      lib/rs/target/
+                  key: ${{ runner.os }}-integration-${{ hashFiles('**/bun.lockb', '**/Cargo.lock') }}
+
+            - name: Full build
               run: |
-                  bun install --no-save
+                  bun install --frozen-lockfile
+                  echo "✅ All components built successfully"
+
+            - name: Verify build artifacts
+              run: |
+                  echo "🔍 Verifying build artifacts..."
+                  if [ -f "lib/rs/target/release/liora-rs" ]; then
+                    echo "✅ Rust supervisor binary found"
+                    ls -lh lib/rs/target/release/liora-rs
+                  else
+                    echo "❌ Rust supervisor binary not found"
+                    exit 1
+                  fi
+
+# ============================================
+# Dependency Review (PRs only)
+# ============================================
+    dependency-review:
+        name: Dependency Review
+        if: github.event_name == 'pull_request'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Dependency Review
+              uses: actions/dependency-review-action@v4
+              with:
+                  fail-on-severity: moderate
+                  deny-licenses: GPL-2.0, GPL-3.0
+
+# ============================================
+# Auto-format & Release Pipeline
+# ============================================
+    release-pipeline:
+        name: Format & Auto Release
+        needs: [javascript-quality, rust-quality, cpp-quality, codeql-analysis, integration-build]
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  token: ${{ secrets.PAT_TOKEN }}
+                  fetch-depth: 0
+
+            - name: Check version change
+              id: check_version
+              run: |
+                  if git show HEAD^:package.json 2>/dev/null; then
+                    PREV_VERSION=$(git show HEAD^:package.json | jq -r '.version')
+                  else
+                    PREV_VERSION="0.0.0"
+                  fi
+                  NEW_VERSION=$(jq -r '.version' package.json)
+
+                  echo "Previous version: $PREV_VERSION"
+                  echo "Current version: $NEW_VERSION"
+
+                  if [ "$PREV_VERSION" != "$NEW_VERSION" ]; then
+                    echo "version_changed=true" >> $GITHUB_OUTPUT
+                    echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+                    
+                    # Check if it's a major version bump
+                    PREV_MAJOR=$(echo $PREV_VERSION | cut -d. -f1)
+                    NEW_MAJOR=$(echo $NEW_VERSION | cut -d. -f1)
+                    
+                    if [ "$NEW_MAJOR" -gt "$PREV_MAJOR" ]; then
+                      echo "is_major=true" >> $GITHUB_OUTPUT
+                    else
+                      echo "is_major=false" >> $GITHUB_OUTPUT
+                    fi
+                  else
+                    echo "version_changed=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Setup Bun
+              if: steps.check_version.outputs.version_changed == 'true'
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Setup Rust
+              if: steps.check_version.outputs.version_changed == 'true'
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  components: rustfmt
+
+            - name: Install dependencies
+              if: steps.check_version.outputs.version_changed == 'true'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y clang-format
+
+            - name: Auto-format all code
+              if: steps.check_version.outputs.version_changed == 'true'
+              run: |
+                  bun install --frozen-lockfile
                   bunx prettier --write . || true
 
+                  cd lib/rs
+                  cargo fmt --all
+                  cd ../..
+
+                  find lib/cpp -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cc" \) -exec clang-format -i {} \; || true
+
+            - name: Commit formatting changes
+              if: steps.check_version.outputs.version_changed == 'true'
+              run: |
                   git config --global user.name "naruyaizumi"
                   git config --global user.email "sexystyle088@gmail.com"
 
                   if [[ `git status --porcelain` ]]; then
                     git add .
-                    git commit -m "style: auto-format with Prettier"
+                    git commit -m "style: auto-format with Prettier, cargo fmt, and clang-format"
                     git push origin main
-                    echo "Prettier formatting applied and pushed."
+                    echo "✅ Formatting changes committed and pushed"
                   else
-                    echo "No changes by Prettier."
+                    echo "✅ No formatting changes needed"
                   fi
 
-            - name: Check Release Necessity
+            - name: Check if release needed
               id: check_release
-              if: steps.check_version_change.outputs.version_changed == 'true'
+              if: steps.check_version.outputs.version_changed == 'true'
               run: |
-                  CURRENT_VERSION=$(jq -r .version package.json)
+                  NEW_VERSION="${{ steps.check_version.outputs.new_version }}"
                   LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-                  OLD_VERSION_TAG=${LAST_TAG#v}
+                  LAST_TAG_VERSION=${LAST_TAG#v}
 
-                  echo "Current Package Version: $CURRENT_VERSION"
-                  echo "Last Git Tag: $LAST_TAG"
+                  echo "Current version: $NEW_VERSION"
+                  echo "Last tag: $LAST_TAG"
 
-                  if [ "$CURRENT_VERSION" != "$OLD_VERSION_TAG" ]; then
+                  if [ "$NEW_VERSION" != "$LAST_TAG_VERSION" ]; then
                     echo "do_release=true" >> $GITHUB_OUTPUT
-                    echo "release_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+                    echo "release_version=$NEW_VERSION" >> $GITHUB_OUTPUT
                   else
                     echo "do_release=false" >> $GITHUB_OUTPUT
-                    echo "Tag already exists for this version."
+                    echo "ℹ️ Tag already exists for version $NEW_VERSION"
                   fi
+
+            - name: Generate changelog from commits
+              id: changelog
+              if: steps.check_release.outputs.do_release == 'true'
+              run: |
+                  VERSION="${{ steps.check_release.outputs.release_version }}"
+                  LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+                  
+                  if [ -n "$LAST_TAG" ]; then
+                    COMMITS=$(git log $LAST_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)
+                  else
+                    COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges | head -20)
+                  fi
+
+                  CHANGELOG="## 🚀 What's Changed in v${VERSION}
+
+                  ${COMMITS}
+
+                  **Full Changelog**: https://github.com/${{ github.repository }}/compare/${LAST_TAG}...v${VERSION}"
+
+                  echo "$CHANGELOG" > /tmp/changelog.md
 
             - name: Create GitHub Release
               if: steps.check_release.outputs.do_release == 'true'
               uses: softprops/action-gh-release@v2
               with:
                   tag_name: v${{ steps.check_release.outputs.release_version }}
-                  name: Release v${{ steps.check_release.outputs.release_version }}
-                  body: |
-                      🎉 Automatic release for version **v${{ steps.check_release.outputs.release_version }}**
+                  name: "Release v${{ steps.check_release.outputs.release_version }}"
+                  body_path: /tmp/changelog.md
+                  draft: false
+                  prerelease: ${{ steps.check_version.outputs.is_major == 'true' }}
+                  generate_release_notes: true
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Notify release
+              if: steps.check_release.outputs.do_release == 'true'
+              run: |
+                  VERSION="${{ steps.check_release.outputs.release_version }}"
+                  IS_MAJOR="${{ steps.check_version.outputs.is_major }}"
+                  
+                  if [ "$IS_MAJOR" == "true" ]; then
+                    echo "🎉 Major release v${VERSION} created! This includes breaking changes."
+                  else
+                    echo "✅ Release v${VERSION} created successfully!"
+                  fi

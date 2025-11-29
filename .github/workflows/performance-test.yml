@@ -1,0 +1,61 @@
+# ============================================
+# Performance regression testing
+# ============================================
+name: Performance Test
+
+on:
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main"]
+
+jobs:
+    benchmark:
+        name: Performance Benchmarks
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Setup Rust
+              uses: dtolnay/rust-toolchain@stable
+
+            - name: Install dependencies
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y \
+                    ffmpeg libwebp-dev libavformat-dev \
+                    libavcodec-dev libavutil-dev
+                  bun install --frozen-lockfile
+
+            - name: Run Rust benchmarks
+              working-directory: ./lib/rs
+              run: |
+                  cargo bench --no-run
+                  cargo bench > ../../bench-results.txt || true
+
+            - name: Upload benchmark results
+              uses: actions/upload-artifact@v4
+              with:
+                  name: benchmark-results
+                  path: bench-results.txt
+
+            - name: Comment PR with results
+              if: github.event_name == 'pull_request'
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const fs = require('fs');
+                      const results = fs.readFileSync('bench-results.txt', 'utf8');
+                      
+                      await github.rest.issues.createComment({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: context.issue.number,
+                        body: `## 📊 Performance Benchmark Results\n\n\`\`\`\n${results}\n\`\`\``
+                      });

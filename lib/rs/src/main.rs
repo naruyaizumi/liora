@@ -382,7 +382,7 @@ impl Supervisor {
 
     async fn handle_signals(&self) -> Result<()> {
         let mut signals =
-            Signals::new(&[SIGINT, SIGTERM]).context("Failed to register signal handlers")?;
+            Signals::new([SIGINT, SIGTERM]).context("Failed to register signal handlers")?;
 
         while let Some(signal) = signals.next().await {
             match signal {
