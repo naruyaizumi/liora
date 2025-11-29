@@ -64,13 +64,9 @@ const sanitizeUrl = (url, fallback) => {
     }
 };
 
-/**
- * Initialize global configuration
- */
 const initializeConfig = () => {
     const owners = safeJSONParse(Bun.env.OWNERS, []);
-    
-    // Validate owners array
+    global.config = {};
     if (!Array.isArray(owners)) {
         console.error('[Config] OWNERS must be an array, using empty array');
         global.config.owner = [];

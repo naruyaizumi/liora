@@ -1,6 +1,6 @@
 {
     "name": "liora",
-    "version": "8.0.0",
+    "version": "8.0.1",
     "description": "Modern, high-performance WhatsApp bot with Rust supervisor, Bun runtime, and advanced caching architecture",
     "keywords": [
         "whatsapp",

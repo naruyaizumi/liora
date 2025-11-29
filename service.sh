@@ -506,8 +506,13 @@ cat > "$WORK_DIR/.env" <<EOF
 # ============================================
 # LIORA BOT CONFIG
 # ============================================
-# Format: [["id1","Name1"],["id2","Name2"]]
-OWNERS=[["113748182302861","Naruya Izumi"],["227551947555018","SXZnightmar"]]
+# Format: [local_identifier]
+# local_identifier: User's native LID, NOT phone number
+
+# Notes:
+# 1. Always use native LID from WhatsApp/WhiskeySocket to ensure consistency.
+# 2. Do NOT use phone numbers, as JIDs can vary across environments.
+OWNERS=["113748182302861","227551947555018"]
 
 # WhatsApp pairing code (REQUIRED - Add your phone number here!)
 PAIRING_NUMBER=
