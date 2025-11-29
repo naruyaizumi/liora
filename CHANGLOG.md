@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [8.0.0] - 2025-01-XX
+## [8.0.0]
 
 ### 🚨 **BREAKING CHANGES - Major Architecture Overhaul**
 
@@ -194,23 +194,6 @@ This is a **major breaking release** that fundamentally changes the Liora archit
 - Cache warming can take 2-5 seconds on first startup
 - PostgreSQL migration from 7.x requires manual data export/import
 
-### 📝 **Migration Guide Summary**
-
-**From 7.6.5 to 8.0.0:**
-
-1. **Backup your data** - No automatic migration
-2. **Install PostgreSQL 16** and **Redis 7**
-3. **Update environment variables** - See `.env.example`
-4. **Rebuild all components**:
-   ```bash
-   bun install
-   cd lib/rs && cargo build --release
-   ```
-5. **Update systemd service** or equivalent process manager
-6. **Test thoroughly** in staging environment first
-
-**For detailed migration instructions**, see: [MIGRATION.md](./MIGRATION.md)
-
 ### 🙏 **Acknowledgments**
 
 Special thanks to all contributors who helped make this major release possible:
@@ -221,42 +204,14 @@ Special thanks to all contributors who helped make this major release possible:
 ### 🔗 **Links**
 
 - **Full Changelog**: https://github.com/naruyaizumi/liora/compare/v7.6.5...v8.0.0
-- **Documentation**: https://github.com/naruyaizumi/liora/wiki
 - **Issues**: https://github.com/naruyaizumi/liora/issues
 - **Discussions**: https://github.com/naruyaizumi/liora/discussions
-
----
-
-## [7.6.5] - 2024-12-XX
-
-### 🔧 **Fixes**
-
-1. **Audio Waveform in PTT (Voice Note)** – fully compatible with Bun
-2. **HD/Remini** – improved media enhancement stability
-3. **Block/Unblock Reply** – consistent reply handling across sessions
-
-### ⚡ **Core Changes**
-
-4. **Remove `ws`, use Native Bun WebSocket** – lighter, faster, and more reliable
-5. **Remove `sendStickerPack`** – deprecated feature removed for cleaner core
-
-### 📦 **Dependencies**
-
-- Removed: `ws` package
-- Using: Native Bun WebSocket implementation
-
----
-
-## Previous Versions
-
-For older versions, see: [CHANGELOG_ARCHIVE.md](./CHANGELOG_ARCHIVE.md)
 
 ---
 
 ## Support
 
 ⭐ **Star the project** if you find it useful!  
-💖 **Sponsor development**: https://github.com/sponsors/naruyaizumi  
 🐛 **Report bugs**: https://github.com/naruyaizumi/liora/issues  
 💬 **Get help**: https://github.com/naruyaizumi/liora/discussions
 
