@@ -33,13 +33,13 @@
         "arm64"
     ],
     "scripts": {
-        "format": "prettier --write .",
-        "format:check": "prettier --check .",
+        "format": "bunx prettier --write .",
+        "format:check": "bunx prettier --check .",
         "format:rust": "cd lib/rs && cargo fmt --all",
         "format:cpp": "find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | xargs clang-format -i",
         "format:all": "bun run format && bun run format:rust && bun run format:cpp",
-        "lint": "eslint . --ext .js",
-        "lint:fix": "eslint . --ext .js --fix",
+        "lint": "bunx eslint . --ext .js",
+        "lint:fix": "bunx eslint . --ext .js --fix",
         "lint:rust": "cd lib/rs && cargo clippy --all-targets --all-features -- -D warnings",
         "audit": "bun pm ls --all",
         "audit:rust": "cd lib/rs && cargo audit",
