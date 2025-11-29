@@ -227,9 +227,7 @@ export async function handler(chatUpdate) {
         
         const settings = getSettings(this.user.lid);
         const senderLid = await resolveSenderLid(m.sender);
-        const regOwners = global.config.owner
-            .filter(([id]) => id)
-            .map(([id]) => id.toString().split("@")[0]);
+        const regOwners = global.config.owner.map(id => id.toString().split("@")[0]);
         const isOwner = m.fromMe || regOwners.includes(senderLid);
         
         const groupMetadata = m.isGroup ?
