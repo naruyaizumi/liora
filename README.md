@@ -65,45 +65,76 @@
 
 ```mermaid
 graph TD
-    subgraph RustSupervisor["Rust Supervisor (Parent)"]
-        RS_Crash["Crash recovery"]
-        RS_Signal["Signal handling"]
-        RS_Metrics["Metrics"]
+    A[main.rs] --> B[main.js]
+    B --> C[connection.js]
+    C --> D[socket.js]
+    D --> E[Baileys WS]
+    E --> F[18 Events]
+    F --> G[Redis Cache]
+    
+    B --> H[handler.js]
+    H --> I[Plugins/Commands]
+    H --> J[External APIs]
+    
+    B --> K[auth.js]
+    K --> L[HTTP -> auth.rs]
+    L --> M[PostgreSQL]
+    
+    H --> N[bridge.js]
+    N --> O[sticker.cpp]
+    N --> P[converter.cpp]
+    O --> Q[Worker Pool]
+    P --> Q
+    
+    J --> R[instagram.js]
+    J --> S[spotify.js]
+    J --> T[tiktok.js]
+    J --> U[ytmp3/ytmp4.js]
+    
+    Q --> V[sticker-worker.js]
+    Q --> W[converter-worker.js]
+    
+    A --> X[http.rs]
+    A --> Y[config.rs]
+    
+    subgraph "Rust Supervisor"
+        A
+        X
+        Y
+        L
     end
-
-    subgraph BunRuntime["Bun Runtime (Child Process)"]
-        BR_Event["Event processing"]
-        BR_Plugin["Plugin system"]
-        BR_WS["WebSocket"]
-        BR_Plugin --> BR_PluginLoader["Plugin Loader"]
-        BR_Plugin --> BR_PluginRegistry["Plugin Registry"]
-        BR_Event --> BR_EventQueue["Event Queue"]
-        BR_Event --> BR_EventDispatcher["Event Dispatcher"]
+    
+    subgraph "Bun Runtime"
+        B
+        C
+        D
+        K
+        H
     end
-
-    subgraph PostgreSQL["PostgreSQL"]
-        PG_Session["Sessions"]
-        PG_Auth["Auth State"]
-        PG_Models["DB Models"]
+    
+    subgraph "C++ Addons"
+        O
+        P
+        N
     end
-
-    subgraph Redis["Redis"]
-        R_Cache["Cache Layer"]
-        R_Events["Event Stream"]
-        R_Subscribers["Subscribers"]
+    
+    subgraph "External APIs"
+        R
+        S
+        T
+        U
     end
-
-    subgraph Monitoring["Monitoring & Metrics"]
-        M_Logs["Logs"]
-        M_Metrics["Metrics Store"]
-        M_Alerts["Alerts"]
+    
+    subgraph "Data Layer"
+        M
+        G
     end
-
-    RustSupervisor --> BunRuntime
-    BunRuntime --> PostgreSQL
-    BunRuntime --> Redis
-    RustSupervisor --> Monitoring
-    BunRuntime --> Monitoring
+    
+    subgraph "Worker System"
+        Q
+        V
+        W
+    end
 ```
 
 > [!IMPORTANT]
