@@ -73,12 +73,8 @@ jobs:
             - name: Install Dependencies
               run: bun install --frozen-lockfile
 
-            - name: Check Prettier formatting
-              run: bun run format:check
-              continue-on-error: true
-
             - name: Run ESLint
-              run: bun run lint
+              run: bunx eslint .
 
             - name: Check for outdated dependencies
               run: |
@@ -225,7 +221,20 @@ jobs:
               if: matrix.language == 'rust'
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y build-essential pkg-config cmake
+                  sudo apt-get install -y \
+                    ffmpeg \
+                    libwebp-dev \
+                    libavformat-dev \
+                    libavcodec-dev \
+                    libavutil-dev \
+                    libswresample-dev \
+                    libswscale-dev \
+                    libavfilter-dev \
+                    build-essential \
+                    python3 \
+                    g++ \
+                    pkg-config \
+                    cmake
 
             - name: Build Rust (for CodeQL)
               if: matrix.language == 'rust'
@@ -235,13 +244,11 @@ jobs:
             - name: Build JavaScript (for CodeQL)
               if: matrix.language == 'javascript'
               run: |
-                  # Setup Bun untuk JavaScript analysis
                   curl -fsSL https://bun.sh/install | bash
                   export BUN_INSTALL="$HOME/.bun"
                   export PATH="$BUN_INSTALL/bin:$PATH"
                   
                   bun install --frozen-lockfile
-                  # Build step JavaScript jika ada
                   [ -f "package.json" ] && bun run build 2>/dev/null || echo "No build script found"
 
             - name: Perform CodeQL Analysis
