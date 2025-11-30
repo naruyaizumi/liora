@@ -92,7 +92,7 @@ async function gracefulShutdown(signal) {
                 if (global.conn.ws) {
                     global.conn.ws.close();
                 }
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise((resolve) => setTimeout(resolve, 1000));
             } catch (e) {
                 logger.error({ error: e.message }, "Error closing WebSocket");
             }
@@ -122,7 +122,7 @@ async function gracefulShutdown(signal) {
 
 function setupSignalHandlers() {
     const signals = ["SIGTERM", "SIGINT"];
-    
+
     signals.forEach((signal) => {
         process.on(signal, () => {
             gracefulShutdown(signal).catch((e) => {
@@ -150,7 +150,7 @@ async function LIORA() {
     const version = new BaileysVersion();
     const baileys = await version.fetchVersion();
     logger.info({ version: baileys.join(".") }, "Baileys version loaded");
-    
+
     const connection = createConnection(
         baileys,
         auth,
@@ -178,10 +178,10 @@ async function LIORA() {
     const CM = new CleanupManager();
     cleanupManager = CM;
     registerProcess(CM);
-    
+
     const EM = new EventManager();
     setupMaintenance(CM);
-    
+
     const handler = await import("./handler.js");
     EM.setHandler(handler);
 
@@ -191,7 +191,7 @@ async function LIORA() {
         CM,
         import.meta.url
     );
-    
+
     const filename = fileURLToPath(import.meta.url);
     const dirname = path.dirname(filename);
     const pluginFolder = path.join(dirname, "../plugins");

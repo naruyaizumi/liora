@@ -74,45 +74,45 @@ graph TB
     %% Bun Main Process Layer
     BN[main.js<br/>Bun Main Process]
     RS --> BN
-    
+
     %% Connection & Socket Layer
     BN --> CONN[connection.js<br/>Connection Manager]
     CONN --> SOCK[socket.js<br/>WebSocket Client]
     SOCK --> BAIL[Baileys<br/>WhatsApp WebSocket]
-    
+
     %% Event Processing Layer
     BAIL --> EVTS[18 Events<br/>Message/Chat/Group]
     EVTS --> REDIS[Redis<br/>Event Cache & Pub/Sub]
     EVTS --> HAND[handler.js<br/>Event Handler]
-    
+
     %% Plugin & Command Layer
     HAND --> PLUG[Plugins System<br/>Command Router]
     PLUG --> CMDS[Commands<br/>Message Processing]
-    
+
     %% External Services Layer
     CMDS --> EXTS[External APIs<br/>Instagram/Spotify/TikTok]
     EXTS --> EXT_IG[instagram.js]
     EXTS --> EXT_SP[spotify.js]
     EXTS --> EXT_TK[tiktok.js]
     EXTS --> EXT_YT[ytmp3/ytmp4.js]
-    
+
     %% Media Processing Layer
     CMDS --> MEDIA[Media Processing]
     MEDIA --> BRIDGE[bridge.js<br/>Native Bridge]
     BRIDGE --> CPP_ST[sticker.cpp<br/>Sticker Converter]
     BRIDGE --> CPP_CV[converter.cpp<br/>Audio Converter]
-    
+
     %% Worker Pool Layer
     CPP_ST --> WORKERS[Worker Pool<br/>Bun Workers]
     CPP_CV --> WORKERS
     WORKERS --> WRK_ST[sticker-worker.js]
     WORKERS --> WRK_CV[converter-worker.js]
-    
+
     %% Database Layer
     RS_AUTH --> PG[PostgreSQL<br/>Session Auth]
     BN --> PG
     HAND --> PG
-    
+
     %% Styling
     classDef rust fill:#ff6b6b,color:#fff
     classDef bun fill:#cbf0ff,color:#000
@@ -121,7 +121,7 @@ graph TB
     classDef external fill:#faad14,color:#000
     classDef worker fill:#722ed1,color:#fff
     classDef network fill:#13c2c2,color:#000
-    
+
     class RS,RS_HTTP,RS_AUTH,RS_CONF rust
     class BN,CONN,SOCK,HAND,PLUG,CMDS bun
     class CPP_ST,CPP_CV,BRIDGE cpp
@@ -133,7 +133,7 @@ graph TB
 
 > [!IMPORTANT]
 > **Breaking Changes in v8.0.0**  
-> This is a major architecture overhaul. Migration from v7.x requires database setup and configuration changes.  
+> This is a major architecture overhaul. Migration from v7.x requires database setup and configuration changes.
 
 > [!CAUTION]
 > **Security Disclosure Policy**  
@@ -141,10 +141,11 @@ graph TB
 > This protects the integrity and trust of the entire Liora ecosystem.
 
 > [!WARNING]
-> **License Compliance**  
+> **License Compliance**
+>
 > - **DO**: Use freely, modify, distribute with attribution
 > - **DON'T**: Remove credits, rebrand for profit, or violate Apache 2.0 terms
-> 
+>
 > Credits represent **respect, transparency, and acknowledgment**—not decoration.
 
 ---

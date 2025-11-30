@@ -19,131 +19,131 @@ This is a **major breaking release** that fundamentally changes the Liora archit
 
 - **BREAKING**: Complete runtime architecture overhaul
 - **NEW**: Rust-based supervisor process as parent
-  - Full async implementation using Tokio runtime
-  - Native signal handling (SIGTERM/SIGINT/SIGHUP)
-  - Automatic crash recovery with exponential backoff
-  - Memory-efficient process management
+    - Full async implementation using Tokio runtime
+    - Native signal handling (SIGTERM/SIGINT/SIGHUP)
+    - Automatic crash recovery with exponential backoff
+    - Memory-efficient process management
 - **NEW**: JavaScript/Bun child process for bot logic
-  - Managed lifecycle by Rust supervisor
-  - Hot-restart capability without data loss
-  - Graceful shutdown with state preservation
+    - Managed lifecycle by Rust supervisor
+    - Hot-restart capability without data loss
+    - Graceful shutdown with state preservation
 
 #### **Database & Caching Layer**
 
 - **NEW**: PostgreSQL session management
-  - Persistent authentication state
-  - Connection pooling (configurable: 20-50 connections)
-  - Automatic retry logic with exponential backoff
-  - Transaction support for atomic operations
+    - Persistent authentication state
+    - Connection pooling (configurable: 20-50 connections)
+    - Automatic retry logic with exponential backoff
+    - Transaction support for atomic operations
 - **NEW**: Redis cache layer
-  - Connection pooling (configurable: 10-30 connections)
-  - 18 Baileys events now cached:
-    - `connection.update`
-    - `creds.update`
-    - `messages.upsert`
-    - `messages.update`
-    - `messages.delete`
-    - `message-receipt.update`
-    - `presence.update`
-    - `chats.upsert`
-    - `chats.update`
-    - `chats.delete`
-    - `contacts.upsert`
-    - `contacts.update`
-    - `groups.upsert`
-    - `groups.update`
-    - `group-participants.update`
-    - `blocklist.set`
-    - `blocklist.update`
-    - `call`
-  - TTL-based cache invalidation (configurable per event type)
-  - Automatic cache warming on startup
-  - Pipeline optimization for batch operations
+    - Connection pooling (configurable: 10-30 connections)
+    - 18 Baileys events now cached:
+        - `connection.update`
+        - `creds.update`
+        - `messages.upsert`
+        - `messages.update`
+        - `messages.delete`
+        - `message-receipt.update`
+        - `presence.update`
+        - `chats.upsert`
+        - `chats.update`
+        - `chats.delete`
+        - `contacts.upsert`
+        - `contacts.update`
+        - `groups.upsert`
+        - `groups.update`
+        - `group-participants.update`
+        - `blocklist.set`
+        - `blocklist.update`
+        - `call`
+    - TTL-based cache invalidation (configurable per event type)
+    - Automatic cache warming on startup
+    - Pipeline optimization for batch operations
 
 #### **Event Processing Pipeline**
 
 - **NEW**: Full async event processing
-  - P-Queue integration for rate limiting
-  - EventEmitter3 for high-performance event dispatching
-  - Concurrent operation control (max 30 parallel ops)
-  - Batch processing with delay (50ms default)
-  - Circuit breaker pattern for external services
+    - P-Queue integration for rate limiting
+    - EventEmitter3 for high-performance event dispatching
+    - Concurrent operation control (max 30 parallel ops)
+    - Batch processing with delay (50ms default)
+    - Circuit breaker pattern for external services
 - **NEW**: Worker-based processing
-  - Bun Worker threads for CPU-intensive tasks
-  - Separate worker pool for media processing
-  - Non-blocking I/O for all operations
+    - Bun Worker threads for CPU-intensive tasks
+    - Separate worker pool for media processing
+    - Non-blocking I/O for all operations
 
 #### **HTTP Bridge Layer**
 
 - **NEW**: Rust HTTP server for Baileys communication
-  - High-performance Axum web framework
-  - WebSocket support for real-time events
-  - RESTful API for command execution
-  - Health check endpoints
-  - Metrics exposure (Prometheus-compatible)
+    - High-performance Axum web framework
+    - WebSocket support for real-time events
+    - RESTful API for command execution
+    - Health check endpoints
+    - Metrics exposure (Prometheus-compatible)
 
 #### **C++ Addon Improvements**
 
 - **REFACTOR**: Complete migration to async N-API workers
-  - Raw N-API implementation (no NAN dependency)
-  - Worker pool for parallel processing
-  - Non-blocking audio conversion (FFmpeg)
-  - Non-blocking sticker processing (libwebp)
-  - Zero-copy buffer transfers where possible
+    - Raw N-API implementation (no NAN dependency)
+    - Worker pool for parallel processing
+    - Non-blocking audio conversion (FFmpeg)
+    - Non-blocking sticker processing (libwebp)
+    - Zero-copy buffer transfers where possible
 
 ### 🗑️ **Removed (Breaking)**
 
 - **REMOVED**: Legacy in-RAM storage system
-  - All data now persisted to PostgreSQL/Redis
-  - Migration script not provided (breaking change)
+    - All data now persisted to PostgreSQL/Redis
+    - Migration script not provided (breaking change)
 - **REMOVED**: Old JavaScript start script
-  - Replaced by Rust supervisor
-  - New startup command: `lib/rs/target/release/liora-rs`
+    - Replaced by Rust supervisor
+    - New startup command: `lib/rs/target/release/liora-rs`
 - **REMOVED**: `ws` package dependency
-  - Using native Bun WebSocket implementation
-  - ~5MB smaller bundle size
-  - Better performance and stability
+    - Using native Bun WebSocket implementation
+    - ~5MB smaller bundle size
+    - Better performance and stability
 - **REMOVED**: `sendStickerPack` feature
-  - Deprecated API endpoint
-  - No replacement provided
+    - Deprecated API endpoint
+    - No replacement provided
 
 ### ✨ **Added**
 
 - HTTP API endpoints:
-  - `GET /health` - Service health check
-  - `GET /metrics` - Prometheus metrics
-  - `POST /restart` - Hot restart without data loss
-  - `GET /status` - Current bot status
+    - `GET /health` - Service health check
+    - `GET /metrics` - Prometheus metrics
+    - `POST /restart` - Hot restart without data loss
+    - `GET /status` - Current bot status
 - Configuration options:
-  - `PG_POOL_SIZE` - PostgreSQL connection pool size
-  - `REDIS_POOL_SIZE` - Redis connection pool size
-  - `MAX_CONCURRENT_OPS` - Max parallel operations
-  - `CACHE_TTL_SECS` - Default cache TTL
-  - `CIRCUIT_BREAKER_THRESHOLD` - Circuit breaker limit
-  - `HEALTH_CHECK_INTERVAL` - Health check frequency
+    - `PG_POOL_SIZE` - PostgreSQL connection pool size
+    - `REDIS_POOL_SIZE` - Redis connection pool size
+    - `MAX_CONCURRENT_OPS` - Max parallel operations
+    - `CACHE_TTL_SECS` - Default cache TTL
+    - `CIRCUIT_BREAKER_THRESHOLD` - Circuit breaker limit
+    - `HEALTH_CHECK_INTERVAL` - Health check frequency
 - Environment variables for fine-tuning:
-  - Per-event cache TTL configuration
-  - Retry policies for DB/Redis operations
-  - Timeout configurations
-  - Logging levels per component
+    - Per-event cache TTL configuration
+    - Retry policies for DB/Redis operations
+    - Timeout configurations
+    - Logging levels per component
 
 ### 🔧 **Fixed**
 
 - **Audio Waveform in PTT (Voice Note)**
-  - Full Bun runtime compatibility
-  - Async worker processing
-  - Memory leak fixes
+    - Full Bun runtime compatibility
+    - Async worker processing
+    - Memory leak fixes
 - **HD/Remini Media Enhancement**
-  - Improved stability with worker threads
-  - Better error handling
-  - Timeout protection
+    - Improved stability with worker threads
+    - Better error handling
+    - Timeout protection
 - **Block/Unblock Reply Handling**
-  - Consistent behavior across sessions
-  - Proper state synchronization with cache
+    - Consistent behavior across sessions
+    - Proper state synchronization with cache
 - **Signal Handling**
-  - Proper SIGTERM/SIGINT propagation
-  - Graceful shutdown with timeout
-  - No orphaned processes
+    - Proper SIGTERM/SIGINT propagation
+    - Graceful shutdown with timeout
+    - No orphaned processes
 
 ### 🚀 **Performance Improvements**
 
@@ -156,6 +156,7 @@ This is a **major breaking release** that fundamentally changes the Liora archit
 ### 📦 **Dependencies**
 
 #### Updated
+
 - `baileys`: github:naruyaizumi/baileys#main (latest)
 - `pino`: ^9.x → ^10.1.0
 - `pino-pretty`: ^11.x → ^13.1.2
@@ -163,11 +164,13 @@ This is a **major breaking release** that fundamentally changes the Liora archit
 - `sharp`: ^0.33.x → ^0.34.4
 
 #### Added
+
 - `async-mutex`: ^0.5.0
 - `eventemitter3`: ^5.0.1
 - `p-queue`: ^9.0.1
 
 #### Removed
+
 - `ws`: (using native Bun WebSocket)
 - `node-cache`: (replaced by Redis)
 
@@ -197,6 +200,7 @@ This is a **major breaking release** that fundamentally changes the Liora archit
 ### 🙏 **Acknowledgments**
 
 Special thanks to all contributors who helped make this major release possible:
+
 - The Baileys community for WhatsApp protocol insights
 - Bun team for runtime improvements
 - Tokio maintainers for excellent async runtime

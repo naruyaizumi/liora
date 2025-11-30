@@ -11,11 +11,12 @@ function normalizeUrl(raw) {
     try {
         const trimmed = raw.trim();
         if (!trimmed) return null;
-        
-        const withProtocol = /^https?:\/\//i.test(trimmed) || /^ftp:\/\//i.test(trimmed) 
-            ? trimmed 
-            : `https://${trimmed}`;
-        
+
+        const withProtocol =
+            /^https?:\/\//i.test(trimmed) || /^ftp:\/\//i.test(trimmed)
+                ? trimmed
+                : `https://${trimmed}`;
+
         new URL(withProtocol);
         return withProtocol;
     } catch {
@@ -25,13 +26,13 @@ function normalizeUrl(raw) {
 
 function cleanCache() {
     const now = Date.now();
-    
+
     for (const [key, value] of VALID_CACHE.entries()) {
         if (now - value.ts > CACHE_TTL) {
             VALID_CACHE.delete(key);
         }
     }
-    
+
     if (VALID_CACHE.size > MAX_CACHE_SIZE) {
         const entries = [...VALID_CACHE.entries()].sort((a, b) => a[1].ts - b[1].ts);
         const toRemove = Math.max(0, VALID_CACHE.size - MAX_CACHE_SIZE);
@@ -66,8 +67,8 @@ async function isValidUrlWithNetwork(url) {
         }
     } catch (headError) {
         if (timeout) clearTimeout(timeout);
-        
-        if (headError.name !== 'AbortError') {
+
+        if (headError.name !== "AbortError") {
             try {
                 controller = new AbortController();
                 timeout = setTimeout(() => controller.abort(), REQ_TIMEOUT);
@@ -78,7 +79,7 @@ async function isValidUrlWithNetwork(url) {
                     redirect: "follow",
                     signal: controller.signal,
                 });
-                
+
                 ok = !!(get && get.status >= 200 && get.status < 400);
             } catch {
                 ok = false;
@@ -96,11 +97,11 @@ async function isValidUrlWithNetwork(url) {
 
 async function filterResolvableLinks(urls) {
     if (!urls || urls.length === 0) return [];
-    
+
     const out = [];
     const queue = [...urls];
     let queueIndex = 0;
-    
+
     const workers = [];
     const workerCount = Math.min(MAX_CONCURRENT, queue.length);
 
@@ -110,10 +111,10 @@ async function filterResolvableLinks(urls) {
                 while (true) {
                     const currentIndex = queueIndex++;
                     if (currentIndex >= queue.length) break;
-                    
+
                     const u = queue[currentIndex];
                     if (!u) continue;
-                    
+
                     try {
                         const ok = await isValidUrlWithNetwork(u);
                         if (ok) out.push(u);
@@ -135,10 +136,10 @@ export async function before(m, { conn, isOwner, isAdmin, isBotAdmin }) {
         if (isOwner) return true;
         if (!m.isGroup) return true;
         if (isAdmin) return true;
-        
+
         const chat = global.db.data.chats?.[m.chat];
         if (!chat?.antiLinks || !isBotAdmin) return true;
-        
+
         const contextInfo = m.message?.extendedTextMessage?.contextInfo || {};
         const linksFromContext = [
             contextInfo.inviteLink,
@@ -158,25 +159,19 @@ export async function before(m, { conn, isOwner, isAdmin, isBotAdmin }) {
             linksFromContext.join(" ") ||
             "";
 
-        if (!text || typeof text !== 'string') return true;
+        if (!text || typeof text !== "string") return true;
 
         const rawMatches = [...text.matchAll(linkRegex)].map((v) => v[0]);
         if (!rawMatches.length) return true;
 
         const candidates = [
-            ...new Set(
-                rawMatches
-                    .map((t) => t.trim())
-                    .filter((t) => t.length >= MIN_LINK_LEN)
-            ),
+            ...new Set(rawMatches.map((t) => t.trim()).filter((t) => t.length >= MIN_LINK_LEN)),
         ];
 
         if (!candidates.length) return true;
 
-        const normalized = candidates
-            .map(normalizeUrl)
-            .filter(Boolean);
-        
+        const normalized = candidates.map(normalizeUrl).filter(Boolean);
+
         if (!normalized.length) return true;
 
         const resolvable = await filterResolvableLinks(normalized);
