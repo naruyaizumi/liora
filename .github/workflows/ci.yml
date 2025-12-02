@@ -163,7 +163,7 @@ jobs:
 
                   if [[ `git status --porcelain` ]]; then
                     git add .
-                    git commit -m "style: auto-format with Prettier"
+                    git commit -m "style: auto-format with Prettier [skip ci]"
                     git push origin main
                     echo "Prettier formatting applied and pushed."
                   else
@@ -200,92 +200,114 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    mirror-gitlab:
-        name: Mirror to GitLab
+    mirror-repositories:
+        name: Mirror to All Repositories
         needs: [release-flow]
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
+        continue-on-error: false
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
+                  token: ${{ secrets.PAT_TOKEN }}
 
-            - name: Push to GitLab
+            - name: Configure Git
               run: |
                   git config --global user.name "naruyaizumi"
                   git config --global user.email "sexystyle088@gmail.com"
-                  git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/naruyaizumi/liora.git || true
-                  git push gitlab main --force --tags
 
-    mirror-codeberg:
-        name: Mirror to Codeberg
-        needs: [mirror-gitlab]
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-
-            - name: Push to Codeberg
+            - name: Mirror to GitLab
+              continue-on-error: true
               run: |
-                  git config --global user.name "naruyaizumi"
-                  git config --global user.email "sexystyle088@gmail.com"
-                  git remote add codeberg https://${{ secrets.CODEBERG_TOKEN }}@codeberg.org/naruyaizumi/liora.git || true
-                  git push codeberg main --force --tags
+                  echo "Pushing to GitLab..."
+                  git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/naruyaizumi/liora.git 2>/dev/null || true
+                  if git push gitlab main --force --tags 2>&1 | tee /tmp/gitlab.log; then
+                    echo "GitLab mirror successful"
+                    echo "gitlab_status=success" >> $GITHUB_ENV
+                  else
+                    echo "GitLab mirror failed"
+                    echo "gitlab_status=failed" >> $GITHUB_ENV
+                    cat /tmp/gitlab.log
+                  fi
 
-    mirror-gitea:
-        name: Mirror to Gitea
-        needs: [mirror-codeberg]
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-
-            - name: Push to Gitea
+            - name: Mirror to Codeberg
+              continue-on-error: true
               run: |
-                  git config --global user.name "naruyaizumi"
-                  git config --global user.email "sexystyle088@gmail.com"
-                  git remote add gitea https://${{ secrets.GITEA_TOKEN }}@gitea.com/naruyaizumi/liora.git || true
-                  git push gitea main --force --tags
+                  echo "Pushing to Codeberg..."
+                  git remote add codeberg https://naruyaizumi:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/naruyaizumi/liora.git 2>/dev/null || true
+                  if git push codeberg main --force --tags 2>&1 | tee /tmp/codeberg.log; then
+                    echo "Codeberg mirror successful"
+                    echo "codeberg_status=success" >> $GITHUB_ENV
+                  else
+                    echo "Codeberg mirror failed"
+                    echo "codeberg_status=failed" >> $GITHUB_ENV
+                    cat /tmp/codeberg.log
+                  fi
 
-    mirror-bitbucket:
-        name: Mirror to Bitbucket
-        needs: [mirror-gitea]
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-
-            - name: Push to Bitbucket
+            - name: Mirror to Gitea
+              continue-on-error: true
               run: |
-                  git config --global user.name "naruyaizumi"
-                  git config --global user.email "sexystyle088@gmail.com"
-                  git remote add bitbucket https://x-token-auth:${{ secrets.BITBUCKET_TOKEN }}@bitbucket.org/naruyaizumi/liora.git || true
-                  git push bitbucket main --force --tags
+                  echo "Pushing to Gitea..."
+                  git remote add gitea https://naruyaizumi:${{ secrets.GITEA_TOKEN }}@gitea.com/naruyaizumi/liora.git 2>/dev/null || true
+                  if git push gitea main --force --tags 2>&1 | tee /tmp/gitea.log; then
+                    echo "Gitea mirror successful"
+                    echo "gitea_status=success" >> $GITHUB_ENV
+                  else
+                    echo "Gitea mirror failed"
+                    echo "gitea_status=failed" >> $GITHUB_ENV
+                    cat /tmp/gitea.log
+                  fi
 
-    mirror-azure:
-        name: Mirror to Azure DevOps
-        needs: [mirror-bitbucket]
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-
-            - name: Push to Azure DevOps
+            - name: Mirror to Bitbucket
+              continue-on-error: true
               run: |
-                  git config --global user.name "naruyaizumi"
-                  git config --global user.email "sexystyle088@gmail.com"
-                  git remote add azure https://${{ secrets.AZURE_TOKEN }}@dev.azure.com/naruyaizumi/_git/liora || true
-                  git push azure main --force --tags
+                  echo "Pushing to Bitbucket..."
+                  git remote add bitbucket https://naruyaizumi:${{ secrets.BITBUCKET_TOKEN }}@bitbucket.org/naruyaizumi/liora.git 2>/dev/null || true
+                  if git push bitbucket main --force --tags 2>&1 | tee /tmp/bitbucket.log; then
+                    echo "Bitbucket mirror successful"
+                    echo "bitbucket_status=success" >> $GITHUB_ENV
+                  else
+                    echo "Bitbucket mirror failed"
+                    echo "bitbucket_status=failed" >> $GITHUB_ENV
+                    cat /tmp/bitbucket.log
+                  fi
+
+            - name: Mirror to Azure DevOps
+              continue-on-error: true
+              run: |
+                  echo "Pushing to Azure DevOps..."
+                  git remote add azure https://naruyaizumi:${{ secrets.AZURE_TOKEN }}@dev.azure.com/naruyaizumi/_git/liora 2>/dev/null || true
+                  if git push azure main --force --tags 2>&1 | tee /tmp/azure.log; then
+                    echo "Azure DevOps mirror successful"
+                    echo "azure_status=success" >> $GITHUB_ENV
+                  else
+                    echo "Azure DevOps mirror failed"
+                    echo "azure_status=failed" >> $GITHUB_ENV
+                    cat /tmp/azure.log
+                  fi
+
+            - name: Mirror Summary
+              if: always()
+              run: |
+                  echo "Mirror Status Summary:"
+                  echo "========================"
+                  echo "GitLab: ${gitlab_status:-unknown}"
+                  echo "Codeberg: ${codeberg_status:-unknown}"
+                  echo "Gitea: ${gitea_status:-unknown}"
+                  echo "Bitbucket: ${bitbucket_status:-unknown}"
+                  echo "Azure DevOps: ${azure_status:-unknown}"
+                  echo "========================"
+                  
+                  # Check if any mirror failed
+                  if [[ "${gitlab_status}" == "failed" ]] || \
+                     [[ "${codeberg_status}" == "failed" ]] || \
+                     [[ "${gitea_status}" == "failed" ]] || \
+                     [[ "${bitbucket_status}" == "failed" ]] || \
+                     [[ "${azure_status}" == "failed" ]]; then
+                    echo "Some mirrors failed. Check logs above."
+                    exit 1
+                  else
+                    echo "All mirrors completed successfully!"
+                  fi
