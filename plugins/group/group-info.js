@@ -19,9 +19,6 @@ let handler = async (m, { conn }) => {
         const listAdmin =
             groupAdmins.map((v, i) => `${i + 1}. @${v.id.split("@")[0]}`).join("\n") || "-";
 
-        const sWelcome = global.db.data.chats[m.chat]?.sWelcome || "(none)";
-        const sBye = global.db.data.chats[m.chat]?.sBye || "(none)";
-
         const ephemeralTime = (() => {
             switch (groupMeta.ephemeralDuration) {
                 case 86400:
