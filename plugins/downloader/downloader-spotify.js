@@ -1,5 +1,6 @@
 import { convert } from "#add-on";
 import { spotify } from "#spotify";
+import { spotifyCanvas } from "../../lib/canvas-spotify.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0])
@@ -7,10 +8,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     await global.loading(m, conn);
     try {
-        const { success, title, channel, cover, url, downloadUrl, error } = await spotify(
+        const { success, title, channel, cover, url, downloadUrl, duration, error } = await spotify(
             args.join(" ")
         );
         if (!success) throw new Error(error);
+
+        const canvasBuffer = await spotifyCanvas(cover, title, channel, duration);
 
         const audioRes = await fetch(downloadUrl);
         if (!audioRes.ok) throw new Error(`Failed to fetch audio. Status: ${audioRes.status}`);
@@ -22,7 +25,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             bitrate: "128k",
             channels: 1,
             sampleRate: 48000,
-            ptt: true,
+            ptt: false,
         });
 
         const finalBuffer =
@@ -44,7 +47,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                     externalAdReply: {
                         title,
                         body: channel,
-                        thumbnailUrl: cover,
+                        thumbnail: canvasBuffer,
                         mediaUrl: url,
                         mediaType: 1,
                         renderLargerThumbnail: true,
@@ -63,6 +66,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
 handler.help = ["spotify"];
 handler.tags = ["downloader"];
-handler.command = /^(spotify)$/i;
+handler.command = /^(spotify|sp)$/i;
 
 export default handler;

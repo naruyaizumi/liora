@@ -10,7 +10,7 @@ Group ID: ${m.chat}`;
             text: info,
             title: "Group Link",
             footer: "Use the button below to copy the group link",
-            buttons: [
+            interactiveButtons: [
                 {
                     name: "cta_copy",
                     buttonParamsJson: JSON.stringify({

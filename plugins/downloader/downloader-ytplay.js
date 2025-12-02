@@ -1,5 +1,6 @@
 import { convert } from "#add-on";
 import { play } from "#play";
+import { youtubeCanvas } from "../../lib/canvas-play.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0])
@@ -11,6 +12,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             args.join(" ")
         );
         if (!success) throw new Error(error);
+
+        const canvasBuffer = await youtubeCanvas(cover, title, channel);
 
         const audioRes = await fetch(downloadUrl);
         if (!audioRes.ok) throw new Error(`Failed to fetch audio. Status: ${audioRes.status}`);
@@ -44,9 +47,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                     externalAdReply: {
                         title,
                         body: channel,
-                        thumbnailUrl: cover,
+                        thumbnail: canvasBuffer,
                         mediaUrl: url,
-                        mediaType: 2,
+                        mediaType: 1,
                         renderLargerThumbnail: true,
                     },
                 },

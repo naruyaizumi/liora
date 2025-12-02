@@ -151,7 +151,7 @@ async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
             caption,
             title: "Liora Menu",
             footer: global.config.watermark || "Liora WhatsApp Bot",
-            buttons: [
+            interactiveButtons: [
                 {
                     name: "single_select",
                     buttonParamsJson: JSON.stringify({

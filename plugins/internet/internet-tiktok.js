@@ -37,7 +37,7 @@ Date: ${item.taken_at || "Unknown"}
                 title: `${i + 1}. ${item.author?.nickname || "Unknown"}`,
                 body: caption,
                 footer: "TikTok Search Engine",
-                buttons: [
+                interactiveButtons: [
                     {
                         name: "cta_url",
                         buttonParamsJson: JSON.stringify({

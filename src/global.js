@@ -192,7 +192,6 @@ const SCHEMAS = {
             mute: "INTEGER DEFAULT 0",
             adminOnly: "INTEGER DEFAULT 0",
             antiLinks: "INTEGER DEFAULT 0",
-            antidelete: "INTEGER DEFAULT 0",
             antiAudio: "INTEGER DEFAULT 0",
             antiFile: "INTEGER DEFAULT 0",
             antiFoto: "INTEGER DEFAULT 0",

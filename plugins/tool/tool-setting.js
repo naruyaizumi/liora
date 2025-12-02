@@ -1,7 +1,6 @@
 const features = [
     { key: "adminOnly", scope: "chat", name: "Admin Only" },
     { key: "antiLinks", scope: "chat", name: "Anti Link" },
-    { key: "antidelete", scope: "chat", name: "Anti Delete" },
     { key: "antiStatus", scope: "chat", name: "Anti Status Mention" },
     { key: "antiSticker", scope: "chat", name: "Anti Sticker" },
     { key: "antiAudio", scope: "chat", name: "Anti Audio" },

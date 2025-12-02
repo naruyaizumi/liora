@@ -47,7 +47,7 @@ Pull Req: https://github.com/naruyaizumi/liora/pulls
         {
             product: {
                 productImage: {
-                    url: "https://qu.ax/WGRQE.jpg",
+                    url: "https://files.catbox.moe/wwboj3.jpg",
                 },
                 productId: "32409523241994909",
                 title: "mkfs.ext4 /dev/naruyaizumi",

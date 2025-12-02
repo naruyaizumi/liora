@@ -31,7 +31,7 @@ let handler = async (m, { conn, args, usedPrefix }) => {
             text: `Target ID: ${id}`,
             title: "Result",
             footer: "Use the button below to copy the ID",
-            buttons: [
+            interactiveButtons: [
                 {
                     name: "cta_copy",
                     buttonParamsJson: JSON.stringify({

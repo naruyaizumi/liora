@@ -1,21 +1,12 @@
 {
     "name": "liora",
     "version": "8.0.2",
-    "description": "Modern, high-performance WhatsApp bot with Rust supervisor, Bun runtime, and advanced caching architecture",
+    "description": "Modern WhatsApp bot",
     "keywords": [
         "whatsapp",
-        "whatsapp-bot",
         "baileys",
         "bun",
-        "rust",
-        "automation",
-        "bot-framework",
-        "websocket",
-        "redis",
-        "postgresql",
-        "async",
-        "tokio",
-        "performance"
+        "automation"
     ],
     "type": "module",
     "private": false,
@@ -24,14 +15,6 @@
         "node": ">=24.0.0",
         "npm": "please-use-bun"
     },
-    "os": [
-        "linux",
-        "darwin"
-    ],
-    "cpu": [
-        "x64",
-        "arm64"
-    ],
     "scripts": {
         "format": "bunx prettier --write .",
         "format:check": "bunx prettier --check .",
@@ -41,25 +24,41 @@
         "lint": "bunx eslint .",
         "lint:fix": "bunx eslint . --fix",
         "lint:rust": "cd lib/rs && cargo clippy --all-targets --all-features -- -D warnings",
-        "audit": "bun pm ls --all",
-        "audit:rust": "cd lib/rs && cargo audit",
-        "outdated": "bun outdated",
         "build:cpp": "node-gyp configure build",
         "build:rs": "cd lib/rs && cargo build --release",
-        "build:rs:dev": "cd lib/rs && cargo build",
         "build": "bun run build:cpp && bun run build:rs",
         "clean:cpp": "node-gyp clean",
         "clean:rust": "cd lib/rs && cargo clean",
         "clean": "bun run clean:cpp && bun run clean:rust && rm -rf node_modules",
-        "postinstall": "bun run build",
-        "test:rust": "cd lib/rs && cargo test --release",
         "check": "bun run format:check && bun run lint && bun run lint:rust"
     },
     "license": "Apache-2.0",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/naruyaizumi/liora.git"
-    },
+    "repository": [
+        {
+            "type": "git",
+            "url": "git+https://github.com/naruyaizumi/liora.git"
+        },
+        {
+            "type": "git",
+            "url": "git+https://gitlab.com/naruyaizumi/liora.git"
+        },
+        {
+            "type": "git",
+            "url": "git+https://codeberg.org/naruyaizumi/liora.git"
+        },
+        {
+            "type": "git",
+            "url": "git+https://gitea.com/naruyaizumi/liora.git"
+        },
+        {
+            "type": "git",
+            "url": "git+https://bitbucket.org/naruyaizumi/liora.git"
+        },
+        {
+            "type": "git",
+            "url": "git+https://dev.azure.com/naruyaizumi/_git/liora"
+        }
+    ],
     "bugs": {
         "url": "https://github.com/naruyaizumi/liora/issues"
     },
@@ -80,6 +79,7 @@
         "url": "https://github.com/sponsors/naruyaizumi"
     },
     "dependencies": {
+        "@napi-rs/canvas": "^0.1.83",
         "async-mutex": "^0.5.0",
         "baileys": "github:naruyaizumi/baileys#main",
         "chokidar": "^5.0.0",
@@ -98,10 +98,6 @@
         "node-addon-api": "^8.5.0",
         "node-gyp": "^12.0.0",
         "prettier": "^3.6.2"
-    },
-    "optionalDependencies": {
-        "bufferutil": "^4.0.8",
-        "utf-8-validate": "^6.0.4"
     },
     "imports": {
         "#tiktok": "./lib/api/tiktok.js",
@@ -142,9 +138,7 @@
     },
     "trustedDependencies": [
         "baileys",
-        "canvas",
         "protobufjs",
-        "sharp",
-        "bufferutil"
+        "sharp"
     ]
 }

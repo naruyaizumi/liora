@@ -1,4 +1,3 @@
-/* todo:
 let handler = async (m, { conn, text }) => {
     const quoted = m.quoted;
     if (!quoted) return m.reply("Reply to a media message to send status mentions.");
@@ -50,4 +49,3 @@ handler.command = /^(tagsw)$/i;
 handler.owner = true;
 
 export default handler;
-*/

@@ -66,9 +66,6 @@ Owner: @${owner.split("@")[0]}
 Administrators:
 ${listAdmin}
 
-Welcome Message: ${sWelcome}
-Leave Message: ${sBye}
-
 Description:
 ${desc}
 

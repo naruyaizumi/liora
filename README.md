@@ -65,70 +65,59 @@
 
 ```mermaid
 graph TB
-    %% Rust Supervisor Layer
-    RS[main.rs<br/>Rust Supervisor]
-    RS --> RS_HTTP[http.rs<br/>HTTP Server]
-    RS --> RS_AUTH[auth.rs<br/>Auth Service]
-    RS --> RS_CONF[config.rs<br/>Config Manager]
+    %% Central Handler
+    HANDLER[Handler]
+    
+    %% Left Side - Auth & Database
+    POSTGRES[(PostgreSQL)] --> AUTH_JS[Auth.js]
+    AUTH_JS --> HANDLER
+    HANDLER --> GLOBAL[(SQLite)]
+    
+    %% Top Side - Rust Parent
+    RUST[Rust Parent] --> HTTP[HTTP Server]
+    RUST --> AUTH_RS[Rust Auth]
+    RUST --> BUN[Bun Child]
+    HTTP --> AUTH_JS
+    AUTH_RS --> POSTGRES
+    BUN --> HANDLER
+    
+    %% Right Side - Connection & Events
+    HANDLER --> CONNECTION[Connection]
+    CONNECTION --> SOCKET[Socket]
+    CONNECTION --> HOTRELOAD[Hot Reload]
+    CONNECTION --> SIGNAL[Parent Signal]
+    
+    SOCKET --> BAILEYS[Baileys WS]
+    SOCKET --> REDIS[(Redis)]
+    
+    BAILEYS --> EVENTS[Events]
+    EVENTS --> REDIS
+    REDIS --> HANDLER
+    
+    %% Bottom Side - Plugins & Processing
+    HANDLER --> PLUGINS[Plugins]
+    PLUGINS --> FALLBACK[API Fallback]
+    PLUGINS --> BRIDGE[Bridge Async]
+    
+    BRIDGE --> WORKERS[Workers]
+    WORKERS --> CPP[C++]
+    FALLBACK --> EXTERNAL[External APIs]
 
-    %% Bun Main Process Layer
-    BN[main.js<br/>Bun Main Process]
-    RS --> BN
+    classDef handler fill:#3B82F6,color:#fff,stroke:#1D4ED8,stroke-width:3px
+    classDef rust fill:#EF4444,color:#fff,stroke:#DC2626,stroke-width:2px
+    classDef auth fill:#10B981,color:#fff,stroke:#047857,stroke-width:2px
+    classDef connection fill:#8B5CF6,color:#fff,stroke:#7C3AED,stroke-width:2px
+    classDef plugin fill:#F59E0B,color:#fff,stroke:#D97706,stroke-width:2px
+    classDef database fill:#6366F1,color:#fff,stroke:#4F46E5,stroke-width:2px
+    classDef cache fill:#EC4899,color:#fff,stroke:#DB2777,stroke-width:2px
 
-    %% Connection & Socket Layer
-    BN --> CONN[connection.js<br/>Connection Manager]
-    CONN --> SOCK[socket.js<br/>WebSocket Client]
-    SOCK --> BAIL[Baileys<br/>WhatsApp WebSocket]
-
-    %% Event Processing Layer
-    BAIL --> EVTS[18 Events<br/>Message/Chat/Group]
-    EVTS --> REDIS[Redis<br/>Event Cache & Pub/Sub]
-    EVTS --> HAND[handler.js<br/>Event Handler]
-
-    %% Plugin & Command Layer
-    HAND --> PLUG[Plugins System<br/>Command Router]
-    PLUG --> CMDS[Commands<br/>Message Processing]
-
-    %% External Services Layer
-    CMDS --> EXTS[External APIs<br/>Instagram/Spotify/TikTok]
-    EXTS --> EXT_IG[instagram.js]
-    EXTS --> EXT_SP[spotify.js]
-    EXTS --> EXT_TK[tiktok.js]
-    EXTS --> EXT_YT[ytmp3/ytmp4.js]
-
-    %% Media Processing Layer
-    CMDS --> MEDIA[Media Processing]
-    MEDIA --> BRIDGE[bridge.js<br/>Native Bridge]
-    BRIDGE --> CPP_ST[sticker.cpp<br/>Sticker Converter]
-    BRIDGE --> CPP_CV[converter.cpp<br/>Audio Converter]
-
-    %% Worker Pool Layer
-    CPP_ST --> WORKERS[Worker Pool<br/>Bun Workers]
-    CPP_CV --> WORKERS
-    WORKERS --> WRK_ST[sticker-worker.js]
-    WORKERS --> WRK_CV[converter-worker.js]
-
-    %% Database Layer
-    RS_AUTH --> PG[PostgreSQL<br/>Session Auth]
-    BN --> PG
-    HAND --> PG
-
-    %% Styling
-    classDef rust fill:#ff6b6b,color:#fff
-    classDef bun fill:#cbf0ff,color:#000
-    classDef cpp fill:#659ad2,color:#fff
-    classDef database fill:#52c41a,color:#fff
-    classDef external fill:#faad14,color:#000
-    classDef worker fill:#722ed1,color:#fff
-    classDef network fill:#13c2c2,color:#000
-
-    class RS,RS_HTTP,RS_AUTH,RS_CONF rust
-    class BN,CONN,SOCK,HAND,PLUG,CMDS bun
-    class CPP_ST,CPP_CV,BRIDGE cpp
-    class PG,REDIS database
-    class EXTS,EXT_IG,EXT_SP,EXT_TK,EXT_YT external
-    class WORKERS,WRK_ST,WRK_CV worker
-    class BAIL,EVTS network
+    class HANDLER handler
+    class RUST,HTTP,AUTH_RS rust
+    class AUTH_JS,BUN auth
+    class CONNECTION,SOCKET,BAILEYS connection
+    class PLUGINS,FALLBACK,BRIDGE,WORKERS,CPP plugin
+    class POSTGRES,GLOBAL database
+    class REDIS,EVENTS cache
 ```
 
 > [!IMPORTANT]

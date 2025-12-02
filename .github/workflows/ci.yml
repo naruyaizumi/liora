@@ -50,6 +50,7 @@ jobs:
 
     rust-check:
         name: Rust Build Check
+        needs: [eslint]
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
@@ -78,6 +79,7 @@ jobs:
 
     codeql:
         name: Analyze JavaScript (CodeQL)
+        needs: [rust-check]
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
@@ -99,7 +101,7 @@ jobs:
 
     release-flow:
         name: Prettier & Auto Release
-        needs: [eslint, rust-check, codeql]
+        needs: [codeql]
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
         steps:
@@ -197,3 +199,93 @@ jobs:
                       🎉 Automatic release for version **v${{ steps.check_release.outputs.release_version }}**
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    mirror-gitlab:
+        name: Mirror to GitLab
+        needs: [release-flow]
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Push to GitLab
+              run: |
+                  git config --global user.name "naruyaizumi"
+                  git config --global user.email "sexystyle088@gmail.com"
+                  git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/naruyaizumi/liora.git || true
+                  git push gitlab main --force --tags
+
+    mirror-codeberg:
+        name: Mirror to Codeberg
+        needs: [mirror-gitlab]
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Push to Codeberg
+              run: |
+                  git config --global user.name "naruyaizumi"
+                  git config --global user.email "sexystyle088@gmail.com"
+                  git remote add codeberg https://${{ secrets.CODEBERG_TOKEN }}@codeberg.org/naruyaizumi/liora.git || true
+                  git push codeberg main --force --tags
+
+    mirror-gitea:
+        name: Mirror to Gitea
+        needs: [mirror-codeberg]
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Push to Gitea
+              run: |
+                  git config --global user.name "naruyaizumi"
+                  git config --global user.email "sexystyle088@gmail.com"
+                  git remote add gitea https://${{ secrets.GITEA_TOKEN }}@gitea.com/naruyaizumi/liora.git || true
+                  git push gitea main --force --tags
+
+    mirror-bitbucket:
+        name: Mirror to Bitbucket
+        needs: [mirror-gitea]
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Push to Bitbucket
+              run: |
+                  git config --global user.name "naruyaizumi"
+                  git config --global user.email "sexystyle088@gmail.com"
+                  git remote add bitbucket https://x-token-auth:${{ secrets.BITBUCKET_TOKEN }}@bitbucket.org/naruyaizumi/liora.git || true
+                  git push bitbucket main --force --tags
+
+    mirror-azure:
+        name: Mirror to Azure DevOps
+        needs: [mirror-bitbucket]
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Push to Azure DevOps
+              run: |
+                  git config --global user.name "naruyaizumi"
+                  git config --global user.email "sexystyle088@gmail.com"
+                  git remote add azure https://${{ secrets.AZURE_TOKEN }}@dev.azure.com/naruyaizumi/_git/liora || true
+                  git push azure main --force --tags

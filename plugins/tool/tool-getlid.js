@@ -23,7 +23,7 @@ let handler = async (m, { conn, text }) => {
             text: `Target LID: ${lid}`,
             title: "Result",
             footer: "Use the button below to copy the LID",
-            buttons: [
+            interactiveButtons: [
                 {
                     name: "cta_copy",
                     buttonParamsJson: JSON.stringify({
