@@ -264,7 +264,10 @@ Apache 2.0 allows free use with attribution. **Do not** remove credits or rebran
 
 ## ✨ Feature Highlights
 
-**🔥 Production Architecture**
+<div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+
+### 🔥 Production Architecture
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Fire.png" width="30" /> **Multi-Process Isolation**  
 Rust supervisor manages Bun child processes with automatic crash recovery
@@ -278,9 +281,10 @@ Built-in watchdog with automatic recovery and alerts
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Satellite%20Antenna.png" width="30" /> **Signal Handling**  
 Proper SIGTERM/SIGINT handling for clean shutdowns
 
----
+</div>
+<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
-**⚡ High Performance**
+### ⚡ High Performance
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Rocket.png" width="30" /> **Native Bun WebSocket**  
 No `ws` dependency—pure performance with native APIs
@@ -294,9 +298,10 @@ PQueue-based message processing prevents bottlenecks
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Electric%20Plug.png" width="30" /> **Circuit Breaker**  
 Automatic API fallback prevents cascading failures
 
----
+</div>
+<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
-**🔒 Enterprise Security**
+### 🔒 Enterprise Security
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Locked%20with%20Key.png" width="30" /> **PostgreSQL Auth**  
 Persistent session storage with encryption at rest
@@ -310,9 +315,10 @@ Comprehensive validation prevents injection attacks
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Stopwatch.png" width="30" /> **Rate Limiting**  
 Per-user and global limits with Redis-backed tracking
 
----
+</div>
+<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
-**🛡️ Group Management**
+### 🛡️ Group Management
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Shield.png" width="30" /> **Anti-Link Protection**  
 Automatically detect and delete unauthorized links
@@ -326,9 +332,10 @@ Promote/demote users with granular permissions
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Scroll.png" width="30" /> **Group Rules**  
 Enforce group rules with automatic warnings
 
----
+</div>
+<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
-**🧩 Developer Experience**
+### 🧩 Developer Experience
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Wrench.png" width="30" /> **Plugin Hot-Reload**  
 Update code without restarting—changes apply instantly
@@ -342,9 +349,10 @@ JSDoc annotations provide IDE autocomplete
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Books.png" width="30" /> **Clean Architecture**  
 SOLID principles with clear separation of concerns
 
----
+</div>
+<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
-**📊 Observability**
+### 📊 Observability
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Chart%20Increasing.png" width="30" /> **Structured Logging**  
 Pino-based JSON logs with trace IDs
@@ -358,9 +366,10 @@ Built-in `/metrics` endpoint for monitoring
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Magnifying%20Glass%20Tilted%20Right.png" width="30" /> **Debug Mode**  
 Detailed traces with performance profiling
 
----
+</div>
+<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
-**🎥 Media Downloader Suite**
+### 🎥 Media Downloader Suite
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Play%20Button.png" width="30" /> **YouTube DL**  
 Download videos/audio in multiple formats
@@ -374,9 +383,10 @@ Download Reels, Stories, and posts
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Video%20Camera.png" width="30" /> **Media Downloader**  
 Download videos/images/audio from various platforms
 
----
+</div>
+<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
-**🛠️ Advanced Message Features**
+### 🛠️ Advanced Message Features
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Plus.png" width="30" /> **Unlimited Buttons**  
 Support for 15+ button types including Pix Key, Galaxy, no limit on quantity
@@ -390,9 +400,10 @@ Group status payloads, card messages (carousel), album messages
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/World%20Map.png" width="30" /> **Location & Product**  
 Support for location sharing and product catalog messages
 
----
+</div>
+<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
-**🔧 Utilities & Tools**
+### 🔧 Utilities & Tools
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Paintbrush.png" width="30" /> **Image Processing**  
 Compress, convert, enhance images
@@ -406,7 +417,8 @@ Check IP, reverse DNS, network information
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Glowing%20Star.png" width="30" /> **Image Enhancement**  
 Enhance image quality with various algorithms
 
----
+</div>
+</div>
 
 <div align="center">
 <small><em>All features are subject to continuous updates based on WhatsApp API changes and community feedback</em></small>
