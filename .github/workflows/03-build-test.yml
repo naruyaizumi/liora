@@ -59,10 +59,12 @@ jobs:
 
       - name: Verify build
         run: |
-          if [ ! -f "build/Release/addon.node" ]; then
-            echo "C++ addon build failed"
-            exit 1
+          for f in build/Release/*.node; do
+          if [ ! -f "$f" ]; then
+          echo "C++ addon build failed for $f"
+          exit 1
           fi
+          done
 
   build-debian:
     name: Build on Debian 12
@@ -90,6 +92,7 @@ jobs:
               g++ \
               pkg-config \
               cmake \
+              unzip \
               clang && \
             curl -fsSL https://bun.sh/install | bash && \
             export PATH=\"\$HOME/.bun/bin:\$PATH\" && \
@@ -122,7 +125,8 @@ jobs:
             ${{ runner.os }}-cargo-build-
 
       - name: Build Rust libraries
-        run: bun run build:rs
+        working-directory: lib/rs
+        run: cargo build --release
 
       - name: Check Rust tests
         working-directory: ./lib/rs
@@ -184,7 +188,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y shellcheck
 
       - name: Lint installer script
-        run: shellcheck -e SC1091 service.sh
+        run: shellcheck service.sh
 
       - name: Test installer (dry-run)
         run: |
