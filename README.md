@@ -1,17 +1,12 @@
 <div align="center">
 
-<div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
-  <img src="https://raw.githubusercontent.com/naruyaizumi/liora/main/aset/logo.png" width="80" height="80" alt="Liora Logo">
-  <div>
-    <h1>🌸 Liora</h1>
-    <p><strong>Enterprise-Grade WhatsApp Bot Framework</strong></p>
-    <p>
-      <strong>Built on Baileys • Powered by Bun • Supervised by Rust • Cached with Redis • Persisted by PostgreSQL</strong>
-    </p>
-  </div>
-</div>
+![Liora Banner](https://files.catbox.moe/3xv7p0.png)
 
-</div>
+**🌸 Liora**
+
+> **Enterprise-Grade WhatsApp Bot Framework**
+
+**Built on Baileys • Powered by Bun • Supervised by Rust • Cached with Redis • Persisted by PostgreSQL**
 
 <p align="center">
 <a href="https://bun.sh"><img src="https://img.shields.io/badge/Runtime-Bun-black?style=for-the-badge&logo=bun&logoColor=white" alt="Bun Runtime"></a>
@@ -109,7 +104,7 @@ AUTH_JS --> HANDLER
 HANDLER --> GLOBAL[(SQLite)]
 
 %% Top Side - Rust Parent
-RUST[Rust Supervisor] --> HTTP[🌐 HTTP Server]
+RUST[Rust Supervisor] --> HTTP[HTTP Server]
 RUST --> AUTH_RS[Rust Auth]
 RUST --> BUN[Bun Runtime]
 HTTP --> AUTH_JS
@@ -214,160 +209,169 @@ Apache 2.0 allows free use with attribution. **Do not** remove credits or rebran
 
 ## ✨ Feature Highlights
 
+<div style="overflow-x: auto; white-space: nowrap;">
 <table>
 <tr>
-<td width="50%" valign="top">
+<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
 
-### 🔥 Production Architecture
+**🔥 Production Architecture**
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Fire.png" width="30" /> **Multi-Process Isolation**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Fire.png" width="30" /> **Multi-Process Isolation**  
 Rust supervisor manages Bun child processes with automatic crash recovery
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/High%20Voltage.png" width="30" /> **Zero-Downtime Deployment**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/High%20Voltage.png" width="30" /> **Zero-Downtime Deployment**  
 Hot-reload plugins and graceful restarts keep your bot online
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Hammer%20and%20Wrench.png" width="30" /> **Health Monitoring**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Hammer%20and%20Wrench.png" width="30" /> **Health Monitoring**  
 Built-in watchdog with automatic recovery and alerts
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Satellite%20Antenna.png" width="30" /> **Signal Handling**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Satellite%20Antenna.png" width="30" /> **Signal Handling**  
 Proper SIGTERM/SIGINT handling for clean shutdowns
 
----
+</td>
+<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
 
-### ⚡ High Performance
+**⚡ High Performance**
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Rocket.png" width="30" /> **Native Bun WebSocket**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Rocket.png" width="30" /> **Native Bun WebSocket**  
 No `ws` dependency—pure performance with native APIs
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Battery.png" width="30" /> **Redis Connection Pool**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Battery.png" width="30" /> **Redis Connection Pool**  
 Optimized caching with persistent connections
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Right%20Arrow%20Curving%20Left.png" width="30" /> **Async Event Queue**
-PQueue-based message processing prevents bottlenecks[citation:5][citation:9]
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Delivery%20Truck.png" width="30" /> **Async Event Queue**  
+PQueue-based message processing prevents bottlenecks
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Electric%20Plug.png" width="30" /> **Circuit Breaker**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Electric%20Plug.png" width="30" /> **Circuit Breaker**  
 Automatic API fallback prevents cascading failures
 
----
+</td>
+<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
 
-### 🔒 Enterprise Security
+**🔒 Enterprise Security**
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Locked%20with%20Key.png" width="30" /> **PostgreSQL Auth**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Locked%20with%20Key.png" width="30" /> **PostgreSQL Auth**  
 Persistent session storage with encryption at rest
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Key.png" width="30" /> **Redis Encryption**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Key.png" width="30" /> **Redis Encryption**  
 Encrypted cache with TTL-based cleanup
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Test%20Tube.png" width="30" /> **Input Sanitization**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Test%20Tube.png" width="30" /> **Input Sanitization**  
 Comprehensive validation prevents injection attacks
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Stopwatch.png" width="30" /> **Rate Limiting**
-Per-user and global limits with Redis-backed tracking[citation:3][citation:7]
-
----
-
-### 🛡️ Group Management
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Shield.png" width="30" /> **Anti-Link Protection**
-Automatically detect and delete unauthorized links
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Prohibited.png" width="30" /> **Anti-Media Filter**
-Auto-delete images/videos/audio with configurable rules
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Crown.png" width="30" /> **Admin Tools**
-Promote/demote users with granular permissions
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Scroll.png" width="30" /> **Group Rules**
-Enforce group rules with automatic warnings
-
-*Note: Group management features are regularly updated based on WhatsApp API changes*
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Stopwatch.png" width="30" /> **Rate Limiting**  
+Per-user and global limits with Redis-backed tracking
 
 </td>
-<td width="50%" valign="top">
+<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
 
-### 🧩 Developer Experience
+**🛡️ Group Management**
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Wrench.png" width="30" /> **Plugin Hot-Reload**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Shield.png" width="30" /> **Anti-Link Protection**  
+Automatically detect and delete unauthorized links
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Cross%20Mark.png" width="30" /> **Anti-Media Filter**  
+Auto-delete images/videos/audio with configurable rules
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Crown.png" width="30" /> **Admin Tools**  
+Promote/demote users with granular permissions
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Scroll.png" width="30" /> **Group Rules**  
+Enforce group rules with automatic warnings
+
+<small><em>*Note: Group management features are regularly updated based on WhatsApp API changes*</em></small>
+
+</td>
+<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
+
+**🧩 Developer Experience**
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Wrench.png" width="30" /> **Plugin Hot-Reload**  
 Update code without restarting—changes apply instantly
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/File%20Folder.png" width="30" /> **ESM Throughout**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/File%20Folder.png" width="30" /> **ESM Throughout**  
 Modern JavaScript modules with clean imports
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Clipboard.png" width="30" /> **Type-Safe Patterns**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Clipboard.png" width="30" /> **Type-Safe Patterns**  
 JSDoc annotations provide IDE autocomplete
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Books.png" width="30" /> **Clean Architecture**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Books.png" width="30" /> **Clean Architecture**  
 SOLID principles with clear separation of concerns
 
----
+</td>
+<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
 
-### 📊 Observability
+**📊 Observability**
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Chart%20Increasing.png" width="30" /> **Structured Logging**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Chart%20Increasing.png" width="30" /> **Structured Logging**  
 Pino-based JSON logs with trace IDs
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Bar%20Chart.png" width="30" /> **Prometheus Metrics**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Bar%20Chart.png" width="30" /> **Prometheus Metrics**  
 Built-in `/metrics` endpoint for monitoring
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Green%20Heart.png" width="30" /> **Health Checks**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/X-Ray.png" width="30" /> **Health Checks**  
 `/health` and `/ready` probes for orchestration
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Magnifying%20Glass%20Tilted%20Right.png" width="30" /> **Debug Mode**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Magnifying%20Glass%20Tilted%20Right.png" width="30" /> **Debug Mode**  
 Detailed traces with performance profiling
 
----
+</td>
+<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
 
-### 🎥 Media Downloader Suite
+**🎥 Media Downloader Suite**
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Play%20Button.png" width="30" /> **YouTube DL**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Play%20Button.png" width="30" /> **YouTube DL**  
 Download videos/audio in multiple formats
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Musical%20Notes.png" width="30" /> **Spotify Audio**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Musical%20Notes.png" width="30" /> **Spotify Audio**  
 Extract music from Spotify links
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Camera.png" width="30" /> **Instagram/TikTok**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Camera.png" width="30" /> **Instagram/TikTok**  
 Download Reels, Stories, and posts
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Video%20Camera.png" width="30" /> **Media Downloader**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Video%20Camera.png" width="30" /> **Media Downloader**  
 Download videos/images/audio from various platforms
 
-*Note: Media downloader support varies by platform and may change*
+<small><em>*Note: Media downloader support varies by platform and may change*</em></small>
 
----
+</td>
+<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
 
-### 🛠️ Advanced Message Features
+**🛠️ Advanced Message Features**
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Plus%20Button.png" width="30" /> **Unlimited Buttons**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Heavy%20Plus%20Sign.png" width="30" /> **Unlimited Buttons**  
 Support for 15+ button types including Pix Key, Galaxy, no limit on quantity
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Frame%20with%20Picture.png" width="30" /> **All Media Support**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Framed%20Picture.png" width="30" /> **All Media Support**  
 Buttons can include any media type - images, videos, audio, documents
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Card%20Index.png" width="30" /> **Rich Message Types**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Card%20Index.png" width="30" /> **Rich Message Types**  
 Group status payloads, card messages (carousel), album messages
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/World%20Map.png" width="30" /> **Location & Product**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/World%20Map.png" width="30" /> **Location & Product**  
 Support for location sharing and product catalog messages
 
----
+</td>
+<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
 
-### 🔧 Utilities & Tools
+**🔧 Utilities & Tools**
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Paintbrush.png" width="30" /> **Image Processing**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Paintbrush.png" width="30" /> **Image Processing**  
 Compress, convert, enhance images
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Party%20Popper.png" width="30" /> **Sticker Creation**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Sparkler.png" width="30" /> **Sticker Creation**  
 Create WhatsApp stickers with cropping and effects
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Desktop%20Computer.png" width="30" /> **IP/DNS Tools**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Desktop%20Computer.png" width="30" /> **IP/DNS Tools**  
 Check IP, reverse DNS, network information
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals%20and%20Nature/Honeybee.png" width="30" /> **Image Enhancement**
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Glowing%20Star.png" width="30" /> **Image Enhancement**  
 Enhance image quality with various algorithms
 
 </td>
 </tr>
 </table>
+</div>
 
 <div align="center">
 <small><em>All features are subject to continuous updates based on WhatsApp API changes and community feedback</em></small>
@@ -446,7 +450,7 @@ All contributions are valuable—bug fixes, features, documentation, or feedback
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Food/Fork%20and%20Knife%20with%20Plate.png" width="60" />
 
-*1 Fork & Clone*
+**Fork & Clone**
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/liora.git
@@ -460,7 +464,7 @@ Create your own copy
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Laptop.png" width="60" />
 
-*2 Develop*
+**Develop**
 
 ```bash
 git checkout -b feature/amazing-feature
@@ -475,7 +479,7 @@ Write clean, tested code
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Rocket.png" width="60" />
 
-*3 Submit*
+**Submit**
 
 ```bash
 git commit -m "✨ Add amazing feature"
@@ -488,7 +492,7 @@ Create a pull request
 </tr>
 </table>
 
-*4. Contribution Guidelines*
+**👏🏻 Contribution Guidelines**
 
 <details>
 <summary><b>💻 Code Standards</b></summary>
@@ -569,7 +573,7 @@ Before submitting your PR, ensure:
 -   [ ] Branch is up-to-date with `main`
 -   [ ] No merge conflicts
 
-### 🏆 Top Contributors
+**🏆 Top Contributors**
 
 <div align="center">
 
@@ -601,15 +605,15 @@ Before submitting your PR, ensure:
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Open%20Book.png" width="80" />
 
-### 📢 GitHub Discussions
+**📢 GitHub Discussions**
 
 Get updates, share ideas, and discuss features directly on GitHub
 
 **Perfect for:**
-- 📰 Release announcements
-- 💡 Feature discussions
-- 🤔 General questions
-- 📣 Community polls
+📰 Release announcements  
+💡 Feature discussions  
+🤔 General questions  
+📣 Community polls  
 
 <br>
 
@@ -620,15 +624,15 @@ Get updates, share ideas, and discuss features directly on GitHub
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Bell.png" width="80" />
 
-### 💭 WhatsApp Community
+**💭 WhatsApp Community**
 
 Real-time help and casual discussions with fellow users
 
 **Perfect for:**
-- ❓ Quick questions
-- 🆘 Troubleshooting help
-- 💬 Casual chat
-- 🤝 Networking
+❓ Quick questions  
+🆘 Troubleshooting help  
+💬 Casual chat  
+🤝 Networking  
 
 <br>
 
@@ -641,15 +645,15 @@ Real-time help and casual discussions with fellow users
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Satellite%20Antenna.png" width="80" />
 
-### 📡 Baileys Discord
+**📡 Baileys Discord**
 
 Official Baileys library support and development discussions
 
 **Perfect for:**
-- 🔧 Technical deep-dives
-- 🐛 Protocol issues
-- 👥 Dev community
-- 📚 Learning resources
+🔧 Technical deep-dives  
+🐛 Protocol issues  
+👥 Dev community  
+📚 Learning resources  
 
 <br>
 
@@ -660,15 +664,15 @@ Official Baileys library support and development discussions
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Sparkling%20Heart.png" width="80" />
 
-### 🐒 Developer Links
+**🐒 Developer Links**
 
 Connect with the maintainer across platforms
 
 **Find me on:**
-- 🔗 All social links
-- 📧 Contact info
-- 🎨 Portfolio
-- ☕ Support options
+🔗 All social links  
+📧 Contact info  
+🎨 Portfolio  
+☕ Support options  
 
 <br>
 
@@ -688,12 +692,12 @@ Connect with the maintainer across platforms
 
 <div align="center">
 
-### 📈 Project Activity Insights
+**📈 Project Activity Insights**
 Get a visual overview of recent contributions, issues, and PRs.
 
 ![Alt](https://repobeats.axiom.co/api/embed/80e8d22ce1b99e5cdc62a986f74bbac8f9e2ed5b.svg "Repobeats analytics image")
 
-### 🌟 Star Growth
+**🌟 Star Growth**
 Track how Liora's popularity has evolved over time.
 
 <a href="https://star-history.com/#naruyaizumi/liora&Date">
@@ -706,14 +710,12 @@ Track how Liora's popularity has evolved over time.
 
 <div align="center">
 
-### 📊 Code & Repository Statistics
+**📊 Code & Repository Statistics**
 
 A quick snapshot of the project's technical footprint.
 
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/naruyaizumi/liora?style=for-the-badge&labelColor=1a1b27&color=bb9af7)
 ![GitHub repo size](https://img.shields.io/github/repo-size/naruyaizumi/liora?style=for-the-badge&labelColor=1a1b27&color=9ece6a)
-
-*Note: The 'Lines of Code' badge has been removed as the service often becomes unresponsive, affecting page load.*
 
 </div>
 
@@ -721,15 +723,12 @@ A quick snapshot of the project's technical footprint.
 
 <div align="center">
 
-### 🚀 Maintainer GitHub Stats
+**🚀 Maintainer GitHub Stats**
 Contributor stats for the primary maintainer.
 
-<a href="https://github.com/anuraghazra/github-readme-stats">
-  <img src="https://github-readme-stats.vercel.app/api?username=naruyaizumi&show_icons=true&count_private=false&hide_rank=true&theme=tokyonight&hide_border=true&bg_color=1a1b27&title_color=7aa2f7&icon_color=bb9af7&text_color=c0caf5&custom_title=Naruya%27s%20GitHub%20Stats" height="165" alt="GitHub Stats"/>
-</a>
-<a href="https://github.com/anuraghazra/github-readme-stats">
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=naruyaizumi&layout=compact&theme=tokyonight&hide_border=true&bg_color=1a1b27&title_color=7aa2f7&text_color=c0caf5&langs_count=8" height="165" alt="Top Languages"/>
-</a>
+![GitHub Stats](https://github-readme-stats.vercel.app/api?username=naruyaizumi&show_icons=true&count_private=false&hide_rank=true&theme=tokyonight&hide_border=true&bg_color=1a1b27&title_color=7aa2f7&icon_color=bb9af7&text_color=c0caf5&custom_title=Naruya%27s%20GitHub%20Stats)
+
+![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=naruyaizumi&layout=compact&theme=tokyonight&hide_border=true&bg_color=1a1b27&title_color=7aa2f7&text_color=c0caf5&langs_count=8)
 
 </div>
 
@@ -748,7 +747,6 @@ Contributor stats for the primary maintainer.
 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/javascript/javascript-original.svg" width="60" />
 
 **JavaScript**
-Runtime Language
 
 </td>
 <td align="center" width="20%">
@@ -756,7 +754,6 @@ Runtime Language
 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/nodejs/nodejs-original.svg" width="60" />
 
 **Node.js**
-JavaScript Runtime
 
 </td>
 <td align="center" width="20%">
@@ -764,14 +761,12 @@ JavaScript Runtime
 <img src="https://bun.sh/logo.svg" width="60" />
 
 **Bun**
-Modern Runtime
 
 </td>
 <td align="center" width="20%">
-<img src="https://rustacean.net/assets/cuddlyferris.svg" width="60" />
+<img src="https://img.icons8.com/external-tal-revivo-bold-tal-revivo/96/external-rust-is-a-multi-paradigm-system-programming-language-logo-bold-tal-revivo.png" width="60" />
 
 **Rust**
-System Layer
 
 </td>
 <td align="center" width="20%">
@@ -779,7 +774,6 @@ System Layer
 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/postgresql/postgresql-original.svg" width="60" />
 
 **PostgreSQL**
-Primary Database
 
 </td>
 </tr>
@@ -789,7 +783,6 @@ Primary Database
 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/redis/redis-original.svg" width="60" />
 
 **Redis**
-Cache Layer
 
 </td>
 <td align="center" width="20%">
@@ -797,7 +790,6 @@ Cache Layer
 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/cplusplus/cplusplus-original.svg" width="60" />
 
 **C++**
-Native Addons
 
 </td>
 <td align="center" width="20%">
@@ -805,7 +797,6 @@ Native Addons
 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/cmake/cmake-original.svg" width="60" />
 
 **CMake**
-Build System
 
 </td>
 <td align="center" width="20%">
@@ -813,7 +804,6 @@ Build System
 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/sqlite/sqlite-original.svg" width="60" />
 
 **SQLite**
-Embedded DB
 
 </td>
 <td align="center" width="20%">
@@ -821,16 +811,14 @@ Embedded DB
 <img src="https://upload.wikimedia.org/wikipedia/commons/7/76/FFmpeg_icon.svg" width="60" />
 
 **FFmpeg**
-Media Processing
 
 </td>
 </tr>
 <tr>
 <td align="center" width="20%">
-<img src="https://static.npmjs.com/58a19602036db1daee0d7863c94673a4.png" width="60" />
+<img src="https://raw.githubusercontent.com/npm/logos/master/npm%20logo/npm-logo-red.png" width="60" />
 
 **NPM**
-Package Manager
 
 </td>
 <td align="center" width="20%">
@@ -838,7 +826,6 @@ Package Manager
 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/linux/linux-original.svg" width="60" />
 
 **Linux**
-Development OS
 
 </td>
 <td align="center" width="20%">
@@ -846,7 +833,6 @@ Development OS
 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/bash/bash-original.svg" width="60" />
 
 **Shell**
-Scripting
 
 </td>
 <td align="center" width="20%">
@@ -854,14 +840,12 @@ Scripting
 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/eslint/eslint-original.svg" width="60" />
 
 **ESLint**
-Code Linting
 
 </td>
 <td align="center" width="20%">
-<img src="https://raw.githubusercontent.com/prettier/prettier-logo/refs/heads/master/images/prettier-avatar-dark.png" width="60" />
+<img src="https://raw.githubusercontent.com/prettier/prettier-logo/master/images/prettier-avatar-dark.png" width="60" />
 
 **Prettier**
-Code Formatting
 
 </td>
 </tr>
@@ -870,21 +854,18 @@ Code Formatting
 <img src="https://llvm.org/img/LLVMWyvernSmall.png" width="60" />
 
 **Clang**
-Compiler Toolchain
 
 </td>
 <td align="center" width="20%">
-<img src="https://raw.githubusercontent.com/WhiskeySockets/Baileys/refs/heads/master/Media/logo.png" width="60" style="background-color: white; padding: 5px; border-radius: 8px;" />
+<img src="https://baileys.wiki/img/WhiskeySockets-colorful.png" width="60" style="background-color: white; padding: 5px; border-radius: 8px;" />
 
 **Baileys**
-WhatsApp API Layer
 
 </td>
 <td align="center" width="20%">
 <img src="https://camo.githubusercontent.com/d67b9b942197ac50f871ce2090c96f3ac34a07c2ca899e6daaa04d44a9bcd3d1/68747470733a2f2f73686172702e706978656c706c756d62696e672e636f6d2f73686172702d6c6f676f2e737667" width="60" />
 
 **Sharp**
-Image Processing
 
 </td>
 <td align="center" width="20%">
@@ -892,7 +873,6 @@ Image Processing
 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/githubactions/githubactions-original.svg" width="60" />
 
 **GitHub Actions**
-CI/CD Automation
 
 </td>
 <td align="center" width="20%">
@@ -900,7 +880,6 @@ CI/CD Automation
 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/git/git-original.svg" width="60" />
 
 **Git**
-Version Control
 
 </td>
 </tr>
@@ -909,32 +888,32 @@ Version Control
 <img src="https://registry.npmmirror.com/@lobehub/icons-static-png/1.74.0/files/dark/openai.png" width="60" />
 
 **ChatGPT**
-AI Assistant
+
 </td>
 <td align="center" width="20%">
 <img src="https://registry.npmmirror.com/@lobehub/icons-static-png/1.74.0/files/dark/githubcopilot.png" width="60" />
 
 **GitHub Copilot**
-AI Pair Programmer
+
 </td>
 <td align="center" width="20%">
-<img src="https://img.icons8.com/color/96/anthropic.png" width="60" />
+<img src="https://registry.npmmirror.com/@lobehub/icons-static-png/1.74.0/files/dark/claude-color.png" width="60" />
 
 **Claude AI**
-AI Assistant
+
 </td>
 <td align="center" width="20%">
-<img src="https://img.icons8.com/external-tal-revivo-color-tal-revivo/96/external-deepseek-an-ai-research-organization-logo-color-tal-revivo.png" width="60" />
+<img src="https://registry.npmmirror.com/@lobehub/icons-static-png/1.74.0/files/dark/deepseek-color.png" width="60" />
 
 **DeepSeek**
-AI Assistant
+
 </td>
 <td align="center" width="20%">
 
 <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/stackoverflow/stackoverflow-original.svg" width="60" />
 
 **Stack Overflow**
-Dev Community
+
 </td>
 </tr>
 </table>
@@ -955,13 +934,13 @@ Dev Community
 
 Liora is released under the **Apache License 2.0**, a permissive open-source license.
 
-### You Can
+**You Can**
 
 <table>
 <tr>
 <td width="25%" align="center">
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/refs/heads/master/Emojis/Hand%20gestures/Call%20Me%20Hand%20Light%20Skin%20Tone.png" width="50" />
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Call%20Me%20Hand%20Light%20Skin%20Tone.png" width="50" />
 
 **Use Commercially**
 
@@ -998,7 +977,7 @@ Grant of patent rights
 </tr>
 </table>
 
-### You Must
+**You Must**
 
 <table>
 <tr>
@@ -1034,7 +1013,7 @@ Credit original authors
 </tr>
 </table>
 
-### You Cannot
+**You Cannot**
 
 <table>
 <tr>
@@ -1073,7 +1052,7 @@ See the full license text in **[LICENSE](LICENSE)** for all details.
 
 <div align="center">
 
-### ✨ Sponsorship & Support
+**✨ Sponsorship & Support**
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Glowing%20Star.png" width="60" />
 
@@ -1095,14 +1074,14 @@ Report issues or suggest features
 </td>
 <td align="center" width="33%">
 
-**🔀 Fork & Contribute**<br>
+**🍽️ Fork & Contribute**<br>
 Help improve Liora for everyone
 
 </td>
 </tr>
 </table>
 
-### 🏆 Made with 💖 by [Naruya Izumi](https://github.com/naruyaizumi)
+**🏆 Made with 💖 by [Naruya Izumi](https://github.com/naruyaizumi)**
 
 **Copyright © 2024 Naruya Izumi**<br>
 Maintained by the Liora community
