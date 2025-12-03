@@ -326,8 +326,6 @@ Promote/demote users with granular permissions
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Scroll.png" width="30" /> **Group Rules**  
 Enforce group rules with automatic warnings
 
-<small><em>*Note: Group management features are regularly updated based on WhatsApp API changes*</em></small>
-
 ---
 
 **🧩 Developer Experience**
@@ -375,8 +373,6 @@ Download Reels, Stories, and posts
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Video%20Camera.png" width="30" /> **Media Downloader**  
 Download videos/images/audio from various platforms
-
-<small><em>*Note: Media downloader support varies by platform and may change*</em></small>
 
 ---
 
