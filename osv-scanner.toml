@@ -1,27 +1,3 @@
-[[directory]]
+[[sources]]
 path = "."
-recursive = false
-
-[[directory]]
-path = "lib/rs"
-recursive = true
-
-[[directory]]
-path = "lib/cpp"
-recursive = true
-
-[[directory]]
-path = "src"
-recursive = true
-
-[[directory]]
-path = "plugins"
-recursive = true
-
-skip-directories = [
-  "build",
-  "tmp",
-  "database",
-  "lib/cpp/workers",
-  "node_modules"
-]
+exclude = ["node_modules", "dist", "build"]
