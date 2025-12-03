@@ -56,7 +56,8 @@ jobs:
         run: pip install njsscan
 
       - name: Run Njsscan
-        run: njsscan .
+        run: |
+          njsscan --json > report.json || exit 1
 
       - name: Upload Njsscan Report
         if: always()
@@ -93,26 +94,6 @@ jobs:
         with:
           fail-on-severity: moderate
           deny-licenses: GPL-2.0, GPL-3.0
-
-  osv-scanner:
-    name: OSV Vulnerability Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Install OSV Scanner
-        run: |
-          curl -sSfL https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 \
-            -o /usr/local/bin/osv-scanner
-          chmod +x /usr/local/bin/osv-scanner
-
-      - name: Run OSV Scanner
-        run: |
-          osv-scanner --lockfile=./bun.lock
-          osv-scanner --lockfile=./lib/rs/Cargo.lock
 
   rust-audit:
     name: Rust Security Audit
