@@ -291,7 +291,7 @@ if [ -f "$PG_HBA_CONF" ]; then
             if sudo -u postgres psql -c "SELECT 1;" &>/dev/null; then
                 break
             fi
-            if [ $i -eq 10 ]; then
+            if [ "$i" -eq 10 ]; then
                 print_error "PostgreSQL not responsive after reload"
                 exit 1
             fi
@@ -315,7 +315,7 @@ for i in {1..15}; do
         CONNECTION_SUCCESS=true
         break
     fi
-    if [ $i -lt 15 ]; then
+    if [ "$i" -lt 15 ]; then
         print_info "Retrying database connection (attempt $i/15)..."
         sleep 2
     fi

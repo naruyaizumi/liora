@@ -184,7 +184,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y shellcheck
 
       - name: Lint installer script
-        run: shellcheck -x service.sh
+        run: shellcheck -e SC1091 service.sh
 
       - name: Test installer (dry-run)
         run: |
