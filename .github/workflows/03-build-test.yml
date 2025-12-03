@@ -99,35 +99,64 @@ jobs:
             unzip \
             clang \
             git \
-            make
+            make \
+            bash  # Install bash
 
       - name: Install Bun
         run: |
           curl -fsSL https://bun.sh/install | bash
-          echo 'export PATH="$HOME/.bun/bin:$PATH"' >> ~/.bashrc
-          source ~/.bashrc
+          
+          export BUN_INSTALL="$HOME/.bun"
+          export PATH="$BUN_INSTALL/bin:$PATH"
+          
+          echo "export BUN_INSTALL=\"\$HOME/.bun\"" >> ~/.bashrc
+          echo "export PATH=\"\$BUN_INSTALL/bin:\$PATH\"" >> ~/.bashrc
 
       - name: Install project dependencies
-        env:
-          PATH: /root/.bun/bin:$PATH
         run: |
+          export BUN_INSTALL="$HOME/.bun"
+          export PATH="$BUN_INSTALL/bin:$PATH"
+          
+          echo "PATH: $PATH"
           bun --version
           bun install --frozen-lockfile
 
       - name: Build C++ Addons
-        env:
-          PATH: /root/.bun/bin:$PATH
         run: |
+          export BUN_INSTALL="$HOME/.bun"
+          export PATH="$BUN_INSTALL/bin:$PATH"
+          
           bun run build:cpp || echo "Build command exited with status: $?"
 
       - name: Verify build
         run: |
-          for f in build/Release/*.node; do
-            if [ ! -f "$f" ]; then
-              echo "C++ addon build failed for $f"
+          echo "Checking build directory structure..."
+          find . -name "*.node" -type f | head -20
+          
+          if [ -d "build/Release" ]; then
+            echo "Files in build/Release/:"
+            ls -la build/Release/
+            
+            count=$(find build/Release -name "*.node" -type f | wc -l)
+            if [ $count -gt 0 ]; then
+              echo "Found $count .node file(s) in build/Release/"
+              for f in build/Release/*.node; do
+                echo "  - $(basename "$f")"
+              done
+            else
+              echo "No .node files found in build/Release/"
               exit 1
             fi
-          done
+          else
+            echo "build/Release directory not found"
+            echo "Current directory contents:"
+            ls -la
+            if [ -d "build" ]; then
+              echo "build directory contents:"
+              ls -la build/
+            fi
+            exit 1
+          fi
 
   build-rust:
     name: Build Rust Libraries
@@ -203,7 +232,7 @@ jobs:
       - name: Run integration tests
         run: |
           echo "Running integration tests..."
-          # bun test
+          # bun run test
 
   validate-installer:
     name: Validate Installer Script
