@@ -1,51 +1,106 @@
 <div align="center">
 
+<!-- Wave Header with Typing Animation -->
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=Liora%20Bot&fontSize=80&fontAlignY=35&animation=twinkling&fontColor=fff&desc=Enterprise-Grade%20WhatsApp%20Bot%20Framework&descAlignY=55&descSize=18" width="100%" />
+
 ![Liora Banner](https://files.catbox.moe/3xv7p0.png)
-
-**🌸 Liora**
-
-> **Enterprise-Grade WhatsApp Bot Framework**
 
 **Built on Baileys • Powered by Bun • Supervised by Rust • Cached with Redis • Persisted by PostgreSQL**
 
+<!-- Tech Stack Badges -->
 <p align="center">
-<a href="https://bun.sh"><img src="https://img.shields.io/badge/Runtime-Bun-black?style=for-the-badge&logo=bun&logoColor=white" alt="Bun Runtime"></a>
-<a href="https://www.rust-lang.org"><img src="https://img.shields.io/badge/Native-Rust-orange?style=for-the-badge&logo=rust&logoColor=white" alt="Rust Native"></a>
-<a href="https://www.postgresql.org"><img src="https://img.shields.io/badge/Database-PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL"></a>
-<a href="https://redis.io"><img src="https://img.shields.io/badge/Cache-Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis"></a>
-<a href="https://ffmpeg.org"><img src="https://img.shields.io/badge/Media-FFmpeg-555555?style=for-the-badge&logo=ffmpeg&logoColor=white" alt="FFmpeg"></a>
-<a href="https://www.sqlite.org"><img src="https://img.shields.io/badge/Embedded-SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite"></a>
-<a href="https://cmake.org"><img src="https://img.shields.io/badge/Build-CMake-064F8C?style=for-the-badge&logo=cmake&logoColor=white" alt="CMake"></a>
-<a href="https://nodejs.org"><img src="https://img.shields.io/badge/Compat-Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js Compatible"></a>
-<a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge&logo=apache&logoColor=white" alt="Apache 2.0 License"></a>
+  <a href="https://bun.sh">
+    <img src="https://img.shields.io/badge/Runtime-Bun-black?style=for-the-badge&logo=bun&logoColor=white" alt="Bun Runtime">
+  </a>
+  <a href="https://www.rust-lang.org">
+    <img src="https://img.shields.io/badge/Native-Rust-orange?style=for-the-badge&logo=rust&logoColor=white" alt="Rust Native">
+  </a>
+  <a href="https://www.postgresql.org">
+    <img src="https://img.shields.io/badge/Database-PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  </a>
+  <a href="https://redis.io">
+    <img src="https://img.shields.io/badge/Cache-Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis">
+  </a>
+  <a href="https://ffmpeg.org">
+    <img src="https://img.shields.io/badge/Media-FFmpeg-555555?style=for-the-badge&logo=ffmpeg&logoColor=white" alt="FFmpeg">
+  </a>
+  <a href="https://www.sqlite.org">
+    <img src="https://img.shields.io/badge/Embedded-SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
+  </a>
+  <a href="https://cmake.org">
+    <img src="https://img.shields.io/badge/Build-CMake-064F8C?style=for-the-badge&logo=cmake&logoColor=white" alt="CMake">
+  </a>
+  <a href="https://nodejs.org">
+    <img src="https://img.shields.io/badge/Compat-Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js Compatible">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge&logo=apache&logoColor=white" alt="Apache 2.0 License">
+  </a>
 </p>
 
+<!-- CI/CD Status Badges -->
 <p align="center">
-<a href="https://github.com/naruyaizumi/liora/actions/workflows/01-code-quality.yml"><img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/01-code-quality.yml?branch=main&style=for-the-badge&logo=eslint&logoColor=white&label=ESLint&labelColor=1a1b27&color=7aa2f7" alt="ESLint Status"></a>
-<a href="https://github.com/naruyaizumi/liora/actions/workflows/01-code-quality.yml"><img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/01-code-quality.yml?branch=main&style=for-the-badge&logo=prettier&logoColor=white&label=Prettier&labelColor=1a1b27&color=bb9af7" alt="Prettier Status"></a>
-<a href="https://github.com/naruyaizumi/liora/actions/workflows/04-documentation.yml"><img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/04-documentation.yml?branch=main&style=for-the-badge&logo=readthedocs&logoColor=white&label=JSDoc&labelColor=1a1b27&color=9ece6a" alt="JSDoc Status"></a>
-<a href="https://github.com/naruyaizumi/liora/actions/workflows/02-security-scan.yml"><img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/02-security-scan.yml?branch=main&style=for-the-badge&logo=codeql&logoColor=white&label=Security&labelColor=1a1b27&color=e0af68" alt="Security Scan"></a>
-<a href="https://github.com/naruyaizumi/liora/actions/workflows/03-build-test.yml"><img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/03-build-test.yml?branch=main&style=for-the-badge&logo=bun&logoColor=white&label=Build%20Test&labelColor=1a1b27&color=f7768e" alt="Build Test"></a>
-<a href="https://github.com/naruyaizumi/liora/actions/workflows/10-deployment.yml"><img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/10-deployment.yml?branch=main&style=for-the-badge&logo=github-actions&logoColor=white&label=Deployment&labelColor=1a1b27&color=73daca" alt="Deployment"></a>
+  <a href="https://github.com/naruyaizumi/liora/actions/workflows/01-code-quality.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/01-code-quality.yml?branch=main&style=for-the-badge&logo=eslint&logoColor=white&label=ESLint&labelColor=1a1b27&color=7aa2f7" alt="ESLint Status">
+  </a>
+  <a href="https://github.com/naruyaizumi/liora/actions/workflows/01-code-quality.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/01-code-quality.yml?branch=main&style=for-the-badge&logo=prettier&logoColor=white&label=Prettier&labelColor=1a1b27&color=bb9af7" alt="Prettier Status">
+  </a>
+  <a href="https://github.com/naruyaizumi/liora/actions/workflows/04-documentation.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/04-documentation.yml?branch=main&style=for-the-badge&logo=readthedocs&logoColor=white&label=JSDoc&labelColor=1a1b27&color=9ece6a" alt="JSDoc Status">
+  </a>
+  <a href="https://github.com/naruyaizumi/liora/actions/workflows/02-security-scan.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/02-security-scan.yml?branch=main&style=for-the-badge&logo=codeql&logoColor=white&label=CodeQL&labelColor=1a1b27&color=e0af68" alt="CodeQL Security">
+  </a>
+  <a href="https://github.com/naruyaizumi/liora/actions/workflows/03-build-test.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/03-build-test.yml?branch=main&style=for-the-badge&logo=bun&logoColor=white&label=Build%20Test&labelColor=1a1b27&color=f7768e" alt="Build Test">
+  </a>
+  <a href="https://github.com/naruyaizumi/liora/actions/workflows/10-deployment.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/10-deployment.yml?branch=main&style=for-the-badge&logo=github-actions&logoColor=white&label=Deployment&labelColor=1a1b27&color=73daca" alt="Deployment">
+  </a>
 </p>
 
+<!-- Repository Stats Badges -->
 <p align="center">
-<a href="https://github.com/naruyaizumi/liora/commits/main"><img src="https://img.shields.io/github/last-commit/naruyaizumi/liora?style=for-the-badge&logo=git&logoColor=white&label=Last%20Commit&labelColor=1a1b27&color=bb9af7" alt="Last Commit"></a>
-<a href="https://github.com/naruyaizumi/liora/stargazers"><img src="https://img.shields.io/github/stars/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&label=Stars&labelColor=1a1b27&color=e0af68" alt="GitHub Stars"></a>
-<a href="https://github.com/naruyaizumi/liora/network/members"><img src="https://img.shields.io/github/forks/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&label=Forks&labelColor=1a1b27&color=f7768e" alt="GitHub Forks"></a>
-<a href="https://github.com/naruyaizumi/liora/issues"><img src="https://img.shields.io/badge/dynamic/json?style=for-the-badge&logo=github&logoColor=white&label=Issues&labelColor=1a1b27&color=73daca&query=count&url=https%3A%2F%2Fapi.github.com%2Frepos%2Fnaruyaizumi%2Fliora" alt="Open Issues"></a>
+  <a href="https://github.com/naruyaizumi/liora/commits/main">
+    <img src="https://img.shields.io/github/last-commit/naruyaizumi/liora?style=for-the-badge&logo=git&logoColor=white&label=Last%20Commit&labelColor=1a1b27&color=bb9af7" alt="Last Commit">
+  </a>
+  <a href="https://github.com/naruyaizumi/liora/stargazers">
+    <img src="https://img.shields.io/github/stars/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&label=Stars&labelColor=1a1b27&color=e0af68" alt="GitHub Stars">
+  </a>
+  <a href="https://github.com/naruyaizumi/liora/network/members">
+    <img src="https://img.shields.io/github/forks/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&label=Forks&labelColor=1a1b27&color=f7768e" alt="GitHub Forks">
+  </a>
+  <a href="https://github.com/naruyaizumi/liora/issues">
+    <img src="https://img.shields.io/badge/dynamic/json?style=for-the-badge&logo=github&logoColor=white&label=Issues&labelColor=1a1b27&color=73daca&query=count&url=https%3A%2F%2Fapi.github.com%2Frepos%2Fnaruyaizumi%2Fliora" alt="Open Issues">
+  </a>
 </p>
 
+<!-- Mirror Repositories Badges -->
 <p align="center">
-<a href="https://github.com/naruyaizumi/liora"><img src="https://img.shields.io/badge/GitHub-Primary-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Mirror"></a>
-<a href="https://gitlab.com/naruyaizumi/liora"><img src="https://img.shields.io/badge/GitLab-Mirror-FC6D26?style=for-the-badge&logo=gitlab&logoColor=white" alt="GitLab Mirror"></a>
-<a href="https://codeberg.org/naruyaizumi/liora"><img src="https://img.shields.io/badge/Codeberg-Mirror-2185D0?style=for-the-badge&logo=codeberg&logoColor=white" alt="Codeberg Mirror"></a>
-<a href="https://gitea.com/naruyaizumi/liora"><img src="https://img.shields.io/badge/Gitea-Mirror-609926?style=for-the-badge&logo=gitea&logoColor=white" alt="Gitea Mirror"></a>
-<a href="https://bitbucket.org/naruyaizumi/liora"><img src="https://img.shields.io/badge/Bitbucket-Mirror-0052CC?style=for-the-badge&logo=bitbucket&logoColor=white" alt="Bitbucket Mirror"></a>
-<a href="https://dev.azure.com/naruyaizumi/_git/liora"><img src="https://img.shields.io/badge/Azure-Mirror-0078D4?style=for-the-badge&logo=azuredevops&logoColor=white" alt="Azure DevOps Mirror"></a>
+  <a href="https://github.com/naruyaizumi/liora">
+    <img src="https://img.shields.io/badge/GitHub-Primary-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Mirror">
+  </a>
+  <a href="https://gitlab.com/naruyaizumi/liora">
+    <img src="https://img.shields.io/badge/GitLab-Mirror-FC6D26?style=for-the-badge&logo=gitlab&logoColor=white" alt="GitLab Mirror">
+  </a>
+  <a href="https://codeberg.org/naruyaizumi/liora">
+    <img src="https://img.shields.io/badge/Codeberg-Mirror-2185D0?style=for-the-badge&logo=codeberg&logoColor=white" alt="Codeberg Mirror">
+  </a>
+  <a href="https://gitea.com/naruyaizumi/liora">
+    <img src="https://img.shields.io/badge/Gitea-Mirror-609926?style=for-the-badge&logo=gitea&logoColor=white" alt="Gitea Mirror">
+  </a>
+  <a href="https://bitbucket.org/naruyaizumi/liora">
+    <img src="https://img.shields.io/badge/Bitbucket-Mirror-0052CC?style=for-the-badge&logo=bitbucket&logoColor=white" alt="Bitbucket Mirror">
+  </a>
+  <a href="https://dev.azure.com/naruyaizumi/_git/liora">
+    <img src="https://img.shields.io/badge/Azure-Mirror-0078D4?style=for-the-badge&logo=azuredevops&logoColor=white" alt="Azure DevOps Mirror">
+  </a>
 </p>
 
+<!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
+
 </div>
 
 ## 🎯 Why Liora?
@@ -209,12 +264,12 @@ Apache 2.0 allows free use with attribution. **Do not** remove credits or rebran
 
 ## ✨ Feature Highlights
 
-<div style="overflow-x: auto; white-space: nowrap;">
+<div style="overflow-x: auto; white-space: nowrap; padding: 20px 0;">
 <table>
 <tr>
-<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
+<td width="280px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
 
-**🔥 Production Architecture**
+### 🔥 Production Architecture
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Fire.png" width="30" /> **Multi-Process Isolation**  
 Rust supervisor manages Bun child processes with automatic crash recovery
@@ -229,9 +284,9 @@ Built-in watchdog with automatic recovery and alerts
 Proper SIGTERM/SIGINT handling for clean shutdowns
 
 </td>
-<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
+<td width="280px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
 
-**⚡ High Performance**
+### ⚡ High Performance
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Rocket.png" width="30" /> **Native Bun WebSocket**  
 No `ws` dependency—pure performance with native APIs
@@ -246,9 +301,9 @@ PQueue-based message processing prevents bottlenecks
 Automatic API fallback prevents cascading failures
 
 </td>
-<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
+<td width="280px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
 
-**🔒 Enterprise Security**
+### 🔒 Enterprise Security
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Locked%20with%20Key.png" width="30" /> **PostgreSQL Auth**  
 Persistent session storage with encryption at rest
@@ -263,14 +318,14 @@ Comprehensive validation prevents injection attacks
 Per-user and global limits with Redis-backed tracking
 
 </td>
-<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
+<td width="280px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
 
-**🛡️ Group Management**
+### 🛡️ Group Management
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Shield.png" width="30" /> **Anti-Link Protection**  
 Automatically detect and delete unauthorized links
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Cross%20Mark.png" width="30" /> **Anti-Media Filter**  
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Cross%20Mark.png" width="30" /> **Anti-Media Filter**  
 Auto-delete images/videos/audio with configurable rules
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Crown.png" width="30" /> **Admin Tools**  
@@ -279,12 +334,12 @@ Promote/demote users with granular permissions
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Scroll.png" width="30" /> **Group Rules**  
 Enforce group rules with automatic warnings
 
-<small><em>*Note: Group management features are regularly updated based on WhatsApp API changes*</em></small>
+<br><small><em>*Note: Group management features are regularly updated based on WhatsApp API changes*</em></small>
 
 </td>
-<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
+<td width="280px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
 
-**🧩 Developer Experience**
+### 🧩 Developer Experience
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Wrench.png" width="30" /> **Plugin Hot-Reload**  
 Update code without restarting—changes apply instantly
@@ -299,9 +354,9 @@ JSDoc annotations provide IDE autocomplete
 SOLID principles with clear separation of concerns
 
 </td>
-<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
+<td width="280px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
 
-**📊 Observability**
+### 📊 Observability
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Chart%20Increasing.png" width="30" /> **Structured Logging**  
 Pino-based JSON logs with trace IDs
@@ -316,9 +371,9 @@ Built-in `/metrics` endpoint for monitoring
 Detailed traces with performance profiling
 
 </td>
-<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
+<td width="280px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
 
-**🎥 Media Downloader Suite**
+### 🎥 Media Downloader Suite
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Play%20Button.png" width="30" /> **YouTube DL**  
 Download videos/audio in multiple formats
@@ -332,17 +387,17 @@ Download Reels, Stories, and posts
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Video%20Camera.png" width="30" /> **Media Downloader**  
 Download videos/images/audio from various platforms
 
-<small><em>*Note: Media downloader support varies by platform and may change*</em></small>
+<br><small><em>*Note: Media downloader support varies by platform and may change*</em></small>
 
 </td>
-<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
+<td width="280px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
 
-**🛠️ Advanced Message Features**
+### 🛠️ Advanced Message Features
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Heavy%20Plus%20Sign.png" width="30" /> **Unlimited Buttons**  
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Plus.png" width="30" /> **Unlimited Buttons**  
 Support for 15+ button types including Pix Key, Galaxy, no limit on quantity
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Framed%20Picture.png" width="30" /> **All Media Support**  
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Frame%20with%20Picture.png" width="30" /> **All Media Support**  
 Buttons can include any media type - images, videos, audio, documents
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Card%20Index.png" width="30" /> **Rich Message Types**  
@@ -352,9 +407,9 @@ Group status payloads, card messages (carousel), album messages
 Support for location sharing and product catalog messages
 
 </td>
-<td width="300px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top;">
+<td width="280px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
 
-**🔧 Utilities & Tools**
+### 🔧 Utilities & Tools
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Paintbrush.png" width="30" /> **Image Processing**  
 Compress, convert, enhance images
@@ -662,7 +717,7 @@ Official Baileys library support and development discussions
 </td>
 <td align="center" width="50%">
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Sparkling%20Heart.png" width="80" />
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/refs/heads/master/Emojis/Objects/Gem%20Stone.png" width="80" />
 
 **🐒 Developer Links**
 
@@ -764,7 +819,7 @@ Contributor stats for the primary maintainer.
 
 </td>
 <td align="center" width="20%">
-<img src="https://img.icons8.com/external-tal-revivo-bold-tal-revivo/96/external-rust-is-a-multi-paradigm-system-programming-language-logo-bold-tal-revivo.png" width="60" />
+<img src="https://user-images.githubusercontent.com/8974888/231858967-7c37bf1e-335b-4f5a-9760-da97be9f54bb.png" width="60" />
 
 **Rust**
 
