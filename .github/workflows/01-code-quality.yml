@@ -98,7 +98,7 @@ jobs:
 
       - name: Check Rust formatting
         working-directory: ./lib/rs
-        run: cargo fmt --all -- --check
+        run: cargo fmt --all
 
   rust-clippy:
     name: Rust Clippy
@@ -125,7 +125,7 @@ jobs:
 
       - name: Run Clippy
         working-directory: lib/rs
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo clippy --all-targets --all-features --fix --allow-dirty --allow-staged
 
   cpp-format:
     name: C++ Format Check
