@@ -1,30 +1,36 @@
 import { uploader } from "../../lib/uploader.js";
 
-let handler = async (m, { conn }) => {
+let handler = async (m, { conn, text }) => {
     try {
         const q = m.quoted ? m.quoted : m;
         const mime = (q.msg || q).mimetype || "";
-        if (!mime || !/image\/(jpeg|png)/.test(mime))
+        let imageUrl = text;
+
+        if (!text && !/image\/(jpeg|jpg|png|webp)/.test(mime))
             return m.reply("Failed to download media or format not recognized.");
         await global.loading(m, conn);
-        const media = await q.download();
-        const uploaded = await uploader(media);
-        if (!uploaded) throw new Error("Failed to upload image. Please try again later.");
+        if (/image\/(jpeg|jpg|png|webp)/.test(mime)) {
+            const media = await q.download();
+            const uploaded = await uploader(media);
+            imageUrl = uploaded.url || uploaded;
+        }
 
-        const api = `https://api.nekolabs.web.id/tools/convert/toanime?imageUrl=${encodeURIComponent(uploaded)}`;
+        if (!imageUrl)
+            return m.reply("Failed to upload image or invalid input.");
+
+        const api = `https://zelapioffciall.koyeb.app/imagecreator/toanime?url=${encodeURIComponent(imageUrl)}`;
         const res = await fetch(api);
-        if (!res.ok) throw new Error("Failed to contact API.");
+        if (!res.ok)
+            throw new Error("Failed to contact API.");
 
-        const json = await res.json();
-        const img1Url = json.result;
-
-        if (!img1Url) throw new Error("Failed to process image to anime.");
+        const buffer = Buffer.from(await res.arrayBuffer());
 
         await conn.sendMessage(
             m.chat,
-            { image: { url: img1Url }, caption: "Anime transformation result." },
+            { image: buffer, caption: "Anime transformation result." },
             { quoted: m }
         );
+
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
