@@ -150,61 +150,79 @@ Hot-reload plugins, ESM modules, type-safe patterns, and clean architecture make
 
 ```mermaid
 graph TB
-%% Central Handler
-HANDLER[Handler Core]
+HANDLER["Handler Core<br/>"]
 
-%% Left Side - Auth & Database
-POSTGRES[(PostgreSQL)] --> AUTH_JS[Auth.js]
-AUTH_JS --> HANDLER
-HANDLER --> GLOBAL[(SQLite)]
+POSTGRES[("PostgreSQL<br/>")]
+GLOBAL[("SQLite<br/>")]
+AUTH_JS{"Auth.js<br/>"}
 
-%% Top Side - Rust Parent
-RUST[Rust Supervisor] --> HTTP[HTTP Server]
-RUST --> AUTH_RS[Rust Auth]
-RUST --> BUN[Bun Runtime]
-HTTP --> AUTH_JS
-AUTH_RS --> POSTGRES
-BUN --> HANDLER
+POSTGRES --> AUTH_JS
+AUTH_JS -.-> HANDLER
+HANDLER -.-> GLOBAL
 
-%% Right Side - Connection & Events
-HANDLER --> CONNECTION[Connection Manager]
-CONNECTION --> SOCKET[WebSocket]
-CONNECTION --> HOTRELOAD[Hot Reload]
-CONNECTION --> SIGNAL[Signal Handler]
+RUST{Rust Supervisor<br/>}
+HTTP(["HTTP Server<br/>"])
+AUTH_RS{"Rust Auth<br/>"}
+BUN>Bun Runtime<br/>]
 
-SOCKET --> BAILEYS[Baileys Protocol]
-SOCKET --> REDIS[(Redis Cache)]
+RUST ==> HTTP
+RUST ==> AUTH_RS
+RUST ==> BUN
+HTTP ==> AUTH_JS
+AUTH_RS ==> POSTGRES
+BUN ==> HANDLER
 
-BAILEYS --> EVENTS[Event Bus]
-EVENTS --> REDIS
-REDIS --> HANDLER
+CONNECTION[Connection Manager<br/>]
+SOCKET["WebSocket<br/>"]
+HOTRELOAD([Hot Reload<br/>])
+SIGNAL{{Signal Handler<br/>}}
 
-%% Bottom Side - Plugins & Processing
-HANDLER --> PLUGINS[Plugin System]
-PLUGINS --> FALLBACK[API Fallback]
-PLUGINS --> BRIDGE[Native Bridge]
+HANDLER ==> CONNECTION
+CONNECTION ==> SOCKET
+CONNECTION ==> HOTRELOAD
+CONNECTION ==> SIGNAL
 
-BRIDGE --> WORKERS[Worker Pool]
-WORKERS --> CPP[C++ Modules]
-FALLBACK --> EXTERNAL[External APIs]
+SOCKET ==> BAILEYS["Baileys Protocol<br/>"]
+SOCKET ==> REDIS[("Redis Cache<br/>")]
 
-classDef handler fill:#7aa2f7,color:#1a1b27,stroke:#bb9af7,stroke-width:3px
-classDef rust fill:#f7768e,color:#1a1b27,stroke:#ff9e64,stroke-width:2px
-classDef auth fill:#9ece6a,color:#1a1b27,stroke:#73daca,stroke-width:2px
-classDef connection fill:#bb9af7,color:#1a1b27,stroke:#7aa2f7,stroke-width:2px
-classDef plugin fill:#e0af68,color:#1a1b27,stroke:#ff9e64,stroke-width:2px
+BAILEYS ==> EVENTS{{Event Bus<br/>}}
+EVENTS ==> REDIS
+REDIS ==> HANDLER
 
+PLUGINS[Plugin System<br/>]
+FALLBACK>API Fallback<br/>]
+BRIDGE[Native Bridge<br/>]
 
-classDef database fill:#2ac3de,color:#1a1b27,stroke:#7dcfff,stroke-width:2px
-classDef cache fill:#ff007c,color:#1a1b27,stroke:#f7768e,stroke-width:2px
+HANDLER ==> PLUGINS
+PLUGINS ==> FALLBACK
+PLUGINS ==> BRIDGE
+
+BRIDGE ==> WORKERS{Worker Pool<br/>}
+WORKERS ==> CPP(["C++ Modules<br/>"])
+FALLBACK ==> EXTERNAL[External APIs<br/>]
+
+classDef handler fill:#7aa2f7,color:#ffffff,stroke:#bb9af7,stroke-width:3px,font-weight:bold,font-family:'Segoe UI',sans-serif,text-shadow:1px 1px 2px #000
+classDef rust fill:#f7768e,color:#ffffff,stroke:#ff9e64,stroke-width:2px,font-weight:bold,font-family:'Segoe UI',sans-serif,text-shadow:1px 1px 2px #000
+classDef auth fill:#9ece6a,color:#ffffff,stroke:#73daca,stroke-width:2px,font-weight:bold,font-family:'Segoe UI',sans-serif,text-shadow:1px 1px 2px #000
+classDef connection fill:#bb9af7,color:#ffffff,stroke:#7aa2f7,stroke-width:2px,font-weight:bold,font-family:'Segoe UI',sans-serif,text-shadow:1px 1px 2px #000
+classDef plugin fill:#e0af68,color:#ffffff,stroke:#ff9e64,stroke-width:2px,font-weight:bold,font-family:'Segoe UI',sans-serif,text-shadow:1px 1px 2px #000
+classDef database fill:#2ac3de,color:#ffffff,stroke:#7dcfff,stroke-width:2px,font-weight:bold,font-family:'Segoe UI',sans-serif,text-shadow:1px 1px 2px #000
+classDef cache fill:#ff007c,color:#ffffff,stroke:#f7768e,stroke-width:2px,font-weight:bold,font-family:'Segoe UI',sans-serif,text-shadow:1px 1px 2px #000
 
 class HANDLER handler
-class RUST,HTTP,AUTH_RS rust
+class RUST rust
+class HTTP,AUTH_RS rust
 class AUTH_JS,BUN auth
-class CONNECTION,SOCKET,BAILEYS connection
-class PLUGINS,FALLBACK,BRIDGE,WORKERS,CPP plugin
+class CONNECTION,SOCKET,BAILEYS,SIGNAL,HOTRELOAD connection
+class PLUGINS,FALLBACK,BRIDGE,WORKERS,CPP,EXTERNAL plugin
 class POSTGRES,GLOBAL database
 class REDIS,EVENTS cache
+
+linkStyle default stroke:#a9b1d6,stroke-width:2px,stroke-dasharray:0
+linkStyle 0,1,2 stroke:#73daca,stroke-width:2px
+linkStyle 3,4,5,6,7,8 stroke:#ff9e64,stroke-width:2px
+linkStyle 9,10,11,12,13,14,15,16,17 stroke:#7aa2f7,stroke-width:2px
+linkStyle 18,19,20,21,22,23 stroke:#e0af68,stroke-width:2px
 ```
 
 </div>
@@ -264,10 +282,13 @@ Apache 2.0 allows free use with attribution. **Do not** remove credits or rebran
 
 ## ✨ Feature Highlights
 
-<div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
-<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+<div align="center">
 
-### 🔥 Production Architecture
+<table>
+<tr>
+<td width="33%" valign="top" align="left">
+
+**🔥 Production Architecture**
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Fire.png" width="30" /> **Multi-Process Isolation**  
 Rust supervisor manages Bun child processes with automatic crash recovery
@@ -281,10 +302,10 @@ Built-in watchdog with automatic recovery and alerts
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Satellite%20Antenna.png" width="30" /> **Signal Handling**  
 Proper SIGTERM/SIGINT handling for clean shutdowns
 
-</div>
-<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+</td>
+<td width="33%" valign="top" align="left">
 
-### ⚡ High Performance
+**⚡ High Performance**
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Rocket.png" width="30" /> **Native Bun WebSocket**  
 No `ws` dependency—pure performance with native APIs
@@ -298,10 +319,10 @@ PQueue-based message processing prevents bottlenecks
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Electric%20Plug.png" width="30" /> **Circuit Breaker**  
 Automatic API fallback prevents cascading failures
 
-</div>
-<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+</td>
+<td width="33%" valign="top" align="left">
 
-### 🔒 Enterprise Security
+**🔒 Enterprise Security**
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Locked%20with%20Key.png" width="30" /> **PostgreSQL Auth**  
 Persistent session storage with encryption at rest
@@ -315,10 +336,12 @@ Comprehensive validation prevents injection attacks
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Stopwatch.png" width="30" /> **Rate Limiting**  
 Per-user and global limits with Redis-backed tracking
 
-</div>
-<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top" align="left">
 
-### 🛡️ Group Management
+**🛡️ Group Management**
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Shield.png" width="30" /> **Anti-Link Protection**  
 Automatically detect and delete unauthorized links
@@ -332,10 +355,10 @@ Promote/demote users with granular permissions
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Scroll.png" width="30" /> **Group Rules**  
 Enforce group rules with automatic warnings
 
-</div>
-<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+</td>
+<td width="33%" valign="top" align="left">
 
-### 🧩 Developer Experience
+**🧩 Developer Experience**
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Wrench.png" width="30" /> **Plugin Hot-Reload**  
 Update code without restarting—changes apply instantly
@@ -349,10 +372,10 @@ JSDoc annotations provide IDE autocomplete
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Books.png" width="30" /> **Clean Architecture**  
 SOLID principles with clear separation of concerns
 
-</div>
-<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+</td>
+<td width="33%" valign="top" align="left">
 
-### 📊 Observability
+**📊 Observability**
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Chart%20Increasing.png" width="30" /> **Structured Logging**  
 Pino-based JSON logs with trace IDs
@@ -366,10 +389,12 @@ Built-in `/metrics` endpoint for monitoring
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Magnifying%20Glass%20Tilted%20Right.png" width="30" /> **Debug Mode**  
 Detailed traces with performance profiling
 
-</div>
-<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top" align="left">
 
-### 🎥 Media Downloader Suite
+**🎥 Media Downloader Suite**
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Play%20Button.png" width="30" /> **YouTube DL**  
 Download videos/audio in multiple formats
@@ -383,10 +408,10 @@ Download Reels, Stories, and posts
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Video%20Camera.png" width="30" /> **Media Downloader**  
 Download videos/images/audio from various platforms
 
-</div>
-<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+</td>
+<td width="33%" valign="top" align="left">
 
-### 🛠️ Advanced Message Features
+**🛠️ Advanced Message Features**
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Plus.png" width="30" /> **Unlimited Buttons**  
 Support for 15+ button types including Pix Key, Galaxy, no limit on quantity
@@ -400,10 +425,10 @@ Group status payloads, card messages (carousel), album messages
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/World%20Map.png" width="30" /> **Location & Product**  
 Support for location sharing and product catalog messages
 
-</div>
-<div style="flex: 1; min-width: 450px; max-width: 480px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+</td>
+<td width="33%" valign="top" align="left">
 
-### 🔧 Utilities & Tools
+**🔧 Utilities & Tools**
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Paintbrush.png" width="30" /> **Image Processing**  
 Compress, convert, enhance images
@@ -417,7 +442,10 @@ Check IP, reverse DNS, network information
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Glowing%20Star.png" width="30" /> **Image Enhancement**  
 Enhance image quality with various algorithms
 
-</div>
+</td>
+</tr>
+</table>
+
 </div>
 
 <div align="center">
