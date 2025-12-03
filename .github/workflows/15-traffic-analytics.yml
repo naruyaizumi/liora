@@ -16,13 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: analytics-data
           fetch-depth: 0
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.x"
 
@@ -114,12 +114,12 @@ jobs:
     if: github.event.schedule == '0 0 * * 0' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout analytics branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: analytics-data
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.x"
 
@@ -342,12 +342,12 @@ jobs:
     needs: collect-traffic-data
     steps:
       - name: Checkout analytics branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: analytics-data
 
       - name: Checkout wiki
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ github.repository }}.wiki
           path: wiki

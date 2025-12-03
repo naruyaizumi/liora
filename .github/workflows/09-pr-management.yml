@@ -18,7 +18,7 @@ jobs:
     if: github.event.action == 'opened' || github.event.action == 'reopened'
     steps:
       - name: Label PR
-        uses: actions/labeler@v5
+        uses: actions/labeler@v6
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           configuration-path: .github/labeler.yml
@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -49,7 +49,7 @@ jobs:
 
       - name: Block PR with breaking changes
         if: steps.breaking.outputs.has_breaking == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             await github.rest.issues.addLabels({
@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Label based on size
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const pr = context.payload.pull_request;
@@ -169,7 +169,7 @@ jobs:
       !contains(github.event.pull_request.labels.*.name, 'breaking-change')
     steps:
       - name: Enable auto-merge
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const pr = context.payload.pull_request;
@@ -203,7 +203,7 @@ jobs:
     if: github.event.action == 'opened'
     steps:
       - name: Request review from CODEOWNERS
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             await github.rest.pulls.requestReviewers({
@@ -219,7 +219,7 @@ jobs:
     if: github.event.action == 'opened'
     steps:
       - name: Validate description
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const pr = context.payload.pull_request;
@@ -247,7 +247,7 @@ jobs:
     if: github.event.action == 'synchronize'
     steps:
       - name: Check merge conflicts
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const pr = context.payload.pull_request;

@@ -20,10 +20,10 @@ jobs:
     if: github.event_name == 'release'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Create release discussion
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const release = context.payload.release;
@@ -142,7 +142,7 @@ jobs:
     if: github.event.schedule == '0 0 1 * *'
     steps:
       - name: Create monthly recap discussion
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const now = new Date();
@@ -256,7 +256,7 @@ jobs:
     if: github.event_name == 'issues' && github.event.action == 'closed'
     steps:
       - name: Check if issue should be converted
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const issue = context.payload.issue;
