@@ -80,7 +80,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run Prettier
-        run: bun run format || true
+        run: bunx prettier --write . || true
 
       - name: Commit formatting changes
         run: |
