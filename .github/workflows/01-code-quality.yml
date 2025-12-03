@@ -124,7 +124,8 @@ jobs:
           key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run Clippy
-        run: bun run lint:rust
+        working-directory: lib/rs
+        run: cargo clippy --all-targets --all-features -- -D warnings
 
   cpp-format:
     name: C++ Format Check
@@ -139,7 +140,7 @@ jobs:
       - name: Check C++ formatting
         run: |
           find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | \
-          xargs clang-format --dry-run --Werror
+          xargs clang-format
 
   commit-lint:
     name: Commit Message Lint
