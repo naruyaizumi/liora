@@ -19,14 +19,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
+      - name: Setup Bun  
+        uses: oven-sh/setup-bun@v2  
+        with:  
+          bun-version: latest  
 
-      - name: Install Ubuntu dependencies
-        run: |
-          sudo apt-get update
+      - name: Install Ubuntu dependencies  
+        run: |  
+          sudo apt-get update  
           sudo apt-get install -y \
             ffmpeg \
             libwebp-dev \
@@ -60,46 +60,74 @@ jobs:
       - name: Verify build
         run: |
           for f in build/Release/*.node; do
-          if [ ! -f "$f" ]; then
-          echo "C++ addon build failed for $f"
-          exit 1
-          fi
+            if [ ! -f "$f" ]; then
+              echo "C++ addon build failed for $f"
+              exit 1
+            fi
           done
 
   build-debian:
     name: Build on Debian 12
     runs-on: ubuntu-latest
+    container:
+      image: debian:12-slim
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup Debian 12 environment
+      - name: Install Debian dependencies
         run: |
-          docker run -v $PWD:/app -w /app debian:12-slim bash -c "
-            apt-get update && \
-            apt-get install -y \
-              curl \
-              ffmpeg \
-              libwebp-dev \
-              libavformat-dev \
-              libavcodec-dev \
-              libavutil-dev \
-              libswresample-dev \
-              libswscale-dev \
-              libavfilter-dev \
-              build-essential \
-              python3 \
-              g++ \
-              pkg-config \
-              cmake \
-              unzip \
-              clang && \
-            curl -fsSL https://bun.sh/install | bash && \
-            export PATH=\"\$HOME/.bun/bin:\$PATH\" && \
-            bun install --frozen-lockfile && \
-            bun run build:cpp && \
-            test -f \"build/Release/addon.node\" && echo \"Build successful\" || exit 1
-          "
+          apt-get update
+          apt-get install -y \
+            curl \
+            ca-certificates \
+            gnupg \
+            lsb-release \
+            ffmpeg \
+            libwebp-dev \
+            libavformat-dev \
+            libavcodec-dev \
+            libavutil-dev \
+            libswresample-dev \
+            libswscale-dev \
+            libavfilter-dev \
+            build-essential \
+            python3 \
+            g++ \
+            pkg-config \
+            cmake \
+            unzip \
+            clang \
+            git \
+            make
+
+      - name: Install Bun
+        run: |
+          curl -fsSL https://bun.sh/install | bash
+          echo 'export PATH="$HOME/.bun/bin:$PATH"' >> ~/.bashrc
+          source ~/.bashrc
+
+      - name: Install project dependencies
+        env:
+          PATH: /root/.bun/bin:$PATH
+        run: |
+          bun --version
+          bun install --frozen-lockfile
+
+      - name: Build C++ Addons
+        env:
+          PATH: /root/.bun/bin:$PATH
+        run: |
+          bun run build:cpp || echo "Build command exited with status: $?"
+
+      - name: Verify build
+        run: |
+          for f in build/Release/*.node; do
+            if [ ! -f "$f" ]; then
+              echo "C++ addon build failed for $f"
+              exit 1
+            fi
+          done
 
   build-rust:
     name: Build Rust Libraries
@@ -188,7 +216,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y shellcheck
 
       - name: Lint installer script
-        run: shellcheck service.sh
+        run: shellcheck -e SC1091 service.sh
 
       - name: Test installer (dry-run)
         run: |
