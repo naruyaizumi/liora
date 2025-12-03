@@ -108,7 +108,6 @@ jobs:
           chmod +x /usr/local/bin/osv-scanner
 
       - name: Run OSV Scanner
-        run: osv-scanner scan source --recursive ./lib/rs
         run: osv-scanner scan source --recursive .
 
   rust-audit:
@@ -145,5 +144,6 @@ jobs:
 
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
+        if: always()
         with:
           sarif_file: "trivy-results.sarif"
