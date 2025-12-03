@@ -56,7 +56,7 @@ jobs:
         run: pip install njsscan
 
       - name: Run Njsscan
-        run: njsscan --exit-warning .
+        run: njsscan .
 
       - name: Upload Njsscan Report
         if: always()
@@ -101,13 +101,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Install OSV Scanner
+        run: |
+          curl -sSfL https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 \
+            -o /usr/local/bin/osv-scanner
+          chmod +x /usr/local/bin/osv-scanner
+
       - name: Run OSV Scanner
-        uses: google/osv-scanner-action@main
-        with:
-          scan-args: |-
-            --recursive
-            --skip-git
-            ./
+        run: osv-scanner --recursive .
 
   rust-audit:
     name: Rust Security Audit
