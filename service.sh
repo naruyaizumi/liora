@@ -219,7 +219,7 @@ for i in {1..30}; do
     if systemctl is-active --quiet postgresql && sudo -u postgres psql -c "SELECT 1;" &>/dev/null; then
         break
     fi
-    if [ $i -eq 30 ]; then
+    if [ "$i" -eq 30 ]; then
         print_error "PostgreSQL failed to start or become ready"
         exit 1
     fi
@@ -389,7 +389,7 @@ for i in {1..30}; do
     if systemctl is-active --quiet redis-server && redis-cli ping &>/dev/null; then
         break
     fi
-    if [ $i -eq 30 ]; then
+    if [ "$i" -eq 30 ]; then
         print_error "Redis failed to start"
         journalctl -u redis-server -n 20 --no-pager
         exit 1
