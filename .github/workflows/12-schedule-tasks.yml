@@ -1,0 +1,241 @@
+name: Scheduled Tasks
+
+on:
+  schedule:
+    - cron: "0 0 * * 0"
+    - cron: "0 0 1 * *"
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  cleanup-cache:
+    name: Cleanup Old Caches
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 0 * * 0'
+    steps:
+      - name: Cleanup
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const caches = await github.rest.actions.getActionsCacheList({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            
+            const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+            
+            for (const cache of caches.data.actions_caches) {
+              const lastAccessed = new Date(cache.last_accessed_at);
+              if (lastAccessed < oneWeekAgo) {
+                await github.rest.actions.deleteActionsCacheById({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  cache_id: cache.id,
+                });
+                console.log(`Deleted cache: ${cache.key}`);
+              }
+            }
+
+  cleanup-old-branches:
+    name: Cleanup Stale Branches
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 0 1 * *'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Delete merged branches
+        run: |
+          git fetch --prune
+          
+          for branch in $(git branch -r | grep -v '\->' | grep -v 'main' | grep -v 'develop'); do
+            branch_name=${branch#origin/}
+            
+            if git merge-base --is-ancestor origin/$branch_name origin/main 2>/dev/null; then
+              echo "Deleting merged branch: $branch_name"
+              git push origin --delete $branch_name || true
+            fi
+          done
+
+  check-dependencies:
+    name: Check Dependency Health
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 0 * * 0'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Check npm dependencies
+        run: |
+          bun outdated || true
+
+      - name: Check for deprecated packages
+        run: |
+          npx check-is-deprecated
+
+  security-scan-scheduled:
+    name: Scheduled Security Scan
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 */6 * * *'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
+
+  update-statistics:
+    name: Update Repository Statistics
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 0 * * 0'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate stats
+        run: |
+          mkdir -p .github/stats
+          
+          cat > .github/stats/repo-stats.json << EOF
+          {
+            "generated_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "total_commits": $(git rev-list --count HEAD),
+            "total_contributors": $(git log --format='%aN' | sort -u | wc -l),
+            "total_files": $(find src lib -type f | wc -l),
+            "total_lines": $(find src lib -name "*.js" -o -name "*.rs" -o -name "*.cpp" | xargs wc -l | tail -1 | awk '{print $1}')
+          }
+          EOF
+
+      - name: Commit stats
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          if [[ `git status --porcelain` ]]; then
+            git add .github/stats/
+            git commit -m "chore: update repository statistics [skip ci]"
+            git push
+          fi
+
+  backup-issues:
+    name: Backup Issues & PRs
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 0 1 * *'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Export issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+            });
+            
+            fs.writeFileSync('issues-backup.json', JSON.stringify(issues, null, 2));
+
+      - name: Upload backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: issues-backup-${{ github.run_number }}
+          path: issues-backup.json
+          retention-days: 90
+
+  check-license-compliance:
+    name: Check License Compliance
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 0 * * 0'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Check licenses
+        run: |
+          npx license-checker --summary
+
+  performance-benchmark:
+    name: Performance Benchmark
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 0 * * 0'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ffmpeg \
+            libwebp-dev \
+            build-essential \
+            python3 \
+            g++ \
+            cmake
+
+      - name: Install npm dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run benchmarks
+        run: |
+          echo "Running performance benchmarks..."
+          # Add benchmark commands here
+          # bun run benchmark
+
+  notify-scheduled-tasks:
+    name: Notify Completion
+    needs:
+      [
+        cleanup-cache,
+        cleanup-old-branches,
+        check-dependencies,
+        update-statistics,
+      ]
+    runs-on: ubuntu-latest
+    if: always() && github.event.schedule == '0 0 * * 0'
+    steps:
+      - name: Create summary
+        run: |
+          echo "# Scheduled Tasks Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Task | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Cache Cleanup | ${{ needs.cleanup-cache.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch Cleanup | ${{ needs.cleanup-old-branches.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency Check | ${{ needs.check-dependencies.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Statistics Update | ${{ needs.update-statistics.result }} |" >> $GITHUB_STEP_SUMMARY

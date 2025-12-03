@@ -1,0 +1,81 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Jakarta"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "naruyaizumi"
+    assignees:
+      - "naruyaizumi"
+    labels:
+      - "dependencies"
+      - "automated"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      production:
+        patterns:
+          - "@napi-rs/*"
+          - "baileys"
+          - "sharp"
+        update-types:
+          - "minor"
+          - "patch"
+      development:
+        patterns:
+          - "eslint*"
+          - "prettier"
+          - "@eslint/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "cargo"
+    directory: "/lib/rs"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "Asia/Jakarta"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "naruyaizumi"
+    labels:
+      - "dependencies"
+      - "rust"
+      - "automated"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "11:00"
+      timezone: "Asia/Jakarta"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "naruyaizumi"
+    labels:
+      - "dependencies"
+      - "ci-cd"
+      - "automated"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"
+    groups:
+      actions:
+        patterns:
+          - "actions/*"
+          - "github/*"

@@ -1,0 +1,212 @@
+name: Documentation
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "src/**/*.js"
+      - "lib/**/*.js"
+      - "lib/rs/**/*.rs"
+      - "lib/cpp/**/*.cpp"
+      - "lib/cpp/**/*.h"
+      - "docs/**"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "src/**/*.js"
+      - "lib/**/*.js"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  generate-jsdoc:
+    name: Generate JSDoc
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install JSDoc
+        run: bun add -d jsdoc jsdoc-to-markdown
+
+      - name: Generate JSDoc
+        run: |
+          mkdir -p docs/api
+          bunx jsdoc -c jsdoc.json -r src lib -d docs/api
+
+      - name: Generate Markdown docs
+        run: |
+          bunx jsdoc2md "src/**/*.js" "lib/**/*.js" > docs/API.md
+
+      - name: Upload JSDoc artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jsdoc
+          path: docs/
+
+  generate-rust-docs:
+    name: Generate Rust Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Generate Rust docs
+        working-directory: ./lib/rs
+        run: cargo doc --no-deps --document-private-items
+
+      - name: Upload Rust docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-docs
+          path: lib/rs/target/doc/
+
+  update-readme:
+    name: Update README Stats
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update README with stats
+        run: |
+          TOTAL_LINES=$(find src lib -name "*.js" -o -name "*.rs" -o -name "*.cpp" | xargs wc -l | tail -1 | awk '{print $1}')
+          
+          if grep -q "<!-- STATS -->" README.md; then
+            sed -i "s/<!-- STATS -->.*<!-- \/STATS -->/<!-- STATS -->Total Lines: $TOTAL_LINES<!-- \/STATS -->/g" README.md
+          fi
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          if [[ `git status --porcelain` ]]; then
+            git add README.md
+            git commit -m "docs: update README stats [skip ci]"
+            git push
+          fi
+
+  build-github-pages:
+    name: Build GitHub Pages
+    runs-on: ubuntu-latest
+    needs: [generate-jsdoc, generate-rust-docs]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download JSDoc artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: jsdoc
+          path: docs/
+
+      - name: Download Rust docs
+        uses: actions/download-artifact@v4
+        with:
+          name: rust-docs
+          path: docs/rust/
+
+      - name: Create index page
+        run: |
+          cat > docs/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Liora Documentation</title>
+            <style>
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 2rem;
+                background: #0d1117;
+                color: #c9d1d9;
+              }
+              h1 { color: #58a6ff; }
+              .nav {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1rem;
+                margin-top: 2rem;
+              }
+              .card {
+                background: #161b22;
+                border: 1px solid #30363d;
+                border-radius: 6px;
+                padding: 1.5rem;
+                transition: transform 0.2s;
+              }
+              .card:hover {
+                transform: translateY(-2px);
+                border-color: #58a6ff;
+              }
+              a {
+                color: #58a6ff;
+                text-decoration: none;
+              }
+              a:hover { text-decoration: underline; }
+            </style>
+          </head>
+          <body>
+            <h1>🤖 Liora Documentation</h1>
+            <p>Modern WhatsApp Bot - Complete Documentation</p>
+            
+            <div class="nav">
+              <div class="card">
+                <h2>📚 API Documentation</h2>
+                <p>JavaScript API reference</p>
+                <a href="./api/index.html">View JSDoc →</a>
+              </div>
+              
+              <div class="card">
+                <h2>🦀 Rust Documentation</h2>
+                <p>Rust libraries documentation</p>
+                <a href="./rust/index.html">View Rust Docs →</a>
+              </div>
+              
+              <div class="card">
+                <h2>📖 Markdown API</h2>
+                <p>API documentation in Markdown</p>
+                <a href="./API.md">View API.md →</a>
+              </div>
+              
+              <div class="card">
+                <h2>🔗 GitHub Repository</h2>
+                <p>Source code and issues</p>
+                <a href="https://github.com/naruyaizumi/liora">View on GitHub →</a>
+              </div>
+            </div>
+          </body>
+          </html>
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

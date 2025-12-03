@@ -1,0 +1,269 @@
+name: Pull Request Management
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+jobs:
+  auto-label-pr:
+    name: Auto Label PR
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened' || github.event.action == 'reopened'
+    steps:
+      - name: Label PR
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+
+  check-breaking-changes:
+    name: Check Breaking Changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for breaking changes
+        id: breaking
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          BREAKING=false
+          
+          if echo "$PR_TITLE" | grep -iE "(breaking|BREAKING|!:)" || \
+             echo "$PR_BODY" | grep -iE "BREAKING CHANGE"; then
+            BREAKING=true
+          fi
+          
+          echo "has_breaking=$BREAKING" >> $GITHUB_OUTPUT
+
+      - name: Block PR with breaking changes
+        if: steps.breaking.outputs.has_breaking == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['breaking-change', 'needs-review']
+            });
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `⚠️ **BREAKING CHANGE DETECTED**\n\nThis PR contains breaking changes and requires careful review before merging.\n\nPlease ensure:\n- [ ] Breaking changes are documented\n- [ ] Migration guide is provided\n- [ ] Version bump is appropriate (major version)\n- [ ] All maintainers have reviewed`
+            });
+            
+            core.setFailed('PR contains breaking changes - blocking auto-merge');
+
+  pr-size-labeler:
+    name: Label PR Size
+    runs-on: ubuntu-latest
+    steps:
+      - name: Label based on size
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const additions = pr.additions;
+            const deletions = pr.deletions;
+            const total = additions + deletions;
+            
+            let sizeLabel = '';
+            
+            if (total < 10) sizeLabel = 'size/XS';
+            else if (total < 50) sizeLabel = 'size/S';
+            else if (total < 200) sizeLabel = 'size/M';
+            else if (total < 500) sizeLabel = 'size/L';
+            else sizeLabel = 'size/XL';
+            
+            const labels = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number
+            });
+            
+            for (const label of labels.data) {
+              if (label.name.startsWith('size/')) {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  name: label.name
+                });
+              }
+            }
+            
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              labels: [sizeLabel]
+            });
+
+  lint-pr-title:
+    name: Lint PR Title
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened' || github.event.action == 'synchronize'
+    steps:
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+
+  auto-approve-dependabot:
+    name: Auto Approve Dependabot
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto approve minor and patch updates
+        if: |
+          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        run: |
+          gh pr review --approve "$PR_URL"
+          gh pr edit "$PR_URL" --add-label "dependencies,automated"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  auto-merge:
+    name: Auto Merge PR
+    runs-on: ubuntu-latest
+    needs: [check-breaking-changes]
+    if: |
+      github.event_name == 'pull_request_review' &&
+      github.event.review.state == 'approved' &&
+      !contains(github.event.pull_request.labels.*.name, 'breaking-change')
+    steps:
+      - name: Enable auto-merge
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            
+            const checks = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: pr.head.sha
+            });
+            
+            const allPassed = checks.data.check_runs.every(
+              check => check.conclusion === 'success' || check.conclusion === 'skipped'
+            );
+            
+            if (allPassed) {
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                merge_method: 'squash'
+              });
+              
+              core.info('PR auto-merged successfully');
+            } else {
+              core.info('Not all checks passed, skipping auto-merge');
+            }
+
+  request-review:
+    name: Request Reviews
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+    steps:
+      - name: Request review from CODEOWNERS
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: ['naruyaizumi']
+            });
+
+  check-pr-description:
+    name: Check PR Description
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+    steps:
+      - name: Validate description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            
+            if (body.length < 30) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: `⚠️ This PR lacks a detailed description.\n\nPlease add:\n- What changes were made\n- Why these changes are necessary\n- How to test the changes\n- Related issues (if any)`
+              });
+              
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: ['needs-description']
+              });
+            }
+
+  conflict-check:
+    name: Check for Conflicts
+    runs-on: ubuntu-latest
+    if: github.event.action == 'synchronize'
+    steps:
+      - name: Check merge conflicts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            
+            if (pr.mergeable === false) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: '⚠️ This PR has merge conflicts. Please resolve them before merging.'
+              });
+              
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: ['conflicts']
+              });
+            }

@@ -1,0 +1,205 @@
+name: Repository Mirror
+
+on:
+  push:
+    branches: ["main"]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mirror-gitlab:
+    name: Mirror to GitLab
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "naruyaizumi"
+          git config --global user.email "sexystyle088@gmail.com"
+
+      - name: Mirror to GitLab
+        run: |
+          git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/naruyaizumi/liora.git 2>/dev/null || true
+          git push gitlab main --force --tags 2>&1 | tee /tmp/gitlab.log
+        continue-on-error: true
+
+      - name: Check GitLab status
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "✓ GitLab mirror successful"
+          else
+            echo "GitLab mirror failed"
+            cat /tmp/gitlab.log
+          fi
+
+  mirror-codeberg:
+    name: Mirror to Codeberg
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "naruyaizumi"
+          git config --global user.email "sexystyle088@gmail.com"
+
+      - name: Mirror to Codeberg
+        run: |
+          git remote add codeberg https://naruyaizumi:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/naruyaizumi/liora.git 2>/dev/null || true
+          git push codeberg main --force --tags 2>&1 | tee /tmp/codeberg.log
+        continue-on-error: true
+
+      - name: Check Codeberg status
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "✓ Codeberg mirror successful"
+          else
+            echo "Codeberg mirror failed"
+            cat /tmp/codeberg.log
+          fi
+
+  mirror-gitea:
+    name: Mirror to Gitea
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "naruyaizumi"
+          git config --global user.email "sexystyle088@gmail.com"
+
+      - name: Mirror to Gitea
+        run: |
+          git remote add gitea https://naruyaizumi:${{ secrets.GITEA_TOKEN }}@gitea.com/naruyaizumi/liora.git 2>/dev/null || true
+          git push gitea main --force --tags 2>&1 | tee /tmp/gitea.log
+        continue-on-error: true
+
+      - name: Check Gitea status
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "✓ Gitea mirror successful"
+          else
+            echo "Gitea mirror failed"
+            cat /tmp/gitea.log
+          fi
+
+  mirror-bitbucket:
+    name: Mirror to Bitbucket
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "naruyaizumi"
+          git config --global user.email "sexystyle088@gmail.com"
+
+      - name: Mirror to Bitbucket
+        run: |
+          git remote add bitbucket https://naruyaizumi:${{ secrets.BITBUCKET_TOKEN }}@bitbucket.org/naruyaizumi/liora.git 2>/dev/null || true
+          git push bitbucket main --force --tags 2>&1 | tee /tmp/bitbucket.log
+        continue-on-error: true
+
+      - name: Check Bitbucket status
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "✓ Bitbucket mirror successful"
+          else
+            echo "Bitbucket mirror failed"
+            cat /tmp/bitbucket.log
+          fi
+
+  mirror-azure:
+    name: Mirror to Azure DevOps
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "naruyaizumi"
+          git config --global user.email "sexystyle088@gmail.com"
+
+      - name: Mirror to Azure DevOps
+        run: |
+          git remote add azure https://naruyaizumi:${{ secrets.AZURE_TOKEN }}@dev.azure.com/naruyaizumi/_git/liora 2>/dev/null || true
+          git push azure main --force --tags 2>&1 | tee /tmp/azure.log
+        continue-on-error: true
+
+      - name: Check Azure status
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "✓ Azure DevOps mirror successful"
+          else
+            echo "Azure DevOps mirror failed"
+            cat /tmp/azure.log
+          fi
+
+  mirror-summary:
+    name: Mirror Summary Report
+    needs:
+      [
+        mirror-gitlab,
+        mirror-codeberg,
+        mirror-gitea,
+        mirror-bitbucket,
+        mirror-azure,
+      ]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "# Mirror Status Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| GitLab | ${{ needs.mirror-gitlab.result == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Codeberg | ${{ needs.mirror-codeberg.result == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Gitea | ${{ needs.mirror-gitea.result == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Bitbucket | ${{ needs.mirror-bitbucket.result == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Azure DevOps | ${{ needs.mirror-azure.result == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Create issue on failure
+        if: |
+          needs.mirror-gitlab.result == 'failure' ||
+          needs.mirror-codeberg.result == 'failure' ||
+          needs.mirror-gitea.result == 'failure' ||
+          needs.mirror-bitbucket.result == 'failure' ||
+          needs.mirror-azure.result == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '⚠️ Repository Mirror Failed',
+              body: 'One or more repository mirrors failed. Please check the workflow logs for details.',
+              labels: ['bug', 'infrastructure']
+            });

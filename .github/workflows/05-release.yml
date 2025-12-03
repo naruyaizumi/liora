@@ -1,0 +1,207 @@
+name: Release Management
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "package.json"
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: "Release type"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  check-version:
+    name: Check Version Change
+    runs-on: ubuntu-latest
+    outputs:
+      version_changed: ${{ steps.check.outputs.changed }}
+      new_version: ${{ steps.check.outputs.version }}
+      should_release: ${{ steps.check.outputs.release }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version change
+        id: check
+        run: |
+          PREV_VERSION=$(git show HEAD^:package.json 2>/dev/null | jq -r '.version' || echo "0.0.0")
+          NEW_VERSION=$(jq -r '.version' package.json)
+          
+          echo "Previous version: $PREV_VERSION"
+          echo "New version: $NEW_VERSION"
+          
+          if [ "$PREV_VERSION" != "$NEW_VERSION" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+            
+            # Check if tag exists
+            if git rev-parse "v$NEW_VERSION" >/dev/null 2>&1; then
+              echo "release=false" >> $GITHUB_OUTPUT
+              echo "Tag v$NEW_VERSION already exists"
+            else
+              echo "release=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "release=false" >> $GITHUB_OUTPUT
+          fi
+
+  format-and-commit:
+    name: Format Code
+    needs: check-version
+    if: needs.check-version.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run Prettier
+        run: bun run format || true
+
+      - name: Commit formatting changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          if [[ `git status --porcelain` ]]; then
+            git add .
+            git commit -m "style: auto-format code [skip ci]"
+            git push
+          else
+            echo "No formatting changes needed"
+          fi
+
+  generate-changelog:
+    name: Generate Changelog
+    needs: [check-version, format-and-commit]
+    if: needs.check-version.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      changelog: ${{ steps.changelog.outputs.changelog }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
+          if [ -z "$PREV_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            CHANGELOG=$(git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          fi
+          
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Update CHANGELOG.md
+        run: |
+          VERSION="${{ needs.check-version.outputs.new_version }}"
+          DATE=$(date +%Y-%m-%d)
+          
+          if [ ! -f CHANGELOG.md ]; then
+            echo "# Changelog" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+          fi
+          
+          # Create new entry
+          {
+            echo "## [$VERSION] - $DATE"
+            echo ""
+            echo "${{ steps.changelog.outputs.changelog }}"
+            echo ""
+          } | cat - CHANGELOG.md > temp && mv temp CHANGELOG.md
+
+      - name: Commit changelog
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          git add CHANGELOG.md
+          git commit -m "docs: update changelog for v${{ needs.check-version.outputs.new_version }} [skip ci]"
+          git push
+
+  create-release:
+    name: Create GitHub Release
+    needs: [check-version, generate-changelog]
+    if: needs.check-version.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.check-version.outputs.new_version }}
+          name: Release v${{ needs.check-version.outputs.new_version }}
+          body: |
+            # 🎉 Release v${{ needs.check-version.outputs.new_version }}
+            
+            ## What's Changed
+            
+            ${{ needs.generate-changelog.outputs.changelog }}
+            
+            ## Installation
+            
+            ```bash
+            curl -sSL https://raw.githubusercontent.com/naruyaizumi/liora/main/service.sh | bash
+            ```
+            
+            ## Full Changelog
+            
+            **Full Changelog**: https://github.com/naruyaizumi/liora/compare/v${{ needs.check-version.outputs.new_version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify-release:
+    name: Notify Release
+    needs: [create-release, check-version]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release announcement issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ needs.check-version.outputs.new_version }}';
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚀 Release v${version}`,
+              body: `A new version has been released!\n\nSee the [release notes](https://github.com/${context.repo.owner}/${context.repo.repo}/releases/tag/v${version}) for details.`,
+              labels: ['release']
+            });

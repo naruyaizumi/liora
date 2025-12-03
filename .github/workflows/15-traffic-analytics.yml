@@ -1,0 +1,424 @@
+name: Traffic & Analytics
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  collect-traffic-data:
+    name: Collect Repository Traffic
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: analytics-data
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          pip install PyGithub matplotlib pandas
+
+      - name: Collect traffic statistics
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python << 'PYTHON_SCRIPT'
+          import json
+          import os
+          from datetime import datetime, timedelta
+          from github import Github
+          
+          g = Github(os.environ['GITHUB_TOKEN'])
+          repo = g.get_repo('${{ github.repository }}')
+          
+          views = repo.get_views_traffic(per='day')
+          clones = repo.get_clones_traffic(per='day')
+          referrers = repo.get_top_referrers()
+          paths = repo.get_top_paths()
+          
+          date_str = datetime.now().strftime('%Y-%m-%d')
+          traffic_data = {
+              'date': date_str,
+              'views': {
+                  'count': views['count'],
+                  'uniques': views['uniques'],
+                  'details': [{'date': v.timestamp.strftime('%Y-%m-%d'), 'count': v.count, 'uniques': v.uniques} for v in views['views']]
+              },
+              'clones': {
+                  'count': clones['count'],
+                  'uniques': clones['uniques'],
+                  'details': [{'date': c.timestamp.strftime('%Y-%m-%d'), 'count': c.count, 'uniques': c.uniques} for c in clones['clones']]
+              },
+              'referrers': [{'name': r.referrer, 'count': r.count, 'uniques': r.uniques} for r in referrers],
+              'paths': [{'path': p.path, 'title': p.title, 'count': p.count, 'uniques': p.uniques} for p in paths]
+          }
+          
+          os.makedirs('analytics/data', exist_ok=True)
+          
+          with open(f'analytics/data/traffic_{date_str}.json', 'w') as f:
+              json.dump(traffic_data, f, indent=2)
+          
+          summary_file = 'analytics/data/traffic_summary.json'
+          if os.path.exists(summary_file):
+              with open(summary_file, 'r') as f:
+                  summary = json.load(f)
+          else:
+              summary = {'daily': [], 'total_views': 0, 'total_clones': 0}
+          
+          summary['daily'].append({
+              'date': date_str,
+              'views': views['count'],
+              'uniques_views': views['uniques'],
+              'clones': clones['count'],
+              'uniques_clones': clones['uniques']
+          })
+          
+          summary['daily'] = summary['daily'][-90:]
+          summary['total_views'] = sum(d['views'] for d in summary['daily'])
+          summary['total_clones'] = sum(d['clones'] for d in summary['daily'])
+          summary['last_updated'] = date_str
+          
+          with open(summary_file, 'w') as f:
+              json.dump(summary, f, indent=2)
+          
+          print(f"Traffic data collected for {date_str}")
+          print(f"Views: {views['count']} ({views['uniques']} unique)")
+          print(f"Clones: {clones['count']} ({clones['uniques']} unique)")
+          PYTHON_SCRIPT
+
+      - name: Commit traffic data
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          git add analytics/
+          git commit -m "chore: update traffic data [skip ci]" || echo "No changes"
+          git push origin analytics-data || echo "Nothing to push"
+
+  generate-analytics-dashboard:
+    name: Generate Analytics Dashboard
+    runs-on: ubuntu-latest
+    needs: collect-traffic-data
+    if: github.event.schedule == '0 0 * * 0' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout analytics branch
+        uses: actions/checkout@v4
+        with:
+          ref: analytics-data
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          pip install matplotlib pandas plotly
+
+      - name: Generate visualizations
+        run: |
+          python << 'PYTHON_SCRIPT'
+          import json
+          import os
+          from datetime import datetime
+          import matplotlib.pyplot as plt
+          import matplotlib.dates as mdates
+          
+          with open('analytics/data/traffic_summary.json', 'r') as f:
+              summary = json.load(f)
+          
+          dates = [datetime.strptime(d['date'], '%Y-%m-%d') for d in summary['daily']]
+          views = [d['views'] for d in summary['daily']]
+          clones = [d['clones'] for d in summary['daily']]
+          
+          os.makedirs('analytics/charts', exist_ok=True)
+          
+          plt.figure(figsize=(12, 6))
+          plt.plot(dates, views, marker='o', linewidth=2, color='#2ea44f')
+          plt.title('Repository Views (Last 90 Days)', fontsize=16, fontweight='bold')
+          plt.xlabel('Date')
+          plt.ylabel('Views')
+          plt.grid(True, alpha=0.3)
+          plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+          plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=7))
+          plt.xticks(rotation=45)
+          plt.tight_layout()
+          plt.savefig('analytics/charts/views.png', dpi=150, bbox_inches='tight')
+          plt.close()
+          
+          plt.figure(figsize=(12, 6))
+          plt.plot(dates, clones, marker='o', linewidth=2, color='#0969da')
+          plt.title('Repository Clones (Last 90 Days)', fontsize=16, fontweight='bold')
+          plt.xlabel('Date')
+          plt.ylabel('Clones')
+          plt.grid(True, alpha=0.3)
+          plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+          plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=7))
+          plt.xticks(rotation=45)
+          plt.tight_layout()
+          plt.savefig('analytics/charts/clones.png', dpi=150, bbox_inches='tight')
+          plt.close()
+          
+          fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
+          
+          ax1.plot(dates, views, marker='o', linewidth=2, color='#2ea44f', label='Views')
+          ax1.set_title('Repository Traffic Overview', fontsize=16, fontweight='bold')
+          ax1.set_ylabel('Views')
+          ax1.grid(True, alpha=0.3)
+          ax1.legend()
+          
+          ax2.plot(dates, clones, marker='o', linewidth=2, color='#0969da', label='Clones')
+          ax2.set_xlabel('Date')
+          ax2.set_ylabel('Clones')
+          ax2.grid(True, alpha=0.3)
+          ax2.legend()
+          
+          plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+          plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=7))
+          plt.xticks(rotation=45)
+          plt.tight_layout()
+          plt.savefig('analytics/charts/overview.png', dpi=150, bbox_inches='tight')
+          plt.close()
+          
+          print("Charts generated successfully")
+          PYTHON_SCRIPT
+
+      - name: Generate HTML dashboard
+        run: |
+          python << 'PYTHON_SCRIPT'
+          import json
+          from datetime import datetime
+          
+          with open('analytics/data/traffic_summary.json', 'r') as f:
+              summary = json.load(f)
+          
+          latest = summary['daily'][-1] if summary['daily'] else {}
+          
+          last_7_days = summary['daily'][-7:] if len(summary['daily']) >= 7 else summary['daily']
+          avg_views = sum(d['views'] for d in last_7_days) / len(last_7_days) if last_7_days else 0
+          avg_clones = sum(d['clones'] for d in last_7_days) / len(last_7_days) if last_7_days else 0
+          
+          html = f'''
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Liora - Traffic Analytics</title>
+            <style>
+              * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+              body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: #fff;
+                padding: 2rem;
+                min-height: 100vh;
+              }}
+              .container {{
+                max-width: 1400px;
+                margin: 0 auto;
+              }}
+              h1 {{
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+              }}
+              .subtitle {{
+                opacity: 0.9;
+                margin-bottom: 2rem;
+              }}
+              .grid {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+              }}
+              .card {{
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border-radius: 12px;
+                padding: 1.5rem;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+              }}
+              .metric {{
+                font-size: 2.5rem;
+                font-weight: bold;
+                margin: 0.5rem 0;
+              }}
+              .metric-label {{
+                font-size: 0.9rem;
+                opacity: 0.8;
+              }}
+              .chart {{
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 12px;
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+              }}
+              .chart img {{
+                width: 100%;
+                border-radius: 8px;
+              }}
+              .timestamp {{
+                text-align: center;
+                opacity: 0.7;
+                margin-top: 2rem;
+              }}
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>📊 Liora Traffic Analytics</h1>
+              <p class="subtitle">Repository Traffic & Engagement Metrics</p>
+              
+              <div class="grid">
+                <div class="card">
+                  <h2>👁️ Total Views</h2>
+                  <div class="metric">{summary['total_views']:,}</div>
+                  <div class="metric-label">All Time</div>
+                </div>
+                
+                <div class="card">
+                  <h2>📥 Total Clones</h2>
+                  <div class="metric">{summary['total_clones']:,}</div>
+                  <div class="metric-label">All Time</div>
+                </div>
+                
+                <div class="card">
+                  <h2>📈 Avg Daily Views</h2>
+                  <div class="metric">{avg_views:.1f}</div>
+                  <div class="metric-label">Last 7 Days</div>
+                </div>
+                
+                <div class="card">
+                  <h2>📊 Avg Daily Clones</h2>
+                  <div class="metric">{avg_clones:.1f}</div>
+                  <div class="metric-label">Last 7 Days</div>
+                </div>
+              </div>
+              
+              <div class="chart">
+                <h2 style="color: #333; margin-bottom: 1rem;">Traffic Overview (90 Days)</h2>
+                <img src="charts/overview.png" alt="Traffic Overview">
+              </div>
+              
+              <div class="timestamp">
+                Last updated: {summary.get('last_updated', 'N/A')} UTC
+              </div>
+            </div>
+          </body>
+          </html>
+          '''
+          
+          with open('analytics/index.html', 'w') as f:
+              f.write(html)
+          
+          print("✅ Dashboard generated")
+          PYTHON_SCRIPT
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./analytics
+          destination_dir: analytics
+          publish_branch: gh-pages
+
+  update-traffic-wiki:
+    name: Update Traffic Stats in Wiki
+    runs-on: ubuntu-latest
+    needs: collect-traffic-data
+    steps:
+      - name: Checkout analytics branch
+        uses: actions/checkout@v4
+        with:
+          ref: analytics-data
+
+      - name: Checkout wiki
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+
+      - name: Generate traffic report for wiki
+        run: |
+          python << 'PYTHON_SCRIPT'
+          import json
+          from datetime import datetime
+          
+          with open('analytics/data/traffic_summary.json', 'r') as f:
+              summary = json.load(f)
+          
+          # Calculate statistics
+          last_7_days = summary['daily'][-7:] if len(summary['daily']) >= 7 else summary['daily']
+          last_30_days = summary['daily'][-30:] if len(summary['daily']) >= 30 else summary['daily']
+          
+          total_views_7d = sum(d['views'] for d in last_7_days)
+          total_clones_7d = sum(d['clones'] for d in last_7_days)
+          total_views_30d = sum(d['views'] for d in last_30_days)
+          total_clones_30d = sum(d['clones'] for d in last_30_days)
+          
+          wiki_content = f'''# 📊 Repository Traffic
+          
+          *Last updated: {summary.get('last_updated', 'N/A')} UTC*
+          
+          ## Overview
+          
+          | Metric | All Time | Last 30 Days | Last 7 Days |
+          |--------|----------|--------------|-------------|
+          | **Views** | {summary['total_views']:,} | {total_views_30d:,} | {total_views_7d:,} |
+          | **Clones** | {summary['total_clones']:,} | {total_clones_30d:,} | {total_clones_7d:,} |
+          
+          ## Daily Average (Last 7 Days)
+          
+          - Views: {total_views_7d / len(last_7_days):.1f} per day
+          - Clones: {total_clones_7d / len(last_7_days):.1f} per day
+          
+          ## Visualizations
+          
+          View detailed analytics: [Traffic Dashboard](https://naruyaizumi.github.io/liora/analytics/)
+          
+          ## Historical Data
+          
+          ### Last 7 Days
+          
+          | Date | Views | Clones |
+          |------|-------|--------|
+          '''
+          
+          for day in reversed(last_7_days):
+              wiki_content += f"| {day['date']} | {day['views']} | {day['clones']} |\n"
+          
+          wiki_content += '''
+          ---
+          
+          *Traffic data is collected daily and retained for 90 days*
+          '''
+          
+          with open('wiki/Traffic-Statistics.md', 'w') as f:
+              f.write(wiki_content)
+          
+          print("Wiki traffic report generated")
+          PYTHON_SCRIPT
+
+      - name: Commit to wiki
+        working-directory: wiki
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          git add Traffic-Statistics.md
+          git commit -m "docs: update traffic statistics [automated]"
+          git push

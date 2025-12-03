@@ -1,0 +1,189 @@
+name: Issue & PR Management
+
+on:
+  issues:
+    types: [opened, labeled, reopened]
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened, labeled, reopened]
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  auto-label-issue:
+    name: Auto Label Issues
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    steps:
+      - name: Label based on title/body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title.toLowerCase();
+            const body = issue.body?.toLowerCase() || '';
+            const labels = [];
+
+            if (title.includes('bug') || title.includes('error') || title.includes('fix')) {
+              labels.push('bug');
+            }
+
+            if (title.includes('feature') || title.includes('enhancement') || title.includes('add')) {
+              labels.push('enhancement');
+            }
+
+            if (title.includes('docs') || title.includes('documentation') || title.includes('readme')) {
+              labels.push('documentation');
+            }
+
+            if (title.includes('how') || title.includes('question') || title.includes('help')) {
+              labels.push('question');
+            }
+
+            if (body.includes('whatsapp') || title.includes('whatsapp') || body.includes('baileys')) {
+              labels.push('whatsapp');
+            }
+
+            if (body.includes('api') || title.includes('api')) {
+              labels.push('api');
+            }
+
+            if (title.includes('security') || title.includes('vulnerability') || body.includes('cve')) {
+              labels.push('security', 'priority-high');
+            }
+
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: labels
+              });
+            }
+
+  greet-first-issue:
+    name: Greet First Time Contributors
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    steps:
+      - name: Check if first issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const creator = issue.user.login;
+            
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              creator: creator,
+              state: 'all'
+            });
+            
+            if (issues.data.length === 1) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `👋 Welcome @${creator}! Thank you for opening your first issue in Liora!\n\nWe appreciate your contribution. A maintainer will review your issue soon.\n\nIn the meantime, please make sure you've provided:\n- Clear description of the issue\n- Steps to reproduce (if applicable)\n- Expected vs actual behavior\n- Environment details (OS, Node/Bun version, etc.)`
+              });
+            }
+
+  close-stale-issues:
+    name: Close Stale Issues
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Close stale issues and PRs
+        uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          stale-issue-message: |
+            This issue has been automatically marked as stale because it has not had recent activity. 
+            It will be closed in 7 days if no further activity occurs.
+            
+            If you believe this issue is still relevant, please comment to keep it open.
+          stale-pr-message: |
+            This pull request has been automatically marked as stale because it has not had recent activity.
+            It will be closed in 7 days if no further activity occurs.
+            
+            If you're still working on this, please comment or push updates to keep it open.
+          close-issue-message: |
+            This issue was automatically closed due to inactivity.
+            
+            If you believe this should be reopened, please create a new issue referencing this one.
+          close-pr-message: "This pull request was automatically closed due to inactivity."
+          days-before-stale: 30
+          days-before-close: 7
+          stale-issue-label: "stale"
+          stale-pr-label: "stale"
+          exempt-issue-labels: "pinned,security,priority-high"
+          exempt-pr-labels: "pinned,security"
+          operations-per-run: 100
+
+  lock-closed-issues:
+    name: Lock Resolved Issues
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Lock closed issues
+        uses: dessant/lock-threads@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-inactive-days: 60
+          pr-inactive-days: 60
+          issue-lock-reason: "resolved"
+          pr-lock-reason: "resolved"
+          issue-comment: |
+            This issue has been automatically locked since there has been no recent activity after it was closed.
+            Please open a new issue for related bugs.
+          pr-comment: |
+            This pull request has been automatically locked since there has been no recent activity after it was closed.
+            Please open a new issue for related bugs or open a new PR for related changes.
+
+  validate-issue:
+    name: Validate Issue Format
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    steps:
+      - name: Check issue format
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const body = issue.body || '';
+            
+            if (body.length < 50) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `⚠️ This issue appears to lack sufficient detail.\n\nPlease provide more information:\n- Description of the problem\n- Steps to reproduce\n- Expected behavior\n- Actual behavior\n- Environment details`
+              });
+              
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ['needs-more-info']
+              });
+            }
+
+  assign-to-project:
+    name: Add to Project Board
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'issues' && github.event.action == 'opened') ||
+      (github.event_name == 'pull_request_target' && github.event.action == 'opened')
+    steps:
+      - name: Add to project
+        uses: actions/add-to-project@v0.5.0
+        with:
+          project-url: https://github.com/users/naruyaizumi/projects/1
+          github-token: ${{ secrets.GITHUB_TOKEN }}

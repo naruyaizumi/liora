@@ -1,0 +1,335 @@
+name: Discussion Management
+
+on:
+  release:
+    types: [published]
+  issues:
+    types: [closed]
+  schedule:
+    - cron: "0 0 1 * *"
+  workflow_dispatch:
+
+permissions:
+  discussions: write
+  contents: read
+
+jobs:
+  create-release-discussion:
+    name: Create Release Discussion
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create release discussion
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const release = context.payload.release;
+            const version = release.tag_name;
+            const versionClean = version.replace('v', '');
+            
+            const fs = require('fs');
+            let changelog = '';
+            
+            try {
+              const changelogContent = fs.readFileSync('CHANGELOG.md', 'utf8');
+              const versionSection = changelogContent.match(new RegExp(`## \\[${versionClean}\\][\\s\\S]*?(?=## \\[|$)`));
+              if (versionSection) {
+                changelog = versionSection[0];
+              }
+            } catch (error) {
+              changelog = release.body || 'No changelog available.';
+            }
+            
+            const mutation = `
+              mutation($repositoryId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
+                createDiscussion(input: {
+                  repositoryId: $repositoryId,
+                  categoryId: $categoryId,
+                  title: $title,
+                  body: $body
+                }) {
+                  discussion {
+                    id
+                    url
+                  }
+                }
+              }
+            `;
+            
+            const repo = await github.rest.repos.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            const categoriesQuery = `
+              query($owner: String!, $repo: String!) {
+                repository(owner: $owner, name: $repo) {
+                  discussionCategories(first: 10) {
+                    nodes {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            `;
+            
+            const categories = await github.graphql(categoriesQuery, {
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            const announcementCategory = categories.repository.discussionCategories.nodes.find(
+              cat => cat.name === 'Announcements' || cat.name === 'General'
+            );
+            
+            if (!announcementCategory) {
+              console.log('No suitable discussion category found');
+              return;
+            }
+            
+            const discussionBody = `
+            # 🎉 ${version} Released!
+            
+            We're excited to announce the release of Liora WhatsApp Bot ${version}!
+            
+            ${changelog}
+            
+            ## 📦 Installation
+            
+            \`\`\`bash
+            curl -sSL https://raw.githubusercontent.com/naruyaizumi/liora/main/service.sh | bash
+            \`\`\`
+            
+            ## 🔗 Links
+            
+            - [Release Notes](${release.html_url})
+            - [Full Changelog](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CHANGELOG.md)
+            - [Documentation](https://naruyaizumi.github.io/liora)
+            - [Wiki](https://github.com/${context.repo.owner}/${context.repo.repo}/wiki)
+            
+            ## 💬 Feedback
+            
+            We'd love to hear your thoughts on this release! Please share your feedback, questions, or issues below.
+            
+            ---
+            
+            Happy bot building! 🤖✨
+            `;
+            
+            const result = await github.graphql(mutation, {
+              repositoryId: repo.data.node_id,
+              categoryId: announcementCategory.id,
+              title: `🚀 Release ${version} - Discussion`,
+              body: discussionBody
+            });
+            
+            console.log('Discussion created:', result.createDiscussion.discussion.url);
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: release.id,
+              body: `📢 Join the discussion about this release: ${result.createDiscussion.discussion.url}`
+            });
+
+  create-monthly-discussion:
+    name: Create Monthly Discussion
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 0 1 * *'
+    steps:
+      - name: Create monthly recap discussion
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now = new Date();
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const monthName = lastMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+            
+            const commits = await github.rest.repos.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              since: lastMonth.toISOString(),
+              per_page: 100
+            });
+            
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              since: lastMonth.toISOString()
+            });
+            
+            const prs = issues.data.filter(issue => issue.pull_request);
+            const regularIssues = issues.data.filter(issue => !issue.pull_request);
+            
+            const discussionBody = `
+            # 📊 ${monthName} - Monthly Recap
+            
+            Here's what happened in the Liora project during ${monthName}:
+            
+            ## 📈 Activity Summary
+            
+            - 💻 **Commits**: ${commits.data.length}
+            - 🐛 **Issues**: ${regularIssues.length} (${regularIssues.filter(i => i.state === 'closed').length} closed)
+            - 🔀 **Pull Requests**: ${prs.length} (${prs.filter(pr => pr.state === 'closed').length} merged)
+            
+            ## 🌟 Highlights
+            
+            ### Top Contributors
+            ${[...new Set(commits.data.map(c => c.author?.login).filter(Boolean))]
+              .slice(0, 5)
+              .map(user => `- @${user}`)
+              .join('\n') || 'No contributors this month'}
+            
+            ### Notable Changes
+            ${commits.data.slice(0, 5).map(c => `- ${c.commit.message.split('\n')[0]}`).join('\n') || 'No notable changes'}
+            
+            ## 💬 Let's Discuss
+            
+            - What features would you like to see next?
+            - Any feedback on recent changes?
+            - Share your use cases and success stories!
+            
+            ---
+            
+            Thank you to everyone who contributed this month! 🙏
+            `;
+            
+            const repo = await github.rest.repos.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            const categoriesQuery = `
+              query($owner: String!, $repo: String!) {
+                repository(owner: $owner, name: $repo) {
+                  discussionCategories(first: 10) {
+                    nodes {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            `;
+            
+            const categories = await github.graphql(categoriesQuery, {
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            const generalCategory = categories.repository.discussionCategories.nodes.find(
+              cat => cat.name === 'General' || cat.name === 'Announcements'
+            );
+            
+            if (generalCategory) {
+              const mutation = `
+                mutation($repositoryId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
+                  createDiscussion(input: {
+                    repositoryId: $repositoryId,
+                    categoryId: $categoryId,
+                    title: $title,
+                    body: $body
+                  }) {
+                    discussion {
+                      url
+                    }
+                  }
+                }
+              `;
+              
+              await github.graphql(mutation, {
+                repositoryId: repo.data.node_id,
+                categoryId: generalCategory.id,
+                title: `📊 ${monthName} - Monthly Recap`,
+                body: discussionBody
+              });
+            }
+
+  close-resolved-issue-discussion:
+    name: Move Resolved Issues to Discussion
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'closed'
+    steps:
+      - name: Check if issue should be converted
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            
+            const labels = issue.labels.map(l => l.name);
+            if (!labels.includes('question') && !labels.includes('discussion')) {
+              console.log('Issue is not a question or discussion, skipping');
+              return;
+            }
+            
+            const repo = await github.rest.repos.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            const categoriesQuery = `
+              query($owner: String!, $repo: String!) {
+                repository(owner: $owner, name: $repo) {
+                  discussionCategories(first: 10) {
+                    nodes {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            `;
+            
+            const categories = await github.graphql(categoriesQuery, {
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            const qaCategory = categories.repository.discussionCategories.nodes.find(
+              cat => cat.name === 'Q&A' || cat.name === 'General'
+            );
+            
+            if (qaCategory) {
+              const mutation = `
+                mutation($repositoryId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
+                  createDiscussion(input: {
+                    repositoryId: $repositoryId,
+                    categoryId: $categoryId,
+                    title: $title,
+                    body: $body
+                  }) {
+                    discussion {
+                      url
+                    }
+                  }
+                }
+              `;
+              
+              const discussionBody = `
+              ${issue.body}
+              
+              ---
+              
+              *This discussion was created from issue #${issue.number}*
+              *Original issue: ${issue.html_url}*
+              `;
+              
+              const result = await github.graphql(mutation, {
+                repositoryId: repo.data.node_id,
+                categoryId: qaCategory.id,
+                title: issue.title,
+                body: discussionBody
+              });
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `This question has been resolved and moved to Discussions for future reference: ${result.createDiscussion.discussion.url}`
+              });
+            }

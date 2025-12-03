@@ -1,0 +1,481 @@
+name: Wiki Management
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "README.md"
+      - "CHANGELOG.md"
+      - "docs/**"
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-readme-to-wiki:
+    name: Sync README to Wiki
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout wiki
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+
+      - name: Sync README to Home page
+        run: |
+          cp README.md wiki/Home.md
+          
+          sed -i 's/](docs\//](/' wiki/Home.md
+          sed -i 's/](\.\//](/' wiki/Home.md
+
+      - name: Commit and push wiki changes
+        working-directory: wiki
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          if [[ `git status --porcelain` ]]; then
+            git add Home.md
+            git commit -m "docs: sync README to wiki [automated]"
+            git push
+            echo "README synced to wiki"
+          else
+            echo "No changes to sync"
+          fi
+
+  update-changelog-archive:
+    name: Archive Changelog to Wiki
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout wiki
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+
+      - name: Create changelog archive structure
+        run: |
+          mkdir -p wiki/changelog-archive
+          
+          VERSION="${{ github.event.release.tag_name }}"
+          VERSION_CLEAN="${VERSION#v}"
+          DATE=$(date +%Y-%m-%d)
+          
+          awk "/## \[$VERSION_CLEAN\]/,/## \[/" CHANGELOG.md | head -n -1 > wiki/changelog-archive/v${VERSION_CLEAN}.md
+          
+          if [ ! -f wiki/Changelog-Archive.md ]; then
+            cat > wiki/Changelog-Archive.md << 'EOF'
+          
+          Archive of all version changelogs for Liora WhatsApp Bot.
+          
+          EOF
+          fi
+          
+          sed -i "3a - [Version $VERSION_CLEAN](changelog-archive/v${VERSION_CLEAN}) - $DATE" wiki/Changelog-Archive.md
+
+      - name: Commit changelog archive
+        working-directory: wiki
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          git add changelog-archive/ Changelog-Archive.md
+          git commit -m "docs: archive changelog for ${{ github.event.release.tag_name }} [automated]"
+          git push
+          echo "Changelog archived"
+
+  update-bot-stats:
+    name: Update Bot Statistics
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout wiki
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+
+      - name: Collect bot statistics
+        id: stats
+        run: |
+          TOTAL_COMMITS=$(git rev-list --count HEAD)
+          CONTRIBUTORS=$(git log --format='%aN' | sort -u | wc -l)
+          TOTAL_RELEASES=$(git tag | wc -l)
+          LATEST_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          
+          TOTAL_FILES=$(find src lib -type f \( -name "*.js" -o -name "*.rs" -o -name "*.cpp" \) | wc -l)
+          TOTAL_LINES=$(find src lib -type f \( -name "*.js" -o -name "*.rs" -o -name "*.cpp" \) -exec wc -l {} + 2>/dev/null | tail -1 | awk '{print $1}')
+          
+          COMMITS_LAST_MONTH=$(git log --since='30 days ago' --oneline | wc -l)
+          LAST_COMMIT_DATE=$(git log -1 --format=%cd --date=format:'%Y-%m-%d %H:%M UTC')
+          
+          echo "total_commits=$TOTAL_COMMITS" >> $GITHUB_OUTPUT
+          echo "contributors=$CONTRIBUTORS" >> $GITHUB_OUTPUT
+          echo "total_releases=$TOTAL_RELEASES" >> $GITHUB_OUTPUT
+          echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+          echo "total_files=$TOTAL_FILES" >> $GITHUB_OUTPUT
+          echo "total_lines=$TOTAL_LINES" >> $GITHUB_OUTPUT
+          echo "commits_last_month=$COMMITS_LAST_MONTH" >> $GITHUB_OUTPUT
+          echo "last_commit_date=$LAST_COMMIT_DATE" >> $GITHUB_OUTPUT
+
+      - name: Generate bot stats page
+        run: |
+          cat > wiki/Bot-Statistics.md << EOF
+          # 📊 Liora Bot Statistics
+          
+          *Last updated: $(date -u +"%Y-%m-%d %H:%M UTC")*
+          
+          ## 🤖 Bot Information
+          
+          | Metric | Value |
+          |--------|-------|
+          | **Latest Version** | ${{ steps.stats.outputs.latest_version }} |
+          | **Total Releases** | ${{ steps.stats.outputs.total_releases }} |
+          | **License** | Apache-2.0 |
+          | **Platform** | WhatsApp (Baileys) |
+          
+          ## 📈 Development Statistics
+          
+          | Metric | Value |
+          |--------|-------|
+          | **Total Commits** | ${{ steps.stats.outputs.total_commits }} |
+          | **Contributors** | ${{ steps.stats.outputs.contributors }} |
+          | **Total Files** | ${{ steps.stats.outputs.total_files }} |
+          | **Lines of Code** | ${{ steps.stats.outputs.total_lines }} |
+          | **Last Commit** | ${{ steps.stats.outputs.last_commit_date }} |
+          
+          ## 🔥 Recent Activity (Last 30 Days)
+          
+          - **Commits**: ${{ steps.stats.outputs.commits_last_month }}
+          - **Status**: 🟢 Active Development
+          
+          ## 🌟 Features
+          
+          - ✅ Multi-platform support (Ubuntu, Debian, RHEL, Arch)
+          - ✅ Native performance (Rust + C++ modules)
+          - ✅ Comprehensive API integrations
+          - ✅ Production-ready CI/CD
+          - ✅ Automatic security scanning
+          - ✅ Real-time monitoring
+          
+          ## 📚 Resources
+          
+          - [Documentation](https://naruyaizumi.github.io/liora)
+          - [Changelog Archive](Changelog-Archive)
+          - [Installation Guide](Installation)
+          - [API Reference](API-Reference)
+          
+          ## 📊 Language Distribution
+          
+          \`\`\`
+          JavaScript: $(find src lib -name "*.js" | wc -l) files
+          Rust:       $(find lib/rs -name "*.rs" | wc -l) files
+          C++:        $(find lib/cpp -name "*.cpp" -o -name "*.h" | wc -l) files
+          \`\`\`
+          
+          ## 🏆 Top Contributors
+          
+          $(git log --format='%aN' | sort | uniq -c | sort -rn | head -10 | awk '{print "- **" $2 " " $3 "**: " $1 " commits"}')
+          
+          ---
+          
+          *Statistics generated automatically by GitHub Actions*
+          EOF
+
+      - name: Commit bot stats
+        working-directory: wiki
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          git add Bot-Statistics.md
+          git commit -m "docs: update bot statistics [automated]"
+          git push
+          echo "✅ Bot statistics updated"
+
+  create-installation-guide:
+    name: Create Installation Guide
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+
+      - name: Checkout wiki
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+
+      - name: Generate installation guide
+        run: |
+          cat > wiki/Installation.md << 'EOF'
+          # 🚀 Installation Guide
+          
+          Complete guide to install and run Liora WhatsApp Bot on various platforms.
+          
+          ## Quick Start
+          
+          ### One-Line Installation (Recommended)
+          
+          ```bash
+          curl -sSL https://raw.githubusercontent.com/naruyaizumi/liora/main/service.sh | bash
+          ```
+          
+          This will automatically:
+          - Detect your OS and install dependencies
+          - Download and setup Liora
+          - Configure systemd service (if available)
+          - Start the bot
+          
+          ## Supported Operating Systems
+          
+          - ✅ Ubuntu 24.04 LTS (Noble)
+          - ✅ Debian 12 (Bookworm)
+          - ✅ Red Hat Enterprise Linux 9
+          - ✅ Arch Linux (latest)
+          - ✅ Other systemd-based distributions
+          
+          ## Manual Installation
+          
+          ### Prerequisites
+          
+          1. **System Dependencies**:
+             ```bash
+             # Ubuntu/Debian
+             sudo apt-get update
+             sudo apt-get install -y curl git ffmpeg build-essential python3 g++ cmake
+             
+             # RHEL/CentOS/Fedora
+             sudo dnf install -y curl git ffmpeg gcc-c++ python3 cmake
+             
+             # Arch Linux
+             sudo pacman -S curl git ffmpeg base-devel python cmake
+             ```
+          
+          2. **Install Bun**:
+             ```bash
+             curl -fsSL https://bun.sh/install | bash
+             source ~/.bashrc  # or ~/.zshrc
+             ```
+          
+          ### Installation Steps
+          
+          1. **Clone Repository**:
+             ```bash
+             git clone https://github.com/naruyaizumi/liora.git
+             cd liora
+             ```
+          
+          2. **Install Dependencies**:
+             ```bash
+             bun install
+             ```
+          
+          3. **Build Native Modules**:
+             ```bash
+             bun run build
+             ```
+          
+          4. **Start Bot**:
+             ```bash
+             bun run src/index.js
+             ```
+          
+          ## Running as Service
+          
+          ### systemd Service (Ubuntu/Debian/RHEL)
+          
+          1. Create service file:
+             ```bash
+             sudo nano /etc/systemd/system/liora.service
+             ```
+          
+          2. Add configuration:
+             ```ini
+             [Unit]
+             Description=Liora WhatsApp Bot
+             After=network.target
+             
+             [Service]
+             Type=simple
+             User=liora
+             WorkingDirectory=/opt/liora
+             ExecStart=/root/.bun/bin/bun run src/index.js
+             Restart=always
+             RestartSec=10
+             StandardOutput=journal
+             StandardError=journal
+             
+             [Install]
+             WantedBy=multi-user.target
+             ```
+          
+          3. Enable and start:
+             ```bash
+             sudo systemctl daemon-reload
+             sudo systemctl enable liora
+             sudo systemctl start liora
+             ```
+          
+          ### Check Status
+          
+          ```bash
+          sudo systemctl status liora
+          sudo journalctl -u liora -f
+          ```
+          
+          ## Configuration
+          
+          Edit `src/config.js` to customize:
+          - Bot prefix
+          - Owner number
+          - Feature toggles
+          - API keys
+          
+          ## Troubleshooting
+          
+          ### Bot Not Starting
+          
+          1. Check logs:
+             ```bash
+             sudo journalctl -u liora -n 50
+             ```
+          
+          2. Verify dependencies:
+             ```bash
+             bun --version
+             node --version
+             ```
+          
+          3. Check permissions:
+             ```bash
+             ls -la /opt/liora
+             ```
+          
+          ### Connection Issues
+          
+          1. Check firewall:
+             ```bash
+             sudo ufw status
+             ```
+          
+          2. Verify network:
+             ```bash
+             ping -c 4 github.com
+             ```
+          
+          ## Updating
+          
+          ```bash
+          cd /opt/liora
+          git pull origin main
+          bun install
+          bun run build
+          sudo systemctl restart liora
+          ```
+          
+          ## Uninstallation
+          
+          ```bash
+          sudo systemctl stop liora
+          sudo systemctl disable liora
+          sudo rm /etc/systemd/system/liora.service
+          sudo rm -rf /opt/liora
+          ```
+          
+          ---
+          
+          For more help, visit [GitHub Issues](https://github.com/naruyaizumi/liora/issues)
+          EOF
+
+      - name: Commit installation guide
+        working-directory: wiki
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          if [[ `git status --porcelain` ]]; then
+            git add Installation.md
+            git commit -m "docs: update installation guide [automated]"
+            git push
+            echo "Installation guide updated"
+          fi
+
+  update-wiki-sidebar:
+    name: Update Wiki Sidebar
+    runs-on: ubuntu-latest
+    needs: [sync-readme-to-wiki, update-bot-stats, create-installation-guide]
+    steps:
+      - name: Checkout wiki
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+
+      - name: Generate sidebar
+        run: |
+          cat > wiki/_Sidebar.md << 'EOF'
+          # 📚 Liora Wiki
+          
+          ## 🏠 Home
+          - [Home](Home)
+          - [Bot Statistics](Bot-Statistics)
+          
+          ## 🚀 Getting Started
+          - [Installation](Installation)
+          - [Quick Start](Quick-Start)
+          - [Configuration](Configuration)
+          
+          ## 📖 Documentation
+          - [API Reference](API-Reference)
+          - [Command List](Commands)
+          - [Features](Features)
+          
+          ## 📜 Changelog
+          - [Latest Changes](../CHANGELOG.md)
+          - [Changelog Archive](Changelog-Archive)
+          
+          ## 🔧 Development
+          - [Contributing](Contributing)
+          - [Code of Conduct](Code-of-Conduct)
+          - [Architecture](Architecture)
+          
+          ## 🐛 Support
+          - [Troubleshooting](Troubleshooting)
+          - [FAQ](FAQ)
+          - [GitHub Issues](https://github.com/naruyaizumi/liora/issues)
+          
+          ---
+          
+          *Last updated: $(date -u +"%Y-%m-%d")*
+          EOF
+
+      - name: Commit sidebar
+        working-directory: wiki
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          git add _Sidebar.md
+          git commit -m "docs: update wiki sidebar [automated]"
+          git push
+          echo "Wiki sidebar updated"

@@ -1,0 +1,61 @@
+whatsapp:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/**/*"
+          - "lib/core/**/*"
+          - "lib/auth/**/*"
+
+api:
+  - changed-files:
+      - any-glob-to-any-file: "lib/api/**/*"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "docs/**/*"
+          - "**/*.md"
+          - "README.md"
+          - "CHANGELOG.md"
+
+config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "*.json"
+          - "*.yml"
+          - "*.yaml"
+          - ".github/**/*"
+
+rust:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "lib/rs/**/*"
+          - "**/Cargo.toml"
+          - "**/Cargo.lock"
+
+cpp:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "lib/cpp/**/*"
+          - "**/*.cpp"
+          - "**/*.h"
+          - "**/*.cc"
+          - "binding.gyp"
+
+ci-cd:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/**/*"
+          - ".github/actions/**/*"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "package.json"
+          - "bun.lockb"
+          - "Cargo.lock"
+
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/*security*"
+          - ".github/workflows/*scan*"
