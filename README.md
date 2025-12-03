@@ -264,11 +264,6 @@ Apache 2.0 allows free use with attribution. **Do not** remove credits or rebran
 
 ## ✨ Feature Highlights
 
-<div style="overflow-x: auto; white-space: nowrap; padding: 20px 0;">
-<table>
-<tr>
-<td width="480px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
-
 **🔥 Production Architecture**
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Fire.png" width="30" /> **Multi-Process Isolation**  
@@ -283,8 +278,7 @@ Built-in watchdog with automatic recovery and alerts
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Satellite%20Antenna.png" width="30" /> **Signal Handling**  
 Proper SIGTERM/SIGINT handling for clean shutdowns
 
-</td>
-<td width="480px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
+---
 
 **⚡ High Performance**
 
@@ -300,8 +294,7 @@ PQueue-based message processing prevents bottlenecks
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Electric%20Plug.png" width="30" /> **Circuit Breaker**  
 Automatic API fallback prevents cascading failures
 
-</td>
-<td width="480px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
+---
 
 **🔒 Enterprise Security**
 
@@ -317,8 +310,7 @@ Comprehensive validation prevents injection attacks
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Stopwatch.png" width="30" /> **Rate Limiting**  
 Per-user and global limits with Redis-backed tracking
 
-</td>
-<td width="480px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
+---
 
 **🛡️ Group Management**
 
@@ -334,10 +326,9 @@ Promote/demote users with granular permissions
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Scroll.png" width="30" /> **Group Rules**  
 Enforce group rules with automatic warnings
 
-<br><small><em>*Note: Group management features are regularly updated based on WhatsApp API changes*</em></small>
+<small><em>*Note: Group management features are regularly updated based on WhatsApp API changes*</em></small>
 
-</td>
-<td width="480px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
+---
 
 **🧩 Developer Experience**
 
@@ -353,8 +344,7 @@ JSDoc annotations provide IDE autocomplete
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Books.png" width="30" /> **Clean Architecture**  
 SOLID principles with clear separation of concerns
 
-</td>
-<td width="480px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
+---
 
 **📊 Observability**
 
@@ -370,8 +360,7 @@ Built-in `/metrics` endpoint for monitoring
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Magnifying%20Glass%20Tilted%20Right.png" width="30" /> **Debug Mode**  
 Detailed traces with performance profiling
 
-</td>
-<td width="480px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
+---
 
 **🎥 Media Downloader Suite**
 
@@ -387,17 +376,16 @@ Download Reels, Stories, and posts
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Video%20Camera.png" width="30" /> **Media Downloader**  
 Download videos/images/audio from various platforms
 
-<br><small><em>*Note: Media downloader support varies by platform and may change*</em></small>
+<small><em>*Note: Media downloader support varies by platform and may change*</em></small>
 
-</td>
-<td width="480px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
+---
 
 **🛠️ Advanced Message Features**
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Plus.png" width="30" /> **Unlimited Buttons**  
 Support for 15+ button types including Pix Key, Galaxy, no limit on quantity
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/refs/heads/master/Emojis/Objects/Open%20File%20Folder.png" width="30" /> **All Media Support**  
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/refs/heads/master/Emojis/Objects/File%20Folder.png" width="30" /> **All Media Support**  
 Buttons can include any media type - images, videos, audio, documents
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Card%20Index.png" width="30" /> **Rich Message Types**  
@@ -406,8 +394,7 @@ Group status payloads, card messages (carousel), album messages
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/World%20Map.png" width="30" /> **Location & Product**  
 Support for location sharing and product catalog messages
 
-</td>
-<td width="480px" valign="top" style="display: inline-block; white-space: normal; vertical-align: top; padding: 15px; min-height: 450px;">
+---
 
 **🔧 Utilities & Tools**
 
@@ -423,10 +410,7 @@ Check IP, reverse DNS, network information
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Glowing%20Star.png" width="30" /> **Image Enhancement**  
 Enhance image quality with various algorithms
 
-</td>
-</tr>
-</table>
-</div>
+---
 
 <div align="center">
 <small><em>All features are subject to continuous updates based on WhatsApp API changes and community feedback</em></small>
