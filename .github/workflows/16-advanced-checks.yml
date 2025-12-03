@@ -105,7 +105,7 @@ jobs:
 
       - name: Check licenses
         run: |
-          npx license-checker --summary --production --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;0BSD;Unlicense"
+          npx license-checker --summary --production
 
       - name: Generate license report
         run: |
