@@ -108,7 +108,8 @@ jobs:
           chmod +x /usr/local/bin/osv-scanner
 
       - name: Run OSV Scanner
-        run: osv-scanner --config=./osv-scanner.toml
+        run: osv-scanner scan source --recursive ./lib/rs
+        run: osv-scanner scan source --recursive .
 
   rust-audit:
     name: Rust Security Audit
