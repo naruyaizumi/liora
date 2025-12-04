@@ -5,7 +5,6 @@ let handler = async (m, { conn, text }) => {
         const q = m.quoted ? m.quoted : m;
         const mime = (q.msg || q).mimetype || "";
         let imageUrl = text;
-
         if (!text && !/image\/(jpeg|jpg|png|webp)/.test(mime))
             return m.reply("Failed to download media or format not recognized.");
         await global.loading(m, conn);
