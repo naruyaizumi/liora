@@ -145,7 +145,7 @@ jobs:
           git add .
           
           if [[ `git status --porcelain` ]]; then  
-            git commit -m "chore(release): prepare v${{ needs.check-version.outputs.new_version }} [skip ci]"
+            git commit -m "chore(release): prepare v${{ needs.check-version.outputs.new_version }}"
             
             git push origin main 2>&1 | sed "s/$PAT_TOKEN/***/g"
             echo "Changes committed directly to main"
