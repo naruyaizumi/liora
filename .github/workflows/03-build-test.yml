@@ -245,9 +245,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y shellcheck
 
       - name: Lint installer script
-        run: shellcheck -e SC1091 service.sh
+        run: shellcheck -e SC1091 install.sh
 
       - name: Test installer (dry-run)
         run: |
-          bash -n service.sh
+          bash -n install.sh
           echo "Installer script syntax is valid"
