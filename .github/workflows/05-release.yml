@@ -66,6 +66,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       branch_name: ${{ steps.create-branch.outputs.branch_name }}
+      changelog: ${{ steps.changelog.outputs.changelog }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -106,8 +107,8 @@ jobs:
             g++ \
             pkg-config \
             cmake \
-            jq  # Tambah jq untuk parsing JSON
-            
+            jq
+
       - name: Install dependencies  
         run: bun install  
 
@@ -144,7 +145,7 @@ jobs:
             echo ""  
             echo "${{ steps.changelog.outputs.changelog }}"  
             echo ""  
-          } | cat - CHANGELOG.md > temp && mv temp CHANGELOG.md  
+          } | cat - CHANGELOG.md > temp && mv temp CHANGELOG.md
 
       - name: Commit and push changes
         run: |
@@ -166,6 +167,13 @@ jobs:
     if: needs.check-version.outputs.should_release == 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+          ref: main
+
       - name: Create Pull Request
         uses: repo-sync/pull-request@v2
         with:
