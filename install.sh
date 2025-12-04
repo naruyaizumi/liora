@@ -12,7 +12,7 @@ load_library() {
     local lib_url="${GITHUB_RAW_BASE}/${lib_name}"
     local temp_file="/tmp/${lib_name}"
     
-    print_debug "Loading library: ${lib_name}"
+    print_info "Loading library: ${lib_name}"
     
     if ! curl -sSf "${lib_url}" -o "${temp_file}"; then
         echo "Error: Failed to download library ${lib_name}"
