@@ -239,11 +239,13 @@ curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh |
 <td width="50%">
 
 **System**
+
 - **OS**: Linux Kernel 6.12+
 - **Distribution**: Ubuntu 24.04+, Debian 12+, Arch Linux
 - **Architecture**: x86_64 / ARM64
 
 **Hardware**
+
 - **CPU**: 2 cores minimum
 - **RAM**: 4GB (2GB with swap)
 - **Storage**: 15GB SSD recommended
@@ -253,12 +255,14 @@ curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh |
 <td width="50%">
 
 **Dependencies**
+
 - **Runtime**: Node.js 24+ / Bun 1.1+
 - **Database**: PostgreSQL 16+ / SQLite 3.35+
 - **Cache**: Redis 7+
 - **Build Tools**: G++ 13+, CMake 3.28+
 
 **Permissions**
+
 - sudo/root access for system installation
 - Port 3000+ available for services
 - Write access to installation directory
@@ -516,17 +520,17 @@ Create a pull request
 <details>
 <summary><b>💻 Code Standards</b></summary>
 
--   **Style**: Follow ESLint and Prettier configurations
--   **Commits**: Use [Conventional Commits](https://www.conventionalcommits.org/):
-    -   `feat:` New features
-    -   `fix:` Bug fixes
-    -   `docs:` Documentation
-    -   `style:` Formatting
-    -   `refactor:` Code restructuring
-    -   `test:` Tests
-    -   `chore:` Maintenance
--   **Testing**: Write tests for new features
--   **Documentation**: Update relevant docs
+- **Style**: Follow ESLint and Prettier configurations
+- **Commits**: Use [Conventional Commits](https://www.conventionalcommits.org/):
+    - `feat:` New features
+    - `fix:` Bug fixes
+    - `docs:` Documentation
+    - `style:` Formatting
+    - `refactor:` Code restructuring
+    - `test:` Tests
+    - `chore:` Maintenance
+- **Testing**: Write tests for new features
+- **Documentation**: Update relevant docs
 
 </details>
 
@@ -537,15 +541,15 @@ Found a bug? Help us fix it!
 
 **Before reporting:**
 
--   Search existing [issues](https://github.com/naruyaizumi/liora/issues)
--   Check if it's already fixed in `main`
+- Search existing [issues](https://github.com/naruyaizumi/liora/issues)
+- Check if it's already fixed in `main`
 
 **When reporting:**
 
--   Use the bug report template
--   Include steps to reproduce
--   Provide error logs
--   Specify environment details
+- Use the bug report template
+- Include steps to reproduce
+- Provide error logs
+- Specify environment details
 
 </details>
 
@@ -556,15 +560,15 @@ Have an idea? We'd love to hear it!
 
 **Before requesting:**
 
--   Check existing [discussions](https://github.com/naruyaizumi/liora/discussions)
--   Search for similar requests
+- Check existing [discussions](https://github.com/naruyaizumi/liora/discussions)
+- Search for similar requests
 
 **When requesting:**
 
--   Use the feature request template
--   Explain the use case
--   Describe expected behavior
--   Provide examples if possible
+- Use the feature request template
+- Explain the use case
+- Describe expected behavior
+- Provide examples if possible
 
 </details>
 
@@ -573,10 +577,10 @@ Have an idea? We'd love to hear it!
 
 Documentation improvements are always welcome!
 
--   Fix typos or unclear sections
--   Add examples and tutorials
--   Translate to other languages
--   Update outdated information
+- Fix typos or unclear sections
+- Add examples and tutorials
+- Translate to other languages
+- Update outdated information
 
 </details>
 
@@ -584,13 +588,13 @@ Documentation improvements are always welcome!
 
 Before submitting your PR, ensure:
 
--   [ ] Code follows project style guidelines
--   [ ] All tests pass (`bun run check`)
--   [ ] New tests added for features
--   [ ] Documentation updated
--   [ ] Commit messages are descriptive
--   [ ] Branch is up-to-date with `main`
--   [ ] No merge conflicts
+- [ ] Code follows project style guidelines
+- [ ] All tests pass (`bun run check`)
+- [ ] New tests added for features
+- [ ] Documentation updated
+- [ ] Commit messages are descriptive
+- [ ] Branch is up-to-date with `main`
+- [ ] No merge conflicts
 
 **🏆 Top Contributors**
 
@@ -632,7 +636,7 @@ Get updates, share ideas, and discuss features directly on GitHub
 📰 Release announcements  
 💡 Feature discussions  
 🤔 General questions  
-📣 Community polls  
+📣 Community polls
 
 <br>
 
@@ -651,7 +655,7 @@ Real-time help and casual discussions with fellow users
 ❓ Quick questions  
 🆘 Troubleshooting help  
 💬 Casual chat  
-🤝 Networking  
+🤝 Networking
 
 <br>
 
@@ -672,7 +676,7 @@ Official Baileys library support and development discussions
 🔧 Technical deep-dives  
 🐛 Protocol issues  
 👥 Dev community  
-📚 Learning resources  
+📚 Learning resources
 
 <br>
 
@@ -691,7 +695,7 @@ Connect with the maintainer across platforms
 🔗 All social links  
 📧 Contact info  
 🎨 Portfolio  
-☕ Support options  
+☕ Support options
 
 <br>
 
@@ -1000,7 +1004,6 @@ Grant of patent rights
 
 <table>
 <tr>
-
 
 <td width="33%" align="center">
 
