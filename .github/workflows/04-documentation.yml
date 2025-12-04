@@ -59,11 +59,11 @@ jobs:
       - name: Generate JSDoc
         run: |
           mkdir -p docs/api
-          bunx jsdoc -c jsdoc.json -r src lib -d docs/api
+          bun run jsdoc:html
 
       - name: Generate Markdown docs
         run: |
-          bunx jsdoc2md "src/**/*.js" "lib/**/*.js" > docs/API.md
+          bun run jsdoc:md
 
       - name: Upload JSDoc artifacts
         uses: actions/upload-artifact@v5

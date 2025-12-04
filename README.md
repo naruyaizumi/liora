@@ -38,66 +38,6 @@
   </a>
 </p>
 
-<!-- CI/CD Status Badges -->
-<p align="center">
-  <a href="https://github.com/naruyaizumi/liora/actions/workflows/01-code-quality.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/01-code-quality.yml?branch=main&style=for-the-badge&logo=eslint&logoColor=white&label=ESLint&labelColor=1a1b27&color=7aa2f7" alt="ESLint Status">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora/actions/workflows/01-code-quality.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/01-code-quality.yml?branch=main&style=for-the-badge&logo=prettier&logoColor=white&label=Prettier&labelColor=1a1b27&color=bb9af7" alt="Prettier Status">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora/actions/workflows/04-documentation.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/04-documentation.yml?branch=main&style=for-the-badge&logo=readthedocs&logoColor=white&label=JSDoc&labelColor=1a1b27&color=9ece6a" alt="JSDoc Status">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora/actions/workflows/02-security-scan.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/02-security-scan.yml?branch=main&style=for-the-badge&logo=codeql&logoColor=white&label=CodeQL&labelColor=1a1b27&color=e0af68" alt="CodeQL Security">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora/actions/workflows/03-build-test.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/03-build-test.yml?branch=main&style=for-the-badge&logo=bun&logoColor=white&label=Build%20Test&labelColor=1a1b27&color=f7768e" alt="Build Test">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora/actions/workflows/10-deployment.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/naruyaizumi/liora/10-deployment.yml?branch=main&style=for-the-badge&logo=github-actions&logoColor=white&label=Deployment&labelColor=1a1b27&color=73daca" alt="Deployment">
-  </a>
-</p>
-
-<!-- Repository Stats Badges -->
-<p align="center">
-  <a href="https://github.com/naruyaizumi/liora/commits/main">
-    <img src="https://img.shields.io/github/last-commit/naruyaizumi/liora?style=for-the-badge&logo=git&logoColor=white&label=Last%20Commit&labelColor=1a1b27&color=bb9af7" alt="Last Commit">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora/stargazers">
-    <img src="https://img.shields.io/github/stars/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&label=Stars&labelColor=1a1b27&color=e0af68" alt="GitHub Stars">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora/network/members">
-    <img src="https://img.shields.io/github/forks/naruyaizumi/liora?style=for-the-badge&logo=github&logoColor=white&label=Forks&labelColor=1a1b27&color=f7768e" alt="GitHub Forks">
-  </a>
-  <a href="https://github.com/naruyaizumi/liora/issues">
-    <img src="https://img.shields.io/badge/dynamic/json?style=for-the-badge&logo=github&logoColor=white&label=Issues&labelColor=1a1b27&color=73daca&query=count&url=https%3A%2F%2Fapi.github.com%2Frepos%2Fnaruyaizumi%2Fliora" alt="Open Issues">
-  </a>
-</p>
-
-<!-- Mirror Repositories Badges -->
-<p align="center">
-  <a href="https://github.com/naruyaizumi/liora">
-    <img src="https://img.shields.io/badge/GitHub-Primary-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Mirror">
-  </a>
-  <a href="https://gitlab.com/naruyaizumi/liora">
-    <img src="https://img.shields.io/badge/GitLab-Mirror-FC6D26?style=for-the-badge&logo=gitlab&logoColor=white" alt="GitLab Mirror">
-  </a>
-  <a href="https://codeberg.org/naruyaizumi/liora">
-    <img src="https://img.shields.io/badge/Codeberg-Mirror-2185D0?style=for-the-badge&logo=codeberg&logoColor=white" alt="Codeberg Mirror">
-  </a>
-  <a href="https://gitea.com/naruyaizumi/liora">
-    <img src="https://img.shields.io/badge/Gitea-Mirror-609926?style=for-the-badge&logo=gitea&logoColor=white" alt="Gitea Mirror">
-  </a>
-  <a href="https://bitbucket.org/naruyaizumi/liora">
-    <img src="https://img.shields.io/badge/Bitbucket-Mirror-0052CC?style=for-the-badge&logo=bitbucket&logoColor=white" alt="Bitbucket Mirror">
-  </a>
-  <a href="https://dev.azure.com/naruyaizumi/_git/liora">
-    <img src="https://img.shields.io/badge/Azure-Mirror-0078D4?style=for-the-badge&logo=azuredevops&logoColor=white" alt="Azure DevOps Mirror">
-  </a>
-</p>
-
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
@@ -269,6 +209,59 @@ width="60" />
 Apache 2.0 allows free use with attribution. **Do not** remove credits or rebrand for profit.
 
 [Read License →](LICENSE)
+
+</td>
+</tr>
+</table>
+
+</div>
+
+<div align="center">
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
+</div>
+
+## 🚀 Quick Start
+
+<div align="center">
+
+**⚡ One-Line Installation**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh | bash
+```
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Backhand%20Index%20Pointing%20Down.png" width="40" />
+
+**Minimum Requirements**
+
+<table>
+<tr>
+<td width="50%">
+
+**System**
+- **OS**: Linux Kernel 6.12+
+- **Distribution**: Ubuntu 24.04+, Debian 12+, Arch Linux
+- **Architecture**: x86_64 / ARM64
+
+**Hardware**
+- **CPU**: 2 cores minimum
+- **RAM**: 4GB (2GB with swap)
+- **Storage**: 15GB SSD recommended
+- **Network**: 100Mbps internet connection
+
+</td>
+<td width="50%">
+
+**Dependencies**
+- **Runtime**: Node.js 24+ / Bun 1.1+
+- **Database**: PostgreSQL 16+ / SQLite 3.35+
+- **Cache**: Redis 7+
+- **Build Tools**: G++ 13+, CMake 3.28+
+
+**Permissions**
+- sudo/root access for system installation
+- Port 3000+ available for services
+- Write access to installation directory
 
 </td>
 </tr>
@@ -454,55 +447,6 @@ Enhance image quality with various algorithms
 
 <div align="center">
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
-</div>
-
-## 🚀 Quick Start
-
-<div align="center">
-
-**⚡ One-Line Installation**
-
-```bash
-curl -sSL https://raw.githubusercontent.com/naruyaizumi/liora/main/service.sh | bash
-```
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Backhand%20Index%20Pointing%20Down.png" width="40" />
-
-**Minimum Requirements**
-
-<table>
-<tr>
-<td width="50%">
-
-**System**
-- **OS**: Linux Kernel 6.12+
-- **Distribution**: Ubuntu 24.04+, Debian 12+, Arch Linux
-- **Architecture**: x86_64 / ARM64
-
-**Hardware**
-- **CPU**: 2 cores minimum
-- **RAM**: 4GB (2GB with swap)
-- **Storage**: 15GB SSD recommended
-- **Network**: 100Mbps internet connection
-
-</td>
-<td width="50%">
-
-**Dependencies**
-- **Runtime**: Node.js 24+ / Bun 1.1+
-- **Database**: PostgreSQL 16+ / SQLite 3.35+
-- **Cache**: Redis 7+
-- **Build Tools**: G++ 13+, CMake 3.28+
-
-**Permissions**
-- sudo/root access for system installation
-- Port 3000+ available for services
-- Write access to installation directory
-
-</td>
-</tr>
-</table>
-
 </div>
 
 ## 🤝 Contributing

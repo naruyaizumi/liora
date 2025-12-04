@@ -80,7 +80,7 @@ jobs:
         run: bun install
 
       - name: Run Prettier
-        run: bunx prettier --write . || true
+        run: bun run format || true
 
       - name: Commit formatting changes
         run: |

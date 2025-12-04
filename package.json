@@ -1,6 +1,6 @@
 {
     "name": "liora",
-    "version": "8.0.2",
+    "version": "8.0.3",
     "description": "Modern WhatsApp bot",
     "keywords": [
         "whatsapp",
@@ -12,8 +12,7 @@
     "private": false,
     "engines": {
         "bun": ">=1.1.0",
-        "node": ">=24.0.0",
-        "npm": "please-use-bun"
+        "node": ">=24.0.0"
     },
     "scripts": {
         "format": "bunx prettier --write .",
@@ -24,13 +23,15 @@
         "lint": "bunx eslint .",
         "lint:fix": "bunx eslint . --fix",
         "lint:rust": "cd lib/rs && cargo clippy --all-targets --all-features -- -D warnings",
-        "build:cpp": "node-gyp configure build",
+        "build:cpp": "node-gyp configure --release && node-gyp build",
         "build:rs": "cd lib/rs && cargo build --release",
         "build": "bun run build:cpp && bun run build:rs",
         "clean:cpp": "node-gyp clean",
         "clean:rust": "cd lib/rs && cargo clean",
         "clean": "bun run clean:cpp && bun run clean:rust && rm -rf node_modules",
-        "check": "bun run format:check && bun run lint && bun run lint:rust"
+        "check": "bun run format:check && bun run lint && bun run lint:rust",
+        "jsdoc:html": "bunx jsdoc -c jsdoc.json -r src lib -d docs/api",
+        "jsdoc:md": "bunx jsdoc2md \"src/**/*.js\" \"lib/**/*.js\" > docs/API.md"
     },
     "license": "Apache-2.0",
     "repository": [

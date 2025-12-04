@@ -4,13 +4,17 @@ on:
   schedule:
     - cron: "0 0 * * 0"
     - cron: "0 0 1 * *"
-    - cron: "0 */6 * * *"
+    - cron: "0 */12 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
   issues: write
   pull-requests: write
+
+env:
+  REPO_URL: https://github.com/naruyaizumi/liora.git
+  BENCHMARK_ITER: 1000000
 
 jobs:
   cleanup-cache:
@@ -83,12 +87,12 @@ jobs:
 
       - name: Check for deprecated packages
         run: |
-          npx check-is-deprecated
+          bunx check-is-deprecated -g $REPO_URL
 
   security-scan-scheduled:
     name: Scheduled Security Scan
     runs-on: ubuntu-latest
-    if: github.event.schedule == '0 */6 * * *'
+    if: github.event.schedule == '0 */12 * * *'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -133,7 +137,6 @@ jobs:
             git add .github/stats/
             git commit -m "chore: update repository statistics [skip ci]"
             git push
-          fi
 
   backup-issues:
     name: Backup Issues & PRs
@@ -182,39 +185,7 @@ jobs:
 
       - name: Check licenses
         run: |
-          npx license-checker --summary
-
-  performance-benchmark:
-    name: Performance Benchmark
-    runs-on: ubuntu-latest
-    if: github.event.schedule == '0 0 * * 0'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            ffmpeg \
-            libwebp-dev \
-            build-essential \
-            python3 \
-            g++ \
-            cmake
-
-      - name: Install npm dependencies
-        run: bun install
-
-      - name: Run benchmarks
-        run: |
-          echo "Running performance benchmarks..."
-          # bun run benchmark
+          bunx license-checker --summary
 
   notify-scheduled-tasks:
     name: Notify Completion

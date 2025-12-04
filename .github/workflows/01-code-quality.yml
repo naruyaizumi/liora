@@ -46,7 +46,7 @@ jobs:
         run: bun install
 
       - name: Run Prettier Fix
-        run: bunx prettier --write .
+        run: bun run format
 
   eslint:
     name: ESLint Analysis
