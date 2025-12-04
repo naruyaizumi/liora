@@ -39,14 +39,18 @@ jobs:
 
       - name: Commit and push wiki changes
         working-directory: wiki
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --local user.name "naruyaizumi"
+          git config --local user.email "sexystyle088@gmail.com"
+          
+          git remote set-url origin "https://naruyaizumi:$PAT_TOKEN@github.com/naruyaizumi/liora.wiki.git"
           
           if [[ `git status --porcelain` ]]; then
             git add Home.md
             git commit -m "docs: sync README to wiki [automated]"
-            git push
+            git push origin HEAD 2>&1 | sed "s/$PAT_TOKEN/***/g"
             echo "README synced to wiki"
           else
             echo "No changes to sync"
@@ -77,27 +81,53 @@ jobs:
           DATE=$(date +%Y-%m-%d)
           
           awk "/## \[$VERSION_CLEAN\]/,/## \[/" CHANGELOG.md | head -n -1 > wiki/changelog-archive/v${VERSION_CLEAN}.md
+
+          if [[ -s "wiki/changelog-archive/v${VERSION_CLEAN}.md" ]]; then
+            echo "Changelog extracted for $VERSION"
+          else
+            echo "Warning: No changelog found for $VERSION"
+            echo "No changelog available for $VERSION" > "wiki/changelog-archive/v${VERSION_CLEAN}.md"
+          fi
           
           if [ ! -f wiki/Changelog-Archive.md ]; then
             cat > wiki/Changelog-Archive.md << 'EOF'
-          
-          Archive of all version changelogs for Liora WhatsApp Bot.
-          
-          EOF
+            
+            # 📜 Changelog Archive
+            
+            Archive of all version changelogs for Liora WhatsApp Bot.
+            
+            ## Available Versions
+            
+            EOF
           fi
           
-          sed -i "3a - [Version $VERSION_CLEAN](changelog-archive/v${VERSION_CLEAN}) - $DATE" wiki/Changelog-Archive.md
+          if ! grep -q "Version $VERSION_CLEAN" wiki/Changelog-Archive.md; then
+            sed -i "6a - [Version $VERSION_CLEAN](changelog-archive/v${VERSION_CLEAN}) - $DATE" wiki/Changelog-Archive.md
+          fi
 
       - name: Commit changelog archive
         working-directory: wiki
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --local user.name "naruyaizumi"
+          git config --local user.email "sexystyle088@gmail.com"
           
-          git add changelog-archive/ Changelog-Archive.md
-          git commit -m "docs: archive changelog for ${{ github.event.release.tag_name }} [automated]"
-          git push
-          echo "Changelog archived"
+          git remote set-url origin "https://naruyaizumi:$PAT_TOKEN@github.com/naruyaizumi/liora.wiki.git"
+          
+          CHANGES=$(git status --porcelain)
+          
+          if [[ -n "$CHANGES" ]]; then
+            echo "Changes detected:"
+            echo "$CHANGES"
+            
+            git add changelog-archive/ Changelog-Archive.md
+            git commit -m "docs: archive changelog for ${{ github.event.release.tag_name }} [automated]"
+            git push origin HEAD 2>&1 | sed "s/$PAT_TOKEN/***/g"
+            echo "Changelog archived"
+          else
+            echo "No changes to commit"
+          fi
 
   update-bot-stats:
     name: Update Bot Statistics
@@ -117,16 +147,16 @@ jobs:
       - name: Collect bot statistics
         id: stats
         run: |
-          TOTAL_COMMITS=$(git rev-list --count HEAD)
+          TOTAL_COMMITS=$(git rev-list --count HEAD 2>/dev/null || echo "0")
           CONTRIBUTORS=$(git log --format='%aN' | sort -u | wc -l)
           TOTAL_RELEASES=$(git tag | wc -l)
           LATEST_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           
-          TOTAL_FILES=$(find src lib -type f \( -name "*.js" -o -name "*.rs" -o -name "*.cpp" \) | wc -l)
-          TOTAL_LINES=$(find src lib -type f \( -name "*.js" -o -name "*.rs" -o -name "*.cpp" \) -exec wc -l {} + 2>/dev/null | tail -1 | awk '{print $1}')
+          TOTAL_FILES=$(find src lib -type f \( -name "*.js" -o -name "*.rs" -o -name "*.cpp" \) 2>/dev/null | wc -l || echo "0")
+          TOTAL_LINES=$(find src lib -type f \( -name "*.js" -o -name "*.rs" -o -name "*.cpp" \) -exec wc -l {} + 2>/dev/null | tail -1 | awk '{print $1}' || echo "0")
           
-          COMMITS_LAST_MONTH=$(git log --since='30 days ago' --oneline | wc -l)
-          LAST_COMMIT_DATE=$(git log -1 --format=%cd --date=format:'%Y-%m-%d %H:%M UTC')
+          COMMITS_LAST_MONTH=$(git log --since='30 days ago' --oneline 2>/dev/null | wc -l || echo "0")
+          LAST_COMMIT_DATE=$(git log -1 --format=%cd --date=format:'%Y-%m-%d %H:%M UTC' 2>/dev/null || echo "N/A")
           
           echo "total_commits=$TOTAL_COMMITS" >> $GITHUB_OUTPUT
           echo "contributors=$CONTRIBUTORS" >> $GITHUB_OUTPUT
@@ -187,14 +217,14 @@ jobs:
           ## 📊 Language Distribution
           
           \`\`\`
-          JavaScript: $(find src lib -name "*.js" | wc -l) files
-          Rust:       $(find lib/rs -name "*.rs" | wc -l) files
-          C++:        $(find lib/cpp -name "*.cpp" -o -name "*.h" | wc -l) files
+          JavaScript: $(find src lib -name "*.js" 2>/dev/null | wc -l || echo "0") files
+          Rust:       $(find lib/rs -name "*.rs" 2>/dev/null | wc -l || echo "0") files
+          C++:        $(find lib/cpp -name "*.cpp" -o -name "*.h" 2>/dev/null | wc -l || echo "0") files
           \`\`\`
           
           ## 🏆 Top Contributors
           
-          $(git log --format='%aN' | sort | uniq -c | sort -rn | head -10 | awk '{print "- **" $2 " " $3 "**: " $1 " commits"}')
+          $(git log --format='%aN' | sort | uniq -c | sort -rn | head -10 2>/dev/null | awk '{print "- **" $2 " " $3 "**: " $1 " commits"}' || echo "- No contributor data available")
           
           ---
           
@@ -203,14 +233,22 @@ jobs:
 
       - name: Commit bot stats
         working-directory: wiki
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --local user.name "naruyaizumi"
+          git config --local user.email "sexystyle088@gmail.com"
           
-          git add Bot-Statistics.md
-          git commit -m "docs: update bot statistics [automated]"
-          git push
-          echo "✅ Bot statistics updated"
+          git remote set-url origin "https://naruyaizumi:$PAT_TOKEN@github.com/naruyaizumi/liora.wiki.git"
+          
+          if [[ -f "Bot-Statistics.md" ]] && [[ -n $(git status --porcelain Bot-Statistics.md 2>/dev/null) ]]; then
+            git add Bot-Statistics.md
+            git commit -m "docs: update bot statistics [automated]"
+            git push origin HEAD 2>&1 | sed "s/$PAT_TOKEN/***/g"
+            echo "Bot statistics updated"
+          else
+            echo "Bot statistics unchanged or file doesn't exist"
+          fi
 
   create-installation-guide:
     name: Create Installation Guide
@@ -225,7 +263,20 @@ jobs:
           repository: ${{ github.repository }}.wiki
           path: wiki
 
+      - name: Check if Installation.md exists or is outdated
+        id: check_install
+        run: |
+          # Cek apakah file ada dan kapan terakhir di-update
+          if [[ -f "wiki/Installation.md" ]]; then
+            # Compare dengan template
+            echo "Installation.md exists"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Generate installation guide
+        if: steps.check_install.outputs.exists == 'false'
         run: |
           cat > wiki/Installation.md << 'EOF'
           # 🚀 Installation Guide
@@ -237,7 +288,7 @@ jobs:
           ### One-Line Installation (Recommended)
           
           ```bash
-          curl -sSL https://raw.githubusercontent.com/naruyaizumi/liora/main/service.sh | bash
+          curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/service.sh | bash
           ```
           
           This will automatically:
@@ -409,15 +460,21 @@ jobs:
 
       - name: Commit installation guide
         working-directory: wiki
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --local user.name "naruyaizumi"
+          git config --local user.email "sexystyle088@gmail.com"
+
+          git remote set-url origin "https://naruyaizumi:$PAT_TOKEN@github.com/naruyaizumi/liora.wiki.git"
           
-          if [[ `git status --porcelain` ]]; then
+          if [[ ! -f "Installation.md" ]] || [[ -n $(git status --porcelain Installation.md 2>/dev/null) ]]; then
             git add Installation.md
             git commit -m "docs: update installation guide [automated]"
-            git push
+            git push origin HEAD 2>&1 | sed "s/$PAT_TOKEN/***/g"
             echo "Installation guide updated"
+          else
+            echo "Installation guide unchanged"
           fi
 
   update-wiki-sidebar:
@@ -431,7 +488,55 @@ jobs:
           repository: ${{ github.repository }}.wiki
           path: wiki
 
+      - name: Check current sidebar content
+        id: check_sidebar
+        run: |
+          DESIRED_SIDEBAR="# 📚 Liora Wiki
+          
+          ## 🏠 Home
+          - [Home](Home)
+          - [Bot Statistics](Bot-Statistics)
+          
+          ## 🚀 Getting Started
+          - [Installation](Installation)
+          - [Quick Start](Quick-Start)
+          - [Configuration](Configuration)
+          
+          ## 📖 Documentation
+          - [API Reference](API-Reference)
+          - [Command List](Commands)
+          - [Features](Features)
+          
+          ## 📜 Changelog
+          - [Latest Changes](../CHANGELOG.md)
+          - [Changelog Archive](Changelog-Archive)
+          
+          ## 🔧 Development
+          - [Contributing](Contributing)
+          - [Code of Conduct](Code-of-Conduct)
+          - [Architecture](Architecture)
+          
+          ## 🐛 Support
+          - [Troubleshooting](Troubleshooting)
+          - [FAQ](FAQ)
+          - [GitHub Issues](https://github.com/naruyaizumi/liora/issues)
+          
+          ---"
+
+          CURRENT_CONTENT=$(cat _Sidebar.md 2>/dev/null || echo "")
+          DESIRED_NORMALIZED=$(echo "$DESIRED_SIDEBAR" | sed 's/\r$//')
+          CURRENT_NORMALIZED=$(echo "$CURRENT_CONTENT" | sed 's/\r$//')
+          
+          if [[ "$DESIRED_NORMALIZED" == "$CURRENT_NORMALIZED" ]]; then
+            echo "Sidebar content unchanged"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "Sidebar needs update"
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Generate sidebar
+        if: steps.check_sidebar.outputs.changed == 'true'
         run: |
           cat > wiki/_Sidebar.md << 'EOF'
           # 📚 Liora Wiki
@@ -469,11 +574,19 @@ jobs:
 
       - name: Commit sidebar
         working-directory: wiki
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --local user.name "naruyaizumi"
+          git config --local user.email "sexystyle088@gmail.com"
           
-          git add _Sidebar.md
-          git commit -m "docs: update wiki sidebar [automated]"
-          git push
-          echo "Wiki sidebar updated"
+          git remote set-url origin "https://naruyaizumi:$PAT_TOKEN@github.com/naruyaizumi/liora.wiki.git"
+          
+          if [[ -f "_Sidebar.md" ]] && [[ -n $(git status --porcelain _Sidebar.md 2>/dev/null) ]]; then
+            git add _Sidebar.md
+            git commit -m "docs: update wiki sidebar [automated]"
+            git push origin HEAD 2>&1 | sed "s/$PAT_TOKEN/***/g"
+            echo "Wiki sidebar updated"
+          else
+            echo "No sidebar changes to commit"
+          fi
