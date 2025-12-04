@@ -35,16 +35,16 @@ let handler = async (m, { conn }) => {
         const network = await getNetworkStats();
         const postgres = await getPostgreSQLInfo();
         const redis = await getRedisInfo();
-        
+
         const uptimeBot = formatTime(process.uptime());
         const uptimeSys = await getSystemUptime();
-        
+
         const warnings = getWarnings(cpu, ram, disk, inodes);
-        
+
         await saveMetricsHistory(cpu, ram, disk, heap);
-        
+
         const history = getMetricsHistory();
-        
+
         const systemData = {
             osInfo,
             kernel,
@@ -63,18 +63,19 @@ let handler = async (m, { conn }) => {
             warnings,
             history,
         };
-        
+
         const imageBuffer = await canvas(systemData);
-        
+
         await conn.sendMessage(
             m.chat,
             {
                 image: imageBuffer,
-                caption: `*SYSTEM MONITOR REPORT*\n\n` +
+                caption:
+                    `*SYSTEM MONITOR REPORT*\n\n` +
                     `*Host: ${kernel.hostname}*\n` +
                     `*System Uptime: ${uptimeSys}*\n` +
                     `*Bot Uptime: ${uptimeBot}*\n` +
-                    (warnings.length > 0 ? `\n*Warnings: ${warnings.join(', ')}*` : ""),
+                    (warnings.length > 0 ? `\n*Warnings: ${warnings.join(", ")}*` : ""),
             },
             { quoted: m }
         );

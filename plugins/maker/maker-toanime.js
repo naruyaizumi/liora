@@ -14,13 +14,11 @@ let handler = async (m, { conn, text }) => {
             imageUrl = uploaded.url || uploaded;
         }
 
-        if (!imageUrl)
-            return m.reply("Failed to upload image or invalid input.");
+        if (!imageUrl) return m.reply("Failed to upload image or invalid input.");
 
         const api = `https://zelapioffciall.koyeb.app/imagecreator/toanime?url=${encodeURIComponent(imageUrl)}`;
         const res = await fetch(api);
-        if (!res.ok)
-            throw new Error("Failed to contact API.");
+        if (!res.ok) throw new Error("Failed to contact API.");
 
         const buffer = Buffer.from(await res.arrayBuffer());
 
@@ -29,7 +27,6 @@ let handler = async (m, { conn, text }) => {
             { image: buffer, caption: "Anime transformation result." },
             { quoted: m }
         );
-
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
