@@ -59,8 +59,8 @@ jobs:
             echo "release=false" >> $GITHUB_OUTPUT  
           fi
 
-  create-release-branch:
-    name: Create Release Branch
+  create-release-prepare:
+    name: Create Release Branch and Prepare
     needs: check-version
     if: needs.check-version.outputs.should_release == 'true'
     runs-on: ubuntu-latest
@@ -78,30 +78,18 @@ jobs:
         run: |
           VERSION="${{ needs.check-version.outputs.new_version }}"
           BRANCH_NAME="release/v${VERSION}"
-
+          
           git checkout -b "$BRANCH_NAME"
           
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
           echo "Created branch: $BRANCH_NAME"
-
-  format-and-prepare:
-    name: Format Code and Prepare Release
-    needs: [check-version, create-release-branch]
-    if: needs.check-version.outputs.should_release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout release branch
-        uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ needs.create-release-branch.outputs.branch_name }}
 
       - name: Setup Bun  
         uses: oven-sh/setup-bun@v2  
         with:  
           bun-version: latest  
 
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -117,7 +105,8 @@ jobs:
             python3 \
             g++ \
             pkg-config \
-            cmake
+            cmake \
+            jq  # Tambah jq untuk parsing JSON
             
       - name: Install dependencies  
         run: bun install  
@@ -157,23 +146,23 @@ jobs:
             echo ""  
           } | cat - CHANGELOG.md > temp && mv temp CHANGELOG.md  
 
-      - name: Commit changes to release branch
+      - name: Commit and push changes
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"  
-          git config --local user.name "github-actions[bot]"  
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"  
+          git config --global user.name "github-actions[bot]"  
           
           git add .
-
+          
           if [[ `git status --porcelain` ]]; then  
             git commit -m "chore(release): prepare v${{ needs.check-version.outputs.new_version }}"
-            git push origin "${{ needs.create-release-branch.outputs.branch_name }}"
+            git push -u origin "${{ steps.create-branch.outputs.branch_name }}"
           else  
             echo "No changes to commit"  
           fi
 
   create-pull-request:
     name: Create Pull Request
-    needs: [check-version, create-release-branch, format-and-prepare]
+    needs: [check-version, create-release-prepare]
     if: needs.check-version.outputs.should_release == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -182,14 +171,14 @@ jobs:
         with:
           destination_branch: "main"
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          source_branch: ${{ needs.create-release-branch.outputs.branch_name }}
+          source_branch: ${{ needs.create-release-prepare.outputs.branch_name }}
           pr_title: "🚀 Release v${{ needs.check-version.outputs.new_version }}"
           pr_body: |
             ## Release v${{ needs.check-version.outputs.new_version }}
             
             ### Changelog
             
-            ${{ steps.changelog.outputs.changelog }}
+            ${{ needs.create-release-prepare.outputs.changelog }}
             
             ### Changes included:
             
@@ -231,12 +220,12 @@ jobs:
               
             ## What's Changed  
               
-            ${{ needs.format-and-prepare.outputs.changelog }}  
+            ${{ needs.create-release-prepare.outputs.changelog }}  
               
             ## Installation  
               
             ```bash  
-            curl -sSL https://raw.githubusercontent.com/naruyaizumi/liora/main/service.sh | bash  
+            curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/service.sh | bash  
             ```  
               
             ## Full Changelog  
