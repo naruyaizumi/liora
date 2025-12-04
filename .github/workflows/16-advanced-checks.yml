@@ -304,7 +304,7 @@ jobs:
 
       - name: Check commit messages
         run: |
-          git log --format=%s origin/${{ github.base_ref }}..HEAD > commits.txt
+          git log --format=%s origin/main..HEAD > commits.txt
           
           while IFS= read -r msg; do
             if ! echo "$msg" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .+"; then
@@ -314,7 +314,7 @@ jobs:
 
       - name: Check for large commits
         run: |
-          git log --format=%H origin/${{ github.base_ref }}..HEAD | while read hash; do
+          git log --format=%H origin/main..HEAD | while read hash; do
             FILES=$(git show --name-only --format="" $hash | wc -l)
             if [ $FILES -gt 50 ]; then
               echo "Large commit detected: $hash changes $FILES files"
