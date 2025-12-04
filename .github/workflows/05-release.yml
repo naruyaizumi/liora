@@ -170,7 +170,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           fetch-depth: 0
           ref: main
 
@@ -178,7 +178,7 @@ jobs:
         uses: repo-sync/pull-request@v2
         with:
           destination_branch: "main"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.PAT_TOKEN }}
           source_branch: ${{ needs.create-release-prepare.outputs.branch_name }}
           pr_title: "🚀 Release v${{ needs.check-version.outputs.new_version }}"
           pr_body: |
@@ -243,4 +243,4 @@ jobs:
           prerelease: false  
           generate_release_notes: true  
         env:  
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
