@@ -45,13 +45,13 @@ jobs:
             
             data.reports.forEach(report => {
               if (report.aggregate.cyclomatic > 10) {
-                console.log(`⚠️ High complexity in ${report.path}: ${report.aggregate.cyclomatic}`);
+                console.log(`High complexity in ${report.path}: ${report.aggregate.cyclomatic}`);
                 hasIssues = true;
               }
             });
             
             if (hasIssues) {
-              console.log('\n⚠️ Consider refactoring high complexity functions');
+              console.log('\nConsider refactoring high complexity functions');
             }
           } catch (e) {
             console.log('No complexity issues found');
@@ -175,13 +175,12 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '⚠️ **WARNING: BREAKING API CHANGES DETECTED**\n\nThis PR removes exported functions from the API. Please ensure this is intentional and update the version accordingly (major bump).'
+              body: '**WARNING: BREAKING API CHANGES DETECTED**\n\nThis PR removes exported functions from the API. Please ensure this is intentional and update the version accordingly (major bump).'
             })
 
   performance-benchmark:
     name: Performance Benchmark
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -226,7 +225,6 @@ jobs:
   bundle-size-check:
     name: Bundle Size Check
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -247,7 +245,7 @@ jobs:
           
           # Check if size is reasonable (< 5MB)
           if [ $(echo "$TOTAL_KB > 5120" | bc) -eq 1 ]; then
-            echo "⚠️ Warning: Bundle size is large (${TOTAL_KB} KB)"
+            echo "Warning: Bundle size is large (${TOTAL_KB} KB)"
           fi
 
   accessibility-check:
@@ -264,7 +262,7 @@ jobs:
           CONSOLE_LOGS=$(grep -r "console.log" src --exclude-dir=node_modules | wc -l)
           
           if [ $CONSOLE_LOGS -gt 0 ]; then
-            echo "⚠️ Found $CONSOLE_LOGS console.log statements in src/"
+            echo "Found $CONSOLE_LOGS console.log statements in src/"
             echo "Consider using proper logging library (pino)"
           fi
 
@@ -291,14 +289,13 @@ jobs:
             echo "Documentation coverage: ${COVERAGE}%"
             
             if [ $(echo "$COVERAGE < 50" | bc) -eq 1 ]; then
-              echo "⚠️ Low documentation coverage"
+              echo "Low documentation coverage"
             fi
           fi
 
   git-history-check:
     name: Git History Quality
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -311,7 +308,7 @@ jobs:
           
           while IFS= read -r msg; do
             if ! echo "$msg" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .+"; then
-              echo "⚠️ Non-conventional commit: $msg"
+              echo "Non-conventional commit: $msg"
             fi
           done < commits.txt
 
@@ -320,7 +317,7 @@ jobs:
           git log --format=%H origin/${{ github.base_ref }}..HEAD | while read hash; do
             FILES=$(git show --name-only --format="" $hash | wc -l)
             if [ $FILES -gt 50 ]; then
-              echo "⚠️ Large commit detected: $hash changes $FILES files"
+              echo "Large commit detected: $hash changes $FILES files"
               echo "Consider splitting into smaller commits"
             fi
           done

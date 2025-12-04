@@ -465,8 +465,6 @@ jobs:
           - [GitHub Issues](https://github.com/naruyaizumi/liora/issues)
           
           ---
-          
-          *Last updated: $(date -u +"%Y-%m-%d")*
           EOF
 
       - name: Commit sidebar

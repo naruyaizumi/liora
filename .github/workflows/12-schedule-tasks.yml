@@ -214,7 +214,6 @@ jobs:
       - name: Run benchmarks
         run: |
           echo "Running performance benchmarks..."
-          # Add benchmark commands here
           # bun run benchmark
 
   notify-scheduled-tasks:

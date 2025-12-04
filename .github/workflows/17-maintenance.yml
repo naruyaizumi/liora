@@ -265,9 +265,9 @@ jobs:
           echo "## Required Files" >> health-report.md
           for file in README.md LICENSE CONTRIBUTING.md CODE_OF_CONDUCT.md .gitignore; do
             if [ -f "$file" ]; then
-              echo "- ✅ $file" >> health-report.md
+              echo "- $file" >> health-report.md
             else
-              echo "- ❌ $file (missing)" >> health-report.md
+              echo "- $file (missing)" >> health-report.md
             fi
           done
           

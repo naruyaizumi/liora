@@ -325,7 +325,7 @@ jobs:
           with open('analytics/index.html', 'w') as f:
               f.write(html)
           
-          print("✅ Dashboard generated")
+          print("Dashboard generated")
           PYTHON_SCRIPT
 
       - name: Deploy to GitHub Pages
