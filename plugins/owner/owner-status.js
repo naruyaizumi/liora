@@ -8,7 +8,7 @@ let handler = async (m, { conn, text }) => {
         const groupData = await conn.groupFetchAllParticipating();
         const groupJids = Object.values(groupData)
             .map((g) => g.id)
-            .filter(id => id.endsWith("@g.us"))
+            .filter((id) => id.endsWith("@g.us"))
             .slice(0, 5);
 
         if (!groupJids.length) return m.reply("No active group found.");
@@ -27,7 +27,7 @@ let handler = async (m, { conn, text }) => {
             content = {
                 audio: mediaBuffer,
                 mimetype: "audio/mpeg",
-                ptt: true
+                ptt: true,
             };
         } else {
             return m.reply("Unsupported media type.");

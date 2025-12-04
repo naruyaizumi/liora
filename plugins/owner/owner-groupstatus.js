@@ -3,15 +3,14 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     const mime = (quoted.msg || quoted).mimetype || "";
 
     const textToParse = m.text || "";
-    const caption = textToParse
-        .replace(new RegExp(`^[.!#/](${command})\\s*`, "i"), "")
-        .trim();
+    const caption = textToParse.replace(new RegExp(`^[.!#/](${command})\\s*`, "i"), "").trim();
 
     const jid = m.chat;
 
     try {
         if (!mime && !caption) {
-            return m.reply(`Reply to media or provide text.\nExamples: ${ usedPrefix + command} Hello everyone! or ${ usedPrefix + command} reply to image/video/audio`
+            return m.reply(
+                `Reply to media or provide text.\nExamples: ${usedPrefix + command} Hello everyone! or ${usedPrefix + command} reply to image/video/audio`
             );
         }
 
@@ -21,41 +20,41 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
         if (/image/.test(mime)) {
             const buffer = await quoted.download();
-            if (!buffer) return m.reply('Failed to download image.');
-            
+            if (!buffer) return m.reply("Failed to download image.");
+
             payload = {
                 image: buffer,
-                caption: caption || ''
+                caption: caption || "",
             };
         } else if (/video/.test(mime)) {
             const buffer = await quoted.download();
-            if (!buffer) return m.reply('Failed to download video.');
-            
+            if (!buffer) return m.reply("Failed to download video.");
+
             payload = {
                 video: buffer,
-                caption: caption || ''
+                caption: caption || "",
             };
         } else if (/audio/.test(mime)) {
             const buffer = await quoted.download();
-            if (!buffer) return m.reply('Failed to download audio.');
-            
+            if (!buffer) return m.reply("Failed to download audio.");
+
             payload = {
                 audio: buffer,
-                mimetype: "audio/mp4"
+                mimetype: "audio/mp4",
             };
         } else if (caption) {
             payload = {
-                text: caption
+                text: caption,
             };
         } else {
             return m.reply(
-                `Reply to media or provide text.\nExamples: ${ usedPrefix + command} Hello everyone! or ${ usedPrefix + command} reply to image/video/audio`
+                `Reply to media or provide text.\nExamples: ${usedPrefix + command} Hello everyone! or ${usedPrefix + command} reply to image/video/audio`
             );
         }
 
         await conn.sendGroupStatus(jid, payload);
-        
-        m.reply('Group status sent successfully.');
+
+        m.reply("Group status sent successfully.");
     } catch (e) {
         conn.logger?.error(e);
         m.reply(`Error: ${e.message}`);

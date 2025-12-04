@@ -23,18 +23,18 @@ This project and everyone participating in it is governed by our [Code of Conduc
 
 1. **Fork the repository** on GitHub
 2. **Clone your fork** locally:
-   ```bash
-   git clone https://github.com/YOUR-USERNAME/liora.git
-   cd liora
-   ```
+    ```bash
+    git clone https://github.com/YOUR-USERNAME/liora.git
+    cd liora
+    ```
 3. **Add upstream remote**:
-   ```bash
-   git remote add upstream https://github.com/naruyaizumi/liora.git
-   ```
+    ```bash
+    git remote add upstream https://github.com/naruyaizumi/liora.git
+    ```
 4. **Create a branch** for your changes:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+    ```bash
+    git checkout -b feature/your-feature-name
+    ```
 
 ## How Can I Contribute?
 
@@ -84,38 +84,42 @@ Unsure where to begin? You can start by looking through `good-first-issue` and `
 - **Bun** >= 1.1.0 (recommended) or **Node.js** >= 24.0.0
 - **Git**
 - **System dependencies**:
-  ```bash
-  # Ubuntu/Debian
-  sudo apt-get install -y ffmpeg libwebp-dev build-essential python3 g++ cmake
-  
-  # RHEL/CentOS/Fedora
-  sudo dnf install -y ffmpeg gcc-c++ python3 cmake
-  
-  # Arch Linux
-  sudo pacman -S ffmpeg base-devel python cmake
-  ```
+
+    ```bash
+    # Ubuntu/Debian
+    sudo apt-get install -y ffmpeg libwebp-dev build-essential python3 g++ cmake
+
+    # RHEL/CentOS/Fedora
+    sudo dnf install -y ffmpeg gcc-c++ python3 cmake
+
+    # Arch Linux
+    sudo pacman -S ffmpeg base-devel python cmake
+    ```
 
 ### Setup Steps
 
 1. **Install Bun** (if not already installed):
-   ```bash
-   curl -fsSL https://bun.sh/install | bash
-   ```
+
+    ```bash
+    curl -fsSL https://bun.sh/install | bash
+    ```
 
 2. **Install dependencies**:
-   ```bash
-   bun install
-   ```
+
+    ```bash
+    bun install
+    ```
 
 3. **Build native modules**:
-   ```bash
-   bun run build
-   ```
+
+    ```bash
+    bun run build
+    ```
 
 4. **Run the bot**:
-   ```bash
-   bun run src/index.js
-   ```
+    ```bash
+    bun run src/index.js
+    ```
 
 ### Rust Development
 
@@ -146,6 +150,7 @@ bun run build:cpp
 - Keep functions small and focused
 
 **Format code before committing**:
+
 ```bash
 bun run format
 bun run lint:fix
@@ -234,15 +239,17 @@ The scope should be the name of the affected module:
 ## Pull Request Process
 
 1. **Update your fork**:
-   ```bash
-   git fetch upstream
-   git rebase upstream/main
-   ```
+
+    ```bash
+    git fetch upstream
+    git rebase upstream/main
+    ```
 
 2. **Push your changes**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
+
+    ```bash
+    git push origin feature/your-feature-name
+    ```
 
 3. **Create Pull Request** on GitHub
 
@@ -297,6 +304,7 @@ bun run test:integration
 - Keep documentation up to date
 
 **Generate documentation**:
+
 ```bash
 bun run docs:generate
 ```
@@ -304,6 +312,7 @@ bun run docs:generate
 ### README Updates
 
 If your changes affect:
+
 - Installation process
 - Usage instructions
 - Configuration options
