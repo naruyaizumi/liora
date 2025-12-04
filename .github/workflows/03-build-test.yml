@@ -245,7 +245,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y shellcheck
 
       - name: Lint installer script
-        run: run: shellcheck -e SC1091 -e SC2034 install.sh || true
+        run: shellcheck -e SC1091 -e SC2034 install.sh || true
 
       - name: Test installer (dry-run)
         run: |
