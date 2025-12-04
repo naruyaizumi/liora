@@ -5,22 +5,43 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LIB_DIR="${SCRIPT_DIR}/lib/shell"
+GITHUB_RAW_BASE="https://raw.githubusercontent.com/naruyaizumi/liora/main/lib/shell"
 
-source "${LIB_DIR}/logger.sh"
-source "${LIB_DIR}/distro.sh"
-source "${LIB_DIR}/cleanup.sh"
-source "${LIB_DIR}/git.sh"
-source "${LIB_DIR}/nodejs.sh"
-source "${LIB_DIR}/postgres.sh"
-source "${LIB_DIR}/redis.sh"
-source "${LIB_DIR}/rust.sh"
-source "${LIB_DIR}/bun.sh"
-source "${LIB_DIR}/ffmpeg.sh"
-source "${LIB_DIR}/liora.sh"
-source "${LIB_DIR}/systemd.sh"
-source "${LIB_DIR}/cli.sh"
+load_library() {
+    local lib_name="$1"
+    local lib_url="${GITHUB_RAW_BASE}/${lib_name}"
+    local temp_file="/tmp/${lib_name}"
+    
+    print_debug "Loading library: ${lib_name}"
+    
+    if ! curl -sSf "${lib_url}" -o "${temp_file}"; then
+        echo "Error: Failed to download library ${lib_name}"
+        exit 1
+    fi
+    
+    source "${temp_file}"
+    
+    rm -f "${temp_file}"
+}
+
+curl -sSf "${GITHUB_RAW_BASE}/logger.sh" -o /tmp/logger.sh
+source /tmp/logger.sh
+rm -f /tmp/logger.sh
+
+print_info "Starting Liora Bot installation..."
+
+load_library "distro.sh"
+load_library "cleanup.sh"
+load_library "git.sh"
+load_library "nodejs.sh"
+load_library "postgres.sh"
+load_library "redis.sh"
+load_library "rust.sh"
+load_library "bun.sh"
+load_library "ffmpeg.sh"
+load_library "liora.sh"
+load_library "systemd.sh"
+load_library "cli.sh"
 
 SERVICE_NAME="liora"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
@@ -37,6 +58,24 @@ DB_PORT="5432"
 REDIS_HOST="localhost"
 REDIS_PORT="6379"
 REPO_URL="https://github.com/naruyaizumi/liora.git"
+
+if ! command -v curl &> /dev/null; then
+    echo "Installing curl..."
+    if command -v apt-get &> /dev/null; then
+        apt-get update && apt-get install -y curl
+    elif command -v yum &> /dev/null; then
+        yum install -y curl
+    elif command -v dnf &> /dev/null; then
+        dnf install -y curl
+    elif command -v pacman &> /dev/null; then
+        pacman -Sy --noconfirm curl
+    elif command -v apk &> /dev/null; then
+        apk add curl
+    else
+        echo "Error: Could not install curl. Please install it manually."
+        exit 1
+    fi
+fi
 
 trap cleanup_on_error ERR
 
