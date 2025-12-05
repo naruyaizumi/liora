@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package ai;
+
+option go_package = "github.com/liora/ai/pb";
+
+service AIService {
+  rpc Chat(ChatRequest) returns (ChatResponse);
+  
+  rpc GetHistory(HistoryRequest) returns (HistoryResponse);
+  
+  rpc ClearHistory(ClearRequest) returns (ClearResponse);
+}
+
+message ChatRequest {
+  string user_id = 1;
+  string chat_id = 2;
+  string message = 3;
+  string system_message = 4;
+  bool include_history = 5;
+  int32 max_tokens = 6;
+  float temperature = 7;
+  bytes media_data = 8;
+  string media_type = 9;
+}
+
+message ChatResponse {
+  bool success = 1;
+  string message = 2;
+  int32 tokens_used = 3;
+  bool from_cache = 4;
+}
+
+message HistoryRequest {
+  string user_id = 1;
+  int32 limit = 2;
+}
+
+message HistoryItem {
+  string role = 1;
+  string content = 2;
+}
+
+message HistoryResponse {
+  bool success = 1;
+  repeated HistoryItem history = 2;
+}
+
+message ClearRequest {
+  string user_id = 1;
+}
+
+message ClearResponse {
+  bool success = 1;
+  string message = 2;
+}
