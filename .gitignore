@@ -28,7 +28,6 @@ dist/
 CMakeFiles/
 cmake-build-*/
 CMakeCache.txt
-Makefile
 
 # =========================  
 # Rust  

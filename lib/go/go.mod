@@ -1,4 +1,4 @@
-module github.com/liora/ai
+module github.com/liora/lib/go
 
 go 1.22
 

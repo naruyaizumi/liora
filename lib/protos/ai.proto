@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package ai;
 
-option go_package = "github.com/liora/ai/pb";
+option go_package = "github.com/liora/lib/go/pb";
 
 service AIService {
   rpc Chat(ChatRequest) returns (ChatResponse);
