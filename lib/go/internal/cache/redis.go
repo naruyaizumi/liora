@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/liora/ai/internal/config"
+	"github.com/liora/lib/go/internal/config"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )

@@ -8,7 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/liora/ai/internal/config"
+	"github.com/liora/lib/go/internal/config"
 	"go.uber.org/zap"
 )
 
@@ -18,15 +18,15 @@ type DB struct {
 }
 
 type ChatHistory struct {
-	ID         int64     `json:"id"`
-	UserID     string    `json:"user_id"`
-	ChatID     string    `json:"chat_id"`
-	Role       string    `json:"role"`
-	Content    string    `json:"content"`
-	Timestamp  time.Time `json:"timestamp"`
-	Model      string    `json:"model"`
-	TokensUsed int       `json:"tokens_used"`
-	MediaType  string    `json:"media_type,omitempty"`
+	ID int64 `json:"id"`
+	UserID string `json:"user_id"`
+	ChatID string `json:"chat_id"`
+	Role string `json:"role"`
+	Content string `json:"content"`
+	Timestamp time.Time `json:"timestamp"`
+	Model string `json:"model"`
+	TokensUsed int `json:"tokens_used"`
+	MediaType string `json:"media_type,omitempty"`
 }
 
 func NewDB(cfg *config.Config, logger *zap.Logger) (*DB, error) {
