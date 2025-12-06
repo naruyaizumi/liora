@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/naruyaizumi/liora/lib/go/internal"
-	pb "github.com/naruyaizumi/liora/lib/go/pb"
+	"liora-ai/internal"
+	pb "liora-ai/pb"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
