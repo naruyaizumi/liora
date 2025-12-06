@@ -5,7 +5,8 @@ print_info(){ echo "[INFO] $1"; }
 print_ok(){ echo "[OK] $1"; }
 print_err(){ echo "[ERROR] $1"; }
 
-INSTALL_DIR="${INSTALL_DIR:-/opt/liora-ai}"
+# Lokasi project asli
+INSTALL_DIR="${INSTALL_DIR:-/root/liora}"
 BIN_DIR="${BIN_DIR:-/usr/local/bin}"
 SERVICE_NAME="${SERVICE_NAME:-liora-ai}"
 VENV_DIR="$INSTALL_DIR/.venv"
@@ -65,7 +66,7 @@ case "$1" in
   status) systemctl status $SERVICE_NAME --no-pager ;;
   log) journalctl -u $SERVICE_NAME -f ;;
   logs) journalctl -u $SERVICE_NAME -n 200 --no-pager ;;
-  test) /opt/liora-ai/.venv/bin/python3 /opt/liora-ai/lib/py/ai.py ;;
+  test) /root/liora/.venv/bin/python3 /root/liora/lib/py/ai.py ;;
   *) echo "Usage: ai {start|stop|restart|status|log|logs|test}" ;;
 esac
 EOFCLI
@@ -78,7 +79,4 @@ EOFCLI
     print_ok "ai-service setup complete"
 }
 
-# ———————————
-# SINGLE ENTRYPOINT
-# ———————————
 setup_service
