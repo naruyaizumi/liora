@@ -9,16 +9,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/liora/lib/go/internal/cache"
-	"github.com/liora/lib/go/internal/claude"
-	"github.com/liora/lib/go/internal/config"
-	"github.com/liora/lib/go/internal/db"
-	"github.com/liora/lib/go/internal/server"
-	pb "github.com/liora/lib/go/pb"
+	"liora-ai/internal"
+	pb "liora-ai/pb"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -73,7 +69,6 @@ func run() error {
 	)
 
 	pb.RegisterAIServiceServer(grpcServer, aiServer)
-	
 	reflection.Register(grpcServer)
 
 	lis, err := net.Listen("tcp", cfg.GRPCAddr())
@@ -83,7 +78,6 @@ func run() error {
 
 	logger.Info("✓ gRPC server listening",
 		zap.String("address", cfg.GRPCAddr()),
-		zap.String("endpoint", fmt.Sprintf("grpc://%s", cfg.GRPCAddr())),
 	)
 
 	serverErrors := make(chan error, 1)
@@ -98,13 +92,9 @@ func run() error {
 	case err := <-serverErrors:
 		return fmt.Errorf("server error: %w", err)
 	case sig := <-shutdown:
-		logger.Info("shutdown signal received",
-			zap.String("signal", sig.String()),
-		)
-
+		logger.Info("shutdown signal received", zap.String("signal", sig.String()))
 		logger.Info("shutting down gracefully...")
 		grpcServer.GracefulStop()
-
 		logger.Info("✓ server stopped")
 		return nil
 	}
@@ -129,7 +119,6 @@ func initLogger(level string) *zap.Logger {
 	config.Level = zap.NewAtomicLevelAt(zapLevel)
 	config.EncoderConfig.TimeKey = "timestamp"
 	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	config.EncoderConfig.EncodeDuration = zapcore.StringDurationEncoder
 
 	logger, _ := config.Build()
 	return logger
@@ -145,16 +134,18 @@ func loggingInterceptor(logger *zap.Logger) grpc.UnaryServerInterceptor {
 		start := time.Now()
 		resp, err := handler(ctx, req)
 		duration := time.Since(start)
-		fields := []zap.Field{
-			zap.String("method", info.FullMethod),
-			zap.Duration("duration", duration),
-		}
 
 		if err != nil {
-			fields = append(fields, zap.Error(err))
-			logger.Error("grpc request failed", fields...)
+			logger.Error("grpc request failed",
+				zap.String("method", info.FullMethod),
+				zap.Duration("duration", duration),
+				zap.Error(err),
+			)
 		} else {
-			logger.Info("grpc request", fields...)
+			logger.Info("grpc request",
+				zap.String("method", info.FullMethod),
+				zap.Duration("duration", duration),
+			)
 		}
 
 		return resp, err

@@ -8,7 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/liora/lib/go/internal/config"
+	"github.com/liora/lib/go/internal"
 	"go.uber.org/zap"
 )
 

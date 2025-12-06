@@ -7,10 +7,7 @@ import (
 	"time"
 
 	"github.com/anthropics/anthropic-sdk-go"
-	"github.com/liora/lib/go/internal/cache"
-	"github.com/liora/lib/go/internal/claude"
-	"github.com/liora/lib/go/internal/config"
-	"github.com/liora/lib/go/internal/db"
+	"github.com/liora/lib/go/internal"
 	pb "github.com/liora/lib/go/pb"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
