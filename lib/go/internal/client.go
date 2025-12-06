@@ -11,7 +11,7 @@ import (
 
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
-	"github.com/liora/lib/go/internal"
+	"github.com/naruyaizumi/liora/lib/go/internal"
 	"go.uber.org/zap"
 )
 
