@@ -1,9 +1,9 @@
-import { getAIClient } from '../../lib/grpc-client.js';
+import { getAIClient } from "../../lib/grpc-client.js";
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text || typeof text !== "string") {
         return m.reply(
-            `Please provide a valid query.\nExample: ${ usedPrefix + command } Explain quantum computing`
+            `Please provide a valid query.\nExample: ${usedPrefix + command} Explain quantum computing`
         );
     }
 
@@ -20,12 +20,12 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             try {
                 mediaBuffer = await q.download?.();
             } catch (err) {
-                console.error('media download error', err);
+                console.error("media download error", err);
                 mediaBuffer = null;
             }
         }
 
-        const userId = m.sender.split('@')[0];
+        const userId = m.sender.split("@")[0];
         const chatId = m.chat;
         const response = await aiClient.chat({
             userId: userId,
@@ -35,17 +35,14 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             maxTokens: 2000,
             temperature: 0.7,
             mediaBuffer: mediaBuffer,
-            mediaMime: mime
+            mediaMime: mime,
         });
 
         if (!response.success) {
             return m.reply(`Error: ${response.message}`);
         }
 
-        await conn.sendMessage(
-            m.chat, { text: response.message.trim() }, { quoted: m }
-        );
-
+        await conn.sendMessage(m.chat, { text: response.message.trim() }, { quoted: m });
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
