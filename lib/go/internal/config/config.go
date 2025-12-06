@@ -1,4 +1,4 @@
-package internal
+package config
 
 import (
 	"fmt"
@@ -9,24 +9,24 @@ import (
 )
 
 type Config struct {
-	AnthropicAPIKey string
-	AdminKey string
-	GRPCPort string
-	GRPCHost string
-	PostgresHost string
-	PostgresPort string
-	PostgresDB string
-	PostgresUser string
+	AnthropicAPIKey  string
+	AdminKey         string
+	GRPCPort         string
+	GRPCHost         string
+	PostgresHost     string
+	PostgresPort     string
+	PostgresDB       string
+	PostgresUser     string
 	PostgresPassword string
-	RedisHost string
-	RedisPort string
-	RedisPassword string
-	RedisDB int
-	MaxTokens int
-	Temperature float32
-	CacheTTL int
-	RateLimit int
-	LogLevel string
+	RedisHost        string
+	RedisPort        string
+	RedisPassword    string
+	RedisDB          int
+	MaxTokens        int
+	Temperature      float32
+	CacheTTL         int
+	RateLimit        int
+	LogLevel         string
 }
 
 func Load() (*Config, error) {
@@ -40,23 +40,23 @@ func Load() (*Config, error) {
 
 	cfg := &Config{
 		AnthropicAPIKey:  getEnv("ANTHROPIC_API_KEY", ""),
-		AdminKey: getEnv("ADMIN_KEY", ""),
-		GRPCPort: getEnv("GRPC_PORT", "50051"),
-		GRPCHost: getEnv("GRPC_HOST", "127.0.0.1"),
-		PostgresHost: getEnv("POSTGRES_HOST", "localhost"),
-		PostgresPort: getEnv("POSTGRES_PORT", "5432"),
-		PostgresDB: getEnv("POSTGRES_DB", "ai"),
-		PostgresUser: getEnv("POSTGRES_USER", "liora"),
+		AdminKey:         getEnv("ADMIN_KEY", ""),
+		GRPCPort:         getEnv("GRPC_PORT", "50051"),
+		GRPCHost:         getEnv("GRPC_HOST", "127.0.0.1"),
+		PostgresHost:     getEnv("POSTGRES_HOST", "localhost"),
+		PostgresPort:     getEnv("POSTGRES_PORT", "5432"),
+		PostgresDB:       getEnv("POSTGRES_DB", "ai"),
+		PostgresUser:     getEnv("POSTGRES_USER", "liora"),
 		PostgresPassword: getEnv("POSTGRES_PASSWORD", "naruyaizumi"),
-		RedisHost: getEnv("REDIS_HOST", "localhost"),
-		RedisPort: getEnv("REDIS_PORT", "6379"),
-		RedisPassword: getEnv("REDIS_PASSWORD", ""),
-		RedisDB: redisDB,
-		MaxTokens: maxTokens,
-		Temperature: float32(temp),
-		CacheTTL: cacheTTL,
-		RateLimit: rateLimit,
-		LogLevel: getEnv("LOG_LEVEL", "info"),
+		RedisHost:        getEnv("REDIS_HOST", "localhost"),
+		RedisPort:        getEnv("REDIS_PORT", "6379"),
+		RedisPassword:    getEnv("REDIS_PASSWORD", ""),
+		RedisDB:          redisDB,
+		MaxTokens:        maxTokens,
+		Temperature:      float32(temp),
+		CacheTTL:         cacheTTL,
+		RateLimit:        rateLimit,
+		LogLevel:         getEnv("LOG_LEVEL", "info"),
 	}
 
 	if cfg.AnthropicAPIKey == "" {

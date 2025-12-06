@@ -1,4 +1,4 @@
-package internal
+package database
 
 import (
 	"context"
@@ -8,23 +8,24 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
+	"liora-ai/internal/config"
 )
 
 type DB struct {
-	pool *pgxpool.Pool
+	pool   *pgxpool.Pool
 	logger *zap.Logger
 }
 
 type ChatHistory struct {
-	ID int64
-	UserID string
-	ChatID string
-	Role string
-	Content string
-	Timestamp time.Time
-	Model string
+	ID         int64
+	UserID     string
+	ChatID     string
+	Role       string
+	Content    string
+	Timestamp  time.Time
+	Model      string
 	TokensUsed int
-	MediaType string
+	MediaType  string
 }
 
 func NewDB(cfg *config.Config, logger *zap.Logger) (*DB, error) {

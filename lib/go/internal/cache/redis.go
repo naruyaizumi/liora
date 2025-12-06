@@ -1,4 +1,4 @@
-package internal
+package cache
 
 import (
 	"context"
@@ -9,23 +9,24 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
+	"liora-ai/internal/config"
 )
 
 type Cache struct {
 	client *redis.Client
-	ttl time.Duration
+	ttl    time.Duration
 	logger *zap.Logger
 }
 
 func NewCache(cfg *config.Config, logger *zap.Logger) (*Cache, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr: cfg.RedisAddr(),
-		Password: cfg.RedisPassword,
-		DB: cfg.RedisDB,
-		DialTimeout: 5 * time.Second,
-		ReadTimeout: 3 * time.Second,
+		Addr:         cfg.RedisAddr(),
+		Password:     cfg.RedisPassword,
+		DB:           cfg.RedisDB,
+		DialTimeout:  5 * time.Second,
+		ReadTimeout:  3 * time.Second,
 		WriteTimeout: 3 * time.Second,
-		PoolSize: 10,
+		PoolSize:     10,
 		MinIdleConns: 5,
 	})
 
@@ -44,7 +45,7 @@ func NewCache(cfg *config.Config, logger *zap.Logger) (*Cache, error) {
 	logger.Info("✓ Redis connected")
 	return &Cache{
 		client: client,
-		ttl: time.Duration(cfg.CacheTTL) * time.Second,
+		ttl:    time.Duration(cfg.CacheTTL) * time.Second,
 		logger: logger,
 	}, nil
 }

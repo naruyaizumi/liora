@@ -76,7 +76,6 @@ desktop.ini
 # =========================
 # Database (SQLite)
 # =========================
-database/
 database/*.db
 database/*.sqlite
 database/*.sqlite3

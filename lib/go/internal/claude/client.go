@@ -1,4 +1,4 @@
-package internal
+package claude
 
 import (
 	"context"
@@ -8,38 +8,39 @@ import (
 
 	"github.com/anthropics/anthropic-sdk-go"
 	"go.uber.org/zap"
+	"liora-ai/internal/config"
 )
 
 type Client struct {
 	client *anthropic.Client
-	cfg *config.Config
+	cfg    *config.Config
 	logger *zap.Logger
 }
 
 type Message struct {
-	Role string
+	Role    string
 	Content []ContentBlock
 }
 
 type ContentBlock struct {
-	Type string
-	Text string
+	Type      string
+	Text      string
 	ImageData []byte
 	MediaType string
 }
 
 type ChatRequest struct {
-	Messages []Message
+	Messages      []Message
 	SystemMessage string
-	MaxTokens int
-	Temperature float32
-	Model string
+	MaxTokens     int
+	Temperature   float32
+	Model         string
 }
 
 type ChatResponse struct {
-	Content string
-	StopReason string
-	InputTokens int
+	Content      string
+	StopReason   string
+	InputTokens  int
 	OutputTokens int
 	TotalTokens  int
 }
@@ -99,9 +100,9 @@ func (c *Client) Chat(ctx context.Context, req ChatRequest) (*ChatResponse, erro
 	}
 
 	params := anthropic.MessageNewParams{
-		Model: anthropic.F(req.Model),
+		Model:     anthropic.F(req.Model),
 		MaxTokens: anthropic.Int(int64(req.MaxTokens)),
-		Messages: anthropic.F(messages),
+		Messages:  anthropic.F(messages),
 	}
 
 	if req.SystemMessage != "" {
@@ -129,11 +130,11 @@ func (c *Client) Chat(ctx context.Context, req ChatRequest) (*ChatResponse, erro
 	}
 
 	return &ChatResponse{
-		Content: content.String(),
-		StopReason: string(response.StopReason),
-		InputTokens: int(response.Usage.InputTokens),
+		Content:      content.String(),
+		StopReason:   string(response.StopReason),
+		InputTokens:  int(response.Usage.InputTokens),
 		OutputTokens: int(response.Usage.OutputTokens),
-		TotalTokens: int(response.Usage.InputTokens + response.Usage.OutputTokens),
+		TotalTokens:  int(response.Usage.InputTokens + response.Usage.OutputTokens),
 	}, nil
 }
 
@@ -159,14 +160,14 @@ func (c *Client) ProcessMediaBuffer(buffer []byte, mimeType string) (ContentBloc
 			return ContentBlock{}, fmt.Errorf("unsupported image type: %s", mimeType)
 		}
 		return ContentBlock{
-			Type: "image",
+			Type:      "image",
 			ImageData: buffer,
 			MediaType: mimeType,
 		}, nil
 	case "application":
 		if mimeType == "application/pdf" {
 			return ContentBlock{
-				Type: "document",
+				Type:      "document",
 				ImageData: buffer,
 				MediaType: mimeType,
 			}, nil

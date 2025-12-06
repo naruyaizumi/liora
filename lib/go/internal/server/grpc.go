@@ -1,4 +1,4 @@
-package internal
+package server
 
 import (
 	"context"
@@ -6,15 +6,19 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	"liora-ai/internal/cache"
+	"liora-ai/internal/claude"
+	"liora-ai/internal/config"
+	"liora-ai/internal/database"
 	pb "liora-ai/pb"
 )
 
 type AIServer struct {
 	pb.UnimplementedAIServiceServer
 	claude *claude.Client
-	db *database.DB
-	cache *cache.Cache
-	cfg *config.Config
+	db     *database.DB
+	cache  *cache.Cache
+	cfg    *config.Config
 	logger *zap.Logger
 }
 
@@ -27,9 +31,9 @@ func NewAIServer(
 ) *AIServer {
 	return &AIServer{
 		claude: claudeClient,
-		db: db,
-		cache: cache,
-		cfg: cfg,
+		db:     db,
+		cache:  cache,
+		cfg:    cfg,
 		logger: logger,
 	}
 }
@@ -114,16 +118,16 @@ func (s *AIServer) Chat(ctx context.Context, req *pb.ChatRequest) (*pb.ChatRespo
 	}
 
 	messages = append(messages, claude.Message{
-		Role: "user",
+		Role:    "user",
 		Content: currentContent,
 	})
 
 	userMsg := &database.ChatHistory{
-		UserID: req.UserId,
-		ChatID: req.ChatId,
-		Role: "user",
-		Content: req.Message,
-		Model: "claude-opus-4-20250514",
+		UserID:    req.UserId,
+		ChatID:    req.ChatId,
+		Role:      "user",
+		Content:   req.Message,
+		Model:     "claude-opus-4-20250514",
 		MediaType: req.MediaType,
 	}
 	if err := s.db.SaveMessage(ctx, userMsg); err != nil {
@@ -141,11 +145,11 @@ func (s *AIServer) Chat(ctx context.Context, req *pb.ChatRequest) (*pb.ChatRespo
 	}
 
 	chatReq := claude.ChatRequest{
-		Messages: messages,
+		Messages:      messages,
 		SystemMessage: req.SystemMessage,
-		MaxTokens: maxTokens,
-		Temperature: temperature,
-		Model: "claude-opus-4-20250514",
+		MaxTokens:     maxTokens,
+		Temperature:   temperature,
+		Model:         "claude-opus-4-20250514",
 	}
 
 	response, err := s.claude.Chat(ctx, chatReq)
@@ -158,11 +162,11 @@ func (s *AIServer) Chat(ctx context.Context, req *pb.ChatRequest) (*pb.ChatRespo
 	}
 
 	assistantMsg := &database.ChatHistory{
-		UserID: req.UserId,
-		ChatID: req.ChatId,
-		Role: "assistant",
-		Content: response.Content,
-		Model: "claude-opus-4-20250514",
+		UserID:     req.UserId,
+		ChatID:     req.ChatId,
+		Role:       "assistant",
+		Content:    response.Content,
+		Model:      "claude-opus-4-20250514",
 		TokensUsed: response.TotalTokens,
 	}
 	if err := s.db.SaveMessage(ctx, assistantMsg); err != nil {
@@ -183,8 +187,8 @@ func (s *AIServer) Chat(ctx context.Context, req *pb.ChatRequest) (*pb.ChatRespo
 	)
 
 	return &pb.ChatResponse{
-		Success: true,
-		Message: response.Content,
+		Success:    true,
+		Message:    response.Content,
 		TokensUsed: int32(response.TotalTokens),
 		FromCache:  false,
 	}, nil
@@ -209,7 +213,7 @@ func (s *AIServer) GetHistory(ctx context.Context, req *pb.HistoryRequest) (*pb.
 	items := make([]*pb.HistoryItem, len(history))
 	for i, h := range history {
 		items[i] = &pb.HistoryItem{
-			Role: h.Role,
+			Role:    h.Role,
 			Content: h.Content,
 		}
 	}

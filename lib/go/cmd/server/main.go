@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"context"
@@ -9,7 +9,11 @@ import (
 	"syscall"
 	"time"
 
-	"liora-ai/internal"
+	"liora-ai/internal/cache"
+	"liora-ai/internal/claude"
+	"liora-ai/internal/config"
+	"liora-ai/internal/database"
+	"liora-ai/internal/server"
 	pb "liora-ai/pb"
 
 	"go.uber.org/zap"
