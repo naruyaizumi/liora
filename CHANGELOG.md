@@ -1,3 +1,29 @@
+## [8.1.1] - 2025-12-06
+
+- update (b80290c)
+- update (63cbece)
+- feat(pyhton): add OpenAi GPT GitHub Models (0cf963f)
+- update (e13e5e4)
+- update go.mod (acee69d)
+- update (e164b40)
+- update install.sh (2434995)
+- update (1826b6c)
+- update (8924df7)
+- update (5a81b2c)
+- update (6ed5b75)
+- update main.go (819bb1c)
+- update (c8ae25f)
+- update (10acfb8)
+- update main.go (fe07ff7)
+- fix(go): path (8490dd6)
+- fix(go): Ai experimental (be1a6b1)
+- fix(go): path (7864254)
+- fix(ai): path (2635127)
+- feat(features): add Claude opus 4.5 (ca2f5c0)
+- chore(sh) (1d4e2c0)
+- chore(ci) (4ac6bdd)
+- chore(sh) (364fc4f)
+
 ## [8.1.0] - 2025-12-04
 
 - chore(release) (fe0f42f)
