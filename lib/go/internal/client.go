@@ -4,47 +4,50 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"io"
-	"mime"
-	"path/filepath"
 	"strings"
 
 	"github.com/anthropics/anthropic-sdk-go"
-	"github.com/anthropics/anthropic-sdk-go/option"
-	"github.com/naruyaizumi/liora/lib/go/internal"
 	"go.uber.org/zap"
+	"liora-ai/internal"
 )
 
 type Client struct {
 	client *anthropic.Client
-	cfg    *config.Config
+	cfg *config.Config
 	logger *zap.Logger
 }
 
 type Message struct {
-	Role    string
-	Content []anthropic.MessageParamContentUnion
+	Role string
+	Content []ContentBlock
+}
+
+type ContentBlock struct {
+	Type string
+	Text string
+	ImageData []byte
+	MediaType string
 }
 
 type ChatRequest struct {
-	Messages      []Message
+	Messages []Message
 	SystemMessage string
-	MaxTokens     int
-	Temperature   float32
-	Model         string
+	MaxTokens int
+	Temperature float32
+	Model string
 }
 
 type ChatResponse struct {
-	Content     string
-	StopReason  string
+	Content string
+	StopReason string
 	InputTokens int
 	OutputTokens int
-	TotalTokens int
+	TotalTokens  int
 }
 
 func NewClient(cfg *config.Config, logger *zap.Logger) *Client {
 	client := anthropic.NewClient(
-		option.WithAPIKey(cfg.AnthropicAPIKey),
+		anthropic.WithAPIKey(cfg.AnthropicAPIKey),
 	)
 
 	return &Client{
@@ -67,10 +70,33 @@ func (c *Client) Chat(ctx context.Context, req ChatRequest) (*ChatResponse, erro
 
 	messages := make([]anthropic.MessageParam, 0, len(req.Messages))
 	for _, msg := range req.Messages {
-		messages = append(messages, anthropic.MessageParam{
-			Role:    anthropic.F(anthropic.MessageParamRole(msg.Role)),
-			Content: anthropic.F(msg.Content),
-		})
+		content := make([]anthropic.ContentBlockParamUnion, 0)
+		
+		for _, block := range msg.Content {
+			if block.Type == "text" {
+				content = append(content, anthropic.NewTextBlock(block.Text))
+			} else if block.Type == "image" && len(block.ImageData) > 0 {
+				encoded := base64.StdEncoding.EncodeToString(block.ImageData)
+				content = append(content, anthropic.NewImageBlockParam(
+					anthropic.ImageBlockParamSourceBase64{
+						Type:      anthropic.F(anthropic.ImageBlockParamSourceBase64TypeBase64),
+						MediaType: anthropic.F(anthropic.ImageBlockParamSourceBase64MediaType(block.MediaType)),
+						Data:      anthropic.F(encoded),
+					},
+				))
+			} else if block.Type == "document" && len(block.ImageData) > 0 {
+				encoded := base64.StdEncoding.EncodeToString(block.ImageData)
+				content = append(content, anthropic.NewDocumentBlockParam(
+					anthropic.DocumentBlockParamSourceBase64{
+						Type:      anthropic.F(anthropic.DocumentBlockParamSourceBase64TypeBase64),
+						MediaType: anthropic.F(anthropic.DocumentBlockParamSourceBase64MediaType(block.MediaType)),
+						Data:      anthropic.F(encoded),
+					},
+				))
+			}
+		}
+
+		messages = append(messages, anthropic.NewUserMessage(content...))
 	}
 
 	params := anthropic.MessageNewParams{
@@ -97,88 +123,58 @@ func (c *Client) Chat(ctx context.Context, req ChatRequest) (*ChatResponse, erro
 
 	var content strings.Builder
 	for _, block := range response.Content {
-		if textBlock, ok := block.AsUnion().(anthropic.TextBlock); ok {
-			content.WriteString(textBlock.Text)
+		switch v := block.(type) {
+		case anthropic.ContentBlockText:
+			content.WriteString(v.Text)
 		}
 	}
 
 	return &ChatResponse{
-		Content:      content.String(),
-		StopReason:   string(response.StopReason),
-		InputTokens:  int(response.Usage.InputTokens),
+		Content: content.String(),
+		StopReason: string(response.StopReason),
+		InputTokens: int(response.Usage.InputTokens),
 		OutputTokens: int(response.Usage.OutputTokens),
-		TotalTokens:  int(response.Usage.InputTokens + response.Usage.OutputTokens),
+		TotalTokens: int(response.Usage.InputTokens + response.Usage.OutputTokens),
 	}, nil
 }
 
-func (c *Client) CreateTextContent(text string) anthropic.MessageParamContentUnion {
-	return anthropic.NewTextBlock(text)
-}
-
-func (c *Client) CreateImageContent(imageData []byte, mediaType string) (anthropic.MessageParamContentUnion, error) {
-	if mediaType == "" {
-		mediaType = "image/jpeg"
-	}
-	
-	supportedTypes := []string{
-		"image/jpeg", "image/png", "image/gif", "image/webp",
-	}
-	isSupported := false
-	for _, t := range supportedTypes {
-		if t == mediaType {
-			isSupported = true
-			break
-		}
-	}
-	if !isSupported {
-		return nil, fmt.Errorf("unsupported image type: %s", mediaType)
-	}
-
-	encoded := base64.StdEncoding.EncodeToString(imageData)
-
-	return anthropic.NewImageBlockBase64(mediaType, encoded), nil
-}
-
-func (c *Client) CreateDocumentContent(docData []byte, mediaType string) (anthropic.MessageParamContentUnion, error) {
-	if mediaType == "" {
-		mediaType = "application/pdf"
-	}
-
-	if mediaType != "application/pdf" {
-		return nil, fmt.Errorf("only PDF documents are supported, got: %s", mediaType)
-	}
-
-	encoded := base64.StdEncoding.EncodeToString(docData)
-
-	return anthropic.NewDocumentBlockBase64(mediaType, encoded), nil
-}
-
-func (c *Client) ProcessMediaBuffer(buffer []byte, mimeType string) (anthropic.MessageParamContentUnion, error) {
+func (c *Client) ProcessMediaBuffer(buffer []byte, mimeType string) (ContentBlock, error) {
 	if len(buffer) == 0 {
-		return nil, fmt.Errorf("empty buffer")
+		return ContentBlock{}, fmt.Errorf("empty buffer")
 	}
 
 	if mimeType == "" {
 		mimeType = c.detectMimeType(buffer)
 	}
 
-	c.logger.Info("Processing media", 
+	c.logger.Info("Processing media",
 		zap.String("mime_type", mimeType),
 		zap.Int("size", len(buffer)),
 	)
 
 	mainType := strings.Split(mimeType, "/")[0]
-	
+
 	switch mainType {
 	case "image":
-		return c.CreateImageContent(buffer, mimeType)
+		if !isValidImageType(mimeType) {
+			return ContentBlock{}, fmt.Errorf("unsupported image type: %s", mimeType)
+		}
+		return ContentBlock{
+			Type: "image",
+			ImageData: buffer,
+			MediaType: mimeType,
+		}, nil
 	case "application":
 		if mimeType == "application/pdf" {
-			return c.CreateDocumentContent(buffer, mimeType)
+			return ContentBlock{
+				Type: "document",
+				ImageData: buffer,
+				MediaType: mimeType,
+			}, nil
 		}
-		return nil, fmt.Errorf("unsupported application type: %s", mimeType)
+		return ContentBlock{}, fmt.Errorf("unsupported application type: %s", mimeType)
 	default:
-		return nil, fmt.Errorf("unsupported media type: %s", mimeType)
+		return ContentBlock{}, fmt.Errorf("unsupported media type: %s", mimeType)
 	}
 }
 
@@ -210,49 +206,14 @@ func (c *Client) detectMimeType(buffer []byte) string {
 	return "application/octet-stream"
 }
 
-func (c *Client) GetMimeTypeFromFilename(filename string) string {
-	ext := strings.ToLower(filepath.Ext(filename))
-	mimeType := mime.TypeByExtension(ext)
-	if mimeType == "" {
-		return "application/octet-stream"
+func isValidImageType(mimeType string) bool {
+	validTypes := []string{"image/jpeg", "image/png", "image/gif", "image/webp"}
+	for _, t := range validTypes {
+		if t == mimeType {
+			return true
+		}
 	}
-	return mimeType
-}
-
-func (c *Client) ValidateMediaSize(size int) error {
-	const maxSize = 32 * 1024 * 1024
-	if size > maxSize {
-		return fmt.Errorf("media size %d exceeds maximum %d bytes", size, maxSize)
-	}
-	return nil
-}
-
-func (c *Client) CountTokens(ctx context.Context, messages []Message, systemMessage string) (int, error) {
-	msgParams := make([]anthropic.MessageParam, 0, len(messages))
-	for _, msg := range messages {
-		msgParams = append(msgParams, anthropic.MessageParam{
-			Role:    anthropic.F(anthropic.MessageParamRole(msg.Role)),
-			Content: anthropic.F(msg.Content),
-		})
-	}
-
-	params := anthropic.MessageCountTokensParams{
-		Model:    anthropic.F("claude-opus-4-20250514"),
-		Messages: anthropic.F(msgParams),
-	}
-
-	if systemMessage != "" {
-		params.System = anthropic.F([]anthropic.TextBlockParam{
-			anthropic.NewTextBlock(systemMessage),
-		})
-	}
-
-	response, err := c.client.Messages.CountTokens(ctx, params)
-	if err != nil {
-		return 0, fmt.Errorf("token count error: %w", err)
-	}
-
-	return int(response.InputTokens), nil
+	return false
 }
 
 func (c *Client) Close() error {

@@ -2,16 +2,12 @@ package server
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/anthropics/anthropic-sdk-go"
-	"github.com/naruyaizumi/liora/lib/go/internal"
-	pb "github.com/naruyaizumi/liora/lib/go/pb"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"liora-ai/internal"
+	pb "liora-ai/pb"
 )
 
 type AIServer struct {
@@ -54,12 +50,7 @@ func (s *AIServer) Chat(ctx context.Context, req *pb.ChatRequest) (*pb.ChatRespo
 		}, nil
 	}
 
-	allowed, err := s.cache.CheckRateLimit(
-		ctx,
-		req.UserId,
-		s.cfg.RateLimit,
-		time.Minute,
-	)
+	allowed, err := s.cache.CheckRateLimit(ctx, req.UserId, s.cfg.RateLimit, time.Minute)
 	if err != nil {
 		s.logger.Error("rate limit check failed", zap.Error(err))
 	}
@@ -75,13 +66,10 @@ func (s *AIServer) Chat(ctx context.Context, req *pb.ChatRequest) (*pb.ChatRespo
 		s.logger.Warn("cache get failed", zap.Error(err))
 	}
 	if found && cachedResponse != "" {
-		s.logger.Info("cache hit",
-			zap.String("user_id", req.UserId),
-			zap.Duration("duration", time.Since(startTime)),
-		)
+		s.logger.Info("cache hit", zap.String("user_id", req.UserId))
 		return &pb.ChatResponse{
-			Success: true,
-			Message: cachedResponse,
+			Success:   true,
+			Message:   cachedResponse,
 			FromCache: true,
 		}, nil
 	}
@@ -96,9 +84,9 @@ func (s *AIServer) Chat(ctx context.Context, req *pb.ChatRequest) (*pb.ChatRespo
 			for _, h := range history {
 				if h.MediaType == "" {
 					messages = append(messages, claude.Message{
-						Role:    h.Role,
-						Content: []anthropic.MessageParamContentUnion{
-							s.claude.CreateTextContent(h.Content),
+						Role: h.Role,
+						Content: []claude.ContentBlock{
+							{Type: "text", Text: h.Content},
 						},
 					})
 				}
@@ -106,12 +94,12 @@ func (s *AIServer) Chat(ctx context.Context, req *pb.ChatRequest) (*pb.ChatRespo
 		}
 	}
 
-	currentContent := []anthropic.MessageParamContentUnion{
-		s.claude.CreateTextContent(req.Message),
+	currentContent := []claude.ContentBlock{
+		{Type: "text", Text: req.Message},
 	}
 
 	if len(req.MediaData) > 0 {
-		mediaContent, err := s.claude.ProcessMediaBuffer(req.MediaData, req.MediaType)
+		mediaBlock, err := s.claude.ProcessMediaBuffer(req.MediaData, req.MediaType)
 		if err != nil {
 			s.logger.Error("failed to process media", zap.Error(err))
 			return &pb.ChatResponse{
@@ -119,7 +107,7 @@ func (s *AIServer) Chat(ctx context.Context, req *pb.ChatRequest) (*pb.ChatRespo
 				Message: fmt.Sprintf("Failed to process media: %v", err),
 			}, nil
 		}
-		currentContent = append(currentContent, mediaContent)
+		currentContent = append(currentContent, mediaBlock)
 		s.logger.Info("media processed",
 			zap.String("media_type", req.MediaType),
 			zap.Int("size", len(req.MediaData)),
@@ -199,15 +187,13 @@ func (s *AIServer) Chat(ctx context.Context, req *pb.ChatRequest) (*pb.ChatRespo
 		Success: true,
 		Message: response.Content,
 		TokensUsed: int32(response.TotalTokens),
-		FromCache: false,
+		FromCache:  false,
 	}, nil
 }
 
 func (s *AIServer) GetHistory(ctx context.Context, req *pb.HistoryRequest) (*pb.HistoryResponse, error) {
 	if req.UserId == "" {
-		return &pb.HistoryResponse{
-			Success: false,
-		}, status.Error(codes.InvalidArgument, "user_id is required")
+		return &pb.HistoryResponse{Success: false}, nil
 	}
 
 	limit := int(req.Limit)
@@ -218,9 +204,7 @@ func (s *AIServer) GetHistory(ctx context.Context, req *pb.HistoryRequest) (*pb.
 	history, err := s.db.GetHistory(ctx, req.UserId, limit)
 	if err != nil {
 		s.logger.Error("failed to get history", zap.Error(err))
-		return &pb.HistoryResponse{
-			Success: false,
-		}, status.Error(codes.Internal, "failed to retrieve history")
+		return &pb.HistoryResponse{Success: false}, nil
 	}
 
 	items := make([]*pb.HistoryItem, len(history))
@@ -264,35 +248,14 @@ func (s *AIServer) ClearHistory(ctx context.Context, req *pb.ClearRequest) (*pb.
 }
 
 func (s *AIServer) HealthCheck(ctx context.Context) error {
-	stats, err := s.db.GetStats(ctx, "healthcheck")
+	_, err := s.db.GetStats(ctx, "healthcheck")
 	if err != nil {
 		return fmt.Errorf("database health check failed: %w", err)
 	}
-	s.logger.Debug("database health", zap.Any("stats", stats))
 
 	if err := s.cache.Ping(ctx); err != nil {
 		s.logger.Warn("cache health check failed", zap.Error(err))
 	}
 
 	return nil
-}
-
-func (s *AIServer) GetStatus(ctx context.Context) (map[string]interface{}, error) {
-	status := map[string]interface{}{
-		"service": "liora-ai",
-		"version": "1.0.0",
-		"model": "claude-opus-4-20250514",
-	}
-
-	dbStats, err := s.db.GetStats(ctx, "status")
-	if err == nil {
-		status["database"] = dbStats
-	}
-	
-	cacheStats, err := s.cache.GetStats(ctx)
-	if err == nil {
-		status["cache"] = cacheStats
-	}
-
-	return status, nil
 }

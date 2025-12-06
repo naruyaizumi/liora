@@ -2,31 +2,30 @@ package database
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/naruyaizumi/liora/lib/go/internal"
 	"go.uber.org/zap"
+	"liora-ai/internal"
 )
 
 type DB struct {
-	pool   *pgxpool.Pool
+	pool *pgxpool.Pool
 	logger *zap.Logger
 }
 
 type ChatHistory struct {
-	ID int64 `json:"id"`
-	UserID string `json:"user_id"`
-	ChatID string `json:"chat_id"`
-	Role string `json:"role"`
-	Content string `json:"content"`
-	Timestamp time.Time `json:"timestamp"`
-	Model string `json:"model"`
-	TokensUsed int `json:"tokens_used"`
-	MediaType string `json:"media_type,omitempty"`
+	ID int64
+	UserID string
+	ChatID string
+	Role string
+	Content string
+	Timestamp time.Time
+	Model string
+	TokensUsed int
+	MediaType string
 }
 
 func NewDB(cfg *config.Config, logger *zap.Logger) (*DB, error) {
@@ -61,7 +60,7 @@ func NewDB(cfg *config.Config, logger *zap.Logger) (*DB, error) {
 		return nil, fmt.Errorf("unable to create tables: %w", err)
 	}
 
-	logger.Info("✓ PostgreSQL connected and tables created")
+	logger.Info("✓ PostgreSQL connected")
 	return db, nil
 }
 
@@ -93,20 +92,6 @@ func (db *DB) createTables(ctx context.Context) error {
 
 	if _, err := db.pool.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vector"); err != nil {
 		db.logger.Warn("pgvector extension not available", zap.Error(err))
-	} else {
-		embedQuery := `CREATE TABLE IF NOT EXISTS embeddings (
-			id SERIAL PRIMARY KEY,
-			user_id VARCHAR(100) NOT NULL,
-			content TEXT NOT NULL,
-			embedding vector(1536),
-			metadata JSONB,
-			timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-		)`
-		if _, err := db.pool.Exec(ctx, embedQuery); err != nil {
-			db.logger.Warn("failed to create embeddings table", zap.Error(err))
-		} else {
-			db.logger.Info("✓ pgvector enabled for RAG")
-		}
 	}
 
 	return nil
@@ -217,7 +202,7 @@ func (db *DB) GetChatHistory(ctx context.Context, chatID string, limit int) ([]C
 
 func (db *DB) ClearHistory(ctx context.Context, userID string) error {
 	query := `DELETE FROM chat_history WHERE user_id = $1`
-	
+
 	result, err := db.pool.Exec(ctx, query, userID)
 	if err != nil {
 		return fmt.Errorf("failed to clear history: %w", err)

@@ -11,33 +11,26 @@ import (
 type Config struct {
 	AnthropicAPIKey string
 	AdminKey string
-
 	GRPCPort string
 	GRPCHost string
-
 	PostgresHost string
 	PostgresPort string
 	PostgresDB string
 	PostgresUser string
 	PostgresPassword string
-
 	RedisHost string
 	RedisPort string
 	RedisPassword string
 	RedisDB int
-
 	MaxTokens int
 	Temperature float32
 	CacheTTL int
 	RateLimit int
-
 	LogLevel string
 }
 
 func Load() (*Config, error) {
-	if err := godotenv.Load(); err != nil {
-		fmt.Println("Warning: .env file not found, using environment variables")
-	}
+	_ = godotenv.Load()
 
 	cacheTTL, _ := strconv.Atoi(getEnv("CACHE_TTL", "300"))
 	maxTokens, _ := strconv.Atoi(getEnv("MAX_TOKENS", "4096"))
@@ -46,28 +39,23 @@ func Load() (*Config, error) {
 	temp, _ := strconv.ParseFloat(getEnv("TEMPERATURE", "0.7"), 32)
 
 	cfg := &Config{
-		AnthropicAPIKey: getEnv("ANTHROPIC_API_KEY", ""),
+		AnthropicAPIKey:  getEnv("ANTHROPIC_API_KEY", ""),
 		AdminKey: getEnv("ADMIN_KEY", ""),
-
 		GRPCPort: getEnv("GRPC_PORT", "50051"),
 		GRPCHost: getEnv("GRPC_HOST", "127.0.0.1"),
-
 		PostgresHost: getEnv("POSTGRES_HOST", "localhost"),
 		PostgresPort: getEnv("POSTGRES_PORT", "5432"),
 		PostgresDB: getEnv("POSTGRES_DB", "ai"),
 		PostgresUser: getEnv("POSTGRES_USER", "liora"),
 		PostgresPassword: getEnv("POSTGRES_PASSWORD", "naruyaizumi"),
-
 		RedisHost: getEnv("REDIS_HOST", "localhost"),
 		RedisPort: getEnv("REDIS_PORT", "6379"),
 		RedisPassword: getEnv("REDIS_PASSWORD", ""),
 		RedisDB: redisDB,
-
-		MaxTokens:   maxTokens,
+		MaxTokens: maxTokens,
 		Temperature: float32(temp),
-		CacheTTL:    cacheTTL,
-		RateLimit:   rateLimit,
-
+		CacheTTL: cacheTTL,
+		RateLimit: rateLimit,
 		LogLevel: getEnv("LOG_LEVEL", "info"),
 	}
 
