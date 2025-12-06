@@ -39,8 +39,6 @@ load_library "ffmpeg.sh"
 load_library "liora.sh"
 load_library "systemd.sh"
 load_library "cli.sh"
-load_library "ai.sh"
-load_library "ai-service.sh"
 
 SERVICE_NAME="liora"
 WORK_DIR="/root/liora"
@@ -91,8 +89,6 @@ main() {
     install_redis
     configure_redis
     test_redis_connection
-    install_ai
-    setup_service
     install_rust
     install_bun
     setup_liora
