@@ -2,13 +2,9 @@ syntax = "proto3";
 
 package ai;
 
-option go_package = "github.com/liora/lib/go/pb";
-
 service AIService {
   rpc Chat(ChatRequest) returns (ChatResponse);
-  
   rpc GetHistory(HistoryRequest) returns (HistoryResponse);
-  
   rpc ClearHistory(ClearRequest) returns (ClearResponse);
 }
 
@@ -20,8 +16,8 @@ message ChatRequest {
   bool include_history = 5;
   int32 max_tokens = 6;
   float temperature = 7;
-  bytes media_data = 8;
-  string media_type = 9;
+  bytes media = 8;
+  string media_mime = 9;
 }
 
 message ChatResponse {
