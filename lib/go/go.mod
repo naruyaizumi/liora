@@ -1,4 +1,4 @@
-module liora-ai
+module github.com/naruyaizumi/liora/lib/go
 
 go 1.22
 
