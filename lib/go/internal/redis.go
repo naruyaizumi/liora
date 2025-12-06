@@ -9,7 +9,6 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
-	"liora-ai/internal"
 )
 
 type Cache struct {

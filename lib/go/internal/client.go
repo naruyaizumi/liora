@@ -8,7 +8,6 @@ import (
 
 	"github.com/anthropics/anthropic-sdk-go"
 	"go.uber.org/zap"
-	"liora-ai/internal"
 )
 
 type Client struct {

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-	"liora-ai/internal"
 	pb "liora-ai/pb"
 )
 
