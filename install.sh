@@ -3,7 +3,7 @@
 # Version: 1.0.0
 # Description: WhatsApp bot installer
 
-set -e
+set -euo pipefail
 
 GITHUB_RAW_BASE="https://raw.githubusercontent.com/naruyaizumi/liora/main/lib/shell"
 
@@ -15,20 +15,17 @@ load_library() {
     print_info "Loading library: ${lib_name}"
     
     if ! curl -sSf "${lib_url}" -o "${temp_file}"; then
-        echo "Error: Failed to download library ${lib_name}"
+        echo "[ERROR] Failed to download library ${lib_name}"
         exit 1
     fi
     
     source "${temp_file}"
-    
     rm -f "${temp_file}"
 }
 
 curl -sSf "${GITHUB_RAW_BASE}/logger.sh" -o /tmp/logger.sh
 source /tmp/logger.sh
 rm -f /tmp/logger.sh
-
-print_info "Starting Liora Bot installation..."
 
 load_library "distro.sh"
 load_library "cleanup.sh"
@@ -46,8 +43,6 @@ load_library "ai.sh"
 load_library "ai-service.sh"
 
 SERVICE_NAME="liora"
-SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
-HELPER_FILE="/usr/local/bin/bot"
 WORK_DIR="/root/liora"
 BUN_PATH="/root/.bun/bin/bun"
 SUPERVISOR_PATH="${WORK_DIR}/lib/rs/target/release/liora-rs"
@@ -62,7 +57,7 @@ REDIS_PORT="6379"
 REPO_URL="https://github.com/naruyaizumi/liora.git"
 
 if ! command -v curl &> /dev/null; then
-    echo "Installing curl..."
+    echo "[INFO] Installing curl..."
     if command -v apt-get &> /dev/null; then
         apt-get update && apt-get install -y curl
     elif command -v yum &> /dev/null; then
@@ -74,7 +69,7 @@ if ! command -v curl &> /dev/null; then
     elif command -v apk &> /dev/null; then
         apk add curl
     else
-        echo "Error: Could not install curl. Please install it manually."
+        echo "[ERROR] Could not install curl. Please install it manually."
         exit 1
     fi
 fi
@@ -96,12 +91,8 @@ main() {
     install_redis
     configure_redis
     test_redis_connection
-    install_ai_runtime
-    install_ai_dependencies
-    setup_ai_project
-    generate_ai_grpc
-    create_ai_service
-    create_ai_cli
+    install_ai
+    setup_service
     install_rust
     install_bun
     setup_liora
