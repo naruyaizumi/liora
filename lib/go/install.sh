@@ -128,7 +128,7 @@ print_success "Protoc plugins installed"
 
 print_status "Generating gRPC code..."
 mkdir -p pb
-PROTO_PATH="../protos/ai.proto"
+PROTO_PATH="./protos/ai.proto"
 if [ ! -f "$PROTO_PATH" ]; then
     PROTO_PATH="protos/ai.proto"
 fi
