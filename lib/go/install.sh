@@ -144,7 +144,7 @@ protoc \
 print_success "gRPC code generated"
 
 print_status "Building AI service..."
-go build -o bin/liora-ai cmd/main.go
+go build -o bin/liora-ai cmd/server/main.go
 print_success "Binary built: $INSTALL_DIR/bin/liora-ai"
 
 print_status "Creating CLI tool..."
@@ -195,12 +195,12 @@ case "$1" in
         ;;
     test)
         cd "$INSTALL_DIR"
-        go run cmd/main.go
+        go run cmd/server/main.go
         ;;
     build)
         echo "Rebuilding service..."
         cd "$INSTALL_DIR"
-        go build -o bin/liora-ai cmd/main.go
+        go build -o bin/liora-ai cmd/server/main.go
         echo "Build complete. Restart with: ai restart"
         ;;
     uninstall)
