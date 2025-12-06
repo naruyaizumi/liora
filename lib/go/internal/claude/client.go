@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/anthropics/anthropic-sdk-go"
+	"github.com/anthropics/anthropic-go"
 	"go.uber.org/zap"
 	"liora-ai/internal/config"
 )
@@ -46,10 +46,8 @@ type ChatResponse struct {
 }
 
 func NewClient(cfg *config.Config, logger *zap.Logger) *Client {
-	client := anthropic.NewClient(
-		anthropic.WithAPIKey(cfg.AnthropicAPIKey),
-	)
-
+	client := anthropic.NewClient(cfg.AnthropicAPIKey)
+	
 	return &Client{
 		client: client,
 		cfg:    cfg,
@@ -68,69 +66,64 @@ func (c *Client) Chat(ctx context.Context, req ChatRequest) (*ChatResponse, erro
 		req.Model = "claude-opus-4-20250514"
 	}
 
-	messages := make([]anthropic.MessageParam, 0, len(req.Messages))
+	messages := make([]anthropic.Message, 0, len(req.Messages))
+	
 	for _, msg := range req.Messages {
-		content := make([]anthropic.ContentBlockParamUnion, 0)
+		content := make([]anthropic.MessageContent, 0)
 		
 		for _, block := range msg.Content {
 			if block.Type == "text" {
-				content = append(content, anthropic.NewTextBlock(block.Text))
+				content = append(content, anthropic.NewTextContent(block.Text))
 			} else if block.Type == "image" && len(block.ImageData) > 0 {
 				encoded := base64.StdEncoding.EncodeToString(block.ImageData)
-				content = append(content, anthropic.NewImageBlockParam(
-					anthropic.ImageBlockParamSourceBase64{
-						Type:      anthropic.F(anthropic.ImageBlockParamSourceBase64TypeBase64),
-						MediaType: anthropic.F(anthropic.ImageBlockParamSourceBase64MediaType(block.MediaType)),
-						Data:      anthropic.F(encoded),
+				content = append(content, anthropic.NewImageContent(
+					anthropic.ImageSource{
+						Type:      "base64",
+						MediaType: block.MediaType,
+						Data:      encoded,
 					},
 				))
 			} else if block.Type == "document" && len(block.ImageData) > 0 {
 				encoded := base64.StdEncoding.EncodeToString(block.ImageData)
-				content = append(content, anthropic.NewDocumentBlockParam(
-					anthropic.DocumentBlockParamSourceBase64{
-						Type:      anthropic.F(anthropic.DocumentBlockParamSourceBase64TypeBase64),
-						MediaType: anthropic.F(anthropic.DocumentBlockParamSourceBase64MediaType(block.MediaType)),
-						Data:      anthropic.F(encoded),
+				content = append(content, anthropic.NewDocumentContent(
+					anthropic.DocumentSource{
+						Type:      "base64",
+						MediaType: block.MediaType,
+						Data:      encoded,
 					},
 				))
 			}
 		}
 
-		messages = append(messages, anthropic.NewUserMessage(content...))
-	}
-
-	params := anthropic.MessageNewParams{
-		Model:     anthropic.F(req.Model),
-		MaxTokens: anthropic.Int(int64(req.MaxTokens)),
-		Messages:  anthropic.F(messages),
-	}
-
-	if req.SystemMessage != "" {
-		params.System = anthropic.F([]anthropic.TextBlockParam{
-			anthropic.NewTextBlock(req.SystemMessage),
+		messages = append(messages, anthropic.Message{
+			Role:    msg.Role,
+			Content: content,
 		})
 	}
 
-	if req.Temperature != 0.7 {
-		params.Temperature = anthropic.Float(float64(req.Temperature))
+	request := anthropic.MessageRequest{
+		Model:       req.Model,
+		MaxTokens:   req.MaxTokens,
+		Messages:    messages,
+		System:      req.SystemMessage,
+		Temperature: float64(req.Temperature),
 	}
 
-	response, err := c.client.Messages.New(ctx, params)
+	response, err := c.client.CreateMessage(ctx, request)
 	if err != nil {
 		c.logger.Error("Claude API error", zap.Error(err))
 		return nil, fmt.Errorf("claude api error: %w", err)
 	}
 
-	var content strings.Builder
+	var contentBuilder strings.Builder
 	for _, block := range response.Content {
-		switch v := block.(type) {
-		case anthropic.ContentBlockText:
-			content.WriteString(v.Text)
+		if textBlock, ok := block.(anthropic.TextContent); ok {
+			contentBuilder.WriteString(textBlock.Text)
 		}
 	}
 
 	return &ChatResponse{
-		Content:      content.String(),
+		Content:      contentBuilder.String(),
 		StopReason:   string(response.StopReason),
 		InputTokens:  int(response.Usage.InputTokens),
 		OutputTokens: int(response.Usage.OutputTokens),
