@@ -1,4 +1,4 @@
-import { addExif, sticker } from "#add-on";
+import { addExif, sticker } from "@naruyaizumi/aurora";
 
 let handler = async (m, { conn, text }) => {
     const q = m.quoted ? m.quoted : m;

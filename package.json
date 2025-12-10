@@ -65,6 +65,7 @@
     },
     "dependencies": {
         "@napi-rs/canvas": "^0.1.83",
+        "@naruyaizumi/aurora": "^0.0.4",
         "async-mutex": "^0.5.0",
         "baileys": "github:naruyaizumi/baileys#main",
         "chokidar": "^5.0.0",

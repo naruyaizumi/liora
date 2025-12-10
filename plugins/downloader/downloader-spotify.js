@@ -1,4 +1,4 @@
-import { convert } from "#add-on";
+import { convert } from "@naruyaizumi/aurora";
 import { spotify } from "#spotify";
 import { spotifyCanvas } from "../../lib/canvas-spotify.js";
 
