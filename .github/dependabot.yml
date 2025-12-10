@@ -39,24 +39,6 @@ updates:
           - "minor"
           - "patch"
 
-  - package-ecosystem: "cargo"
-    directory: "/lib/rs"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "10:00"
-      timezone: "Asia/Jakarta"
-    open-pull-requests-limit: 5
-    reviewers:
-      - "naruyaizumi"
-    labels:
-      - "dependencies"
-      - "rust"
-      - "automated"
-    commit-message:
-      prefix: "chore(deps)"
-      include: "scope"
-
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

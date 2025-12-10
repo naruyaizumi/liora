@@ -25,22 +25,6 @@ config:
           - "*.yaml"
           - ".github/**/*"
 
-rust:
-  - changed-files:
-      - any-glob-to-any-file:
-          - "lib/rs/**/*"
-          - "**/Cargo.toml"
-          - "**/Cargo.lock"
-
-cpp:
-  - changed-files:
-      - any-glob-to-any-file:
-          - "lib/cpp/**/*"
-          - "**/*.cpp"
-          - "**/*.h"
-          - "**/*.cc"
-          - "binding.gyp"
-
 ci-cd:
   - changed-files:
       - any-glob-to-any-file:
@@ -52,7 +36,6 @@ dependencies:
       - any-glob-to-any-file:
           - "package.json"
           - "bun.lockb"
-          - "Cargo.lock"
 
 security:
   - changed-files:

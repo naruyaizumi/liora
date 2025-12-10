@@ -24,25 +24,6 @@ jobs:
         with:  
           bun-version: latest  
 
-      - name: Install Ubuntu dependencies  
-        run: |  
-          sudo apt-get update  
-          sudo apt-get install -y \
-            ffmpeg \
-            libwebp-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            libavutil-dev \
-            libswresample-dev \
-            libswscale-dev \
-            libavfilter-dev \
-            build-essential \
-            python3 \
-            g++ \
-            pkg-config \
-            cmake \
-            clang
-
       - name: Cache Bun dependencies
         uses: actions/cache@v4
         with:
@@ -54,151 +35,10 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Build C++ Addons
-        run: bun run build:cpp
-
-      - name: Verify build
-        run: |
-          for f in build/Release/*.node; do
-            if [ ! -f "$f" ]; then
-              echo "C++ addon build failed for $f"
-              exit 1
-            fi
-          done
-
-  build-debian:
-    name: Build on Debian 12
-    runs-on: ubuntu-latest
-    container:
-      image: debian:12-slim
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Install Debian dependencies
-        run: |
-          apt-get update
-          apt-get install -y \
-            curl \
-            ca-certificates \
-            gnupg \
-            lsb-release \
-            ffmpeg \
-            libwebp-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            libavutil-dev \
-            libswresample-dev \
-            libswscale-dev \
-            libavfilter-dev \
-            build-essential \
-            python3 \
-            g++ \
-            pkg-config \
-            cmake \
-            unzip \
-            clang \
-            git \
-            make \
-            bash  # Install bash
-
-      - name: Install Bun
-        run: |
-          curl -fsSL https://bun.sh/install | bash
-          
-          export BUN_INSTALL="$HOME/.bun"
-          export PATH="$BUN_INSTALL/bin:$PATH"
-          
-          echo "export BUN_INSTALL=\"\$HOME/.bun\"" >> ~/.bashrc
-          echo "export PATH=\"\$BUN_INSTALL/bin:\$PATH\"" >> ~/.bashrc
-
-      - name: Install project dependencies
-        run: |
-          export BUN_INSTALL="$HOME/.bun"
-          export PATH="$BUN_INSTALL/bin:$PATH"
-          
-          echo "PATH: $PATH"
-          bun --version
-          bun install
-
-      - name: Build C++ Addons
-        run: |
-          export BUN_INSTALL="$HOME/.bun"
-          export PATH="$BUN_INSTALL/bin:$PATH"
-          
-          bun run build:cpp || echo "Build command exited with status: $?"
-
-      - name: Verify build
-        run: |
-          echo "Checking build directory structure..."
-          find . -name "*.node" -type f | head -20
-          
-          if [ -d "build/Release" ]; then
-            echo "Files in build/Release/:"
-            ls -la build/Release/
-            
-            count=$(find build/Release -name "*.node" -type f | wc -l)
-            if [ $count -gt 0 ]; then
-              echo "Found $count .node file(s) in build/Release/"
-              for f in build/Release/*.node; do
-                echo "  - $(basename "$f")"
-              done
-            else
-              echo "No .node files found in build/Release/"
-              exit 1
-            fi
-          else
-            echo "build/Release directory not found"
-            echo "Current directory contents:"
-            ls -la
-            if [ -d "build" ]; then
-              echo "build directory contents:"
-              ls -la build/
-            fi
-            exit 1
-          fi
-
-  build-rust:
-    name: Build Rust Libraries
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache Cargo
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            lib/rs/target/
-          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-build-
-
-      - name: Build Rust libraries
-        working-directory: lib/rs
-        run: cargo build --release
-
-      - name: Check Rust tests
-        working-directory: ./lib/rs
-        run: cargo test --release
-
-      - name: Upload Rust artifacts
-        uses: actions/upload-artifact@v5
-        with:
-          name: rust-build-artifacts
-          path: lib/rs/target/release/
-
   integration-test:
     name: Integration Tests
     runs-on: ubuntu-24.04
-    needs: [build-ubuntu, build-debian, build-rust]
+    needs: [build-ubuntu]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -208,24 +48,6 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            ffmpeg \
-            libwebp-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            libavutil-dev \
-            libswresample-dev \
-            libswscale-dev \
-            libavfilter-dev \
-            build-essential \
-            python3 \
-            g++ \
-            pkg-config \
-            cmake
-
       - name: Install npm dependencies
         run: bun install
 
@@ -233,21 +55,3 @@ jobs:
         run: |
           echo "Running integration tests..."
           # bun run test
-
-  validate-installer:
-    name: Validate Installer Script
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Install shellcheck
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
-
-      - name: Lint installer script
-        run: shellcheck -e SC1091 -e SC2034 install.sh || true
-
-      - name: Test installer (dry-run)
-        run: |
-          bash -n install.sh
-          echo "Installer script syntax is valid"

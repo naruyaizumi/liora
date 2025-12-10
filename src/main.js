@@ -1,7 +1,7 @@
 /* global conn */
 import "#config";
 import { serialize } from "#message";
-import { PostgresAuth } from "#auth";
+import { SQLiteAuth } from "#sqlite-auth";
 import { fileURLToPath } from "url";
 import path from "path";
 import pino from "pino";
@@ -33,11 +33,6 @@ const logger = pino({
 const pluginCache = new PluginCache(5000);
 const pairingNumber = global.config.pairingNumber;
 
-let isShuttingDown = false;
-let cleanupManager = null;
-
-global.cleanupTasks = [];
-
 async function setupPairingCode(conn) {
     const waitForConnection = new Promise((resolve) => {
         const checkConnection = setInterval(() => {
@@ -56,7 +51,7 @@ async function setupPairingCode(conn) {
     await waitForConnection;
 
     try {
-        let code = await conn.requestPairingCode(pairingNumber);
+        let code = await conn.requestPairingCode(pairingNumber, conn.Pairing);
         code = code?.match(/.{1,4}/g)?.join("-") || code;
         logger.info(`Pairing code for ${pairingNumber}: ${code}`);
     } catch (e) {
@@ -64,93 +59,11 @@ async function setupPairingCode(conn) {
     }
 }
 
-async function gracefulShutdown(signal) {
-    if (isShuttingDown) {
-        logger.warn("Shutdown already in progress, ignoring duplicate signal");
-        return;
-    }
-
-    isShuttingDown = true;
-    logger.info(`Received ${signal}, initiating graceful shutdown...`);
-
-    const shutdownTimeout = setTimeout(() => {
-        logger.error("Graceful shutdown timeout, forcing exit");
-        process.exit(1);
-    }, 25000);
-
-    try {
-        for (const task of global.cleanupTasks) {
-            try {
-                await task();
-            } catch (e) {
-                logger.error({ error: e.message }, "Cleanup task failed");
-            }
-        }
-
-        if (global.conn) {
-            try {
-                if (global.conn.ws) {
-                    global.conn.ws.close();
-                }
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-            } catch (e) {
-                logger.error({ error: e.message }, "Error closing WebSocket");
-            }
-        }
-
-        if (cleanupManager) {
-            try {
-                await cleanupManager.cleanup();
-            } catch (e) {
-                logger.error({ error: e.message }, "Error during cleanup");
-            }
-        }
-
-        await new Promise((resolve) => {
-            logger.flush();
-            setTimeout(resolve, 200);
-        });
-
-        clearTimeout(shutdownTimeout);
-        process.exit(0);
-    } catch (e) {
-        logger.error({ error: e.message, stack: e.stack }, "Error during shutdown");
-        clearTimeout(shutdownTimeout);
-        process.exit(1);
-    }
-}
-
-function setupSignalHandlers() {
-    const signals = ["SIGTERM", "SIGINT"];
-
-    signals.forEach((signal) => {
-        process.on(signal, () => {
-            gracefulShutdown(signal).catch((e) => {
-                logger.error({ error: e.message }, `Error in ${signal} handler`);
-                process.exit(1);
-            });
-        });
-    });
-
-    process.on("uncaughtException", (error) => {
-        logger.error({ error: error.message, stack: error.stack }, "Uncaught exception");
-        gracefulShutdown("uncaughtException").catch(() => process.exit(1));
-    });
-
-    process.on("unhandledRejection", (reason, promise) => {
-        logger.error({ reason, promise }, "Unhandled rejection");
-        gracefulShutdown("unhandledRejection").catch(() => process.exit(1));
-    });
-}
-
 async function LIORA() {
-    setupSignalHandlers();
-
-    const auth = await PostgresAuth();
+    const auth = SQLiteAuth();
     const version = new BaileysVersion();
     const baileys = await version.fetchVersion();
     logger.info({ version: baileys.join(".") }, "Baileys version loaded");
-
     const connection = createConnection(
         baileys,
         auth,
@@ -176,13 +89,10 @@ async function LIORA() {
     }
 
     const CM = new CleanupManager();
-    cleanupManager = CM;
     registerProcess(CM);
-
     const EM = new EventManager();
     setupMaintenance(CM);
-
-    const handler = await import("./handler.js");
+    const handler = await import("../handler.js");
     EM.setHandler(handler);
 
     global.reloadHandler = await EM.createReloadHandler(
@@ -191,7 +101,6 @@ async function LIORA() {
         CM,
         import.meta.url
     );
-
     const filename = fileURLToPath(import.meta.url);
     const dirname = path.dirname(filename);
     const pluginFolder = path.join(dirname, "../plugins");

@@ -60,51 +60,6 @@ jobs:
           delete-branch: true
           labels: dependencies, automated
 
-  update-rust-deps:
-    name: Update Rust Dependencies
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install cargo-edit
-        run: cargo install cargo-edit
-
-      - name: Update Rust dependencies
-        working-directory: ./lib/rs
-        run: |
-          cargo update
-          cargo upgrade --incompatible
-
-      - name: Run tests
-        working-directory: ./lib/rs
-        run: cargo test
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore(deps): update rust dependencies"
-          title: "chore(deps): update rust dependencies"
-          body: |
-            ## Rust Dependency Updates
-            
-            This PR updates Rust dependencies in lib/rs.
-            
-            ### Changes
-            - Updated Cargo.lock with latest compatible versions
-            - All tests passing
-            
-            Please review before merging.
-          branch: deps/rust-update
-          delete-branch: true
-          labels: dependencies, rust, automated
-
   security-audit:
     name: Security Audit
     runs-on: ubuntu-latest
@@ -130,12 +85,6 @@ jobs:
               npm audit fix || true
             fi
           fi
-
-      - name: Rust security audit
-        working-directory: ./lib/rs
-        run: |
-          cargo install cargo-audit
-          cargo audit
 
       - name: Create security issue if vulnerabilities found
         if: failure()

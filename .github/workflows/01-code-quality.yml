@@ -23,30 +23,12 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-
-      - name: Install native dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            ffmpeg \
-            libwebp-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            libavutil-dev \
-            libswresample-dev \
-            libswscale-dev \
-            libavfilter-dev \
-            build-essential \
-            python3 \
-            g++ \
-            pkg-config \
-            cmake
             
       - name: Install dependencies
         run: bun install
 
       - name: Run Prettier Fix
-        run: bun run format
+        run: bunx prettier --write . 
 
   eslint:
     name: ESLint Analysis
@@ -59,88 +41,12 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-
-      - name: Install native dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            ffmpeg \
-            libwebp-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            libavutil-dev \
-            libswresample-dev \
-            libswscale-dev \
-            libavfilter-dev \
-            build-essential \
-            python3 \
-            g++ \
-            pkg-config \
-            cmake
-
+          
       - name: Install dependencies
         run: bun install
 
       - name: Run ESLint
-        run: bun run lint
-
-  rust-fmt:
-    name: Rust Format Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
-
-      - name: Check Rust formatting
-        working-directory: ./lib/rs
-        run: cargo fmt --all
-
-  rust-clippy:
-    name: Rust Clippy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
-
-      - name: Cache Cargo
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            lib/rs/target/
-          key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Run Clippy
-        working-directory: lib/rs
-        run: cargo clippy --all-targets --all-features --fix --allow-dirty --allow-staged
-
-  cpp-format:
-    name: C++ Format Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Install clang-format
-        run: sudo apt-get update && sudo apt-get install -y clang-format
-
-      - name: Check C++ formatting
-        run: |
-          find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | \
-          xargs clang-format
+        run: bunx eslint .
 
   commit-lint:
     name: Commit Message Lint

@@ -18,15 +18,6 @@
 # APIs
 /lib/api/ @naruyaizumi
 
-# Rust code
-/lib/rs/ @naruyaizumi
-Cargo.toml @naruyaizumi
-Cargo.lock @naruyaizumi
-
-# C++ code
-/lib/cpp/ @naruyaizumi
-binding.gyp @naruyaizumi
-
 # Configuration files
 package.json @naruyaizumi
 *.config.js @naruyaizumi

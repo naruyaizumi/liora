@@ -95,23 +95,6 @@ jobs:
           fail-on-severity: moderate
           deny-licenses: GPL-2.0, GPL-3.0
 
-  rust-audit:
-    name: Rust Security Audit
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install cargo-audit
-        run: cargo install cargo-audit
-
-      - name: Run Audit
-        working-directory: ./lib/rs
-        run: cargo audit
-
   trivy-scan:
     name: Trivy Container Scan
     runs-on: ubuntu-latest

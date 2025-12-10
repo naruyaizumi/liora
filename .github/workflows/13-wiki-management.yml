@@ -201,7 +201,6 @@ jobs:
           ## 🌟 Features
           
           - ✅ Multi-platform support (Ubuntu, Debian, RHEL, Arch)
-          - ✅ Native performance (Rust + C++ modules)
           - ✅ Comprehensive API integrations
           - ✅ Production-ready CI/CD
           - ✅ Automatic security scanning
@@ -218,8 +217,6 @@ jobs:
           
           \`\`\`
           JavaScript: $(find src lib -name "*.js" 2>/dev/null | wc -l || echo "0") files
-          Rust:       $(find lib/rs -name "*.rs" 2>/dev/null | wc -l || echo "0") files
-          C++:        $(find lib/cpp -name "*.cpp" -o -name "*.h" 2>/dev/null | wc -l || echo "0") files
           \`\`\`
           
           ## 🏆 Top Contributors

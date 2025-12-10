@@ -121,25 +121,6 @@ Unsure where to begin? You can start by looking through `good-first-issue` and `
     bun run src/index.js
     ```
 
-### Rust Development
-
-If you're working on Rust code:
-
-```bash
-cd lib/rs
-cargo build
-cargo test
-cargo clippy
-```
-
-### C++ Development
-
-If you're working on C++ addons:
-
-```bash
-bun run build:cpp
-```
-
 ## Coding Standards
 
 ### JavaScript/TypeScript
@@ -154,28 +135,6 @@ bun run build:cpp
 ```bash
 bun run format
 bun run lint:fix
-```
-
-### Rust
-
-- Follow Rust naming conventions
-- Run `cargo fmt` before committing
-- Ensure `cargo clippy` passes without warnings
-- Write tests for new functionality
-
-```bash
-bun run format:rust
-bun run lint:rust
-```
-
-### C++
-
-- Follow Google C++ Style Guide
-- Format with clang-format
-- Use modern C++ features (C++17)
-
-```bash
-bun run format:cpp
 ```
 
 ## Commit Guidelines
@@ -280,9 +239,6 @@ The scope should be the name of the affected module:
 # JavaScript tests
 bun test
 
-# Rust tests
-cd lib/rs && cargo test
-
 # Integration tests
 bun run test:integration
 ```
@@ -331,9 +287,7 @@ liora/
 ├── lib/              # Libraries and modules
 │   ├── api/          # API integrations
 │   ├── core/         # Core functionality
-│   ├── auth/         # Authentication
-│   ├── rs/           # Rust code
-│   └── cpp/          # C++ code
+│   └── auth/         # Authentication
 ├── docs/             # Documentation
 ├── .github/          # GitHub configuration
 │   └── workflows/    # CI/CD workflows
