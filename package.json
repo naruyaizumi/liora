@@ -99,8 +99,7 @@
         "#message": "./lib/core/message.js",
         "#socket": "./lib/core/socket.js",
         "#connection": "./lib/core/connection.js",
-        "#add-on": "./lib/cpp/bridge-async.js",
-        "#auth": "./lib/auth/auth.js"
+        "#auth": "./lib/auth/sqlite-auth.js"
     },
     "prettier": {
         "printWidth": 100,

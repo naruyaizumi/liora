@@ -1,7 +1,7 @@
 /* global conn */
 import "#config";
 import { serialize } from "#message";
-import { SQLiteAuth } from "#sqlite-auth";
+import { SQLiteAuth } from "#auth";
 import { fileURLToPath } from "url";
 import path from "path";
 import pino from "pino";
