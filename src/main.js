@@ -92,7 +92,7 @@ async function LIORA() {
     registerProcess(CM);
     const EM = new EventManager();
     setupMaintenance(CM);
-    const handler = await import("../handler.js");
+    const handler = await import("./handler.js");
     EM.setHandler(handler);
 
     global.reloadHandler = await EM.createReloadHandler(
