@@ -1,4 +1,4 @@
-import { sticker } from "@naruyaizumi/aurora";
+import { sticker } from "#add-on";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     try {

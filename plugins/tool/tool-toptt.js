@@ -1,4 +1,4 @@
-import { convert } from "@naruyaizumi/aurora";
+import { convert } from "#add-on";
 
 let handler = async (m, { conn, usedPrefix, command }) => {
     try {

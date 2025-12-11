@@ -1,4 +1,4 @@
-import { convert } from "@naruyaizumi/aurora";
+import { convert } from "#add-on";
 import { play } from "#play";
 import { youtubeCanvas } from "../../lib/canvas-play.js";
 
