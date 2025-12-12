@@ -4,7 +4,7 @@ First off, thank you for considering contributing to Liora! It's people like you
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to sexystyle088@gmail.com.
+This project and everyone participating in it is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to liora.bot.official@gmail.com.
 
 ## Getting Started
 
@@ -269,7 +269,7 @@ Please update the README.md accordingly.
 
 - **GitHub Discussions**: Ask questions and share ideas
 - **GitHub Issues**: Report bugs and request features
-- **Email**: sexystyle088@gmail.com
+- **Email**: liora.bot.official@gmail.com
 
 ### Stay Updated
 

@@ -8,16 +8,19 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
   prettier-check:
-    name: Prettier Format Check
+    name: Prettier Auto Fix
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -46,7 +49,19 @@ jobs:
         run: npm install
 
       - name: Run Prettier Fix
-        run: npx prettier --write . || true
+        run: npx prettier --write .
+
+      - name: Commit and Push Prettier Fix
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config --global user.name "github-actions"
+            git config --global user.email "github-actions@github.com"
+            git add .
+            git commit -m "chore(format): auto-prettier"
+            git push origin HEAD:${{ github.ref }}
+          else
+            echo "No Prettier changes."
+          fi
 
   eslint:
     name: ESLint Analysis
@@ -85,19 +100,34 @@ jobs:
         run: npx eslint . --ext .js
 
   cpp-format:
-    name: C++ Format Check
+    name: C++ Auto Format Fix
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          fetch-depth: 0
 
       - name: Install clang-format
         run: sudo apt-get update && sudo apt-get install -y clang-format
 
-      - name: Check C++ formatting
+      - name: Run clang-format Fix
         run: |
           find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | \
-          xargs clang-format --dry-run --Werror
+            xargs clang-format -i
+
+      - name: Commit and Push C++ Formatting Fix
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config --global user.name "liora-bot"
+            git config --global user.email "liora.bot.official@gmail.com"
+            git add .
+            git commit -m "chore(format): auto-clang-format"
+            git push origin HEAD:${{ github.ref }}
+          else
+            echo "No C++ formatting changes."
+          fi
 
   commit-lint:
     name: Commit Message Lint

@@ -140,8 +140,8 @@ jobs:
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          git config --local user.name "naruyaizumi"
-          git config --local user.email "sexystyle088@gmail.com"
+          git config --local user.name "liora-bot"
+          git config --local user.email "liora.bot.official@gmail.com"
           
           git remote set-url origin "https://naruyaizumi:$PAT_TOKEN@github.com/naruyaizumi/liora.git"
           

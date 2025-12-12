@@ -14,7 +14,7 @@ We provide security updates for active versions. Please always use the latest st
 **DO NOT report security vulnerabilities through public GitHub issues, discussions, or pull requests.**
 
 ### Preferred Method
-**Email**: [sexystyle088@gmail.com](mailto:sexystyle088@gmail.com?subject=Security%20Vulnerability%20Report%20-%20Liora)
+**Email**: [liora.bot.official@gmail.com](mailto:liora.bot.official@gmail.com?subject=Security%20Vulnerability%20Report%20-%20Liora)
 
 ### What to Include
 - **Description**: Detailed explanation of the vulnerability
