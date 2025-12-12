@@ -83,11 +83,11 @@ jobs:
 
       - name: Check npm dependencies
         run: |
-          bun outdated || true
+          npm outdated || true
 
       - name: Check for deprecated packages
         run: |
-          bunx check-is-deprecated -g $REPO_URL
+          npx check-is-deprecated -g $REPO_URL
 
   security-scan-scheduled:
     name: Scheduled Security Scan
@@ -112,7 +112,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Generate stats
         run: |
@@ -185,7 +185,7 @@ jobs:
 
       - name: Check licenses
         run: |
-          bunx license-checker --summary
+          npx license-checker --summary
 
   notify-scheduled-tasks:
     name: Notify Completion

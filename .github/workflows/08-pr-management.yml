@@ -20,7 +20,7 @@ jobs:
       - name: Label PR
         uses: actions/labeler@v6
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.PAT_TOKEN }}
           configuration-path: .github/labeler.yml
 
   check-release-pr:
@@ -282,7 +282,7 @@ jobs:
       - name: Validate PR title
         uses: amannn/action-semantic-pull-request@v6
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         with:
           types: |
             feat
@@ -310,7 +310,7 @@ jobs:
         id: metadata
         uses: dependabot/fetch-metadata@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PAT_TOKEN }}
 
       - name: Auto approve minor and patch updates
         if: |
@@ -321,7 +321,7 @@ jobs:
           gh pr edit "$PR_URL" --add-label "dependencies,automated"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
   auto-merge-regular:
     name: Auto Merge Regular PR

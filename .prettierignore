@@ -1,7 +1,4 @@
 node_modules/
 .github/
-build/
-target/
-.clang-format
 *.log
 *.tmp

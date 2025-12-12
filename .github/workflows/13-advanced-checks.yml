@@ -2,9 +2,9 @@ name: Advanced Quality Checks
 
 on:
   push:
-    branches: ["main", "dev"]
+    branches: ["main"]
   pull_request:
-    branches: ["main", "dev"]
+    branches: ["main"]
   schedule:
     - cron: "0 0 * * 1"
   workflow_dispatch:

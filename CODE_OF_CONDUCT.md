@@ -90,6 +90,5 @@ For answers to common questions about this code of conduct, see the FAQ at [http
 
 If you have questions or concerns, please contact:
 
-- **Email**: sexystyle088@gmail.com
 - **GitHub**: [@naruyaizumi](https://github.com/naruyaizumi)
 - **Issues**: [GitHub Issues](https://github.com/naruyaizumi/liora/issues)

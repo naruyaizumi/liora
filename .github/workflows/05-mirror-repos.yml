@@ -180,11 +180,11 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| GitLab | ${{ needs.mirror-gitlab.result == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Codeberg | ${{ needs.mirror-codeberg.result == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Gitea | ${{ needs.mirror-gitea.result == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Bitbucket | ${{ needs.mirror-bitbucket.result == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Azure DevOps | ${{ needs.mirror-azure.result == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| GitLab | ${{ needs.mirror-gitlab.result == 'success' && 'Success' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Codeberg | ${{ needs.mirror-codeberg.result == 'success' && 'Success' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Gitea | ${{ needs.mirror-gitea.result == 'success' && 'Success' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Bitbucket | ${{ needs.mirror-bitbucket.result == 'success' && 'Success' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Azure DevOps | ${{ needs.mirror-azure.result == 'success' && 'Success' || 'Failed' }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Create issue on failure
         if: |
@@ -199,7 +199,7 @@ jobs:
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: '⚠️ Repository Mirror Failed',
+              title: 'Repository Mirror Failed',
               body: 'One or more repository mirrors failed. Please check the workflow logs for details.',
               labels: ['bug', 'infrastructure']
             });

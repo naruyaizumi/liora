@@ -37,7 +37,7 @@ jobs:
             apt-get update && apt-get install -y curl
           fi
           echo "Testing installation on ${{ matrix.os }}..."
-          curl -sSL https://raw.githubusercontent.com/naruyaizumi/liora/main/service.sh | bash -s -- --dry-run
+          curl -sSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh | bash -s -- --dry-run
           echo "Installation test passed on ${{ matrix.os }}"
 
   notify:

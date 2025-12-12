@@ -53,6 +53,8 @@ graph LR
 ## 🛠️ Security Features
 
 ### Code Security
+- **Memory Safety**: Rust components with zero-cost abstractions
+- **Type Safety**: TypeScript and Rust type systems
 - **Input Validation**: Comprehensive sanitization for all inputs
 - **SQL Injection Prevention**: Parameterized queries and ORM
 - **XSS Protection**: Output encoding and CSP-ready

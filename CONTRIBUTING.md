@@ -2,19 +2,6 @@
 
 First off, thank you for considering contributing to Liora! It's people like you that make Liora such a great tool. 🎉
 
-## Table of Contents
-
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [How Can I Contribute?](#how-can-i-contribute)
-- [Development Setup](#development-setup)
-- [Coding Standards](#coding-standards)
-- [Commit Guidelines](#commit-guidelines)
-- [Pull Request Process](#pull-request-process)
-- [Testing](#testing)
-- [Documentation](#documentation)
-- [Community](#community)
-
 ## Code of Conduct
 
 This project and everyone participating in it is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to sexystyle088@gmail.com.
@@ -275,24 +262,6 @@ If your changes affect:
 - Available commands
 
 Please update the README.md accordingly.
-
-## Project Structure
-
-```
-liora/
-├── src/              # Main application code
-│   ├── config.js     # Configuration
-│   ├── global.js     # Global utilities
-│   └── index.js      # Entry point
-├── lib/              # Libraries and modules
-│   ├── api/          # API integrations
-│   ├── core/         # Core functionality
-│   └── auth/         # Authentication
-├── docs/             # Documentation
-├── .github/          # GitHub configuration
-│   └── workflows/    # CI/CD workflows
-└── tests/            # Test files
-```
 
 ## Community
 

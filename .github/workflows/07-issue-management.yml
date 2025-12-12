@@ -8,7 +8,7 @@ on:
   pull_request_target:
     types: [opened, labeled, reopened]
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 1 * * *"
 
 permissions:
   issues: write
@@ -103,7 +103,7 @@ jobs:
       - name: Close stale issues and PRs
         uses: actions/stale@v10
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.PAT_TOKEN }}
           stale-issue-message: |
             This issue has been automatically marked as stale because it has not had recent activity. 
             It will be closed in 7 days if no further activity occurs.
@@ -135,7 +135,7 @@ jobs:
       - name: Lock closed issues
         uses: dessant/lock-threads@v5
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PAT_TOKEN }}
           issue-inactive-days: 60
           pr-inactive-days: 60
           issue-lock-reason: "resolved"
@@ -164,7 +164,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
-                body: `⚠️ This issue appears to lack sufficient detail.\n\nPlease provide more information:\n- Description of the problem\n- Steps to reproduce\n- Expected behavior\n- Actual behavior\n- Environment details`
+                body: `This issue appears to lack sufficient detail.\n\nPlease provide more information:\n- Description of the problem\n- Steps to reproduce\n- Expected behavior\n- Actual behavior\n- Environment details`
               });
               
               await github.rest.issues.addLabels({
@@ -186,4 +186,4 @@ jobs:
         uses: actions/add-to-project@v1.0.2
         with:
           project-url: https://github.com/users/naruyaizumi/projects/1
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PAT_TOKEN }}

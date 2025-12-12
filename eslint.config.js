@@ -24,7 +24,6 @@ export default [
         languageOptions: {
             globals: {
                 ...globals.node,
-                Bun: "readonly",
             },
         },
     },

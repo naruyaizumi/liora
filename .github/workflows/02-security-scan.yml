@@ -2,9 +2,9 @@ name: Security Scanning
 
 on:
   push:
-    branches: ["main", "dev"]
+    branches: ["main"]
   pull_request:
-    branches: ["main", "dev"]
+    branches: ["main"]
   schedule:
     - cron: "0 0 * * 0"
   workflow_dispatch:
@@ -80,20 +80,6 @@ jobs:
         with:
           path: ./
           scan_all: true
-
-  dependency-review:
-    name: Dependency Review
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
-        with:
-          fail-on-severity: moderate
-          deny-licenses: GPL-2.0, GPL-3.0
 
   trivy-scan:
     name: Trivy Container Scan

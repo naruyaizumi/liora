@@ -35,6 +35,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
       - name: Check version change  
         id: check  
         run: |  
@@ -71,10 +74,10 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
           fetch-depth: 0
 
-      - name: Setup Bun  
-        uses: oven-sh/setup-bun@v2  
-        with:  
-          bun-version: latest  
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
 
       - name: Install system dependencies
         run: |
@@ -96,10 +99,10 @@ jobs:
             jq
 
       - name: Install dependencies  
-        run: bun install  
+        run: npm install  
 
       - name: Run Prettier  
-        run: bun run format || true
+        run: npx prettier --write . || true
 
       - name: Generate changelog  
         id: changelog  
@@ -188,13 +191,7 @@ jobs:
             ## What's Changed  
               
             ${{ needs.prepare-and-tag.outputs.changelog }}  
-              
-            ## Installation  
-              
-            ```bash  
-            curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/service.sh | bash  
-            ```  
-              
+            
             ## Full Changelog  
               
             **Full Changelog**: https://github.com/naruyaizumi/liora/compare/v${{ needs.check-version.outputs.new_version }}  
@@ -203,32 +200,3 @@ jobs:
           generate_release_notes: true  
         env:  
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-  trigger-downstream-workflows:
-    name: Trigger Downstream Workflows
-    needs: [create-release]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Documentation Workflow
-        uses: actions/github-script@v8
-        with:
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'documentation.yml',
-              ref: 'main'
-            });
-            console.log('Triggered documentation workflow');
-
-      - name: Trigger Wiki Management Workflow
-        uses: actions/github-script@v8
-        with:
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'wiki-management.yml',
-              ref: 'main'
-            });
-            console.log('Triggered wiki management workflow');

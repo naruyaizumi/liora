@@ -18,6 +18,10 @@
 # APIs
 /lib/api/ @naruyaizumi
 
+# C++ code
+/lib/cpp/ @naruyaizumi
+binding.gyp @naruyaizumi
+
 # Configuration files
 package.json @naruyaizumi
 *.config.js @naruyaizumi

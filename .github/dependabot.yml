@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "09:00"
+      time: "08:00"
       timezone: "Asia/Jakarta"
     open-pull-requests-limit: 10
     reviewers:
@@ -22,22 +22,53 @@ updates:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
     groups:
-      production:
-        patterns:
-          - "@napi-rs/*"
-          - "baileys"
-          - "sharp"
-        update-types:
-          - "minor"
-          - "patch"
-      development:
-        patterns:
-          - "eslint*"
-          - "prettier"
-          - "@eslint/*"
-        update-types:
-          - "minor"
-          - "patch"
+      canvas:
+        patterns: ["@napi-rs/canvas"]
+        update-types: ["minor", "patch"]
+      
+      baileys:
+        patterns: ["baileys"]
+        update-types: ["minor", "patch"]
+      
+      sqlite:
+        patterns: ["better-sqlite3"]
+        update-types: ["minor", "patch"]
+      
+      file-processing:
+        patterns: ["sharp", "file-type"]
+        update-types: ["minor", "patch"]
+      
+      async-utils:
+        patterns: ["async-mutex", "p-queue", "eventemitter3"]
+        update-types: ["minor", "patch"]
+      
+      logging:
+        patterns: ["pino", "pino-pretty"]
+        update-types: ["minor", "patch"]
+      
+      file-watcher:
+        patterns: ["chokidar"]
+        update-types: ["minor", "patch"]
+      
+      youtube:
+        patterns: ["yt-search"]
+        update-types: ["minor", "patch"]
+      
+      eslint:
+        patterns: ["eslint*", "@eslint/*"]
+        update-types: ["minor", "patch"]
+      
+      prettier:
+        patterns: ["prettier"]
+        update-types: ["minor", "patch"]
+      
+      native-addons:
+        patterns: ["node-addon-api", "node-gyp"]
+        update-types: ["minor", "patch"]
+      
+      globals:
+        patterns: ["globals"]
+        update-types: ["minor", "patch"]
 
   - package-ecosystem: "github-actions"
     directory: "/"

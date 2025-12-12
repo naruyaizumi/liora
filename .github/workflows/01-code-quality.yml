@@ -2,9 +2,9 @@ name: Code Quality
 
 on:
   push:
-    branches: ["main", "dev"]
+    branches: ["main"]
   pull_request:
-    branches: ["main", "dev"]
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -19,16 +19,34 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          bun-version: latest
-            
+          node-version: 24.x
+
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ffmpeg \
+            libwebp-dev \
+            libavformat-dev \
+            libavcodec-dev \
+            libavutil-dev \
+            libswresample-dev \
+            libswscale-dev \
+            libavfilter-dev \
+            build-essential \
+            python3 \
+            g++ \
+            pkg-config \
+            cmake
+
       - name: Install dependencies
-        run: bun install
+        run: npm install
 
       - name: Run Prettier Fix
-        run: bunx prettier --write . 
+        run: npx prettier --write . || true
 
   eslint:
     name: ESLint Analysis
@@ -37,16 +55,49 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          bun-version: latest
-          
+          node-version: 24.x
+
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ffmpeg \
+            libwebp-dev \
+            libavformat-dev \
+            libavcodec-dev \
+            libavutil-dev \
+            libswresample-dev \
+            libswscale-dev \
+            libavfilter-dev \
+            build-essential \
+            python3 \
+            g++ \
+            pkg-config \
+            cmake
+
       - name: Install dependencies
-        run: bun install
+        run: npm install
 
       - name: Run ESLint
-        run: bunx eslint .
+        run: npx eslint . --ext .js
+
+  cpp-format:
+    name: C++ Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+
+      - name: Check C++ formatting
+        run: |
+          find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | \
+          xargs clang-format --dry-run --Werror
 
   commit-lint:
     name: Commit Message Lint

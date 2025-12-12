@@ -5,66 +5,27 @@
 	"keywords": [
 		"whatsapp",
 		"baileys",
-		"bun",
+		"nodejs",
 		"automation"
 	],
 	"type": "module",
 	"private": false,
 	"engines": {
-		"bun": ">=1.1.0",
 		"node": ">=24.0.0"
 	},
 	"scripts": {
-		"start": "bun ./src/index.js"
+		"start": "node ./src/index.js"
 	},
 	"license": "Apache-2.0",
-	"repository": [
-	{
-		"type": "git",
-		"url": "git+https://github.com/naruyaizumi/liora.git"
-	},
-	{
-		"type": "git",
-		"url": "git+https://gitlab.com/naruyaizumi/liora.git"
-	},
-	{
-		"type": "git",
-		"url": "git+https://codeberg.org/naruyaizumi/liora.git"
-	},
-	{
-		"type": "git",
-		"url": "git+https://gitea.com/naruyaizumi/liora.git"
-	},
-	{
-		"type": "git",
-		"url": "git+https://bitbucket.org/naruyaizumi/liora.git"
-	},
-	{
-		"type": "git",
-		"url": "git+https://dev.azure.com/naruyaizumi/_git/liora"
-	}],
-	"bugs": {
-		"url": "https://github.com/naruyaizumi/liora/issues"
-	},
-	"homepage": "https://github.com/naruyaizumi/liora#readme",
 	"author": {
 		"name": "Naruya Izumi",
-		"email": "sexystyle088@gmail.com",
 		"url": "https://linkbio.co/naruyaizumi"
-	},
-	"contributors": [
-	{
-		"name": "Naruya Izumi",
-		"url": "https://github.com/naruyaizumi"
-	}],
-	"funding": {
-		"type": "individual",
-		"url": "https://github.com/sponsors/naruyaizumi"
 	},
 	"dependencies": {
 		"@napi-rs/canvas": "^0.1.83",
 		"async-mutex": "^0.5.0",
-		"baileys": "github:naruyaizumi/baileys#main",
+		"baileys": "^7.0.0-rc.9",
+		"better-sqlite3": "^12.5.0",
 		"chokidar": "^5.0.0",
 		"eventemitter3": "^5.0.1",
 		"file-type": "^21.0.0",
@@ -78,6 +39,8 @@
 		"@eslint/js": "^9.39.1",
 		"eslint": "^9.39.1",
 		"globals": "^16.5.0",
+		"node-addon-api": "^8.5.0",
+		"node-gyp": "^12.0.0",
 		"prettier": "^3.6.2"
 	},
 	"imports": {
@@ -116,10 +79,5 @@
 		"proseWrap": "preserve",
 		"htmlWhitespaceSensitivity": "css",
 		"embeddedLanguageFormatting": "auto"
-	},
-	"trustedDependencies": [
-		"baileys",
-		"protobufjs",
-		"sharp"
-	]
+	}
 }
