@@ -240,7 +240,7 @@ jobs:
           cat maintenance-report.md
 
       - name: Upload report
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: maintenance-report
           path: maintenance-report.md
@@ -281,7 +281,7 @@ jobs:
           cat health-report.md
 
       - name: Upload health report
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: health-report
           path: health-report.md

@@ -161,7 +161,7 @@ jobs:
             fs.writeFileSync('issues-backup.json', JSON.stringify(issues, null, 2));
 
       - name: Upload backup
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: issues-backup-${{ github.run_number }}
           path: issues-backup.json
