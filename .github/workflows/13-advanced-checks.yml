@@ -63,7 +63,7 @@ jobs:
           jscpd src lib --format "json" --output "./jscpd-report.json" || true
 
       - name: Upload reports
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: code-quality-reports
           path: |
@@ -129,7 +129,7 @@ jobs:
           EOF
 
       - name: Upload license report
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: license-report
           path: LICENSE_REPORT.md

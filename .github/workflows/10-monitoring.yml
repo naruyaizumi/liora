@@ -78,7 +78,7 @@ jobs:
             return { success, failed, total, rate: ((success/total)*100).toFixed(1) };
 
       - name: Upload dashboard
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: dashboard
           path: reports/
