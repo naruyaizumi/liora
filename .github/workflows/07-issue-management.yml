@@ -133,7 +133,7 @@ jobs:
     if: github.event_name == 'schedule'
     steps:
       - name: Lock closed issues
-        uses: dessant/lock-threads@v5
+        uses: dessant/lock-threads@v6
         with:
           github-token: ${{ secrets.PAT_TOKEN }}
           issue-inactive-days: 60
