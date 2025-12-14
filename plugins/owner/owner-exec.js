@@ -1,4 +1,6 @@
-import { $ } from "bun";
+import { exec } from "child_process";
+import { promisify } from "util";
+const execAsync = promisify(exec);
 
 const blocked = [
     "rm -rf /",
@@ -29,7 +31,6 @@ const handler = async (m, { conn, isOwner }) => {
     const flags = {
         cwd: null,
         env: {},
-        quiet: true,
         timeout: null,
     };
 
@@ -46,8 +47,6 @@ const handler = async (m, { conn, isOwner }) => {
             flags.env[key] = val;
         } else if (flag === "timeout") {
             flags.timeout = parseInt(value);
-        } else if (flag === "verbose") {
-            flags.quiet = false;
         }
 
         cmdText = cmdText.slice(fullMatch.length);
@@ -61,23 +60,18 @@ const handler = async (m, { conn, isOwner }) => {
 
     let resultText;
     try {
-        let command = $`bash -c ${cmdText}`;
-        if (flags.cwd) {
-            command = command.cwd(flags.cwd);
-        }
-        if (Object.keys(flags.env).length > 0) {
-            command = command.env({ ...process.env, ...flags.env });
-        }
-        if (flags.quiet) {
-            command = command.quiet();
-        }
-        if (flags.timeout) {
-            command = command.timeout(flags.timeout);
-        }
-        const result = await command.nothrow();
-        const stdout = result.stdout?.toString() || "";
-        const stderr = result.stderr?.toString() || "";
-        const exitCode = result.exitCode;
+        const options = {
+            cwd: flags.cwd || process.cwd(),
+            env: { ...process.env, ...flags.env },
+            timeout: flags.timeout || 30000,
+            shell: '/bin/bash',
+            maxBuffer: 1024 * 1024 * 10,
+        };
+
+        const result = await execAsync(cmdText, options);
+        const stdout = result.stdout || "";
+        const stderr = result.stderr || "";
+        const exitCode = 0;
         const output = stdout || stderr || "(no output)";
         const parts = [`${cmdText}`, "────────────────────────────"];
 
@@ -98,12 +92,27 @@ const handler = async (m, { conn, isOwner }) => {
 
         resultText = parts.join("\n");
     } catch (err) {
-        resultText = [
+        const exitCode = err.code || 1;
+        const stdout = err.stdout || "";
+        const stderr = err.stderr || err.message || "";
+        const output = stdout || stderr || "(no output)";
+        
+        const parts = [
             `${cmdText}`,
             "────────────────────────────",
-            `Error: ${err.message || String(err)}`,
-            "",
-        ].join("\n");
+            output.trim(),
+        ];
+        
+        const footer = [`Exit code: ${exitCode}`];
+        if (flags.cwd) {
+            footer.push(`📁 ${flags.cwd}`);
+        }
+        
+        if (footer.length > 0) {
+            parts.push("", footer.join(" • "));
+        }
+        
+        resultText = parts.join("\n");
     }
 
     await conn.sendMessage(m.chat, { text: resultText });

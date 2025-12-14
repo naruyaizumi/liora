@@ -1,3 +1,4 @@
+import { readFile } from "fs/promises";
 import { join, extname } from "path";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -11,7 +12,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         if (!extname(target)) target += ".js";
         const filepath = join(process.cwd(), target);
 
-        const fileBuffer = Buffer.from(await Bun.file(filepath).arrayBuffer());
+        const fileBuffer = await readFile(filepath);
         const fileName = target.split("/").pop();
 
         await conn.sendMessage(
@@ -25,7 +26,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         );
     } catch (e) {
         conn.logger.error(e);
-        m.reply(`Error: ${e.message}`);
+        if (e.code === 'ENOENT') {
+            m.reply(`File not found: ${join(process.cwd(), target)}`);
+        } else {
+            m.reply(`Error: ${e.message}`);
+        }
     }
 };
 

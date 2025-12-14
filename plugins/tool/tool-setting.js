@@ -14,7 +14,6 @@ const features = [
     { key: "autoread", scope: "bot", name: "Auto Read" },
     { key: "restrict", scope: "bot", name: "Restrict" },
     { key: "adReply", scope: "bot", name: "Ad Reply" },
-    { key: "noerror", scope: "bot", name: "Hide Error" },
 ];
 
 function listFeatures(isOwner, chat, bot) {

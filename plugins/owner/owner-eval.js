@@ -1,3 +1,5 @@
+import { inspect } from "util";
+
 let handler = async (m, { conn, noPrefix, isOwner }) => {
     if (!isOwner) return;
     let _text = noPrefix;
@@ -18,11 +20,11 @@ let handler = async (m, { conn, noPrefix, isOwner }) => {
         Array.isArray(_return) &&
         _return.every((item) => item && typeof item === "object" && !Array.isArray(item))
     ) {
-        output = Bun.inspect(_return, { depth: null, maxArrayLength: null });
+        output = inspect(_return, { depth: null, maxArrayLength: null });
     } else if (typeof _return === "string") {
         output = _return;
     } else {
-        output = Bun.inspect(_return, { depth: null, maxArrayLength: null });
+        output = inspect(_return, { depth: null, maxArrayLength: null });
     }
 
     await conn.sendMessage(m.chat, { text: output });

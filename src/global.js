@@ -1,5 +1,5 @@
 import { join } from "path";
-import { Database } from "bun:sqlite";
+import Database from "better-sqlite3";
 import { Buffer } from "node:buffer";
 import pino from "pino";
 
@@ -172,18 +172,19 @@ class BinaryCodec {
 }
 
 const sqlite = new Database(DB_PATH, {
-    create: true,
-    readwrite: true,
-    strict: true,
+    verbose: logger.level === "debug" ? logger.debug.bind(logger) : null,
+    fileMustExist: false,
 });
 
-sqlite.exec("PRAGMA journal_mode = WAL");
-sqlite.exec("PRAGMA synchronous = NORMAL");
-sqlite.exec("PRAGMA cache_size = -128000");
-sqlite.exec("PRAGMA temp_store = MEMORY");
-sqlite.exec("PRAGMA mmap_size = 30000000000");
-sqlite.exec("PRAGMA page_size = 8192");
-sqlite.exec("PRAGMA wal_autocheckpoint = 1000");
+sqlite.pragma("journal_mode = WAL");
+sqlite.pragma("synchronous = NORMAL");
+sqlite.pragma("cache_size = -128000");
+sqlite.pragma("temp_store = MEMORY");
+sqlite.pragma("mmap_size = 30000000000");
+sqlite.pragma("page_size = 8192");
+sqlite.pragma("wal_autocheckpoint = 1000");
+sqlite.pragma("foreign_keys = ON");
+sqlite.pragma("auto_vacuum = INCREMENTAL");
 
 const SCHEMAS = {
     chats: {
@@ -210,7 +211,6 @@ const SCHEMAS = {
             restrict: "INTEGER DEFAULT 0",
             adReply: "INTEGER DEFAULT 0",
             noprint: "INTEGER DEFAULT 0",
-            noerror: "INTEGER DEFAULT 1",
         },
         indices: ["CREATE INDEX IF NOT EXISTS idx_settings_jid ON settings(jid)"],
     },
@@ -224,8 +224,8 @@ const SCHEMAS = {
     },
     binary_cache: {
         columns: {
-            table_name: "TEXT",
-            jid: "TEXT",
+            table_name: "TEXT NOT NULL",
+            jid: "TEXT NOT NULL",
             data: "BLOB NOT NULL",
             checksum: "INTEGER NOT NULL",
             updated_at: "INTEGER DEFAULT (unixepoch())",
@@ -239,7 +239,7 @@ const SCHEMAS = {
 
 function ensureTable(tableName, schema) {
     const exists = sqlite
-        .query("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
         .get(tableName);
 
     const columnDefs = Object.entries(schema.columns)
@@ -248,6 +248,7 @@ function ensureTable(tableName, schema) {
 
     if (!exists) {
         sqlite.exec(`CREATE TABLE ${tableName} (${columnDefs}) STRICT`);
+        logger.info({ table: tableName }, "Created table");
 
         if (schema.indices) {
             for (const idx of schema.indices) {
@@ -256,7 +257,7 @@ function ensureTable(tableName, schema) {
         }
     } else {
         const existingCols = sqlite
-            .query(`PRAGMA table_info(${tableName})`)
+            .prepare(`PRAGMA table_info(${tableName})`)
             .all()
             .map((c) => c.name);
 
@@ -264,10 +265,9 @@ function ensureTable(tableName, schema) {
             if (!existingCols.includes(col)) {
                 try {
                     sqlite.exec(`ALTER TABLE ${tableName} ADD COLUMN ${col} ${def}`);
+                    logger.info({ table: tableName, column: col }, "Added column");
                 } catch (e) {
-                    if (logger) {
-                        logger.error({ column: col, error: e.message }, `Failed to add column`);
-                    }
+                    logger.error({ column: col, error: e.message }, `Failed to add column`);
                 }
             }
         }
@@ -278,14 +278,14 @@ for (const [tableName, schema] of Object.entries(SCHEMAS)) {
     ensureTable(tableName, schema);
 }
 
-sqlite.exec("PRAGMA wal_checkpoint(TRUNCATE)");
-sqlite.exec("PRAGMA optimize");
+sqlite.pragma("wal_checkpoint(TRUNCATE)");
+sqlite.pragma("optimize");
 
 const STMTS = {
-    getCached: sqlite.query(
+    getCached: sqlite.prepare(
         "SELECT data, checksum FROM binary_cache WHERE table_name = ? AND jid = ?"
     ),
-    setCached: sqlite.query(`
+    setCached: sqlite.prepare(`
         INSERT INTO binary_cache (table_name, jid, data, checksum, updated_at)
         VALUES (?, ?, ?, ?, unixepoch())
         ON CONFLICT(table_name, jid) DO UPDATE SET
@@ -293,23 +293,45 @@ const STMTS = {
             checksum = excluded.checksum,
             updated_at = unixepoch()
     `),
-    deleteCached: sqlite.query("DELETE FROM binary_cache WHERE table_name = ? AND jid = ?"),
-    getRow: (table) => sqlite.query(`SELECT * FROM ${table} WHERE jid = ?`),
-    insertRow: (table) => sqlite.query(`INSERT OR IGNORE INTO ${table} (jid) VALUES (?)`),
-    updateCol: (table, col) => sqlite.query(`UPDATE ${table} SET ${col} = ? WHERE jid = ?`),
+    deleteCached: sqlite.prepare("DELETE FROM binary_cache WHERE table_name = ? AND jid = ?"),
+    
+    getRow: {},
+    insertRow: {},
+    updateCol: {},
+    deleteRow: {},
 };
+
+for (const table of Object.keys(SCHEMAS)) {
+    if (table === "binary_cache" || table === "meta") continue;
+    
+    STMTS.getRow[table] = sqlite.prepare(`SELECT * FROM ${table} WHERE jid = ?`);
+    STMTS.insertRow[table] = sqlite.prepare(`INSERT OR IGNORE INTO ${table} (jid) VALUES (?)`);
+    STMTS.deleteRow[table] = sqlite.prepare(`DELETE FROM ${table} WHERE jid = ?`);
+    
+    STMTS.updateCol[table] = {};
+    for (const col of Object.keys(SCHEMAS[table].columns)) {
+        if (col !== "jid") {
+            STMTS.updateCol[table][col] = sqlite.prepare(
+                `UPDATE ${table} SET ${col} = ? WHERE jid = ?`
+            );
+        }
+    }
+}
 
 class CacheManager {
     constructor() {
         this.cache = new Map();
         this.dirty = new Set();
         this.flushTimer = null;
+        this.isShuttingDown = false;
         this._startFlushTimer();
     }
 
     _startFlushTimer() {
         this.flushTimer = setInterval(() => {
-            this.flush();
+            if (!this.isShuttingDown) {
+                this.flush();
+            }
         }, 2000);
     }
 
@@ -320,18 +342,22 @@ class CacheManager {
             return this.cache.get(key);
         }
 
-        const cached = STMTS.getCached.get(table, jid);
-        if (cached) {
-            const expectedChecksum = BinaryCodec.checksum(cached.data);
-            if (expectedChecksum === cached.checksum) {
-                const decoded = BinaryCodec.decode(cached.data);
-                if (decoded) {
-                    this.cache.set(key, decoded);
-                    return decoded;
+        try {
+            const cached = STMTS.getCached.get(table, jid);
+            if (cached) {
+                const expectedChecksum = BinaryCodec.checksum(cached.data);
+                if (expectedChecksum === cached.checksum) {
+                    const decoded = BinaryCodec.decode(cached.data);
+                    if (decoded) {
+                        this.cache.set(key, decoded);
+                        return decoded;
+                    }
+                } else {
+                    logger.warn({ table, jid }, "Cache checksum mismatch");
                 }
-            } else if (logger) {
-                logger.warn({ table, jid }, "Cache checksum mismatch");
             }
+        } catch (e) {
+            logger.error({ table, jid, error: e.message }, "Cache get failed");
         }
 
         return null;
@@ -351,20 +377,18 @@ class CacheManager {
         try {
             STMTS.deleteCached.run(table, jid);
         } catch (e) {
-            if (logger) {
-                logger.error({ table, jid, error: e.message }, "Cache delete failed");
-            }
+            logger.error({ table, jid, error: e.message }, "Cache delete failed");
         }
     }
 
     flush() {
         if (this.dirty.size === 0) return;
 
-        const snapshot = new Set(this.dirty);
+        const snapshot = Array.from(this.dirty);
         this.dirty.clear();
 
-        sqlite.transaction(() => {
-            for (const key of snapshot) {
+        const transaction = sqlite.transaction((keys) => {
+            for (const key of keys) {
                 const [table, jid] = key.split(":");
                 const data = this.cache.get(key);
 
@@ -376,19 +400,26 @@ class CacheManager {
 
                     STMTS.setCached.run(table, jid, encoded, checksum);
                 } catch (e) {
-                    if (logger) {
-                        logger.error({ table, jid, error: e.message }, "Cache flush failed");
-                    }
+                    logger.error({ table, jid, error: e.message }, "Cache flush failed");
                 }
             }
-        })();
+        });
+
+        try {
+            transaction(snapshot);
+        } catch (e) {
+            logger.error({ error: e.message }, "Transaction failed");
+        }
     }
 
     dispose() {
+        this.isShuttingDown = true;
+        
         if (this.flushTimer) {
             clearInterval(this.flushTimer);
             this.flushTimer = null;
         }
+        
         this.flush();
         this.cache.clear();
         this.dirty.clear();
@@ -406,8 +437,9 @@ class DataWrapper {
     }
 
     _createProxy(table) {
-        const getRowStmt = STMTS.getRow(table);
-        const insertRowStmt = STMTS.insertRow(table);
+        const getRowStmt = STMTS.getRow[table];
+        const insertRowStmt = STMTS.insertRow[table];
+        const deleteRowStmt = STMTS.deleteRow[table];
 
         return new Proxy(
             {},
@@ -418,17 +450,22 @@ class DataWrapper {
                     let cached = cacheManager.get(table, jid);
                     if (cached) return this._createRowProxy(table, jid, cached);
 
-                    let row = getRowStmt.get(jid);
+                    try {
+                        let row = getRowStmt.get(jid);
 
-                    if (!row) {
-                        insertRowStmt.run(jid);
-                        row = getRowStmt.get(jid);
+                        if (!row) {
+                            insertRowStmt.run(jid);
+                            row = getRowStmt.get(jid);
+                        }
+
+                        const rowData = { ...row };
+                        cacheManager.set(table, jid, rowData);
+
+                        return this._createRowProxy(table, jid, rowData);
+                    } catch (e) {
+                        logger.error({ table, jid, error: e.message }, "Get row failed");
+                        return undefined;
                     }
-
-                    const rowData = { ...row };
-                    cacheManager.set(table, jid, rowData);
-
-                    return this._createRowProxy(table, jid, rowData);
                 },
 
                 set: (_, jid, value) => {
@@ -446,8 +483,13 @@ class DataWrapper {
                     const cached = cacheManager.get(table, jid);
                     if (cached) return true;
 
-                    const row = getRowStmt.get(jid);
-                    return !!row;
+                    try {
+                        const row = getRowStmt.get(jid);
+                        return !!row;
+                    } catch (e) {
+                        logger.error({ table, jid, error: e.message }, "Has check failed");
+                        return false;
+                    }
                 },
 
                 deleteProperty: (_, jid) => {
@@ -456,12 +498,10 @@ class DataWrapper {
                     cacheManager.delete(table, jid);
 
                     try {
-                        sqlite.query(`DELETE FROM ${table} WHERE jid = ?`).run(jid);
+                        deleteRowStmt.run(jid);
                         return true;
                     } catch (e) {
-                        if (logger) {
-                            logger.error({ table, jid, error: e.message }, "Delete failed");
-                        }
+                        logger.error({ table, jid, error: e.message }, "Delete failed");
                         return false;
                     }
                 },
@@ -473,16 +513,19 @@ class DataWrapper {
         return new Proxy(rowData, {
             set: (obj, prop, value) => {
                 if (!Object.prototype.hasOwnProperty.call(SCHEMAS[table].columns, prop)) {
-                    if (logger) {
-                        logger.warn({ table, prop }, "Unknown column");
-                    }
+                    logger.warn({ table, prop }, "Unknown column");
                     return false;
                 }
 
                 const normalizedValue = typeof value === "boolean" ? (value ? 1 : 0) : value;
 
                 try {
-                    const updateStmt = STMTS.updateCol(table, prop);
+                    const updateStmt = STMTS.updateCol[table][prop];
+                    if (!updateStmt) {
+                        logger.error({ table, prop }, "No update statement found");
+                        return false;
+                    }
+
                     updateStmt.run(normalizedValue, jid);
 
                     obj[prop] = normalizedValue;
@@ -492,9 +535,7 @@ class DataWrapper {
 
                     return true;
                 } catch (e) {
-                    if (logger) {
-                        logger.error({ table, prop, error: e.message }, "Update failed");
-                    }
+                    logger.error({ table, prop, error: e.message }, "Update failed");
                     return false;
                 }
             },
@@ -512,3 +553,22 @@ class DataWrapper {
 const db = new DataWrapper();
 global.db = db;
 global.sqlite = sqlite;
+
+function shutdown() {
+    logger.info("Shutting down database...");
+    
+    try {
+        cacheManager.dispose();
+        sqlite.pragma("wal_checkpoint(TRUNCATE)");
+        sqlite.close();
+        logger.info("Database closed successfully");
+    } catch (e) {
+        logger.error({ error: e.message }, "Error during shutdown");
+    }
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
+process.on("beforeExit", shutdown);
+
+export { db, sqlite };

@@ -39,7 +39,7 @@ updates:
         update-types: ["minor", "patch"]
       
       async-utils:
-        patterns: ["async-mutex", "p-queue", "eventemitter3"]
+        patterns: ["async-mutex", "p-queue", "lru-cache"]
         update-types: ["minor", "patch"]
       
       logging:

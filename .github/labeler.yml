@@ -44,8 +44,6 @@ dependencies:
   - changed-files:
       - any-glob-to-any-file:
           - "package.json"
-          - "bun.lockb"
-          - "Cargo.lock"
 
 security:
   - changed-files:

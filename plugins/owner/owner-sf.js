@@ -1,4 +1,4 @@
-import { readdir, mkdir } from "node:fs/promises";
+import { readdir, mkdir, writeFile } from "fs/promises";
 import path from "path";
 
 const handler = async (m, { args, conn }) => {
@@ -39,7 +39,9 @@ const handler = async (m, { args, conn }) => {
         const baseName = q.fileName ? path.basename(q.fileName) : `file-${Date.now()}.${ext}`;
         const fullpath = path.resolve(target, baseName);
         await mkdir(path.dirname(fullpath), { recursive: true });
-        await Bun.write(fullpath, buffer);
+        
+        await writeFile(fullpath, buffer);
+        
         return m.reply(`Saved as: ${path.relative(process.cwd(), fullpath)}`);
     } catch (e) {
         conn.logger.error(e);

@@ -4,18 +4,13 @@ import {
     getCPUUsageSinceBoot,
     getRAMInfo,
     getDiskUsage,
-    getInodeUsage,
     getHeapInfo,
     getProcessInfo,
     getNetworkStats,
     getKernelInfo,
     getSystemUptime,
-    getPostgreSQLInfo,
-    getRedisInfo,
     getWarnings,
     formatTime,
-    saveMetricsHistory,
-    getMetricsHistory,
 } from "../../lib/system-info.js";
 
 import { canvas } from "../../lib/canvas-os.js";
@@ -23,27 +18,21 @@ import { canvas } from "../../lib/canvas-os.js";
 let handler = async (m, { conn }) => {
     try {
         await global.loading(m, conn);
+        
         const osInfo = await getOSPrettyName();
         const kernel = await getKernelInfo();
         const cpu = await getCPUInfo();
         const cpuBootUsage = await getCPUUsageSinceBoot();
         const ram = await getRAMInfo();
         const disk = await getDiskUsage();
-        const inodes = await getInodeUsage();
         const heap = getHeapInfo();
         const proc = getProcessInfo();
         const network = await getNetworkStats();
-        const postgres = await getPostgreSQLInfo();
-        const redis = await getRedisInfo();
 
         const uptimeBot = formatTime(process.uptime());
         const uptimeSys = await getSystemUptime();
 
-        const warnings = getWarnings(cpu, ram, disk, inodes);
-
-        await saveMetricsHistory(cpu, ram, disk, heap);
-
-        const history = getMetricsHistory();
+        const warnings = getWarnings(cpu, ram, disk);
 
         const systemData = {
             osInfo,
@@ -52,16 +41,12 @@ let handler = async (m, { conn }) => {
             cpuBootUsage,
             ram,
             disk,
-            inodes,
             heap,
             proc,
             network,
-            postgres,
-            redis,
             uptimeBot,
             uptimeSys,
             warnings,
-            history,
         };
 
         const imageBuffer = await canvas(systemData);
@@ -72,10 +57,10 @@ let handler = async (m, { conn }) => {
                 image: imageBuffer,
                 caption:
                     `*SYSTEM MONITOR REPORT*\n\n` +
-                    `*Host: ${kernel.hostname}*\n` +
-                    `*System Uptime: ${uptimeSys}*\n` +
-                    `*Bot Uptime: ${uptimeBot}*\n` +
-                    (warnings.length > 0 ? `\n*Warnings: ${warnings.join(", ")}*` : ""),
+                    `*Host:* ${kernel.hostname}\n` +
+                    `*System Uptime:* ${uptimeSys}\n` +
+                    `*Bot Uptime:* ${uptimeBot}\n` +
+                    (warnings.length > 0 ? `\n⚠️ *Warnings:* ${warnings.join(", ")}` : ""),
             },
             { quoted: m }
         );

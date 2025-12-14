@@ -1,4 +1,10 @@
 import os from "os";
+import { readFile } from "fs/promises";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const CATEGORIES = ["ai", "downloader", "group", "info", "internet", "maker", "owner", "tools"];
 
@@ -101,7 +107,7 @@ async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
         `Version    : ${pkg.version}`,
         `License    : ${pkg.license}`,
         `Type       : ${pkg.type}`,
-        `Runtime    : Bun ${Bun.version}`,
+        `Runtime    : Node.js ${process.version}`,
         `VPS Uptime : ${uptimeSys}`,
         `Bot Uptime : ${uptimeBot}`,
         "",
@@ -230,9 +236,11 @@ function formatTime(sec) {
     );
 }
 
-function getPackageInfo() {
+async function getPackageInfo() {
     try {
-        return Bun.file("./package.json").json();
+        const packageJsonPath = new URL('./package.json', import.meta.url);
+        const data = await readFile(packageJsonPath, 'utf-8');
+        return JSON.parse(data);
     } catch {
         return {
             name: "Unknown",
