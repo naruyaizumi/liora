@@ -64,7 +64,7 @@ const handler = async (m, { conn, isOwner }) => {
             cwd: flags.cwd || process.cwd(),
             env: { ...process.env, ...flags.env },
             timeout: flags.timeout || 30000,
-            shell: '/bin/bash',
+            shell: "/bin/bash",
             maxBuffer: 1024 * 1024 * 10,
         };
 
@@ -96,22 +96,18 @@ const handler = async (m, { conn, isOwner }) => {
         const stdout = err.stdout || "";
         const stderr = err.stderr || err.message || "";
         const output = stdout || stderr || "(no output)";
-        
-        const parts = [
-            `${cmdText}`,
-            "────────────────────────────",
-            output.trim(),
-        ];
-        
+
+        const parts = [`${cmdText}`, "────────────────────────────", output.trim()];
+
         const footer = [`Exit code: ${exitCode}`];
         if (flags.cwd) {
             footer.push(`📁 ${flags.cwd}`);
         }
-        
+
         if (footer.length > 0) {
             parts.push("", footer.join(" • "));
         }
-        
+
         resultText = parts.join("\n");
     }
 

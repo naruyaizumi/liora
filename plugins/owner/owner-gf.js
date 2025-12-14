@@ -26,7 +26,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         );
     } catch (e) {
         conn.logger.error(e);
-        if (e.code === 'ENOENT') {
+        if (e.code === "ENOENT") {
             m.reply(`File not found: ${join(process.cwd(), target)}`);
         } else {
             m.reply(`Error: ${e.message}`);

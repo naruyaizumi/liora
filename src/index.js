@@ -39,7 +39,7 @@ const COOLDOWN_TIME = 10000;
 const RESTART_DELAY = 2000;
 
 function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function start(file) {
@@ -56,7 +56,7 @@ async function start(file) {
                 env: process.env,
             });
 
-            childProcess.on('exit', (exitCode, signalCode) => {
+            childProcess.on("exit", (exitCode, signalCode) => {
                 if (!shuttingDown && exitCode !== 0) {
                     logger.warn(
                         `Child process exited with code ${exitCode}${
@@ -68,7 +68,7 @@ async function start(file) {
                 resolve(exitCode || 0);
             });
 
-            childProcess.on('error', (error) => {
+            childProcess.on("error", (error) => {
                 logger.error(error.message);
                 childProcess = null;
                 resolve(1);
@@ -106,16 +106,16 @@ async function stopChild(signal = "SIGTERM") {
 
     try {
         childProcess.kill(signal);
-        
+
         await new Promise((resolve) => {
             const onExit = () => resolve();
-            childProcess.on('exit', onExit);
+            childProcess.on("exit", onExit);
             setTimeout(() => {
-                childProcess.removeListener('exit', onExit);
+                childProcess.removeListener("exit", onExit);
                 resolve();
             }, 10000);
         });
-        
+
         clearTimeout(timeout);
     } catch (e) {
         logger.error(e.message);

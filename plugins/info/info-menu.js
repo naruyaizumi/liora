@@ -1,7 +1,7 @@
 import os from "os";
 import { readFile } from "fs/promises";
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -238,8 +238,8 @@ function formatTime(sec) {
 
 async function getPackageInfo() {
     try {
-        const packageJsonPath = new URL('./package.json', import.meta.url);
-        const data = await readFile(packageJsonPath, 'utf-8');
+        const packageJsonPath = new URL("./package.json", import.meta.url);
+        const data = await readFile(packageJsonPath, "utf-8");
         return JSON.parse(data);
     } catch {
         return {

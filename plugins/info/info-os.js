@@ -18,7 +18,7 @@ import { canvas } from "../../lib/canvas-os.js";
 let handler = async (m, { conn }) => {
     try {
         await global.loading(m, conn);
-        
+
         const osInfo = await getOSPrettyName();
         const kernel = await getKernelInfo();
         const cpu = await getCPUInfo();

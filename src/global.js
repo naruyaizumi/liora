@@ -294,7 +294,7 @@ const STMTS = {
             updated_at = unixepoch()
     `),
     deleteCached: sqlite.prepare("DELETE FROM binary_cache WHERE table_name = ? AND jid = ?"),
-    
+
     getRow: {},
     insertRow: {},
     updateCol: {},
@@ -303,11 +303,11 @@ const STMTS = {
 
 for (const table of Object.keys(SCHEMAS)) {
     if (table === "binary_cache" || table === "meta") continue;
-    
+
     STMTS.getRow[table] = sqlite.prepare(`SELECT * FROM ${table} WHERE jid = ?`);
     STMTS.insertRow[table] = sqlite.prepare(`INSERT OR IGNORE INTO ${table} (jid) VALUES (?)`);
     STMTS.deleteRow[table] = sqlite.prepare(`DELETE FROM ${table} WHERE jid = ?`);
-    
+
     STMTS.updateCol[table] = {};
     for (const col of Object.keys(SCHEMAS[table].columns)) {
         if (col !== "jid") {
@@ -414,12 +414,12 @@ class CacheManager {
 
     dispose() {
         this.isShuttingDown = true;
-        
+
         if (this.flushTimer) {
             clearInterval(this.flushTimer);
             this.flushTimer = null;
         }
-        
+
         this.flush();
         this.cache.clear();
         this.dirty.clear();
@@ -556,7 +556,7 @@ global.sqlite = sqlite;
 
 function shutdown() {
     logger.info("Shutting down database...");
-    
+
     try {
         cacheManager.dispose();
         sqlite.pragma("wal_checkpoint(TRUNCATE)");
