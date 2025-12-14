@@ -21,7 +21,7 @@
  * - Do not remove or alter original credits under any circumstances.
  */
 
-import 'dotenv/config';
+import "dotenv/config";
 
 const PRESENCE_DELAY = 800;
 const DEFAULT_THUMBNAIL = "https://qu.ax/DdwBH.jpg";
@@ -91,7 +91,7 @@ global.loading = async (m, conn, back = false) => {
     try {
         if (back) {
             await conn.sendPresenceUpdate("paused", m.chat);
-            await new Promise(resolve => setTimeout(resolve, PRESENCE_DELAY));
+            await new Promise((resolve) => setTimeout(resolve, PRESENCE_DELAY));
             await conn.sendPresenceUpdate("available", m.chat);
         } else {
             await conn.sendPresenceUpdate("composing", m.chat);

@@ -39,9 +39,9 @@ const handler = async (m, { args, conn }) => {
         const baseName = q.fileName ? path.basename(q.fileName) : `file-${Date.now()}.${ext}`;
         const fullpath = path.resolve(target, baseName);
         await mkdir(path.dirname(fullpath), { recursive: true });
-        
+
         await writeFile(fullpath, buffer);
-        
+
         return m.reply(`Saved as: ${path.relative(process.cwd(), fullpath)}`);
     } catch (e) {
         conn.logger.error(e);

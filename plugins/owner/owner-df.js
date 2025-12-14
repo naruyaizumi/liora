@@ -17,7 +17,7 @@ let handler = async (m, { args, usedPrefix, command, conn }) => {
         m.reply("File deleted successfully.");
     } catch (e) {
         conn.logger.error(e);
-        if (e.code === 'ENOENT') {
+        if (e.code === "ENOENT") {
             m.reply(`File not found: ${filepath}`);
         } else {
             m.reply(`Error: ${e.message}`);
