@@ -2,19 +2,25 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/lib/shell/logger.sh"
-source "${SCRIPT_DIR}/lib/shell/system.sh"
-source "${SCRIPT_DIR}/lib/shell/nodejs.sh"
-source "${SCRIPT_DIR}/lib/shell/liora.sh"
-source "${SCRIPT_DIR}/lib/shell/service.sh"
-source "${SCRIPT_DIR}/lib/shell/cli.sh"
-source "${SCRIPT_DIR}/lib/shell/interactive.sh"
+WORK_DIR="/root/liora"
+LIB_DIR="$WORK_DIR/lib/shell"
+mkdir -p "$LIB_DIR"
+
+FILES=(logger.sh system.sh nodejs.sh liora.sh service.sh cli.sh interactive.sh)
+RAW_BASE_URL="https://raw.githubusercontent.com/naruyaizumi/liora/main/lib/shell"
+
+for file in "${FILES[@]}"; do
+    echo "Downloading $file..."
+    curl -sSfL "$RAW_BASE_URL/$file" -o "$LIB_DIR/$file"
+done
+
+for file in "${FILES[@]}"; do
+    source "$LIB_DIR/$file"
+done
 
 SERVICE_NAME="liora"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 HELPER_FILE="/usr/local/bin/bot"
-WORK_DIR="/root/liora"
 TIME_ZONE="Asia/Jakarta"
 REPO_URL="https://github.com/naruyaizumi/liora.git"
 
@@ -38,25 +44,6 @@ cleanup_on_error() {
 }
 
 trap cleanup_on_error ERR
-
-main() {
-    print_header "Liora Bot Installer"
-    print_info "Starting installation process..."
-    echo ""
-    
-    validate_os "$WORK_DIR"
-    install_system_dependencies
-    validate_ffmpeg
-    install_nodejs
-    setup_liora "$WORK_DIR" "$REPO_URL" "$TIME_ZONE"
-    
-    interactive_configure "$WORK_DIR"
-    
-    create_systemd_service "$SERVICE_NAME" "$SERVICE_FILE" "$WORK_DIR" "$TIME_ZONE"
-    create_cli_helper "$HELPER_FILE" "$SERVICE_NAME" "$WORK_DIR" "$REPO_URL"
-    
-    print_installation_summary "$WORK_DIR"
-}
 
 print_installation_summary() {
     local work_dir="$1"
@@ -112,6 +99,25 @@ print_installation_summary() {
     fi
     
     echo ""
+}
+
+main() {
+    print_header "Liora Bot Installer"
+    print_info "Starting installation process..."
+    echo ""
+    
+    validate_os "$WORK_DIR"
+    install_system_dependencies
+    validate_ffmpeg
+    install_nodejs
+    setup_liora "$WORK_DIR" "$REPO_URL" "$TIME_ZONE"
+    
+    interactive_configure "$WORK_DIR"
+    
+    create_systemd_service "$SERVICE_NAME" "$SERVICE_FILE" "$WORK_DIR" "$TIME_ZONE"
+    create_cli_helper "$HELPER_FILE" "$SERVICE_NAME" "$WORK_DIR" "$REPO_URL"
+    
+    print_installation_summary "$WORK_DIR"
 }
 
 main
