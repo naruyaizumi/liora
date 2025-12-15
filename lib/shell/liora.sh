@@ -20,10 +20,39 @@ get_latest_release_tag() {
     echo "$latest_tag"
 }
 
+install_package_manager_deps() {
+    local pkg_manager="$1"
+    
+    case "$pkg_manager" in
+        npm)
+            print_info "Using npm (already included with Node.js)"
+            ;;
+        yarn)
+            print_info "Installing Yarn via Corepack..."
+            corepack enable yarn || {
+                print_error "Failed to enable yarn"
+                exit 1
+            }
+            
+            if ! command -v yarn &> /dev/null; then
+                print_error "Yarn installation failed"
+                exit 1
+            fi
+            
+            YARN_VERSION=$(yarn -v)
+            print_success "Yarn installed: v$YARN_VERSION"
+            ;;
+        pnpm)
+            print_info "Using pnpm (already installed)"
+            ;;
+    esac
+}
+
 setup_liora() {
     local work_dir="$1"
     local repo_url="$2"
     local time_zone="$3"
+    local pkg_manager="$4"
     
     print_info "Setting up Liora..."
     
@@ -32,6 +61,10 @@ setup_liora() {
         
         if systemctl is-active --quiet "liora" 2>/dev/null; then
             systemctl stop "liora" 2>/dev/null || true
+        fi
+        
+        if command -v pm2 &> /dev/null; then
+            pm2 delete liora 2>/dev/null || true
         fi
         
         BACKUP_DIR="${work_dir}.backup.$(date +%Y%m%d_%H%M%S)"
@@ -71,7 +104,7 @@ setup_liora() {
     cat > "$work_dir/.env" <<EOF
 PAIRING_NUMBER=
 
-OWNERS=["113748182302861","227551947555018"]
+OWNERS=[]
 GROUP_LINK=https://chat.whatsapp.com
 WATERMARK=Liora
 AUTHOR=Naruya Izumi
@@ -84,11 +117,30 @@ EOF
     
     print_success ".env file created at $work_dir/.env"
     
-    print_info "Installing Liora dependencies..."
-    pnpm install || {
-        print_error "Failed to install Liora dependencies"
-        exit 1
-    }
+    install_package_manager_deps "$pkg_manager"
+    
+    print_info "Installing Liora dependencies with $pkg_manager..."
+    
+    case "$pkg_manager" in
+        npm)
+            npm install || {
+                print_error "Failed to install Liora dependencies"
+                exit 1
+            }
+            ;;
+        yarn)
+            yarn install || {
+                print_error "Failed to install Liora dependencies"
+                exit 1
+            }
+            ;;
+        pnpm)
+            pnpm install || {
+                print_error "Failed to install Liora dependencies"
+                exit 1
+            }
+            ;;
+    esac
     
     print_success "Liora dependencies installed"
     print_success "Liora setup completed"

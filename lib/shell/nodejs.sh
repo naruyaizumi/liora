@@ -48,17 +48,21 @@ install_nodejs() {
     
     print_success "Node.js installed: $NODE_VERSION at $NODE_DIR"
     
-    print_info "Enabling pnpm via Corepack..."
-    corepack enable pnpm || {
-        print_error "Failed to enable pnpm"
+    print_info "Enabling Corepack for package managers..."
+    corepack enable || {
+        print_error "Failed to enable Corepack"
         exit 1
     }
     
-    if ! command -v pnpm &> /dev/null; then
-        print_error "pnpm installation failed"
-        exit 1
+    print_info "Preparing pnpm..."
+    corepack prepare pnpm@latest --activate || {
+        print_warning "Failed to prepare pnpm, but continuing..."
+    }
+    
+    if command -v pnpm &> /dev/null; then
+        PNPM_VERSION=$(pnpm -v)
+        print_success "pnpm ready: v$PNPM_VERSION"
     fi
     
-    PNPM_VERSION=$(pnpm -v)
-    print_success "pnpm installed: v$PNPM_VERSION"
+    print_success "Node.js setup completed"
 }

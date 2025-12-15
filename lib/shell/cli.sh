@@ -5,6 +5,8 @@ create_cli_helper() {
     local service_name="$2"
     local work_dir="$3"
     local repo_url="$4"
+    local proc_manager="$5"
+    local pkg_manager="$6"
     
     print_info "Creating helper CLI tool..."
     
@@ -17,9 +19,21 @@ NVM_DIR="$HOME/.nvm"
 REPO_URL="https://github.com/naruyaizumi/liora.git"
 ENV_FILE="$WORK_DIR/.env"
 VERSION_FILE="$WORK_DIR/.current_version"
+CONFIG_FILE="$WORK_DIR/.liora_config"
 BACKUP_DIR="/root/.liora_backups"
 
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 2>/dev/null
+
+load_config() {
+    if [ -f "$CONFIG_FILE" ]; then
+        source "$CONFIG_FILE"
+    else
+        PROCESS_MANAGER="systemd"
+        PACKAGE_MANAGER="pnpm"
+    fi
+}
+
+load_config
 
 print_header() {
     echo ""
@@ -31,6 +45,37 @@ print_header() {
 
 print_separator() {
     echo "================================================================"
+}
+
+get_package_manager_cmd() {
+    case "$PACKAGE_MANAGER" in
+        npm)
+            echo "npm"
+            ;;
+        yarn)
+            echo "yarn"
+            ;;
+        pnpm|*)
+            echo "pnpm"
+            ;;
+    esac
+}
+
+install_dependencies() {
+    local pm=$(get_package_manager_cmd)
+    echo "[INFO] Installing dependencies with $pm..."
+    
+    case "$pm" in
+        npm)
+            npm install
+            ;;
+        yarn)
+            yarn install
+            ;;
+        pnpm)
+            pnpm install
+            ;;
+    esac
 }
 
 get_latest_release_tag() {
@@ -61,7 +106,7 @@ get_all_release_tags() {
 
 check_pairing_number() {
     if [ ! -f "$ENV_FILE" ]; then
-        echo "[ERROR] Configuration file not found!"
+        echo "[ERROR] Configuration file not found"
         return 1
     fi
     
@@ -69,7 +114,7 @@ check_pairing_number() {
     pairing_num=$(grep "^PAIRING_NUMBER=" "$ENV_FILE" | cut -d= -f2 | tr -d ' ')
     
     if [ -z "$pairing_num" ]; then
-        echo "[WARNING] PAIRING_NUMBER is empty!"
+        echo "[WARNING] PAIRING_NUMBER is empty"
         echo "Configure with: bot config"
         return 1
     fi
@@ -78,7 +123,6 @@ check_pairing_number() {
 }
 
 backup_version() {
-    local backup_name="$1"
     mkdir -p "$BACKUP_DIR"
     
     if [ -f "$VERSION_FILE" ]; then
@@ -92,18 +136,72 @@ backup_version() {
 }
 
 list_backups() {
-    if [ ! -d "$BACKUP_DIR" ] || [ -z "$(ls -A $BACKUP_DIR)" ]; then
+    if [ ! -d "$BACKUP_DIR" ] || [ -z "$(ls -A $BACKUP_DIR 2>/dev/null)" ]; then
         echo "[INFO] No version backups found"
         return
     fi
     
     echo "Available version backups:"
     echo ""
-    ls -1t "$BACKUP_DIR" | while read backup; do
+    ls -1t "$BACKUP_DIR" 2>/dev/null | while read backup; do
         local version=$(cat "$BACKUP_DIR/$backup" 2>/dev/null)
         local date=$(echo "$backup" | grep -oP '\d{8}_\d{6}')
         echo "  • $version (backed up: $date)"
     done
+}
+
+service_start() {
+    if [ "$PROCESS_MANAGER" == "pm2" ]; then
+        cd "$WORK_DIR" || exit 1
+        pm2 start ecosystem.config.js
+        pm2 save
+    else
+        systemctl start $SERVICE
+    fi
+}
+
+service_stop() {
+    if [ "$PROCESS_MANAGER" == "pm2" ]; then
+        pm2 stop $SERVICE
+    else
+        systemctl stop $SERVICE
+    fi
+}
+
+service_restart() {
+    if [ "$PROCESS_MANAGER" == "pm2" ]; then
+        pm2 restart $SERVICE
+    else
+        systemctl restart $SERVICE
+    fi
+}
+
+service_status() {
+    if [ "$PROCESS_MANAGER" == "pm2" ]; then
+        pm2 status $SERVICE
+        echo ""
+        pm2 describe $SERVICE
+    else
+        systemctl status $SERVICE --no-pager -l
+    fi
+}
+
+service_logs() {
+    local lines="${1:-100}"
+    
+    if [ "$PROCESS_MANAGER" == "pm2" ]; then
+        pm2 logs $SERVICE --lines "$lines"
+    else
+        journalctl -u $SERVICE -n "$lines" --no-pager
+    fi
+}
+
+service_logs_live() {
+    if [ "$PROCESS_MANAGER" == "pm2" ]; then
+        pm2 logs $SERVICE
+    else
+        journalctl -u $SERVICE -f -o cat
+    fi
 }
 
 case "$1" in
@@ -112,14 +210,14 @@ case "$1" in
             exit 1
         fi
         echo "[INFO] Starting bot..."
-        systemctl start $SERVICE && echo "[SUCCESS] Bot started" || echo "[ERROR] Failed to start"
+        service_start && echo "[SUCCESS] Bot started" || echo "[ERROR] Failed to start"
         sleep 2
-        systemctl status $SERVICE --no-pager -l
+        service_status
         ;;
         
     stop)
         echo "[INFO] Stopping bot..."
-        systemctl stop $SERVICE && echo "[SUCCESS] Bot stopped" || echo "[ERROR] Failed to stop"
+        service_stop && echo "[SUCCESS] Bot stopped" || echo "[ERROR] Failed to stop"
         ;;
         
     restart)
@@ -127,24 +225,24 @@ case "$1" in
             exit 1
         fi
         echo "[INFO] Restarting bot..."
-        systemctl restart $SERVICE && echo "[SUCCESS] Bot restarted" || echo "[ERROR] Failed to restart"
+        service_restart && echo "[SUCCESS] Bot restarted" || echo "[ERROR] Failed to restart"
         sleep 2
-        systemctl status $SERVICE --no-pager -l
+        service_status
         ;;
         
     status)
-        systemctl status $SERVICE --no-pager -l
+        service_status
         ;;
         
-    log|logs)
-        if [ "$1" == "log" ]; then
-            echo "[INFO] Showing live logs (Ctrl+C to exit)..."
-            journalctl -u $SERVICE -f -o cat
-        else
-            local lines=${2:-100}
-            echo "[INFO] Showing last $lines log entries..."
-            journalctl -u $SERVICE -n "$lines" --no-pager
-        fi
+    log)
+        echo "[INFO] Showing live logs (Ctrl+C to exit)..."
+        service_logs_live
+        ;;
+        
+    logs)
+        local lines=${2:-100}
+        echo "[INFO] Showing last $lines log entries..."
+        service_logs "$lines"
         ;;
         
     update)
@@ -224,10 +322,7 @@ case "$1" in
         
         backup_version
         
-        if systemctl is-active --quiet $SERVICE; then
-            echo "[INFO] Stopping service..."
-            systemctl stop $SERVICE || { echo "[ERROR] Failed to stop service"; exit 1; }
-        fi
+        service_stop || { echo "[ERROR] Failed to stop service"; exit 1; }
         
         if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
             echo "[INFO] Stashing local changes..."
@@ -249,15 +344,14 @@ case "$1" in
         
         echo "$TARGET_VERSION" > "$VERSION_FILE"
         
-        echo "[INFO] Installing dependencies..."
-        pnpm install || { echo "[ERROR] Dependency installation failed"; exit 1; }
+        install_dependencies || { echo "[ERROR] Dependency installation failed"; exit 1; }
         
         echo "[SUCCESS] Update completed to $TARGET_VERSION"
         echo "[INFO] Restarting service..."
         
-        systemctl restart $SERVICE && echo "[SUCCESS] Bot restarted" || echo "[ERROR] Failed to restart"
+        service_restart && echo "[SUCCESS] Bot restarted" || echo "[ERROR] Failed to restart"
         sleep 2
-        systemctl status $SERVICE --no-pager -l
+        service_status
         ;;
         
     rollback)
@@ -289,10 +383,7 @@ case "$1" in
         fi
         
         backup_version
-        
-        if systemctl is-active --quiet $SERVICE; then
-            systemctl stop $SERVICE
-        fi
+        service_stop
         
         git fetch --tags --quiet
         git checkout "$rollback_version" || {
@@ -302,11 +393,11 @@ case "$1" in
         
         echo "$rollback_version" > "$VERSION_FILE"
         
-        pnpm install || { echo "[ERROR] Dependency installation failed"; exit 1; }
+        install_dependencies || { echo "[ERROR] Dependency installation failed"; exit 1; }
         
         echo "[SUCCESS] Rolled back to $rollback_version"
         
-        systemctl restart $SERVICE && echo "[SUCCESS] Bot restarted" || echo "[ERROR] Failed to restart"
+        service_restart && echo "[SUCCESS] Bot restarted" || echo "[ERROR] Failed to restart"
         ;;
         
     config)
@@ -385,11 +476,24 @@ EOF
         print_header "Liora Bot System Information"
         
         echo "Service Status:"
-        if systemctl is-active --quiet $SERVICE; then
-            echo "  • Service: RUNNING"
+        if [ "$PROCESS_MANAGER" == "pm2" ]; then
+            if pm2 describe $SERVICE &>/dev/null; then
+                echo "  • Service: RUNNING (PM2)"
+            else
+                echo "  • Service: STOPPED (PM2)"
+            fi
         else
-            echo "  • Service: STOPPED"
+            if systemctl is-active --quiet $SERVICE; then
+                echo "  • Service: RUNNING (systemd)"
+            else
+                echo "  • Service: STOPPED (systemd)"
+            fi
         fi
+        
+        echo ""
+        echo "Configuration:"
+        echo "  • Process Manager: $PROCESS_MANAGER"
+        echo "  • Package Manager: $PACKAGE_MANAGER"
         
         echo ""
         echo "Version Information:"
@@ -399,7 +503,7 @@ EOF
         echo "  • Latest: $(get_latest_release_tag)"
         
         echo ""
-        echo "Configuration:"
+        echo "Bot Configuration:"
         if [ -f "$ENV_FILE" ]; then
             local pairing=$(grep "^PAIRING_NUMBER=" "$ENV_FILE" | cut -d= -f2)
             if [ -n "$pairing" ]; then
@@ -412,8 +516,12 @@ EOF
         echo ""
         echo "System Resources:"
         echo "  • Node.js: $(node -v 2>/dev/null || echo 'Not found')"
-        echo "  • pnpm: v$(pnpm -v 2>/dev/null || echo 'Not found')"
+        echo "  • $(get_package_manager_cmd): v$($(get_package_manager_cmd) -v 2>/dev/null || echo 'Not found')"
         echo "  • FFmpeg: $(ffmpeg -version 2>/dev/null | head -n1 | awk '{print $3}' || echo 'Not found')"
+        
+        if [ "$PROCESS_MANAGER" == "pm2" ] && command -v pm2 &> /dev/null; then
+            echo "  • PM2: v$(pm2 -v 2>/dev/null || echo 'Not found')"
+        fi
         
         echo ""
         echo "Disk Usage:"
@@ -433,15 +541,12 @@ EOF
         
         cd "$WORK_DIR" || exit 1
         
-        if systemctl is-active --quiet $SERVICE; then
-            systemctl stop $SERVICE
-        fi
+        service_stop
         
         echo "[INFO] Removing node_modules..."
         rm -rf node_modules
         
-        echo "[INFO] Reinstalling dependencies..."
-        pnpm install || { echo "[ERROR] Failed to install dependencies"; exit 1; }
+        install_dependencies || { echo "[ERROR] Failed to install dependencies"; exit 1; }
         
         echo "[SUCCESS] Cleanup completed"
         ;;
