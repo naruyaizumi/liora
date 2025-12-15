@@ -27,6 +27,7 @@
         "baileys": "^7.0.0-rc.9",
         "better-sqlite3": "^12.5.0",
         "chokidar": "^5.0.0",
+        "dotenv": "^17.2.3",
         "file-type": "^21.0.0",
         "lru-cache": "^11.2.4",
         "p-queue": "^9.0.1",
