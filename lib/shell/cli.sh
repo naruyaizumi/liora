@@ -226,8 +226,6 @@ case "$1" in
         fi
         echo "[INFO] Restarting bot..."
         service_restart && echo "[SUCCESS] Bot restarted" || echo "[ERROR] Failed to restart"
-        sleep 2
-        service_status
         ;;
         
     status)
