@@ -6,6 +6,14 @@ interactive_configure() {
     local -n proc_manager_ref="$3"
     local env_file="$work_dir/.env"
     
+    if [ ! -c /dev/tty ]; then
+        print_error "Cannot access terminal for interactive input"
+        print_info "Using default configuration: pnpm + systemd"
+        pkg_manager_ref="pnpm"
+        proc_manager_ref="systemd"
+        return 0
+    fi
+    
     echo ""
     print_separator
     print_info "Interactive Configuration"
@@ -17,7 +25,7 @@ interactive_configure() {
     
     echo ""
     print_question "Do you want to configure the bot now? (Y/n)"
-    read -r configure_now
+    read -r configure_now </dev/tty
     configure_now=${configure_now:-Y}
     
     if [[ ! "$configure_now" =~ ^[Yy]$ ]]; then
@@ -48,7 +56,7 @@ select_package_manager() {
     echo ""
     
     while true; do
-        read -p "Choose package manager [1-3] (default: 1): " pm_choice
+        read -p "Choose package manager [1-3] (default: 1): " pm_choice </dev/tty
         pm_choice=${pm_choice:-1}
         
         case $pm_choice in
@@ -90,7 +98,7 @@ select_process_manager() {
     echo ""
     
     while true; do
-        read -p "Choose process manager [1-2] (default: 1): " proc_choice
+        read -p "Choose process manager [1-2] (default: 1): " proc_choice </dev/tty
         proc_choice=${proc_choice:-1}
         
         case $proc_choice in
@@ -125,7 +133,7 @@ configure_pairing_number() {
     echo ""
     
     while true; do
-        read -p "Pairing Number: " pairing_number
+        read -p "Pairing Number: " pairing_number </dev/tty
         
         if [[ -z "$pairing_number" ]]; then
             print_error "Pairing number cannot be empty"
@@ -139,7 +147,7 @@ configure_pairing_number() {
         
         echo ""
         print_question "Confirm pairing number: $pairing_number (Y/n)"
-        read -r confirm
+        read -r confirm </dev/tty
         confirm=${confirm:-Y}
         
         if [[ "$confirm" =~ ^[Yy]$ ]]; then
@@ -155,7 +163,7 @@ configure_owner_numbers() {
     
     echo ""
     print_question "Do you want to configure owner numbers? (Y/n)"
-    read -r configure_owners
+    read -r configure_owners </dev/tty
     configure_owners=${configure_owners:-Y}
     
     if [[ ! "$configure_owners" =~ ^[Yy]$ ]]; then
@@ -173,7 +181,7 @@ configure_owner_numbers() {
     echo "Multiple owners: separate with comma"
     echo ""
     
-    read -p "Owner Numbers (or press Enter to skip): " owner_numbers
+    read -p "Owner Numbers (or press Enter to skip): " owner_numbers </dev/tty
     
     if [[ -n "$owner_numbers" ]]; then
         IFS=',' read -ra OWNERS <<< "$owner_numbers"
@@ -210,7 +218,7 @@ configure_additional_settings() {
     
     echo ""
     print_question "Do you want to configure additional settings? (y/N)"
-    read -r configure_additional
+    read -r configure_additional </dev/tty
     configure_additional=${configure_additional:-N}
     
     if [[ ! "$configure_additional" =~ ^[Yy]$ ]]; then
@@ -222,17 +230,17 @@ configure_additional_settings() {
     print_separator
     echo ""
     
-    read -p "Bot Watermark (default: Liora): " watermark
+    read -p "Bot Watermark (default: Liora): " watermark </dev/tty
     if [[ -n "$watermark" ]]; then
         sed -i "s/^WATERMARK=.*/WATERMARK=$watermark/" "$env_file"
     fi
     
-    read -p "Bot Author (default: Naruya Izumi): " author
+    read -p "Bot Author (default: Naruya Izumi): " author </dev/tty
     if [[ -n "$author" ]]; then
         sed -i "s/^AUTHOR=.*/AUTHOR=$author/" "$env_file"
     fi
     
-    read -p "Group Link (default: https://chat.whatsapp.com): " group_link
+    read -p "Group Link (default: https://chat.whatsapp.com): " group_link </dev/tty
     if [[ -n "$group_link" ]]; then
         sed -i "s|^GROUP_LINK=.*|GROUP_LINK=$group_link|" "$env_file"
     fi
