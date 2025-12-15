@@ -56,22 +56,17 @@ body:
       description: What OS are you using?
       options:
         - Ubuntu 24.04
-        - Ubuntu 22.04
         - Debian 12
-        - Debian 11
-        - Other Linux
-        - macOS
-        - Windows (WSL)
         - Other
     validations:
       required: true
 
   - type: input
-    id: bun-version
+    id: node-version
     attributes:
-      label: Bun Version
-      description: Run `bun --version` to find your version
-      placeholder: e.g., 1.1.0
+      label: Node Version
+      description: Run `node --version` to find your version
+      placeholder: e.g., 24.0.0
     validations:
       required: true
 

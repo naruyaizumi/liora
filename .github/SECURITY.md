@@ -38,18 +38,6 @@ We provide security updates for active versions. Please always use the latest st
 | Medium   | 7-14 days     | Scheduled release |
 | Low      | 14-30 days    | Next minor release |
 
-```mermaid
-graph LR
-    A[Vulnerability Reported] --> B{Triage}
-    B --> C[Critical/High]
-    B --> D[Medium/Low]
-    C --> E[Immediate Patch]
-    D --> F[Scheduled Fix]
-    E --> G[Security Advisory]
-    F --> G
-    G --> H[Public Release]
-```
-
 ## 🛠️ Security Features
 
 ### Code Security

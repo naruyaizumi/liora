@@ -44,7 +44,6 @@ Closes #
 ### Test Environment
 
 - OS: 
-- Bun version: 
 - Node version: 
 
 ## Screenshots (if applicable)

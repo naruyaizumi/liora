@@ -91,7 +91,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
-                body: `👋 Welcome @${creator}! Thank you for opening your first issue in Liora!\n\nWe appreciate your contribution. A maintainer will review your issue soon.\n\nIn the meantime, please make sure you've provided:\n- Clear description of the issue\n- Steps to reproduce (if applicable)\n- Expected vs actual behavior\n- Environment details (OS, Node/Bun version, etc.)`
+                body: `👋 Welcome @${creator}! Thank you for opening your first issue in Liora!\n\nWe appreciate your contribution. A maintainer will review your issue soon.\n\nIn the meantime, please make sure you've provided:\n- Clear description of the issue\n- Steps to reproduce (if applicable)\n- Expected vs actual behavior\n- Environment details (OS, Node version, etc.)`
               });
             }
 

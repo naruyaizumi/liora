@@ -33,7 +33,7 @@ Before creating bug reports, please check existing issues as you might find that
 - **Describe the exact steps to reproduce the problem**
 - **Provide specific examples** (code snippets, screenshots)
 - **Describe the behavior you observed** and what you expected
-- **Include your environment details** (OS, Bun version, Node version)
+- **Include your environment details** (OS, Node version)
 
 Use our [Bug Report Template](.github/ISSUE_TEMPLATE/bug_report.yml).
 
@@ -68,61 +68,28 @@ Unsure where to begin? You can start by looking through `good-first-issue` and `
 
 ### Prerequisites
 
-- **Bun** >= 1.1.0 (recommended) or **Node.js** >= 24.0.0
+- **Node.js** >= 24.0.0
 - **Git**
 - **System dependencies**:
 
     ```bash
     # Ubuntu/Debian
-    sudo apt-get install -y ffmpeg libwebp-dev build-essential python3 g++ cmake
-
-    # RHEL/CentOS/Fedora
-    sudo dnf install -y ffmpeg gcc-c++ python3 cmake
-
-    # Arch Linux
-    sudo pacman -S ffmpeg base-devel python cmake
-    ```
-
-### Setup Steps
-
-1. **Install Bun** (if not already installed):
-
-    ```bash
-    curl -fsSL https://bun.sh/install | bash
-    ```
-
-2. **Install dependencies**:
-
-    ```bash
-    bun install
-    ```
-
-3. **Build native modules**:
-
-    ```bash
-    bun run build
-    ```
-
-4. **Run the bot**:
-    ```bash
-    bun run src/index.js
+    sudo apt-get install -y \
+        ffmpeg libwebp-dev libavformat-dev \
+        libavcodec-dev libavutil-dev libswresample-dev \
+        libswscale-dev libavfilter-dev build-essential \
+        python3 g++ pkg-config jq \
+        cmake git curl unzip wget ca-certificates gnupg lsb-release
     ```
 
 ## Coding Standards
 
-### JavaScript/TypeScript
+### JavaScript
 
 - Follow the existing code style (enforced by ESLint and Prettier)
 - Use meaningful variable and function names
 - Write comments for complex logic
 - Keep functions small and focused
-
-**Format code before committing**:
-
-```bash
-bun run format
-bun run lint:fix
-```
 
 ## Commit Guidelines
 
@@ -218,50 +185,12 @@ The scope should be the name of the affected module:
 - [ ] All tests passing
 - [ ] PR description is clear and complete
 
-## Testing
-
-### Running Tests
-
-```bash
-# JavaScript tests
-bun test
-
-# Integration tests
-bun run test:integration
-```
-
 ### Writing Tests
 
 - Write tests for all new features
 - Ensure tests are deterministic
 - Use descriptive test names
 - Keep tests focused and simple
-
-## Documentation
-
-### Code Documentation
-
-- Use JSDoc for JavaScript functions
-- Document public APIs
-- Include examples in documentation
-- Keep documentation up to date
-
-**Generate documentation**:
-
-```bash
-bun run docs:generate
-```
-
-### README Updates
-
-If your changes affect:
-
-- Installation process
-- Usage instructions
-- Configuration options
-- Available commands
-
-Please update the README.md accordingly.
 
 ## Community
 
