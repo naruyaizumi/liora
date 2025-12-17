@@ -12,7 +12,6 @@ api:
 documentation:
   - changed-files:
       - any-glob-to-any-file:
-          - "docs/**/*"
           - "**/*.md"
           - "README.md"
           - "CHANGELOG.md"
