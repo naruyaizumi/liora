@@ -1,20 +1,8 @@
 name: Release Management
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - "package.json"
   workflow_dispatch:
-    inputs:
-      release_type:
-        description: "Release type"
-        required: true
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
+  workflow_call:
 
 permissions:
   contents: write
@@ -35,17 +23,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
       - name: Check version change  
         id: check  
         run: |  
           PREV_VERSION=$(git show HEAD^:package.json 2>/dev/null | jq -r '.version' || echo "0.0.0")  
           NEW_VERSION=$(jq -r '.version' package.json)  
-            
-          echo "Previous version: $PREV_VERSION"  
-          echo "New version: $NEW_VERSION"  
             
           if [ "$PREV_VERSION" != "$NEW_VERSION" ]; then  
             echo "changed=true" >> $GITHUB_OUTPUT  
@@ -53,7 +35,6 @@ jobs:
               
             if git rev-parse "v$NEW_VERSION" >/dev/null 2>&1; then  
               echo "release=false" >> $GITHUB_OUTPUT  
-              echo "Tag v$NEW_VERSION already exists"  
             else  
               echo "release=true" >> $GITHUB_OUTPUT  
             fi  
@@ -63,7 +44,7 @@ jobs:
           fi
 
   prepare-and-tag:
-    name: Prepare and Create Release Tag
+    name: Prepare Release
     needs: check-version
     if: needs.check-version.outputs.should_release == 'true'
     runs-on: ubuntu-latest
@@ -78,28 +59,10 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24'
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            ffmpeg \
-            libwebp-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            libavutil-dev \
-            libswresample-dev \
-            libswscale-dev \
-            libavfilter-dev \
-            build-essential \
-            python3 \
-            g++ \
-            pkg-config \
-            cmake \
-            jq
+          cache: npm
 
       - name: Install dependencies  
-        run: npm install  
+        run: npm ci --prefer-offline
 
       - name: Run Prettier  
         run: npx prettier --write . || true
@@ -136,38 +99,22 @@ jobs:
             echo ""  
           } | cat - CHANGELOG.md > temp && mv temp CHANGELOG.md
 
-      - name: Commit changes directly to main
+      - name: Commit and push changes
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          git config --local user.name "liora-bot"
-          git config --local user.email "liora.bot.official@gmail.com"
-          
+          git config user.name "liora-bot"
+          git config user.email "liora.bot.official@gmail.com"
           git remote set-url origin "https://naruyaizumi:$PAT_TOKEN@github.com/naruyaizumi/liora.git"
-          
-          git add .
           
           if [[ `git status --porcelain` ]]; then  
+            git add .
             git commit -m "chore(release): prepare v${{ needs.check-version.outputs.new_version }}"
-            
             git push origin main 2>&1 | sed "s/$PAT_TOKEN/***/g"
-            echo "Changes committed directly to main"
-          else  
-            echo "No formatting changes needed"
           fi
-
-      - name: Create and push git tag
-        env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
-        run: |
-          VERSION="${{ needs.check-version.outputs.new_version }}"
           
-          git tag -a "v$VERSION" -m "Release v$VERSION"
-          
-          git remote set-url origin "https://naruyaizumi:$PAT_TOKEN@github.com/naruyaizumi/liora.git"
-          git push origin "v$VERSION" 2>&1 | sed "s/$PAT_TOKEN/***/g"
-          
-          echo "Tag v$VERSION created and pushed"
+          git tag -a "v${{ needs.check-version.outputs.new_version }}" -m "Release v${{ needs.check-version.outputs.new_version }}"
+          git push origin "v${{ needs.check-version.outputs.new_version }}" 2>&1 | sed "s/$PAT_TOKEN/***/g"
 
   create-release:
     name: Create GitHub Release
@@ -200,3 +147,38 @@ jobs:
           generate_release_notes: true  
         env:  
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+  trigger-mirror:
+    name: Trigger Mirror Sync
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger mirror workflow
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '05-mirror-repos.yml',
+              ref: 'main'
+            });
+
+  trigger-deployment:
+    name: Trigger Deployment
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deployment workflow
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '09-deployment.yml',
+              ref: 'main',
+              inputs: {
+                environment: 'production'
+              }
+            });

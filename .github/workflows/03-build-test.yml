@@ -1,20 +1,21 @@
 name: Build & Test
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
   checks: write
+  attestations: write
+  id-token: write
 
 jobs:
   build-ubuntu:
     name: Build on Ubuntu 24.04
     runs-on: ubuntu-24.04
+    outputs:
+      build-artifact: ${{ steps.upload.outputs.artifact-id }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -23,49 +24,78 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24'
+          cache: npm
+
+      - name: Cache native dependencies
+        id: cache-native
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/lib/x86_64-linux-gnu/libavformat*
+            /usr/lib/x86_64-linux-gnu/libavcodec*
+            /usr/include/libav*
+          key: ${{ runner.os }}-native-libs-${{ hashFiles('.github/workflows/*.yml') }}
 
       - name: Install Ubuntu dependencies
+        if: steps.cache-native.outputs.cache-hit != 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            ffmpeg \
-            libwebp-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            libavutil-dev \
-            libswresample-dev \
-            libswscale-dev \
-            libavfilter-dev \
-            build-essential \
-            python3 \
-            g++ \
-            pkg-config \
-            cmake \
-            clang
+            ffmpeg libwebp-dev libavformat-dev libavcodec-dev \
+            libavutil-dev libswresample-dev libswscale-dev \
+            libavfilter-dev build-essential python3 g++ \
+            pkg-config cmake clang
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-24-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci --prefer-offline
+
+      - name: Cache build artifacts
+        id: cache-build
+        uses: actions/cache@v4
+        with:
+          path: build/Release
+          key: ${{ runner.os }}-build-${{ hashFiles('lib/cpp/**', 'binding.gyp') }}
 
       - name: Build C++ Addons
+        if: steps.cache-build.outputs.cache-hit != 'true'
         run: npx node-gyp rebuild
 
       - name: Verify build
         run: |
           if ls build/Release/*.node 1> /dev/null 2>&1; then
-            echo "C++ addons built successfully:"
+            echo "✓ C++ addons built successfully"
             ls -la build/Release/*.node
           else
-            echo "No .node files found in build/Release/"
-            echo "Directory contents:"
-            find build -type f 2>/dev/null || true
+            echo "✗ No .node files found"
             exit 1
           fi
+
+      - name: Upload build artifacts
+        id: upload
+        uses: actions/upload-artifact@v6
+        with:
+          name: build-ubuntu-24
+          path: build/Release/*.node
+          retention-days: 7
+
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@v3.0.0
+        with:
+          subject-path: 'build/Release/*.node'
 
   build-debian:
     name: Build on Debian 12
     runs-on: ubuntu-latest
     container:
       image: debian:12-slim
+    outputs:
+      build-artifact: ${{ steps.upload.outputs.artifact-id }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -74,71 +104,64 @@ jobs:
         run: |
           apt-get update
           apt-get install -y \
-            curl \
-            ca-certificates \
-            gnupg \
-            lsb-release \
-            ffmpeg \
-            libwebp-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            libavutil-dev \
-            libswresample-dev \
-            libswscale-dev \
-            libavfilter-dev \
-            build-essential \
-            python3 \
-            g++ \
-            pkg-config \
-            cmake \
-            unzip \
-            clang \
-            git \
-            make \
-            bash
+            curl ca-certificates gnupg lsb-release \
+            ffmpeg libwebp-dev libavformat-dev libavcodec-dev \
+            libavutil-dev libswresample-dev libswscale-dev \
+            libavfilter-dev build-essential python3 g++ \
+            pkg-config cmake clang git make bash unzip
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '24'
 
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: debian-node-24-${{ hashFiles('package-lock.json') }}
+
       - name: Install project dependencies
-        run: |
-          npm install
+        run: npm ci --prefer-offline
+
+      - name: Cache build artifacts
+        id: cache-build
+        uses: actions/cache@v4
+        with:
+          path: build/Release
+          key: debian-build-${{ hashFiles('lib/cpp/**', 'binding.gyp') }}
 
       - name: Build C++ Addons
-        run: |
-          npx node-gyp rebuild || echo "Build command exited with status: $?"
+        if: steps.cache-build.outputs.cache-hit != 'true'
+        run: npx node-gyp rebuild
 
       - name: Verify build
         run: |
-          echo "Checking build directory structure..."
-          find . -name "*.node" -type f | head -20
-          
           if [ -d "build/Release" ]; then
-            echo "Files in build/Release/:"
-            ls -la build/Release/
-            
             count=$(find build/Release -name "*.node" -type f | wc -l)
             if [ $count -gt 0 ]; then
-              echo "Found $count .node file(s) in build/Release/"
-              for f in build/Release/*.node; do
-                echo "  - $(basename "$f")"
-              done
+              echo "✓ Found $count .node file(s)"
             else
-              echo "No .node files found in build/Release/"
+              echo "✗ No .node files found"
               exit 1
             fi
           else
-            echo "build/Release directory not found"
-            echo "Current directory contents:"
-            ls -la
-            if [ -d "build" ]; then
-              echo "build directory contents:"
-              ls -la build/
-            fi
+            echo "✗ build/Release directory not found"
             exit 1
           fi
+
+      - name: Upload build artifacts
+        id: upload
+        uses: actions/upload-artifact@v6
+        with:
+          name: build-debian-12
+          path: build/Release/*.node
+          retention-days: 7
+
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@v3.0.0
+        with:
+          subject-path: 'build/Release/*.node'
 
   integration-test:
     name: Integration Tests
@@ -152,27 +175,16 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24'
+          cache: npm
+
+      - name: Download Ubuntu build
+        uses: actions/download-artifact@v6
+        with:
+          name: build-ubuntu-24
+          path: build/Release
 
       - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            ffmpeg \
-            libwebp-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            libavutil-dev \
-            libswresample-dev \
-            libswscale-dev \
-            libavfilter-dev \
-            build-essential \
-            python3 \
-            g++ \
-            pkg-config \
-            cmake
-
-      - name: Install project dependencies
-        run: npm install
+        run: npm ci --prefer-offline
 
       - name: Run integration tests
         run: |
@@ -186,6 +198,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Cache shellcheck
+        uses: actions/cache@v4
+        with:
+          path: /usr/bin/shellcheck
+          key: ${{ runner.os }}-shellcheck
+
       - name: Install shellcheck
         run: sudo apt-get update && sudo apt-get install -y shellcheck
 
@@ -195,4 +213,4 @@ jobs:
       - name: Test installer (dry-run)
         run: |
           bash -n install.sh
-          echo "Installer script syntax is valid"
+          echo "✓ Installer script syntax is valid"
