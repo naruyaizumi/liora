@@ -1,46 +1,45 @@
 import { sticker } from "#add-on";
-import { uploader } from "../../lib/uploader.js";
+import { uploader2 } from "../../lib/uploader.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-    try {
-        const q = m.quoted ?? m;
-        const mime = (q.msg || q).mimetype || "";
-        if (!mime || !/image\/(jpeg|png|webp)/.test(mime))
-            return m.reply("Only JPEG, PNG, or WEBP images are supported.");
+  await global.loading(m, conn)
+  try {
+    if (!args[0])
+      return m.reply(
+        `Enter top and bottom text for meme (use | separator).\n› Example: ${usedPrefix + command} Top|Bottom`
+      )
 
-        const [textT = "", textB = ""] = args.join(" ").split("|");
-        if (!textT && !textB)
-            return m.reply(
-                `Please provide meme text.\n› Example: ${usedPrefix + command} top|bottom`
-            );
+    const q = m.quoted ? m.quoted : m
+    const mime = (q.msg || q).mimetype || ""
+    if (!mime || !/image\/(jpeg|png)/.test(mime))
+      return m.reply("Reply to a JPG or PNG image to make a meme sticker.")
 
-        await global.loading(m, conn);
-        const media = await q.download();
-        const uploaded = await uploader(media);
-        if (!uploaded) throw new Error("Failed to upload image.");
+    const media = await q.download()
+    const up = await uploader2(media).catch(() => null)
+    if (!up) return m.reply("Failed to upload image to server. Try again later.")
 
-        const api = `https://api.nekolabs.web.id/canvas/meme?imageUrl=${encodeURIComponent(uploaded)}&textT=${encodeURIComponent(textT)}&textB=${encodeURIComponent(textB)}`;
-        const res = await fetch(api);
-        if (!res.ok) throw new Error("Failed to contact Meme API.");
+    const [top, bottom] = args.join(" ").split("|")
+    const apiUrl = `https://api.memegen.link/images/custom/${encodeURIComponent(
+      top || "_"
+    )}/${encodeURIComponent(bottom || "_")}.png?background=${encodeURIComponent(up)}`
 
-        const buffer = Buffer.from(await res.arrayBuffer());
+    const buffer = Buffer.from(await (await fetch(apiUrl)).arrayBuffer())
+    const stickerImage = await sticker(buffer, {
+      packName: global.config.stickpack || "",
+      authorName: global.config.stickauth || "",
+    })
 
-        const stickerImage = await sticker(buffer, {
-            packName: global.config.stickpack || "",
-            authorName: global.config.stickauth || "",
-        });
+  await conn.sendMessage(m.chat, { sticker: stickerImage }, { quoted: m });
+  } catch (e) {
+    console.error(e)
+    m.reply("Error: " + e.message)
+  } finally {
+    await global.loading(m, conn, true)
+  }
+}
 
-        await conn.sendMessage(m.chat, { sticker: stickerImage }, { quoted: m });
-    } catch (e) {
-        conn.logger.error(e);
-        m.reply(`Error: ${e.message}`);
-    } finally {
-        await global.loading(m, conn, true);
-    }
-};
+handler.help = ["smeme"]
+handler.tags = ["maker"]
+handler.command = /^(smeme)$/i
 
-handler.help = ["smeme"];
-handler.tags = ["maker"];
-handler.command = /^(smeme)$/i;
-
-export default handler;
+export default handler

@@ -4,25 +4,20 @@ on:
   schedule:
     - cron: "0 0 * * 0"
     - cron: "0 0 1 * *"
-    - cron: "0 */12 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
   issues: write
-  pull-requests: write
-
-env:
-  REPO_URL: https://github.com/naruyaizumi/liora.git
-  BENCHMARK_ITER: 1000000
+  actions: write
 
 jobs:
   cleanup-cache:
     name: Cleanup Old Caches
     runs-on: ubuntu-latest
-    if: github.event.schedule == '0 0 * * 0'
+    if: github.event.schedule == '0 0 * * 0' || github.event_name == 'workflow_dispatch'
     steps:
-      - name: Cleanup
+      - name: Cleanup caches
         uses: actions/github-script@v8
         with:
           script: |
@@ -32,6 +27,7 @@ jobs:
             });
             
             const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+            let deletedCount = 0;
             
             for (const cache of caches.data.actions_caches) {
               const lastAccessed = new Date(cache.last_accessed_at);
@@ -41,19 +37,55 @@ jobs:
                   repo: context.repo.repo,
                   cache_id: cache.id,
                 });
-                console.log(`Deleted cache: ${cache.key}`);
+                deletedCount++;
               }
             }
+            
+            console.log(`Deleted ${deletedCount} old caches`);
+
+  cleanup-old-artifacts:
+    name: Cleanup Old Artifacts
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 0 * * 0' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Delete old artifacts
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const days = 7;
+            const timestamp = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+            
+            const artifacts = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            
+            let deletedCount = 0;
+            for (const artifact of artifacts.data.artifacts) {
+              const createdAt = new Date(artifact.created_at);
+              if (createdAt < timestamp) {
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id
+                });
+                deletedCount++;
+              }
+            }
+            
+            console.log(`Deleted ${deletedCount} old artifacts`);
 
   cleanup-old-branches:
     name: Cleanup Stale Branches
     runs-on: ubuntu-latest
-    if: github.event.schedule == '0 0 1 * *'
+    if: github.event.schedule == '0 0 1 * *' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Delete merged branches
         run: |
@@ -68,46 +100,26 @@ jobs:
             fi
           done
 
-  check-dependencies:
-    name: Check Dependency Health
+  trigger-security-scan:
+    name: Trigger Weekly Security Scan
     runs-on: ubuntu-latest
     if: github.event.schedule == '0 0 * * 0'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js 24
-        uses: actions/setup-node@v6
+      - name: Trigger security workflow
+        uses: actions/github-script@v8
         with:
-          node-version: '24'
-
-      - name: Check npm dependencies
-        run: |
-          npm outdated || true
-
-      - name: Check for deprecated packages
-        run: |
-          npx check-is-deprecated -g $REPO_URL
-
-  security-scan-scheduled:
-    name: Scheduled Security Scan
-    runs-on: ubuntu-latest
-    if: github.event.schedule == '0 */12 * * *'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Run Trivy scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: "fs"
-          scan-ref: "."
-          format: "table"
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '02-security-scan.yml',
+              ref: 'main'
+            });
 
   update-statistics:
     name: Update Repository Statistics
     runs-on: ubuntu-latest
-    if: github.event.schedule == '0 0 * * 0'
+    if: github.event.schedule == '0 0 * * 0' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -123,89 +135,34 @@ jobs:
             "generated_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
             "total_commits": $(git rev-list --count HEAD),
             "total_contributors": $(git log --format='%aN' | sort -u | wc -l),
-            "total_files": $(find src lib -type f | wc -l),
-            "total_lines": $(find src lib -name "*.js" -o -name "*.rs" -o -name "*.cpp" | xargs wc -l | tail -1 | awk '{print $1}')
+            "total_files": $(find src lib -type f 2>/dev/null | wc -l || echo 0),
+            "total_lines": $(find src lib -name "*.js" -o -name "*.cpp" 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}' || echo 0)
           }
           EOF
 
       - name: Commit stats
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
           
           if [[ `git status --porcelain` ]]; then
             git add .github/stats/
             git commit -m "chore: update repository statistics [skip ci]"
             git push
+          fi
 
-  backup-issues:
-    name: Backup Issues & PRs
-    runs-on: ubuntu-latest
-    if: github.event.schedule == '0 0 1 * *'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Export issues
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const fs = require('fs');
-            
-            const issues = await github.paginate(github.rest.issues.listForRepo, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'all',
-            });
-            
-            fs.writeFileSync('issues-backup.json', JSON.stringify(issues, null, 2));
-
-      - name: Upload backup
-        uses: actions/upload-artifact@v6
-        with:
-          name: issues-backup-${{ github.run_number }}
-          path: issues-backup.json
-          retention-days: 90
-
-  check-license-compliance:
-    name: Check License Compliance
-    runs-on: ubuntu-latest
-    if: github.event.schedule == '0 0 * * 0'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js 24
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Check licenses
-        run: |
-          npx license-checker --summary
-
-  notify-scheduled-tasks:
+  notify-completion:
     name: Notify Completion
-    needs:
-      [
-        cleanup-cache,
-        cleanup-old-branches,
-        check-dependencies,
-        update-statistics,
-      ]
+    needs: [cleanup-cache, cleanup-old-artifacts, cleanup-old-branches, update-statistics]
     runs-on: ubuntu-latest
-    if: always() && github.event.schedule == '0 0 * * 0'
+    if: always()
     steps:
       - name: Create summary
         run: |
           echo "# Scheduled Tasks Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Task | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Cache Cleanup | ${{ needs.cleanup-cache.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Artifact Cleanup | ${{ needs.cleanup-old-artifacts.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Branch Cleanup | ${{ needs.cleanup-old-branches.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Dependency Check | ${{ needs.check-dependencies.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Statistics Update | ${{ needs.update-statistics.result }} |" >> $GITHUB_STEP_SUMMARY

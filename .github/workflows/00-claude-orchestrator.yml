@@ -1,0 +1,147 @@
+name: Claude Code Orchestrator
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  security-events: write
+  actions: write
+  checks: write
+  issues: write
+
+jobs:
+  claude-analyze:
+    name: Claude Code Analysis
+    runs-on: ubuntu-latest
+    outputs:
+      needs_code_quality: ${{ steps.analyze.outputs.needs_code_quality }}
+      needs_security: ${{ steps.analyze.outputs.needs_security }}
+      needs_build: ${{ steps.analyze.outputs.needs_build }}
+      version_changed: ${{ steps.analyze.outputs.version_changed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Claude Code Action
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          github_token: ${{ secrets.PAT_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Analyze changes
+        id: analyze
+        run: |
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} 2>/dev/null || echo "")
+          
+          # Check if code quality needed
+          if echo "$CHANGED_FILES" | grep -qE '\.(js|cpp|h|cc)$'; then
+            echo "needs_code_quality=true" >> $GITHUB_OUTPUT
+          else
+            echo "needs_code_quality=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check if security scan needed (on schedule or main push)
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "needs_security=true" >> $GITHUB_OUTPUT
+          else
+            echo "needs_security=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check if build needed
+          if echo "$CHANGED_FILES" | grep -qE '\.(cpp|h|cc|gyp|json)$'; then
+            echo "needs_build=true" >> $GITHUB_OUTPUT
+          else
+            echo "needs_build=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check version change
+          if echo "$CHANGED_FILES" | grep -q "package.json"; then
+            PREV_VERSION=$(git show ${{ github.event.before }}:package.json 2>/dev/null | jq -r '.version' || echo "0.0.0")
+            NEW_VERSION=$(jq -r '.version' package.json)
+            if [[ "$PREV_VERSION" != "$NEW_VERSION" ]]; then
+              echo "version_changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "version_changed=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "version_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+  trigger-code-quality:
+    name: Trigger Code Quality
+    needs: claude-analyze
+    if: needs.claude-analyze.outputs.needs_code_quality == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger code quality workflow
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '01-code-quality.yml',
+              ref: context.ref
+            });
+
+  trigger-security:
+    name: Trigger Security Scan
+    needs: claude-analyze
+    if: needs.claude-analyze.outputs.needs_security == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger security workflow
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '02-security-scan.yml',
+              ref: context.ref
+            });
+
+  trigger-build:
+    name: Trigger Build & Test
+    needs: [claude-analyze, trigger-code-quality]
+    if: needs.claude-analyze.outputs.needs_build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger build workflow
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '03-build-test.yml',
+              ref: context.ref
+            });
+
+  trigger-release:
+    name: Trigger Release
+    needs: [claude-analyze, trigger-build]
+    if: |
+      needs.claude-analyze.outputs.version_changed == 'true' &&
+      github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger release workflow
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '04-release.yml',
+              ref: 'main'
+            });

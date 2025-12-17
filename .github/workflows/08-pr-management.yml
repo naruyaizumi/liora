@@ -9,275 +9,84 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  issues: read
 
 jobs:
-  auto-label-pr:
-    name: Auto Label PR
-    runs-on: ubuntu-latest
-    if: github.event.action == 'opened' || github.event.action == 'reopened'
-    steps:
-      - name: Label PR
-        uses: actions/labeler@v6
-        with:
-          repo-token: ${{ secrets.PAT_TOKEN }}
-          configuration-path: .github/labeler.yml
-
-  check-release-pr:
-    name: Check if Release PR
+  analyze-pr:
+    name: Analyze PR Type
     runs-on: ubuntu-latest
     outputs:
       is_release: ${{ steps.check.outputs.is_release }}
-      version: ${{ steps.check.outputs.version }}
+      is_breaking: ${{ steps.check.outputs.is_breaking }}
+      size_label: ${{ steps.check.outputs.size_label }}
     steps:
       - name: Check PR type
         id: check
         run: |
           PR_BRANCH="${{ github.event.pull_request.head.ref }}"
-          echo "PR branch: $PR_BRANCH"
-          
-          if [[ "$PR_BRANCH" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "This is a release PR"
-            echo "is_release=true" >> $GITHUB_OUTPUT
-            
-            # Extract version from branch name
-            VERSION=$(echo "$PR_BRANCH" | sed 's/release\/v//')
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-            echo "Version: $VERSION"
-          else
-            echo "is_release=false" >> $GITHUB_OUTPUT
-          fi
-
-  auto-approve-release-pr:
-    name: Auto Approve Release PR
-    runs-on: ubuntu-latest
-    needs: [check-release-pr]
-    if: |
-      github.event_name == 'pull_request' &&
-      needs.check-release-pr.outputs.is_release == 'true' &&
-      github.event.action == 'opened'
-    steps:
-      - name: Approve Release PR
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const prNumber = context.issue.number;
-            
-            await github.rest.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber,
-              event: 'APPROVE',
-              body: 'Auto-approved: Release PR from automated workflow'
-            });
-            
-            await github.rest.issues.addLabels({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              labels: ['release', 'automated']
-            });
-            
-            console.log(`Release PR #${prNumber} auto-approved`);
-
-  auto-merge-release:
-    name: Auto Merge Release PR
-    runs-on: ubuntu-latest
-    needs: [check-release-pr]
-    if: |
-      github.event_name == 'pull_request' &&
-      needs.check-release-pr.outputs.is_release == 'true' &&
-      (github.event.action == 'synchronize' || github.event.action == 'opened')
-    steps:
-      - name: Check if PR is mergeable
-        id: check-merge
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const pr = context.payload.pull_request;
-            const prNumber = pr.number;
-            
-            const { data: prData } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber
-            });
-            
-            if (prData.mergeable && prData.mergeable_state === 'clean') {
-              console.log('PR is mergeable, proceeding with auto-merge');
-              core.setOutput('mergeable', 'true');
-            } else {
-              console.log(`PR is not mergeable. State: ${prData.mergeable_state}`);
-              core.setOutput('mergeable', 'false');
-            }
-
-      - name: Auto Merge Release PR
-        if: steps.check-merge.outputs.mergeable == 'true'
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const prNumber = context.issue.number;
-            const version = '${{ needs.check-release-pr.outputs.version }}';
-            
-            await github.rest.pulls.merge({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber,
-              merge_method: 'squash',
-              commit_title: `chore(release): v${version}`,
-              commit_message: `Release v${version}\n\nAutomated release merge`
-            });
-            
-            console.log(`Release PR #${prNumber} merged successfully`);
-            
-            await github.rest.issues.addLabels({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              labels: ['merged']
-            });
-
-  trigger-release-workflow:
-    name: Trigger Release Workflow
-    runs-on: ubuntu-latest
-    needs: [check-release-pr, auto-merge-release]
-    if: |
-      github.event_name == 'pull_request' &&
-      needs.check-release-pr.outputs.is_release == 'true' &&
-      success()
-    steps:
-      - name: Trigger Release Management Workflow
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const version = '${{ needs.check-release-pr.outputs.version }}';
-            
-            const versionParts = version.split('.');
-            let releaseType = 'patch';
-            
-            if (versionParts[2] === '0') {
-              releaseType = 'minor';
-            }
-            if (versionParts[1] === '0' && versionParts[2] === '0') {
-              releaseType = 'major';
-            }
-            
-            console.log(`Version: ${version}, Release Type: ${releaseType}`);
-            
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'release-management.yml',
-              ref: 'main',
-              inputs: {
-                release_type: releaseType
-              }
-            });
-            
-            console.log(`Triggered release workflow for v${version}`);
-
-  check-breaking-changes:
-    name: Check Breaking Changes
-    runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'pull_request' &&
-      needs.check-release-pr.outputs.is_release == 'false'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Check for breaking changes
-        id: breaking
-        run: |
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_BODY="${{ github.event.pull_request.body }}"
           
-          BREAKING=false
-          
-          if echo "$PR_TITLE" | grep -iE "(breaking|BREAKING|!:)" || \
-             echo "$PR_BODY" | grep -iE "BREAKING CHANGE"; then
-            BREAKING=true
+          if [[ "$PR_BRANCH" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "is_release=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_release=false" >> $GITHUB_OUTPUT
           fi
           
-          echo "has_breaking=$BREAKING" >> $GITHUB_OUTPUT
+          k
+          if echo "$PR_TITLE" | grep -qE "(breaking|BREAKING|!:)" || \
+             echo "$PR_BODY" | grep -qE "BREAKING CHANGE"; then
+            echo "is_breaking=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_breaking=false" >> $GITHUB_OUTPUT
+          fi
+          
+          ADDITIONS=${{ github.event.pull_request.additions }}
+          DELETIONS=${{ github.event.pull_request.deletions }}
+          TOTAL=$((ADDITIONS + DELETIONS))
+          
+          if [ $TOTAL -lt 10 ]; then
+            echo "size_label=size/XS" >> $GITHUB_OUTPUT
+          elif [ $TOTAL -lt 50 ]; then
+            echo "size_label=size/S" >> $GITHUB_OUTPUT
+          elif [ $TOTAL -lt 200 ]; then
+            echo "size_label=size/M" >> $GITHUB_OUTPUT
+          elif [ $TOTAL -lt 500 ]; then
+            echo "size_label=size/L" >> $GITHUB_OUTPUT
+          else
+            echo "size_label=size/XL" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Block PR with breaking changes
-        if: steps.breaking.outputs.has_breaking == 'true'
-        uses: actions/github-script@v8
-        with:
-          script: |
-            await github.rest.issues.addLabels({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              labels: ['breaking-change', 'needs-review']
-            });
-            
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: `⚠️ **BREAKING CHANGE DETECTED**\n\nThis PR contains breaking changes and requires careful review before merging.\n\nPlease ensure:\n- [ ] Breaking changes are documented\n- [ ] Migration guide is provided\n- [ ] Version bump is appropriate (major version)\n- [ ] All maintainers have reviewed`
-            });
-            
-            core.setFailed('PR contains breaking changes - blocking auto-merge');
-
-  pr-size-labeler:
-    name: Label PR Size
+  auto-label:
+    name: Auto Label PR
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'pull_request' &&
-      needs.check-release-pr.outputs.is_release == 'false'
+    needs: analyze-pr
+    if: github.event.action == 'opened' || github.event.action == 'reopened'
     steps:
-      - name: Label based on size
+      - name: Apply labels
         uses: actions/github-script@v8
         with:
           script: |
-            const pr = context.payload.pull_request;
-            const additions = pr.additions;
-            const deletions = pr.deletions;
-            const total = additions + deletions;
+            const labels = ['${{ needs.analyze-pr.outputs.size_label }}'];
             
-            let sizeLabel = '';
+            if ('${{ needs.analyze-pr.outputs.is_release }}' === 'true') {
+              labels.push('release', 'automated');
+            }
             
-            if (total < 10) sizeLabel = 'size/XS';
-            else if (total < 50) sizeLabel = 'size/S';
-            else if (total < 200) sizeLabel = 'size/M';
-            else if (total < 500) sizeLabel = 'size/L';
-            else sizeLabel = 'size/XL';
-            
-            const labels = await github.rest.issues.listLabelsOnIssue({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: pr.number
-            });
-            
-            for (const label of labels.data) {
-              if (label.name.startsWith('size/')) {
-                await github.rest.issues.removeLabel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: pr.number,
-                  name: label.name
-                });
-              }
+            if ('${{ needs.analyze-pr.outputs.is_breaking }}' === 'true') {
+              labels.push('breaking-change', 'needs-review');
             }
             
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: pr.number,
-              labels: [sizeLabel]
+              issue_number: context.issue.number,
+              labels: labels
             });
 
   lint-pr-title:
     name: Lint PR Title
     runs-on: ubuntu-latest
-    if: |
-      (github.event.action == 'opened' || github.event.action == 'synchronize') &&
-      needs.check-release-pr.outputs.is_release == 'false'
+    if: github.event.action == 'opened' || github.event.action == 'synchronize'
     steps:
       - name: Validate PR title
         uses: amannn/action-semantic-pull-request@v6
@@ -296,15 +105,48 @@ jobs:
             ci
             chore
             revert
-          requireScope: false
+
+  auto-approve-release:
+    name: Auto Approve Release PR
+    runs-on: ubuntu-latest
+    needs: analyze-pr
+    if: |
+      needs.analyze-pr.outputs.is_release == 'true' &&
+      github.event.action == 'opened'
+    steps:
+      - name: Approve Release PR
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              event: 'APPROVE',
+              body: '✓ Auto-approved: Release PR'
+            });
+
+  check-breaking-changes:
+    name: Check Breaking Changes
+    runs-on: ubuntu-latest
+    needs: analyze-pr
+    if: needs.analyze-pr.outputs.is_breaking == 'true'
+    steps:
+      - name: Comment on breaking change
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `⚠️ **BREAKING CHANGE DETECTED**\n\nThis PR requires careful review.\n\nEnsure:\n- [ ] Breaking changes documented\n- [ ] Migration guide provided\n- [ ] Version bump is major`
+            });
 
   auto-approve-dependabot:
     name: Auto Approve Dependabot
     runs-on: ubuntu-latest
-    if: |
-      github.actor == 'dependabot[bot]' &&
-      github.event_name == 'pull_request' &&
-      needs.check-release-pr.outputs.is_release == 'false'
+    if: github.actor == 'dependabot[bot]' && github.event.action == 'opened'
     steps:
       - name: Dependabot metadata
         id: metadata
@@ -312,129 +154,10 @@ jobs:
         with:
           github-token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Auto approve minor and patch updates
+      - name: Auto approve
         if: |
           steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
           steps.metadata.outputs.update-type == 'version-update:semver-minor'
-        run: |
-          gh pr review --approve "$PR_URL"
-          gh pr edit "$PR_URL" --add-label "dependencies,automated"
+        run: gh pr review --approve "${{ github.event.pull_request.html_url }}"
         env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-  auto-merge-regular:
-    name: Auto Merge Regular PR
-    runs-on: ubuntu-latest
-    needs: [check-breaking-changes, check-release-pr]
-    if: |
-      github.event_name == 'pull_request_review' &&
-      github.event.review.state == 'approved' &&
-      !contains(github.event.pull_request.labels.*.name, 'breaking-change') &&
-      needs.check-release-pr.outputs.is_release == 'false'
-    steps:
-      - name: Enable auto-merge
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const pr = context.payload.pull_request;
-            
-            const checks = await github.rest.checks.listForRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: pr.head.sha
-            });
-            
-            const allPassed = checks.data.check_runs.every(
-              check => check.conclusion === 'success' || check.conclusion === 'skipped'
-            );
-            
-            if (allPassed) {
-              await github.rest.pulls.merge({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: pr.number,
-                merge_method: 'squash'
-              });
-              
-              core.info('PR auto-merged successfully');
-            } else {
-              core.info('Not all checks passed, skipping auto-merge');
-            }
-
-  request-review:
-    name: Request Reviews
-    runs-on: ubuntu-latest
-    if: |
-      github.event.action == 'opened' &&
-      needs.check-release-pr.outputs.is_release == 'false'
-    steps:
-      - name: Request review from CODEOWNERS
-        uses: actions/github-script@v8
-        with:
-          script: |
-            await github.rest.pulls.requestReviewers({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-              reviewers: ['naruyaizumi']
-            });
-
-  check-pr-description:
-    name: Check PR Description
-    runs-on: ubuntu-latest
-    if: |
-      github.event.action == 'opened' &&
-      needs.check-release-pr.outputs.is_release == 'false'
-    steps:
-      - name: Validate description
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const pr = context.payload.pull_request;
-            const body = pr.body || '';
-            
-            if (body.length < 30) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-                body: `⚠️ This PR lacks a detailed description.\n\nPlease add:\n- What changes were made\n- Why these changes are necessary\n- How to test the changes\n- Related issues (if any)`
-              });
-              
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-                labels: ['needs-description']
-              });
-            }
-
-  conflict-check:
-    name: Check for Conflicts
-    runs-on: ubuntu-latest
-    if: |
-      github.event.action == 'synchronize' &&
-      needs.check-release-pr.outputs.is_release == 'false'
-    steps:
-      - name: Check merge conflicts
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const pr = context.payload.pull_request;
-            
-            if (pr.mergeable === false) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-                body: '⚠️ This PR has merge conflicts. Please resolve them before merging.'
-              });
-              
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-                labels: ['conflicts']
-              });
-            }

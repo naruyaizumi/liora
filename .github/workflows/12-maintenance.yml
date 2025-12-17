@@ -1,0 +1,159 @@
+name: Repository Maintenance
+
+on:
+  schedule:
+    - cron: "0 2 * * 0"
+    - cron: "0 3 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  cleanup-workflow-runs:
+    name: Cleanup Old Workflow Runs
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 3 1 * *' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Delete old runs
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const days = 90;
+            const timestamp = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+            
+            const workflows = await github.rest.actions.listRepoWorkflows({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            
+            let deletedCount = 0;
+            for (const workflow of workflows.data.workflows) {
+              const runs = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: workflow.id,
+                created: `<${timestamp.toISOString()}`
+              });
+              
+              for (const run of runs.data.workflow_runs) {
+                await github.rest.actions.deleteWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: run.id
+                });
+                deletedCount++;
+              }
+            }
+            
+            console.log(`Deleted ${deletedCount} old workflow runs`);
+
+  update-contributors:
+    name: Update Contributors List
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 2 * * 0' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Generate contributors list
+        run: |
+          cat > CONTRIBUTORS.md << 'EOF'
+          # Contributors
+          
+          Thank you to everyone who has contributed to Liora! 🎉
+          
+          ## Core Team
+          
+          - **Naruya Izumi** ([@naruyaizumi](https://github.com/naruyaizumi)) - Creator & Maintainer
+          
+          ## Contributors
+          
+          EOF
+          
+          git log --format='%aN <%aE>' | sort -u | while read line; do
+            NAME=$(echo $line | cut -d'<' -f1 | xargs)
+            EMAIL=$(echo $line | cut -d'<' -f2 | cut -d'>' -f1)
+            COMMITS=$(git log --author="$EMAIL" --oneline | wc -l)
+            echo "- **$NAME** - $COMMITS commits" >> CONTRIBUTORS.md
+          done
+          
+          cat >> CONTRIBUTORS.md << 'EOF'
+          
+          ## How to Contribute
+          
+          See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+          
+          ---
+          
+          *Last updated: $(date -u +"%Y-%m-%d")*
+          EOF
+
+      - name: Commit contributors list
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          
+          if [[ `git status --porcelain` ]]; then
+            git add CONTRIBUTORS.md
+            git commit -m "docs: update contributors list [skip ci]"
+            git push
+          fi
+
+  health-check:
+    name: Repository Health Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Run health checks
+        run: |
+          echo "# Repository Health Report" > health-report.md
+          echo "**Generated**: $(date -u)" >> health-report.md
+          echo "" >> health-report.md
+          
+          echo "## Required Files" >> health-report.md
+          for file in README.md LICENSE CONTRIBUTING.md .gitignore; do
+            if [ -f "$file" ]; then
+              echo "- ✓ $file" >> health-report.md
+            else
+              echo "- ✗ $file (missing)" >> health-report.md
+            fi
+          done
+          
+          echo "" >> health-report.md
+          echo "## Statistics" >> health-report.md
+          echo "- Commits: $(git rev-list --count HEAD)" >> health-report.md
+          echo "- Contributors: $(git log --format='%aN' | sort -u | wc -l)" >> health-report.md
+          
+          cat health-report.md
+
+      - name: Upload health report
+        uses: actions/upload-artifact@v6
+        with:
+          name: health-report
+          path: health-report.md
+          retention-days: 30
+
+  notify-completion:
+    name: Maintenance Complete
+    needs: [cleanup-workflow-runs, update-contributors, health-check]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Create summary
+        run: |
+          echo "# 🔧 Maintenance Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Task | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Cleanup Runs | ${{ needs.cleanup-workflow-runs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Update Contributors | ${{ needs.update-contributors.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Health Check | ${{ needs.health-check.result }} |" >> $GITHUB_STEP_SUMMARY

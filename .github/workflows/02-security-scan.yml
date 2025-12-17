@@ -1,13 +1,10 @@
 name: Security Scanning
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+  workflow_dispatch:
+  workflow_call:
   schedule:
     - cron: "0 0 * * 0"
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -47,6 +44,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Cache Python packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-njsscan
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
@@ -56,15 +59,15 @@ jobs:
         run: pip install njsscan
 
       - name: Run Njsscan
-        run: |
-          njsscan --json > report.json || exit 1
+        run: njsscan --json > report.json || exit 1
 
       - name: Upload Njsscan Report
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: njsscan-report
-          path: njsscan-report.sarif
+          path: report.json
+          retention-days: 30
 
   secret-scan:
     name: Secret Scanning
@@ -101,3 +104,8 @@ jobs:
         if: always()
         with:
           sarif_file: "trivy-results.sarif"
+
+      - name: Attest Security Scan
+        uses: actions/attest-build-provenance@v3.0.0
+        with:
+          subject-path: "trivy-results.sarif"
