@@ -1,0 +1,53 @@
+{
+  "name": "Liora WhatsApp Bot",
+  "description": "AI-powered WhatsApp bot with advanced features",
+  "version": "1.0.0",
+  "guidelines": [
+    "Follow conventional commits format (feat:, fix:, docs:, etc.)",
+    "Use Prettier for code formatting",
+    "Use clang-format for C++ code",
+    "Write clear commit messages",
+    "Add tests for new features",
+    "Update documentation when needed"
+  ],
+  "code_style": {
+    "javascript": {
+      "formatter": "prettier",
+      "semi": true,
+      "singleQuote": true,
+      "tabWidth": 2,
+      "trailingComma": "es5"
+    },
+    "cpp": {
+      "formatter": "clang-format",
+      "style": "Google"
+    }
+  },
+  "file_structure": {
+    "src/": "Main source code",
+    "lib/": "Library code including C++ addons",
+    "lib/cpp/": "C++ native addons",
+    "lib/api/": "API endpoints",
+    "lib/core/": "Core WhatsApp functionality",
+    "lib/auth/": "Authentication modules"
+  },
+  "technologies": {
+    "runtime": "Node.js 24.x",
+    "package_manager": "npm",
+    "whatsapp_library": "@whiskeysockets/baileys",
+    "native_addons": "node-gyp (C++)",
+    "media_processing": "ffmpeg, libwebp"
+  },
+  "commit_conventions": {
+    "feat": "New feature",
+    "fix": "Bug fix",
+    "docs": "Documentation changes",
+    "style": "Code style changes (formatting)",
+    "refactor": "Code refactoring",
+    "perf": "Performance improvements",
+    "test": "Test changes",
+    "build": "Build system changes",
+    "ci": "CI/CD changes",
+    "chore": "Other changes"
+  }
+}
