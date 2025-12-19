@@ -105,8 +105,3 @@ jobs:
         if: always()
         with:
           sarif_file: "trivy-results.sarif"
-
-      - name: Attest Security Scan
-        uses: actions/attest-build-provenance@v3.0.0
-        with:
-          subject-path: "trivy-results.sarif"
