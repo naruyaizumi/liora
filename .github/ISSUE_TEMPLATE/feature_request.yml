@@ -1,21 +1,19 @@
 name: ✨ Feature Request
 description: Suggest a new feature or enhancement
 title: "[Feature]: "
-labels: ["enhancement", "needs-triage"]
-assignees:
-  - naruyaizumi
+labels: ["enhancement", "needs-discussion"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for suggesting a new feature!
+        Thanks for suggesting a feature! Please provide as much detail as possible.
 
   - type: textarea
     id: problem
     attributes:
-      label: Is your feature request related to a problem?
-      description: A clear and concise description of what the problem is
-      placeholder: I'm always frustrated when...
+      label: Problem Statement
+      description: Is your feature request related to a problem? Please describe.
+      placeholder: I'm frustrated when...
     validations:
       required: true
 
@@ -24,28 +22,30 @@ body:
     attributes:
       label: Proposed Solution
       description: Describe the solution you'd like
-      placeholder: I would like to see...
+      placeholder: I would like to...
     validations:
       required: true
 
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternatives Considered
+      label: Alternative Solutions
       description: Describe alternatives you've considered
-      placeholder: I've also thought about...
+      placeholder: I've also considered...
 
   - type: dropdown
     id: category
     attributes:
       label: Feature Category
-      description: What category does this feature fall under?
+      description: What area does this feature belong to?
       options:
-        - WhatsApp Bot Features
-        - API Integration
-        - Performance Improvement
-        - Documentation
+        - Core Bot Functionality
+        - Media Processing
+        - API Integration (new platform)
+        - Performance Optimization
         - Developer Experience
+        - Documentation
+        - Testing
         - Security
         - Other
     validations:
@@ -57,26 +57,48 @@ body:
       label: Priority
       description: How important is this feature to you?
       options:
-        - Low - Nice to have
-        - Medium - Would be helpful
-        - High - Important for my use case
-        - Critical - Blocking my work
+        - Low (Nice to have)
+        - Medium (Would help)
+        - High (Need it soon)
+        - Critical (Blocking my use case)
     validations:
       required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Describe your use case and how this feature would help
+      placeholder: |
+        I want to...
+        So that I can...
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples
+      description: Provide examples, mockups, or code snippets
+      render: javascript
+      placeholder: |
+        // Example usage
+        await bot.newFeature(options);
+
+  - type: checkboxes
+    id: implementation
+    attributes:
+      label: Implementation Willingness
+      description: Are you willing to help implement this feature?
+      options:
+        - label: I can implement this feature and submit a PR
+        - label: I can help test this feature
+        - label: I can provide additional information/feedback
+        - label: I'm requesting someone else to implement this
 
   - type: textarea
     id: additional
     attributes:
       label: Additional Context
-      description: Add any other context, mockups, or screenshots about the feature
+      description: Add any other context, screenshots, or references
       placeholder: Any additional information...
-
-  - type: checkboxes
-    id: terms
-    attributes:
-      label: Checklist
-      options:
-        - label: I have searched existing issues to ensure this is not a duplicate
-          required: true
-        - label: I am willing to help implement this feature
-          required: false

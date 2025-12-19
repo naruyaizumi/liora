@@ -1,75 +1,134 @@
 ## Description
 
-<!-- Provide a brief description of the changes in this PR -->
+<!-- Provide a clear and concise description of what this PR does -->
 
 ## Type of Change
 
-<!-- Put an 'x' in all the boxes that apply -->
+<!-- Mark the relevant option with an 'x' -->
 
 - [ ] 🐛 Bug fix (non-breaking change which fixes an issue)
 - [ ] ✨ New feature (non-breaking change which adds functionality)
 - [ ] 💥 Breaking change (fix or feature that would cause existing functionality to not work as expected)
 - [ ] 📝 Documentation update
-- [ ] 🎨 Style update (formatting, renaming)
-- [ ] ♻️ Code refactoring
+- [ ] 🎨 Code style/formatting
+- [ ] ♻️ Code refactoring (no functional changes)
 - [ ] ⚡ Performance improvement
-- [ ] ✅ Test update
-- [ ] 🔧 Configuration change
-- [ ] 🔨 Build/CI update
-
-## Related Issues
-
-<!-- Link to related issues, e.g., Fixes #123, Closes #456 -->
-
-Fixes #
-Closes #
+- [ ] ✅ Test updates
+- [ ] 🔧 Build/CI changes
+- [ ] 📦 Dependency updates
 
 ## Changes Made
 
-<!-- List the specific changes made in this PR -->
+<!-- Detailed list of changes -->
 
 - 
 - 
 - 
+
+## Related Issues
+
+<!-- Link to related issues. Use "Fixes #123" or "Closes #123" to auto-close issues -->
+
+- Fixes #
+- Related to #
 
 ## Testing
 
-<!-- Describe the testing you've done -->
+### How to Test
 
-- [ ] Tested locally
-- [ ] Unit tests added/updated
-- [ ] Integration tests added/updated
-- [ ] Manual testing performed
+<!-- Describe how to test these changes -->
 
-### Test Environment
+1. 
+2. 
+3. 
 
-- OS: 
-- Node version: 
+### Test Results
 
-## Screenshots (if applicable)
+<!-- Provide test results, screenshots, or benchmarks if applicable -->
 
-<!-- Add screenshots to help explain your changes -->
+- [ ] All existing tests pass
+- [ ] New tests added (if applicable)
+- [ ] Manual testing completed
 
-## Checklist
+## Performance Impact
 
-<!-- Put an 'x' in all the boxes that apply -->
+<!-- If applicable, provide performance benchmarks -->
 
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
-- [ ] Any dependent changes have been merged and published
+**Before:**
+```
+<!-- Benchmark results before changes -->
+```
+
+**After:**
+```
+<!-- Benchmark results after changes -->
+```
+
+**Impact:** 
+<!-- e.g., "20% faster", "Reduces memory by 15%", "No performance impact" -->
+
+## Code Quality Checklist
+
+<!-- Ensure all items are checked before requesting review -->
+
+- [ ] Code follows the project's style guidelines (Prettier for JS, clang-format for C++)
+- [ ] Self-reviewed my own code
+- [ ] Commented hard-to-understand areas
+- [ ] Made corresponding changes to documentation
+- [ ] No new warnings generated
+- [ ] Added tests that prove the fix is effective or the feature works
+- [ ] New and existing unit tests pass locally
+
+## C++ Specific (if applicable)
+
+- [ ] No memory leaks (checked with valgrind or AddressSanitizer)
+- [ ] Uses RAII for resource management
+- [ ] Uses smart pointers instead of raw pointers where appropriate
+- [ ] Proper error handling in N-API bindings
+- [ ] No blocking operations in async workers
+- [ ] Follows C++20 best practices
 
 ## Breaking Changes
 
-<!-- If this PR introduces breaking changes, describe them here -->
+<!-- If this PR introduces breaking changes, describe them and migration steps -->
 
-- [ ] This PR introduces breaking changes
-- [ ] Migration guide has been provided
+**Breaking:**
+- 
 
-## Additional Notes
+**Migration Guide:**
+```javascript
+// Before
+...
 
-<!-- Add any additional notes or context about the PR here -->
+// After
+...
+```
+
+## Screenshots/Demos
+
+<!-- If applicable, add screenshots or demo videos -->
+
+## Additional Context
+
+<!-- Add any other context about the PR here -->
+
+## Checklist for Reviewers
+
+<!-- For maintainers reviewing this PR -->
+
+- [ ] Code quality is acceptable
+- [ ] Tests are comprehensive
+- [ ] Documentation is updated
+- [ ] Performance impact is acceptable
+- [ ] Security implications have been considered
+- [ ] Breaking changes are properly documented
+- [ ] Commit messages follow conventional commits
+
+---
+
+**Note:** This PR will trigger automated checks:
+- ✅ Prettier/ESLint for JavaScript
+- ✅ clang-format/clang-tidy for C++
+- ✅ Security scans (CodeQL, Trivy)
+- ✅ Build tests (Ubuntu 24.04, Debian 12)
+- ✅ Memory safety checks (if C++ changes)

@@ -17,6 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'issues' && github.event.action == 'opened'
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
       - name: Label based on content
         uses: actions/github-script@v8
         with:
@@ -24,24 +27,52 @@ jobs:
             const issue = context.payload.issue;
             const title = issue.title.toLowerCase();
             const body = issue.body?.toLowerCase() || '';
+            const text = `${title} ${body}`;
             const labels = [];
 
-            if (title.includes('bug') || title.includes('error')) labels.push('bug');
-            if (title.includes('feature') || title.includes('enhancement')) labels.push('enhancement');
-            if (title.includes('docs') || title.includes('documentation')) labels.push('documentation');
-            if (title.includes('question') || title.includes('help')) labels.push('question');
-            if (body.includes('whatsapp') || title.includes('whatsapp')) labels.push('whatsapp');
-            if (title.includes('security') || title.includes('vulnerability')) {
-              labels.push('security', 'priority-high');
+            // Load labeler config
+            const fs = require('fs');
+            const yaml = require('js-yaml');
+            
+            try {
+              const config = yaml.load(fs.readFileSync('.github/issue-labeler.yml', 'utf8'));
+              
+              for (const [label, patterns] of Object.entries(config)) {
+                for (const pattern of patterns) {
+                  const regex = new RegExp(pattern, 'i');
+                  if (regex.test(text)) {
+                    labels.push(label);
+                    break;
+                  }
+                }
+              }
+            } catch (e) {
+              console.log('Using fallback labeling...');
+              
+              // Fallback labeling
+              if (/bug|error|crash|fail/i.test(text)) labels.push('bug');
+              if (/feature|enhancement|suggest/i.test(text)) labels.push('enhancement');
+              if (/docs|documentation/i.test(text)) labels.push('documentation');
+              if (/question|help|how/i.test(text)) labels.push('question');
+              if (/whatsapp|baileys/i.test(text)) labels.push('whatsapp');
+              if (/sticker|webp/i.test(text)) labels.push('sticker');
+              if (/c\+\+|cpp|native/i.test(text)) labels.push('cpp');
+              if (/security|vulnerability/i.test(text)) labels.push('security', 'priority-high');
+              if (/performance|slow|optimize/i.test(text)) labels.push('performance');
             }
 
-            if (labels.length > 0) {
+            // Remove duplicates
+            const uniqueLabels = [...new Set(labels)];
+            
+            if (uniqueLabels.length > 0) {
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
-                labels: labels
+                labels: uniqueLabels
               });
+              
+              console.log(`Applied labels: ${uniqueLabels.join(', ')}`);
             }
 
   greet-first-contributor:

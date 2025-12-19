@@ -1,0 +1,89 @@
+# Bug-related labels
+bug:
+  - '\b(bug|error|crash|exception|fail|broken|not working)\b'
+  - '\b(segfault|memory leak|undefined behavior)\b'
+
+# Priority labels
+priority-high:
+  - '\b(critical|urgent|blocker|severe)\b'
+  - '\b(security|vulnerability|exploit)\b'
+  - '\b(data loss|corruption)\b'
+
+priority-medium:
+  - '\b(important|significant|should have)\b'
+
+priority-low:
+  - '\b(nice to have|enhancement|minor)\b'
+
+# Feature requests
+enhancement:
+  - '\b(feature|enhance|improvement|suggest)\b'
+  - '\b(add support for|new feature|feature request)\b'
+
+# Documentation
+documentation:
+  - '\b(docs|documentation|readme|wiki|guide|tutorial)\b'
+  - '\b(typo|grammar|spelling)\b'
+
+# Questions/Help
+question:
+  - '\b(how to|how do I|question|help|support)\b'
+  - '\b(what is|why|when|where)\b'
+
+# Component-specific labels
+whatsapp:
+  - '\b(baileys|whatsapp|connection|qr|pairing)\b'
+  - '\b(message|chat|group|contact)\b'
+
+sticker:
+  - '\b(sticker|webp|image conversion)\b'
+
+media-processing:
+  - '\b(video|audio|image|ffmpeg|conversion)\b'
+  - '\b(webp|mp4|mp3|converter)\b'
+
+cpp:
+  - '\b(c\+\+|native|addon|binding|gyp)\b'
+  - '\b(memory leak|segfault|valgrind)\b'
+
+api:
+  - '\b(api|endpoint|integration)\b'
+  - '\b(tiktok|instagram|twitter|spotify|youtube)\b'
+
+# Performance
+performance:
+  - '\b(slow|performance|speed|optimize|latency)\b'
+  - '\b(memory usage|cpu usage|resource)\b'
+
+# Installation/Setup
+installation:
+  - '\b(install|setup|configure|deployment)\b'
+  - '\b(dependencies|npm|node-gyp)\b'
+
+# Platform-specific
+ubuntu:
+  - '\bubuntu\b'
+
+debian:
+  - '\bdebian\b'
+
+windows:
+  - '\bwindows\b'
+
+# Testing
+testing:
+  - '\b(test|testing|unit test|integration test)\b'
+
+# CI/CD
+ci-cd:
+  - '\b(github actions|workflow|ci|cd|pipeline)\b'
+  - '\b(build failed|test failed)\b'
+
+# Security
+security:
+  - '\b(security|vulnerability|cve|exploit|injection)\b'
+  - '\b(xss|sql injection|auth)\b'
+
+# Good first issue (for contributors)
+good-first-issue:
+  - '\b(beginner|easy|good first issue|starter)\b'

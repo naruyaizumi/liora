@@ -60,7 +60,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: build/Release
-          key: ${{ runner.os }}-build-${{ hashFiles('lib/cpp/**', 'binding.gyp') }}
+          key: ${{ runner.os }}-build-${{ hashFiles('lib/cpp/**/*.cpp', 'lib/cpp/**/*.h', 'binding.gyp', 'package.json') }}-node24
 
       - name: Build C++ Addons
         if: steps.cache-build.outputs.cache-hit != 'true'
@@ -129,7 +129,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: build/Release
-          key: debian-build-${{ hashFiles('lib/cpp/**', 'binding.gyp') }}
+          key: debian-build-${{ hashFiles('lib/cpp/**/*.cpp', 'lib/cpp/**/*.h', 'binding.gyp', 'package.json') }}-node24
 
       - name: Build C++ Addons
         if: steps.cache-build.outputs.cache-hit != 'true'

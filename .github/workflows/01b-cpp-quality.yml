@@ -1,0 +1,229 @@
+name: C++ Code Quality
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  pull_request:
+    paths:
+      - 'lib/cpp/**/*.cpp'
+      - 'lib/cpp/**/*.h'
+      - 'lib/cpp/**/*.cc'
+      - 'binding.gyp'
+      - '.clang-format'
+      - '.clang-tidy'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  clang-format-check:
+    name: Clang-Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Cache clang-format
+        uses: actions/cache@v4
+        with:
+          path: /usr/bin/clang-format
+          key: ${{ runner.os }}-clang-format-18
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+
+      - name: Check C++ formatting
+        id: format-check
+        run: |
+          echo "Checking C++ code formatting..."
+          
+          UNFORMATTED_FILES=""
+          for file in $(find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc'); do
+            if ! clang-format --dry-run --Werror "$file" 2>/dev/null; then
+              UNFORMATTED_FILES="$UNFORMATTED_FILES$file\n"
+            fi
+          done
+          
+          if [ -n "$UNFORMATTED_FILES" ]; then
+            echo "Unformatted files found:"
+            echo -e "$UNFORMATTED_FILES"
+            echo "needs_format=true" >> $GITHUB_OUTPUT
+          else
+            echo "✓ All C++ files are properly formatted"
+            echo "needs_format=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Auto-format if needed
+        if: steps.format-check.outputs.needs_format == 'true' && github.event_name == 'pull_request'
+        run: |
+          find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | \
+            xargs clang-format -i
+          
+          echo "✓ Applied clang-format to all C++ files"
+
+      - name: Commit formatting changes
+        if: steps.format-check.outputs.needs_format == 'true' && github.event_name == 'pull_request'
+        run: |
+          git config user.name "liora-bot"
+          git config user.email "liora.bot.official@gmail.com"
+          
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add lib/cpp/
+            git commit -m "style(cpp): auto-format with clang-format"
+            git push
+            echo "✓ Formatting changes committed"
+          fi
+
+  clang-tidy-analysis:
+    name: Clang-Tidy Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Cache clang-tidy
+        uses: actions/cache@v4
+        with:
+          path: /usr/bin/clang-tidy
+          key: ${{ runner.os }}-clang-tidy-18
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang-tidy \
+            build-essential \
+            libavformat-dev \
+            libavcodec-dev \
+            libavutil-dev \
+            libswresample-dev \
+            libswscale-dev \
+            libwebp-dev
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install node-addon-api
+        run: npm install node-addon-api
+
+      - name: Run clang-tidy
+        run: |
+          echo "Running clang-tidy analysis..."
+          
+          NAPI_INCLUDE=$(node -p "require('node-addon-api').include")
+          
+          for file in $(find lib/cpp -name '*.cpp'); do
+            echo "Analyzing $file..."
+            clang-tidy "$file" \
+              --checks='-*,bugprone-*,cert-*,performance-*,readability-*' \
+              -- \
+              -std=c++20 \
+              -I"$NAPI_INCLUDE" \
+              -I/usr/include \
+              -Ilib/cpp/core \
+              -DNAPI_CPP_EXCEPTIONS \
+              || true
+          done
+
+      - name: Generate analysis summary
+        run: |
+          echo "# C++ Static Analysis Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Clang-tidy analysis completed." >> $GITHUB_STEP_SUMMARY
+          echo "Review the logs for detailed findings." >> $GITHUB_STEP_SUMMARY
+
+  memory-safety-check:
+    name: Memory Safety Check (Headers)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Check for unsafe patterns
+        run: |
+          echo "Checking for unsafe C++ patterns..."
+          
+          ISSUES_FOUND=false
+          
+          if grep -rn "new \|delete " lib/cpp/ --include="*.cpp" --include="*.h"; then
+            echo "Found raw new/delete - prefer smart pointers"
+            ISSUES_FOUND=true
+          fi
+          
+          if grep -rn "malloc\|free\|calloc\|realloc" lib/cpp/ --include="*.cpp" --include="*.h"; then
+            echo "Found malloc/free - prefer C++ memory management"
+            ISSUES_FOUND=true
+          fi
+          
+          if grep -rn "void.*\*" lib/cpp/ --include="*.h" | grep -v "Napi::" | grep -v "//"; then
+            echo "Found potential raw pointer parameters"
+            ISSUES_FOUND=true
+          fi
+          
+          if [ "$ISSUES_FOUND" = false ]; then
+            echo "✓ No obvious unsafe patterns found"
+          else
+            echo ""
+            echo "Consider:"
+            echo "  - Use std::unique_ptr or std::shared_ptr instead of raw pointers"
+            echo "  - Use RAII for resource management"
+            echo "  - Use std::vector instead of C arrays"
+          fi
+
+  build-compile-check:
+    name: Compilation Test with Warnings
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            libavformat-dev \
+            libavcodec-dev \
+            libavutil-dev \
+            libswresample-dev \
+            libswscale-dev \
+            libwebp-dev
+          
+          npm ci --prefer-offline
+
+      - name: Compile with extra warnings
+        run: |
+          echo "Compiling with -Wall -Wextra -Wpedantic..."
+          
+          export CXXFLAGS="-Wall -Wextra -Wpedantic -Wconversion -Wshadow"
+          
+          npx node-gyp configure
+          npx node-gyp build 2>&1 | tee build.log
+          
+          if grep -i "warning:" build.log; then
+            echo "Compilation warnings found - review above"
+          else
+            echo "✓ Clean compilation with no warnings"
+          fi
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: cpp-build-log
+          path: build.log
+          retention-days: 7

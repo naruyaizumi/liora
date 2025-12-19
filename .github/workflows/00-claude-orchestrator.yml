@@ -101,7 +101,7 @@ jobs:
     if: needs.analyze-changes.outputs.needs_code_quality == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger code quality workflow
+      - name: Trigger JS code quality workflow
         uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.PAT_TOKEN }}
@@ -114,6 +114,21 @@ jobs:
               ref: context.ref.replace('refs/heads/', '')
             });
             console.log('✓ Code quality workflow triggered');
+
+      - name: Trigger C++ code quality workflow
+        if: needs.analyze-changes.outputs.has_cpp_changes == 'true'
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.PAT_TOKEN }}
+          script: |
+            console.log('Triggering C++ quality workflow...');
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '01b-cpp-quality.yml',
+              ref: context.ref.replace('refs/heads/', '')
+            });
+            console.log('✓ C++ quality workflow triggered');
 
   trigger-security:
     name: Trigger Security Scan
@@ -188,7 +203,7 @@ jobs:
     steps:
       - name: Generate summary
         run: |
-          echo "# 🎯 Workflow Orchestrator Summary" >> $GITHUB_STEP_SUMMARY
+          echo "# Workflow Orchestrator Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Analysis Results" >> $GITHUB_STEP_SUMMARY
           echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY

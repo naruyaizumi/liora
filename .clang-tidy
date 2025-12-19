@@ -1,0 +1,91 @@
+# Clang-Tidy configuration for Liora C++ code
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  cert-*,
+  clang-analyzer-*,
+  concurrency-*,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  misc-*,
+  -misc-non-private-member-variables-in-classes,
+  modernize-*,
+  -modernize-use-trailing-return-type,
+  performance-*,
+  readability-*,
+  -readability-magic-numbers,
+  -readability-identifier-length,
+  -readability-function-cognitive-complexity
+
+WarningsAsErrors: ''
+
+HeaderFilterRegex: 'lib/cpp/.*'
+
+CheckOptions:
+  # Naming conventions
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.ConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.ParameterCase
+    value: lower_case
+  - key: readability-identifier-naming.MemberCase
+    value: lower_case
+  - key: readability-identifier-naming.MemberSuffix
+    value: '_'
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: '_'
+  - key: readability-identifier-naming.NamespaceCase
+    value: lower_case
+
+  # Performance
+  - key: performance-move-const-arg.CheckTriviallyCopyableMove
+    value: 'false'
+  - key: performance-unnecessary-value-param.AllowedTypes
+    value: 'Napi::.*'
+
+  # Modernize
+  - key: modernize-use-auto.MinTypeNameLength
+    value: '8'
+  - key: modernize-loop-convert.MinConfidence
+    value: 'reasonable'
+
+  # Readability
+  - key: readability-function-size.LineThreshold
+    value: '100'
+  - key: readability-function-size.StatementThreshold
+    value: '50'
+  - key: readability-function-size.BranchThreshold
+    value: '10'
+  - key: readability-function-size.ParameterThreshold
+    value: '6'
+  - key: readability-simplify-boolean-expr.ChainedConditionalReturn
+    value: 'true'
+  - key: readability-simplify-boolean-expr.ChainedConditionalAssignment
+    value: 'true'
+
+  # C++ Core Guidelines
+  - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
+    value: 'true'
+  - key: cppcoreguidelines-explicit-virtual-functions.IgnoreDestructors
+    value: 'true'
+
+  # Bugprone
+  - key: bugprone-assert-side-effect.AssertMacros
+    value: 'assert,NAPI_ASSERT'
+  - key: bugprone-exception-escape.FunctionsThatShouldNotThrow
+    value: ''
+
+# Specific rules for N-API code
+# Allow raw pointers in N-API bindings as they're required by the API
+# Allow reinterpret_cast for N-API data handling
+# Allow magic numbers in N-API status codes

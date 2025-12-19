@@ -2,31 +2,29 @@ name: 🐛 Bug Report
 description: Report a bug or unexpected behavior
 title: "[Bug]: "
 labels: ["bug", "needs-triage"]
-assignees:
-  - naruyaizumi
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this bug report!
-        
+        Thanks for taking the time to report a bug! Please fill out the information below.
+
   - type: textarea
     id: description
     attributes:
       label: Bug Description
-      description: A clear and concise description of what the bug is.
+      description: A clear and concise description of what the bug is
       placeholder: Describe the bug...
     validations:
       required: true
 
   - type: textarea
-    id: reproduction
+    id: steps
     attributes:
       label: Steps to Reproduce
       description: Steps to reproduce the behavior
       placeholder: |
         1. Go to '...'
-        2. Run command '...'
+        2. Execute command '...'
         3. See error
     validations:
       required: true
@@ -35,8 +33,8 @@ body:
     id: expected
     attributes:
       label: Expected Behavior
-      description: What you expected to happen
-      placeholder: What should have happened?
+      description: What did you expect to happen?
+      placeholder: Describe the expected behavior...
     validations:
       required: true
 
@@ -44,8 +42,52 @@ body:
     id: actual
     attributes:
       label: Actual Behavior
-      description: What actually happened
-      placeholder: What actually happened?
+      description: What actually happened?
+      placeholder: Describe what actually happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs
+      description: Paste any relevant error logs or stack traces
+      render: shell
+      placeholder: |
+        Error: ...
+        Stack trace: ...
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which component is affected?
+      options:
+        - Core Bot (connection, messages)
+        - Media Processing (stickers, converters)
+        - API Integration (TikTok, Instagram, etc.)
+        - C++ Addons (native modules)
+        - Authentication
+        - Database
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Liora Version
+      description: Which version are you using? (check package.json)
+      placeholder: e.g., 9.0.0-beta.3
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js Version
+      description: Output of `node --version`
+      placeholder: e.g., v24.0.0
     validations:
       required: true
 
@@ -53,53 +95,49 @@ body:
     id: os
     attributes:
       label: Operating System
-      description: What OS are you using?
+      description: Which OS are you using?
       options:
         - Ubuntu 24.04
+        - Ubuntu 22.04
         - Debian 12
+        - Debian 11
+        - Other Linux
+        - Windows (WSL)
+        - macOS
         - Other
     validations:
       required: true
 
-  - type: input
-    id: node-version
-    attributes:
-      label: Node Version
-      description: Run `node --version` to find your version
-      placeholder: e.g., 24.0.0
-    validations:
-      required: true
-
-  - type: input
-    id: node-version
-    attributes:
-      label: Node Version (if applicable)
-      description: Run `node --version` to find your version
-      placeholder: e.g., v24.0.0
-
   - type: textarea
-    id: logs
+    id: system-info
     attributes:
-      label: Relevant Log Output
-      description: Please copy and paste any relevant log output
-      render: shell
+      label: System Information
+      description: Additional system information
+      placeholder: |
+        - RAM: 8GB
+        - CPU: Intel i5
+        - FFmpeg version: 6.0
+        - libwebp version: 1.3.0
+      render: markdown
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues and this is not a duplicate
+          required: true
+        - label: I am using the latest version of Liora
+          required: true
+        - label: I have included all necessary information above
+          required: true
+        - label: I have checked the documentation and this is not a usage error
+          required: false
 
   - type: textarea
     id: additional
     attributes:
       label: Additional Context
-      description: Add any other context about the problem here
+      description: Add any other context about the problem
       placeholder: Any additional information...
-
-  - type: checkboxes
-    id: terms
-    attributes:
-      label: Checklist
-      description: Please confirm the following
-      options:
-        - label: I have searched existing issues to ensure this is not a duplicate
-          required: true
-        - label: I have provided all required information
-          required: true
-        - label: I am using the latest version of Liora
-          required: false
