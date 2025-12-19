@@ -13,7 +13,7 @@ permissions:
 jobs:
   build-ubuntu:
     name: Build on Ubuntu 24.04
-    runs-on: ubuntu-24.04
+    runs-on: self-hosted
     outputs:
       build-artifact: ${{ steps.upload.outputs.artifact-id }}
     steps:
@@ -89,111 +89,9 @@ jobs:
         with:
           subject-path: 'build/Release/*.node'
 
-  build-debian:
-    name: Build on Debian 12
-    runs-on: ubuntu-latest
-    container:
-      image: debian:12-slim
-    outputs:
-      build-artifact: ${{ steps.upload.outputs.artifact-id }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Install Debian dependencies
-        run: |
-          apt-get update
-          apt-get install -y \
-            curl ca-certificates gnupg lsb-release \
-            ffmpeg libwebp-dev libavformat-dev libavcodec-dev \
-            libavutil-dev libswresample-dev libswscale-dev \
-            libavfilter-dev build-essential python3 g++ \
-            pkg-config cmake clang git make bash unzip
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: debian-node-24-${{ hashFiles('package-lock.json') }}
-
-      - name: Install project dependencies
-        run: npm ci --prefer-offline
-
-      - name: Cache build artifacts
-        id: cache-build
-        uses: actions/cache@v4
-        with:
-          path: build/Release
-          key: debian-build-${{ hashFiles('lib/cpp/**/*.cpp', 'lib/cpp/**/*.h', 'binding.gyp', 'package.json') }}-node24
-
-      - name: Build C++ Addons
-        if: steps.cache-build.outputs.cache-hit != 'true'
-        run: npx node-gyp rebuild
-
-      - name: Verify build
-        run: |
-          if [ -d "build/Release" ]; then
-            count=$(find build/Release -name "*.node" -type f | wc -l)
-            if [ $count -gt 0 ]; then
-              echo "✓ Found $count .node file(s)"
-            else
-              echo "✗ No .node files found"
-              exit 1
-            fi
-          else
-            echo "✗ build/Release directory not found"
-            exit 1
-          fi
-
-      - name: Upload build artifacts
-        id: upload
-        uses: actions/upload-artifact@v6
-        with:
-          name: build-debian-12
-          path: build/Release/*.node
-          retention-days: 7
-
-      - name: Attest Build Provenance
-        uses: actions/attest-build-provenance@v3.0.0
-        with:
-          subject-path: 'build/Release/*.node'
-
-  integration-test:
-    name: Integration Tests
-    runs-on: ubuntu-24.04
-    needs: [build-ubuntu, build-debian]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-          cache: npm
-
-      - name: Download Ubuntu build
-        uses: actions/download-artifact@v6
-        with:
-          name: build-ubuntu-24
-          path: build/Release
-
-      - name: Install dependencies
-        run: npm ci --prefer-offline
-
-      - name: Run integration tests
-        run: |
-          echo "Running integration tests..."
-          # npm run test:integration
-
   validate-installer:
     name: Validate Installer Script
-    runs-on: ubuntu-24.04
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

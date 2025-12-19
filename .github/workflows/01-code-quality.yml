@@ -11,7 +11,7 @@ permissions:
 jobs:
   setup-cache:
     name: Setup Dependencies Cache
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       cache-hit: ${{ steps.cache.outputs.cache-hit }}
     steps:
@@ -41,7 +41,7 @@ jobs:
 
   prettier-check:
     name: Prettier Auto Fix
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: setup-cache
     steps:
       - name: Checkout code
@@ -83,7 +83,7 @@ jobs:
 
   eslint:
     name: ESLint Analysis
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: setup-cache
     steps:
       - name: Checkout code
@@ -112,7 +112,7 @@ jobs:
 
   cpp-format:
     name: C++ Auto Format Fix
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -146,7 +146,7 @@ jobs:
 
   commit-lint:
     name: Commit Message Lint
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.event_name == 'pull_request'
     steps:
       - name: Checkout code

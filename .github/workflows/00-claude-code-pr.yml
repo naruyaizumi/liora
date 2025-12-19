@@ -16,7 +16,7 @@ permissions:
 jobs:
   claude-assist:
     name: Claude Code Assistant
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: |
       (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'claude')) ||
       (github.event_name == 'issues' && contains(github.event.issue.labels.*.name, 'claude')) ||

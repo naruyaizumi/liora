@@ -19,7 +19,7 @@ permissions:
 jobs:
   clang-format-check:
     name: Clang-Format Check
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -81,7 +81,7 @@ jobs:
 
   clang-tidy-analysis:
     name: Clang-Tidy Static Analysis
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -142,7 +142,7 @@ jobs:
 
   memory-safety-check:
     name: Memory Safety Check (Headers)
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -180,7 +180,7 @@ jobs:
 
   build-compile-check:
     name: Compilation Test with Warnings
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

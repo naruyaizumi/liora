@@ -13,7 +13,7 @@ permissions:
 jobs:
   cleanup-workflow-runs:
     name: Cleanup Old Workflow Runs
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.event.schedule == '0 3 1 * *' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Delete old runs
@@ -51,7 +51,7 @@ jobs:
 
   update-contributors:
     name: Update Contributors List
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.event.schedule == '0 2 * * 0' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
@@ -106,7 +106,7 @@ jobs:
 
   health-check:
     name: Repository Health Check
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -145,7 +145,7 @@ jobs:
   notify-completion:
     name: Maintenance Complete
     needs: [cleanup-workflow-runs, update-contributors, health-check]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: always()
     steps:
       - name: Create summary

@@ -14,7 +14,7 @@ permissions:
 jobs:
   cleanup-cache:
     name: Cleanup Old Caches
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.event.schedule == '0 0 * * 0' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Cleanup caches
@@ -45,7 +45,7 @@ jobs:
 
   cleanup-old-artifacts:
     name: Cleanup Old Artifacts
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.event.schedule == '0 0 * * 0' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Delete old artifacts
@@ -78,7 +78,7 @@ jobs:
 
   cleanup-old-branches:
     name: Cleanup Stale Branches
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.event.schedule == '0 0 1 * *' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
@@ -102,7 +102,7 @@ jobs:
 
   trigger-security-scan:
     name: Trigger Weekly Security Scan
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.event.schedule == '0 0 * * 0'
     steps:
       - name: Trigger security workflow
@@ -118,7 +118,7 @@ jobs:
 
   update-statistics:
     name: Update Repository Statistics
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.event.schedule == '0 0 * * 0' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
@@ -154,7 +154,7 @@ jobs:
   notify-completion:
     name: Notify Completion
     needs: [cleanup-cache, cleanup-old-artifacts, cleanup-old-branches, update-statistics]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: always()
     steps:
       - name: Create summary

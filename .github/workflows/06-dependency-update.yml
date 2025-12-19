@@ -12,7 +12,7 @@ permissions:
 jobs:
   check-updates:
     name: Check for Updates
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       has_updates: ${{ steps.check.outputs.has_updates }}
     steps:
@@ -46,7 +46,7 @@ jobs:
 
   update-dependencies:
     name: Update Dependencies
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: check-updates
     if: needs.check-updates.outputs.has_updates == 'true'
     steps:
@@ -82,7 +82,7 @@ jobs:
 
   security-audit:
     name: Security Audit
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

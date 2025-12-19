@@ -25,7 +25,7 @@ permissions:
 jobs:
   prepare-deployment:
     name: Prepare Deployment
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
@@ -40,31 +40,19 @@ jobs:
           echo "Deploying version: $VERSION"
 
   test-installation:
-    name: Test Installation on ${{ matrix.os }}
-    runs-on: ${{ matrix.runner }}
+    name: Test Installation
+    runs-on: self-hosted
     needs: prepare-deployment
-    strategy:
-      matrix:
-        include:
-          - os: Ubuntu 24.04
-            runner: ubuntu-24.04
-          - os: Debian 12
-            runner: ubuntu-latest
-            container: debian:12-slim
     steps:
-      - name: Setup for Debian
-        if: matrix.os == 'Debian 12'
-        run: apt-get update && apt-get install -y curl
-
       - name: Test installation script
         run: |
-          echo "Testing installation on ${{ matrix.os }}..."
+          echo "Testing installation on Ubuntu 24.04..."
           curl -sSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh | bash -s -- --dry-run
-          echo "✓ Installation test passed on ${{ matrix.os }}"
+          echo "✓ Installation test passed"
 
   create-deployment-artifact:
     name: Create Deployment Artifact
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [prepare-deployment, test-installation]
     steps:
       - name: Checkout code
@@ -72,28 +60,23 @@ jobs:
 
       - name: Create deployment package
         run: |
-          mkdir -p dist
-          tar -czf dist/liora-${{ needs.prepare-deployment.outputs.version }}.tar.gz \
+          mkdir -p artifact
+          tar -czf artifact/liora-${{ needs.prepare-deployment.outputs.version }}.tar.gz \
             --exclude=node_modules \
             --exclude=.git \
-            --exclude=dist \
+            --exclude=artifact \
             .
 
       - name: Upload deployment artifact
         uses: actions/upload-artifact@v6
         with:
           name: deployment-package
-          path: dist/*.tar.gz
+          path: artifact/*.tar.gz
           retention-days: 30
-
-      - name: Attest Deployment Package
-        uses: actions/attest-build-provenance@v3.0.0
-        with:
-          subject-path: 'dist/*.tar.gz'
 
   deploy:
     name: Deploy to ${{ inputs.environment || 'production' }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [prepare-deployment, create-deployment-artifact]
     environment:
       name: ${{ inputs.environment || 'production' }}
@@ -111,7 +94,7 @@ jobs:
 
   notify:
     name: Notify Deployment Status
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [prepare-deployment, deploy]
     if: always()
     steps:

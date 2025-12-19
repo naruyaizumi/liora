@@ -10,7 +10,7 @@ permissions:
 jobs:
   mirror-gitlab:
     name: Mirror to GitLab
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -26,7 +26,7 @@ jobs:
 
   mirror-codeberg:
     name: Mirror to Codeberg
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -42,7 +42,7 @@ jobs:
 
   mirror-gitea:
     name: Mirror to Gitea
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -59,7 +59,7 @@ jobs:
   mirror-summary:
     name: Mirror Summary
     needs: [mirror-gitlab, mirror-codeberg, mirror-gitea]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: always()
     steps:
       - name: Generate Summary

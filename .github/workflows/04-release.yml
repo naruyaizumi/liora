@@ -12,7 +12,7 @@ permissions:
 jobs:
   check-version:
     name: Check Version Change
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       version_changed: ${{ steps.check.outputs.changed }}
       new_version: ${{ steps.check.outputs.version }}
@@ -47,7 +47,7 @@ jobs:
     name: Prepare Release
     needs: check-version
     if: needs.check-version.outputs.should_release == 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -120,7 +120,7 @@ jobs:
     name: Create GitHub Release
     needs: [check-version, prepare-and-tag]
     if: needs.check-version.outputs.should_release == 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -151,7 +151,7 @@ jobs:
   trigger-mirror:
     name: Trigger Mirror Sync
     needs: [create-release]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Trigger mirror workflow
         uses: actions/github-script@v8
@@ -167,7 +167,7 @@ jobs:
   trigger-deployment:
     name: Trigger Deployment
     needs: [create-release]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Trigger deployment workflow
         uses: actions/github-script@v8

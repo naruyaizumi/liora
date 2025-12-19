@@ -18,7 +18,7 @@ permissions:
 jobs:
   analyze-changes:
     name: Analyze Changes
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       needs_code_quality: ${{ steps.analyze.outputs.needs_code_quality }}
       needs_security: ${{ steps.analyze.outputs.needs_security }}
@@ -99,7 +99,7 @@ jobs:
     name: Trigger Code Quality
     needs: analyze-changes
     if: needs.analyze-changes.outputs.needs_code_quality == 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Trigger JS code quality workflow
         uses: actions/github-script@v8
@@ -134,7 +134,7 @@ jobs:
     name: Trigger Security Scan
     needs: analyze-changes
     if: needs.analyze-changes.outputs.needs_security == 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Trigger security workflow
         uses: actions/github-script@v8
@@ -156,7 +156,7 @@ jobs:
     if: |
       needs.analyze-changes.outputs.needs_build == 'true' &&
       (needs.trigger-code-quality.result == 'success' || needs.trigger-code-quality.result == 'skipped')
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Trigger build workflow
         uses: actions/github-script@v8
@@ -179,7 +179,7 @@ jobs:
       needs.analyze-changes.outputs.version_changed == 'true' &&
       github.ref == 'refs/heads/main' &&
       github.event_name == 'push'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Trigger release workflow
         uses: actions/github-script@v8
@@ -199,7 +199,7 @@ jobs:
     name: Orchestrator Summary
     needs: [analyze-changes, trigger-code-quality, trigger-security, trigger-build, trigger-release]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Generate summary
         run: |

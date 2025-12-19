@@ -13,7 +13,7 @@ permissions:
 jobs:
   analyze-pr:
     name: Analyze PR Type
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       is_release: ${{ steps.check.outputs.is_release }}
       is_breaking: ${{ steps.check.outputs.is_breaking }}
@@ -58,7 +58,7 @@ jobs:
 
   auto-label:
     name: Auto Label PR
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: analyze-pr
     if: github.event.action == 'opened' || github.event.action == 'reopened'
     steps:
@@ -85,7 +85,7 @@ jobs:
 
   lint-pr-title:
     name: Lint PR Title
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.event.action == 'opened' || github.event.action == 'synchronize'
     steps:
       - name: Validate PR title
@@ -108,7 +108,7 @@ jobs:
 
   auto-approve-release:
     name: Auto Approve Release PR
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: analyze-pr
     if: |
       needs.analyze-pr.outputs.is_release == 'true' &&
@@ -128,7 +128,7 @@ jobs:
 
   check-breaking-changes:
     name: Check Breaking Changes
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: analyze-pr
     if: needs.analyze-pr.outputs.is_breaking == 'true'
     steps:
@@ -145,7 +145,7 @@ jobs:
 
   auto-approve-dependabot:
     name: Auto Approve Dependabot
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.actor == 'dependabot[bot]' && github.event.action == 'opened'
     steps:
       - name: Dependabot metadata
