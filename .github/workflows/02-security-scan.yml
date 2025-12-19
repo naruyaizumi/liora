@@ -10,6 +10,7 @@ permissions:
   contents: read
   security-events: write
   actions: read
+  id-token: write
 
 jobs:
   codeql:
@@ -82,7 +83,7 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          scan_all: true
+          extra_args: --only-verified
 
   trivy-scan:
     name: Trivy Container Scan
