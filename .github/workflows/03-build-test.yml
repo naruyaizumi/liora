@@ -28,31 +28,22 @@ jobs:
           node-version: '24'
           cache: npm
 
-      - name: Cache native dependencies
-        id: cache-native
-        uses: actions/cache@v4
-        with:
-          path: |
-            /usr/lib/x86_64-linux-gnu/libavformat*
-            /usr/lib/x86_64-linux-gnu/libavcodec*
-            /usr/include/libav*
-          key: ${{ runner.os }}-native-libs-${{ hashFiles('.github/workflows/*.yml') }}
-
-      - name: Install Ubuntu dependencies
-        if: steps.cache-native.outputs.cache-hit != 'true'
+      - name: Check native dependencies
+        id: check-deps
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            ffmpeg libwebp-dev libavformat-dev libavcodec-dev \
-            libavutil-dev libswresample-dev libswscale-dev \
-            libavfilter-dev build-essential python3 g++ \
-            pkg-config cmake clang
+          for lib in libavformat libavcodec libavutil libswresample libswscale libwebp; do
+            pkg-config --exists "$lib" || exit 1
+          done
+          
+          for tool in g++ cmake pkg-config python3; do
+            command -v "$tool" || exit 1
+          done
 
       - name: Cache node modules
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-24-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-node-24-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install dependencies
         run: npm ci --prefer-offline
@@ -70,13 +61,8 @@ jobs:
 
       - name: Verify build
         run: |
-          if ls build/Release/*.node 1> /dev/null 2>&1; then
-            echo "✓ C++ addons built successfully"
-            ls -la build/Release/*.node
-          else
-            echo "✗ No .node files found"
-            exit 1
-          fi
+          ls build/Release/*.node 1>/dev/null 2>&1 || exit 1
+          echo "✓ C++ addons built successfully"
 
       - name: Upload build artifacts
         id: upload
@@ -98,19 +84,53 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Cache shellcheck
-        uses: actions/cache@v4
-        with:
-          path: /usr/bin/shellcheck
-          key: ${{ runner.os }}-shellcheck
-
-      - name: Install shellcheck
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Check shellcheck availability
+        id: check-shellcheck
+        run: |
+          command -v shellcheck && echo "available=true" >> $GITHUB_OUTPUT || echo "available=false" >> $GITHUB_OUTPUT
 
       - name: Lint installer script
+        if: steps.check-shellcheck.outputs.available == 'true'
         run: shellcheck -e SC1091 -e SC2034 install.sh || true
 
       - name: Test installer (dry-run)
         run: |
-          bash -n install.sh
+          bash -n install.sh || exit 1
           echo "✓ Installer script syntax is valid"
+
+  basic-test:
+    name: Basic Functionality Test
+    runs-on: self-hosted
+    needs: build-ubuntu
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Download built artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: build-ubuntu-24
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Copy built addon to build directory
+        run: |
+          mkdir -p build/Release
+          cp *.node build/Release/ 2>/dev/null || true
+
+      - name: Run basic tests
+        run: |
+          ls build/Release/*.node 1>/dev/null 2>&1 || exit 1
+          
+          node -e "
+            try {
+              require('./build/Release/liora.node');
+              console.log('✓ Addon loaded successfully');
+            } catch (error) {
+              console.error('✗ Failed to load addon:', error.message);
+              process.exit(1);
+            }
+          "

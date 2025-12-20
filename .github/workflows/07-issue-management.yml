@@ -29,7 +29,6 @@ jobs:
             const text = `${title} ${body}`;
             const labels = [];
 
-            // Load labeler config
             const fs = require('fs');
             const yaml = require('js-yaml');
             
@@ -48,7 +47,6 @@ jobs:
             } catch (e) {
               console.log('Using fallback labeling...');
               
-              // Fallback labeling
               if (/bug|error|crash|fail/i.test(text)) labels.push('bug');
               if (/feature|enhancement|suggest/i.test(text)) labels.push('enhancement');
               if (/docs|documentation/i.test(text)) labels.push('documentation');
@@ -60,7 +58,6 @@ jobs:
               if (/performance|slow|optimize/i.test(text)) labels.push('performance');
             }
 
-            // Remove duplicates
             const uniqueLabels = [...new Set(labels)];
             
             if (uniqueLabels.length > 0) {

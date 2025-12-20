@@ -25,7 +25,6 @@ jobs:
           git config user.email "liora.bot.official@gmail.com"
           git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/naruyaizumi/liora.git 2>/dev/null || true
           
-          # Push berdasarkan trigger
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "Pushing main branch to GitLab..."
             git push gitlab main --force --tags
@@ -49,7 +48,6 @@ jobs:
           git config user.email "liora.bot.official@gmail.com"
           git remote add codeberg https://naruyaizumi:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/naruyaizumi/liora.git 2>/dev/null || true
           
-          # Push berdasarkan trigger
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "Pushing main branch to Codeberg..."
             git push codeberg main --force --tags
@@ -73,7 +71,6 @@ jobs:
           git config user.email "liora.bot.official@gmail.com"
           git remote add gitea https://naruyaizumi:${{ secrets.GITEA_TOKEN }}@gitea.com/naruyaizumi/liora.git 2>/dev/null || true
           
-          # Push berdasarkan trigger
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "Pushing main branch to Gitea..."
             git push gitea main --force --tags

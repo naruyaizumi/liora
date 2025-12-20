@@ -27,56 +27,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cache clang-format
-        uses: actions/cache@v4
-        with:
-          path: /usr/bin/clang-format
-          key: ${{ runner.os }}-clang-format-18
-
       - name: Check C++ formatting
         id: format-check
         run: |
-          echo "Checking C++ code formatting..."
-          
-          # Check if clang-format is available
-          if ! command -v clang-format &> /dev/null; then
-            echo "WARNING: clang-format not installed, skipping format check"
-            echo "needs_format=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          
-          echo "Using clang-format version:"
-          clang-format --version
+          command -v clang-format || exit 1
           
           UNFORMATTED_FILES=""
           for file in $(find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc'); do
-            if ! clang-format --dry-run --Werror "$file" 2>/dev/null; then
-              UNFORMATTED_FILES="$UNFORMATTED_FILES$file\n"
-            fi
+            clang-format --dry-run --Werror "$file" 2>/dev/null || UNFORMATTED_FILES="$UNFORMATTED_FILES$file\n"
           done
           
           if [ -n "$UNFORMATTED_FILES" ]; then
-            echo "Unformatted files found:"
-            echo -e "$UNFORMATTED_FILES"
             echo "needs_format=true" >> $GITHUB_OUTPUT
           else
-            echo "✓ All C++ files are properly formatted"
             echo "needs_format=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Auto-format if needed
         if: steps.format-check.outputs.needs_format == 'true' && github.event_name == 'pull_request'
         run: |
-          if ! command -v clang-format &> /dev/null; then
-            echo "ERROR: clang-format not available for auto-formatting"
-            exit 1
-          fi
-          
-          echo "Auto-formatting C++ files..."
-          find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | \
-            xargs clang-format -i
-          
-          echo "✓ Applied clang-format to all C++ files"
+          command -v clang-format || exit 1
+          find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | xargs clang-format -i
 
       - name: Commit formatting changes
         if: steps.format-check.outputs.needs_format == 'true' && github.event_name == 'pull_request'
@@ -88,7 +59,6 @@ jobs:
             git add lib/cpp/
             git commit -m "style(cpp): auto-format with clang-format"
             git push
-            echo "✓ Formatting changes committed"
           fi
 
   clang-tidy-analysis:
@@ -97,12 +67,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-
-      - name: Cache clang-tidy
-        uses: actions/cache@v4
-        with:
-          path: /usr/bin/clang-tidy
-          key: ${{ runner.os }}-clang-tidy-18
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -115,21 +79,11 @@ jobs:
 
       - name: Run clang-tidy analysis
         run: |
-          echo "Running clang-tidy analysis..."
-          
-          # Check if clang-tidy is available
-          if ! command -v clang-tidy &> /dev/null; then
-            echo "WARNING: clang-tidy not installed, skipping analysis"
-            exit 0
-          fi
-          
-          echo "Using clang-tidy version:"
-          clang-tidy --version
+          command -v clang-tidy || exit 0
           
           NAPI_INCLUDE=$(node -p "require('node-addon-api').include")
           
           for file in $(find lib/cpp -name '*.cpp'); do
-            echo "Analyzing $file..."
             clang-tidy "$file" \
               --checks='-*,bugprone-*,cert-*,performance-*,readability-*' \
               -- \
@@ -141,13 +95,6 @@ jobs:
               || true
           done
 
-      - name: Generate analysis summary
-        run: |
-          echo "# C++ Static Analysis Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Clang-tidy analysis completed." >> $GITHUB_STEP_SUMMARY
-          echo "Review the logs for detailed findings." >> $GITHUB_STEP_SUMMARY
-
   memory-safety-check:
     name: Memory Safety Check (Headers)
     runs-on: self-hosted
@@ -157,34 +104,9 @@ jobs:
 
       - name: Check for unsafe patterns
         run: |
-          echo "Checking for unsafe C++ patterns..."
-          
-          ISSUES_FOUND=false
-          
-          if grep -rn "new \|delete " lib/cpp/ --include="*.cpp" --include="*.h"; then
-            echo "Found raw new/delete - prefer smart pointers"
-            ISSUES_FOUND=true
-          fi
-          
-          if grep -rn "malloc\|free\|calloc\|realloc" lib/cpp/ --include="*.cpp" --include="*.h"; then
-            echo "Found malloc/free - prefer C++ memory management"
-            ISSUES_FOUND=true
-          fi
-          
-          if grep -rn "void.*\*" lib/cpp/ --include="*.h" | grep -v "Napi::" | grep -v "//"; then
-            echo "Found potential raw pointer parameters"
-            ISSUES_FOUND=true
-          fi
-          
-          if [ "$ISSUES_FOUND" = false ]; then
-            echo "✓ No obvious unsafe patterns found"
-          else
-            echo ""
-            echo "Consider:"
-            echo "  - Use std::unique_ptr or std::shared_ptr instead of raw pointers"
-            echo "  - Use RAII for resource management"
-            echo "  - Use std::vector instead of C arrays"
-          fi
+          grep -rn "new \|delete " lib/cpp/ --include="*.cpp" --include="*.h" && echo "Found raw new/delete" || true
+          grep -rn "malloc\|free\|calloc\|realloc" lib/cpp/ --include="*.cpp" --include="*.h" && echo "Found malloc/free" || true
+          grep -rn "void.*\*" lib/cpp/ --include="*.h" | grep -v "Napi::" | grep -v "//" && echo "Found raw pointers" || true
 
   build-compile-check:
     name: Compilation Test with Warnings
@@ -201,42 +123,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # Check if required libraries are available
-          echo "Checking for required libraries..."
-          MISSING_DEPS=false
-          
-          for lib in libavformat libavcodec libavutil libswresample libswscale libwebp; do
-            if ! pkg-config --exists "$lib"; then
-              echo "WARNING: $lib not found via pkg-config"
-              MISSING_DEPS=true
-            fi
-          done
-          
-          if [ "$MISSING_DEPS" = true ]; then
-            echo "WARNING: Some dependencies missing, compilation may fail"
-          fi
-          
           npm ci --prefer-offline
 
       - name: Compile with extra warnings
         run: |
-          echo "Compiling with -Wall -Wextra -Wpedantic..."
-          
           export CXXFLAGS="-Wall -Wextra -Wpedantic -Wconversion -Wshadow"
-          
           npx node-gyp configure
           npx node-gyp build 2>&1 | tee build.log
           
-          if grep -i "warning:" build.log; then
-            echo "Compilation warnings found - review above"
-          else
-            echo "✓ Clean compilation with no warnings"
-          fi
-
-      - name: Upload build log
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: cpp-build-log
-          path: build.log
-          retention-days: 7
+          grep -i "warning:" build.log && echo "Compilation warnings found" || echo "✓ Clean compilation"

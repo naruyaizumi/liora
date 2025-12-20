@@ -3,9 +3,6 @@ name: Release Management
 on:
   push:
     branches: [main]
-    paths:
-      - 'package.json'
-      - 'package-lock.json'
 
 permissions:
   contents: write
@@ -17,37 +14,30 @@ jobs:
     name: Check Version Change
     runs-on: self-hosted
     outputs:
-      version_changed: ${{ steps.check.outputs.changed }}
-      new_version: ${{ steps.check.outputs.version }}
       should_release: ${{ steps.check.outputs.release }}
+      new_version: ${{ steps.check.outputs.version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Check version change  
-        id: check  
-        run: |  
-          PREV_VERSION=$(git show HEAD^:package.json 2>/dev/null | jq -r '.version' || echo "0.0.0")  
-          NEW_VERSION=$(jq -r '.version' package.json)  
-            
-          if [ "$PREV_VERSION" != "$NEW_VERSION" ]; then  
-            echo "changed=true" >> $GITHUB_OUTPUT  
-            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT  
-              
-            if git rev-parse "v$NEW_VERSION" >/dev/null 2>&1; then  
-              echo "release=false" >> $GITHUB_OUTPUT  
-            else  
-              echo "release=true" >> $GITHUB_OUTPUT  
-            fi  
-          else  
-            echo "changed=false" >> $GITHUB_OUTPUT  
-            echo "release=false" >> $GITHUB_OUTPUT  
+      - name: Check version vs tag
+        id: check
+        run: |
+          PACKAGE_VERSION=$(jq -r '.version' package.json)
+          echo "version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
+          
+          if git rev-parse "v$PACKAGE_VERSION" >/dev/null 2>&1; then
+            echo "Tag already exists: v$PACKAGE_VERSION"
+            echo "release=false" >> $GITHUB_OUTPUT
+          else
+            echo "New version detected: $PACKAGE_VERSION"
+            echo "release=true" >> $GITHUB_OUTPUT
           fi
 
-  prepare-and-tag:
-    name: Prepare Release
+  create-tag:
+    name: Create Tag if Needed
     needs: check-version
     if: needs.check-version.outputs.should_release == 'true'
     runs-on: self-hosted
@@ -58,70 +48,17 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-          cache: npm
-
-      - name: Install dependencies  
-        run: npm ci --prefer-offline
-
-      - name: Run Prettier  
-        run: npx prettier --write . || true
-
-      - name: Generate changelog  
-        id: changelog  
-        run: |  
-          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")  
-            
-          if [ -z "$PREV_TAG" ]; then  
-            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)  
-          else  
-            CHANGELOG=$(git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)  
-          fi  
-            
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT  
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT  
-          echo "EOF" >> $GITHUB_OUTPUT  
-
-      - name: Update CHANGELOG.md  
-        run: |  
-          VERSION="${{ needs.check-version.outputs.new_version }}"  
-          DATE=$(date +%Y-%m-%d)  
-            
-          if [ ! -f CHANGELOG.md ]; then  
-            echo "# Changelog" > CHANGELOG.md  
-            echo "" >> CHANGELOG.md  
-          fi  
-            
-          {  
-            echo "## [$VERSION] - $DATE"  
-            echo ""  
-            echo "${{ steps.changelog.outputs.changelog }}"  
-            echo ""  
-          } | cat - CHANGELOG.md > temp && mv temp CHANGELOG.md
-
-      - name: Commit and push changes
-        env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+      - name: Create tag
         run: |
+          VERSION="${{ needs.check-version.outputs.new_version }}"
           git config user.name "liora-bot"
           git config user.email "liora.bot.official@gmail.com"
-          git remote set-url origin "https://naruyaizumi:$PAT_TOKEN@github.com/naruyaizumi/liora.git"
-          
-          if [[ `git status --porcelain` ]]; then  
-            git add .
-            git commit -m "chore(release): prepare v${{ needs.check-version.outputs.new_version }}"
-            git push origin main 2>&1 | sed "s/$PAT_TOKEN/***/g"
-          fi
-          
-          git tag -a "v${{ needs.check-version.outputs.new_version }}" -m "Release v${{ needs.check-version.outputs.new_version }}"
-          git push origin "v${{ needs.check-version.outputs.new_version }}" 2>&1 | sed "s/$PAT_TOKEN/***/g"
+          git tag -a "v$VERSION" -m "Release v$VERSION"
+          git push origin "v$VERSION"
 
   create-release:
     name: Create GitHub Release
-    needs: [check-version, prepare-and-tag]
+    needs: [check-version, create-tag]
     if: needs.check-version.outputs.should_release == 'true'
     runs-on: self-hosted
     steps:
@@ -130,58 +67,38 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Create GitHub Release  
-        uses: softprops/action-gh-release@v2  
-        with:  
-          tag_name: v${{ needs.check-version.outputs.new_version }}  
-          name: Release v${{ needs.check-version.outputs.new_version }}  
-          body: |  
-            # 🎉 Release v${{ needs.check-version.outputs.new_version }}  
-              
-            ## What's Changed  
-              
-            ${{ needs.prepare-and-tag.outputs.changelog }}  
+      - name: Generate changelog
+        id: changelog
+        run: |
+          VERSION="${{ needs.check-version.outputs.new_version }}"
+          PREV_TAG=$(git describe --tags --abbrev=0 "v$VERSION^" 2>/dev/null || echo "")
+          
+          if [ -z "$PREV_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            CHANGELOG=$(git log "$PREV_TAG..v$VERSION" --pretty=format:"- %s (%h)" --no-merges)
+          fi
+          
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.check-version.outputs.new_version }}
+          name: Release v${{ needs.check-version.outputs.new_version }}
+          body: |
+            # 🎉 Release v${{ needs.check-version.outputs.new_version }}
             
-            ## Full Changelog  
-              
-            **Full Changelog**: https://github.com/naruyaizumi/liora/compare/v${{ needs.check-version.outputs.new_version }}  
-          draft: false  
-          prerelease: false  
-          generate_release_notes: true  
-        env:  
+            ## What's Changed
+            
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ## Full Changelog
+            
+            **Full Changelog**: https://github.com/naruyaizumi/liora/compare/v${{ needs.check-version.outputs.new_version }}
+          draft: false
+          prerelease: false
+        env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-  trigger-mirror:
-    name: Trigger Mirror Sync
-    needs: [create-release]
-    runs-on: self-hosted
-    steps:
-      - name: Trigger mirror workflow
-        uses: actions/github-script@v8
-        with:
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: '05-mirror-repos.yml',
-              ref: 'main'
-            });
-
-  trigger-deployment:
-    name: Trigger Deployment
-    needs: [create-release]
-    runs-on: self-hosted
-    steps:
-      - name: Trigger deployment workflow
-        uses: actions/github-script@v8
-        with:
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: '09-deployment.yml',
-              ref: 'main',
-              inputs: {
-                environment: 'production'
-              }
-            });

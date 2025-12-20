@@ -11,40 +11,9 @@ permissions:
   pull-requests: write
 
 jobs:
-  setup-cache:
-    name: Setup Dependencies Cache
-    runs-on: self-hosted
-    outputs:
-      cache-hit: ${{ steps.cache.outputs.cache-hit }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Cache node modules
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            ~/.npm
-          key: ${{ runner.os }}-node-24-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-24-
-
-      - name: Cache native dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            /var/cache/apt
-            /usr/include
-          key: ${{ runner.os }}-native-deps-${{ hashFiles('.github/workflows/*.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-native-deps-
-
   prettier-check:
     name: Prettier Auto Fix
     runs-on: self-hosted
-    needs: setup-cache
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -58,16 +27,17 @@ jobs:
           node-version: 24
           cache: npm
 
-      - name: Restore dependencies cache
+      - name: Cache node modules
+        id: npm-cache
         uses: actions/cache@v4
         with:
-          path: |
-            node_modules
-            ~/.npm
-          key: ${{ runner.os }}-node-24-${{ hashFiles('package-lock.json') }}
+          path: node_modules
+          key: ${{ runner.os }}-node-24-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-24-
 
       - name: Install dependencies
-        if: needs.setup-cache.outputs.cache-hit != 'true'
+        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline
 
       - name: Run Prettier Fix
@@ -86,7 +56,6 @@ jobs:
   eslint:
     name: ESLint Analysis
     runs-on: self-hosted
-    needs: setup-cache
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -97,16 +66,17 @@ jobs:
           node-version: 24
           cache: npm
 
-      - name: Restore dependencies cache
+      - name: Cache node modules
+        id: npm-cache
         uses: actions/cache@v4
         with:
-          path: |
-            node_modules
-            ~/.npm
-          key: ${{ runner.os }}-node-24-${{ hashFiles('package-lock.json') }}
+          path: node_modules
+          key: ${{ runner.os }}-node-24-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-24-
 
       - name: Install dependencies
-        if: needs.setup-cache.outputs.cache-hit != 'true'
+        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm ci --prefer-offline
 
       - name: Run ESLint
@@ -122,19 +92,10 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
           fetch-depth: 0
 
-      - name: Cache clang-format
-        uses: actions/cache@v4
-        with:
-          path: /usr/bin/clang-format
-          key: ${{ runner.os }}-clang-format
-
-      - name: Install clang-format
-        run: sudo apt-get update && sudo apt-get install -y clang-format
-
       - name: Run clang-format Fix
         run: |
-          find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | \
-            xargs clang-format -i
+          command -v clang-format || exit 1
+          find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | xargs clang-format -i
 
       - name: Commit changes
         run: |
@@ -160,15 +121,6 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
-
-      - name: Cache commitlint
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-commitlint
-
-      - name: Install commitlint
-        run: npm install -g @commitlint/cli @commitlint/config-conventional
 
       - name: Validate commits
         run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --config .github/.commitlintrc.json --verbose
