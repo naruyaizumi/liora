@@ -1,3 +1,4 @@
+/* global conn */
 import os from "os";
 import { readFile } from "fs/promises";
 
