@@ -1,6 +1,6 @@
 import { convert } from "#add-on";
 import { play } from "#play";
-import { youtubeCanvas } from "../../lib/canvas-play.js";
+import { youtubeCanvas } from "../../lib/canvas/canvas-play.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0])

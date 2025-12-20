@@ -1,6 +1,6 @@
 import { convert } from "#add-on";
 import { spotify } from "#spotify";
-import { spotifyCanvas } from "../../lib/canvas-spotify.js";
+import { spotifyCanvas } from "../../lib/canvas/canvas-spotify.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0])
