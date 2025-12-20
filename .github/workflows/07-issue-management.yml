@@ -5,7 +5,6 @@ on:
     types: [opened, labeled, reopened]
   schedule:
     - cron: "0 1 * * *"
-  workflow_dispatch:
 
 permissions:
   issues: write
@@ -134,7 +133,6 @@ jobs:
   close-stale:
     name: Close Stale Issues
     runs-on: self-hosted
-    if: github.event.schedule == '0 1 * * *'
     steps:
       - name: Close stale issues
         uses: actions/stale@v10

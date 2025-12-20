@@ -1,8 +1,11 @@
 name: Release Management
 
 on:
-  workflow_dispatch:
-  workflow_call:
+  push:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
 
 permissions:
   contents: write

@@ -4,7 +4,6 @@ on:
   schedule:
     - cron: "0 2 * * 0"
     - cron: "0 3 1 * *"
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,7 +13,6 @@ jobs:
   cleanup-workflow-runs:
     name: Cleanup Old Workflow Runs
     runs-on: self-hosted
-    if: github.event.schedule == '0 3 1 * *' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Delete old runs
         uses: actions/github-script@v8
@@ -52,7 +50,6 @@ jobs:
   update-contributors:
     name: Update Contributors List
     runs-on: self-hosted
-    if: github.event.schedule == '0 2 * * 0' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

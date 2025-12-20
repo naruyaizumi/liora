@@ -1,21 +1,9 @@
 name: Deployment
 
 on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: "Deployment environment"
-        required: true
-        type: choice
-        options:
-          - production
-          - staging
-  workflow_call:
-    inputs:
-      environment:
-        required: false
-        type: string
-        default: 'production'
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   contents: read
@@ -28,6 +16,7 @@ jobs:
     runs-on: self-hosted
     outputs:
       version: ${{ steps.version.outputs.version }}
+      environment: ${{ steps.environment.outputs.env }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -38,6 +27,22 @@ jobs:
           VERSION=$(jq -r '.version' package.json)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Deploying version: $VERSION"
+
+      - name: Determine environment
+        id: environment
+        run: |
+          # Determine environment based on tag
+          TAG="${{ github.ref_name }}"
+          
+          if [[ "$TAG" =~ v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+ ]]; then
+            echo "env=staging" >> $GITHUB_OUTPUT
+          elif [[ "$TAG" =~ v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+ ]]; then
+            echo "env=staging" >> $GITHUB_OUTPUT
+          elif [[ "$TAG" =~ v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            echo "env=production" >> $GITHUB_OUTPUT
+          else
+            echo "env=staging" >> $GITHUB_OUTPUT
+          fi
 
   test-installation:
     name: Test Installation
@@ -70,26 +75,26 @@ jobs:
       - name: Upload deployment artifact
         uses: actions/upload-artifact@v6
         with:
-          name: deployment-package
+          name: deployment-package-${{ needs.prepare-deployment.outputs.version }}
           path: artifact/*.tar.gz
           retention-days: 30
 
   deploy:
-    name: Deploy to ${{ inputs.environment || 'production' }}
+    name: Deploy to ${{ needs.prepare-deployment.outputs.environment || 'production' }}
     runs-on: self-hosted
     needs: [prepare-deployment, create-deployment-artifact]
     environment:
-      name: ${{ inputs.environment || 'production' }}
+      name: ${{ needs.prepare-deployment.outputs.environment || 'production' }}
     steps:
       - name: Download deployment artifact
         uses: actions/download-artifact@v6
         with:
-          name: deployment-package
+          name: deployment-package-${{ needs.prepare-deployment.outputs.version }}
 
       - name: Deploy
         run: |
           echo "Deploying version ${{ needs.prepare-deployment.outputs.version }}"
-          echo "Environment: ${{ inputs.environment || 'production' }}"
+          echo "Environment: ${{ needs.prepare-deployment.outputs.environment || 'production' }}"
           echo "✓ Deployment completed"
 
   notify:
@@ -103,7 +108,7 @@ jobs:
           echo "# Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version**: ${{ needs.prepare-deployment.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Environment**: ${{ inputs.environment || 'production' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment**: ${{ needs.prepare-deployment.outputs.environment || 'production' }}" >> $GITHUB_STEP_SUMMARY
           echo "**Status**: ${{ needs.deploy.result }}" >> $GITHUB_STEP_SUMMARY
           echo "**Deployed at**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
 
@@ -116,6 +121,6 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: 'Deployment Failed',
-              body: `Deployment to ${{ inputs.environment || 'production' }} failed.\n\nVersion: ${{ needs.prepare-deployment.outputs.version }}\n\nWorkflow: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              body: `Deployment to ${{ needs.prepare-deployment.outputs.environment || 'production' }} failed.\n\nVersion: ${{ needs.prepare-deployment.outputs.version }}\n\nWorkflow: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
               labels: ['deployment', 'bug']
             });

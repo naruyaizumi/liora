@@ -4,7 +4,6 @@ on:
   schedule:
     - cron: "0 0 * * 0"
     - cron: "0 0 1 * *"
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,7 +14,6 @@ jobs:
   cleanup-cache:
     name: Cleanup Old Caches
     runs-on: self-hosted
-    if: github.event.schedule == '0 0 * * 0' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Cleanup caches
         uses: actions/github-script@v8
@@ -46,7 +44,6 @@ jobs:
   cleanup-old-artifacts:
     name: Cleanup Old Artifacts
     runs-on: self-hosted
-    if: github.event.schedule == '0 0 * * 0' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Delete old artifacts
         uses: actions/github-script@v8
@@ -79,7 +76,7 @@ jobs:
   cleanup-old-branches:
     name: Cleanup Stale Branches
     runs-on: self-hosted
-    if: github.event.schedule == '0 0 1 * *' || github.event_name == 'workflow_dispatch'
+    if: github.event.schedule == '0 0 1 * *'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -103,7 +100,6 @@ jobs:
   trigger-security-scan:
     name: Trigger Weekly Security Scan
     runs-on: self-hosted
-    if: github.event.schedule == '0 0 * * 0'
     steps:
       - name: Trigger security workflow
         uses: actions/github-script@v8
@@ -119,7 +115,6 @@ jobs:
   update-statistics:
     name: Update Repository Statistics
     runs-on: self-hosted
-    if: github.event.schedule == '0 0 * * 0' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

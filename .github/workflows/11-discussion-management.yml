@@ -7,7 +7,6 @@ on:
     types: [closed]
   schedule:
     - cron: "0 0 1 * *"
-  workflow_dispatch:
 
 permissions:
   discussions: write
@@ -17,7 +16,6 @@ jobs:
   create-release-discussion:
     name: Create Release Discussion
     runs-on: self-hosted
-    if: github.event_name == 'release'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -139,7 +137,6 @@ jobs:
   create-monthly-discussion:
     name: Create Monthly Discussion
     runs-on: self-hosted
-    if: github.event.schedule == '0 0 1 * *'
     steps:
       - name: Create monthly recap discussion
         uses: actions/github-script@v8
@@ -253,7 +250,6 @@ jobs:
   close-resolved-issue-discussion:
     name: Move Resolved Issues to Discussion
     runs-on: self-hosted
-    if: github.event_name == 'issues' && github.event.action == 'closed'
     steps:
       - name: Check if issue should be converted
         uses: actions/github-script@v8

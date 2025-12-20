@@ -1,8 +1,10 @@
 name: Repository Mirror
 
 on:
-  workflow_dispatch:
-  workflow_call:
+  push:
+    branches: [main]
+    tags:
+      - 'v*'
 
 permissions:
   contents: read
@@ -22,7 +24,15 @@ jobs:
           git config user.name "liora-bot"
           git config user.email "liora.bot.official@gmail.com"
           git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/naruyaizumi/liora.git 2>/dev/null || true
-          git push gitlab main --force --tags
+          
+          # Push berdasarkan trigger
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "Pushing main branch to GitLab..."
+            git push gitlab main --force --tags
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref_type }}" == "tag" ]]; then
+            echo "Pushing tag ${{ github.ref_name }} to GitLab..."
+            git push gitlab ${{ github.ref_name }}
+          fi
 
   mirror-codeberg:
     name: Mirror to Codeberg
@@ -38,7 +48,15 @@ jobs:
           git config user.name "liora-bot"
           git config user.email "liora.bot.official@gmail.com"
           git remote add codeberg https://naruyaizumi:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/naruyaizumi/liora.git 2>/dev/null || true
-          git push codeberg main --force --tags
+          
+          # Push berdasarkan trigger
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "Pushing main branch to Codeberg..."
+            git push codeberg main --force --tags
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref_type }}" == "tag" ]]; then
+            echo "Pushing tag ${{ github.ref_name }} to Codeberg..."
+            git push codeberg ${{ github.ref_name }}
+          fi
 
   mirror-gitea:
     name: Mirror to Gitea
@@ -54,7 +72,15 @@ jobs:
           git config user.name "liora-bot"
           git config user.email "liora.bot.official@gmail.com"
           git remote add gitea https://naruyaizumi:${{ secrets.GITEA_TOKEN }}@gitea.com/naruyaizumi/liora.git 2>/dev/null || true
-          git push gitea main --force --tags
+          
+          # Push berdasarkan trigger
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "Pushing main branch to Gitea..."
+            git push gitea main --force --tags
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.ref_type }}" == "tag" ]]; then
+            echo "Pushing tag ${{ github.ref_name }} to Gitea..."
+            git push gitea ${{ github.ref_name }}
+          fi
 
   mirror-summary:
     name: Mirror Summary
@@ -65,6 +91,10 @@ jobs:
       - name: Generate Summary
         run: |
           echo "# Mirror Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Ref**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| GitLab | ${{ needs.mirror-gitlab.result }} |" >> $GITHUB_STEP_SUMMARY
