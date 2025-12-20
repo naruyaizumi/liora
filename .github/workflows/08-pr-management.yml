@@ -13,7 +13,7 @@ permissions:
 jobs:
   analyze-pr:
     name: Analyze PR Type
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     outputs:
       is_release: ${{ steps.check.outputs.is_release }}
       is_breaking: ${{ steps.check.outputs.is_breaking }}
@@ -32,7 +32,6 @@ jobs:
             echo "is_release=false" >> $GITHUB_OUTPUT
           fi
           
-          k
           if echo "$PR_TITLE" | grep -qE "(breaking|BREAKING|!:)" || \
              echo "$PR_BODY" | grep -qE "BREAKING CHANGE"; then
             echo "is_breaking=true" >> $GITHUB_OUTPUT
@@ -58,7 +57,7 @@ jobs:
 
   auto-label:
     name: Auto Label PR
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: analyze-pr
     if: github.event.action == 'opened' || github.event.action == 'reopened'
     steps:
@@ -85,7 +84,7 @@ jobs:
 
   lint-pr-title:
     name: Lint PR Title
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     if: github.event.action == 'opened' || github.event.action == 'synchronize'
     steps:
       - name: Validate PR title
@@ -108,7 +107,7 @@ jobs:
 
   auto-approve-release:
     name: Auto Approve Release PR
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: analyze-pr
     if: |
       needs.analyze-pr.outputs.is_release == 'true' &&
@@ -128,7 +127,7 @@ jobs:
 
   check-breaking-changes:
     name: Check Breaking Changes
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: analyze-pr
     if: needs.analyze-pr.outputs.is_breaking == 'true'
     steps:
@@ -145,7 +144,7 @@ jobs:
 
   auto-approve-dependabot:
     name: Auto Approve Dependabot
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]' && github.event.action == 'opened'
     steps:
       - name: Dependabot metadata

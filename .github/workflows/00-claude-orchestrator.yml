@@ -26,6 +26,7 @@ jobs:
       version_changed: ${{ steps.analyze.outputs.version_changed }}
       has_cpp_changes: ${{ steps.analyze.outputs.has_cpp_changes }}
       has_js_changes: ${{ steps.analyze.outputs.has_js_changes }}
+      new_version: ${{ steps.analyze.outputs.new_version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -35,32 +36,54 @@ jobs:
       - name: Analyze changes
         id: analyze
         run: |
+          echo "=== Starting Change Analysis ==="
+          
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} 2>/dev/null || echo "")
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.sha }}"
+            echo "PR Mode: Comparing $BASE_SHA..$HEAD_SHA"
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            if [[ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]]; then
+              BASE_SHA="HEAD~1"
+            else
+              BASE_SHA="${{ github.event.before }}"
+            fi
+            HEAD_SHA="${{ github.sha }}"
+            echo "Push Mode: Comparing $BASE_SHA..$HEAD_SHA"
           else
-            CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} 2>/dev/null || echo "")
+            BASE_SHA="HEAD~1"
+            HEAD_SHA="HEAD"
+            echo "Manual Mode: Comparing last commit"
           fi
+          
+          CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA 2>/dev/null || git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
           
           echo "Changed files:"
           echo "$CHANGED_FILES"
+          echo "---"
           
           if echo "$CHANGED_FILES" | grep -qE '\.(js|cpp|h|cc)$'; then
             echo "needs_code_quality=true" >> $GITHUB_OUTPUT
             echo "✓ Code quality check needed"
           else
             echo "needs_code_quality=false" >> $GITHUB_OUTPUT
+            echo "✗ No code quality check needed"
           fi
           
           if echo "$CHANGED_FILES" | grep -qE '\.(cpp|h|cc)$'; then
             echo "has_cpp_changes=true" >> $GITHUB_OUTPUT
+            echo "✓ Has C++ changes"
           else
             echo "has_cpp_changes=false" >> $GITHUB_OUTPUT
+            echo "✗ No C++ changes"
           fi
           
           if echo "$CHANGED_FILES" | grep -qE '\.js$'; then
             echo "has_js_changes=true" >> $GITHUB_OUTPUT
+            echo "✓ Has JS changes"
           else
             echo "has_js_changes=false" >> $GITHUB_OUTPUT
+            echo "✗ No JS changes"
           fi
           
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
@@ -68,6 +91,7 @@ jobs:
             echo "✓ Security scan needed (main push)"
           else
             echo "needs_security=false" >> $GITHUB_OUTPUT
+            echo "✗ Security scan not needed"
           fi
           
           if echo "$CHANGED_FILES" | grep -qE '\.(cpp|h|cc|gyp|json)$'; then
@@ -75,25 +99,44 @@ jobs:
             echo "✓ Build needed"
           else
             echo "needs_build=false" >> $GITHUB_OUTPUT
+            echo "✗ Build not needed"
           fi
           
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]] && echo "$CHANGED_FILES" | grep -q "package.json"; then
-            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-              PREV_VERSION=$(git show ${{ github.event.pull_request.base.sha }}:package.json 2>/dev/null | jq -r '.version' || echo "0.0.0")
-            else
-              PREV_VERSION=$(git show ${{ github.event.before }}:package.json 2>/dev/null | jq -r '.version' || echo "0.0.0")
-            fi
-            NEW_VERSION=$(jq -r '.version' package.json)
+          echo "=== Checking Version Change ==="
+          VERSION_CHANGED=false
+          NEW_VERSION=""
+          
+          if echo "$CHANGED_FILES" | grep -q "package.json"; then
+            echo "✓ package.json changed, checking version..."
             
-            if [[ "$PREV_VERSION" != "$NEW_VERSION" ]]; then
-              echo "version_changed=true" >> $GITHUB_OUTPUT
-              echo "✓ Version changed: $PREV_VERSION → $NEW_VERSION"
+            PREV_VERSION=$(git show $BASE_SHA:package.json 2>/dev/null | jq -r '.version' 2>/dev/null || echo "0.0.0")
+            CURRENT_VERSION=$(jq -r '.version' package.json 2>/dev/null || echo "0.0.0")
+            
+            echo "Previous version: $PREV_VERSION"
+            echo "Current version: $CURRENT_VERSION"
+            
+            if [[ "$PREV_VERSION" != "$CURRENT_VERSION" ]]; then
+              VERSION_CHANGED=true
+              NEW_VERSION="$CURRENT_VERSION"
+              echo "✓ VERSION CHANGED: $PREV_VERSION → $CURRENT_VERSION"
             else
-              echo "version_changed=false" >> $GITHUB_OUTPUT
+              echo "✗ Version unchanged: $CURRENT_VERSION"
             fi
           else
-            echo "version_changed=false" >> $GITHUB_OUTPUT
+            echo "✗ package.json not changed"
           fi
+          
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" && "$VERSION_CHANGED" == "true" ]]; then
+            echo "version_changed=true" >> $GITHUB_OUTPUT
+            echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+            echo "🚀 WILL TRIGGER RELEASE for v$NEW_VERSION"
+          else
+            echo "version_changed=false" >> $GITHUB_OUTPUT
+            echo "new_version=" >> $GITHUB_OUTPUT
+            echo "✗ Release not triggered (event: ${{ github.event_name }}, ref: ${{ github.ref }}, version_changed: $VERSION_CHANGED)"
+          fi
+          
+          echo "=== Analysis Complete ==="
 
   trigger-code-quality:
     name: Trigger Code Quality
@@ -107,13 +150,18 @@ jobs:
           github-token: ${{ secrets.PAT_TOKEN }}
           script: |
             console.log('Triggering code quality workflow...');
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: '01-code-quality.yml',
-              ref: context.ref.replace('refs/heads/', '')
-            });
-            console.log('✓ Code quality workflow triggered');
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: '01-code-quality.yml',
+                ref: context.ref.replace('refs/heads/', '').replace('refs/pull/', '')
+              });
+              console.log('✓ Code quality workflow triggered');
+            } catch (error) {
+              console.error('Failed to trigger workflow:', error.message);
+              throw error;
+            }
 
       - name: Trigger C++ code quality workflow
         if: needs.analyze-changes.outputs.has_cpp_changes == 'true'
@@ -122,13 +170,18 @@ jobs:
           github-token: ${{ secrets.PAT_TOKEN }}
           script: |
             console.log('Triggering C++ quality workflow...');
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: '01b-cpp-quality.yml',
-              ref: context.ref.replace('refs/heads/', '')
-            });
-            console.log('✓ C++ quality workflow triggered');
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: '01b-cpp-quality.yml',
+                ref: context.ref.replace('refs/heads/', '').replace('refs/pull/', '')
+              });
+              console.log('✓ C++ quality workflow triggered');
+            } catch (error) {
+              console.error('Failed to trigger workflow:', error.message);
+              throw error;
+            }
 
   trigger-security:
     name: Trigger Security Scan
@@ -142,13 +195,18 @@ jobs:
           github-token: ${{ secrets.PAT_TOKEN }}
           script: |
             console.log('Triggering security scan workflow...');
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: '02-security-scan.yml',
-              ref: 'main'
-            });
-            console.log('✓ Security scan workflow triggered');
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: '02-security-scan.yml',
+                ref: 'main'
+              });
+              console.log('✓ Security scan workflow triggered');
+            } catch (error) {
+              console.error('Failed to trigger workflow:', error.message);
+              throw error;
+            }
 
   trigger-build:
     name: Trigger Build & Test
@@ -164,13 +222,18 @@ jobs:
           github-token: ${{ secrets.PAT_TOKEN }}
           script: |
             console.log('Triggering build & test workflow...');
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: '03-build-test.yml',
-              ref: context.ref.replace('refs/heads/', '')
-            });
-            console.log('✓ Build & test workflow triggered');
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: '03-build-test.yml',
+                ref: context.ref.replace('refs/heads/', '').replace('refs/pull/', '')
+              });
+              console.log('✓ Build & test workflow triggered');
+            } catch (error) {
+              console.error('Failed to trigger workflow:', error.message);
+              throw error;
+            }
 
   trigger-release:
     name: Trigger Release
@@ -186,14 +249,21 @@ jobs:
         with:
           github-token: ${{ secrets.PAT_TOKEN }}
           script: |
-            console.log('Triggering release workflow...');
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: '04-release.yml',
-              ref: 'main'
-            });
-            console.log('✓ Release workflow triggered');
+            const version = '${{ needs.analyze-changes.outputs.new_version }}';
+            console.log(`🚀 Triggering release workflow for version ${version}...`);
+            
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: '04-release.yml',
+                ref: 'main'
+              });
+              console.log(`✓ Release workflow triggered for v${version}`);
+            } catch (error) {
+              console.error('Failed to trigger release workflow:', error.message);
+              throw error;
+            }
 
   summary:
     name: Orchestrator Summary
@@ -203,7 +273,11 @@ jobs:
     steps:
       - name: Generate summary
         run: |
-          echo "# Workflow Orchestrator Summary" >> $GITHUB_STEP_SUMMARY
+          echo "# 🎯 Workflow Orchestrator Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Event**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Ref**: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "**SHA**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Analysis Results" >> $GITHUB_STEP_SUMMARY
           echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
@@ -211,7 +285,10 @@ jobs:
           echo "| Code Quality Needed | ${{ needs.analyze-changes.outputs.needs_code_quality }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Security Scan Needed | ${{ needs.analyze-changes.outputs.needs_security }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build Needed | ${{ needs.analyze-changes.outputs.needs_build }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Version Changed | ${{ needs.analyze-changes.outputs.version_changed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| C++ Changes | ${{ needs.analyze-changes.outputs.has_cpp_changes }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| JS Changes | ${{ needs.analyze-changes.outputs.has_js_changes }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version Changed** | **${{ needs.analyze-changes.outputs.version_changed }}** |" >> $GITHUB_STEP_SUMMARY
+          echo "| **New Version** | **${{ needs.analyze-changes.outputs.new_version }}** |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Triggered Workflows" >> $GITHUB_STEP_SUMMARY
           echo "| Workflow | Status |" >> $GITHUB_STEP_SUMMARY
@@ -219,4 +296,4 @@ jobs:
           echo "| Code Quality | ${{ needs.trigger-code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Security Scan | ${{ needs.trigger-security.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build & Test | ${{ needs.trigger-build.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Release | ${{ needs.trigger-release.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Release** | **${{ needs.trigger-release.result }}** |" >> $GITHUB_STEP_SUMMARY
