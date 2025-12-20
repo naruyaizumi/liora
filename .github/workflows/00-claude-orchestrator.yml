@@ -1,4 +1,4 @@
-name: Workflow Orchestrator
+name: Workflow Orchestrator - Enhanced
 
 on:
   push:
@@ -29,6 +29,7 @@ jobs:
       has_cpp_changes: ${{ steps.analyze.outputs.has_cpp_changes }}
       has_js_changes: ${{ steps.analyze.outputs.has_js_changes }}
       new_version: ${{ steps.analyze.outputs.new_version }}
+      force_trigger: ${{ steps.analyze.outputs.force_trigger }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -59,6 +60,8 @@ jobs:
           echo "Changed files:"
           echo "$CHANGED_FILES"
           echo "---"
+          
+          FORCE_TRIGGER=false
           
           if echo "$CHANGED_FILES" | grep -qE '\.(js|cpp|h|cc)$'; then
             echo "needs_code_quality=true" >> $GITHUB_OUTPUT
@@ -92,14 +95,6 @@ jobs:
             echo "✗ Security scan not needed"
           fi
           
-          if echo "$CHANGED_FILES" | grep -qE '\.(cpp|h|cc|gyp|json)$'; then
-            echo "needs_build=true" >> $GITHUB_OUTPUT
-            echo "✓ Build needed"
-          else
-            echo "needs_build=false" >> $GITHUB_OUTPUT
-            echo "✗ Build not needed"
-          fi
-          
           echo "=== Checking Version Change ==="
           VERSION_CHANGED=false
           NEW_VERSION=""
@@ -115,17 +110,29 @@ jobs:
             if [[ "$PREV_VERSION" != "$CURRENT_VERSION" ]]; then
               VERSION_CHANGED=true
               NEW_VERSION="$CURRENT_VERSION"
+              FORCE_TRIGGER=true
               echo "✓ VERSION CHANGED: $PREV_VERSION → $CURRENT_VERSION"
+              echo "🚀 FORCE TRIGGER ENABLED for build jobs"
             fi
+          fi
+          
+          if [[ "$FORCE_TRIGGER" == "true" ]] || echo "$CHANGED_FILES" | grep -qE '\.(cpp|h|cc|gyp|json|js|py|ts)$'; then
+            echo "needs_build=true" >> $GITHUB_OUTPUT
+            echo "✓ Build needed (force trigger or relevant changes)"
+          else
+            echo "needs_build=false" >> $GITHUB_OUTPUT
+            echo "✗ Build not needed"
           fi
           
           if [[ "$VERSION_CHANGED" == "true" && "${{ github.ref }}" == "refs/heads/main" && "${{ github.event_name }}" == "push" ]]; then
             echo "version_changed=true" >> $GITHUB_OUTPUT
             echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+            echo "force_trigger=true" >> $GITHUB_OUTPUT
             echo "🚀 WILL TRIGGER RELEASE for v$NEW_VERSION"
           else
             echo "version_changed=false" >> $GITHUB_OUTPUT
             echo "new_version=" >> $GITHUB_OUTPUT
+            echo "force_trigger=false" >> $GITHUB_OUTPUT
           fi
           
           echo "=== Analysis Complete ==="
@@ -133,14 +140,18 @@ jobs:
   code-quality:
     name: Code Quality Check
     needs: analyze-changes
-    if: needs.analyze-changes.outputs.needs_code_quality == 'true'
+    if: |
+      needs.analyze-changes.outputs.needs_code_quality == 'true' ||
+      needs.analyze-changes.outputs.version_changed == 'true'
     uses: ./.github/workflows/01-code-quality.yml
     secrets: inherit
 
   cpp-quality:
     name: C++ Code Quality
     needs: analyze-changes
-    if: needs.analyze-changes.outputs.has_cpp_changes == 'true'
+    if: |
+      needs.analyze-changes.outputs.has_cpp_changes == 'true' ||
+      needs.analyze-changes.outputs.version_changed == 'true'
     uses: ./.github/workflows/01b-cpp-quality.yml
     secrets: inherit
 
@@ -158,10 +169,10 @@ jobs:
 
   build-test:
     name: Build & Test
-    needs: [analyze-changes, code-quality]
+    needs: [analyze-changes, code-quality, cpp-quality]
     if: |
-      needs.analyze-changes.outputs.needs_build == 'true' &&
-      (needs.code-quality.result == 'success' || needs.code-quality.result == 'skipped')
+      needs.analyze-changes.outputs.needs_build == 'true' ||
+      needs.analyze-changes.outputs.version_changed == 'true'
     uses: ./.github/workflows/03-build-test.yml
     secrets: inherit
     permissions:
@@ -172,10 +183,10 @@ jobs:
 
   release:
     name: Release Management
-    needs: [analyze-changes, build-test]
+    needs: [analyze-changes, build-test, security-scan]
     if: |
-      needs.analyze-changes.outputs.version_changed == 'true' &&
-      (needs.build-test.result == 'success' || needs.build-test.result == 'skipped')
+      (needs.analyze-changes.outputs.version_changed == 'true' && needs.build-test.result != 'failure') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     uses: ./.github/workflows/04-release.yml
     secrets: inherit
 
@@ -187,11 +198,13 @@ jobs:
     steps:
       - name: Generate summary
         run: |
-          echo "# 🎯 Workflow Orchestrator Summary" >> $GITHUB_STEP_SUMMARY
+          echo "# Enhanced Workflow Orchestrator Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Event**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
           echo "**Ref**: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger Type**: ${{ github.event.inputs.trigger_type || 'automatic' }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          
           echo "## Analysis Results" >> $GITHUB_STEP_SUMMARY
           echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
@@ -200,13 +213,64 @@ jobs:
           echo "| Security Scan Needed | ${{ needs.analyze-changes.outputs.needs_security }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build Needed | ${{ needs.analyze-changes.outputs.needs_build }} |" >> $GITHUB_STEP_SUMMARY
           echo "| **Version Changed** | **${{ needs.analyze-changes.outputs.version_changed }}** |" >> $GITHUB_STEP_SUMMARY
-          echo "| **New Version** | **${{ needs.analyze-changes.outputs.new_version }}** |" >> $GITHUB_STEP_SUMMARY
+          echo "| **New Version** | **${{ needs.analyze-changes.outputs.new_version || 'N/A' }}** |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Force Trigger** | **${{ needs.analyze-changes.outputs.force_trigger }}** |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Executed Workflows" >> $GITHUB_STEP_SUMMARY
-          echo "| Workflow | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Code Quality | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| C++ Quality | ${{ needs.cpp-quality.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Security Scan | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build & Test | ${{ needs.build-test.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Release** | **${{ needs.release.result }}** |" >> $GITHUB_STEP_SUMMARY
+          
+          echo "##Executed Workflows" >> $GITHUB_STEP_SUMMARY
+          echo "| Workflow | Status | Trigger Reason |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|----------------|" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.code-quality.result }}" == "skipped" ]]; then
+            echo "| Code Quality | ${{ needs.code-quality.result }} | No code changes or version update |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Code Quality | ${{ needs.code-quality.result }} | Code changes detected |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.cpp-quality.result }}" == "skipped" ]]; then
+            echo "| C++ Quality | ${{ needs.cpp-quality.result }} | No C++ changes |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| C++ Quality | ${{ needs.cpp-quality.result }} | C++ changes detected |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.security-scan.result }}" == "skipped" ]]; then
+            echo "| Security Scan | ${{ needs.security-scan.result }} | Not a main branch push |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Security Scan | ${{ needs.security-scan.result }} | Main branch security scan |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.build-test.result }}" == "skipped" ]]; then
+            echo "| Build & Test | ${{ needs.build-test.result }} | No build needed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Build & Test | ${{ needs.build-test.result }} | Build triggered |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.release.result }}" == "skipped" ]]; then
+            echo "| **Release** | **${{ needs.release.result }}** | Version unchanged or build failed |" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.release.result }}" == "success" ]]; then
+            echo "| **Release** | **${{ needs.release.result }}** | 🚀 Version ${{ needs.analyze-changes.outputs.new_version }} released |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| **Release** | **${{ needs.release.result }}** | Check logs for details |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "##Flow Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.analyze-changes.outputs.version_changed }}" == "true" ]]; then
+            echo "### Version Update Detected!" >> $GITHUB_STEP_SUMMARY
+            echo "- **New Version**: ${{ needs.analyze-changes.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Force Trigger**: Enabled" >> $GITHUB_STEP_SUMMARY
+            echo "- **All quality checks**: Executed regardless of file changes" >> $GITHUB_STEP_SUMMARY
+            echo "- **Build & Test**: Always executed for version updates" >> $GITHUB_STEP_SUMMARY
+            echo "- **Release**: Triggered if build succeeds" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### Standard Change Detection" >> $GITHUB_STEP_SUMMARY
+            echo "- **Selective execution** based on changed file types" >> $GITHUB_STEP_SUMMARY
+            echo "- **Optimized resource usage**" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Enhanced orchestrator - Minimal skips, maximum coverage*" >> $GITHUB_STEP_SUMMARY
