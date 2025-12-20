@@ -26,7 +26,13 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24'
-          cache: npm
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
 
       - name: Check native dependencies
         id: check-deps
@@ -39,30 +45,35 @@ jobs:
             command -v "$tool" || exit 1
           done
 
-      - name: Cache node modules
+      - name: Cache pnpm store
         uses: actions/cache@v4
         with:
-          path: node_modules
-          key: ${{ runner.os }}-node-24-${{ hashFiles('pnpm-lock.yaml') }}
+          path: |
+            ~/.pnpm-store
+            node_modules
+          key: ${{ runner.os }}-pnpm-10-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-10-
 
       - name: Install dependencies
-        run: npm ci --prefer-offline
+        run: |
+          pnpm install --frozen-lockfile --prefer-offline
 
       - name: Cache build artifacts
         id: cache-build
         uses: actions/cache@v4
         with:
           path: build/Release
-          key: ${{ runner.os }}-build-${{ hashFiles('lib/cpp/**/*.cpp', 'lib/cpp/**/*.h', 'binding.gyp', 'package.json') }}-node24
+          key: ${{ runner.os }}-build-${{ hashFiles('lib/cpp/**/*.cpp', 'lib/cpp/**/*.h', 'binding.gyp', 'package.json', 'pnpm-lock.yaml') }}-node24
 
       - name: Build C++ Addons
         if: steps.cache-build.outputs.cache-hit != 'true'
-        run: npx node-gyp rebuild
+        run: |
+          pnpm exec node-gyp rebuild
 
       - name: Verify build
         run: |
           ls build/Release/*.node 1>/dev/null 2>&1 || exit 1
-          echo "✓ C++ addons built successfully"
 
       - name: Upload build artifacts
         id: upload
@@ -96,7 +107,6 @@ jobs:
       - name: Test installer (dry-run)
         run: |
           bash -n install.sh || exit 1
-          echo "✓ Installer script syntax is valid"
 
   basic-test:
     name: Basic Functionality Test
@@ -116,7 +126,13 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Copy built addon to build directory
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: true
+
+      - name: Copy built addon
         run: |
           mkdir -p build/Release
           cp *.node build/Release/ 2>/dev/null || true
@@ -125,12 +141,13 @@ jobs:
         run: |
           ls build/Release/*.node 1>/dev/null 2>&1 || exit 1
           
-          node -e "
-            try {
-              require('./build/Release/liora.node');
-              console.log('✓ Addon loaded successfully');
-            } catch (error) {
-              console.error('✗ Failed to load addon:', error.message);
-              process.exit(1);
-            }
-          "
+          for node_file in build/Release/*.node; do
+            node -e "
+              try {
+                require('$node_file');
+              } catch (error) {
+                console.error(error.message);
+                process.exit(1);
+              }
+            "
+          done

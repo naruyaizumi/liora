@@ -25,23 +25,30 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: npm
+          cache: pnpm
 
-      - name: Cache node modules
-        id: npm-cache
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Cache pnpm store
         uses: actions/cache@v4
         with:
-          path: node_modules
-          key: ${{ runner.os }}-node-24-${{ hashFiles('pnpm-lock.yaml') }}
+          path: |
+            ~/.pnpm-store
+            node_modules
+          key: ${{ runner.os }}-pnpm-10-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-node-24-
+            ${{ runner.os }}-pnpm-10-
 
       - name: Install dependencies
         if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: npm ci --prefer-offline
+        run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run Prettier Fix
-        run: npx prettier --write .
+        run: pnpm exec prettier --write .
 
       - name: Commit changes
         run: |
@@ -64,23 +71,29 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: npm
+          cache: pnpm
 
-      - name: Cache node modules
-        id: npm-cache
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Cache pnpm store
         uses: actions/cache@v4
         with:
-          path: node_modules
-          key: ${{ runner.os }}-node-24-${{ hashFiles('pnpm-lock.yaml') }}
+          path: |
+            ~/.pnpm-store
+            node_modules
+          key: ${{ runner.os }}-pnpm-10-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-node-24-
+            ${{ runner.os }}-pnpm-10-
 
       - name: Install dependencies
-        if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: npm ci --prefer-offline
+        run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run ESLint
-        run: npx eslint . --ext .js
+        run: pnpm exec eslint . --ext .js
 
   cpp-format:
     name: C++ Auto Format Fix
@@ -122,5 +135,14 @@ jobs:
         with:
           node-version: 24
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Install commitlint if needed
+        run: pnpm add -g @commitlint/cli @commitlint/config-conventional || pnpm exec commitlint --version
+
       - name: Validate commits
-        run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --config .github/.commitlintrc.json --verbose
+        run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --config .github/.commitlintrc.json --verbose

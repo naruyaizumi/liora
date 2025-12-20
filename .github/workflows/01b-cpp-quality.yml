@@ -72,10 +72,26 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24'
-          cache: npm
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pnpm-store
+            node_modules
+          key: ${{ runner.os }}-pnpm-10-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-10-
 
       - name: Install node-addon-api
-        run: npm install node-addon-api
+        run: pnpm add node-addon-api
 
       - name: Run clang-tidy analysis
         run: |
@@ -119,16 +135,32 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24'
-          cache: npm
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pnpm-store
+            node_modules
+          key: ${{ runner.os }}-pnpm-10-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-10-
 
       - name: Install dependencies
         run: |
-          npm ci --prefer-offline
+          pnpm install --frozen-lockfile --prefer-offline
 
       - name: Compile with extra warnings
         run: |
           export CXXFLAGS="-Wall -Wextra -Wpedantic -Wconversion -Wshadow"
-          npx node-gyp configure
-          npx node-gyp build 2>&1 | tee build.log
+          pnpm exec node-gyp configure
+          pnpm exec node-gyp build 2>&1 | tee build.log
           
           grep -i "warning:" build.log && echo "Compilation warnings found" || echo "✓ Clean compilation"
