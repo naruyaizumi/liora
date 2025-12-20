@@ -14,6 +14,8 @@ permissions:
   actions: write
   checks: write
   issues: write
+  id-token: write
+  attestations: write
 
 jobs:
   analyze-changes:
@@ -148,6 +150,11 @@ jobs:
     if: needs.analyze-changes.outputs.needs_security == 'true'
     uses: ./.github/workflows/02-security-scan.yml
     secrets: inherit
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+      id-token: write
 
   build-test:
     name: Build & Test
@@ -157,6 +164,11 @@ jobs:
       (needs.code-quality.result == 'success' || needs.code-quality.result == 'skipped')
     uses: ./.github/workflows/03-build-test.yml
     secrets: inherit
+    permissions:
+      contents: read
+      checks: write
+      attestations: write
+      id-token: write
 
   release:
     name: Release Management
