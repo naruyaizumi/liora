@@ -1,7 +1,5 @@
 import os from "os";
 import { readFile } from "fs/promises";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
 
 const CATEGORIES = ["ai", "downloader", "group", "info", "internet", "maker", "owner", "tools"];
 
@@ -235,10 +233,11 @@ function formatTime(sec) {
 
 async function getPackageInfo() {
     try {
-        const packageJsonPath = new URL("./package.json", import.meta.url);
+        const packageJsonPath = `${process.cwd()}/package.json`;
         const data = await readFile(packageJsonPath, "utf-8");
         return JSON.parse(data);
-    } catch {
+    } catch (e) {
+        conn.logger.error(e);
         return {
             name: "Unknown",
             version: "?",

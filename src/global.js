@@ -1,19 +1,6 @@
 /* global conn */
 import { join } from "path";
 import Database from "better-sqlite3";
-import pino from "pino";
-
-const logger = pino({
-    level: "debug",
-    transport: {
-        target: "pino-pretty",
-        options: {
-            colorize: true,
-            translateTime: "HH:MM",
-            ignore: "pid,hostname",
-        },
-    },
-});
 
 global.timestamp = { start: new Date() };
 
