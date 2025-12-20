@@ -103,7 +103,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         let detectedType;
         try {
             detectedType = await fileTypeFromBuffer(buffer);
-        } catch {}
+        } catch {/* ignore */}
 
         if (detectedType) {
             mime = detectedType.mime;
@@ -131,8 +131,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         }
 
         const isJson = mime === "application/json" || mime.includes("json");
-        const isText =
-            mime.startsWith("text/") || mime.includes("xml") || mime.includes("javascript");
         const isImage = mime.startsWith("image/");
         const isVideo = mime.startsWith("video/");
         const isAudio = mime.startsWith("audio/");
@@ -151,7 +149,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                     const keys = Object.keys(jsonContent);
                     contentTypeInfo += `JSON Keys: ${keys.length > 5 ? keys.slice(0, 5).join(", ") + "..." : keys.join(", ")}\n`;
                 }
-            } catch {}
+            } catch {/* ignore */}
         } else if (isHtml) {
             const textContent = buffer.toString("utf-8", 0, 50000);
             const titleMatch = textContent.match(/<title[^>]*>([^<]+)<\/title>/i);

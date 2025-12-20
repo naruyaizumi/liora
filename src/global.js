@@ -1,3 +1,4 @@
+/* global conn */
 import { join } from "path";
 import Database from "better-sqlite3";
 import pino from "pino";

@@ -3,9 +3,6 @@ import { readFile } from "fs/promises";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 const CATEGORIES = ["ai", "downloader", "group", "info", "internet", "maker", "owner", "tools"];
 
 const MENU_META = {
