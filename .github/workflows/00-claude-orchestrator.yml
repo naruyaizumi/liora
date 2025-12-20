@@ -27,6 +27,8 @@ jobs:
       has_cpp_changes: ${{ steps.analyze.outputs.has_cpp_changes }}
       has_js_changes: ${{ steps.analyze.outputs.has_js_changes }}
       new_version: ${{ steps.analyze.outputs.new_version }}
+      dispatch_ref: ${{ steps.analyze.outputs.dispatch_ref }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -35,107 +37,61 @@ jobs:
 
       - name: Analyze changes
         id: analyze
+        shell: bash
         run: |
           echo "=== Starting Change Analysis ==="
-          
+
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            HEAD_SHA="${{ github.sha }}"
-            echo "PR Mode: Comparing $BASE_SHA..$HEAD_SHA"
-          elif [[ "${{ github.event_name }}" == "push" ]]; then
-            if [[ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]]; then
-              BASE_SHA="HEAD~1"
-            else
-              BASE_SHA="${{ github.event.before }}"
-            fi
-            HEAD_SHA="${{ github.sha }}"
-            echo "Push Mode: Comparing $BASE_SHA..$HEAD_SHA"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            DISPATCH_REF="${{ github.event.pull_request.head.ref }}"
+            echo "PR Mode"
           else
-            BASE_SHA="HEAD~1"
-            HEAD_SHA="HEAD"
-            echo "Manual Mode: Comparing last commit"
+            BASE_SHA="${{ github.event.before || 'HEAD~1' }}"
+            HEAD_SHA="${{ github.sha }}"
+            DISPATCH_REF="${{ github.ref_name }}"
+            echo "Push / Manual Mode"
           fi
-          
-          CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA 2>/dev/null || git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
-          
+
+          echo "dispatch_ref=$DISPATCH_REF" >> $GITHUB_OUTPUT
+
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" || true)
+
           echo "Changed files:"
           echo "$CHANGED_FILES"
-          echo "---"
-          
-          if echo "$CHANGED_FILES" | grep -qE '\.(js|cpp|h|cc)$'; then
-            echo "needs_code_quality=true" >> $GITHUB_OUTPUT
-            echo "✓ Code quality check needed"
-          else
-            echo "needs_code_quality=false" >> $GITHUB_OUTPUT
-            echo "✗ No code quality check needed"
-          fi
-          
-          if echo "$CHANGED_FILES" | grep -qE '\.(cpp|h|cc)$'; then
-            echo "has_cpp_changes=true" >> $GITHUB_OUTPUT
-            echo "✓ Has C++ changes"
-          else
-            echo "has_cpp_changes=false" >> $GITHUB_OUTPUT
-            echo "✗ No C++ changes"
-          fi
-          
-          if echo "$CHANGED_FILES" | grep -qE '\.js$'; then
-            echo "has_js_changes=true" >> $GITHUB_OUTPUT
-            echo "✓ Has JS changes"
-          else
-            echo "has_js_changes=false" >> $GITHUB_OUTPUT
-            echo "✗ No JS changes"
-          fi
-          
+
+          echo "needs_code_quality=$(echo "$CHANGED_FILES" | grep -qE '\.(js|cpp|h|cc|json|sh|md|gyp)$' && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "has_cpp_changes=$(echo "$CHANGED_FILES" | grep -qE '\.(cpp|h|cc)$' && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "has_js_changes=$(echo "$CHANGED_FILES" | grep -qE '\.js$' && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "needs_build=$(echo "$CHANGED_FILES" | grep -qE '\.(js|cpp|h|cc|json|sh|md|gyp)$' && echo true || echo false)" >> $GITHUB_OUTPUT
+
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "needs_security=true" >> $GITHUB_OUTPUT
-            echo "✓ Security scan needed (main push)"
           else
             echo "needs_security=false" >> $GITHUB_OUTPUT
-            echo "✗ Security scan not needed"
           fi
-          
-          if echo "$CHANGED_FILES" | grep -qE '\.(cpp|h|cc|gyp|json)$'; then
-            echo "needs_build=true" >> $GITHUB_OUTPUT
-            echo "✓ Build needed"
-          else
-            echo "needs_build=false" >> $GITHUB_OUTPUT
-            echo "✗ Build not needed"
-          fi
-          
-          echo "=== Checking Version Change ==="
+
           VERSION_CHANGED=false
           NEW_VERSION=""
-          
+
           if echo "$CHANGED_FILES" | grep -q "package.json"; then
-            echo "✓ package.json changed, checking version..."
-            
-            PREV_VERSION=$(git show $BASE_SHA:package.json 2>/dev/null | jq -r '.version' 2>/dev/null || echo "0.0.0")
-            CURRENT_VERSION=$(jq -r '.version' package.json 2>/dev/null || echo "0.0.0")
-            
-            echo "Previous version: $PREV_VERSION"
-            echo "Current version: $CURRENT_VERSION"
-            
+            PREV_VERSION=$(git show "$BASE_SHA:package.json" | jq -r '.version' || echo "0.0.0")
+            CURRENT_VERSION=$(jq -r '.version' package.json)
+
             if [[ "$PREV_VERSION" != "$CURRENT_VERSION" ]]; then
               VERSION_CHANGED=true
               NEW_VERSION="$CURRENT_VERSION"
-              echo "✓ VERSION CHANGED: $PREV_VERSION → $CURRENT_VERSION"
-            else
-              echo "✗ Version unchanged: $CURRENT_VERSION"
             fi
-          else
-            echo "✗ package.json not changed"
           fi
-          
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" && "$VERSION_CHANGED" == "true" ]]; then
+
+          if [[ "$VERSION_CHANGED" == "true" && "${{ github.ref }}" == "refs/heads/main" && "${{ github.event_name }}" == "push" ]]; then
             echo "version_changed=true" >> $GITHUB_OUTPUT
             echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-            echo "🚀 WILL TRIGGER RELEASE for v$NEW_VERSION"
           else
             echo "version_changed=false" >> $GITHUB_OUTPUT
             echo "new_version=" >> $GITHUB_OUTPUT
-            echo "✗ Release not triggered"
           fi
-          
+
           echo "=== Analysis Complete ==="
 
   trigger-code-quality:
@@ -144,7 +100,7 @@ jobs:
     if: needs.analyze-changes.outputs.needs_code_quality == 'true'
     runs-on: self-hosted
     steps:
-      - name: Trigger JS code quality workflow
+      - name: Trigger JS Code Quality
         uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.PAT_TOKEN }}
@@ -153,10 +109,10 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: '01-code-quality.yml',
-              ref: context.ref.replace('refs/heads/', '').replace('refs/pull/', '')
+              ref: '${{ needs.analyze-changes.outputs.dispatch_ref }}'
             });
 
-      - name: Trigger C++ code quality workflow
+      - name: Trigger C++ Code Quality
         if: needs.analyze-changes.outputs.has_cpp_changes == 'true'
         uses: actions/github-script@v8
         with:
@@ -166,7 +122,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: '01b-cpp-quality.yml',
-              ref: context.ref.replace('refs/heads/', '').replace('refs/pull/', '')
+              ref: '${{ needs.analyze-changes.outputs.dispatch_ref }}'
             });
 
   trigger-security:
@@ -175,7 +131,7 @@ jobs:
     if: needs.analyze-changes.outputs.needs_security == 'true'
     runs-on: self-hosted
     steps:
-      - name: Trigger security workflow
+      - name: Trigger Security Workflow
         uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.PAT_TOKEN }}
@@ -193,7 +149,7 @@ jobs:
     if: needs.analyze-changes.outputs.needs_build == 'true'
     runs-on: self-hosted
     steps:
-      - name: Trigger build workflow
+      - name: Trigger Build Workflow
         uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.PAT_TOKEN }}
@@ -202,19 +158,16 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: '03-build-test.yml',
-              ref: context.ref.replace('refs/heads/', '').replace('refs/pull/', '')
+              ref: '${{ needs.analyze-changes.outputs.dispatch_ref }}'
             });
 
   trigger-release:
     name: Trigger Release
     needs: analyze-changes
-    if: |
-      needs.analyze-changes.outputs.version_changed == 'true' &&
-      github.ref == 'refs/heads/main' &&
-      github.event_name == 'push'
+    if: needs.analyze-changes.outputs.version_changed == 'true'
     runs-on: self-hosted
     steps:
-      - name: Trigger release workflow
+      - name: Trigger Release Workflow
         uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.PAT_TOKEN }}
@@ -228,15 +181,13 @@ jobs:
 
   summary:
     name: Orchestrator Summary
+    if: always()
     needs:
       - analyze-changes
       - trigger-code-quality
       - trigger-security
       - trigger-build
       - trigger-release
-    if: always()
     runs-on: self-hosted
     steps:
-      - name: Generate summary
-        run: |
-          echo "Workflow summary generated."
+      - run: echo "Workflow Orchestrator completed."
