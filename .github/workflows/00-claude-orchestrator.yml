@@ -133,7 +133,7 @@ jobs:
           else
             echo "version_changed=false" >> $GITHUB_OUTPUT
             echo "new_version=" >> $GITHUB_OUTPUT
-            echo "✗ Release not triggered (event: ${{ github.event_name }}, ref: ${{ github.ref }}, version_changed: $VERSION_CHANGED)"
+            echo "✗ Release not triggered"
           fi
           
           echo "=== Analysis Complete ==="
@@ -149,19 +149,12 @@ jobs:
         with:
           github-token: ${{ secrets.PAT_TOKEN }}
           script: |
-            console.log('Triggering code quality workflow...');
-            try {
-              await github.rest.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: '01-code-quality.yml',
-                ref: context.ref.replace('refs/heads/', '').replace('refs/pull/', '')
-              });
-              console.log('✓ Code quality workflow triggered');
-            } catch (error) {
-              console.error('Failed to trigger workflow:', error.message);
-              throw error;
-            }
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '01-code-quality.yml',
+              ref: context.ref.replace('refs/heads/', '').replace('refs/pull/', '')
+            });
 
       - name: Trigger C++ code quality workflow
         if: needs.analyze-changes.outputs.has_cpp_changes == 'true'
@@ -169,19 +162,12 @@ jobs:
         with:
           github-token: ${{ secrets.PAT_TOKEN }}
           script: |
-            console.log('Triggering C++ quality workflow...');
-            try {
-              await github.rest.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: '01b-cpp-quality.yml',
-                ref: context.ref.replace('refs/heads/', '').replace('refs/pull/', '')
-              });
-              console.log('✓ C++ quality workflow triggered');
-            } catch (error) {
-              console.error('Failed to trigger workflow:', error.message);
-              throw error;
-            }
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '01b-cpp-quality.yml',
+              ref: context.ref.replace('refs/heads/', '').replace('refs/pull/', '')
+            });
 
   trigger-security:
     name: Trigger Security Scan
@@ -194,26 +180,17 @@ jobs:
         with:
           github-token: ${{ secrets.PAT_TOKEN }}
           script: |
-            console.log('Triggering security scan workflow...');
-            try {
-              await github.rest.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: '02-security-scan.yml',
-                ref: 'main'
-              });
-              console.log('✓ Security scan workflow triggered');
-            } catch (error) {
-              console.error('Failed to trigger workflow:', error.message);
-              throw error;
-            }
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '02-security-scan.yml',
+              ref: 'main'
+            });
 
   trigger-build:
     name: Trigger Build & Test
-    needs: [analyze-changes, trigger-code-quality]
-    if: |
-      needs.analyze-changes.outputs.needs_build == 'true' &&
-      (needs.trigger-code-quality.result == 'success' || needs.trigger-code-quality.result == 'skipped')
+    needs: analyze-changes
+    if: needs.analyze-changes.outputs.needs_build == 'true'
     runs-on: self-hosted
     steps:
       - name: Trigger build workflow
@@ -221,23 +198,16 @@ jobs:
         with:
           github-token: ${{ secrets.PAT_TOKEN }}
           script: |
-            console.log('Triggering build & test workflow...');
-            try {
-              await github.rest.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: '03-build-test.yml',
-                ref: context.ref.replace('refs/heads/', '').replace('refs/pull/', '')
-              });
-              console.log('✓ Build & test workflow triggered');
-            } catch (error) {
-              console.error('Failed to trigger workflow:', error.message);
-              throw error;
-            }
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '03-build-test.yml',
+              ref: context.ref.replace('refs/heads/', '').replace('refs/pull/', '')
+            });
 
   trigger-release:
     name: Trigger Release
-    needs: [analyze-changes, trigger-build]
+    needs: analyze-changes
     if: |
       needs.analyze-changes.outputs.version_changed == 'true' &&
       github.ref == 'refs/heads/main' &&
@@ -249,51 +219,24 @@ jobs:
         with:
           github-token: ${{ secrets.PAT_TOKEN }}
           script: |
-            const version = '${{ needs.analyze-changes.outputs.new_version }}';
-            console.log(`🚀 Triggering release workflow for version ${version}...`);
-            
-            try {
-              await github.rest.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: '04-release.yml',
-                ref: 'main'
-              });
-              console.log(`✓ Release workflow triggered for v${version}`);
-            } catch (error) {
-              console.error('Failed to trigger release workflow:', error.message);
-              throw error;
-            }
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: '04-release.yml',
+              ref: 'main'
+            });
 
   summary:
     name: Orchestrator Summary
-    needs: [analyze-changes, trigger-code-quality, trigger-security, trigger-build, trigger-release]
+    needs:
+      - analyze-changes
+      - trigger-code-quality
+      - trigger-security
+      - trigger-build
+      - trigger-release
     if: always()
     runs-on: self-hosted
     steps:
       - name: Generate summary
         run: |
-          echo "# 🎯 Workflow Orchestrator Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Event**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Ref**: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
-          echo "**SHA**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Analysis Results" >> $GITHUB_STEP_SUMMARY
-          echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Code Quality Needed | ${{ needs.analyze-changes.outputs.needs_code_quality }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Security Scan Needed | ${{ needs.analyze-changes.outputs.needs_security }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build Needed | ${{ needs.analyze-changes.outputs.needs_build }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| C++ Changes | ${{ needs.analyze-changes.outputs.has_cpp_changes }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| JS Changes | ${{ needs.analyze-changes.outputs.has_js_changes }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Version Changed** | **${{ needs.analyze-changes.outputs.version_changed }}** |" >> $GITHUB_STEP_SUMMARY
-          echo "| **New Version** | **${{ needs.analyze-changes.outputs.new_version }}** |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Triggered Workflows" >> $GITHUB_STEP_SUMMARY
-          echo "| Workflow | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Code Quality | ${{ needs.trigger-code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Security Scan | ${{ needs.trigger-security.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build & Test | ${{ needs.trigger-build.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Release** | **${{ needs.trigger-release.result }}** |" >> $GITHUB_STEP_SUMMARY
+          echo "Workflow summary generated."
