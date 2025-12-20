@@ -18,7 +18,7 @@ import { canvas } from "../../lib/canvas/canvas-os.js";
 let handler = async (m, { conn }) => {
     try {
         await global.loading(m, conn);
-        
+
         const osInfo = await getOSPrettyName();
         const kernel = await getKernelInfo();
         const cpu = await getCPUInfo();
@@ -28,12 +28,12 @@ let handler = async (m, { conn }) => {
         const heap = getHeapInfo();
         const proc = getProcessInfo();
         const network = await getNetworkStats();
-        
+
         const uptimeBot = formatTime(process.uptime());
         const uptimeSys = await getSystemUptime();
-        
+
         const warnings = getWarnings(cpu, ram, disk);
-        
+
         const systemData = {
             osInfo,
             kernel,
@@ -48,15 +48,16 @@ let handler = async (m, { conn }) => {
             uptimeSys,
             warnings,
         };
-        
+
         const imageBuffer = await canvas(systemData);
-        
+
         await conn.sendMessage(
             m.chat,
             {
                 image: imageBuffer,
                 caption: "*SYSTEM MONITOR REPORT*",
-            }, { quoted: m }
+            },
+            { quoted: m }
         );
     } catch (e) {
         conn.logger.error(e);

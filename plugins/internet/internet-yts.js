@@ -7,17 +7,17 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             `Usage: ${usedPrefix + command} <query>\n› Example: ${usedPrefix + command} YAD`
         );
     }
-    
+
     try {
         await global.loading(m, conn);
-        
+
         const search = await yts(text);
         const videos = search.videos;
-        
+
         if (!Array.isArray(videos) || videos.length === 0) {
             return m.reply(`No results found for "${text}".`);
         }
-        
+
         const imageBuffer = await canvas(videos, text);
         const rows = videos.map((video, index) => ({
             header: `Result ${index + 1}`,
@@ -25,24 +25,26 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             description: `${video.author.name} • ${video.timestamp || "-"} • ${formatNumber(video.views)} views`,
             id: `.play ${video.url}`,
         }));
-        
+
         await conn.sendButton(m.chat, {
             image: imageBuffer || videos[0].thumbnail,
             caption: "*Select a song from the results above*",
             title: "YouTube Search Results",
             footer: `Found ${videos.length} results for "${text}"`,
             interactiveButtons: [
-            {
-                name: "single_select",
-                buttonParamsJson: JSON.stringify({
-                    title: "Select Video",
-                    sections: [
-                    {
-                        title: "Top Results",
-                        rows: rows,
-                    }, ],
-                }),
-            }, ],
+                {
+                    name: "single_select",
+                    buttonParamsJson: JSON.stringify({
+                        title: "Select Video",
+                        sections: [
+                            {
+                                title: "Top Results",
+                                rows: rows,
+                            },
+                        ],
+                    }),
+                },
+            ],
             hasMediaAttachment: true,
         });
     } catch (e) {

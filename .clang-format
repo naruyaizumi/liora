@@ -18,21 +18,21 @@ KeepEmptyLinesAtTheStartOfBlocks: false
 
 # Braces
 BraceWrapping:
-  AfterClass: false
-  AfterControlStatement: Never
-  AfterEnum: false
-  AfterFunction: false
-  AfterNamespace: false
-  AfterStruct: false
-  AfterUnion: false
-  AfterExternBlock: false
-  BeforeCatch: false
-  BeforeElse: false
-  BeforeLambdaBody: false
-  BeforeWhile: false
-  SplitEmptyFunction: false
-  SplitEmptyRecord: false
-  SplitEmptyNamespace: false
+    AfterClass: false
+    AfterControlStatement: Never
+    AfterEnum: false
+    AfterFunction: false
+    AfterNamespace: false
+    AfterStruct: false
+    AfterUnion: false
+    AfterExternBlock: false
+    BeforeCatch: false
+    BeforeElse: false
+    BeforeLambdaBody: false
+    BeforeWhile: false
+    SplitEmptyFunction: false
+    SplitEmptyRecord: false
+    SplitEmptyNamespace: false
 
 BreakBeforeBraces: Attach
 BreakConstructorInitializers: BeforeColon
@@ -74,21 +74,21 @@ PointerAlignment: Left
 SortIncludes: true
 IncludeBlocks: Regroup
 IncludeCategories:
-  # N-API headers first
-  - Regex:           '^<napi\.h>|^<node_api\.h>'
-    Priority:        1
-  # System headers
-  - Regex:           '^<.*>'
-    Priority:        2
-  # FFmpeg headers
-  - Regex:           '^<libav.*>'
-    Priority:        3
-  # libwebp headers
-  - Regex:           '^<webp/.*>'
-    Priority:        4
-  # Project headers
-  - Regex:           '^".*"'
-    Priority:        5
+    # N-API headers first
+    - Regex: '^<napi\.h>|^<node_api\.h>'
+      Priority: 1
+    # System headers
+    - Regex: "^<.*>"
+      Priority: 2
+    # FFmpeg headers
+    - Regex: "^<libav.*>"
+      Priority: 3
+    # libwebp headers
+    - Regex: "^<webp/.*>"
+      Priority: 4
+    # Project headers
+    - Regex: '^".*"'
+      Priority: 5
 
 # Function and method formatting
 AllowShortFunctionsOnASingleLine: Inline
