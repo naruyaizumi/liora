@@ -46,7 +46,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pnpm install --no-frozen-lockfile
+          pnpm install
 
       - name: Build C++ Addons
         run: |

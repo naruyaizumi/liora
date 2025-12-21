@@ -1,4 +1,13 @@
 # =========================  
+# Node Package Manager Lockfiles  
+# =========================  
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+shrinkwrap.yaml
+npm-shrinkwrap.json
+
+# =========================  
 # Node  
 # =========================  
 node_modules/

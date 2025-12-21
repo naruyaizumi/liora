@@ -50,7 +50,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.check_version.outputs.version_changed == 'true'
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
 
       - name: Run Prettier Fix
         if: steps.check_version.outputs.version_changed == 'true'
@@ -86,7 +86,7 @@ jobs:
           run_install: false
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
 
       - name: Run ESLint
         run: pnpm exec eslint . --ext .js
@@ -139,7 +139,7 @@ jobs:
 
       - name: Install commitlint if needed
         run: |
-          pnpm add -g @commitlint/cli @commitlint/config-conventional --no-frozen-lockfile || pnpm exec commitlint --version
+          pnpm add -g @commitlint/cli @commitlint/config-conventional || pnpm exec commitlint --version
 
       - name: Validate commits
         run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --config .github/.commitlintrc.json --verbose
