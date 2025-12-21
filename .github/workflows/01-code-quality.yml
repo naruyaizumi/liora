@@ -139,7 +139,7 @@ jobs:
 
       - name: Install commitlint if needed
         run: |
-          pnpm add -g @commitlint/cli @commitlint/config-conventional --no-frozen-lockfile || pnpm exec commitlint --version
+          pnpm add -g @commitlint/cli @commitlint/config-conventional --no-lockfile || pnpm exec commitlint --version
 
       - name: Validate commits
         run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --config .github/.commitlintrc.json --verbose
