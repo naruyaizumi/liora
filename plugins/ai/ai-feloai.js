@@ -8,7 +8,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
         await global.loading(m, conn);
 
-        const apiUrl = `https://api.nekolabs.web.id/ai/feloai?text=${encodeURIComponent(text)}`;
+        const apiUrl = `https://api.nekolabs.web.id/text-generation/feloai?text=${encodeURIComponent(text)}`;
         const response = await fetch(apiUrl);
 
         if (!response.ok) {

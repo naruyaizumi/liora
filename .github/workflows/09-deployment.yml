@@ -31,7 +31,6 @@ jobs:
       - name: Determine environment
         id: environment
         run: |
-          # Determine environment based on tag
           TAG="${{ github.ref_name }}"
           
           if [[ "$TAG" =~ v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+ ]]; then

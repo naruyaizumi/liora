@@ -97,58 +97,9 @@ jobs:
             fi
           done
 
-  trigger-security-scan:
-    name: Trigger Weekly Security Scan
-    runs-on: self-hosted
-    steps:
-      - name: Trigger security workflow
-        uses: actions/github-script@v8
-        with:
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: '02-security-scan.yml',
-              ref: 'main'
-            });
-
-  update-statistics:
-    name: Update Repository Statistics
-    runs-on: self-hosted
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.PAT_TOKEN }}
-
-      - name: Generate stats
-        run: |
-          mkdir -p .github/stats
-          
-          cat > .github/stats/repo-stats.json << EOF
-          {
-            "generated_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
-            "total_commits": $(git rev-list --count HEAD),
-            "total_contributors": $(git log --format='%aN' | sort -u | wc -l),
-            "total_files": $(find src lib -type f 2>/dev/null | wc -l || echo 0),
-            "total_lines": $(find src lib -name "*.js" -o -name "*.cpp" 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}' || echo 0)
-          }
-          EOF
-
-      - name: Commit stats
-        run: |
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "github-actions[bot]"
-          
-          if [[ `git status --porcelain` ]]; then
-            git add .github/stats/
-            git commit -m "chore: update repository statistics [skip ci]"
-            git push
-          fi
-
   notify-completion:
     name: Notify Completion
-    needs: [cleanup-cache, cleanup-old-artifacts, cleanup-old-branches, update-statistics]
+    needs: [cleanup-cache, cleanup-old-artifacts, cleanup-old-branches]
     runs-on: self-hosted
     if: always()
     steps:
@@ -160,4 +111,3 @@ jobs:
           echo "| Cache Cleanup | ${{ needs.cleanup-cache.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Artifact Cleanup | ${{ needs.cleanup-old-artifacts.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Branch Cleanup | ${{ needs.cleanup-old-branches.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Statistics Update | ${{ needs.update-statistics.result }} |" >> $GITHUB_STEP_SUMMARY

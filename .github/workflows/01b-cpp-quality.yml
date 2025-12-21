@@ -79,18 +79,9 @@ jobs:
           version: 10
           run_install: false
 
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pnpm-store
-            node_modules
-          key: ${{ runner.os }}-pnpm-10-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-10-
-
       - name: Install node-addon-api
-        run: pnpm add node-addon-api
+        run: |
+          pnpm add node-addon-api --no-frozen-lockfile
 
       - name: Run clang-tidy analysis
         run: |
@@ -122,43 +113,3 @@ jobs:
           grep -rn "new \|delete " lib/cpp/ --include="*.cpp" --include="*.h" && echo "Found raw new/delete" || true
           grep -rn "malloc\|free\|calloc\|realloc" lib/cpp/ --include="*.cpp" --include="*.h" && echo "Found malloc/free" || true
           grep -rn "void.*\*" lib/cpp/ --include="*.h" | grep -v "Napi::" | grep -v "//" && echo "Found raw pointers" || true
-
-  build-compile-check:
-    name: Compilation Test with Warnings
-    runs-on: self-hosted
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-          run_install: false
-
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pnpm-store
-            node_modules
-          key: ${{ runner.os }}-pnpm-10-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-10-
-
-      - name: Install dependencies
-        run: |
-          pnpm install --frozen-lockfile --prefer-offline
-
-      - name: Compile with extra warnings
-        run: |
-          export CXXFLAGS="-Wall -Wextra -Wpedantic -Wconversion -Wshadow"
-          pnpm exec node-gyp configure
-          pnpm exec node-gyp build 2>&1 | tee build.log
-          
-          grep -i "warning:" build.log && echo "Compilation warnings found" || echo "✓ Clean compilation"

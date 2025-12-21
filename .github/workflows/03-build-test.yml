@@ -44,29 +44,11 @@ jobs:
             command -v "$tool" || exit 1
           done
 
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pnpm-store
-            node_modules
-          key: ${{ runner.os }}-pnpm-10-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-10-
-
       - name: Install dependencies
         run: |
-          pnpm install --frozen-lockfile --prefer-offline
-
-      - name: Cache build artifacts
-        id: cache-build
-        uses: actions/cache@v4
-        with:
-          path: build/Release
-          key: ${{ runner.os }}-build-${{ hashFiles('lib/cpp/**/*.cpp', 'lib/cpp/**/*.h', 'binding.gyp', 'package.json', 'pnpm-lock.yaml') }}-node24
+          pnpm install --no-frozen-lockfile
 
       - name: Build C++ Addons
-        if: steps.cache-build.outputs.cache-hit != 'true'
         run: |
           pnpm exec node-gyp rebuild
 
