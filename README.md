@@ -99,6 +99,48 @@ Apache 2.0 allows free use with attribution. **Do not** remove credits or rebran
 curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh | bash
 ```
 
+**🌩️ Or manual installation**
+```bash
+# Install system dependencies
+# Needed for C++ build and media processing
+sudo apt-get update
+sudo apt-get install -y \
+    ffmpeg libwebp-dev libavformat-dev \
+    libavcodec-dev libavutil-dev libswresample-dev \
+    libswscale-dev libavfilter-dev build-essential \
+    python3 g++ pkg-config jq cmake
+
+# Clone the repository
+git clone https://github.com/naruyaizumi/liora.git
+cd liora
+
+# Environment setup
+cp .env.example .env
+nano .env
+# (Edit as needed, save: Ctrl+O → Enter, exit: Ctrl+X)
+
+# Install project dependencies
+# Choose one package manager
+# npm
+npm install
+
+# yarn
+# yarn install
+
+# pnpm
+# pnpm install
+
+# Run the script
+# npm
+npm start
+
+# yarn
+# yarn start
+
+# pnpm
+# pnpm start
+```
+
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Backhand%20Index%20Pointing%20Down.png" width="40" />
 
 **Minimum Requirements**
