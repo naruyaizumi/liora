@@ -101,6 +101,7 @@ curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh |
 
 **🌩️ Or manual installation**
 </div>
+
 ```bash
 # Install system dependencies
 # Needed for C++ build and media processing
