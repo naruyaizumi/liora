@@ -98,9 +98,9 @@ Apache 2.0 allows free use with attribution. **Do not** remove credits or rebran
 ```bash
 curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh | bash
 ```
-</div>
 
 **🌩️ Or manual installation**
+</div>
 ```bash
 # Install system dependencies
 # Needed for C++ build and media processing
