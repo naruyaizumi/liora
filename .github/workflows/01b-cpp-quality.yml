@@ -81,7 +81,7 @@ jobs:
 
       - name: Install node-addon-api
         run: |
-          pnpm add node-addon-api
+          pnpm add node-addon-api --no-lockfile
 
       - name: Run clang-tidy analysis
         run: |
