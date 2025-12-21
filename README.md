@@ -98,6 +98,7 @@ Apache 2.0 allows free use with attribution. **Do not** remove credits or rebran
 ```bash
 curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh | bash
 ```
+</div>
 
 **🌩️ Or manual installation**
 ```bash
@@ -141,6 +142,7 @@ npm start
 # pnpm start
 ```
 
+<div align="center">
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Backhand%20Index%20Pointing%20Down.png" width="40" />
 
 **Minimum Requirements**
