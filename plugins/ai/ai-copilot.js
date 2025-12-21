@@ -6,7 +6,7 @@ let handler = async (m, { conn, text }) => {
     try {
         await global.loading(m, conn);
 
-        const apiUrl = `https://api.nekolabs.web.id/ai/copilot?text=${encodeURIComponent(text)}`;
+        const apiUrl = `https://api.nekolabs.web.id/text-generation/copilot?text=${encodeURIComponent(text)}`;
         const response = await fetch(apiUrl);
         if (!response.ok) {
             return m.reply("Unable to connect to Copilot AI. Please try again later.");
@@ -14,11 +14,16 @@ let handler = async (m, { conn, text }) => {
 
         const json = await response.json();
         const replyText = json?.result?.text;
-        if (!replyText) {
-            return m.reply("Copilot AI did not return a response.");
+
+        if (typeof replyText !== "string") {
+            return m.reply("Copilot AI did not return a valid response.");
         }
 
-        await conn.sendMessage(m.chat, { text: `Copilot AI:\n${replyText.trim()}` }, { quoted: m });
+        await conn.sendMessage(
+            m.chat,
+            { text: `Copilot AI:\n${replyText.trim()}` },
+            { quoted: m }
+        );
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
