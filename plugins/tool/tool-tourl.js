@@ -6,17 +6,19 @@ import {
     uploader5,
     uploader6,
     uploader7,
+    uploader8,
     uploader,
 } from "../../lib/uploader.js";
 
 const uploaders = {
-    1: { name: "Catbox.moe", fn: uploader1, info: "Permanent hosting" },
-    2: { name: "Uguu.se", fn: uploader2, info: "48 hours retention" },
-    3: { name: "Qu.ax", fn: uploader3, info: "Temporary hosting" },
-    4: { name: "Put.icu", fn: uploader4, info: "Direct upload" },
-    5: { name: "Tmpfiles.org", fn: uploader5, info: "1 hour retention" },
-    6: { name: "GoFile", fn: uploader6, info: "Image only uploader" },
-    7: { name: "Videy", fn: uploader7, info: "Video only uploader" },
+    1: { name: "Catbox.moe", fn: uploader1 },
+    2: { name: "Uguu.se", fn: uploader2 },
+    3: { name: "Qu.ax", fn: uploader3 },
+    4: { name: "Put.icu", fn: uploader4 },
+    5: { name: "Tmpfiles.org", fn: uploader5 },
+    6: { name: "Alibaba Cloud", fn: uploader6 },
+    7: { name: "Videy", fn: uploader7 },
+    8: { name: "GoFile", fn: uploader8 },
 };
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -27,16 +29,14 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         if (!args[0]) {
             if (!mime) {
                 let listText = "*Upload Server Options*\n\n";
-                listText += "*Auto Upload (1-5):*\n";
-                for (let i = 1; i <= 5; i++) {
-                    const { name, info } = uploaders[i];
-                    listText += `${i}. ${name} — ${info}\n`;
+                listText += "*Auto Upload (1-6):*\n";
+                for (let i = 1; i <= 6; i++) {
+                    const { name } = uploaders[i];
+                    listText += `${i}. ${name}\n`;
                 }
                 listText += "\n*Manual Only:*\n";
-                for (let i = 6; i <= 7; i++) {
-                    const { name, info } = uploaders[i];
-                    listText += `${i}. ${name} — ${info}\n`;
-                }
+                listText += `7. ${uploaders[7].name} — Video only\n`;
+                listText += `8. ${uploaders[8].name} — Image only\n`;
                 listText += `\nSelect upload server by number.\n› Example: ${usedPrefix + command} 1\n› Auto upload: send media without number`;
                 return m.reply(listText);
             } else {
@@ -75,7 +75,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         args[0] = args[0].toString().trim().match(/\d+/)?.[0] || "";
         if (isNaN(args[0]) || !uploaders[args[0]]) {
-            return m.reply("Invalid server. Use number only (1-7).");
+            return m.reply("Invalid server. Use number only (1-8).");
         }
 
         await global.loading(m, conn);
