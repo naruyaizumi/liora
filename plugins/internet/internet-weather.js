@@ -33,8 +33,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         const imageBuffer = await canvas(weatherData);
         
         const location = weatherData.location;
-        const today = forecasts[0];
-        
         await conn.sendMessage(m.chat, {
             image: imageBuffer,
             caption: `*Weather Forecast for ${location.name}, ${location.country}*`,
