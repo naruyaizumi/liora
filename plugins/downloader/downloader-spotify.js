@@ -1,6 +1,6 @@
 import { convert } from "#add-on";
 import { spotify } from "#spotify";
-import { spotifyCanvas } from "../../lib/canvas/canvas-spotify.js";
+import { canvas } from "../../lib/canvas/canvas-spotify.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0])
@@ -13,7 +13,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         );
         if (!success) throw new Error(error);
 
-        const canvasBuffer = await spotifyCanvas(cover, title, channel, duration);
+        const canvasBuffer = await canvas(cover, title, channel, duration);
 
         const audioRes = await fetch(downloadUrl);
         if (!audioRes.ok) throw new Error(`Failed to fetch audio. Status: ${audioRes.status}`);
