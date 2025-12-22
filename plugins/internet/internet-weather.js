@@ -30,7 +30,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             return m.reply(`No weather data found for "${text}".`);
         }
 
-        const imageBuffer = await canvas(weatherData, text);
+        const imageBuffer = await canvas(weatherData);
         
         const location = weatherData.location;
         const today = forecasts[0];
