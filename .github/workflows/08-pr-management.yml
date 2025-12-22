@@ -2,86 +2,13 @@ name: Pull Request Management
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
-  pull_request_review:
-    types: [submitted]
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
-  analyze-pr:
-    name: Analyze PR Type
-    runs-on: ubuntu-latest
-    outputs:
-      is_release: ${{ steps.check.outputs.is_release }}
-      is_breaking: ${{ steps.check.outputs.is_breaking }}
-      size_label: ${{ steps.check.outputs.size_label }}
-    steps:
-      - name: Check PR type
-        id: check
-        run: |
-          PR_BRANCH="${{ github.event.pull_request.head.ref }}"
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          PR_BODY="${{ github.event.pull_request.body }}"
-          
-          if [[ "$PR_BRANCH" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "is_release=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_release=false" >> $GITHUB_OUTPUT
-          fi
-          
-          if echo "$PR_TITLE" | grep -qE "(breaking|BREAKING|!:)" || \
-             echo "$PR_BODY" | grep -qE "BREAKING CHANGE"; then
-            echo "is_breaking=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_breaking=false" >> $GITHUB_OUTPUT
-          fi
-          
-          ADDITIONS=${{ github.event.pull_request.additions }}
-          DELETIONS=${{ github.event.pull_request.deletions }}
-          TOTAL=$((ADDITIONS + DELETIONS))
-          
-          if [ $TOTAL -lt 10 ]; then
-            echo "size_label=size/XS" >> $GITHUB_OUTPUT
-          elif [ $TOTAL -lt 50 ]; then
-            echo "size_label=size/S" >> $GITHUB_OUTPUT
-          elif [ $TOTAL -lt 200 ]; then
-            echo "size_label=size/M" >> $GITHUB_OUTPUT
-          elif [ $TOTAL -lt 500 ]; then
-            echo "size_label=size/L" >> $GITHUB_OUTPUT
-          else
-            echo "size_label=size/XL" >> $GITHUB_OUTPUT
-          fi
-
-  auto-label:
-    name: Auto Label PR
-    runs-on: ubuntu-latest
-    needs: analyze-pr
-    if: github.event.action == 'opened' || github.event.action == 'reopened'
-    steps:
-      - name: Apply labels
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const labels = ['${{ needs.analyze-pr.outputs.size_label }}'];
-            
-            if ('${{ needs.analyze-pr.outputs.is_release }}' === 'true') {
-              labels.push('release', 'automated');
-            }
-            
-            if ('${{ needs.analyze-pr.outputs.is_breaking }}' === 'true') {
-              labels.push('breaking-change', 'needs-review');
-            }
-            
-            await github.rest.issues.addLabels({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              labels: labels
-            });
-
   lint-pr-title:
     name: Lint PR Title
     runs-on: ubuntu-latest
@@ -105,43 +32,6 @@ jobs:
             chore
             revert
 
-  auto-approve-release:
-    name: Auto Approve Release PR
-    runs-on: ubuntu-latest
-    needs: analyze-pr
-    if: |
-      needs.analyze-pr.outputs.is_release == 'true' &&
-      github.event.action == 'opened'
-    steps:
-      - name: Approve Release PR
-        uses: actions/github-script@v8
-        with:
-          script: |
-            await github.rest.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-              event: 'APPROVE',
-              body: '✓ Auto-approved: Release PR'
-            });
-
-  check-breaking-changes:
-    name: Check Breaking Changes
-    runs-on: ubuntu-latest
-    needs: analyze-pr
-    if: needs.analyze-pr.outputs.is_breaking == 'true'
-    steps:
-      - name: Comment on breaking change
-        uses: actions/github-script@v8
-        with:
-          script: |
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: `⚠️ **BREAKING CHANGE DETECTED**\n\nThis PR requires careful review.\n\nEnsure:\n- [ ] Breaking changes documented\n- [ ] Migration guide provided\n- [ ] Version bump is major`
-            });
-
   auto-approve-dependabot:
     name: Auto Approve Dependabot
     runs-on: ubuntu-latest
@@ -160,3 +50,22 @@ jobs:
         run: gh pr review --approve "${{ github.event.pull_request.html_url }}"
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+  auto-approve-release:
+    name: Auto Approve Release PR
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.head.ref =~ /^release\/v[0-9]+\.[0-9]+\.[0-9]+$/ &&
+      github.event.action == 'opened'
+    steps:
+      - name: Approve Release PR
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              event: 'APPROVE',
+              body: '✓ Auto-approved: Release PR'
+            });
