@@ -90,7 +90,7 @@ jobs:
       - name: Validate PR title
         uses: amannn/action-semantic-pull-request@v6
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         with:
           types: |
             feat
@@ -104,7 +104,6 @@ jobs:
             ci
             chore
             revert
-          requireScope: false
 
   auto-approve-release:
     name: Auto Approve Release PR
@@ -140,143 +139,24 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `**BREAKING CHANGE DETECTED**\n\nThis PR requires careful review.\n\nEnsure:\n- [ ] Breaking changes documented\n- [ ] Migration guide provided\n- [ ] Version bump is major`
+              body: `⚠️ **BREAKING CHANGE DETECTED**\n\nThis PR requires careful review.\n\nEnsure:\n- [ ] Breaking changes documented\n- [ ] Migration guide provided\n- [ ] Version bump is major`
             });
 
   auto-approve-dependabot:
     name: Auto Approve Dependabot
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]' && github.event.action == 'opened'
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
-      - name: Checkout repository (optional)
-        if: false
-        uses: actions/checkout@v4
-
       - name: Dependabot metadata
         id: metadata
         uses: dependabot/fetch-metadata@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Auto approve minor and patch updates
+      - name: Auto approve
         if: |
           steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
           steps.metadata.outputs.update-type == 'version-update:semver-minor'
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const updateType = '${{ steps.metadata.outputs.update-type }}';
-            const prNumber = context.issue.number;
-            
-            console.log(`Auto-approving Dependabot PR #${prNumber} for ${updateType} update`);
-            
-            await github.rest.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber,
-              event: 'APPROVE',
-              body: `Auto-approved: ${updateType} update`
-            });
-            
-            await github.rest.issues.addLabels({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              labels: ['dependencies', 'automated']
-            });
-
-      - name: Auto-merge patch updates (optional)
-        if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const prNumber = context.issue.number;
-            
-            console.log(`Attempting to merge Dependabot PR #${prNumber}`);
-            
-            try {
-              await github.graphql(`
-                mutation($pullRequestId: ID!, $mergeMethod: PullRequestMergeMethod!) {
-                  enablePullRequestAutoMerge(input: {
-                    pullRequestId: $pullRequestId,
-                    mergeMethod: $mergeMethod
-                  }) {
-                    pullRequest {
-                      autoMergeRequest {
-                        enabledAt
-                      }
-                    }
-                  }
-                }
-              `, {
-                pullRequestId: `MDExOlB1bGxSZXF1ZXN0${prNumber}`,
-                mergeMethod: 'SQUASH'
-              });
-              
-              console.log(`Auto-merge enabled for PR #${prNumber}`);
-              
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                body: 'Auto-merge enabled for patch update'
-              });
-              
-            } catch (error) {
-              console.log(`Could not enable auto-merge: ${error.message}`);
-              console.log('This is normal if PR has conflicts or checks are pending');
-            }
-
-      - name: Comment on major updates
-        if: steps.metadata.outputs.update-type == 'version-update:semver-major'
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const prNumber = context.issue.number;
-            const packageName = '${{ steps.metadata.outputs.package-names }}';
-            const newVersion = '${{ steps.metadata.outputs.new-version }}';
-            
-            console.log(`Major update detected for ${packageName} to ${newVersion}`);
-            
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              body: `**MAJOR VERSION UPDATE DETECTED**\n\nPackage: **${packageName}**\nNew Version: **${newVersion}**\n\nThis update contains breaking changes and requires manual review.\n\nPlease check:\n- [ ] Changelog for breaking changes\n- [ ] Compatibility with current codebase\n- [ ] Update any necessary configurations`
-            });
-
-  sync-labels:
-    name: Sync PR Labels with Review
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request_review'
-    steps:
-      - name: Add 'reviewed' label when approved
-        uses: actions/github-script@v8
-        if: github.event.review.state == 'APPROVED'
-        with:
-          script: |
-            await github.rest.issues.addLabels({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              labels: ['reviewed']
-            });
-
-      - name: Remove 'reviewed' label when changes requested
-        uses: actions/github-script@v8
-        if: github.event.review.state == 'CHANGES_REQUESTED'
-        with:
-          script: |
-            try {
-              await github.rest.issues.removeLabel({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                name: 'reviewed'
-              });
-            } catch (error) {
-              console.log('Label "reviewed" not found, ignoring...');
-            }
+        run: gh pr review --approve "${{ github.event.pull_request.html_url }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
