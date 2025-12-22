@@ -65,7 +65,7 @@ jobs:
           retention-days: 7
 
       - name: Attest Build Provenance
-        uses: actions/attest-build-provenance@v3.0.0
+        uses: actions/attest-build-provenance@v3.1.0
         with:
           subject-path: 'build/Release/*.node'
 
