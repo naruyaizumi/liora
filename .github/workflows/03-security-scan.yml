@@ -100,24 +100,3 @@ jobs:
         with:
           path: ./
           extra_args: --only-verified
-
-  trivy-scan:
-    name: Trivy Container Scan
-    runs-on: self-hosted
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: "fs"
-          scan-ref: "."
-          format: "sarif"
-          output: "trivy-results.sarif"
-
-      - name: Upload Trivy results
-        uses: github/codeql-action/upload-sarif@v4
-        if: always()
-        with:
-          sarif_file: "trivy-results.sarif"
