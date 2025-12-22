@@ -96,18 +96,3 @@ jobs:
               git push origin --delete $branch_name || true
             fi
           done
-
-  notify-completion:
-    name: Notify Completion
-    needs: [cleanup-cache, cleanup-old-artifacts, cleanup-old-branches]
-    runs-on: self-hosted
-    if: always()
-    steps:
-      - name: Create summary
-        run: |
-          echo "# Scheduled Tasks Summary" >> $GITHUB_STEP_SUMMARY
-          echo "| Task | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Cache Cleanup | ${{ needs.cleanup-cache.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Artifact Cleanup | ${{ needs.cleanup-old-artifacts.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Branch Cleanup | ${{ needs.cleanup-old-branches.result }} |" >> $GITHUB_STEP_SUMMARY

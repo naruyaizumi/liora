@@ -78,22 +78,3 @@ jobs:
             echo "Pushing tag ${{ github.ref_name }} to Gitea..."
             git push gitea ${{ github.ref_name }}
           fi
-
-  mirror-summary:
-    name: Mirror Summary
-    needs: [mirror-gitlab, mirror-codeberg, mirror-gitea]
-    runs-on: self-hosted
-    if: always()
-    steps:
-      - name: Generate Summary
-        run: |
-          echo "# Mirror Status" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Ref**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| GitLab | ${{ needs.mirror-gitlab.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Codeberg | ${{ needs.mirror-codeberg.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Gitea | ${{ needs.mirror-gitea.result }} |" >> $GITHUB_STEP_SUMMARY
