@@ -41,38 +41,6 @@ jobs:
             
             console.log(`Deleted ${deletedCount} old caches`);
 
-  cleanup-old-artifacts:
-    name: Cleanup Old Artifacts
-    runs-on: self-hosted
-    steps:
-      - name: Delete old artifacts
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const days = 7;
-            const timestamp = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-            
-            const artifacts = await github.rest.actions.listArtifactsForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              per_page: 100
-            });
-            
-            let deletedCount = 0;
-            for (const artifact of artifacts.data.artifacts) {
-              const createdAt = new Date(artifact.created_at);
-              if (createdAt < timestamp) {
-                await github.rest.actions.deleteArtifact({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  artifact_id: artifact.id
-                });
-                deletedCount++;
-              }
-            }
-            
-            console.log(`Deleted ${deletedCount} old artifacts`);
-
   cleanup-old-branches:
     name: Cleanup Stale Branches
     runs-on: self-hosted

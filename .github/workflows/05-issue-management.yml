@@ -71,34 +71,6 @@ jobs:
               console.log(`Applied labels: ${uniqueLabels.join(', ')}`);
             }
 
-  greet-first-contributor:
-    name: Greet First Time Contributors
-    runs-on: self-hosted
-    if: github.event_name == 'issues' && github.event.action == 'opened'
-    steps:
-      - name: Check if first issue
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const issue = context.payload.issue;
-            const creator = issue.user.login;
-            
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              creator: creator,
-              state: 'all'
-            });
-            
-            if (issues.data.length === 1) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
-                body: `👋 Welcome @${creator}! Thank you for your first issue!\n\nA maintainer will review it soon. Please ensure you've provided:\n- Clear description\n- Steps to reproduce (if applicable)\n- Expected vs actual behavior\n- Environment details`
-              });
-            }
-
   validate-issue:
     name: Validate Issue Format
     runs-on: self-hosted

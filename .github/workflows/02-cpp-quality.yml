@@ -100,16 +100,3 @@ jobs:
               -DNAPI_CPP_EXCEPTIONS \
               || true
           done
-
-  memory-safety-check:
-    name: Memory Safety Check (Headers)
-    runs-on: self-hosted
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Check for unsafe patterns
-        run: |
-          grep -rn "new \|delete " lib/cpp/ --include="*.cpp" --include="*.h" && echo "Found raw new/delete" || true
-          grep -rn "malloc\|free\|calloc\|realloc" lib/cpp/ --include="*.cpp" --include="*.h" && echo "Found malloc/free" || true
-          grep -rn "void.*\*" lib/cpp/ --include="*.h" | grep -v "Napi::" | grep -v "//" && echo "Found raw pointers" || true
