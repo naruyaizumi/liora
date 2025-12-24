@@ -192,7 +192,7 @@ class DatabaseCore {
         try {
             const serialized = stringify(obj);
             const result = parse(serialized);
-            if (result === null && obj !== null) return CLONE_FAILED;
+            if (result === null) return CLONE_FAILED;
             return result;
         } catch (e) {
             global.logger.error(`Clone error: ${e.message}`);
