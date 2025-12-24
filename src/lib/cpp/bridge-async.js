@@ -6,7 +6,7 @@ import fs from "fs/promises";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, "../..");
+const projectRoot = path.resolve(__dirname, "../../..");
 const require = createRequire(import.meta.url);
 
 const WORKER_MODE = process.env.ADDON_WORKER_MODE || "threadpool"; // sync | async | threadpool

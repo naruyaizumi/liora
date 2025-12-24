@@ -12,7 +12,7 @@ const MAX_CONSECUTIVE_ERRORS = 5;
 function loadAddon() {
     if (stickerAddon) return stickerAddon;
 
-    const projectRoot = path.resolve(__dirname, "../../..");
+    const projectRoot = path.resolve(__dirname, "../../../..");
     const searchPaths = [
         path.join(projectRoot, "build", "Release", "sticker.node"),
         path.join(projectRoot, "build", "Debug", "sticker.node"),

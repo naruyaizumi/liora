@@ -1,4 +1,4 @@
-import { instagram } from "#instagram";
+import { instagram } from "#api/instagram.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     const url = args[0];
