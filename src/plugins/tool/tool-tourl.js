@@ -101,7 +101,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                 caption = `Uploaded\nPrimary: ${server.name} (failed)\nFallback: ${result.provider}\nSize: ${sizeDisplay}`;
                 url = result.url;
             }
-        } else if (result && result.success) {
+        } else if (result.success) {
             caption = `Uploaded\nServer: ${result.provider}\nSize: ${sizeDisplay}\nTries: ${result.attempts.length}`;
             url = result.url;
         } else if (typeof result === "string") {
