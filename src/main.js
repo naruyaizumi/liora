@@ -1,3 +1,4 @@
+/* global conn */
 import "./config.js";
 import { serialize } from "#core/message.js";
 import { useSQLiteAuthState } from "#auth";

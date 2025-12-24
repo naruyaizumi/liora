@@ -87,7 +87,6 @@ curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/src/lib/shel
 
 ```bash
 # Install system dependencies
-# Needed for C++ build and media processing
 sudo apt-get update
 sudo apt-get install -y \
     ffmpeg libwebp-dev libavformat-dev \
@@ -102,28 +101,11 @@ cd liora
 # Environment setup
 cp .env.example .env
 nano .env
-# (Edit as needed, save: Ctrl+O → Enter, exit: Ctrl+X)
 
-# Install project dependencies
-# Choose one package manager
-# npm
 npm install
 
-# yarn
-# yarn install
-
-# pnpm
-# pnpm install
-
-# Run the script
-# npm
 npm start
 
-# yarn
-# yarn start
-
-# pnpm
-# pnpm start
 ```
 
 <div align="center">
@@ -149,81 +131,6 @@ npm start
 - **CPU**: 2 cores minimum
 - **RAM**: 4GB
 - **Storage**: 10GB SSD recommended
-
-</td>
-</tr>
-</table>
-
-</div>
-
-<div align="center">
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
-</div>
-
-## 💬 Community & Support
-
-<div align="center">
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Waving%20Hand.png" width="100" />
-
-**Join our vibrant community!**
-
-</div>
-
-<table>
-<tr>
-<td align="center" width="50%">
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Open%20Book.png" width="80" />
-
-**📢 GitHub Discussions**
-
-Get updates, share ideas, and discuss features directly on GitHub
-
-<br>
-
-[![Join Discussions](https://img.shields.io/badge/Join-Discussions-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/naruyaizumi/liora/discussions)
-
-</td>
-<td align="center" width="50%">
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Bell.png" width="80" />
-
-**💭 WhatsApp Community**
-
-Real-time help and casual discussions with fellow users
-
-<br>
-
-[![Join Group](https://img.shields.io/badge/Join-Community-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FtMSX1EsGHTJeynu8QmjpG)
-
-</td>
-</tr>
-<tr>
-<td align="center" width="50%">
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Satellite%20Antenna.png" width="80" />
-
-**📡 Baileys Discord**
-
-Official Baileys library support and development discussions
-
-<br>
-
-[![Join Discord](https://img.shields.io/badge/Join-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/baileys)
-
-</td>
-<td align="center" width="50%">
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/refs/heads/master/Emojis/Objects/Gem%20Stone.png" width="80" />
-
-**🏳️ Developer Links**
-
-Connect with the maintainer across platforms
-
-<br>
-
-[![LinkBio](https://img.shields.io/badge/Visit-LinkBio-FF4088?style=for-the-badge&logo=linktree&logoColor=white)](https://linkbio.co/naruyaizumi)
 
 </td>
 </tr>
