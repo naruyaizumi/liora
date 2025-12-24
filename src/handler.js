@@ -160,7 +160,6 @@ export async function handler(chatUpdate) {
                 if (!m.fromMe && settings?.self && !isOwner) return;
 
                 if (settings?.gconly && !m.isGroup && !isOwner) {
-                    await global.sendDenied(this, m);
                     return;
                 }
 

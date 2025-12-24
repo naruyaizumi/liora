@@ -70,9 +70,9 @@ desktop.ini
 # =========================
 # Database (SQLite)
 # =========================
-database/*.db
-database/*.sqlite
-database/*.sqlite3
+src/database/*.db
+src/database/*.sqlite
+src/database/*.sqlite3
 *.db-wal
 *.db-shm
 

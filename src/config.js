@@ -288,41 +288,6 @@ global.dbManager = {
 
 global.timestamp = { start: new Date() };
 
-global.sendDenied = async (conn, m) => {
-    const safe = async (fn, fallback = undefined) => {
-        try {
-            return await fn();
-        } catch {
-            return fallback;
-        }
-    };
-
-    const userName = await safe(() => conn.getName(m.sender), "unknown");
-
-    return conn.sendMessage(
-        m.chat,
-        {
-            text: [
-                `┌─[ACCESS DENIED]────────────`,
-                `│  Private chat is currently disabled.`,
-                "└────────────────────────────",
-                `User   : ${userName}`,
-                `Action : Blocked private access`,
-            ].join("\n"),
-            contextInfo: {
-                externalAdReply: {
-                    title: "ACCESS DENIED",
-                    body: global.config.watermark,
-                    mediaType: 1,
-                    thumbnailUrl: global.config.thumbnailUrl,
-                    renderLargerThumbnail: true,
-                },
-            },
-        },
-        { quoted: m }
-    );
-};
-
 global.loading = async (m, conn, back = false) => {
     if (!conn || !m || !m.chat) {
         return;
