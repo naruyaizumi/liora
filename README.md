@@ -7,23 +7,6 @@
 
 **Built on Baileys • Powered by Nodejs**
 
-<!-- Tech Stack Badges -->
-<p align="center">
-  <a href="https://nodejs.org">
-    <img src="https://img.shields.io/badge/Compat-Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js Compatible">
-  </a>
-  <a href="https://ffmpeg.org">
-    <img src="https://img.shields.io/badge/Media-FFmpeg-555555?style=for-the-badge&logo=ffmpeg&logoColor=white" alt="FFmpeg">
-  </a>
-  <a href="https://www.sqlite.org">
-    <img src="https://img.shields.io/badge/Embedded-SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
-  </a>
-  <a href="LICENSE">
-    <img src="https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge&logo=apache&logoColor=white" alt="Apache 2.0 License">
-  </a>
-</p>
-
-<!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
 </div>
@@ -48,12 +31,12 @@
 <tr>
 <td width="33%" align="center">
 
-**🚨 Breaking Changes**
+**🚨 Warning!**
 
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Warning.png"
 width="60" />
 
-**Version 9.0.0** introduces major architecture changes. Migration from v8.x requires database setup and configuration updates.
+This project is for educational purposes only. Selling or claiming copyright is strictly prohibited.
 
 </td>
 <td width="33%" align="center">

@@ -1,4 +1,4 @@
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { args, usedPrefix, command }) => {
     if (!args[0]) {
         return m.reply(`Enter a domain name or URL.\nExample: ${usedPrefix + command} google.com`);
     }

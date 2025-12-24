@@ -1,7 +1,7 @@
 import { unlink, access } from "fs/promises";
 import path from "path";
 
-let handler = async (m, { args, usedPrefix, command, conn }) => {
+let handler = async (m, { args, usedPrefix, command }) => {
     if (!args.length)
         return m.reply(
             `Enter the file path to delete.\n› Example: ${usedPrefix + command} plugins/owner/owner-sf`

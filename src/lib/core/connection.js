@@ -93,7 +93,7 @@ export async function loadPlugins(pluginFolder, getAllPluginsFn) {
 }
 
 const IGNORED_PATTERNS = [
-    /(^|[\/\\])\../,
+    /(^|[/\\])\../,
     /node_modules/,
     /\.db$/,
     /\.cpp$/,

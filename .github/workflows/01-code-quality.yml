@@ -99,7 +99,7 @@ jobs:
 
       - name: Lint installer script
         if: steps.check-shellcheck.outputs.available == 'true'
-        run: shellcheck -e SC1091 -e SC2034 install.sh || true
+        run: shellcheck -e SC1091 -e SC2034 ./src/lib/shell/install.sh || true
 
       - name: Test installer (dry-run)
         run: |

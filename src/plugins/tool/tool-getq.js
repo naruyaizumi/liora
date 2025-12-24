@@ -1,6 +1,6 @@
 import { BufferJSON } from "baileys";
 
-let handler = async (m, { conn }) => {
+let handler = async (m) => {
     if (!m.quoted) return m.reply("Reply to a message to debug its structure.");
     try {
         const output = inspect(m.quoted);

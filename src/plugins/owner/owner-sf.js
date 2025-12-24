@@ -1,7 +1,7 @@
 import { readdir, mkdir, writeFile } from "fs/promises";
 import path from "path";
 
-const handler = async (m, { args, conn }) => {
+const handler = async (m, { args }) => {
     try {
         let target = args.length ? path.join(process.cwd(), ...args) : process.cwd();
         target = path.resolve(target);

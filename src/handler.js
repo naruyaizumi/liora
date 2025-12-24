@@ -1,3 +1,4 @@
+/* global conn */
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 import { smsg } from "#core/smsg.js";
 import { join, dirname } from "path";
@@ -73,7 +74,7 @@ export async function handler(chatUpdate) {
     try {
         if (!chatUpdate) return;
 
-        this.pushMessage(chatUpdate.messages).catch(global.logger?.error);
+        this.pushMessage(chatUpdate.messages).catch(global.logger.error);
         
         const m = smsg(this, chatUpdate.messages?.[chatUpdate.messages.length - 1]);
         if (!m || m.isBaileys || m.fromMe) return;
@@ -82,8 +83,6 @@ export async function handler(chatUpdate) {
         const senderLid = await resolveLid(m.sender);
         const regOwners = global.config.owner.map(id => id.toString().split("@")[0]);
         const isOwner = m.fromMe || regOwners.includes(senderLid);
-
-        // Get group metadata if in group
         const groupMetadata = m.isGroup
             ? this.chats?.[m.chat]?.metadata || await safe(() => this.groupMetadata(m.chat), {})
             : {};
@@ -107,8 +106,6 @@ export async function handler(chatUpdate) {
             if (!plugin || plugin.disabled) continue;
 
             const __filename = join(pluginDir, name);
-
-            // Before hook
             if (typeof plugin.before === "function") {
                 try {
                     const stop = await plugin.before.call(this, m, {
@@ -127,11 +124,10 @@ export async function handler(chatUpdate) {
                     });
                     if (stop) continue;
                 } catch (e) {
-                    global.logger?.error?.(e);
+                    global.logger.error(e);
                 }
             }
 
-            // All hook
             if (typeof plugin.all === "function") {
                 await safe(() => plugin.all.call(this, m, {
                     chatUpdate,
@@ -140,10 +136,8 @@ export async function handler(chatUpdate) {
                 }));
             }
 
-            // Check admin restrictions
             if (!settings?.restrict && plugin.tags?.includes("admin")) continue;
 
-            // Command matching
             if (typeof plugin !== "function") continue;
 
             const prefix = parsePrefix(this.prefix, plugin.customPrefix);
@@ -163,7 +157,6 @@ export async function handler(chatUpdate) {
                 m.plugin = name;
                 const chat = global.db?.data?.chats?.[m.chat] || {};
 
-                // Permission checks
                 if (!m.fromMe && settings?.self && !isOwner) return;
                 
                 if (settings?.gconly && !m.isGroup && !isOwner) {
@@ -174,7 +167,6 @@ export async function handler(chatUpdate) {
                 if (!isAdmin && !isOwner && chat?.adminOnly) return;
                 if (!isOwner && chat?.mute) return;
 
-                // Auto read
                 if (settings?.autoread) {
                     await safe(() => this.readMessages([m.key]));
                 }
@@ -230,11 +222,10 @@ export async function handler(chatUpdate) {
                 try {
                     await plugin.call(this, m, extra);
                 } catch (e) {
-                    global.logger?.error?.(e);
+                    global.logger.error(e);
                     await safe(() => m.reply("Something went wrong."));
                 }
 
-                // After hook
                 if (typeof plugin.after === "function") {
                     await safe(() => plugin.after.call(this, m, extra));
                 }
@@ -243,11 +234,10 @@ export async function handler(chatUpdate) {
             }
         }
 
-        // Print message
         if (!settings?.noprint) {
             await safe(() => printMessage(m, this));
         }
     } catch (e) {
-        global.logger?.error?.({ error: e.message, stack: e.stack }, "Handler error");
+        global.logger.error({ error: e.message, stack: e.stack }, "Handler error");
     }
 }

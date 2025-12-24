@@ -1,4 +1,4 @@
-let handler = async (m, { text, usedPrefix, command, conn }) => {
+let handler = async (m, { text, usedPrefix, command }) => {
     try {
         const chat = global.db.data.chats[m.chat];
 

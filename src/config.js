@@ -255,7 +255,7 @@ class DataWrapper {
                                     obj[prop] = value;
                                     return true;
                                 } catch (e) {
-                                    conn.logger.error(
+                                    logger.error(
                                         { module: "DB", table, prop },
                                         `[DB] Update failed on ${table}.${prop}: ${e.message}`
                                     );

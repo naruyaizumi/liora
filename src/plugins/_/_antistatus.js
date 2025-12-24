@@ -1,4 +1,4 @@
-export async function before(m, { conn, isOwner, isAdmin, isBotAdmin }) {
+export async function before(m, { isOwner, isAdmin, isBotAdmin }) {
     if (!m.isGroup) return true;
     if (isOwner) return true;
     if (isAdmin) return true;
