@@ -10,12 +10,16 @@ on:
       - 'lib/cpp/**/*.h'
       - 'lib/cpp/**/*.cc'
       - 'binding.gyp'
-      - '.clang-format'
-      - '.clang-tidy'
+      - '.github/.clang-format'
+      - '.github/.clang-tidy'
 
 permissions:
   contents: write
   pull-requests: write
+
+env:
+  CLANG_FORMAT_CONFIG: .github/.clang-format
+  CLANG_TIDY_CONFIG: .github/.clang-tidy
 
 jobs:
   clang-format-check:
@@ -34,11 +38,14 @@ jobs:
           
           UNFORMATTED_FILES=""
           for file in $(find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc'); do
-            clang-format --dry-run --Werror "$file" 2>/dev/null || UNFORMATTED_FILES="$UNFORMATTED_FILES$file\n"
+            clang-format --dry-run --Werror --style=file:"$CLANG_FORMAT_CONFIG" "$file" 2>/dev/null || UNFORMATTED_FILES="$UNFORMATTED_FILES$file\n"
           done
           
           if [ -n "$UNFORMATTED_FILES" ]; then
             echo "needs_format=true" >> $GITHUB_OUTPUT
+            echo "files<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$UNFORMATTED_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
           else
             echo "needs_format=false" >> $GITHUB_OUTPUT
           fi
@@ -47,7 +54,7 @@ jobs:
         if: steps.format-check.outputs.needs_format == 'true' && github.event_name == 'pull_request'
         run: |
           command -v clang-format || exit 1
-          find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | xargs clang-format -i
+          find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | xargs clang-format -i --style=file:"$CLANG_FORMAT_CONFIG"
 
       - name: Commit formatting changes
         if: steps.format-check.outputs.needs_format == 'true' && github.event_name == 'pull_request'
@@ -73,15 +80,9 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-          run_install: false
-
       - name: Install node-addon-api
         run: |
-          pnpm add node-addon-api
+          npm install node-addon-api
 
       - name: Run clang-tidy analysis
         run: |
@@ -91,7 +92,7 @@ jobs:
           
           for file in $(find lib/cpp -name '*.cpp'); do
             clang-tidy "$file" \
-              --checks='-*,bugprone-*,cert-*,performance-*,readability-*' \
+              --config-file="$CLANG_TIDY_CONFIG" \
               -- \
               -std=c++20 \
               -I"$NAPI_INCLUDE" \

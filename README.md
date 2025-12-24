@@ -96,7 +96,7 @@ Apache 2.0 allows free use with attribution. **Do not** remove credits or rebran
 **⚡ One-Line Installation**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/src/lib/shell/install.sh | bash
 ```
 
 **🌩️ Or manual installation**

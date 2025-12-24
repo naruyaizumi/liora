@@ -18,11 +18,10 @@ const logger = pino({
 const rootDir = process.cwd();
 
 async function ensureDirs() {
-    const dbDir = join(rootDir, "database");
     try {
-        await mkdir(dbDir, { recursive: true });
+        await mkdir(join(rootDir, "database"), { recursive: true });
     } catch (e) {
-        logger.error(e.message);
+        logger.error({ error: e.message }, "Failed to create directories");
         throw e;
     }
 }
@@ -30,20 +29,22 @@ async function ensureDirs() {
 await ensureDirs();
 
 let childProcess = null;
-let shuttingDown = false;
+let isShuttingDown = false;
 let crashCount = 0;
 let lastCrash = 0;
+
 const MAX_CRASHES = 5;
 const CRASH_WINDOW = 60000;
 const COOLDOWN_TIME = 10000;
 const RESTART_DELAY = 2000;
+const GRACEFUL_SHUTDOWN_TIMEOUT = 10000;
 
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function start(file) {
-    if (shuttingDown) return 1;
+    if (isShuttingDown) return 0;
 
     const scriptPath = join(rootDir, "src", file);
     const args = [...process.execArgv, scriptPath, ...process.argv.slice(2)];
@@ -56,93 +57,109 @@ async function start(file) {
                 env: process.env,
             });
 
-            childProcess.on("exit", (exitCode, signalCode) => {
-                if (!shuttingDown && exitCode !== 0) {
-                    logger.warn(
-                        `Child process exited with code ${exitCode}${
-                            signalCode ? ` (signal: ${signalCode})` : ""
-                        }`
-                    );
+            childProcess.on("exit", (code, signal) => {
+                const exitCode = code ?? 0;
+                
+                if (!isShuttingDown) {
+                    if (exitCode !== 0) {
+                        logger.warn(
+                            { code: exitCode, signal },
+                            "Child process exited with error"
+                        );
+                    } else if (signal) {
+                        logger.info({ signal }, "Child process terminated by signal");
+                    }
                 }
+                
                 childProcess = null;
-                resolve(exitCode || 0);
+                resolve(exitCode);
             });
 
             childProcess.on("error", (error) => {
-                logger.error(error.message);
+                logger.error({ error: error.message }, "Child process error");
                 childProcess = null;
                 resolve(1);
             });
         } catch (e) {
-            logger.error(e.message);
+            logger.error({ error: e.message }, "Failed to spawn child process");
             childProcess = null;
             resolve(1);
         }
     });
 }
 
-async function stopChild(signal = "SIGTERM") {
-    if (shuttingDown) return;
-    shuttingDown = true;
+async function stopChild(reason = "shutdown") {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
 
     if (!childProcess) {
-        return cleanup();
+        logger.info("No child process to stop");
+        return;
     }
 
-    logger.info(`Shutting down gracefully (signal: ${signal})...`);
+    logger.info({ reason }, "Stopping child process gracefully...");
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => {
-        if (childProcess && !childProcess.killed) {
-            logger.warn("Child process unresponsive after 8s, force killing...");
-            try {
-                childProcess.kill("SIGKILL");
-            } catch (e) {
-                logger.error(e.message);
-            }
-        }
-        controller.abort();
-    }, 8000);
+    let exitedGracefully = false;
 
+    // Send SIGTERM for graceful shutdown
     try {
-        childProcess.kill(signal);
-
-        await new Promise((resolve) => {
-            const onExit = () => resolve();
-            childProcess.on("exit", onExit);
-            setTimeout(() => {
-                childProcess.removeListener("exit", onExit);
-                resolve();
-            }, 10000);
-        });
-
-        clearTimeout(timeout);
+        childProcess.kill("SIGTERM");
     } catch (e) {
-        logger.error(e.message);
-    } finally {
-        clearTimeout(timeout);
+        logger.error({ error: e.message }, "Failed to send SIGTERM");
     }
 
-    cleanup();
-}
+    // Wait for graceful exit
+    const gracefulExit = new Promise((resolve) => {
+        const onExit = () => {
+            exitedGracefully = true;
+            resolve();
+        };
+        
+        if (childProcess) {
+            childProcess.once("exit", onExit);
+        } else {
+            resolve();
+        }
+    });
 
-function cleanup() {
-    setTimeout(() => {
-        process.exit(0);
-    }, 100);
+    const timeout = new Promise((resolve) => 
+        setTimeout(resolve, GRACEFUL_SHUTDOWN_TIMEOUT)
+    );
+
+    await Promise.race([gracefulExit, timeout]);
+
+    // Force kill if still running
+    if (childProcess && !exitedGracefully) {
+        logger.warn("Child process did not exit gracefully, sending SIGKILL");
+        try {
+            childProcess.kill("SIGKILL");
+            await sleep(1000);
+        } catch (e) {
+            logger.error({ error: e.message }, "Failed to send SIGKILL");
+        }
+    } else {
+        logger.info("Child process exited gracefully");
+    }
+
+    childProcess = null;
 }
 
 async function supervise() {
     while (true) {
-        if (shuttingDown) break;
-
-        const code = await start("main.js");
-
-        if (shuttingDown || code === 0) {
-            logger.info("Supervisor shutting down");
+        if (isShuttingDown) {
+            logger.info("Supervisor exiting");
             break;
         }
 
+        const exitCode = await start("main.js");
+
+        // Clean exit or shutdown
+        if (isShuttingDown || exitCode === 0) {
+            logger.info("Clean exit, stopping supervisor");
+            break;
+        }
+
+        // Track crash rate
         const now = Date.now();
         if (now - lastCrash < CRASH_WINDOW) {
             crashCount++;
@@ -151,50 +168,65 @@ async function supervise() {
         }
         lastCrash = now;
 
+        // Too many crashes - cooldown
         if (crashCount >= MAX_CRASHES) {
             logger.warn(
-                `Too many crashes (${crashCount}/${MAX_CRASHES} in ${CRASH_WINDOW / 1000}s). ` +
-                    `Cooling down for ${COOLDOWN_TIME / 1000}s...`
+                {
+                    crashes: crashCount,
+                    window: CRASH_WINDOW / 1000,
+                    cooldown: COOLDOWN_TIME / 1000
+                },
+                "Too many crashes, cooling down..."
             );
             await sleep(COOLDOWN_TIME);
             crashCount = 0;
         } else {
             logger.info(
-                `Restarting after crash (${crashCount}/${MAX_CRASHES})... ` +
-                    `Waiting ${RESTART_DELAY / 1000}s`
+                {
+                    crashes: crashCount,
+                    max: MAX_CRASHES,
+                    delay: RESTART_DELAY / 1000
+                },
+                "Restarting after crash..."
             );
             await sleep(RESTART_DELAY);
         }
     }
 }
 
-process.once("SIGINT", () => {
-    stopChild("SIGINT").catch((e) => {
-        logger.error(e.message);
-        process.exit(1);
-    });
+// Graceful shutdown on SIGTERM
+process.once("SIGTERM", async () => {
+    logger.info("Received SIGTERM");
+    await stopChild("SIGTERM");
+    process.exit(0);
 });
 
-process.once("SIGTERM", () => {
-    stopChild("SIGTERM").catch((e) => {
-        logger.error(e.message);
-        process.exit(1);
-    });
+// Graceful shutdown on SIGINT (Ctrl+C)
+process.once("SIGINT", async () => {
+    logger.info("Received SIGINT");
+    await stopChild("SIGINT");
+    process.exit(0);
 });
 
-process.on("uncaughtException", (e) => {
-    logger.error(e.message);
-    if (e.stack) logger.error(e.stack);
-    stopChild("SIGTERM").catch(() => process.exit(1));
+// Handle uncaught errors
+process.on("uncaughtException", async (e) => {
+    logger.error({ error: e.message, stack: e.stack }, "Uncaught exception in supervisor");
+    await stopChild("uncaughtException");
+    process.exit(1);
 });
 
-process.on("unhandledRejection", (e) => {
-    logger.error(e.message);
-    stopChild("SIGTERM").catch(() => process.exit(1));
+process.on("unhandledRejection", async (e) => {
+    logger.error(
+        { error: e?.message, stack: e?.stack },
+        "Unhandled rejection in supervisor"
+    );
+    await stopChild("unhandledRejection");
+    process.exit(1);
 });
 
-supervise().catch((e) => {
-    logger.fatal(e.message);
-    if (e.stack) logger.fatal(e.stack);
+// Start supervising
+supervise().catch(async (e) => {
+    logger.fatal({ error: e.message, stack: e.stack }, "Fatal supervisor error");
+    await stopChild("fatal");
     process.exit(1);
 });

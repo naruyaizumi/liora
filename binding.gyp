@@ -27,8 +27,8 @@
       "<!@(node -p \"require('node-addon-api').include\")",
       "/usr/include",
       "/usr/local/include",
-      "lib/cpp",
-      "lib/cpp/core"
+      "src/lib/cpp",
+      "src/lib/cpp/core"
     ],
     "common_libs": [
       "-lwebp",
@@ -48,7 +48,7 @@
       "target_name": "sticker_core",
       "type": "static_library",
       "sources": [
-        "lib/cpp/core/sticker_core.cpp"
+        "src/lib/cpp/core/sticker_core.cpp"
       ],
       "include_dirs": ["<@(common_includes)"],
       "cflags_cc": ["<@(common_cflags_cc)"],
@@ -60,7 +60,7 @@
       "target_name": "converter_core",
       "type": "static_library",
       "sources": [
-        "lib/cpp/core/converter_core.cpp"
+        "src/lib/cpp/core/converter_core.cpp"
       ],
       "include_dirs": ["<@(common_includes)"],
       "cflags_cc": ["<@(common_cflags_cc)"],
@@ -71,7 +71,7 @@
     {
       "target_name": "sticker",
       "sources": [
-        "lib/cpp/bindings/sticker.cpp"
+        "src/lib/cpp/bindings/sticker.cpp"
       ],
       "include_dirs": ["<@(common_includes)"],
       "dependencies": [
@@ -86,7 +86,7 @@
     {
       "target_name": "converter",
       "sources": [
-        "lib/cpp/bindings/converter.cpp"
+        "src/lib/cpp/bindings/converter.cpp"
       ],
       "include_dirs": ["<@(common_includes)"],
       "dependencies": [
@@ -101,7 +101,7 @@
     {
       "target_name": "sticker_async",
       "sources": [
-        "lib/cpp/bindings/sticker_async.cpp"
+        "src/lib/cpp/bindings/sticker_async.cpp"
       ],
       "include_dirs": ["<@(common_includes)"],
       "dependencies": [
@@ -116,7 +116,7 @@
     {
       "target_name": "converter_async",
       "sources": [
-        "lib/cpp/bindings/converter_async.cpp"
+        "src/lib/cpp/bindings/converter_async.cpp"
       ],
       "include_dirs": ["<@(common_includes)"],
       "dependencies": [

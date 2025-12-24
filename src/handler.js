@@ -1,11 +1,8 @@
-/* global conn */
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
-import "#global";
-import { smsg } from "../lib/core/smsg.js";
-import path, { join } from "path";
+import { smsg } from "#core/smsg.js";
+import { join, dirname } from "path";
 import { fileURLToPath } from "url";
-import chokidar from "chokidar";
-import printMessage from "../lib/console.js";
+import printMessage from "#lib/console.js";
 
 const CMD_PREFIX_RE = /^[/!.]/;
 
@@ -17,14 +14,6 @@ const safe = async (fn, fallback = undefined) => {
     }
 };
 
-const getSettings = (jid) => {
-    try {
-        return global.db?.data?.settings?.[jid] || {};
-    } catch {
-        return {};
-    }
-};
-
 const parsePrefix = (connPrefix, pluginPrefix) => {
     if (pluginPrefix) return pluginPrefix;
     if (connPrefix) return connPrefix;
@@ -32,168 +21,94 @@ const parsePrefix = (connPrefix, pluginPrefix) => {
 };
 
 const matchPrefix = (prefix, text) => {
-    if (prefix instanceof RegExp) return [[prefix.exec(text), prefix]];
+    if (prefix instanceof RegExp) {
+        return [[prefix.exec(text), prefix]];
+    }
 
     if (Array.isArray(prefix)) {
         return prefix.map((p) => {
-            const re =
-                p instanceof RegExp ? p : new RegExp(p.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&"));
+            const re = p instanceof RegExp 
+                ? p 
+                : new RegExp(p.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&"));
             return [re.exec(text), re];
         });
     }
 
     if (typeof prefix === "string") {
-        const safe = prefix.replace(/[^a-zA-Z0-9_-]/g, "\\$&");
-        const esc = new RegExp(`^${safe}`, "i");
-        return [[esc.exec(text), esc]];
+        const escaped = prefix.replace(/[^a-zA-Z0-9_-]/g, "\\$&");
+        const regex = new RegExp(`^${escaped}`, "i");
+        return [[regex.exec(text), regex]];
     }
 
     return [[[], new RegExp()]];
 };
 
-const isCmdAccepted = (cmd, rule) => {
+const isCmdMatch = (cmd, rule) => {
     if (rule instanceof RegExp) return rule.test(cmd);
-    if (Array.isArray(rule))
-        return rule.some((r) => (r instanceof RegExp ? r.test(cmd) : r === cmd));
+    if (Array.isArray(rule)) return rule.some(r => 
+        r instanceof RegExp ? r.test(cmd) : r === cmd
+    );
     if (typeof rule === "string") return rule === cmd;
     return false;
 };
 
-const resolveSenderLid = async (sender) => {
-    let senderLid = sender;
-    if (senderLid.endsWith("@lid")) {
-        senderLid = senderLid.split("@")[0];
-    } else if (senderLid.endsWith("@s.whatsapp.net")) {
-        const resolved = await conn.signalRepository.lidMapping.getLIDForPN(senderLid);
+const resolveLid = async (sender) => {
+    if (sender.endsWith("@lid")) {
+        return sender.split("@")[0];
+    }
+    
+    if (sender.endsWith("@s.whatsapp.net")) {
+        const resolved = await conn.signalRepository.lidMapping.getLIDForPN(sender);
         if (resolved) {
-            senderLid =
-                typeof resolved === "string" && resolved.endsWith("@lid")
-                    ? resolved.split("@")[0]
-                    : resolved;
-        } else {
-            senderLid = senderLid.split("@")[0];
+            return typeof resolved === "string" && resolved.endsWith("@lid")
+                ? resolved.split("@")[0]
+                : resolved;
         }
-    } else {
-        senderLid = senderLid.split("@")[0];
     }
-    return senderLid;
+    
+    return sender.split("@")[0];
 };
-
-const sendDenied = async (conn, m) => {
-    const userName = await safe(() => conn.getName(m.sender), "unknown");
-
-    return conn.sendMessage(
-        m.chat,
-        {
-            text: [
-                `┌─[ACCESS DENIED]────────────`,
-                `│  Private chat is currently disabled.`,
-                "└────────────────────────────",
-                `User   : ${userName}`,
-                `Action : Blocked private access`,
-                `Group  : ${global.config.group}`,
-                "────────────────────────────",
-                "Join the group to continue using the bot.",
-            ].join("\n"),
-            contextInfo: {
-                externalAdReply: {
-                    title: "ACCESS DENIED",
-                    body: global.config.watermark,
-                    mediaType: 1,
-                    thumbnailUrl: "https://qu.ax/DdwBH.jpg",
-                    renderLargerThumbnail: true,
-                },
-            },
-        },
-        { quoted: m }
-    );
-};
-
-class MessageTracker {
-    constructor() {
-        this.active = 0;
-        this.shuttingDown = false;
-    }
-
-    async enter() {
-        if (this.shuttingDown) {
-            return false;
-        }
-        this.active++;
-        return true;
-    }
-
-    exit() {
-        this.active--;
-        if (this.active < 0) this.active = 0;
-    }
-
-    async waitForCompletion(timeoutMs = 20000) {
-        this.shuttingDown = true;
-        const start = Date.now();
-
-        while (this.active > 0) {
-            if (Date.now() - start > timeoutMs) {
-                conn.logger.warn(`Force shutdown: ${this.active} messages still processing`);
-                break;
-            }
-            await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-    }
-
-    getActive() {
-        return this.active;
-    }
-}
-
-const messageTracker = new MessageTracker();
-
-if (global.cleanupTasks) {
-    global.cleanupTasks.push(async () => {
-        await messageTracker.waitForCompletion();
-    });
-}
 
 export async function handler(chatUpdate) {
-    const canProcess = await messageTracker.enter();
-    if (!canProcess) {
-        return;
-    }
-
     try {
         if (!chatUpdate) return;
 
-        this.pushMessage(chatUpdate.messages).catch(conn.logger.error);
-        const last = chatUpdate.messages?.[chatUpdate.messages.length - 1];
-        if (!last) return;
+        this.pushMessage(chatUpdate.messages).catch(global.logger?.error);
+        
+        const m = smsg(this, chatUpdate.messages?.[chatUpdate.messages.length - 1]);
+        if (!m || m.isBaileys || m.fromMe) return;
 
-        let m = smsg(this, last) || last;
-        if (m.isBaileys || m.fromMe) return;
-
-        const settings = getSettings(this.user.lid);
-        const senderLid = await resolveSenderLid(m.sender);
-        const regOwners = global.config.owner.map((id) => id.toString().split("@")[0]);
+        const settings = global.db?.data?.settings?.[this.user.lid] || {};
+        const senderLid = await resolveLid(m.sender);
+        const regOwners = global.config.owner.map(id => id.toString().split("@")[0]);
         const isOwner = m.fromMe || regOwners.includes(senderLid);
 
+        // Get group metadata if in group
         const groupMetadata = m.isGroup
-            ? this.chats?.[m.chat]?.metadata || (await safe(() => this.groupMetadata(m.chat), null))
+            ? this.chats?.[m.chat]?.metadata || await safe(() => this.groupMetadata(m.chat), {})
             : {};
+        
         const participants = groupMetadata?.participants || [];
-        const map = Object.fromEntries(participants.map((p) => [p.id, p]));
-        const botId = conn.decodeJid(conn.user.lid);
-        const user = map[m.sender] || {};
-        const bot = map[botId] || {};
+        const participantMap = Object.fromEntries(participants.map(p => [p.id, p]));
+        
+        const botId = this.decodeJid(this.user.lid);
+        const user = participantMap[m.sender] || {};
+        const bot = participantMap[botId] || {};
+        
         const isRAdmin = user?.admin === "superadmin";
         const isAdmin = isRAdmin || user?.admin === "admin";
         const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
-        const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), "../plugins");
+
+        const __dirname = dirname(fileURLToPath(import.meta.url));
+        const pluginDir = join(__dirname, "./plugins");
 
         for (const name in global.plugins) {
             const plugin = global.plugins[name];
             if (!plugin || plugin.disabled) continue;
 
-            const __filename = join(___dirname, name);
+            const __filename = join(pluginDir, name);
 
+            // Before hook
             if (typeof plugin.before === "function") {
                 try {
                     const stop = await plugin.before.call(this, m, {
@@ -207,30 +122,33 @@ export async function handler(chatUpdate) {
                         isAdmin,
                         isBotAdmin,
                         chatUpdate,
-                        filename: __filename,
-                        dirname: ___dirname,
+                        __filename,
+                        __dirname: pluginDir,
                     });
                     if (stop) continue;
                 } catch (e) {
-                    conn.logger.error(e);
+                    global.logger?.error?.(e);
                 }
             }
 
+            // All hook
             if (typeof plugin.all === "function") {
-                await safe(() =>
-                    plugin.all.call(this, m, {
-                        chatUpdate,
-                        __dirname: ___dirname,
-                        __filename,
-                    })
-                );
+                await safe(() => plugin.all.call(this, m, {
+                    chatUpdate,
+                    __dirname: pluginDir,
+                    __filename,
+                }));
             }
 
+            // Check admin restrictions
             if (!settings?.restrict && plugin.tags?.includes("admin")) continue;
+
+            // Command matching
+            if (typeof plugin !== "function") continue;
+
             const prefix = parsePrefix(this.prefix, plugin.customPrefix);
             const body = typeof m.text === "string" ? m.text : "";
-            const match = matchPrefix(prefix, body).find((p) => p[1]);
-            if (typeof plugin !== "function") continue;
+            const match = matchPrefix(prefix, body).find(p => p[1]);
 
             let usedPrefix;
             if ((usedPrefix = (match?.[0] || "")[0])) {
@@ -238,39 +156,51 @@ export async function handler(chatUpdate) {
                 const parts = noPrefix.trim().split(/\s+/);
                 const [rawCmd, ...argsArr] = parts;
                 const command = (rawCmd || "").toLowerCase();
-                const _args = parts.slice(1);
-                const text = _args.join(" ");
-                const isAccept = isCmdAccepted(command, plugin.command);
-                if (!isAccept) continue;
+                const text = parts.slice(1).join(" ");
+
+                if (!isCmdMatch(command, plugin.command)) continue;
+
                 m.plugin = name;
-                const chat = global.db?.data?.chats?.[m.chat];
+                const chat = global.db?.data?.chats?.[m.chat] || {};
+
+                // Permission checks
                 if (!m.fromMe && settings?.self && !isOwner) return;
+                
                 if (settings?.gconly && !m.isGroup && !isOwner) {
-                    await sendDenied(this, m);
+                    await global.sendDenied(this, m);
                     return;
                 }
+
                 if (!isAdmin && !isOwner && chat?.adminOnly) return;
                 if (!isOwner && chat?.mute) return;
+
+                // Auto read
                 if (settings?.autoread) {
                     await safe(() => this.readMessages([m.key]));
                 }
+
                 const fail = plugin.fail || global.dfail;
+
                 if (plugin.owner && !isOwner) {
                     fail("owner", m, this);
                     continue;
                 }
+
                 if (plugin.group && !m.isGroup) {
                     fail("group", m, this);
                     continue;
                 }
+
                 if (plugin.restrict) {
                     fail("restrict", m, this);
                     continue;
                 }
+
                 if (plugin.botAdmin && !isBotAdmin) {
                     fail("botAdmin", m, this);
                     continue;
                 }
+
                 if (plugin.admin && !isAdmin) {
                     fail("admin", m, this);
                     continue;
@@ -280,8 +210,7 @@ export async function handler(chatUpdate) {
                     match,
                     usedPrefix,
                     noPrefix,
-                    _args,
-                    args: argsArr || [],
+                    args: argsArr,
                     command,
                     text,
                     conn: this,
@@ -294,19 +223,18 @@ export async function handler(chatUpdate) {
                     isAdmin,
                     isBotAdmin,
                     chatUpdate,
-                    __dirname: ___dirname,
+                    __dirname: pluginDir,
                     __filename,
                 };
 
-                await (async () => {
-                    try {
-                        await plugin.call(this, m, extra);
-                    } catch (e) {
-                        conn.logger.error(e);
-                        await safe(() => m.reply(`Upss.. Something went wrong.`));
-                    }
-                })();
+                try {
+                    await plugin.call(this, m, extra);
+                } catch (e) {
+                    global.logger?.error?.(e);
+                    await safe(() => m.reply("Something went wrong."));
+                }
 
+                // After hook
                 if (typeof plugin.after === "function") {
                     await safe(() => plugin.after.call(this, m, extra));
                 }
@@ -315,61 +243,11 @@ export async function handler(chatUpdate) {
             }
         }
 
-        if (!getSettings(this.user.lif)?.noprint) {
+        // Print message
+        if (!settings?.noprint) {
             await safe(() => printMessage(m, this));
         }
-    } finally {
-        messageTracker.exit();
+    } catch (e) {
+        global.logger?.error?.({ error: e.message, stack: e.stack }, "Handler error");
     }
-}
-
-const __filename = fileURLToPath(import.meta.url);
-let watcher = null;
-
-function setupFileWatcher() {
-    if (watcher) {
-        watcher.close();
-    }
-
-    watcher = chokidar.watch(__filename, {
-        persistent: true,
-        ignoreInitial: true,
-        awaitWriteFinish: {
-            stabilityThreshold: 300,
-            pollInterval: 100,
-        },
-    });
-
-    watcher.on("change", async (path) => {
-        conn.logger.info(`handler.js changed at ${path} — reloading modules`);
-
-        try {
-            if (global.reloadHandler) {
-                await global.reloadHandler();
-            }
-        } catch (e) {
-            conn.logger.error(e);
-        }
-    });
-
-    watcher.on("error", (error) => {
-        conn.logger.error(error);
-    });
-}
-
-setupFileWatcher();
-
-if (global.cleanupTasks) {
-    global.cleanupTasks.push(async () => {
-        if (watcher) {
-            await watcher.close();
-        }
-    });
-}
-
-export function getHandlerStatus() {
-    return {
-        activeMessages: messageTracker.getActive(),
-        shuttingDown: messageTracker.shuttingDown,
-    };
 }
