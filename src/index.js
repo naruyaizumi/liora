@@ -19,7 +19,7 @@ const rootDir = process.cwd();
 
 async function ensureDirs() {
     try {
-        await mkdir(join(rootDir, "database"), { recursive: true });
+        await mkdir(join(rootDir, "src/database"), { recursive: true });
     } catch (e) {
         logger.error({ error: e.message }, "Failed to create directories");
         throw e;
@@ -101,14 +101,12 @@ async function stopChild(reason = "shutdown") {
 
     let exitedGracefully = false;
 
-    // Send SIGTERM for graceful shutdown
     try {
         childProcess.kill("SIGTERM");
     } catch (e) {
         logger.error({ error: e.message }, "Failed to send SIGTERM");
     }
 
-    // Wait for graceful exit
     const gracefulExit = new Promise((resolve) => {
         const onExit = () => {
             exitedGracefully = true;
@@ -128,7 +126,6 @@ async function stopChild(reason = "shutdown") {
 
     await Promise.race([gracefulExit, timeout]);
 
-    // Force kill if still running
     if (childProcess && !exitedGracefully) {
         logger.warn("Child process did not exit gracefully, sending SIGKILL");
         try {
@@ -153,13 +150,11 @@ async function supervise() {
 
         const exitCode = await start("main.js");
 
-        // Clean exit or shutdown
         if (isShuttingDown || exitCode === 0) {
             logger.info("Clean exit, stopping supervisor");
             break;
         }
 
-        // Track crash rate
         const now = Date.now();
         if (now - lastCrash < CRASH_WINDOW) {
             crashCount++;
@@ -168,7 +163,6 @@ async function supervise() {
         }
         lastCrash = now;
 
-        // Too many crashes - cooldown
         if (crashCount >= MAX_CRASHES) {
             logger.warn(
                 {
@@ -194,21 +188,18 @@ async function supervise() {
     }
 }
 
-// Graceful shutdown on SIGTERM
 process.once("SIGTERM", async () => {
     logger.info("Received SIGTERM");
     await stopChild("SIGTERM");
     process.exit(0);
 });
 
-// Graceful shutdown on SIGINT (Ctrl+C)
 process.once("SIGINT", async () => {
     logger.info("Received SIGINT");
     await stopChild("SIGINT");
     process.exit(0);
 });
 
-// Handle uncaught errors
 process.on("uncaughtException", async (e) => {
     logger.error({ error: e.message, stack: e.stack }, "Uncaught exception in supervisor");
     await stopChild("uncaughtException");
@@ -224,7 +215,6 @@ process.on("unhandledRejection", async (e) => {
     process.exit(1);
 });
 
-// Start supervising
 supervise().catch(async (e) => {
     logger.fatal({ error: e.message, stack: e.stack }, "Fatal supervisor error");
     await stopChild("fatal");
