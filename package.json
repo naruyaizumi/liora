@@ -42,11 +42,11 @@
         "prettier": "^3.7.4"
     },
     "imports": {
-        "#api": "./src/lib/api/*",
+        "#api/*": "./src/lib/api/*",
         "#auth": "./src/lib/auth/auth.js",
-        "#canvas": "./src/lib/canvas/*",
-        "#core": "./src/lib/core/*",
-        "#cpp": "./src/lib/cpp/*",
-        "#lib": "./src/lib/*"
+        "#canvas/*": "./src/lib/canvas/*",
+        "#core/*": "./src/lib/core/*",
+        "#cpp": "./src/lib/cpp/bridge-async.js",
+        "#lib/*": "./src/lib/*"
     }
 }
