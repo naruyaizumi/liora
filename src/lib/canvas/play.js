@@ -20,7 +20,7 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 export async function canvas(coverUrl, title, artist) {
     const W = 1200;
     const H = 630;
-    
+
     const canvas = createCanvas(W, H);
     const ctx = canvas.getContext("2d");
 

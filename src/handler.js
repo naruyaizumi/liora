@@ -28,9 +28,8 @@ const matchPrefix = (prefix, text) => {
 
     if (Array.isArray(prefix)) {
         return prefix.map((p) => {
-            const re = p instanceof RegExp 
-                ? p 
-                : new RegExp(p.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&"));
+            const re =
+                p instanceof RegExp ? p : new RegExp(p.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&"));
             return [re.exec(text), re];
         });
     }
@@ -46,9 +45,8 @@ const matchPrefix = (prefix, text) => {
 
 const isCmdMatch = (cmd, rule) => {
     if (rule instanceof RegExp) return rule.test(cmd);
-    if (Array.isArray(rule)) return rule.some(r => 
-        r instanceof RegExp ? r.test(cmd) : r === cmd
-    );
+    if (Array.isArray(rule))
+        return rule.some((r) => (r instanceof RegExp ? r.test(cmd) : r === cmd));
     if (typeof rule === "string") return rule === cmd;
     return false;
 };
@@ -57,7 +55,7 @@ const resolveLid = async (sender) => {
     if (sender.endsWith("@lid")) {
         return sender.split("@")[0];
     }
-    
+
     if (sender.endsWith("@s.whatsapp.net")) {
         const resolved = await conn.signalRepository.lidMapping.getLIDForPN(sender);
         if (resolved) {
@@ -66,7 +64,7 @@ const resolveLid = async (sender) => {
                 : resolved;
         }
     }
-    
+
     return sender.split("@")[0];
 };
 
@@ -75,25 +73,25 @@ export async function handler(chatUpdate) {
         if (!chatUpdate) return;
 
         this.pushMessage(chatUpdate.messages).catch(global.logger.error);
-        
+
         const m = smsg(this, chatUpdate.messages?.[chatUpdate.messages.length - 1]);
         if (!m || m.isBaileys || m.fromMe) return;
 
         const settings = global.db?.data?.settings?.[this.user.lid] || {};
         const senderLid = await resolveLid(m.sender);
-        const regOwners = global.config.owner.map(id => id.toString().split("@")[0]);
+        const regOwners = global.config.owner.map((id) => id.toString().split("@")[0]);
         const isOwner = m.fromMe || regOwners.includes(senderLid);
         const groupMetadata = m.isGroup
-            ? this.chats?.[m.chat]?.metadata || await safe(() => this.groupMetadata(m.chat), {})
+            ? this.chats?.[m.chat]?.metadata || (await safe(() => this.groupMetadata(m.chat), {}))
             : {};
-        
+
         const participants = groupMetadata?.participants || [];
-        const participantMap = Object.fromEntries(participants.map(p => [p.id, p]));
-        
+        const participantMap = Object.fromEntries(participants.map((p) => [p.id, p]));
+
         const botId = this.decodeJid(this.user.lid);
         const user = participantMap[m.sender] || {};
         const bot = participantMap[botId] || {};
-        
+
         const isRAdmin = user?.admin === "superadmin";
         const isAdmin = isRAdmin || user?.admin === "admin";
         const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
@@ -129,11 +127,13 @@ export async function handler(chatUpdate) {
             }
 
             if (typeof plugin.all === "function") {
-                await safe(() => plugin.all.call(this, m, {
-                    chatUpdate,
-                    __dirname: pluginDir,
-                    __filename,
-                }));
+                await safe(() =>
+                    plugin.all.call(this, m, {
+                        chatUpdate,
+                        __dirname: pluginDir,
+                        __filename,
+                    })
+                );
             }
 
             if (!settings?.restrict && plugin.tags?.includes("admin")) continue;
@@ -142,7 +142,7 @@ export async function handler(chatUpdate) {
 
             const prefix = parsePrefix(this.prefix, plugin.customPrefix);
             const body = typeof m.text === "string" ? m.text : "";
-            const match = matchPrefix(prefix, body).find(p => p[1]);
+            const match = matchPrefix(prefix, body).find((p) => p[1]);
 
             let usedPrefix;
             if ((usedPrefix = (match?.[0] || "")[0])) {
@@ -158,7 +158,7 @@ export async function handler(chatUpdate) {
                 const chat = global.db?.data?.chats?.[m.chat] || {};
 
                 if (!m.fromMe && settings?.self && !isOwner) return;
-                
+
                 if (settings?.gconly && !m.isGroup && !isOwner) {
                     await global.sendDenied(this, m);
                     return;

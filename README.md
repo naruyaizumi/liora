@@ -83,6 +83,7 @@ curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/src/lib/shel
 ```
 
 **🌩️ Or manual installation**
+
 </div>
 
 ```bash

@@ -26,7 +26,7 @@ class TransactionManager {
         if (!m) {
             m = new Mutex();
             this.typeMutex.set(type, m);
-            
+
             if (this.typeMutex.size > this.mutexCleanupThreshold) {
                 this._scheduleCleanupMutexes();
             }
@@ -37,7 +37,7 @@ class TransactionManager {
     _scheduleCleanupMutexes() {
         const now = Date.now();
         if (now - this.lastMutexCleanup < 5000) return;
-        
+
         if (this.mutexCleanupTimer) return;
 
         this.mutexCleanupTimer = setTimeout(() => {
@@ -74,12 +74,12 @@ class TransactionManager {
 
     _checkCacheSize() {
         if (!this.txnCache) return false;
-        
+
         let totalSize = 0;
         for (const type in this.txnCache) {
             totalSize += Object.keys(this.txnCache[type]).length;
         }
-        
+
         if (totalSize > MAX_TRANSACTION_CACHE_SIZE) {
             global.logger.warn(`Transaction cache size exceeded: ${totalSize}`);
             return true;
@@ -94,7 +94,7 @@ class TransactionManager {
             }
             this.txnCache = null;
         }
-        
+
         if (this.txnMutations) {
             for (const type in this.txnMutations) {
                 delete this.txnMutations[type];
@@ -169,7 +169,7 @@ function createKeyStore() {
                     }
                 }
             }
-            
+
             txnManager._checkCacheSize();
             return out;
         }
@@ -189,7 +189,7 @@ function createKeyStore() {
                     muBucket[id] = normalized;
                 }
             }
-            
+
             txnManager._checkCacheSize();
             return;
         }
@@ -222,11 +222,11 @@ function createKeyStore() {
             if (!isOutermost) {
                 const clonedCache = core.deepClone(txnManager.txnCache);
                 const clonedMutations = core.deepClone(txnManager.txnMutations);
-                
-                if (clonedCache !== null && typeof clonedCache === 'object') {
+
+                if (clonedCache !== null && typeof clonedCache === "object") {
                     savedCache = clonedCache;
                 }
-                if (clonedMutations !== null && typeof clonedMutations === 'object') {
+                if (clonedMutations !== null && typeof clonedMutations === "object") {
                     savedMutations = clonedMutations;
                 }
             } else {
@@ -258,7 +258,7 @@ function createKeyStore() {
                 return result;
             } catch (e) {
                 global.logger.error(`Transaction error: ${e.message}`);
-                
+
                 if (!isOutermost && savedCache !== null && savedMutations !== null) {
                     txnManager.txnCache = savedCache;
                     txnManager.txnMutations = savedMutations;
@@ -266,11 +266,11 @@ function createKeyStore() {
                 throw e;
             } finally {
                 txnManager.transactionsInProgress -= 1;
-                
+
                 if (isOutermost) {
                     txnManager.clearTransactionData();
                 }
-                
+
                 if (txnManager.transactionsInProgress === 0) {
                     txnManager._scheduleCleanupMutexes();
                 }
@@ -300,7 +300,7 @@ function createKeyStore() {
         _dispose: async () => {
             await core.flush();
             txnManager.dispose();
-        }
+        },
     };
 }
 
@@ -331,7 +331,7 @@ export function useSQLiteAuthState(_dbPath, _options) {
 
         async clear() {
             return keyStore.clear();
-        }
+        },
     };
 
     function saveCreds() {

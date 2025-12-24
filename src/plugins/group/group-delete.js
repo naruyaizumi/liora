@@ -3,10 +3,8 @@ let handler = async (m, { conn }) => {
     const { chat, id, participant, sender, fromMe } = m.quoted.vM;
     if (m.isBaileys || m.fromMe) return true;
     const quotedSender = participant || sender;
-    if (!quotedSender) return m.reply(
-        "Could not identify quoted sender.");
-    if (fromMe) return m.reply(
-        "Cannot delete messages sent by the bot.");
+    if (!quotedSender) return m.reply("Could not identify quoted sender.");
+    if (fromMe) return m.reply("Cannot delete messages sent by the bot.");
     try {
         await conn.sendMessage(chat, {
             delete: {

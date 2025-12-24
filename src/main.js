@@ -28,7 +28,7 @@ let isShuttingDown = false;
 async function setupPairingCode(conn) {
     return new Promise((resolve) => {
         const timeout = setTimeout(resolve, 3000);
-        
+
         const checkConnection = setInterval(() => {
             if (conn.user || conn.ws?.readyState === 1) {
                 clearInterval(checkConnection);
@@ -49,10 +49,10 @@ async function setupPairingCode(conn) {
 
 async function LIORA() {
     authState = useSQLiteAuthState();
-    
+
     const { state, saveCreds } = authState;
     const { version: baileysVersion } = await fetchLatestBaileysVersion();
-    
+
     global.logger.info(
         `[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}`
     );
@@ -88,24 +88,19 @@ async function LIORA() {
 
     global.conn.connectionUpdate = handleDisconnect.bind(global.conn);
     global.conn.ev.on("connection.update", global.conn.connectionUpdate);
-    global.reloadHandler = await eventManager.createReloadHandler(
-        connectionOptions,
-        saveCreds
-    );
+    global.reloadHandler = await eventManager.createReloadHandler(connectionOptions, saveCreds);
 
     const filename = fileURLToPath(import.meta.url);
     const pluginFolder = join(dirname(filename), "./plugins");
 
-    await loadPlugins(pluginFolder, (dir, skipCache) =>
-        getAllPlugins(dir, pluginCache, skipCache)
-    );
+    await loadPlugins(pluginFolder, (dir, skipCache) => getAllPlugins(dir, pluginCache, skipCache));
 
     hotReloadCleanup = initHotReload(pluginFolder, async (filename, module) => {
         try {
             if (module === null) {
                 const oldPlugin = global.plugins[filename];
-                
-                if (oldPlugin && typeof oldPlugin.cleanup === 'function') {
+
+                if (oldPlugin && typeof oldPlugin.cleanup === "function") {
                     try {
                         await oldPlugin.cleanup();
                     } catch (e) {
@@ -121,8 +116,8 @@ async function LIORA() {
             } else {
                 const oldPlugin = global.plugins[filename];
 
-                if (typeof module === 'function' || typeof module === 'object') {
-                    if (oldPlugin && typeof oldPlugin.cleanup === 'function') {
+                if (typeof module === "function" || typeof module === "object") {
+                    if (oldPlugin && typeof oldPlugin.cleanup === "function") {
                         try {
                             await oldPlugin.cleanup();
                         } catch (e) {
@@ -134,8 +129,8 @@ async function LIORA() {
                     }
 
                     global.plugins[filename] = module;
-                    
-                    if (typeof module.init === 'function') {
+
+                    if (typeof module.init === "function") {
                         try {
                             await module.init();
                         } catch (e) {
@@ -168,7 +163,7 @@ async function gracefulShutdown(signal) {
     isShuttingDown = true;
 
     global.logger.info(`Received ${signal}, shutting down gracefully...`);
-    
+
     try {
         if (hotReloadCleanup) {
             hotReloadCleanup();
@@ -176,7 +171,7 @@ async function gracefulShutdown(signal) {
         }
 
         cleanupReconnect();
-        
+
         if (global.conn?.ev) {
             try {
                 global.conn.ev.removeAllListeners();
@@ -201,7 +196,7 @@ async function gracefulShutdown(signal) {
             }
         }
 
-        if (authState && typeof authState.dispose === 'function') {
+        if (authState && typeof authState.dispose === "function") {
             try {
                 await authState.dispose();
             } catch (e) {
@@ -209,36 +204,36 @@ async function gracefulShutdown(signal) {
             }
         }
 
-        global.logger.info('Shutdown completed');
+        global.logger.info("Shutdown completed");
     } catch (e) {
         global.logger.error({ error: e.message }, "Shutdown error");
     }
 }
 
-process.on('SIGTERM', async () => {
-    await gracefulShutdown('SIGTERM');
+process.on("SIGTERM", async () => {
+    await gracefulShutdown("SIGTERM");
     process.exit(0);
 });
 
-process.on('SIGINT', async () => {
-    await gracefulShutdown('SIGINT');
+process.on("SIGINT", async () => {
+    await gracefulShutdown("SIGINT");
     process.exit(0);
 });
 
-process.on('uncaughtException', async (e) => {
-    global.logger.error({ error: e.message, stack: e.stack }, 'Uncaught exception');
-    await gracefulShutdown('uncaughtException');
+process.on("uncaughtException", async (e) => {
+    global.logger.error({ error: e.message, stack: e.stack }, "Uncaught exception");
+    await gracefulShutdown("uncaughtException");
     process.exit(1);
 });
 
-process.on('unhandledRejection', async (e) => {
-    global.logger.error({ error: e?.message, stack: e?.stack }, 'Unhandled rejection');
-    await gracefulShutdown('unhandledRejection');
+process.on("unhandledRejection", async (e) => {
+    global.logger.error({ error: e?.message, stack: e?.stack }, "Unhandled rejection");
+    await gracefulShutdown("unhandledRejection");
     process.exit(1);
 });
 
 LIORA().catch(async (e) => {
     global.logger.fatal({ error: e.message, stack: e.stack }, "Fatal initialization error");
-    await gracefulShutdown('fatal');
+    await gracefulShutdown("fatal");
     process.exit(1);
 });

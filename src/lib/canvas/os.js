@@ -223,20 +223,20 @@ export async function canvas(systemData) {
     const HD_SCALE = 2;
     const BASE_WIDTH = 1200;
     const BASE_HEIGHT = 900;
-    
+
     const W = BASE_WIDTH * HD_SCALE;
     const H = BASE_HEIGHT * HD_SCALE;
-    
+
     const canvas = createCanvas(W, H);
     const ctx = canvas.getContext("2d");
-    
-    ctx.antialias = 'default';
+
+    ctx.antialias = "default";
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.textDrawingMode = 'glyph';
-    
+    ctx.imageSmoothingQuality = "high";
+    ctx.textDrawingMode = "glyph";
+
     ctx.scale(HD_SCALE, HD_SCALE);
-    
+
     const bgGrad = ctx.createLinearGradient(0, 0, BASE_WIDTH, BASE_HEIGHT);
     bgGrad.addColorStop(0, "#EDF2F7");
     bgGrad.addColorStop(0.5, "#E2E8F0");
@@ -638,6 +638,6 @@ export async function canvas(systemData) {
 
     return canvas.toBuffer("image/png", {
         compressionLevel: 0,
-        filters: canvas.PNG_ALL_FILTERS
+        filters: canvas.PNG_ALL_FILTERS,
     });
 }

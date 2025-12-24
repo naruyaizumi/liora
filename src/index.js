@@ -59,18 +59,15 @@ async function start(file) {
 
             childProcess.on("exit", (code, signal) => {
                 const exitCode = code ?? 0;
-                
+
                 if (!isShuttingDown) {
                     if (exitCode !== 0) {
-                        logger.warn(
-                            { code: exitCode, signal },
-                            "Child process exited with error"
-                        );
+                        logger.warn({ code: exitCode, signal }, "Child process exited with error");
                     } else if (signal) {
                         logger.info({ signal }, "Child process terminated by signal");
                     }
                 }
-                
+
                 childProcess = null;
                 resolve(exitCode);
             });
@@ -112,7 +109,7 @@ async function stopChild(reason = "shutdown") {
             exitedGracefully = true;
             resolve();
         };
-        
+
         if (childProcess) {
             childProcess.once("exit", onExit);
         } else {
@@ -120,9 +117,7 @@ async function stopChild(reason = "shutdown") {
         }
     });
 
-    const timeout = new Promise((resolve) => 
-        setTimeout(resolve, GRACEFUL_SHUTDOWN_TIMEOUT)
-    );
+    const timeout = new Promise((resolve) => setTimeout(resolve, GRACEFUL_SHUTDOWN_TIMEOUT));
 
     await Promise.race([gracefulExit, timeout]);
 
@@ -168,7 +163,7 @@ async function supervise() {
                 {
                     crashes: crashCount,
                     window: CRASH_WINDOW / 1000,
-                    cooldown: COOLDOWN_TIME / 1000
+                    cooldown: COOLDOWN_TIME / 1000,
                 },
                 "Too many crashes, cooling down..."
             );
@@ -179,7 +174,7 @@ async function supervise() {
                 {
                     crashes: crashCount,
                     max: MAX_CRASHES,
-                    delay: RESTART_DELAY / 1000
+                    delay: RESTART_DELAY / 1000,
                 },
                 "Restarting after crash..."
             );
@@ -207,10 +202,7 @@ process.on("uncaughtException", async (e) => {
 });
 
 process.on("unhandledRejection", async (e) => {
-    logger.error(
-        { error: e?.message, stack: e?.stack },
-        "Unhandled rejection in supervisor"
-    );
+    logger.error({ error: e?.message, stack: e?.stack }, "Unhandled rejection in supervisor");
     await stopChild("unhandledRejection");
     process.exit(1);
 });

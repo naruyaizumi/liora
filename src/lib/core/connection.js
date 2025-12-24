@@ -65,7 +65,8 @@ export async function getAllPlugins(dir, cacheManager, skipCache = false) {
 }
 
 export async function loadPlugins(pluginFolder, getAllPluginsFn) {
-    let success = 0, failed = 0;
+    let success = 0,
+        failed = 0;
     global.plugins = {};
 
     try {
@@ -73,7 +74,7 @@ export async function loadPlugins(pluginFolder, getAllPluginsFn) {
 
         for (const filepath of files) {
             const filename = normalize(relative(pluginFolder, filepath)).replace(/\\/g, "/");
-            
+
             try {
                 const module = await import(`${filepath}?init=${Date.now()}`);
                 global.plugins[filename] = module.default || module;
@@ -81,7 +82,10 @@ export async function loadPlugins(pluginFolder, getAllPluginsFn) {
             } catch (e) {
                 delete global.plugins[filename];
                 failed++;
-                global.logger?.warn?.({ file: filename, error: e.message }, "Failed to load plugin");
+                global.logger?.warn?.(
+                    { file: filename, error: e.message },
+                    "Failed to load plugin"
+                );
             }
         }
 
@@ -159,15 +163,15 @@ export function initHotReload(watchPath, onReload) {
                 const cacheKey = `${Date.now()}-${++reloadCounter}`;
                 const module = await import(`${filepath}?v=${cacheKey}`);
 
-                if (!module || (typeof module !== 'object' && typeof module !== 'function')) {
+                if (!module || (typeof module !== "object" && typeof module !== "function")) {
                     throw new Error("Invalid module export");
                 }
 
                 await Promise.race([
                     onReload(filename, module.default || module),
-                    new Promise((_, reject) => 
+                    new Promise((_, reject) =>
                         setTimeout(() => reject(new Error("Reload timeout")), RELOAD_TIMEOUT)
-                    )
+                    ),
                 ]);
 
                 clearTimeout(timeoutId);
@@ -175,20 +179,19 @@ export function initHotReload(watchPath, onReload) {
                 global.logger?.info?.({ file: filename }, "File reloaded");
             } catch (e) {
                 clearTimeout(timeoutId);
-                
+
                 const newFailCount = failCount + 1;
                 failedReloads.set(filename, newFailCount);
 
                 global.logger?.error?.(
-                    { 
-                        file: filename, 
+                    {
+                        file: filename,
                         error: e.message,
                         stack: e.stack,
-                        attempts: newFailCount
+                        attempts: newFailCount,
                     },
                     "Reload failed"
                 );
-
             } finally {
                 setTimeout(() => reloadLocks.delete(filename), 1000);
             }
@@ -213,7 +216,7 @@ export function initHotReload(watchPath, onReload) {
 
         const timer = setTimeout(() => {
             debounceTimers.delete(filename);
-            reloadFile(filepath).catch(e => {
+            reloadFile(filepath).catch((e) => {
                 global.logger?.debug?.({ error: e.message }, "Debounced reload error");
             });
         }, 500);
@@ -246,7 +249,7 @@ export function initHotReload(watchPath, onReload) {
 
                 const filename = normalize(relative(watchPath, filepath)).replace(/\\/g, "/");
                 if (filename.endsWith(".js")) {
-                    onReload(filename, null).catch(e => {
+                    onReload(filename, null).catch((e) => {
                         global.logger?.error?.({ error: e.message }, "Unlink error");
                     });
                 }
@@ -274,7 +277,7 @@ export function initHotReload(watchPath, onReload) {
             }
         }
 
-        debounceTimers.forEach(timer => clearTimeout(timer));
+        debounceTimers.forEach((timer) => clearTimeout(timer));
         debounceTimers.clear();
         reloadLocks.clear();
         failedReloads.clear();
@@ -358,7 +361,7 @@ export class EventManager {
                     }
 
                     global.conn = null;
-                    await new Promise(r => setTimeout(r, 100));
+                    await new Promise((r) => setTimeout(r, 100));
                 } catch (e) {
                     global.logger?.error?.({ error: e.message }, "Restart error");
                 }
@@ -393,15 +396,12 @@ const backoff = (baseMs, factor = 1.8, maxMs = 60_000) => {
 
 const getDisconnectReason = (error) => {
     const code = String(
-        error?.output?.statusCode ??
-        error?.statusCode ??
-        error?.code ??
-        0
+        error?.output?.statusCode ?? error?.statusCode ?? error?.code ?? 0
     ).toUpperCase();
 
     const reasons = {
-        "428": "replaced_by_another_session",
-        "515": "connection_replaced",
+        428: "replaced_by_another_session",
+        515: "connection_replaced",
     };
 
     if (reasons[code]) return reasons[code];
@@ -480,15 +480,13 @@ export async function handleDisconnect({ lastDisconnect, connection, isNewLogin 
         RECONNECT_STATE.timer = null;
 
         try {
-            await new Promise(r => setTimeout(r, 200));
+            await new Promise((r) => setTimeout(r, 200));
             await global.reloadHandler(true);
 
             RECONNECT_STATE.attempts += 1;
             RECONNECT_STATE.lastAt = Date.now();
 
-            global.logger?.info?.(
-                `Reconnected (attempt ${RECONNECT_STATE.attempts})`
-            );
+            global.logger?.info?.(`Reconnected (attempt ${RECONNECT_STATE.attempts})`);
         } catch (e) {
             global.logger?.error?.({ error: e.message }, "Reconnect failed");
             RECONNECT_STATE.attempts += 1;

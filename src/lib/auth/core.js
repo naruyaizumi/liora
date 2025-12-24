@@ -20,7 +20,6 @@ export const parse = (str) => {
 
 export const makeKey = (type, id) => `${type}-${id}`;
 
-
 const CLONE_FAILED = Symbol("CLONE_FAILED");
 const MAX_CLONE_DEPTH = 50;
 
@@ -73,8 +72,7 @@ class DatabaseCore {
             deleteOnExpire: true,
         });
 
-        this.cache.on('del', () => {
-        });
+        this.cache.on("del", () => {});
 
         this.dbQueue = new PQueue({ concurrency: 1 });
         this.writeBuffer = new WriteBuffer();
@@ -84,7 +82,7 @@ class DatabaseCore {
         this.flushTimer = null;
         this.disposed = false;
         this.isCleaningUp = false;
-        
+
         this.txCommit = this.db.transaction((upsertsArr, deletesArr) => {
             for (let i = 0; i < upsertsArr.length; i += this.maxBatch) {
                 const slice = upsertsArr.slice(i, i + this.maxBatch);
@@ -150,7 +148,7 @@ class DatabaseCore {
         if (!this.flushTimer && !this.disposed && !this.isCleaningUp) {
             this.flushTimer = setTimeout(() => {
                 this.flushTimer = null;
-                this.flush().catch(err => {
+                this.flush().catch((err) => {
                     if (!this.disposed) {
                         global.logger.error(`Flush error: ${err.message}`);
                     }
@@ -185,10 +183,10 @@ class DatabaseCore {
     deepClone(obj, depth = 0) {
         if (obj === null || obj === undefined) return obj;
         if (depth > MAX_CLONE_DEPTH) {
-            global.logger.warn('Max clone depth reached');
+            global.logger.warn("Max clone depth reached");
             return CLONE_FAILED;
         }
-        
+
         try {
             const serialized = stringify(obj);
             const result = parse(serialized);
@@ -199,10 +197,10 @@ class DatabaseCore {
             return CLONE_FAILED;
         }
     }
-    
+
     async dispose() {
         if (this.disposed || this.isCleaningUp) return;
-        
+
         this.isCleaningUp = true;
 
         if (this.flushTimer) {
@@ -211,12 +209,12 @@ class DatabaseCore {
         }
 
         try {
-            const timeout = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Cleanup timeout')), 5000)
+            const timeout = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Cleanup timeout")), 5000)
             );
-            
+
             await Promise.race([this.dbQueue.onIdle(), timeout]).catch(() => {
-                global.logger.warn('Database queue cleanup timeout');
+                global.logger.warn("Database queue cleanup timeout");
             });
 
             const { upserts, deletes } = this.writeBuffer.toArrays();
@@ -233,12 +231,11 @@ class DatabaseCore {
                 this.db.pragma("optimize");
                 this.db.close();
             }
-
         } catch (e) {
             global.logger.error(`Dispose error: ${e.message}`);
         } finally {
             this.disposed = true;
-            
+
             this.stmtGet = null;
             this.stmtSet = null;
             this.stmtDel = null;

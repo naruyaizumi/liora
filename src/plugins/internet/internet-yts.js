@@ -12,17 +12,17 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         const url = `https://api.nekolabs.web.id/discovery/youtube/search?q=${encodeURIComponent(text)}`;
         const response = await fetch(url);
-        
+
         if (!response.ok) {
             throw new Error(`API request failed: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (!data.success || !Array.isArray(data.result)) {
             throw new Error("Invalid API response");
         }
-        
+
         const videos = data.result;
 
         if (videos.length === 0) {
@@ -30,7 +30,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         }
 
         const imageBuffer = await canvas(videos, text);
-        
+
         const rows = videos.map((video, index) => ({
             header: `Result ${index + 1}`,
             title: video.title,

@@ -21,21 +21,21 @@ function drawCard(ctx, x, y, w, h, r = 12) {
     ctx.shadowBlur = 20;
     ctx.shadowOffsetY = 8;
     roundRect(ctx, x, y, w, h, r);
-    
+
     ctx.fillStyle = "#181818";
     ctx.fill();
-    
+
     ctx.restore();
 }
 
 function drawSearchBar(ctx, x, y, w, h, query) {
     ctx.save();
-    
+
     roundRect(ctx, x, y, w, h, 500);
-    
+
     ctx.fillStyle = "#FFFFFF";
     ctx.fill();
-    
+
     ctx.strokeStyle = "#000000";
     ctx.lineWidth = 2.5;
     ctx.beginPath();
@@ -45,31 +45,31 @@ function drawSearchBar(ctx, x, y, w, h, query) {
     ctx.moveTo(x + 35, y + h / 2 + 6);
     ctx.lineTo(x + 40, y + h / 2 + 11);
     ctx.stroke();
-    
+
     ctx.fillStyle = "#000000";
     ctx.font = "22px Cobbler";
     ctx.textAlign = "left";
     ctx.fillText(query, x + 55, y + h / 2 + 7);
-    
+
     ctx.restore();
 }
 
 function drawStatsCard(ctx, x, y, w, h, title, value) {
     ctx.save();
-    
+
     roundRect(ctx, x, y, w, h, 8);
     ctx.fillStyle = "#181818";
     ctx.fill();
-    
+
     ctx.fillStyle = "#B3B3B3";
     ctx.font = "14px Cobbler";
     ctx.textAlign = "left";
     ctx.fillText(title, x + 20, y + 35);
-    
+
     ctx.fillStyle = "#FFFFFF";
     ctx.font = "bold 36px Cobbler";
     ctx.fillText(value, x + 20, y + 80);
-    
+
     ctx.restore();
 }
 
@@ -86,32 +86,32 @@ function formatDuration(seconds) {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hrs > 0) {
-        return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        return `${hrs}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     }
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
 function drawInfoBadge(ctx, x, y, text) {
     ctx.save();
-    
+
     const padding = 12;
     const height = 32;
     const textWidth = ctx.measureText(text).width;
     const width = textWidth + padding * 2;
-    
+
     roundRect(ctx, x, y, width, height, 16);
     ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
     ctx.fill();
-    
+
     ctx.fillStyle = "#FFFFFF";
     ctx.font = "bold 14px Cobbler";
     ctx.textAlign = "center";
     ctx.fillText(text, x + width / 2, y + height / 2 + 4);
-    
+
     ctx.restore();
-    
+
     return width;
 }
 
@@ -119,18 +119,18 @@ export async function canvas(tracks, query) {
     const HD_SCALE = 2;
     const BASE_WIDTH = 1400;
     const BASE_HEIGHT = 1500;
-    
+
     const W = BASE_WIDTH * HD_SCALE;
     const H = BASE_HEIGHT * HD_SCALE;
-    
+
     const canvas = createCanvas(W, H);
     const ctx = canvas.getContext("2d");
-    
-    ctx.antialias = 'default';
+
+    ctx.antialias = "default";
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.textDrawingMode = 'glyph';
-    
+    ctx.imageSmoothingQuality = "high";
+    ctx.textDrawingMode = "glyph";
+
     ctx.scale(HD_SCALE, HD_SCALE);
 
     const bgGradient = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
@@ -150,7 +150,9 @@ export async function canvas(tracks, query) {
         })
     );
 
-    const spotifyLogo = await loadImage("https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Green.png");
+    const spotifyLogo = await loadImage(
+        "https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_RGB_Green.png"
+    );
 
     const padding = 50;
 
@@ -161,7 +163,7 @@ export async function canvas(tracks, query) {
     const logoW = 150;
     const logoH = 45;
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
+    ctx.imageSmoothingQuality = "high";
     ctx.drawImage(spotifyLogo, padding, 35, logoW, logoH);
     ctx.restore();
 
@@ -172,14 +174,14 @@ export async function canvas(tracks, query) {
 
     const badgeY = 50;
     let badgeX = BASE_WIDTH - padding;
-    
+
     ctx.font = "bold 14px Cobbler";
-    
+
     const totalTracks = tracks.length;
     const w1 = drawInfoBadge(ctx, badgeX - 110, badgeY, `${totalTracks} tracks`);
     badgeX -= w1 + 10;
-    
-    const totalArtists = new Set(tracks.slice(0, 20).map(t => t.artist)).size;
+
+    const totalArtists = new Set(tracks.slice(0, 20).map((t) => t.artist)).size;
     drawInfoBadge(ctx, badgeX - 120, badgeY, `${totalArtists} artists`);
 
     const statsY = 180;
@@ -187,40 +189,36 @@ export async function canvas(tracks, query) {
     const cardH = 110;
     const cardGap = 20;
 
-    const totalDuration = tracks.slice(0, 20).reduce((sum, t) => sum + parseDuration(t.duration), 0);
+    const totalDuration = tracks
+        .slice(0, 20)
+        .reduce((sum, t) => sum + parseDuration(t.duration), 0);
     const avgDuration = Math.floor(totalDuration / Math.min(tracks.length, 20));
-    const totalPlaytime = tracks.slice(0, 20).reduce((sum, t) => sum + parseDuration(t.duration), 0);
+    const totalPlaytime = tracks
+        .slice(0, 20)
+        .reduce((sum, t) => sum + parseDuration(t.duration), 0);
 
     const statsCards = [
         {
             title: "TOTAL TRACKS",
             value: tracks.length.toString(),
         },
-        { 
-            title: "AVG DURATION", 
+        {
+            title: "AVG DURATION",
             value: formatDuration(avgDuration),
         },
-        { 
-            title: "TOTAL PLAYTIME", 
+        {
+            title: "TOTAL PLAYTIME",
             value: formatDuration(totalPlaytime),
         },
         {
             title: "ARTISTS",
-            value: new Set(tracks.slice(0, 20).map(t => t.artist)).size.toString(),
+            value: new Set(tracks.slice(0, 20).map((t) => t.artist)).size.toString(),
         },
     ];
 
     statsCards.forEach((card, i) => {
         const cardX = padding + i * (cardW + cardGap);
-        drawStatsCard(
-            ctx,
-            cardX,
-            statsY,
-            cardW,
-            cardH,
-            card.title,
-            card.value
-        );
+        drawStatsCard(ctx, cardX, statsY, cardW, cardH, card.title, card.value);
     });
 
     const albumY = statsY + cardH + 40;
@@ -246,8 +244,8 @@ export async function canvas(tracks, query) {
             ctx.clip();
 
             ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            
+            ctx.imageSmoothingQuality = "high";
+
             const scale = Math.max((trackCardW - 30) / img.width, coverSize / img.height);
             const sw = (trackCardW - 30) / scale;
             const sh = coverSize / scale;
@@ -325,7 +323,7 @@ export async function canvas(tracks, query) {
     }
 
     const footerY = BASE_HEIGHT - 70;
-    
+
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(0, footerY, BASE_WIDTH, 70);
 
@@ -348,6 +346,6 @@ export async function canvas(tracks, query) {
 
     return canvas.toBuffer("image/png", {
         compressionLevel: 0,
-        filters: canvas.PNG_ALL_FILTERS
+        filters: canvas.PNG_ALL_FILTERS,
     });
 }

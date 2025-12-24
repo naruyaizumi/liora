@@ -19,11 +19,7 @@ let handler = async (m, { conn, text }) => {
             return m.reply("Copilot AI did not return a valid response.");
         }
 
-        await conn.sendMessage(
-            m.chat,
-            { text: `Copilot AI:\n${replyText.trim()}` },
-            { quoted: m }
-        );
+        await conn.sendMessage(m.chat, { text: `Copilot AI:\n${replyText.trim()}` }, { quoted: m });
     } catch (e) {
         global.logger.error(e);
         m.reply(`Error: ${e.message}`);

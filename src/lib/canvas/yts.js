@@ -31,7 +31,7 @@ function drawCard(ctx, x, y, w, h, r = 12) {
 
 function drawSearchBar(ctx, x, y, w, h, query) {
     ctx.save();
-    
+
     ctx.shadowColor = "rgba(0, 0, 0, 0.1)";
     ctx.shadowBlur = 20;
     ctx.shadowOffsetY = 5;
@@ -41,7 +41,7 @@ function drawSearchBar(ctx, x, y, w, h, query) {
     ctx.strokeStyle = "rgba(0, 0, 0, 0.1)";
     ctx.lineWidth = 2;
     ctx.stroke();
-    
+
     ctx.strokeStyle = "#666666";
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -51,23 +51,23 @@ function drawSearchBar(ctx, x, y, w, h, query) {
     ctx.moveTo(x + 37, y + h / 2 + 7);
     ctx.lineTo(x + 43, y + h / 2 + 13);
     ctx.stroke();
-    
+
     ctx.fillStyle = "#1A1A1A";
     ctx.font = "26px Cobbler";
     ctx.textAlign = "left";
     ctx.fillText(query, x + 60, y + h / 2 + 9);
-    
+
     const cursorX = x + 60 + ctx.measureText(query).width + 5;
     ctx.fillStyle = "#FF3B30";
     ctx.fillRect(cursorX, y + h / 2 - 12, 2, 24);
-    
+
     ctx.restore();
 }
 
 function drawDotGrid(ctx, x, y, w, h, spacing = 25, opacity = 0.15) {
     ctx.save();
     ctx.fillStyle = `rgba(255, 59, 48, ${opacity})`;
-    
+
     for (let i = 0; i < w; i += spacing) {
         for (let j = 0; j < h; j += spacing) {
             ctx.beginPath();
@@ -75,13 +75,13 @@ function drawDotGrid(ctx, x, y, w, h, spacing = 25, opacity = 0.15) {
             ctx.fill();
         }
     }
-    
+
     ctx.restore();
 }
 
 function drawStatsCard(ctx, x, y, w, h, title, value, color) {
     ctx.save();
-    
+
     roundRect(ctx, x, y, w, h, 12);
     const gradient = ctx.createLinearGradient(x, y, x, y + h);
     gradient.addColorStop(0, "#2D2D2D");
@@ -89,21 +89,21 @@ function drawStatsCard(ctx, x, y, w, h, title, value, color) {
     gradient.addColorStop(1, "#1A1A1A");
     ctx.fillStyle = gradient;
     ctx.fill();
-    
+
     drawDotGrid(ctx, x + 10, y + 10, w - 20, h - 20, 20, 0.08);
-    
+
     ctx.fillStyle = "#BBBBBB";
     ctx.font = "bold 16px Cobbler";
     ctx.textAlign = "left";
     ctx.fillText(title, x + 20, y + 40);
-    
+
     ctx.fillStyle = color;
     ctx.font = "bold 40px Cobbler";
     ctx.fillText(value, x + 20, y + 95);
-    
+
     ctx.fillStyle = color;
     ctx.fillRect(x + 20, y + h - 8, 45, 4);
-    
+
     ctx.restore();
 }
 
@@ -120,35 +120,35 @@ function formatDuration(seconds) {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hrs > 0) {
-        return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        return `${hrs}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     }
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
 function drawInfoBadge(ctx, x, y, text, color) {
     ctx.save();
-    
+
     const padding = 15;
     const height = 35;
     const textWidth = ctx.measureText(text).width;
     const width = textWidth + padding * 2;
-    
+
     roundRect(ctx, x, y, width, height, 8);
     ctx.fillStyle = color + "20";
     ctx.fill();
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.stroke();
-    
+
     ctx.fillStyle = color;
     ctx.font = "bold 16px Cobbler";
     ctx.textAlign = "center";
     ctx.fillText(text, x + width / 2, y + height / 2 + 5);
-    
+
     ctx.restore();
-    
+
     return width;
 }
 
@@ -156,18 +156,18 @@ export async function canvas(videos, query) {
     const HD_SCALE = 2;
     const BASE_WIDTH = 1400;
     const BASE_HEIGHT = 1500;
-    
+
     const W = BASE_WIDTH * HD_SCALE;
     const H = BASE_HEIGHT * HD_SCALE;
-    
+
     const canvas = createCanvas(W, H);
     const ctx = canvas.getContext("2d");
-    
-    ctx.antialias = 'default';
+
+    ctx.antialias = "default";
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.textDrawingMode = 'glyph';
-    
+    ctx.imageSmoothingQuality = "high";
+    ctx.textDrawingMode = "glyph";
+
     ctx.scale(HD_SCALE, HD_SCALE);
 
     const bgGradient = ctx.createLinearGradient(0, 0, 0, BASE_HEIGHT);
@@ -177,7 +177,7 @@ export async function canvas(videos, query) {
     bgGradient.addColorStop(1, "#E8E8E8");
     ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, BASE_WIDTH, BASE_HEIGHT);
-    
+
     drawDotGrid(ctx, 0, 0, BASE_WIDTH, BASE_HEIGHT, 30, 0.03);
 
     const displayVideos = videos.slice(0, 9);
@@ -197,7 +197,7 @@ export async function canvas(videos, query) {
 
     ctx.fillStyle = "#0F0F0F";
     ctx.fillRect(0, 0, BASE_WIDTH, 180);
-    
+
     drawDotGrid(ctx, 0, 0, BASE_WIDTH, 180, 25, 0.05);
 
     ctx.drawImage(ytLogo, padding, padding - 5, 55, 55);
@@ -214,14 +214,14 @@ export async function canvas(videos, query) {
 
     const badgeY = padding + 75;
     let badgeX = BASE_WIDTH - padding;
-    
+
     ctx.font = "bold 16px Cobbler";
-    
+
     const totalVideos = videos.length;
     const w1 = drawInfoBadge(ctx, badgeX - 120, badgeY, `${totalVideos} results`, "#FF3B30");
     badgeX -= w1 + 15;
-    
-    const totalChannels = new Set(videos.slice(0, 20).map(v => v.channel)).size;
+
+    const totalChannels = new Set(videos.slice(0, 20).map((v) => v.channel)).size;
     drawInfoBadge(ctx, badgeX - 130, badgeY, `${totalChannels} channels`, "#007AFF");
 
     const statsY = 200;
@@ -229,10 +229,14 @@ export async function canvas(videos, query) {
     const cardH = 130;
     const cardGap = 20;
 
-    const totalDuration = videos.slice(0, 20).reduce((sum, v) => sum + parseDuration(v.duration), 0);
+    const totalDuration = videos
+        .slice(0, 20)
+        .reduce((sum, v) => sum + parseDuration(v.duration), 0);
     const avgDuration = Math.floor(totalDuration / Math.min(videos.length, 20));
 
-    const totalWatchTime = videos.slice(0, 20).reduce((sum, v) => sum + parseDuration(v.duration), 0);
+    const totalWatchTime = videos
+        .slice(0, 20)
+        .reduce((sum, v) => sum + parseDuration(v.duration), 0);
 
     const statsCards = [
         {
@@ -240,35 +244,26 @@ export async function canvas(videos, query) {
             value: videos.length.toString(),
             color: "#FF3B30",
         },
-        { 
-            title: "AVG DURATION", 
+        {
+            title: "AVG DURATION",
             value: formatDuration(avgDuration),
-            color: "#007AFF" 
+            color: "#007AFF",
         },
-        { 
-            title: "TOTAL WATCH TIME", 
+        {
+            title: "TOTAL WATCH TIME",
             value: formatDuration(totalWatchTime),
-            color: "#34C759" 
+            color: "#34C759",
         },
         {
             title: "CHANNELS",
-            value: new Set(videos.slice(0, 20).map(v => v.channel)).size.toString(),
+            value: new Set(videos.slice(0, 20).map((v) => v.channel)).size.toString(),
             color: "#FF9500",
         },
     ];
 
     statsCards.forEach((card, i) => {
         const cardX = padding + i * (cardW + cardGap);
-        drawStatsCard(
-            ctx,
-            cardX,
-            statsY,
-            cardW,
-            cardH,
-            card.title,
-            card.value,
-            card.color
-        );
+        drawStatsCard(ctx, cardX, statsY, cardW, cardH, card.title, card.value, card.color);
     });
 
     const albumY = statsY + cardH + 40;
@@ -294,8 +289,8 @@ export async function canvas(videos, query) {
             ctx.clip();
 
             ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            
+            ctx.imageSmoothingQuality = "high";
+
             const scale = Math.max((videoCardW - 30) / img.width, thumbH / img.height);
             const sw = (videoCardW - 30) / scale;
             const sh = thumbH / scale;
@@ -364,7 +359,7 @@ export async function canvas(videos, query) {
         ctx.beginPath();
         ctx.arc(x + 20, infoY + 60, 6, 0, Math.PI * 2);
         ctx.fill();
-        
+
         ctx.fillStyle = "#FF3B30";
         ctx.font = "bold 16px Cobbler";
         ctx.fillText(`Video ${i + 1}`, x + 35, infoY + 65);
@@ -378,10 +373,10 @@ export async function canvas(videos, query) {
     }
 
     const footerY = BASE_HEIGHT - 80;
-    
+
     ctx.fillStyle = "rgba(15, 15, 15, 0.03)";
     ctx.fillRect(0, footerY, BASE_WIDTH, 80);
-    
+
     ctx.strokeStyle = "rgba(0, 0, 0, 0.1)";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -406,7 +401,11 @@ export async function canvas(videos, query) {
 
     ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
     ctx.font = "14px Cobbler";
-    ctx.fillText(`${videos.length} videos analyzed • ${totalChannels} unique channels`, BASE_WIDTH / 2, footerY + 60);
+    ctx.fillText(
+        `${videos.length} videos analyzed • ${totalChannels} unique channels`,
+        BASE_WIDTH / 2,
+        footerY + 60
+    );
 
     ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
     ctx.font = "bold 12px Cobbler";
@@ -415,6 +414,6 @@ export async function canvas(videos, query) {
 
     return canvas.toBuffer("image/png", {
         compressionLevel: 0,
-        filters: canvas.PNG_ALL_FILTERS
+        filters: canvas.PNG_ALL_FILTERS,
     });
 }

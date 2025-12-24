@@ -94,7 +94,7 @@ const logger = initializeLogger();
 
 const initializeConfig = () => {
     const owners = safeJSONParse(process.env.OWNERS, []);
-    
+
     if (!Array.isArray(owners)) {
         logger.warn("OWNERS must be a valid JSON array");
     }
@@ -104,8 +104,7 @@ const initializeConfig = () => {
             ? owners.filter((owner) => typeof owner === "string" && owner.trim() !== "")
             : [],
         pairingNumber: (process.env.PAIRING_NUMBER || "").trim(),
-        pairingCode:
-            (process.env.PAIRING_CODE || "").trim().toUpperCase() || generatePairingCode(),
+        pairingCode: (process.env.PAIRING_CODE || "").trim().toUpperCase() || generatePairingCode(),
         watermark: (process.env.WATERMARK || "Liora").trim(),
         author: (process.env.AUTHOR || "Naruya Izumi").trim(),
         stickpack: (process.env.STICKPACK || "Liora").trim(),
@@ -262,9 +261,7 @@ class DataWrapper {
                                     return false;
                                 }
                             }
-                            logger.warn(
-                                `Tried to set unknown column ${prop} on ${table}`
-                            );
+                            logger.warn(`Tried to set unknown column ${prop} on ${table}`);
                             return false;
                         },
                     });
@@ -286,7 +283,7 @@ global.dbManager = {
             logger.error({ error: e.message }, "Database close error");
             throw e;
         }
-    }
+    },
 };
 
 global.timestamp = { start: new Date() };
@@ -299,9 +296,9 @@ global.sendDenied = async (conn, m) => {
             return fallback;
         }
     };
-    
+
     const userName = await safe(() => conn.getName(m.sender), "unknown");
-    
+
     return conn.sendMessage(
         m.chat,
         {
@@ -321,7 +318,7 @@ global.sendDenied = async (conn, m) => {
                     renderLargerThumbnail: true,
                 },
             },
-        }, 
+        },
         { quoted: m }
     );
 };

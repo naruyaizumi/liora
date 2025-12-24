@@ -2,7 +2,8 @@
 import { fileTypeFromBuffer } from "file-type";
 
 const DEFAULT_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     Accept: "*/*",
     "Accept-Language": "en-US,en;q=0.9",
     "Accept-Encoding": "gzip, deflate, br",
@@ -14,33 +15,29 @@ const UPLOAD_TIMEOUT = 60000;
 
 async function uploader1(buffer) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error(
-            "Buffer cannot be empty");
-        
+        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+
         const type = await fileTypeFromBuffer(buffer);
         if (!type) throw new Error("Unrecognized file format");
-        
+
         const formData = new FormData();
         formData.append("reqtype", "fileupload");
         const blob = new Blob([buffer], { type: type.mime });
         formData.append("fileToUpload", blob, `upload.${type.ext}`);
-        
+
         const response = await fetch("https://catbox.moe/user/api.php", {
             method: "POST",
             headers: DEFAULT_HEADERS,
             body: formData,
             signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
         });
-        
-        if (!response.ok) throw new Error(
-            `Catbox HTTP ${response.status}: ${response.statusText}`
-        );
-        
+
+        if (!response.ok) throw new Error(`Catbox HTTP ${response.status}: ${response.statusText}`);
+
         const text = await response.text();
         if (!text.startsWith("http"))
-            throw new Error(
-                `Catbox invalid response: ${text.substring(0, 100)}`);
-        
+            throw new Error(`Catbox invalid response: ${text.substring(0, 100)}`);
+
         return text.trim();
     } catch (e) {
         conn?.logger?.error(e.message);
@@ -50,30 +47,27 @@ async function uploader1(buffer) {
 
 async function uploader2(buffer) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error(
-            "Buffer cannot be empty");
-        
+        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+
         const type = await fileTypeFromBuffer(buffer);
         if (!type) throw new Error("Unrecognized file format");
-        
+
         const formData = new FormData();
         const blob = new Blob([buffer], { type: type.mime });
         formData.append("files[]", blob, `upload.${type.ext}`);
-        
+
         const response = await fetch("https://uguu.se/upload.php", {
             method: "POST",
             headers: DEFAULT_HEADERS,
             body: formData,
             signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
         });
-        
-        if (!response.ok) throw new Error(
-            `Uguu HTTP ${response.status}: ${response.statusText}`);
-        
+
+        if (!response.ok) throw new Error(`Uguu HTTP ${response.status}: ${response.statusText}`);
+
         const json = await response.json();
-        if (!json?.files?.[0]?.url) throw new Error(
-            "Uguu invalid response format");
-        
+        if (!json?.files?.[0]?.url) throw new Error("Uguu invalid response format");
+
         return json.files[0].url.trim();
     } catch (e) {
         conn?.logger?.error(e.message);
@@ -83,30 +77,27 @@ async function uploader2(buffer) {
 
 async function uploader3(buffer) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error(
-            "Buffer cannot be empty");
-        
+        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+
         const type = await fileTypeFromBuffer(buffer);
         if (!type) throw new Error("Unrecognized file format");
-        
+
         const formData = new FormData();
         const blob = new Blob([buffer], { type: type.mime });
         formData.append("files[]", blob, `upload.${type.ext}`);
-        
+
         const response = await fetch("https://qu.ax/upload.php", {
             method: "POST",
             headers: DEFAULT_HEADERS,
             body: formData,
             signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
         });
-        
-        if (!response.ok) throw new Error(
-            `Qu.ax HTTP ${response.status}: ${response.statusText}`);
-        
+
+        if (!response.ok) throw new Error(`Qu.ax HTTP ${response.status}: ${response.statusText}`);
+
         const json = await response.json();
-        if (!json?.files?.[0]?.url) throw new Error(
-            "Qu.ax invalid response format");
-        
+        if (!json?.files?.[0]?.url) throw new Error("Qu.ax invalid response format");
+
         return json.files[0].url.trim();
     } catch (e) {
         conn?.logger?.error(e.message);
@@ -116,12 +107,11 @@ async function uploader3(buffer) {
 
 async function uploader4(buffer) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error(
-            "Buffer cannot be empty");
-        
+        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+
         const type = await fileTypeFromBuffer(buffer);
         if (!type) throw new Error("Unrecognized file format");
-        
+
         const response = await fetch("https://put.icu/upload/", {
             method: "PUT",
             headers: {
@@ -132,16 +122,13 @@ async function uploader4(buffer) {
             body: buffer,
             signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
         });
-        
+
         if (!response.ok)
-            throw new Error(
-                `Put.icu HTTP ${response.status}: ${response.statusText}`
-            );
-        
+            throw new Error(`Put.icu HTTP ${response.status}: ${response.statusText}`);
+
         const json = await response.json();
-        if (!json?.direct_url) throw new Error(
-            "Put.icu invalid response format");
-        
+        if (!json?.direct_url) throw new Error("Put.icu invalid response format");
+
         return json.direct_url.trim();
     } catch (e) {
         conn?.logger?.error(e.message);
@@ -151,32 +138,28 @@ async function uploader4(buffer) {
 
 async function uploader5(buffer) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error(
-            "Buffer cannot be empty");
-        
+        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+
         const type = await fileTypeFromBuffer(buffer);
         if (!type) throw new Error("Unrecognized file format");
-        
+
         const formData = new FormData();
         const blob = new Blob([buffer], { type: type.mime });
         formData.append("file", blob, `upload.${type.ext}`);
-        
+
         const response = await fetch("https://tmpfiles.org/api/v1/upload", {
             method: "POST",
             headers: DEFAULT_HEADERS,
             body: formData,
             signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
         });
-        
+
         if (!response.ok)
-            throw new Error(
-                `Tmpfiles HTTP ${response.status}: ${response.statusText}`
-            );
-        
+            throw new Error(`Tmpfiles HTTP ${response.status}: ${response.statusText}`);
+
         const json = await response.json();
-        if (!json?.data?.url) throw new Error(
-            "Tmpfiles invalid response format");
-        
+        if (!json?.data?.url) throw new Error("Tmpfiles invalid response format");
+
         return json.data.url.replace("/file/", "/dl/").trim();
     } catch (e) {
         conn?.logger?.error(e.message);
@@ -186,53 +169,47 @@ async function uploader5(buffer) {
 
 async function uploader6(buffer) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error(
-            "Buffer cannot be empty");
-        
+        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+
         const type = await fileTypeFromBuffer(buffer);
         if (!type) throw new Error("Unrecognized file format");
-        
+
         const formData = new FormData();
         const blob = new Blob([buffer], { type: type.mime });
-        
+
         const { createHash, randomBytes } = await import("crypto");
-        
+
         const timestamp = Date.now();
         const rand = randomBytes(12).toString("hex");
-        const hashBuffer = createHash("sha256").update(
-            `${timestamp}${rand}`).digest();
-        
+        const hashBuffer = createHash("sha256").update(`${timestamp}${rand}`).digest();
+
         let filename = hashBuffer.toString("base64url");
         filename = filename
-            .split('')
+            .split("")
             .sort(() => Math.random() - 0.5)
-            .join('');
+            .join("");
         filename = filename.substring(0, 32);
-        
+
         formData.append("filename", filename);
         formData.append("file", blob, filename);
-        
-        const response = await fetch(
-            "https://api.nekolabs.web.id/tools/uploader/alibaba/v1", {
-                method: "POST",
-                headers: {
-                    ...DEFAULT_HEADERS,
-                    "Accept": "application/json",
-                },
-                body: formData,
-                signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
-            });
-        
+
+        const response = await fetch("https://api.nekolabs.web.id/tools/uploader/alibaba/v1", {
+            method: "POST",
+            headers: {
+                ...DEFAULT_HEADERS,
+                Accept: "application/json",
+            },
+            body: formData,
+            signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
+        });
+
         if (!response.ok)
-            throw new Error(
-                `Alibaba HTTP ${response.status}: ${response.statusText}`
-            );
-        
+            throw new Error(`Alibaba HTTP ${response.status}: ${response.statusText}`);
+
         const json = await response.json();
-        
-        if (!json?.success || !json?.result)
-            throw new Error("Alibaba invalid response format");
-        
+
+        if (!json?.success || !json?.result) throw new Error("Alibaba invalid response format");
+
         return json.result.trim();
     } catch (e) {
         conn?.logger?.error(e.message);
@@ -242,39 +219,36 @@ async function uploader6(buffer) {
 
 async function uploader7(buffer) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error(
-            "Buffer cannot be empty");
-        
+        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+
         const type = await fileTypeFromBuffer(buffer);
         if (!type) throw new Error("Unrecognized file format");
         if (!type.mime.startsWith("video/")) {
             throw new Error("Videy uploader only supports videos");
         }
-        
+
         const formData = new FormData();
         const blob = new Blob([buffer], { type: type.mime });
         formData.append("file", blob, `upload.${type.ext}`);
         formData.append("apikey", "freeApikey");
-        
-        const response = await fetch(
-            "https://anabot.my.id/api/tools/videy", {
-                method: "POST",
-                headers: {
-                    Accept: "*/*",
-                },
-                body: formData,
-                signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
-            });
-        
-        if (!response.ok) throw new Error(
-            `Videy HTTP ${response.status}: ${response.statusText}`);
-        
+
+        const response = await fetch("https://anabot.my.id/api/tools/videy", {
+            method: "POST",
+            headers: {
+                Accept: "*/*",
+            },
+            body: formData,
+            signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
+        });
+
+        if (!response.ok) throw new Error(`Videy HTTP ${response.status}: ${response.statusText}`);
+
         const json = await response.json();
-        
+
         if (!json?.success || !json?.data?.result?.link) {
             throw new Error("Videy invalid response format");
         }
-        
+
         return json.data.result.link.trim();
     } catch (e) {
         conn?.logger?.error(e.message);
@@ -284,40 +258,36 @@ async function uploader7(buffer) {
 
 async function uploader8(buffer) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error(
-            "Buffer cannot be empty");
-        
+        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+
         const type = await fileTypeFromBuffer(buffer);
         if (!type) throw new Error("Unrecognized file format");
         if (!type.mime.startsWith("image/")) {
             throw new Error("GoFile uploader only supports images");
         }
-        
+
         const formData = new FormData();
         const blob = new Blob([buffer], { type: type.mime });
         formData.append("file", blob, `upload.${type.ext}`);
         formData.append("apikey", "freeApikey");
-        
-        const response = await fetch(
-            "https://anabot.my.id/api/tools/goFile", {
-                method: "POST",
-                headers: {
-                    Accept: "*/*",
-                },
-                body: formData,
-                signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
-            });
-        
-        if (!response.ok) throw new Error(
-            `GoFile HTTP ${response.status}: ${response.statusText}`
-        );
-        
+
+        const response = await fetch("https://anabot.my.id/api/tools/goFile", {
+            method: "POST",
+            headers: {
+                Accept: "*/*",
+            },
+            body: formData,
+            signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
+        });
+
+        if (!response.ok) throw new Error(`GoFile HTTP ${response.status}: ${response.statusText}`);
+
         const json = await response.json();
-        
+
         if (!json?.success || !json?.data?.result?.imageUrl) {
             throw new Error("GoFile invalid response format");
         }
-        
+
         return json.data.result.imageUrl.trim();
     } catch (e) {
         conn?.logger?.error(e.message);
@@ -334,20 +304,20 @@ async function uploader(buffer) {
         { name: "Tmpfiles", fn: uploader5 },
         { name: "Alibaba", fn: uploader6 },
     ];
-    
+
     const attempts = [];
-    
+
     for (const provider of providers) {
         try {
             const url = await provider.fn(buffer);
-            
+
             if (url && typeof url === "string" && url.startsWith("http")) {
                 attempts.push({
                     provider: provider.name,
                     status: "success",
-                    url
+                    url,
                 });
-                
+
                 return {
                     success: true,
                     url,
@@ -355,26 +325,25 @@ async function uploader(buffer) {
                     attempts,
                 };
             }
-            
+
             attempts.push({
                 provider: provider.name,
-                status: "invalid_response"
+                status: "invalid_response",
             });
         } catch (e) {
             attempts.push({
                 provider: provider.name,
                 status: "error",
-                error: e.message
+                error: e.message,
             });
             conn?.logger?.error(`${provider.name}: ${e.message}`);
             continue;
         }
     }
-    
+
     conn?.logger?.error("All upload providers failed");
-    attempts.forEach((a) => conn?.logger?.error(
-        `  - ${a.provider}: ${a.status}`));
-    
+    attempts.forEach((a) => conn?.logger?.error(`  - ${a.provider}: ${a.status}`));
+
     return {
         success: false,
         url: null,
@@ -392,5 +361,5 @@ export {
     uploader6,
     uploader7,
     uploader8,
-    uploader
+    uploader,
 };

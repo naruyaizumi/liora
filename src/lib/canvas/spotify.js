@@ -19,29 +19,29 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 
 function parseSpotifyDuration(durationInput) {
     if (!durationInput) return 0;
-    
-    if (typeof durationInput === 'number') {
+
+    if (typeof durationInput === "number") {
         if (durationInput > 3600 && durationInput < 86400000) {
             return Math.floor(durationInput / 1000);
         }
         return Math.floor(durationInput);
     }
-    
+
     const durationString = String(durationInput);
-    
-    const parts = durationString.split(':');
-    
+
+    const parts = durationString.split(":");
+
     if (parts.length === 2) {
         const minutes = parseInt(parts[0], 10) || 0;
         const seconds = parseInt(parts[1], 10) || 0;
-        return (minutes * 60) + seconds;
+        return minutes * 60 + seconds;
     } else if (parts.length === 3) {
         const hours = parseInt(parts[0], 10) || 0;
         const minutes = parseInt(parts[1], 10) || 0;
         const seconds = parseInt(parts[2], 10) || 0;
-        return (hours * 3600) + (minutes * 60) + seconds;
+        return hours * 3600 + minutes * 60 + seconds;
     }
-    
+
     const num = parseFloat(durationString);
     if (!isNaN(num) && num > 0) {
         if (num > 3600 && num < 86400000) {
@@ -49,17 +49,17 @@ function parseSpotifyDuration(durationInput) {
         }
         return Math.floor(num);
     }
-    
+
     return 0;
 }
 
 function formatTime(seconds) {
     if (!seconds || isNaN(seconds) || seconds <= 0) return "0:00";
-    
+
     const hours = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
-    
+
     if (hours > 0) {
         return `${hours}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     }
@@ -69,7 +69,7 @@ function formatTime(seconds) {
 export async function canvas(coverUrl, title, artist, duration) {
     const W = 1200;
     const H = 630;
-    
+
     const canvas = createCanvas(W, H);
     const ctx = canvas.getContext("2d");
 
@@ -139,9 +139,9 @@ export async function canvas(coverUrl, title, artist, duration) {
         drawRoundedRect(ctx, coverX, coverY, coverSize, coverSize, coverRadius);
         ctx.closePath();
         ctx.clip();
-        
+
         ctx.drawImage(cover, coverX, coverY, coverSize, coverSize);
-        
+
         ctx.restore();
 
         ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
@@ -168,7 +168,7 @@ export async function canvas(coverUrl, title, artist, duration) {
         );
         ctx.save();
         ctx.globalAlpha = 0.9;
-        
+
         const sourceSize = Math.min(logo.width, logo.height);
         const sourceX = (logo.width - sourceSize) / 2;
         const sourceY = (logo.height - sourceSize) / 2;
@@ -241,7 +241,7 @@ export async function canvas(coverUrl, title, artist, duration) {
     const progressWidth = infoMaxWidth;
     const progressHeight = 6;
     const progressRadius = 3;
-    
+
     ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
     drawRoundedRect(ctx, infoX, infoY, progressWidth, progressHeight, progressRadius);
     ctx.fill();
