@@ -1,7 +1,7 @@
 import { readdir, stat, access } from "fs/promises";
 import { join, relative, normalize } from "path";
 import chokidar from "chokidar";
-import { naruyaizumi } from "#lib/socket.js";
+import { naruyaizumi } from "./socket.js";
 
 export class PluginCache {
     constructor(ttl = 5000) {
