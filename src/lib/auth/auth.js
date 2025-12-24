@@ -201,7 +201,7 @@ function createKeyStore(options = {}) {
     };
 }
 
-export function useSqliteFileAuthState (_dbPath, _options) {
+export function useSQLiteAuthState (_dbPath, _options) {
     let creds;
     try {
         const credsData = core.get("creds");
