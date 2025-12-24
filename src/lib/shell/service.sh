@@ -28,7 +28,7 @@ StartLimitBurst=5
 Type=simple
 User=root
 WorkingDirectory=${work_dir}
-ExecStart=${NODE_PATH} --expose-gc --max-old-space-size=4096 --trace-warnings --trace-deprecation ${work_dir}/src/index.js
+ExecStart=${NODE_PATH} --max-old-space-size=4096 ${work_dir}/src/index.js
 KillMode=mixed
 KillSignal=SIGTERM
 FinalKillSignal=SIGKILL
@@ -98,10 +98,7 @@ module.exports = {
     instances: 1,
     exec_mode: 'fork',
     node_args: [
-      '--expose-gc',
-      '--max-old-space-size=4096',
-      '--trace-warnings',
-      '--trace-deprecation'
+      '--max-old-space-size=4096'
     ],
     autorestart: true,
     watch: false,
