@@ -123,245 +123,173 @@ const initializeConfig = () => {
 
 global.config = initializeConfig();
 
-// ============================================================================
-// DATABASE INITIALIZATION
-// ============================================================================
-
 const DB_PATH = join(process.cwd(), "src", "database", "database.db");
+const sqlite = new Database(DB_PATH, { timeout: 5000 });
 
-class DatabaseManager {
-    constructor(dbPath) {
-        this.db = new Database(dbPath, { timeout: 5000 });
-        this._initPragmas();
-        this._initTables();
-        this._initStatements();
-    }
+sqlite.pragma("journal_mode = WAL");
+sqlite.pragma("synchronous = NORMAL");
+sqlite.pragma("cache_size = -128000");
+sqlite.pragma("temp_store = MEMORY");
+sqlite.pragma("mmap_size = 30000000000");
 
-    _initPragmas() {
-        this.db.pragma("journal_mode = WAL");
-        this.db.pragma("synchronous = NORMAL");
-        this.db.pragma("cache_size = -64000"); // 64MB
-        this.db.pragma("temp_store = MEMORY");
-        this.db.pragma("mmap_size = 134217728"); // 128MB
-    }
-
-    _initTables() {
-        // Chats table
-        this.db.exec(`
-            CREATE TABLE IF NOT EXISTS chats (
-                jid TEXT PRIMARY KEY,
-                mute INTEGER DEFAULT 0,
-                adminOnly INTEGER DEFAULT 0,
-                antiLinks INTEGER DEFAULT 0,
-                antiAudio INTEGER DEFAULT 0,
-                antiFile INTEGER DEFAULT 0,
-                antiFoto INTEGER DEFAULT 0,
-                antiVideo INTEGER DEFAULT 0,
-                antiSticker INTEGER DEFAULT 0,
-                antiStatus INTEGER DEFAULT 0
-            )
-        `);
-
-        // Settings table
-        this.db.exec(`
-            CREATE TABLE IF NOT EXISTS settings (
-                jid TEXT PRIMARY KEY,
-                self INTEGER DEFAULT 0,
-                gconly INTEGER DEFAULT 0,
-                autoread INTEGER DEFAULT 0,
-                adReply INTEGER DEFAULT 0,
-                noprint INTEGER DEFAULT 0
-            )
-        `);
-
-        // Meta table
-        this.db.exec(`
-            CREATE TABLE IF NOT EXISTS meta (
-                key TEXT PRIMARY KEY,
-                value TEXT DEFAULT ''
-            )
-        `);
-
-        logger.info("Database tables initialized");
-    }
-
-    _initStatements() {
-        // Prepared statements for chats
-        this.stmtGetChat = this.db.prepare("SELECT * FROM chats WHERE jid = ?");
-        this.stmtInsertChat = this.db.prepare("INSERT OR IGNORE INTO chats (jid) VALUES (?)");
-        this.stmtUpdateChat = this.db.prepare("UPDATE chats SET [key] = ? WHERE jid = ?");
-
-        // Prepared statements for settings
-        this.stmtGetSettings = this.db.prepare("SELECT * FROM settings WHERE jid = ?");
-        this.stmtInsertSettings = this.db.prepare("INSERT OR IGNORE INTO settings (jid) VALUES (?)");
-        this.stmtUpdateSettings = this.db.prepare("UPDATE settings SET [key] = ? WHERE jid = ?");
-    }
-
-    getChat(jid) {
-        let row = this.stmtGetChat.get(jid);
-        if (!row) {
-            this.stmtInsertChat.run(jid);
-            row = this.stmtGetChat.get(jid);
-        }
-        return row;
-    }
-
-    updateChat(jid, key, value) {
-        const normalized = this._normalizeValue(value);
-        const stmt = this.db.prepare(`UPDATE chats SET ${key} = ? WHERE jid = ?`);
-        stmt.run(normalized, jid);
-    }
-
-    getSettings(jid) {
-        let row = this.stmtGetSettings.get(jid);
-        if (!row) {
-            this.stmtInsertSettings.run(jid);
-            row = this.stmtGetSettings.get(jid);
-        }
-        return row;
-    }
-
-    updateSettings(jid, key, value) {
-        const normalized = this._normalizeValue(value);
-        const stmt = this.db.prepare(`UPDATE settings SET ${key} = ? WHERE jid = ?`);
-        stmt.run(normalized, jid);
-    }
-
-    _normalizeValue(val) {
-        if (val === undefined || val === null) return null;
-        if (typeof val === "boolean") return val ? 1 : 0;
-        if (typeof val === "object") return JSON.stringify(val);
-        return val;
-    }
-
-    _parseValue(val) {
-        if (val === null || val === undefined) return val;
-        
-        // Try to parse JSON
-        if (typeof val === "string") {
-            try {
-                const parsed = JSON.parse(val);
-                if (typeof parsed === "object") return parsed;
-            } catch {
-                // Not JSON, return as-is
-            }
-        }
-        
-        return val;
-    }
-
-    close() {
-        try {
-            this.db.pragma("wal_checkpoint(TRUNCATE)");
-            this.db.pragma("optimize");
-            this.db.close();
-            logger.info("Database closed");
-        } catch (e) {
-            logger.error(`Database close error: ${e.message}`);
-        }
-    }
+function normalizeValue(val) {
+    if (val === undefined) return null;
+    if (typeof val === "boolean") return val ? 1 : 0;
+    if (typeof val === "object" && val !== null) return JSON.stringify(val);
+    return val;
 }
 
-const dbManager = new DatabaseManager(DB_PATH);
+function ensureTable(tableName, schema) {
+    const exists = sqlite
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
+        .get(tableName);
+    if (!exists) {
+        sqlite.exec(`CREATE TABLE ${tableName} (${schema})`);
+    } else {
+        const columns = sqlite
+            .prepare(`PRAGMA table_info(${tableName})`)
+            .all()
+            .map((c) => c.name);
 
-// Create proxy-based data access
-class DataProxy {
-    constructor(manager, table, getMethods, updateMethod) {
-        this.manager = manager;
-        this.table = table;
-        this.getMethods = getMethods;
-        this.updateMethod = updateMethod;
-        this.cache = new Map();
-    }
+        const wanted = schema
+            .split(",")
+            .map((x) => x.trim().split(" ")[0])
+            .filter(Boolean);
 
-    get(jid) {
-        // Check cache first
-        if (this.cache.has(jid)) {
-            return this.cache.get(jid);
-        }
+        for (const col of wanted) {
+            if (!columns.includes(col)) {
+                try {
+                    const colDef = schema
+                        .split(",")
+                        .map((x) => x.trim())
+                        .find((x) => x.startsWith(col));
 
-        // Get from database
-        const row = this.getMethods(jid);
-        
-        // Parse all values
-        const parsed = {};
-        for (const key in row) {
-            parsed[key] = this.manager._parseValue(row[key]);
-        }
-
-        // Create proxy for this row
-        const proxy = new Proxy(parsed, {
-            set: (obj, prop, value) => {
-                if (Object.prototype.hasOwnProperty.call(parsed, prop)) {
-                    try {
-                        this.updateMethod(jid, prop, value);
-                        obj[prop] = value;
-                        return true;
-                    } catch (e) {
-                        logger.error(`Failed to update ${this.table}.${prop}: ${e.message}`);
-                        return false;
-                    }
+                    sqlite.exec(`ALTER TABLE ${tableName} ADD COLUMN ${colDef}`);
+                    logger.info({ module: "DB" }, `Added column ${col} to ${tableName}`);
+                } catch (e) {
+                    logger.error(
+                        { module: "DB", column: col, error: e.message },
+                        `Failed to add column`
+                    );
                 }
-                logger.warn(`Unknown column ${prop} on ${this.table}`);
-                return false;
             }
-        });
-
-        // Cache the proxy
-        this.cache.set(jid, proxy);
-        return proxy;
-    }
-
-    clearCache(jid) {
-        if (jid) {
-            this.cache.delete(jid);
-        } else {
-            this.cache.clear();
         }
     }
 }
 
-// Initialize data proxies
-const chatsProxy = new DataProxy(
-    dbManager,
+ensureTable(
     "chats",
-    (jid) => dbManager.getChat(jid),
-    (jid, key, value) => dbManager.updateChat(jid, key, value)
+    `
+  jid TEXT PRIMARY KEY,
+  mute INTEGER DEFAULT 0,
+  adminOnly INTEGER DEFAULT 0,
+  antiLinks INTEGER DEFAULT 0,
+  antiAudio INTEGER DEFAULT 0,
+  antiFile INTEGER DEFAULT 0,
+  antiFoto INTEGER DEFAULT 0,
+  antiVideo INTEGER DEFAULT 0,
+  antiSticker INTEGER DEFAULT 0,
+  antiStatus INTEGER DEFAULT 0
+  `
 );
 
-const settingsProxy = new DataProxy(
-    dbManager,
+ensureTable(
     "settings",
-    (jid) => dbManager.getSettings(jid),
-    (jid, key, value) => dbManager.updateSettings(jid, key, value)
+    `
+  jid TEXT PRIMARY KEY,
+  self INTEGER DEFAULT 0,
+  gconly INTEGER DEFAULT 0,
+  autoread INTEGER DEFAULT 0,
+  adReply INTEGER DEFAULT 0,
+  noprint INTEGER DEFAULT 0
+  `
 );
 
-// Create main proxy handler
-const dataHandler = {
-    get(target, table) {
-        if (table === "chats") return new Proxy({}, {
-            get: (_, jid) => chatsProxy.get(jid)
-        });
-        
-        if (table === "settings") return new Proxy({}, {
-            get: (_, jid) => settingsProxy.get(jid)
-        });
-        
-        return undefined;
+ensureTable(
+    "meta",
+    `
+  key TEXT PRIMARY KEY,
+  value TEXT DEFAULT ''
+  `
+);
+
+sqlite.pragma("wal_checkpoint(FULL)");
+sqlite.pragma("optimize");
+
+class DataWrapper {
+    constructor() {
+        this.data = {
+            chats: this.createProxy("chats"),
+            settings: this.createProxy("settings"),
+        };
+    }
+
+    createProxy(table) {
+        return new Proxy(
+            {},
+            {
+                get: (_, jid) => {
+                    let row = sqlite.prepare(`SELECT * FROM ${table} WHERE jid = ?`).get(jid);
+                    if (!row) {
+                        sqlite.prepare(`INSERT INTO ${table} (jid) VALUES (?)`).run(jid);
+                        row = sqlite.prepare(`SELECT * FROM ${table} WHERE jid = ?`).get(jid);
+                    }
+
+                    for (const k in row) {
+                        try {
+                            const parsed = JSON.parse(row[k]);
+                            if (typeof parsed === "object") row[k] = parsed;
+                        } catch {
+                            //
+                        }
+                    }
+
+                    return new Proxy(row, {
+                        set: (obj, prop, value) => {
+                            if (Object.prototype.hasOwnProperty.call(row, prop)) {
+                                try {
+                                    sqlite
+                                        .prepare(`UPDATE ${table} SET ${prop} = ? WHERE jid = ?`)
+                                        .run(normalizeValue(value), jid);
+
+                                    obj[prop] = value;
+                                    return true;
+                                } catch (e) {
+                                    conn.logger.error(
+                                        { module: "DB", table, prop },
+                                        `[DB] Update failed on ${table}.${prop}: ${e.message}`
+                                    );
+                                    return false;
+                                }
+                            }
+                            logger.warn(
+                                `Tried to set unknown column ${prop} on ${table}`
+                            );
+                            return false;
+                        },
+                    });
+                },
+            }
+        );
+    }
+}
+
+const db = new DataWrapper();
+global.db = db;
+
+global.dbManager = {
+    close: () => {
+        try {
+            sqlite.close();
+            logger.info("Database closed successfully");
+        } catch (e) {
+            logger.error({ error: e.message }, "Database close error");
+            throw e;
+        }
     }
 };
 
-// Export database
-global.db = new Proxy({}, dataHandler);
-global.sqlite = dbManager.db;
-global.dbManager = dbManager;
-
-// Timestamp
 global.timestamp = { start: new Date() };
-
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
 
 global.sendDenied = async (conn, m) => {
     const safe = async (fn, fallback = undefined) => {
