@@ -48,5 +48,22 @@
         "#core/*": "./src/lib/core/*",
         "#cpp": "./src/lib/cpp/bridge-async.js",
         "#lib/*": "./src/lib/*"
+    },
+    "prettier": {
+        "printWidth": 100,
+        "tabWidth": 4,
+        "useTabs": false,
+        "semi": true,
+        "singleQuote": false,
+        "quoteProps": "as-needed",
+        "jsxSingleQuote": false,
+        "trailingComma": "es5",
+        "bracketSpacing": true,
+        "bracketSameLine": false,
+        "arrowParens": "always",
+        "endOfLine": "lf",
+        "proseWrap": "preserve",
+        "htmlWhitespaceSensitivity": "css",
+        "embeddedLanguageFormatting": "auto"
     }
 }

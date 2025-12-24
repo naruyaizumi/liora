@@ -37,7 +37,7 @@ jobs:
           command -v clang-format || exit 1
           
           UNFORMATTED_FILES=""
-          for file in $(find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc'); do
+          for file in $(find src/lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc'); do
             clang-format --dry-run --Werror --style=file:"$CLANG_FORMAT_CONFIG" "$file" 2>/dev/null || UNFORMATTED_FILES="$UNFORMATTED_FILES$file\n"
           done
           
@@ -54,7 +54,7 @@ jobs:
         if: steps.format-check.outputs.needs_format == 'true' && github.event_name == 'pull_request'
         run: |
           command -v clang-format || exit 1
-          find lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | xargs clang-format -i --style=file:"$CLANG_FORMAT_CONFIG"
+          find src/lib/cpp -name '*.cpp' -o -name '*.h' -o -name '*.cc' | xargs clang-format -i --style=file:"$CLANG_FORMAT_CONFIG"
 
       - name: Commit formatting changes
         if: steps.format-check.outputs.needs_format == 'true' && github.event_name == 'pull_request'
@@ -90,7 +90,7 @@ jobs:
           
           NAPI_INCLUDE=$(node -p "require('node-addon-api').include")
           
-          for file in $(find lib/cpp -name '*.cpp'); do
+          for file in $(find src/lib/cpp -name '*.cpp'); do
             clang-tidy "$file" \
               --config-file="$CLANG_TIDY_CONFIG" \
               -- \
