@@ -98,24 +98,26 @@ export async function loadPlugins(pluginFolder, getAllPluginsFn) {
 
 const IGNORED_PATTERNS = [
     /(^|[/\\])\../,
-    /node_modules/,
+    /database/,
     /\.db$/,
+    /\.db-shm$/,
+    /\.db-wal$/,
     /\.cpp$/,
     /\.h$/,
     /\.c$/,
-    /package\.json$/,
-    /package-lock\.json$/,
-    /yarn\.lock$/,
-    /pnpm-lock\.yaml$/,
-    /\.git/,
+    /\.sh$/,
+    /\.ttf$/,
     /\.log$/,
     /\.tmp$/,
+    /main\.js$/,
+    /index\.js$/,
+    /config\.js$/,
 ];
 
 const MAX_RELOAD_ATTEMPTS = 3;
 const RELOAD_TIMEOUT = 5000;
 
-export function initHotReload(watchPath, onReload) {
+export function initHotReload(srcFolder, pluginFolder, onReload) {
     const reloadLocks = new Map();
     const failedReloads = new Map();
     let reloadCounter = 0;
@@ -124,7 +126,11 @@ export function initHotReload(watchPath, onReload) {
     async function reloadFile(filepath) {
         if (isClosed) return;
 
-        const filename = normalize(relative(watchPath, filepath)).replace(/\\/g, "/");
+        const relativeToPlugins = normalize(relative(pluginFolder, filepath)).replace(/\\/g, "/");
+        const relativeToSrc = normalize(relative(srcFolder, filepath)).replace(/\\/g, "/");
+        
+        const isPlugin = !relativeToPlugins.startsWith("..");
+        const filename = isPlugin ? relativeToPlugins : relativeToSrc;
 
         if (!filename.endsWith(".js")) return;
 
@@ -154,9 +160,9 @@ export function initHotReload(watchPath, onReload) {
                     await access(filepath);
                 } catch {
                     clearTimeout(timeoutId);
-                    await onReload(filename, null);
+                    await onReload(filename, null, isPlugin, filepath);
                     failedReloads.delete(filename);
-                    global.logger?.info?.({ file: filename }, "File removed");
+                    global.logger?.info?.({ file: filename, isPlugin }, "File removed");
                     return;
                 }
 
@@ -168,7 +174,7 @@ export function initHotReload(watchPath, onReload) {
                 }
 
                 await Promise.race([
-                    onReload(filename, module.default || module),
+                    onReload(filename, module.default || module, isPlugin, filepath),
                     new Promise((_, reject) =>
                         setTimeout(() => reject(new Error("Reload timeout")), RELOAD_TIMEOUT)
                     ),
@@ -176,7 +182,7 @@ export function initHotReload(watchPath, onReload) {
 
                 clearTimeout(timeoutId);
                 failedReloads.delete(filename);
-                global.logger?.info?.({ file: filename }, "File reloaded");
+                global.logger?.info?.({ file: filename, isPlugin }, "File reloaded");
             } catch (e) {
                 clearTimeout(timeoutId);
 
@@ -202,32 +208,40 @@ export function initHotReload(watchPath, onReload) {
     }
 
     const debounceTimers = new Map();
+    const lastReloadTimes = new Map();
+    
     const debouncedReload = (filepath) => {
         if (isClosed) return;
 
-        const filename = normalize(relative(watchPath, filepath)).replace(/\\/g, "/");
+        if (!filepath.endsWith(".js")) return;
+        
+        const now = Date.now();
+        const lastTime = lastReloadTimes.get(filepath) || 0;
+        if (now - lastTime < 1000) {
+            return;
+        }
 
-        if (!filename.endsWith(".js")) return;
-
-        const existingTimer = debounceTimers.get(filename);
+        const existingTimer = debounceTimers.get(filepath);
         if (existingTimer) {
             clearTimeout(existingTimer);
         }
 
         const timer = setTimeout(() => {
-            debounceTimers.delete(filename);
+            debounceTimers.delete(filepath);
+            lastReloadTimes.set(filepath, Date.now());
+            
             reloadFile(filepath).catch((e) => {
                 global.logger?.debug?.({ error: e.message }, "Debounced reload error");
             });
         }, 500);
 
-        debounceTimers.set(filename, timer);
+        debounceTimers.set(filepath, timer);
     };
 
     let watcher = null;
 
     try {
-        watcher = chokidar.watch(watchPath, {
+        watcher = chokidar.watch(srcFolder, {
             ignored: IGNORED_PATTERNS,
             persistent: true,
             ignoreInitial: true,
@@ -247,9 +261,13 @@ export function initHotReload(watchPath, onReload) {
             .on("unlink", (filepath) => {
                 if (isClosed) return;
 
-                const filename = normalize(relative(watchPath, filepath)).replace(/\\/g, "/");
-                if (filename.endsWith(".js")) {
-                    onReload(filename, null).catch((e) => {
+                if (filepath.endsWith(".js")) {
+                    const relativeToPlugins = normalize(relative(pluginFolder, filepath)).replace(/\\/g, "/");
+                    const relativeToSrc = normalize(relative(srcFolder, filepath)).replace(/\\/g, "/");
+                    const isPlugin = !relativeToPlugins.startsWith("..");
+                    const filename = isPlugin ? relativeToPlugins : relativeToSrc;
+
+                    onReload(filename, null, isPlugin, filepath).catch((e) => {
                         global.logger?.error?.({ error: e.message }, "Unlink error");
                     });
                 }
@@ -260,7 +278,7 @@ export function initHotReload(watchPath, onReload) {
                 }
             });
 
-        global.logger?.info?.("Hot reload initialized");
+        global.logger?.info?.({ watchPath: srcFolder }, "Hot reload initialized");
     } catch (e) {
         global.logger?.error?.({ error: e.message }, "Failed to initialize watcher");
         throw e;
@@ -279,6 +297,7 @@ export function initHotReload(watchPath, onReload) {
 
         debounceTimers.forEach((timer) => clearTimeout(timer));
         debounceTimers.clear();
+        lastReloadTimes.clear();
         reloadLocks.clear();
         failedReloads.clear();
 

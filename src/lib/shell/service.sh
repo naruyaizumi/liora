@@ -28,7 +28,7 @@ StartLimitBurst=5
 Type=simple
 User=root
 WorkingDirectory=${work_dir}
-ExecStart=${NODE_PATH} --max-old-space-size=4096 ${work_dir}/src/index.js
+ExecStart=${NODE_PATH} ${work_dir}/src/index.js
 KillMode=mixed
 KillSignal=SIGTERM
 FinalKillSignal=SIGKILL
@@ -97,9 +97,6 @@ module.exports = {
     cwd: '/root/liora',
     instances: 1,
     exec_mode: 'fork',
-    node_args: [
-      '--max-old-space-size=4096'
-    ],
     autorestart: true,
     watch: false,
     max_memory_restart: '1G',
