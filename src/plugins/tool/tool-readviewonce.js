@@ -1,30 +1,49 @@
 let handler = async (m, { conn }) => {
     const q = m.quoted;
     try {
-        const msg = q?.msg?.message?.viewOnceMessageV2?.message || q?.msg || q?.message || {};
-        const mediaMsg =
-            msg.imageMessage || msg.videoMessage || msg.audioMessage || msg.documentMessage;
+        const media = q?.mediaMessage;
+        
+        if (!media) {
+            return m.reply("No media found in quoted message.");
+        }
 
-        if (!mediaMsg) return m.reply("No media found in view-once message.");
+        const vid = media.videoMessage;
+        const img = media.imageMessage;
+        const aud = media.audioMessage;
+
+        const msg = vid || img || aud;
+
+        if (!msg) {
+            return m.reply("Unsupported media type.");
+        }
+
+        if (!msg.viewOnce) {
+            return m.reply("This is not a view-once message.");
+        }
 
         const buffer = await q.download?.();
-        if (!buffer) return m.reply("Failed to retrieve media.");
+        if (!buffer) {
+            return m.reply("Failed to retrieve media.");
+        }
 
-        const mime = mediaMsg.mimetype || "";
-        const type = mime.startsWith("image/")
-            ? "image"
-            : mime.startsWith("video/")
-              ? "video"
-              : mime.startsWith("audio/")
-                ? "audio"
-                : null;
+        const mime = msg.mimetype || "";
+        
+        let type;
+        if (mime.startsWith("image/") || img) {
+            type = "image";
+        } else if (mime.startsWith("video/") || vid) {
+            type = "video";
+        } else if (mime.startsWith("audio/") || aud) {
+            type = "audio";
+        } else {
+            return m.reply("Unsupported media type.");
+        }
 
-        if (!type) return m.reply("Unsupported media type.");
-
-        const caption = mediaMsg.caption || q.text || "";
-        const contextInfo = {};
-        if (mediaMsg.contextInfo?.mentionedJid) {
-            contextInfo.mentionedJid = mediaMsg.contextInfo.mentionedJid;
+        const caption = msg.caption || q.text || "";
+        const ctx = {};
+        
+        if (msg.contextInfo?.mentionedJid?.length > 0) {
+            ctx.mentionedJid = msg.contextInfo.mentionedJid;
         }
 
         await conn.sendMessage(
@@ -33,12 +52,13 @@ let handler = async (m, { conn }) => {
                 [type]: buffer,
                 mimetype: mime,
                 caption,
-                contextInfo,
+                contextInfo: ctx,
             },
-            { quoted: q.fakeObj }
+            { quoted: m }
         );
+
     } catch (e) {
-        global.logger.error(e);
+        global.logger?.error(e);
         m.reply(`Error: ${e.message}`);
     }
 };
