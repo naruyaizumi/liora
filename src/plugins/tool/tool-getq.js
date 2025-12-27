@@ -1,29 +1,231 @@
 import { BufferJSON } from "baileys";
+import { fileTypeFromBuffer } from "file-type";
 
-let handler = async (m) => {
-    if (!m.quoted) return m.reply("Reply to a message to debug its structure.");
-    try {
-        const output = inspect(m.quoted);
-        await m.reply(output);
-    } catch (e) {
-        global.logger.error(e);
-        m.reply(`Error: ${e.message}`);
+let handler = async (m, { conn }) => {
+    if (!m.quoted) return;
+    
+    const q = m.quoted;
+    
+    const found = (function find(obj, seen = new WeakSet()) {
+        if (!obj || typeof obj !== "object") return null;
+        if (seen.has(obj)) return null;
+        seen.add(obj);
+        
+        if (obj.url || obj.directPath) {
+            let type = null;
+            if (obj.mimetype) {
+                if (obj.mimetype.startsWith('image/')) {
+                    if (obj.mimetype === 'image/webp') {
+                        type = 'sticker';
+                    } else {
+                        type = 'image';
+                    }
+                } else if (obj.mimetype.startsWith('video/')) {
+                    type = 'video';
+                } else if (obj.mimetype.startsWith('audio/')) {
+                    type = 'audio';
+                } else {
+                    type = 'document';
+                }
+            }
+            
+            if (type) return { node: obj, type };
+        }
+        
+        const mediaPropKeys = ['_mediaMsg', 'message',
+            'mediaMessage', 'documentMessage',
+            'imageMessage', 'videoMessage', 'audioMessage',
+            'stickerMessage'
+        ];
+        for (const prop of mediaPropKeys) {
+            if (obj[prop] && typeof obj[prop] === 'object') {
+                const result = find(obj[prop], seen);
+                if (result) return result;
+            }
+        }
+        
+        for (const k of Object.keys(obj)) {
+            try {
+                const v = obj[k];
+                if (v && typeof v === "object") {
+                    const r = find(v, seen);
+                    if (r) return r;
+                }
+            } catch {}
+        }
+        return null;
+    })(q);
+    
+    if (!found) {
+        if (q.text) {
+            const debugInfo = `📄 DEBUG INFO - TEXT
+
+📦 MESSAGE DATA:
+• Type: text
+• Length: ${q.text.length} characters
+• Text Preview: ${q.text.substring(0, 100)}${q.text.length > 100 ? '...' : ''}
+
+📋 FULL DATA:
+${inspect(q)}
+`.trim();
+            
+            return conn.sendMessage(
+                m.chat, { text: debugInfo }, { quoted: m }
+            );
+        }
+        
+        const debugInfo = `📄 DEBUG INFO - NO MEDIA FOUND
+
+📦 MESSAGE DATA:
+• Type: unknown
+• Has Text: ${!!q.text}
+• Text Length: ${q.text?.length || 0}
+
+📋 FULL DATA:
+${inspect(q)}
+`.trim();
+        
+        return conn.sendMessage(
+            m.chat, { text: debugInfo }, { quoted: m }
+        );
+    }
+    
+    const { node, type } = found;
+    
+    const sendMediaTypes = ['image', 'video', 'document'];
+    let buffer = null;
+    
+    if (sendMediaTypes.includes(type)) {
+        try {
+            buffer = await conn.downloadM(node, type);
+        } catch {
+            if (q.download && typeof q.download === 'function') {
+                try {
+                    buffer = await q.download();
+                } catch {
+                    //
+                }
+            }
+        }
+    }
+    
+    let mime = node.mimetype;
+    let detectedMime = mime;
+    let bufferSize = 0;
+    
+    if (buffer && buffer.length) {
+        bufferSize = buffer.length;
+        try {
+            const fileInfo = await fileTypeFromBuffer(buffer);
+            if (fileInfo) {
+                detectedMime = fileInfo.mime;
+            }
+        } catch {
+            //
+        }
+    }
+    
+    let fileName = node.fileName || "N/A";
+    if (type === 'document' && fileName === "N/A") {
+        if (node.url) {
+            try {
+                const urlObj = new URL(node.url);
+                const pathname = urlObj.pathname;
+                const extracted = pathname.split('/').pop();
+                if (extracted) fileName = extracted.split('?')[0];
+            } catch {}
+        }
+    }
+    
+    const debugInfo = `📄 DEBUG INFO
+
+📦 MEDIA DATA:
+• Type: ${type}
+• Original MIME: ${mime || "N/A"}
+• Detected MIME: ${detectedMime || "N/A"}
+${bufferSize > 0 ? `• Size: ${formatBytes(bufferSize)}` : ''}
+• URL: ${node.url || "N/A"}
+• Direct Path: ${node.directPath || "N/A"}
+• File Name: ${fileName}
+${q.text ? `• Has Text: Yes (${q.text.length} chars)` : ''}
+
+${q.text ? `📝 TEXT PREVIEW:\n${q.text.substring(0, 200)}${q.text.length > 200 ? '...' : ''}\n\n` : ''}📋 FULL DATA:
+${inspect(q)}
+`.trim();
+    
+    if (sendMediaTypes.includes(type) && buffer && buffer.length) {
+        const finalMime = detectedMime || mime;
+        
+        if (type === 'image') {
+            await conn.sendMessage(
+                m.chat,
+                {
+                    image: buffer,
+                    mimetype: finalMime,
+                    caption: debugInfo
+                }, { quoted: m }
+            );
+        } else if (type === 'video') {
+            await conn.sendMessage(
+                m.chat,
+                {
+                    video: buffer,
+                    mimetype: finalMime,
+                    caption: debugInfo
+                }, { quoted: m }
+            );
+        } else if (type === 'document') {
+            await conn.sendMessage(
+                m.chat,
+                {
+                    document: buffer,
+                    mimetype: finalMime,
+                    fileName: fileName !== "N/A" ? fileName :
+                        `document.${getExtension(finalMime)}`,
+                    caption: debugInfo
+                }, { quoted: m }
+            );
+        }
+    } else {
+        await conn.sendMessage(
+            m.chat, { text: debugInfo }, { quoted: m }
+        );
     }
 };
 
-handler.help = ["debug"];
-handler.tags = ["tool"];
-handler.command = /^(getq|q|debug)$/i;
-handler.owner = true;
+function formatBytes(bytes) {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
 
-export default handler;
+function getExtension(mime) {
+    const mimeToExt = {
+        'application/pdf': 'pdf',
+        'application/vnd.ms-excel': 'xls',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+        'application/msword': 'doc',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+        'text/plain': 'txt',
+        'text/javascript': 'js',
+        'application/json': 'json',
+        'image/jpeg': 'jpg',
+        'image/png': 'png',
+        'video/mp4': 'mp4',
+        'audio/mpeg': 'mp3'
+    };
+    return mimeToExt[mime] || 'bin';
+}
 
 function isByteArray(obj) {
     return (
         typeof obj === "object" &&
         obj !== null &&
         Object.keys(obj).every((k) => /^\d+$/.test(k)) &&
-        Object.values(obj).every((v) => typeof v === "number" && v >= 0 && v <= 255)
+        Object.values(obj).every((v) => typeof v === "number" && v >= 0 &&
+            v <= 255)
     );
 }
 
@@ -34,13 +236,13 @@ function inspect(obj, depth = 0, seen = new WeakSet()) {
     if (seen.has(obj)) return "[Circular]";
     seen.add(obj);
     if (depth > 15) return "[Depth limit reached]";
-
+    
     const result = {};
     for (const key of Reflect.ownKeys(obj)) {
         try {
             const desc = Object.getOwnPropertyDescriptor(obj, key);
             let value = desc?.get ? desc.get.call(obj) : obj[key];
-
+            
             if (Buffer.isBuffer(value)) {
                 const hex = BufferJSON.toJSON(value)
                     .data.map((v) => v.toString(16).padStart(2, "0"))
@@ -62,6 +264,13 @@ function inspect(obj, depth = 0, seen = new WeakSet()) {
             result[key] = `[Error: ${e.message}]`;
         }
     }
-
+    
     return depth === 0 ? JSON.stringify(result, null, 2) : result;
 }
+
+handler.help = ["debug"];
+handler.tags = ["tools"];
+handler.command = /^(debug|q)$/i;
+handler.owner = true;
+
+export default handler;

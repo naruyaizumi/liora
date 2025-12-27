@@ -1,56 +1,43 @@
-import path from "path";
-import { fileURLToPath } from "url";
-import { createRequire } from "module";
-import fs from "fs/promises";
+import path from "node:path";
+import { existsSync } from "node:fs";
+import { createRequire } from "node:module";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, "../../..");
 const require = createRequire(import.meta.url);
 
-let stickerAddon = null;
-let converterAddon = null;
-
-async function loadAddon(name) {
-    const searchPaths = [
-        path.join(projectRoot, "build", "Release", `${name}.node`),
-        path.join(projectRoot, "build", "Debug", `${name}.node`),
-    ];
-
-    for (const addonPath of searchPaths) {
+function loadAddon(name) {
+    const addonPath = path.join(process.cwd(), "build", "Release", `${name}.node`);
+    
+    if (existsSync(addonPath)) {
         try {
-            await fs.access(addonPath);
             return require(addonPath);
         } catch (err) {
-            console.error(`[${name}] Failed to load ${addonPath}:`, err.message);
-            continue;
+            throw new Error(`Failed to load addon ${name}: ${err.message}`);
         }
     }
 
-    const pathList = searchPaths.map((p) => `  - ${p}`).join("\n");
-    throw new Error(
-        `Native addon "${name}.node" not found.\n` +
-            `Searched in:\n${pathList}\n\n` +
-            `Build the addon first:\n  npm run build:addon`
-    );
+    throw new Error(`Addon not found: ${addonPath}. Please build the native addon first.`);
 }
 
-async function getStickerAddon() {
-    if (!stickerAddon) {
-        stickerAddon = await loadAddon("sticker");
+let stickerNative = null;
+let converterNative = null;
+
+function getStickerAddon() {
+    if (!stickerNative) {
+        stickerNative = loadAddon("sticker");
     }
-    return stickerAddon;
+    return stickerNative;
 }
 
-async function getConverterAddon() {
-    if (!converterAddon) {
-        converterAddon = await loadAddon("converter");
+function getConverterAddon() {
+    if (!converterNative) {
+        converterNative = loadAddon("converter");
     }
-    return converterAddon;
+    return converterNative;
 }
 
 function isWebP(buf) {
     if (!Buffer.isBuffer(buf) || buf.length < 12) return false;
+
     return (
         buf[0] === 0x52 &&
         buf[1] === 0x49 &&
@@ -70,73 +57,48 @@ function validateBuffer(buf, fnName) {
     if (buf.length === 0) {
         throw new Error(`${fnName} received empty buffer`);
     }
-    if (buf.length > 100 * 1024 * 1024) {
-        throw new Error(`${fnName} buffer too large (max 100MB)`);
+    return true;
+}
+
+export function addExif(buffer, meta = {}) {
+    validateBuffer(buffer, "addExif()");
+
+    const addon = getStickerAddon();
+
+    try {
+        return addon.addExif(buffer, meta);
+    } catch (err) {
+        throw new Error(`addExif() failed: ${err.message}`);
     }
 }
 
-function normalizeStickerOptions(options = {}) {
-    return {
+export function sticker(buffer, options = {}) {
+    validateBuffer(buffer, "sticker()");
+
+    const addon = getStickerAddon();
+
+    const opts = {
         crop: Boolean(options.crop),
         quality: Math.min(100, Math.max(1, Number(options.quality) || 80)),
         fps: Math.min(30, Math.max(1, Number(options.fps) || 15)),
         maxDuration: Math.min(60, Math.max(1, Number(options.maxDuration) || 15)),
         packName: String(options.packName || ""),
         authorName: String(options.authorName || ""),
-        emojis: Array.isArray(options.emojis)
-            ? options.emojis.filter((e) => typeof e === "string")
-            : [],
+        emojis: Array.isArray(options.emojis) ? options.emojis : [],
     };
-}
-
-function normalizeConverterOptions(options = {}) {
-    const validFormats = ["opus", "mp3", "aac", "m4a", "ogg", "wav"];
-    const format = String(options.format || "opus").toLowerCase();
-
-    if (!validFormats.includes(format)) {
-        throw new Error(`Invalid format "${format}". Valid formats: ${validFormats.join(", ")}`);
-    }
-
-    return {
-        format,
-        bitrate: String(options.bitrate || "64k"),
-        channels: Math.min(2, Math.max(1, Number(options.channels) || 2)),
-        sampleRate: Math.min(96000, Math.max(8000, Number(options.sampleRate) || 48000)),
-        ptt: Boolean(options.ptt),
-        vbr: options.vbr !== false,
-    };
-}
-
-export async function addExif(buffer, meta = {}) {
-    validateBuffer(buffer, "addExif()");
-
-    const addon = await getStickerAddon();
 
     try {
-        return addon.addExif(buffer, {
-            packName: String(meta.packName || ""),
-            authorName: String(meta.authorName || ""),
-            emojis: Array.isArray(meta.emojis) ? meta.emojis : [],
-        });
-    } catch (err) {
-        throw new Error(`addExif() failed: ${err.message}`);
-    }
-}
+        if (isWebP(buffer)) {
+            return addon.addExif(buffer, opts);
+        }
 
-export async function sticker(buffer, options = {}) {
-    validateBuffer(buffer, "sticker()");
-
-    const opts = normalizeStickerOptions(options);
-    const addon = await getStickerAddon();
-
-    try {
         return addon.sticker(buffer, opts);
     } catch (err) {
         throw new Error(`sticker() failed: ${err.message}`);
     }
 }
 
-export async function encodeRGBA(buf, width, height, options = {}) {
+export function encodeRGBA(buf, width, height, options = {}) {
     validateBuffer(buf, "encodeRGBA()");
 
     const w = Number(width);
@@ -156,22 +118,37 @@ export async function encodeRGBA(buf, width, height, options = {}) {
         );
     }
 
-    const addon = await getStickerAddon();
-    const quality = Math.min(100, Math.max(1, Number(options.quality) || 80));
+    const addon = getStickerAddon();
 
     try {
-        return addon.encodeRGBA(buf, w, h, { quality });
+        return addon.encodeRGBA(buf, w, h, options);
     } catch (err) {
         throw new Error(`encodeRGBA() failed: ${err.message}`);
     }
 }
 
-export async function convert(input, options = {}) {
+export function convert(input, options = {}) {
     const buf = Buffer.isBuffer(input) ? input : input?.data;
+
     validateBuffer(buf, "convert()");
 
-    const opts = normalizeConverterOptions(options);
-    const addon = await getConverterAddon();
+    const addon = getConverterAddon();
+
+    const opts = {
+        format: String(options.format || "opus"),
+        bitrate: String(options.bitrate || "64k"),
+        channels: Math.min(2, Math.max(1, Number(options.channels) || 2)),
+        sampleRate: Number(options.sampleRate) || 48000,
+        ptt: Boolean(options.ptt),
+        vbr: options.vbr !== false,
+    };
+
+    const validFormats = ["opus", "mp3", "aac", "m4a", "ogg"];
+    if (!validFormats.includes(opts.format)) {
+        throw new Error(
+            `convert() invalid format: ${opts.format}. Valid formats: ${validFormats.join(", ")}`
+        );
+    }
 
     try {
         return addon.convert(buf, opts);
@@ -179,26 +156,3 @@ export async function convert(input, options = {}) {
         throw new Error(`convert() failed: ${err.message}`);
     }
 }
-
-export function isWebPFormat(buffer) {
-    return isWebP(buffer);
-}
-
-export async function getAddonInfo() {
-    return {
-        mode: "sync",
-        runtime: "node",
-        sticker: {
-            loaded: stickerAddon !== null,
-            path: stickerAddon ? "loaded" : "not loaded",
-        },
-        converter: {
-            loaded: converterAddon !== null,
-            path: converterAddon ? "loaded" : "not loaded",
-        },
-    };
-}
-
-export { sticker as stickerSync };
-export { convert as convertSync };
-export { addExif as addExifSync };

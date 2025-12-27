@@ -12,14 +12,19 @@
 
 # Core application
 /src/ @naruyaizumi
-/lib/core/ @naruyaizumi
-/lib/auth/ @naruyaizumi
+/src/lib/core/ @naruyaizumi
+/src/lib/auth/ @naruyaizumi
+
+# Plugins feature
+/src/ @naruyaizumi
+/src/lib/core/ @naruyaizumi
+/src/lib/auth/ @naruyaizumi
 
 # APIs
-/lib/api/ @naruyaizumi
+/src/lib/api/ @naruyaizumi
 
 # C++ code
-/lib/cpp/ @naruyaizumi
+/src/lib/cpp/ @naruyaizumi
 binding.gyp @naruyaizumi
 
 # Configuration files
@@ -28,7 +33,6 @@ package.json @naruyaizumi
 *.config.json @naruyaizumi
 
 # Documentation
-/docs/ @naruyaizumi
 *.md @naruyaizumi
 README.md @naruyaizumi
 CHANGELOG.md @naruyaizumi

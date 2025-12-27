@@ -4,6 +4,9 @@ import { Mutex } from "async-mutex";
 import core, { parse, makeKey } from "./core.js";
 
 const MAX_TRANSACTION_CACHE_SIZE = 10000;
+const MUTEX_CLEANUP_THRESHOLD = 100;
+const MUTEX_CLEANUP_COUNT = 50;
+const MUTEX_CLEANUP_INTERVAL = 5000;
 
 class TransactionManager {
     constructor() {
@@ -11,10 +14,8 @@ class TransactionManager {
         this.txnCache = null;
         this.txnMutations = null;
         this.typeMutex = new Map();
-        this.mutexCleanupThreshold = 100;
-        this.mutexCleanupCount = 50;
-        this.mutexCleanupTimer = null;
         this.lastMutexCleanup = Date.now();
+        this.mutexCleanupTimer = null;
     }
 
     isInTransaction() {
@@ -27,7 +28,7 @@ class TransactionManager {
             m = new Mutex();
             this.typeMutex.set(type, m);
 
-            if (this.typeMutex.size > this.mutexCleanupThreshold) {
+            if (this.typeMutex.size > MUTEX_CLEANUP_THRESHOLD) {
                 this._scheduleCleanupMutexes();
             }
         }
@@ -36,7 +37,7 @@ class TransactionManager {
 
     _scheduleCleanupMutexes() {
         const now = Date.now();
-        if (now - this.lastMutexCleanup < 5000) return;
+        if (now - this.lastMutexCleanup < MUTEX_CLEANUP_INTERVAL) return;
 
         if (this.mutexCleanupTimer) return;
 
@@ -52,7 +53,7 @@ class TransactionManager {
         for (const [key, mutex] of this.typeMutex.entries()) {
             if (!mutex.isLocked()) {
                 toDelete.push(key);
-                if (toDelete.length >= this.mutexCleanupCount) break;
+                if (toDelete.length >= MUTEX_CLEANUP_COUNT) break;
             }
         }
         for (const key of toDelete) {
@@ -81,7 +82,7 @@ class TransactionManager {
         }
 
         if (totalSize > MAX_TRANSACTION_CACHE_SIZE) {
-            global.logger.warn(`Transaction cache size exceeded: ${totalSize}`);
+            global.logger?.warn(`Transaction cache size exceeded: ${totalSize}`);
             return true;
         }
         return false;
@@ -137,11 +138,13 @@ function createKeyStore() {
                 const v = row ? parse(row.value) : null;
 
                 core.cache.set(k, v);
+                
                 if (v !== null) {
                     out[id] = v;
                 }
             }
         }
+
         return out;
     }
 
@@ -182,6 +185,7 @@ function createKeyStore() {
                 const bucket = data[type] || {};
                 const txBucket = (txnManager.txnCache[type] ||= Object.create(null));
                 const muBucket = (txnManager.txnMutations[type] ||= Object.create(null));
+                
                 for (const id in bucket) {
                     const v = bucket[id];
                     const normalized = v === undefined ? null : v;
@@ -193,12 +197,13 @@ function createKeyStore() {
             txnManager._checkCacheSize();
             return;
         }
-
+        
         for (const type in data) {
             const bucket = data[type] || {};
             for (const id in bucket) {
                 const v = bucket[id];
                 const k = makeKey(type, id);
+                
                 if (v === null || v === undefined) {
                     core.cache.del(k);
                     core.del(k);
@@ -212,6 +217,7 @@ function createKeyStore() {
 
     async function transaction(work, key = "default") {
         const txKeyMutex = txnManager.getTypeMutex(`__txn__:${key}`);
+        
         return await txKeyMutex.runExclusive(async () => {
             const isOutermost = txnManager.transactionsInProgress === 0;
             txnManager.transactionsInProgress += 1;
@@ -239,11 +245,13 @@ function createKeyStore() {
 
                 if (isOutermost) {
                     const mutations = txnManager.txnMutations;
+                    
                     for (const type in mutations) {
                         const bucket = mutations[type];
                         for (const id in bucket) {
                             const k = makeKey(type, id);
                             const v = bucket[id];
+                            
                             if (v === null || v === undefined) {
                                 core.cache.del(k);
                                 core.del(k);
@@ -257,12 +265,13 @@ function createKeyStore() {
 
                 return result;
             } catch (e) {
-                global.logger.error(`Transaction error: ${e.message}`);
+                global.logger?.error(`Transaction error: ${e.message}`);
 
                 if (!isOutermost && savedCache !== null && savedMutations !== null) {
                     txnManager.txnCache = savedCache;
                     txnManager.txnMutations = savedMutations;
                 }
+                
                 throw e;
             } finally {
                 txnManager.transactionsInProgress -= 1;
@@ -281,14 +290,21 @@ function createKeyStore() {
     async function clear() {
         core.cache.flushAll();
 
-        await core.dbQueue.add(() => {
+        try {
+            await core.flush();
+            
+            core.db.exec("BEGIN IMMEDIATE");
             try {
                 core.db.exec("DELETE FROM baileys_state WHERE key LIKE '%-%'");
+                core.db.exec("COMMIT");
             } catch (e) {
-                global.logger.error(e.message);
+                core.db.exec("ROLLBACK");
                 throw e;
             }
-        });
+        } catch (e) {
+            global.logger?.error(`Clear error: ${e.message}`);
+            throw e;
+        }
     }
 
     return {
@@ -306,6 +322,7 @@ function createKeyStore() {
 
 export function useSQLiteAuthState(_dbPath, _options) {
     let creds;
+    
     try {
         const row = core.get("creds");
         if (row && row.value) {
@@ -314,7 +331,7 @@ export function useSQLiteAuthState(_dbPath, _options) {
             creds = initAuthCreds();
         }
     } catch (e) {
-        global.logger.error(e.message);
+        global.logger?.error(`Load creds error: ${e.message}`);
         creds = initAuthCreds();
     }
 
@@ -345,7 +362,7 @@ export function useSQLiteAuthState(_dbPath, _options) {
             await keyStore._dispose();
             await core.dispose();
         } catch (e) {
-            global.logger.error(`Auth dispose error: ${e.message}`);
+            global.logger?.error(`Auth dispose error: ${e.message}`);
         }
     }
 

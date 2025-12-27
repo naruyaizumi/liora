@@ -1,30 +1,7 @@
-/*
- * Liora WhatsApp Bot
- * @description Open source WhatsApp bot based on Node.js and Baileys.
- *
- * @owner       Naruya Izumi <https://linkbio.co/naruyaizumi>
- * @copyright   © 2024 - 2025 Naruya Izumi
- * @license     Apache License 2.0
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at:
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *
- * IMPORTANT NOTICE:
- * - Do not sell or redistribute this source code for commercial purposes.
- * - Do not remove or alter original credits under any circumstances.
- */
-
 import "dotenv/config";
 import pino from "pino";
 import { join } from "path";
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 
 const PRESENCE_DELAY = 800;
 const DEFAULT_THUMBNAIL = "https://qu.ax/DdwBH.jpg";
@@ -69,9 +46,6 @@ const initializeLogger = () => {
 
     const logLevel = (process.env.LOG_LEVEL || "info").toLowerCase();
     const usePretty = parseBoolean(process.env.LOG_PRETTY, true);
-    const colorize = parseBoolean(process.env.LOG_COLORIZE, true);
-    const timeFormat = process.env.LOG_TIME_FORMAT || "HH:MM";
-    const ignore = process.env.LOG_IGNORE || "pid,hostname";
 
     global.logger = pino(
         { level: logLevel },
@@ -79,9 +53,9 @@ const initializeLogger = () => {
             ? pino.transport({
                   target: "pino-pretty",
                   options: {
-                      colorize,
-                      translateTime: timeFormat,
-                      ignore,
+                      colorize: true,
+                      translateTime: "HH:MM",
+                      ignore: "pid,hostname",
                   },
               })
             : undefined
@@ -123,13 +97,17 @@ const initializeConfig = () => {
 global.config = initializeConfig();
 
 const DB_PATH = join(process.cwd(), "src", "database", "database.db");
-const sqlite = new Database(DB_PATH, { timeout: 5000 });
+const sqlite = new DatabaseSync(DB_PATH, { open: true });
 
-sqlite.pragma("journal_mode = WAL");
-sqlite.pragma("synchronous = NORMAL");
-sqlite.pragma("cache_size = -128000");
-sqlite.pragma("temp_store = MEMORY");
-sqlite.pragma("mmap_size = 30000000000");
+sqlite.exec("PRAGMA journal_mode = WAL");
+sqlite.exec("PRAGMA synchronous = NORMAL");
+sqlite.exec("PRAGMA cache_size = -131072");
+sqlite.exec("PRAGMA temp_store = MEMORY");
+sqlite.exec("PRAGMA mmap_size = 268435456");
+sqlite.exec("PRAGMA page_size = 4096");
+sqlite.exec("PRAGMA auto_vacuum = INCREMENTAL");
+sqlite.exec("PRAGMA busy_timeout = 5000");
+sqlite.exec("PRAGMA wal_autocheckpoint = 1000");
 
 function normalizeValue(val) {
     if (val === undefined) return null;
@@ -139,16 +117,16 @@ function normalizeValue(val) {
 }
 
 function ensureTable(tableName, schema) {
-    const exists = sqlite
-        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
-        .get(tableName);
+    const checkStmt = sqlite.prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
+    );
+    const exists = checkStmt.get(tableName);
+
     if (!exists) {
-        sqlite.exec(`CREATE TABLE ${tableName} (${schema})`);
+        sqlite.exec(`CREATE TABLE ${tableName} (${schema}) WITHOUT ROWID`);
     } else {
-        const columns = sqlite
-            .prepare(`PRAGMA table_info(${tableName})`)
-            .all()
-            .map((c) => c.name);
+        const pragmaStmt = sqlite.prepare(`PRAGMA table_info(${tableName})`);
+        const columns = pragmaStmt.all().map((c) => c.name);
 
         const wanted = schema
             .split(",")
@@ -162,14 +140,9 @@ function ensureTable(tableName, schema) {
                         .split(",")
                         .map((x) => x.trim())
                         .find((x) => x.startsWith(col));
-
                     sqlite.exec(`ALTER TABLE ${tableName} ADD COLUMN ${colDef}`);
-                    logger.info({ module: "DB" }, `Added column ${col} to ${tableName}`);
-                } catch (e) {
-                    logger.error(
-                        { module: "DB", column: col, error: e.message },
-                        `Failed to add column`
-                    );
+                } catch {
+                    //
                 }
             }
         }
@@ -178,49 +151,70 @@ function ensureTable(tableName, schema) {
 
 ensureTable(
     "chats",
-    `
-  jid TEXT PRIMARY KEY,
-  mute INTEGER DEFAULT 0,
-  adminOnly INTEGER DEFAULT 0,
-  antiLinks INTEGER DEFAULT 0,
-  antiAudio INTEGER DEFAULT 0,
-  antiFile INTEGER DEFAULT 0,
-  antiFoto INTEGER DEFAULT 0,
-  antiVideo INTEGER DEFAULT 0,
-  antiSticker INTEGER DEFAULT 0,
-  antiStatus INTEGER DEFAULT 0
-  `
+    `jid TEXT PRIMARY KEY NOT NULL,
+     mute INTEGER DEFAULT 0,
+     adminOnly INTEGER DEFAULT 0,
+     antiLinks INTEGER DEFAULT 0,
+     antiAudio INTEGER DEFAULT 0,
+     antiFile INTEGER DEFAULT 0,
+     antiFoto INTEGER DEFAULT 0,
+     antiVideo INTEGER DEFAULT 0,
+     antiSticker INTEGER DEFAULT 0,
+     antiStatus INTEGER DEFAULT 0`
 );
 
 ensureTable(
     "settings",
-    `
-  jid TEXT PRIMARY KEY,
-  self INTEGER DEFAULT 0,
-  gconly INTEGER DEFAULT 0,
-  autoread INTEGER DEFAULT 0,
-  adReply INTEGER DEFAULT 0,
-  noprint INTEGER DEFAULT 0
-  `
+    `jid TEXT PRIMARY KEY NOT NULL,
+     self INTEGER DEFAULT 0,
+     gconly INTEGER DEFAULT 0,
+     autoread INTEGER DEFAULT 0,
+     adReply INTEGER DEFAULT 0,
+     noprint INTEGER DEFAULT 0`
 );
 
-ensureTable(
-    "meta",
-    `
-  key TEXT PRIMARY KEY,
-  value TEXT DEFAULT ''
-  `
-);
+ensureTable("meta", `key TEXT PRIMARY KEY NOT NULL, value TEXT DEFAULT ''`);
 
-sqlite.pragma("wal_checkpoint(FULL)");
-sqlite.pragma("optimize");
+try {
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS idx_chats_mute ON chats(mute) WHERE mute = 1`);
+    sqlite.exec(`CREATE INDEX IF NOT EXISTS idx_settings_self ON settings(self) WHERE self = 1`);
+} catch {
+    //
+}
+
+sqlite.exec("PRAGMA wal_checkpoint(PASSIVE)");
+sqlite.exec("PRAGMA optimize");
 
 class DataWrapper {
     constructor() {
+        this.stmts = {
+            chats: {
+                select: sqlite.prepare("SELECT * FROM chats WHERE jid = ?"),
+                insert: sqlite.prepare("INSERT OR IGNORE INTO chats (jid) VALUES (?)"),
+            },
+            settings: {
+                select: sqlite.prepare("SELECT * FROM settings WHERE jid = ?"),
+                insert: sqlite.prepare("INSERT OR IGNORE INTO settings (jid) VALUES (?)"),
+            },
+        };
+
+        this.updateCache = {
+            chats: new Map(),
+            settings: new Map(),
+        };
+
         this.data = {
             chats: this.createProxy("chats"),
             settings: this.createProxy("settings"),
         };
+    }
+
+    getUpdateStatement(table, col) {
+        const cache = this.updateCache[table];
+        if (!cache.has(col)) {
+            cache.set(col, sqlite.prepare(`UPDATE ${table} SET ${col} = ? WHERE jid = ?`));
+        }
+        return cache.get(col);
     }
 
     createProxy(table) {
@@ -228,10 +222,10 @@ class DataWrapper {
             {},
             {
                 get: (_, jid) => {
-                    let row = sqlite.prepare(`SELECT * FROM ${table} WHERE jid = ?`).get(jid);
+                    let row = this.stmts[table].select.get(jid);
                     if (!row) {
-                        sqlite.prepare(`INSERT INTO ${table} (jid) VALUES (?)`).run(jid);
-                        row = sqlite.prepare(`SELECT * FROM ${table} WHERE jid = ?`).get(jid);
+                        this.stmts[table].insert.run(jid);
+                        row = this.stmts[table].select.get(jid);
                     }
 
                     for (const k in row) {
@@ -247,27 +241,28 @@ class DataWrapper {
                         set: (obj, prop, value) => {
                             if (Object.prototype.hasOwnProperty.call(row, prop)) {
                                 try {
-                                    sqlite
-                                        .prepare(`UPDATE ${table} SET ${prop} = ? WHERE jid = ?`)
-                                        .run(normalizeValue(value), jid);
-
+                                    const updateStmt = this.getUpdateStatement(table, prop);
+                                    updateStmt.run(normalizeValue(value), jid);
                                     obj[prop] = value;
                                     return true;
-                                } catch (e) {
-                                    logger.error(
-                                        { module: "DB", table, prop },
-                                        `[DB] Update failed on ${table}.${prop}: ${e.message}`
-                                    );
+                                } catch {
                                     return false;
                                 }
                             }
-                            logger.warn(`Tried to set unknown column ${prop} on ${table}`);
                             return false;
                         },
                     });
                 },
             }
         );
+    }
+
+    cleanup() {
+        for (const table in this.updateCache) {
+            this.updateCache[table].clear();
+        }
+        this.stmts = null;
+        this.updateCache = null;
     }
 }
 
@@ -277,8 +272,13 @@ global.db = db;
 global.dbManager = {
     close: () => {
         try {
+            if (db && typeof db.cleanup === "function") {
+                db.cleanup();
+            }
+            sqlite.exec("PRAGMA wal_checkpoint(TRUNCATE)");
+            sqlite.exec("PRAGMA incremental_vacuum");
+            sqlite.exec("PRAGMA optimize");
             sqlite.close();
-            logger.info("Database closed successfully");
         } catch (e) {
             logger.error({ error: e.message }, "Database close error");
             throw e;
@@ -289,9 +289,7 @@ global.dbManager = {
 global.timestamp = { start: new Date() };
 
 global.loading = async (m, conn, back = false) => {
-    if (!conn || !m || !m.chat) {
-        return;
-    }
+    if (!conn || !m || !m.chat) return;
 
     try {
         if (back) {
@@ -302,7 +300,7 @@ global.loading = async (m, conn, back = false) => {
             await conn.sendPresenceUpdate("composing", m.chat);
         }
     } catch {
-        /* silent */
+        //
     }
 };
 
@@ -360,7 +358,7 @@ global.dfail = async (type, m, conn) => {
         try {
             await conn.sendMessage(m.chat, { text: messageText }, { quoted: m });
         } catch {
-            /* silent */
+            //
         }
     }
 };

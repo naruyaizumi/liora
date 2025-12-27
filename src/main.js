@@ -1,7 +1,7 @@
 /* global conn */
 import "./config.js";
 import { serialize } from "#core/message.js";
-import { useSQLiteAuthState } from "#auth";
+import { useSQLiteAuthState } from "#auth/auth.js";
 import { Browsers, fetchLatestBaileysVersion } from "baileys";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
@@ -28,7 +28,7 @@ let isShuttingDown = false;
 async function setupPairingCode(conn) {
     return new Promise((resolve) => {
         const timeout = setTimeout(resolve, 3000);
-        
+
         const checkConnection = setInterval(() => {
             if (conn.user || conn.ws?.readyState === 1) {
                 clearInterval(checkConnection);
@@ -38,27 +38,25 @@ async function setupPairingCode(conn) {
         }, 100);
     }).then(async () => {
         try {
-            let code = await conn.requestPairingCode(
-                pairingNumber, pairingCode);
+            let code = await conn.requestPairingCode(pairingNumber, pairingCode);
             code = code?.match(/.{1,4}/g)?.join("-") || code;
             global.logger.info(`Pairing code: ${code}`);
         } catch (e) {
-            global.logger.error({ error: e.message },
-                "Pairing code error");
+            global.logger.error({ error: e.message }, "Pairing code error");
         }
     });
 }
 
 async function LIORA() {
     authState = useSQLiteAuthState();
-    
+
     const { state, saveCreds } = authState;
     const { version: baileysVersion } = await fetchLatestBaileysVersion();
-    
+
     global.logger.info(
         `[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}`
     );
-    
+
     const connectionOptions = {
         version: baileysVersion,
         logger: pino({
@@ -76,30 +74,30 @@ async function LIORA() {
         browser: Browsers.macOS("Safari"),
         auth: state,
     };
-    
+
     global.conn = naruyaizumi(connectionOptions);
     global.conn.isInit = false;
-    
+
     if (!state.creds.registered && pairingNumber) {
         await setupPairingCode(conn);
     }
-    
+
     const eventManager = new EventManager();
     const handler = await import("./handler.js");
     eventManager.setHandler(handler);
-    
+
     global.conn.connectionUpdate = handleDisconnect.bind(global.conn);
     global.conn.ev.on("connection.update", global.conn.connectionUpdate);
-    global.reloadHandler = await eventManager.createReloadHandler(
-        connectionOptions, saveCreds);
-    
+    global.reloadHandler = await eventManager.createReloadHandler(connectionOptions, saveCreds);
+
     const filename = fileURLToPath(import.meta.url);
     const srcFolder = dirname(filename);
     const pluginFolder = join(srcFolder, "./plugins");
-    
-    await loadPlugins(pluginFolder, (dir, skipCache) => getAllPlugins(dir,
-        pluginCache, skipCache));
-    
+
+    await loadPlugins(pluginFolder, (dir, skipCache) =>
+        getAllPlugins(dir, pluginCache, skipCache)
+    );
+
     hotReloadCleanup = initHotReload(
         srcFolder,
         pluginFolder,
@@ -108,89 +106,69 @@ async function LIORA() {
                 if (module === null) {
                     if (isPlugin) {
                         const oldPlugin = global.plugins[filename];
-                        
-                        if (oldPlugin && typeof oldPlugin
-                            .cleanup === "function") {
+
+                        if (oldPlugin && typeof oldPlugin.cleanup === "function") {
                             try {
                                 await oldPlugin.cleanup();
-                            } catch (e) {
-                                global.logger.warn({
-                                        plugin: filename,
-                                        error: e.message
-                                    },
-                                    "Plugin cleanup error"
-                                );
+                            } catch {
+                                //
                             }
                         }
-                        
+
                         delete global.plugins[filename];
                     }
-                    
-                    global.logger.info({ file: filename, isPlugin },
-                        "File removed");
+
+                    global.logger.info({ file: filename, isPlugin }, "File removed");
                 } else {
                     if (isPlugin) {
                         const oldPlugin = global.plugins[filename];
-                        
-                        if (typeof module === "function" ||
-                            typeof module === "object") {
-                            if (oldPlugin && typeof oldPlugin
-                                .cleanup === "function") {
+
+                        if (typeof module === "function" || typeof module === "object") {
+                            if (oldPlugin && typeof oldPlugin.cleanup === "function") {
                                 try {
                                     await oldPlugin.cleanup();
-                                } catch (e) {
-                                    global.logger.warn({
-                                            plugin: filename,
-                                            error: e.message
-                                        },
-                                        "Old plugin cleanup error"
-                                    );
+                                } catch {
+                                    //
                                 }
                             }
-                            
+
                             global.plugins[filename] = module;
-                            
+
                             if (typeof module.init === "function") {
                                 try {
                                     await module.init();
-                                } catch (e) {
-                                    global.logger.warn({
-                                            plugin: filename,
-                                            error: e.message
-                                        },
-                                        "Plugin init error"
-                                    );
+                                } catch {
+                                    //
                                 }
                             }
                         } else {
-                            throw new Error(
-                                "Invalid plugin structure");
+                            throw new Error("Invalid plugin structure");
                         }
                     }
-                    
-                    global.logger.info({ file: filename, isPlugin },
-                        "File reloaded");
-                    
-                    if (!isPlugin && !filename.includes(
-                            "main.js") && !filename.includes(
-                            "config.js") && !filename.includes(
-                            "index.js")) {
+
+                    global.logger.info({ file: filename, isPlugin }, "File reloaded");
+
+                    if (
+                        !isPlugin &&
+                        !filename.includes("main.js") &&
+                        !filename.includes("config.js") &&
+                        !filename.includes("index.js")
+                    ) {
                         await global.reloadHandler(false);
                     }
                 }
             } catch (e) {
-                global.logger.error({
+                global.logger.error(
+                    {
                         file: filename,
-                        error: e
-                            .message,
-                        stack: e.stack
+                        error: e.message,
                     },
                     "File reload error"
                 );
             }
         }
     );
-    
+
     await global.reloadHandler();
     serialize();
 }
@@ -198,53 +176,49 @@ async function LIORA() {
 async function gracefulShutdown(signal) {
     if (isShuttingDown) return;
     isShuttingDown = true;
-    
-    global.logger.info(`Received ${signal}, shutting down gracefully...`);
-    
+
+    global.logger.info(`Shutting down (${signal})...`);
+
     try {
         if (hotReloadCleanup) {
             hotReloadCleanup();
             hotReloadCleanup = null;
         }
-        
+
         cleanupReconnect();
-        
+
         if (global.conn?.ev) {
             try {
                 global.conn.ev.removeAllListeners();
-            } catch (e) {
-                global.logger.error({ error: e.message },
-                    "Event cleanup error");
+            } catch {
+                //
             }
         }
-        
+
         if (global.conn?.ws) {
             try {
                 global.conn.ws.close();
-            } catch (e) {
-                global.logger.error({ error: e.message },
-                    "WebSocket close error");
+            } catch {
+                //
             }
         }
-        
-        if (global.dbManager) {
-            try {
-                global.dbManager.close();
-            } catch (e) {
-                global.logger.error({ error: e.message },
-                    "Main DB close error");
-            }
-        }
-        
+
         if (authState && typeof authState.dispose === "function") {
             try {
                 await authState.dispose();
             } catch (e) {
-                global.logger.error({ error: e.message },
-                    "Auth DB close error");
+                global.logger.error({ error: e.message }, "Auth dispose error");
             }
         }
-        
+
+        if (global.dbManager) {
+            try {
+                global.dbManager.close();
+            } catch (e) {
+                global.logger.error({ error: e.message }, "DB close error");
+            }
+        }
+
         global.logger.info("Shutdown completed");
     } catch (e) {
         global.logger.error({ error: e.message }, "Shutdown error");
@@ -262,22 +236,19 @@ process.on("SIGINT", async () => {
 });
 
 process.on("uncaughtException", async (e) => {
-    global.logger.error({ error: e.message, stack: e.stack },
-        "Uncaught exception");
+    global.logger.error({ error: e.message }, "Uncaught exception");
     await gracefulShutdown("uncaughtException");
     process.exit(1);
 });
 
 process.on("unhandledRejection", async (e) => {
-    global.logger.error({ error: e?.message, stack: e?.stack },
-        "Unhandled rejection");
+    global.logger.error({ error: e?.message }, "Unhandled rejection");
     await gracefulShutdown("unhandledRejection");
     process.exit(1);
 });
 
 LIORA().catch(async (e) => {
-    global.logger.fatal({ error: e.message, stack: e.stack },
-        "Fatal initialization error");
+    global.logger.fatal({ error: e.message }, "Fatal initialization error");
     await gracefulShutdown("fatal");
     process.exit(1);
 });

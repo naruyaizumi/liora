@@ -10,123 +10,59 @@
       "-fdata-sections",
       "-ffunction-sections",
       "-fexceptions",
-      "-pthread",
-      "-Wall",
-      "-Wextra",
       "-Wno-deprecated-declarations",
+      "-Wno-reorder",
+      "-Wno-unused-variable",
       "-Wno-unused-parameter",
-      "-Wno-sign-compare"
+      "-Wno-sign-compare",
+      "-Wno-stringop-overflow"
     ],
     "common_ldflags": [
       "-Wl,--as-needed",
-      "-Wl,--gc-sections",
-      "-flto=auto",
-      "-pthread"
+      "-Wl,--gc-sections"
     ],
     "common_includes": [
       "<!@(node -p \"require('node-addon-api').include\")",
       "/usr/include",
-      "/usr/local/include",
-      "src/lib/cpp",
-      "src/lib/cpp/core"
-    ],
-    "common_libs": [
-      "-lwebp",
-      "-lwebpmux",
-      "-lwebpdemux",
-      "-lavformat",
-      "-lavcodec",
-      "-lavutil",
-      "-lswresample",
-      "-lswscale",
-      "-lpthread"
+      "/usr/local/include"
     ]
   },
 
   "targets": [
     {
-      "target_name": "sticker_core",
-      "type": "static_library",
-      "sources": [
-        "src/lib/cpp/core/sticker_core.cpp"
-      ],
-      "include_dirs": ["<@(common_includes)"],
-      "cflags_cc": ["<@(common_cflags_cc)"],
-      "direct_dependent_settings": {
-        "include_dirs": ["<@(common_includes)"]
-      }
-    },
-    {
-      "target_name": "converter_core",
-      "type": "static_library",
-      "sources": [
-        "src/lib/cpp/core/converter_core.cpp"
-      ],
-      "include_dirs": ["<@(common_includes)"],
-      "cflags_cc": ["<@(common_cflags_cc)"],
-      "direct_dependent_settings": {
-        "include_dirs": ["<@(common_includes)"]
-      }
-    },
-    {
       "target_name": "sticker",
-      "sources": [
-        "src/lib/cpp/bindings/sticker.cpp"
-      ],
+      "sources": ["src/lib/cpp/sticker.cpp"],
       "include_dirs": ["<@(common_includes)"],
-      "dependencies": [
-        "<!(node -p \"require('node-addon-api').gyp\")",
-        "sticker_core"
-      ],
+      "dependencies": ["<!(node -p \"require('node-addon-api').gyp\")"],
       "cflags_cc": ["<@(common_cflags_cc)"],
       "ldflags": ["<@(common_ldflags)"],
       "defines": ["NAPI_CPP_EXCEPTIONS"],
-      "libraries": ["<@(common_libs)"]
+      "libraries": [
+        "-lwebp",
+        "-lwebpmux",
+        "-lwebpdemux",
+        "-lavformat",
+        "-lavcodec",
+        "-lavutil",
+        "-lswresample",
+        "-lswscale"
+      ]
     },
     {
       "target_name": "converter",
-      "sources": [
-        "src/lib/cpp/bindings/converter.cpp"
-      ],
+      "sources": ["src/lib/cpp/converter.cpp"],
       "include_dirs": ["<@(common_includes)"],
-      "dependencies": [
-        "<!(node -p \"require('node-addon-api').gyp\")",
-        "converter_core"
-      ],
+      "dependencies": ["<!(node -p \"require('node-addon-api').gyp\")"],
       "cflags_cc": ["<@(common_cflags_cc)"],
       "ldflags": ["<@(common_ldflags)"],
       "defines": ["NAPI_CPP_EXCEPTIONS"],
-      "libraries": ["<@(common_libs)"]
-    },
-    {
-      "target_name": "sticker_async",
-      "sources": [
-        "src/lib/cpp/bindings/sticker_async.cpp"
-      ],
-      "include_dirs": ["<@(common_includes)"],
-      "dependencies": [
-        "<!(node -p \"require('node-addon-api').gyp\")",
-        "sticker_core"
-      ],
-      "cflags_cc": ["<@(common_cflags_cc)"],
-      "ldflags": ["<@(common_ldflags)"],
-      "defines": ["NAPI_CPP_EXCEPTIONS"],
-      "libraries": ["<@(common_libs)"]
-    },
-    {
-      "target_name": "converter_async",
-      "sources": [
-        "src/lib/cpp/bindings/converter_async.cpp"
-      ],
-      "include_dirs": ["<@(common_includes)"],
-      "dependencies": [
-        "<!(node -p \"require('node-addon-api').gyp\")",
-        "converter_core"
-      ],
-      "cflags_cc": ["<@(common_cflags_cc)"],
-      "ldflags": ["<@(common_ldflags)"],
-      "defines": ["NAPI_CPP_EXCEPTIONS"],
-      "libraries": ["<@(common_libs)"]
+      "libraries": [
+        "-lavformat",
+        "-lavcodec",
+        "-lavutil",
+        "-lswresample",
+        "-lswscale"
+      ]
     }
   ]
 }
