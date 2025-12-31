@@ -15,32 +15,19 @@ setup_liora() {
         print_info "Old installation backed up to $BACKUP_DIR"
     fi
     
-    print_info "Fetching latest release tag..."
-    LATEST_TAG=$(get_latest_release_tag)
-    
-    if [ -z "$LATEST_TAG" ]; then
-        print_warning "No release tag found, using main branch..."
-        git clone "$REPO_URL" "$WORK_DIR" || {
-            print_error "Failed to clone Liora repository"
-            exit 1
-        }
-    else
-        print_success "Latest release tag: $LATEST_TAG"
-        git clone --branch "$LATEST_TAG" --depth 1 "$REPO_URL" "$WORK_DIR" || {
-            print_error "Failed to clone Liora repository at tag $LATEST_TAG"
-            exit 1
-        }
-    fi
+    print_info "Cloning Liora repository (branch: main)..."
+    git clone --branch main --depth 1 "$REPO_URL" "$WORK_DIR" || {
+        print_error "Failed to clone Liora repository"
+        exit 1
+    }
     
     cd "$WORK_DIR" || {
         print_error "Failed to change to Liora directory"
         exit 1
     }
     
-    CURRENT_TAG=$(git describe --tags 2>/dev/null || echo "main")
-    echo "$CURRENT_TAG" > "$WORK_DIR/.current_version"
-    
-    print_success "Liora cloned successfully (version: $CURRENT_TAG)"
+    echo "main" > "$WORK_DIR/.current_version"
+    print_success "Liora cloned successfully (branch: main)"
 }
 
 create_env_files() {
