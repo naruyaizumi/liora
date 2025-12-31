@@ -9,7 +9,7 @@ create_cli_helper() {
 SERVICE="liora"
 WORK_DIR="/root/liora"
 BUN_PATH="/root/.bun/bin/bun"
-SUPERVISOR_PATH="${WORK_DIR}/lib/rs/target/release/liora-rs"
+SUPERVISOR_PATH="${WORK_DIR}/src/lib/rs/target/release/liora-rs"
 NVM_DIR="$HOME/.nvm"
 REPO_URL="https://github.com/naruyaizumi/liora.git"
 
@@ -272,7 +272,7 @@ case "$1" in
         fi
         
         "$BUN_PATH" install || { echo "[ERROR] Install failed"; exit 1; }
-        cd "${WORK_DIR}/lib/rs" && cargo clean && cargo build --release || { echo "[ERROR] Build failed"; exit 1; }
+        cd "${WORK_DIR}/src/lib/rs" && cargo clean && cargo build --release || { echo "[ERROR] Build failed"; exit 1; }
         
         echo "[SUCCESS] Update completed"
         cd "$WORK_DIR" && systemctl restart $SERVICE && echo "[SUCCESS] Bot restarted" || echo "[ERROR] Restart failed"
@@ -286,7 +286,7 @@ case "$1" in
         ;;
     rebuild)
         echo "[INFO] Rebuilding supervisor..."
-        cd "${WORK_DIR}/lib/rs" && cargo clean && cargo build --release || { echo "[ERROR] Build failed"; exit 1; }
+        cd "${WORK_DIR}/src/lib/rs" && cargo clean && cargo build --release || { echo "[ERROR] Build failed"; exit 1; }
         echo "[SUCCESS] Supervisor rebuilt"
         echo "[INFO] Restart to use: bot restart"
         ;;
@@ -295,7 +295,7 @@ case "$1" in
         read -r confirmation
         [[ "$confirmation" != "yes" ]] && exit 0
         systemctl stop $SERVICE 2>/dev/null || true
-        cd "${WORK_DIR}/lib/rs" && cargo clean
+        cd "${WORK_DIR}/src/lib/rs" && cargo clean
         cd "$WORK_DIR" && rm -rf node_modules .bun-cache
         echo "[SUCCESS] Cleaned"
         ;;
@@ -317,7 +317,7 @@ case "$1" in
         fi
         
         cd "$WORK_DIR" && "$BUN_PATH" install
-        cd "${WORK_DIR}/lib/rs" && cargo build --release
+        cd "${WORK_DIR}/src/lib/rs" && cargo build --release
         echo "[SUCCESS] Reinstalled"
         ;;
     daemon-reload)
@@ -485,32 +485,32 @@ case "$1" in
         ;;
     benchmark)
         echo "[INFO] Running benchmark..."
-        cd "$WORK_DIR/lib/rs" && cargo bench 2>/dev/null || echo "[INFO] No benchmarks available"
+        cd "$WORK_DIR/src/lib/rs" && cargo bench 2>/dev/null || echo "[INFO] No benchmarks available"
         ;;
     test)
         echo "[INFO] Running tests..."
         cd "$WORK_DIR" && "$BUN_PATH" test 2>/dev/null || echo "[INFO] No tests configured"
-        cd "$WORK_DIR/lib/rs" && cargo test || echo "[INFO] Tests failed or not available"
+        cd "$WORK_DIR/src/lib/rs" && cargo test || echo "[INFO] Tests failed or not available"
         ;;
     lint)
         echo "[INFO] Running linter..."
-        cd "$WORK_DIR/lib/rs" && cargo clippy || echo "[INFO] Clippy not available"
+        cd "$WORK_DIR/src/lib/rs" && cargo clippy || echo "[INFO] Clippy not available"
         ;;
     format)
         echo "[INFO] Formatting code..."
-        cd "$WORK_DIR/lib/rs" && cargo fmt || echo "[INFO] Failed to format"
+        cd "$WORK_DIR/src/lib/rs" && cargo fmt || echo "[INFO] Failed to format"
         ;;
     check)
         echo "[INFO] Checking code..."
-        cd "$WORK_DIR/lib/rs" && cargo check || echo "[INFO] Check failed"
+        cd "$WORK_DIR/src/lib/rs" && cargo check || echo "[INFO] Check failed"
         ;;
     audit)
         echo "[INFO] Security audit..."
-        cd "$WORK_DIR/lib/rs" && cargo audit 2>/dev/null || echo "[INFO] cargo-audit not installed"
+        cd "$WORK_DIR/src/lib/rs" && cargo audit 2>/dev/null || echo "[INFO] cargo-audit not installed"
         ;;
     outdated)
         echo "[INFO] Outdated dependencies..."
-        cd "$WORK_DIR/lib/rs" && cargo outdated 2>/dev/null || echo "[INFO] cargo-outdated not installed"
+        cd "$WORK_DIR/src/lib/rs" && cargo outdated 2>/dev/null || echo "[INFO] cargo-outdated not installed"
         ;;
     *)
         cat <<EOF

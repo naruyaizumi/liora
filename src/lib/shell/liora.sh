@@ -212,14 +212,14 @@ EOF
 
     print_success ".env file created at $WORK_DIR/.env"
     
-    mkdir -p "$WORK_DIR/lib/rs"
-    cat > "$WORK_DIR/lib/rs/.env" <<EOF
+    mkdir -p "$WORK_DIR/src/lib/rs"
+    cat > "$WORK_DIR/src/lib/rs/.env" <<EOF
 DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
 REDIS_URL=redis://${REDIS_HOST}:${REDIS_PORT}
 RUST_LOG=info
 EOF
 
-    print_success ".env file created at $WORK_DIR/lib/rs/.env"
+    print_success ".env file created at $WORK_DIR/src/lib/rs/.env"
 }
 
 install_liora_dependencies() {
@@ -235,7 +235,7 @@ install_liora_dependencies() {
 build_rust_supervisor() {
     print_info "Building Rust supervisor..."
     
-    cd "${WORK_DIR}/lib/rs" || {
+    cd "${WORK_DIR}/src/lib/rs" || {
         print_error "Supervisor directory not found"
         exit 1
     }
