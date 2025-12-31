@@ -11,10 +11,9 @@ const MAX_CONSECUTIVE_ERRORS = 5;
 function loadAddon() {
     if (converterAddon) return converterAddon;
 
-    const projectRoot = path.resolve(__dirname, "../../..");
     const searchPaths = [
-        path.join(projectRoot, "build", "Release", "converter.node"),
-        path.join(projectRoot, "build", "Debug", "converter.node"),
+        path.join(process.cwd(), "build", "Release", "converter.node"),
+        path.join(process.cwd(), "build", "Debug", "converter.node"),
     ];
 
     for (const addonPath of searchPaths) {

@@ -38,7 +38,7 @@ export class RedisPool {
 
         await Promise.all(promises);
         this.initialized = true;
-        global.logger.info(`Redis pool initialized with ${this.poolSize} connections`);
+        global.logger.debug(`Redis pool initialized with ${this.poolSize} connections`);
     }
 
     async _createClient(index) {
@@ -63,17 +63,17 @@ export class RedisPool {
             };
 
             client._eventHandlers.close = () => {
-                global.logger.warn({ clientIndex: index }, "Redis client connection closed");
+                global.logger.debug({ clientIndex: index }, "Redis client connection closed");
                 this._markUnhealthy(client);
             };
 
             client._eventHandlers.end = () => {
-                global.logger.warn({ clientIndex: index }, "Redis client connection ended");
+                global.logger.debug({ clientIndex: index }, "Redis client connection ended");
                 this._markUnhealthy(client);
             };
 
             client._eventHandlers.ready = () => {
-                global.logger.info({ clientIndex: index }, "Redis client ready");
+                global.logger.debug({ clientIndex: index }, "Redis client ready");
                 client._isHealthy = true;
                 client._connectionAttempts = 0;
             };
@@ -97,7 +97,7 @@ export class RedisPool {
             ]);
 
             client._isHealthy = true;
-            global.logger.info({ clientIndex: index }, "Redis client connected and verified");
+            global.logger.debug({ clientIndex: index }, "Redis client connected and verified");
         } catch (err) {
             global.logger.error({ err, clientIndex: index }, "Failed to connect Redis client");
             this._cleanupClient(client);
@@ -162,7 +162,7 @@ export class RedisPool {
         client._connectionAttempts++;
 
         try {
-            global.logger.info(
+            global.logger.debug(
                 { clientIndex: client._poolIndex, attempt: client._connectionAttempts },
                 "Attempting to reconnect Redis client"
             );
@@ -187,7 +187,7 @@ export class RedisPool {
 
             if (newClient._isHealthy) {
                 this.available.push(newClient);
-                global.logger.info(
+                global.logger.debug(
                     { clientIndex: newClient._poolIndex },
                     "Redis client reconnected successfully"
                 );
@@ -249,7 +249,7 @@ export class RedisPool {
             return true;
         } catch (err) {
             if (err.code !== "ERR_REDIS_CONNECTION_CLOSED" && !this.destroyed) {
-                global.logger.warn({ err, clientIndex: client._poolIndex }, "Client health check failed");
+                global.logger.debug({ err, clientIndex: client._poolIndex }, "Client health check failed");
             }
 
             this._markUnhealthy(client);
@@ -279,7 +279,7 @@ export class RedisPool {
         const healthyCount = this.clients.filter((c) => c._isHealthy).length;
         const reconnectingCount = this.reconnecting.size;
 
-        global.logger.warn(
+        global.logger.debug(
             {
                 healthyClients: healthyCount,
                 reconnectingClients: reconnectingCount,
@@ -312,7 +312,7 @@ export class RedisPool {
         }
 
         if (!this.clients.includes(client)) {
-            global.logger.warn(
+            global.logger.debug(
                 { clientIndex: client?._poolIndex },
                 "Attempted to release client not from this pool"
             );
@@ -377,7 +377,7 @@ export class RedisPool {
 
                 if (attempt < retries) {
                     const delay = 100 * Math.pow(2, attempt);
-                    global.logger.warn(
+                    global.logger.debug(
                         { err: err.message, attempt: attempt + 1, maxRetries: retries + 1, delay },
                         "Retrying Redis operation"
                     );
@@ -421,7 +421,7 @@ export class RedisPool {
                         ]);
                     }
                 } catch (err) {
-                    global.logger.warn(
+                    global.logger.debug(
                         { err, clientIndex: client._poolIndex },
                         "Error closing Redis client"
                     );
@@ -433,7 +433,7 @@ export class RedisPool {
         this.available = [];
         this.initialized = false;
 
-        global.logger.info("Redis pool destroyed");
+        global.logger.debug("Redis pool destroyed");
     }
 
     getStats() {
@@ -463,7 +463,7 @@ export class BatchManager {
 
     add(operation, key, value, ttl) {
         if (this.destroyed) {
-            global.logger.warn("Attempted to add to destroyed batch manager");
+            global.logger.debug("Attempted to add to destroyed batch manager");
             return;
         }
 
@@ -531,7 +531,7 @@ export class BatchManager {
         }
 
         if (this.failedBatches.length > 0) {
-            global.logger.info({ count: this.failedBatches.length }, "Retrying failed batches");
+            global.logger.debug({ count: this.failedBatches.length }, "Retrying failed batches");
             const retriedBatches = [...this.failedBatches];
             this.failedBatches = [];
 
@@ -606,7 +606,7 @@ export class BatchManager {
                 }
             }, 1);
         } catch (err) {
-            global.logger.warn({ err, batchCount: currentBatches.size }, "Batch flush error, will retry");
+            global.logger.debug({ err, batchCount: currentBatches.size }, "Batch flush error, will retry");
 
             if (this.failedBatches.length < 10) {
                 this.failedBatches.push(currentBatches);
@@ -652,7 +652,7 @@ export class RedisLRUCache {
 
     async get(key) {
         if (!key) {
-            global.logger.warn("Cache get called with null/undefined key");
+            global.logger.debug("Cache get called with null/undefined key");
             return undefined;
         }
 
@@ -693,13 +693,13 @@ export class RedisLRUCache {
                     this.stats.redisHits++;
                     return parsed;
                 } catch (parseErr) {
-                    global.logger.warn({ err: parseErr, key }, "JSON parse error, invalid data in cache");
+                    global.logger.debug({ err: parseErr, key }, "JSON parse error, invalid data in cache");
                     this.stats.errors++;
                     this.batchManager.add("DEL", redisKey);
                 }
             }
         } catch (err) {
-            global.logger.warn({ err: err.message, key }, "Redis get error");
+            global.logger.debug({ err: err.message, key }, "Redis get error");
             this.stats.errors++;
         }
 
@@ -709,12 +709,12 @@ export class RedisLRUCache {
 
     async set(key, value) {
         if (!key) {
-            global.logger.warn("Attempted to set cache with null/undefined key");
+            global.logger.debug("Attempted to set cache with null/undefined key");
             return false;
         }
 
         if (value === undefined) {
-            global.logger.warn({ key }, "Attempted to set cache with undefined value");
+            global.logger.debug({ key }, "Attempted to set cache with undefined value");
             return false;
         }
 
@@ -726,7 +726,7 @@ export class RedisLRUCache {
             this.batchManager.add("SET", redisKey, serialized, this.ttl);
             return true;
         } catch (err) {
-            global.logger.warn({ err, key }, "Failed to serialize value for cache");
+            global.logger.debug({ err, key }, "Failed to serialize value for cache");
             this.stats.errors++;
             this.cache.delete(key);
             return false;
@@ -777,7 +777,7 @@ export class RedisLRUCache {
             const exists = await this.pool.execute((client) => client.exists(redisKey));
             return exists === 1;
         } catch (err) {
-            global.logger.warn({ err: err.message, key }, "Redis exists error");
+            global.logger.debug({ err: err.message, key }, "Redis exists error");
             this.stats.errors++;
             return false;
         }
@@ -873,13 +873,13 @@ export class RedisBlocklistCache {
             this.lastSync = Date.now();
             global.logger.debug({ count: this.localSet.size }, "Synced blocklist entries from Redis");
         } catch (err) {
-            global.logger.warn({ err: err.message }, "Blocklist sync error");
+            global.logger.debug({ err: err.message }, "Blocklist sync error");
         }
     }
 
     async add(jid) {
         if (!jid) {
-            global.logger.warn("Attempted to add null/undefined JID to blocklist");
+            global.logger.debug("Attempted to add null/undefined JID to blocklist");
             return;
         }
         this.localSet.add(jid);
@@ -911,9 +911,9 @@ export class RedisBlocklistCache {
 
         try {
             await this.pool.execute((client) => client.del(REDIS_PREFIX.BLOCKLIST));
-            global.logger.info("Blocklist cleared");
+            global.logger.debug("Blocklist cleared");
         } catch (err) {
-            global.logger.warn({ err: err.message }, "Blocklist clear error");
+            global.logger.debug({ err: err.message }, "Blocklist clear error");
         }
     }
 

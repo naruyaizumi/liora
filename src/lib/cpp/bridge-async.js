@@ -3,7 +3,6 @@ import { WorkerPool } from "./worker-pool.js";
 
 const __filename = Bun.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, "../..");
 
 const WORKER_MODE = process.env.ADDON_WORKER_MODE || "threadpool"; // sync | async | threadpool
 const POOL_SIZE = parseInt(process.env.ADDON_POOL_SIZE) || 8;
@@ -18,8 +17,8 @@ let converterWorkerPool = null;
 
 async function loadAddon(name) {
     const searchPaths = [
-        path.join(projectRoot, "build", "Release", `${name}.node`),
-        path.join(projectRoot, "build", "Debug", `${name}.node`),
+        path.join(process.cwd(), "build", "Release", `${name}.node`),
+        path.join(process.cwd(), "build", "Debug", `${name}.node`),
     ];
 
     for (const addonPath of searchPaths) {

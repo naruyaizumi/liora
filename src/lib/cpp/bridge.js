@@ -2,15 +2,14 @@ import path from "path";
 
 const __filename = Bun.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, "../..");
 
 let stickerAddon = null;
 let converterAddon = null;
 
 function loadAddon(name) {
     const searchPaths = [
-        path.join(projectRoot, "build", "Release", `${name}.node`),
-        path.join(projectRoot, "build", "Debug", `${name}.node`),
+        path.join(process.cwd(), "build", "Release", `${name}.node`),
+        path.join(process.cwd(), "build", "Debug", `${name}.node`),
     ];
 
     for (const addonPath of searchPaths) {

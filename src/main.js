@@ -16,7 +16,6 @@ import {
     cleanupReconnect,
 } from "#core/connection.js";
 import { naruyaizumi } from "#core/socket.js";
-import { redisStore } from "#store/store.js";
 
 const pluginCache = new PluginCache(5000);
 const pairingNumber = global.config.pairingNumber;
@@ -205,21 +204,6 @@ async function gracefulShutdown(signal) {
             }
         }
 
-        if (global.dbManager?.core) {
-            try {
-                global.logger.info("Flushing user database...");
-                await Promise.race([
-                    global.dbManager.core.flush(),
-                    new Promise((_, reject) => 
-                        setTimeout(() => reject(new Error("User flush timeout")), 5000)
-                    )
-                ]);
-                global.logger.info("User database flushed");
-            } catch (e) {
-                global.logger.error({ error: e.message }, "User DB flush error");
-            }
-        }
-
         if (authState && typeof authState.dispose === "function") {
             try {
                 global.logger.info("Disposing auth state...");
@@ -233,39 +217,6 @@ async function gracefulShutdown(signal) {
                 authState = null;
             } catch (e) {
                 global.logger.error({ error: e.message }, "Auth dispose error");
-            }
-        }
-
-        if (global.dbManager) {
-            try {
-                global.logger.info("Closing user database...");
-                await Promise.race([
-                    global.dbManager.close(),
-                    new Promise((_, reject) => 
-                        setTimeout(() => reject(new Error("User close timeout")), 3000)
-                    )
-                ]);
-                global.logger.info("User database closed");
-            } catch (e) {
-                global.logger.error({ error: e.message }, "User DB close error");
-            }
-        }
-
-        if (redisStore) {
-            try {
-                global.logger.info("Disconnecting Redis...");
-                const metrics = redisStore.getMetrics();
-                global.logger.info({ metrics }, "Final Redis metrics");
-                
-                await Promise.race([
-                    redisStore.disconnect(),
-                    new Promise((_, reject) => 
-                        setTimeout(() => reject(new Error("Redis disconnect timeout")), 3000)
-                    )
-                ]);
-                global.logger.info("Redis disconnected");
-            } catch (e) {
-                global.logger.error({ error: e.message }, "Redis disconnect error");
             }
         }
 

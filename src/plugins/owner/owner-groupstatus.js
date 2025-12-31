@@ -5,8 +5,6 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     const textToParse = m.text || "";
     const caption = textToParse.replace(new RegExp(`^[.!#/](${command})\\s*`, "i"), "").trim();
 
-    const jid = m.chat;
-
     try {
         if (!mime && !caption) {
             return m.reply(
@@ -52,7 +50,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
             );
         }
 
-        await conn.sendGroupStatus(jid, payload);
+        await conn.sendGroupStatus(m.chat, payload);
 
         m.reply("Group status sent successfully.");
     } catch (e) {

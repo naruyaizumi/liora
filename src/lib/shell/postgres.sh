@@ -79,7 +79,7 @@ install_postgresql() {
         sleep 1
     done
     
-    PG_VERSION=$(psql --version | awk '{print $3}' | cut -d. -f1)
+    PG_VERSION=$(psql -V | awk '{print $3}' | cut -d. -f1)
     print_success "PostgreSQL $PG_VERSION installed and running"
 }
 

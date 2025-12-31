@@ -41,6 +41,8 @@ load_library "systemd.sh"
 load_library "cli.sh"
 
 SERVICE_NAME="liora"
+SERVICE_FILE="/etc/systemd/system/liora.service"
+HELPER_FILE="/usr/local/bin/bot"
 WORK_DIR="/root/liora"
 BUN_PATH="/root/.bun/bin/bun"
 SUPERVISOR_PATH="${WORK_DIR}/src/lib/rs/target/release/liora-rs"
