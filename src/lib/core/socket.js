@@ -1,4 +1,4 @@
-import store from "./store.js";
+import bind from "./storage/event.js";
 import { smsg } from "./smsg.js";
 import {
     proto,
@@ -1789,6 +1789,6 @@ export function naruyaizumi(connectionOptions, options = {}) {
         conn.user.lid = conn.decodeJid(conn.user.lid);
     }
 
-    store.bind(conn);
+    bind(conn);
     return conn;
 }
