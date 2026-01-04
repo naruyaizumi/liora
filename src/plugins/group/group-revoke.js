@@ -1,11 +1,11 @@
 let handler = async (m, { conn }) => {
-    try {
-        await conn.groupRevokeInvite(m.chat);
-        m.reply("Group invite link has been successfully reset.");
-    } catch (e) {
-        global.logger.error(e);
-        m.reply(`Error: ${e.message}`);
-    }
+  try {
+    await conn.groupRevokeInvite(m.chat);
+    m.reply("Group invite link has been successfully reset.");
+  } catch (e) {
+    global.logger.error(e);
+    m.reply(`Error: ${e.message}`);
+  }
 };
 
 handler.help = ["revoke"];

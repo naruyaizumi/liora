@@ -1,31 +1,33 @@
 let handler = async (m, { conn, noPrefix, isOwner }) => {
-    if (!isOwner) return;
-    let _text = noPrefix;
-    let _return;
+  if (!isOwner) return;
+  let _text = noPrefix;
+  let _return;
 
-    try {
-        if (m.text.startsWith("=>")) {
-            _return = await eval(`(async () => { return ${_text} })()`);
-        } else {
-            _return = await eval(`(async () => { ${_text} })()`);
-        }
-    } catch (e) {
-        _return = e;
-    }
-
-    let output;
-    if (
-        Array.isArray(_return) &&
-        _return.every((item) => item && typeof item === "object" && !Array.isArray(item))
-    ) {
-        output = Bun.inspect(_return, { depth: null, maxArrayLength: null });
-    } else if (typeof _return === "string") {
-        output = _return;
+  try {
+    if (m.text.startsWith("=>")) {
+      _return = await eval(`(async () => { return ${_text} })()`);
     } else {
-        output = Bun.inspect(_return, { depth: null, maxArrayLength: null });
+      _return = await eval(`(async () => { ${_text} })()`);
     }
+  } catch (e) {
+    _return = e;
+  }
 
-    await conn.sendMessage(m.chat, { text: output });
+  let output;
+  if (
+    Array.isArray(_return) &&
+    _return.every(
+      (item) => item && typeof item === "object" && !Array.isArray(item),
+    )
+  ) {
+    output = Bun.inspect(_return, { depth: null, maxArrayLength: null });
+  } else if (typeof _return === "string") {
+    output = _return;
+  } else {
+    output = Bun.inspect(_return, { depth: null, maxArrayLength: null });
+  }
+
+  await conn.sendMessage(m.chat, { text: output });
 };
 
 handler.help = [">", "=>"];

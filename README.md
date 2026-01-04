@@ -146,6 +146,7 @@ curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh |
 ```
 
 After installation:
+
 ```bash
 # Configure bot
 bot config
@@ -289,6 +290,7 @@ bun install
 #### Run the Bot
 
 **Option A: Direct Run**
+
 ```bash
 bun start
 ```
@@ -354,6 +356,7 @@ pm2 delete liora     # Remove from PM2
 <td width="50%">
 
 **Basic Commands**
+
 ```bash
 pm2 start ecosystem.config.js
 pm2 stop liora
@@ -366,6 +369,7 @@ pm2 logs liora
 <td width="50%">
 
 **Monitoring**
+
 ```bash
 pm2 status
 pm2 monit

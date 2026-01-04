@@ -1,20 +1,22 @@
 let handler = async (m, { conn, usedPrefix, command }) => {
-    const bot = conn.decodeJid(conn.user.id);
-    const q = m.quoted ? m.quoted : m;
-    const mime = (q.msg || q).mimetype || "";
+  const bot = conn.decodeJid(conn.user.id);
+  const q = m.quoted ? m.quoted : m;
+  const mime = (q.msg || q).mimetype || "";
 
-    if (!/image/.test(mime))
-        return m.reply(`Send or reply an image with caption ${usedPrefix + command}`);
+  if (!/image/.test(mime))
+    return m.reply(
+      `Send or reply an image with caption ${usedPrefix + command}`,
+    );
 
-    try {
-        const img = await q.download();
-        if (!img) return m.reply("Failed to download image.");
-        await conn.updateProfilePicture(bot, img);
-        m.reply("Bot profile picture updated successfully.");
-    } catch (e) {
-        global.logger.error(e);
-        m.reply(`Error: ${e.message}`);
-    }
+  try {
+    const img = await q.download();
+    if (!img) return m.reply("Failed to download image.");
+    await conn.updateProfilePicture(bot, img);
+    m.reply("Bot profile picture updated successfully.");
+  } catch (e) {
+    global.logger.error(e);
+    m.reply(`Error: ${e.message}`);
+  }
 };
 
 handler.help = ["setppbot"];

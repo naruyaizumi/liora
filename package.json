@@ -1,22 +1,25 @@
 {
-    "name": "liora",
-    "version": "9.1.3",
-    "scripts": {
-        "start": "bun ./src/index.js"
-    },
-    "type": "module",
-    "license": "Apache-2.0",
-    "dependencies": {
-        "baileys": "github:naruyaizumi/baileys"
-    },
-    "imports": {
-        "#api/*": "./src/lib/api/*",
-        "#auth": "./src/lib/core/auth/auth.js",
-        "#core/*": "./src/lib/core/*",
-        "#lib/*": "./src/lib/*"
-    },
-    "trustedDependencies": [
-        "baileys",
-        "protobufjs"
-    ]
+  "name": "liora",
+  "version": "9.1.3",
+  "scripts": {
+    "start": "bun ./src/index.js"
+  },
+  "type": "module",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "baileys": "github:naruyaizumi/baileys"
+  },
+  "imports": {
+    "#api/*": "./src/lib/api/*",
+    "#auth": "./src/lib/core/auth/auth.js",
+    "#core/*": "./src/lib/core/*",
+    "#lib/*": "./src/lib/*"
+  },
+  "trustedDependencies": [
+    "baileys",
+    "protobufjs"
+  ],
+  "devDependencies": {
+    "prettier": "^3.7.4"
+  }
 }

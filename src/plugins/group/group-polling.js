@@ -1,32 +1,32 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-    const input = args.join(" ");
-    if (!input.includes("|"))
-        return m.reply(
-            `Invalid format.\nExample: ${usedPrefix + command} Who is the most active?|Naruya, Liora, Member`
-        );
+  const input = args.join(" ");
+  if (!input.includes("|"))
+    return m.reply(
+      `Invalid format.\nExample: ${usedPrefix + command} Who is the most active?|Naruya, Liora, Member`,
+    );
 
-    const [title, optionsRaw] = input.split("|");
-    const options = optionsRaw
-        .split(",")
-        .map((v) => v.trim())
-        .filter(Boolean);
+  const [title, optionsRaw] = input.split("|");
+  const options = optionsRaw
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
 
-    if (!title || options.length < 2)
-        return m.reply("Poll must have a title and at least 2 options.");
+  if (!title || options.length < 2)
+    return m.reply("Poll must have a title and at least 2 options.");
 
-    try {
-        await conn.sendMessage(m.chat, {
-            poll: {
-                name: title.trim(),
-                values: options,
-                selectableCount: 1,
-                toAnnouncementGroup: true,
-            },
-        });
-    } catch (e) {
-        global.logger.error(e);
-        m.reply(`Error: ${e.message}`);
-    }
+  try {
+    await conn.sendMessage(m.chat, {
+      poll: {
+        name: title.trim(),
+        values: options,
+        selectableCount: 1,
+        toAnnouncementGroup: true,
+      },
+    });
+  } catch (e) {
+    global.logger.error(e);
+    m.reply(`Error: ${e.message}`);
+  }
 };
 
 handler.help = ["poll"];

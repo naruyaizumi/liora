@@ -2,152 +2,152 @@ import { initAuthCreds } from "baileys";
 import core, { parse, makeKey } from "./core.js";
 
 function createKeyStore() {
-    async function _getMany(type, ids) {
-        const out = {};
-        const missing = [];
+  async function _getMany(type, ids) {
+    const out = {};
+    const missing = [];
 
-        for (const id of ids) {
-            const k = makeKey(type, id);
-            missing.push({ id, k });
-        }
-
-        if (missing.length > 0) {
-            for (const { id, k } of missing) {
-                const row = await core.get(k);
-                const v = row ? parse(row.value) : null;
-                
-                if (v !== null) {
-                    out[id] = v;
-                }
-            }
-        }
-
-        return out;
+    for (const id of ids) {
+      const k = makeKey(type, id);
+      missing.push({ id, k });
     }
 
-    async function get(type, ids) {
-        return _getMany(type, ids);
+    if (missing.length > 0) {
+      for (const { id, k } of missing) {
+        const row = await core.get(k);
+        const v = row ? parse(row.value) : null;
+
+        if (v !== null) {
+          out[id] = v;
+        }
+      }
     }
 
-    async function set(data) {
-        const flatData = {};
-        const keysToDelete = [];
-        
-        for (const type in data) {
-            const bucket = data[type] || {};
-            for (const id in bucket) {
-                const v = bucket[id];
-                const k = makeKey(type, id);
-                
-                if (v === null || v === undefined) {
-                    keysToDelete.push(k);
-                } else {
-                    flatData[k] = v;
-                }
-            }
-        }
+    return out;
+  }
 
-        if (Object.keys(flatData).length > 0) {
-            await core.setMany(flatData);
-        }
+  async function get(type, ids) {
+    return _getMany(type, ids);
+  }
 
-        if (keysToDelete.length > 0) {
-            await core.deleteMany(keysToDelete);
+  async function set(data) {
+    const flatData = {};
+    const keysToDelete = [];
+
+    for (const type in data) {
+      const bucket = data[type] || {};
+      for (const id in bucket) {
+        const v = bucket[id];
+        const k = makeKey(type, id);
+
+        if (v === null || v === undefined) {
+          keysToDelete.push(k);
+        } else {
+          flatData[k] = v;
         }
+      }
     }
 
-    async function transaction(work) {
-        try {
-            const result = await work();
-            await core.flush();
-            return result;
-        } catch (e) {
-            global.logger?.error(`Transaction error: ${e.message}`);
-            throw e;
-        }
+    if (Object.keys(flatData).length > 0) {
+      await core.setMany(flatData);
     }
 
-    async function clear() {
-        try {
-            await core.flush();
-            
-            const db = core.db;
-            await db.begin(async (tx) => {
-                await tx`DELETE FROM baileys_state WHERE key LIKE '%-%'`;
-            });
-        } catch (e) {
-            global.logger?.error(`Clear error: ${e.message}`);
-            throw e;
-        }
+    if (keysToDelete.length > 0) {
+      await core.deleteMany(keysToDelete);
     }
+  }
 
-    return {
-        get,
-        set,
-        clear,
-        transaction,
-        _dispose: async () => {
-            await core.flush();
-        },
-    };
+  async function transaction(work) {
+    try {
+      const result = await work();
+      await core.flush();
+      return result;
+    } catch (e) {
+      global.logger?.error(`Transaction error: ${e.message}`);
+      throw e;
+    }
+  }
+
+  async function clear() {
+    try {
+      await core.flush();
+
+      const db = core.db;
+      await db.begin(async (tx) => {
+        await tx`DELETE FROM baileys_state WHERE key LIKE '%-%'`;
+      });
+    } catch (e) {
+      global.logger?.error(`Clear error: ${e.message}`);
+      throw e;
+    }
+  }
+
+  return {
+    get,
+    set,
+    clear,
+    transaction,
+    _dispose: async () => {
+      await core.flush();
+    },
+  };
 }
 
 export async function useSQLAuthState() {
-    let creds;
-    
-    async function loadCreds() {
-        try {
-            const row = await core.get("creds");
-            if (row && row.value) {
-                creds = parse(row.value) || initAuthCreds();
-            } else {
-                creds = initAuthCreds();
-            }
-        } catch (e) {
-            global.logger?.error(`Load creds error: ${e.message}`);
-            creds = initAuthCreds();
-        }
+  let creds;
+
+  async function loadCreds() {
+    try {
+      const row = await core.get("creds");
+      if (row && row.value) {
+        creds = parse(row.value) || initAuthCreds();
+      } else {
+        creds = initAuthCreds();
+      }
+    } catch (e) {
+      global.logger?.error(`Load creds error: ${e.message}`);
+      creds = initAuthCreds();
     }
+  }
 
-    await loadCreds();
+  await loadCreds();
 
-    const keyStore = createKeyStore();
+  const keyStore = createKeyStore();
 
-    const keys = {
-        async get(type, ids) {
-            return keyStore.get(type, ids);
-        },
+  const keys = {
+    async get(type, ids) {
+      return keyStore.get(type, ids);
+    },
 
-        async set(data) {
-            return keyStore.set(data);
-        },
+    async set(data) {
+      return keyStore.set(data);
+    },
 
-        async clear() {
-            return keyStore.clear();
-        },
-    };
+    async clear() {
+      return keyStore.clear();
+    },
+  };
 
-    function saveCreds() {
-        if (core.isHealthy()) {
-            core.set("creds", creds);
-        }
+  function saveCreds() {
+    if (core.isHealthy()) {
+      core.set("creds", creds);
     }
+  }
 
-    async function dispose() {
-        try {
-            await keyStore._dispose();
-            await core.dispose();
-        } catch (e) {
-            global.logger?.error(`Auth dispose error: ${e.message}`);
-        }
+  async function dispose() {
+    try {
+      await keyStore._dispose();
+      await core.dispose();
+    } catch (e) {
+      global.logger?.error(`Auth dispose error: ${e.message}`);
     }
+  }
 
-    return {
-        state: { creds, keys },
-        saveCreds,
-        dispose,
-        get closed() {
-            return core.disposed;
-        },
-    };
+  return {
+    state: { creds, keys },
+    saveCreds,
+    dispose,
+    get closed() {
+      return core.disposed;
+    },
+  };
 }

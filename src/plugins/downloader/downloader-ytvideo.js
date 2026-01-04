@@ -1,37 +1,39 @@
 import { ytmp4 } from "#api/ytmp4.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-    if (!args[0])
-        return m.reply(
-            `Please provide a valid YouTube video link.\n› Example: ${usedPrefix + command} https://youtu.be/N2P6ARXAWMQ`
-        );
+  if (!args[0])
+    return m.reply(
+      `Please provide a valid YouTube video link.\n› Example: ${usedPrefix + command} https://youtu.be/N2P6ARXAWMQ`,
+    );
 
-    const url = args[0];
-    const youtubeRegex =
-        /^(https?:\/\/)?((www|m)\.)?(youtube(-nocookie)?\.com\/(watch\?v=|shorts\/|live\/)|youtu\.be\/)[\w-]+(\S+)?$/i;
-    if (!youtubeRegex.test(url))
-        return m.reply("Invalid URL. Only standard YouTube video links are supported.");
+  const url = args[0];
+  const youtubeRegex =
+    /^(https?:\/\/)?((www|m)\.)?(youtube(-nocookie)?\.com\/(watch\?v=|shorts\/|live\/)|youtu\.be\/)[\w-]+(\S+)?$/i;
+  if (!youtubeRegex.test(url))
+    return m.reply(
+      "Invalid URL. Only standard YouTube video links are supported.",
+    );
 
-    await global.loading(m, conn);
+  await global.loading(m, conn);
 
-    try {
-        const { success, downloadUrl, error } = await ytmp4(url);
-        if (!success) throw new Error(error);
+  try {
+    const { success, downloadUrl, error } = await ytmp4(url);
+    if (!success) throw new Error(error);
 
-        await conn.sendMessage(
-            m.chat,
-            {
-                video: { url: downloadUrl },
-                mimetype: "video/mp4",
-            },
-            { quoted: m }
-        );
-    } catch (e) {
-        global.logger.error(e);
-        m.reply(`Error: ${e.message}`);
-    } finally {
-        await global.loading(m, conn, true);
-    }
+    await conn.sendMessage(
+      m.chat,
+      {
+        video: { url: downloadUrl },
+        mimetype: "video/mp4",
+      },
+      { quoted: m },
+    );
+  } catch (e) {
+    global.logger.error(e);
+    m.reply(`Error: ${e.message}`);
+  } finally {
+    await global.loading(m, conn, true);
+  }
 };
 
 handler.help = ["ytmp4"];

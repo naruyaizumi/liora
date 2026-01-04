@@ -1,5 +1,5 @@
 let handler = async (m, { conn }) => {
-    const vcard = `BEGIN:VCARD
+  const vcard = `BEGIN:VCARD
 VERSION:3.0
 FN:Naruya Izumi
 ORG:Naruya Izumi
@@ -13,45 +13,45 @@ X-WA-BIZ-DESCRIPTION:𝙊𝙬𝙣𝙚𝙧 𝙤𝙛 𝙇𝙞𝙤𝙧𝙖 𝙎𝙘
 X-WA-BIZ-HOURS:Mo-Su 00:00-23:59
 END:VCARD`;
 
-    const q = {
-        key: {
-            fromMe: false,
-            participant: "12066409886@s.whatsapp.net",
-            remoteJid: "status@broadcast",
-        },
-        message: {
-            contactMessage: {
-                displayName: "Naruya Izumi",
-                vcard,
-            },
-        },
-    };
+  const q = {
+    key: {
+      fromMe: false,
+      participant: "12066409886@s.whatsapp.net",
+      remoteJid: "status@broadcast",
+    },
+    message: {
+      contactMessage: {
+        displayName: "Naruya Izumi",
+        vcard,
+      },
+    },
+  };
 
-    await conn.sendMessage(
-        m.chat,
-        {
-            contacts: {
-                displayName: "Naruya Izumi",
-                contacts: [{ vcard }],
-            },
-            contextInfo: {
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: "120363144038483540@newsletter",
-                    newsletterName: "mkfs.ext4 /dev/naruyaizumi",
-                },
-                externalAdReply: {
-                    title: "© 2024–2025 Liora Project",
-                    body: "Contact the Owner via WhatsApp",
-                    thumbnailUrl: "https://files.catbox.moe/8tw69l.jpeg",
-                    mediaType: 1,
-                    renderLargerThumbnail: true,
-                },
-            },
+  await conn.sendMessage(
+    m.chat,
+    {
+      contacts: {
+        displayName: "Naruya Izumi",
+        contacts: [{ vcard }],
+      },
+      contextInfo: {
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: "120363144038483540@newsletter",
+          newsletterName: "mkfs.ext4 /dev/naruyaizumi",
         },
-        { quoted: q }
-    );
+        externalAdReply: {
+          title: "© 2024–2025 Liora Project",
+          body: "Contact the Owner via WhatsApp",
+          thumbnailUrl: "https://files.catbox.moe/8tw69l.jpeg",
+          mediaType: 1,
+          renderLargerThumbnail: true,
+        },
+      },
+    },
+    { quoted: q },
+  );
 };
 
 handler.help = ["owner"];
