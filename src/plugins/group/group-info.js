@@ -1,7 +1,7 @@
 let handler = async (m, { conn }) => {
   try {
     await global.loading(m, conn);
-    
+
     let groupMeta;
     try {
       const chatData = await conn.getChat(m.chat);
@@ -11,13 +11,13 @@ let handler = async (m, { conn }) => {
     } catch {
       //
     }
-    
+
     if (!groupMeta) {
       try {
         groupMeta = await conn.groupMetadata(m.chat);
-        
+
         try {
-          const chatData = await conn.getChat(m.chat) || { id: m.chat };
+          const chatData = (await conn.getChat(m.chat)) || { id: m.chat };
           chatData.metadata = groupMeta;
           chatData.subject = groupMeta.subject;
           chatData.isChats = true;

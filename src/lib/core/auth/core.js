@@ -31,7 +31,10 @@ export class DatabaseCore {
 
     this.initialized = false;
     this.initPromise = this._initDatabase().catch((err) => {
-      global.logger?.error({ error: err.message }, "Database initialization failed");
+      global.logger?.error(
+        { error: err.message },
+        "Database initialization failed",
+      );
       throw err;
     });
 
@@ -66,7 +69,8 @@ export class DatabaseCore {
           $$ LANGUAGE plpgsql
         `;
 
-        await this.db`DROP TRIGGER IF EXISTS baileys_updated_at ON baileys_state`;
+        await this
+          .db`DROP TRIGGER IF EXISTS baileys_updated_at ON baileys_state`;
         await this.db`
           CREATE TRIGGER baileys_updated_at
           BEFORE UPDATE ON baileys_state
@@ -79,7 +83,10 @@ export class DatabaseCore {
 
       this.initialized = true;
     } catch (e) {
-      global.logger?.fatal({ error: e.message, stack: e.stack }, "Database initialization failed");
+      global.logger?.fatal(
+        { error: e.message, stack: e.stack },
+        "Database initialization failed",
+      );
       throw e;
     }
   }
@@ -111,9 +118,9 @@ export class DatabaseCore {
     await this._ensureInitialized();
 
     try {
-      const promises = keys.map(key => this.get(key));
+      const promises = keys.map((key) => this.get(key));
       const results = await Promise.all(promises);
-      
+
       const out = {};
       for (let i = 0; i < keys.length; i++) {
         if (results[i]) {
@@ -152,7 +159,7 @@ export class DatabaseCore {
     })();
 
     this.writeQueue.set(key, writePromise);
-    
+
     return writePromise;
   }
 
@@ -167,7 +174,7 @@ export class DatabaseCore {
       throw e;
     }
   }
-  
+
   async setMany(data) {
     if (this.disposed) return;
     await this._ensureInitialized();
@@ -178,7 +185,7 @@ export class DatabaseCore {
     try {
       const pendingKeys = new Set();
       const canExecuteNow = [];
-      
+
       for (const [key, value] of entries) {
         if (this.writeQueue.has(key)) {
           pendingKeys.add(key);
@@ -186,12 +193,14 @@ export class DatabaseCore {
           canExecuteNow.push([key, value]);
         }
       }
-      
+
       if (pendingKeys.size > 0) {
-        const waitPromises = Array.from(pendingKeys).map(k => this.writeQueue.get(k));
+        const waitPromises = Array.from(pendingKeys).map((k) =>
+          this.writeQueue.get(k),
+        );
         await Promise.all(waitPromises);
       }
-      
+
       const promises = entries.map(([key, value]) => {
         const writePromise = this.db`
           INSERT INTO baileys_state (key, value) 
@@ -201,11 +210,11 @@ export class DatabaseCore {
         `.finally(() => {
           this.writeQueue.delete(key);
         });
-        
+
         this.writeQueue.set(key, writePromise);
         return writePromise;
       });
-      
+
       await Promise.all(promises);
     } catch (error) {
       global.logger?.error(`Batch set error: ${error.message}`);
@@ -218,10 +227,10 @@ export class DatabaseCore {
     await this._ensureInitialized();
 
     try {
-      const promises = keys.map(key => 
-        this.db`DELETE FROM baileys_state WHERE key = ${key}`
+      const promises = keys.map(
+        (key) => this.db`DELETE FROM baileys_state WHERE key = ${key}`,
       );
-      
+
       await Promise.all(promises);
     } catch (error) {
       global.logger?.error(`Batch delete error: ${error.message}`);

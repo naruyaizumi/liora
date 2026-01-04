@@ -5,7 +5,7 @@ export async function smsg(conn, m) {
   if (m.conn === conn) {
     return m;
   }
-  
+
   const M = proto.WebMessageInfo;
   if (M?.create && !(m instanceof M)) {
     try {
@@ -15,7 +15,7 @@ export async function smsg(conn, m) {
       return m;
     }
   }
-  
+
   m.conn = conn;
 
   const msg = m.message;
@@ -35,7 +35,7 @@ export async function smsg(conn, m) {
     }
 
     const botId = conn.decodeJid?.(conn.user?.lid || "") || "";
-    
+
     if (botId) {
       const partId = conn.decodeJid?.(key.participant) || "";
       key.fromMe = partId === botId;
@@ -46,7 +46,7 @@ export async function smsg(conn, m) {
     }
 
     m.msg.key = key;
-    
+
     if (conn.ev?.emit) {
       setImmediate(() => {
         conn.ev.emit("messages.delete", { keys: [key] });
@@ -57,7 +57,7 @@ export async function smsg(conn, m) {
   if (m.quoted && !m.quoted.mediaMessage && m.quoted.download !== undefined) {
     delete m.quoted.download;
   }
-  
+
   if (!m.mediaMessage && m.download !== undefined) {
     delete m.download;
   }

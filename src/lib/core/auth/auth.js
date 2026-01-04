@@ -5,15 +5,15 @@ function createKeyStore() {
   async function _getMany(type, ids) {
     if (ids.length === 0) return {};
 
-    const keys = ids.map(id => makeKey(type, id));
-    
+    const keys = ids.map((id) => makeKey(type, id));
+
     const results = await core.getMany(keys);
-    
+
     const out = {};
     for (const id of ids) {
       const k = makeKey(type, id);
       const row = results[k];
-      
+
       if (row && row.value) {
         const v = parse(row.value);
         if (v !== null) {
@@ -48,7 +48,7 @@ function createKeyStore() {
     }
 
     const promises = [];
-    
+
     if (Object.keys(flatData).length > 0) {
       promises.push(core.setMany(flatData));
     }

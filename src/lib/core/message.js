@@ -20,7 +20,7 @@ const skipTypes = new Set([
 const firstMeaningfulType = (msg) => {
   const keys = fastKeys(msg);
   if (!keys.length) return "";
-  
+
   for (const key of keys) {
     if (!skipTypes.has(key)) return key;
   }
@@ -36,10 +36,9 @@ const getMediaEnvelope = (root, node) => {
 
 const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
   const textNode = typeof rawNode === "string" ? rawNode : rawNode?.text;
-  const base = typeof rawNode === "string" ? { text: rawNode } : rawNode ||
-  {};
+  const base = typeof rawNode === "string" ? { text: rawNode } : rawNode || {};
   const out = Object.create(base);
-  
+
   return Object.defineProperties(out, {
     mtype: {
       get: () => type,
@@ -74,8 +73,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
         const id = this.id;
         return !!(
           id &&
-          (id.length === 16 || (id.startsWith?.("3EB0") && id
-            .length === 12))
+          (id.length === 16 || (id.startsWith?.("3EB0") && id.length === 12))
         );
       },
       enumerable: true,
@@ -94,7 +92,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
       async get() {
         const conn = self.conn;
         if (!conn?.user?.id) return false;
-        
+
         const sender = await this.sender;
         return areJidsSameUser?.(sender, conn.user.id) || false;
       },
@@ -122,9 +120,9 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
       async get() {
         const s = await this.sender;
         if (!s) return "";
-        
+
         try {
-          return await self.conn?.getName?.(s) || "";
+          return (await self.conn?.getName?.(s)) || "";
         } catch {
           return "";
         }
@@ -149,7 +147,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
       async value() {
         const t = this.mediaType;
         if (!t || !self.conn?.downloadM) return null;
-        
+
         const data = await self.conn.downloadM(
           this.mediaMessage[t],
           t.replace(/message/i, ""),
@@ -164,10 +162,9 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
         if (!self.conn?.reply) {
           return Promise.reject(new Error("Connection not available"));
         }
-        
+
         const quoted = this.vM;
-        return self.conn.reply(chatId || this.chat, text, quoted,
-          options);
+        return self.conn.reply(chatId || this.chat, text, quoted, options);
       },
       enumerable: true,
     },
@@ -185,7 +182,8 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
           return Promise.reject(new Error("Connection not available"));
         }
         return self.conn.sendMessage(
-          jid, { forward: this.vM, force, ...options },
+          jid,
+          { forward: this.vM, force, ...options },
           options,
         );
       },
@@ -221,8 +219,7 @@ export function serialize() {
         const id = this.id;
         return !!(
           id &&
-          (id.length === 16 || (id.startsWith?.("3EB0") && id.length ===
-            12))
+          (id.length === 16 || (id.startsWith?.("3EB0") && id.length === 12))
         );
       },
       enumerable: true,
@@ -234,7 +231,7 @@ export function serialize() {
           this.key?.remoteJid ||
           (skdm && skdm !== "status@broadcast" ? skdm : "") ||
           "";
-        
+
         const conn = this.conn;
         if (conn?.decodeJid) return conn.decodeJid(raw);
         if (typeof raw.decodeJid === "function") return raw.decodeJid();
@@ -266,7 +263,7 @@ export function serialize() {
           this.key?.participant ||
           this.chat ||
           "";
-        
+
         if (conn?.decodeJid) return conn.decodeJid(cand);
         if (typeof cand.decodeJid === "function") return cand.decodeJid();
         return cand;
@@ -317,12 +314,12 @@ export function serialize() {
         const baseMsg = this.msg;
         const ctx = baseMsg?.contextInfo;
         const quoted = ctx?.quotedMessage;
-        
+
         if (!baseMsg || !ctx || !quoted) return null;
-        
+
         const type = fastKeys(quoted)[0];
         if (!type) return null;
-        
+
         const rawNode = quoted[type];
         return createQuotedMessage(this, ctx, quoted, rawNode, type);
       },
@@ -333,7 +330,7 @@ export function serialize() {
         const msg = this.msg;
         if (!msg) return "";
         if (typeof msg === "string") return msg;
-        
+
         const primary =
           msg.text ||
           msg.caption ||
@@ -342,17 +339,16 @@ export function serialize() {
           msg.selectedDisplayText ||
           "";
         if (primary) return primary;
-        
+
         if (msg.nativeFlowResponseMessage?.paramsJson) {
           try {
-            const parsed = JSON.parse(msg.nativeFlowResponseMessage
-              .paramsJson);
+            const parsed = JSON.parse(msg.nativeFlowResponseMessage.paramsJson);
             if (parsed?.id) return String(parsed.id);
           } catch {
             //
           }
         }
-        
+
         return msg.hydratedTemplate?.hydratedContentText || "";
       },
       enumerable: true,
@@ -368,12 +364,12 @@ export function serialize() {
       async get() {
         const pn = this.pushName;
         if (pn != null && pn !== "") return pn;
-        
+
         const sender = this.sender;
         if (!sender) return "";
-        
+
         try {
-          return await this.conn?.getName?.(sender) || "";
+          return (await this.conn?.getName?.(sender)) || "";
         } catch {
           return "";
         }
@@ -384,7 +380,7 @@ export function serialize() {
       async value() {
         const t = this.mediaType;
         if (!t || !this.conn?.downloadM) return null;
-        
+
         const data = await this.conn.downloadM(
           this.mediaMessage[t],
           t.replace(/message/i, ""),
@@ -417,7 +413,8 @@ export function serialize() {
           return Promise.reject(new Error("Connection not available"));
         }
         return this.conn.sendMessage(
-          jid, { forward: this, force, ...options },
+          jid,
+          { forward: this, force, ...options },
           options,
         );
       },
@@ -427,10 +424,10 @@ export function serialize() {
       async value() {
         const q = this.quoted;
         if (!q?.id || !this.conn) return null;
-        
-        const M = await this.conn.loadMessage?.(q.id) || q.vM;
+
+        const M = (await this.conn.loadMessage?.(q.id)) || q.vM;
         if (!M) return null;
-        
+
         return smsg(this.conn, proto.WebMessageInfo.fromObject(M));
       },
       enumerable: true,

@@ -12,7 +12,8 @@ let handler = async (m, { text, usedPrefix, command, conn }) => {
     switch (text.toLowerCase()) {
       case "off":
       case "disable":
-        if (!settings.gconly) return m.reply("GC Only mode is already disabled.");
+        if (!settings.gconly)
+          return m.reply("GC Only mode is already disabled.");
         settings.gconly = false;
         return m.reply("GC Only mode disabled.");
 
