@@ -22,34 +22,26 @@ const parsePrefix = (connPrefix, pluginPrefix) => {
 
 const matchPrefix = (prefix, text) => {
   if (prefix instanceof RegExp) {
-    return [
-      [prefix.exec(text), prefix]
-    ];
+    return [[prefix.exec(text), prefix]];
   }
-  
+
   if (Array.isArray(prefix)) {
     return prefix.map((p) => {
       const re =
-        p instanceof RegExp ?
-        p :
-        new RegExp(p.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&"));
+        p instanceof RegExp
+          ? p
+          : new RegExp(p.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&"));
       return [re.exec(text), re];
     });
   }
-  
+
   if (typeof prefix === "string") {
     const escaped = prefix.replace(/[^a-zA-Z0-9_-]/g, "\\$&");
     const regex = new RegExp(`^${escaped}`, "i");
-    return [
-      [regex.exec(text), regex]
-    ];
+    return [[regex.exec(text), regex]];
   }
-  
-  return [
-    [
-      [], new RegExp()
-    ]
-  ];
+
+  return [[[], new RegExp()]];
 };
 
 const isCmdMatch = (cmd, rule) => {
@@ -61,51 +53,52 @@ const isCmdMatch = (cmd, rule) => {
 };
 
 const resolveLid = async (sender) => {
-  if (!sender || typeof sender !== 'string') {
+  if (!sender || typeof sender !== "string") {
     return sender || "";
   }
-  
+
   if (sender.endsWith("@lid")) {
     return sender.split("@")[0];
   }
-  
+
   if (sender.endsWith("@s.whatsapp.net")) {
-    const resolved = await conn.signalRepository.lidMapping.getLIDForPN(
-      sender);
+    const resolved = await conn.signalRepository.lidMapping.getLIDForPN(sender);
     if (resolved) {
-      return typeof resolved === "string" && resolved.endsWith("@lid") ?
-        resolved.split("@")[0] :
-        resolved;
+      return typeof resolved === "string" && resolved.endsWith("@lid")
+        ? resolved.split("@")[0]
+        : resolved;
     }
   }
-  
+
   return sender.split("@")[0];
 };
 
 export async function handler(chatUpdate) {
   try {
     if (!chatUpdate) return;
-    
+
     setImmediate(async () => {
       try {
-        await this.readMessages(chatUpdate.messages.map(m => m.key).filter(Boolean));
+        await this.readMessages(
+          chatUpdate.messages.map((m) => m.key).filter(Boolean),
+        );
       } catch {
         //
       }
     });
-    
+
     this.pushMessage(chatUpdate.messages).catch(global.logger.error);
-    
+
     const m = smsg(this, chatUpdate.messages?.[chatUpdate.messages.length - 1]);
     if (!m || m.isBaileys || m.fromMe) return;
-    
+
     const settings = global.db?.data?.settings?.[this.user.lid] || {};
     const senderLid = await resolveLid(m.sender);
     const regOwners = global.config.owner.map(
       (id) => id.toString().split("@")[0],
     );
     const isOwner = m.fromMe || regOwners.includes(senderLid);
-    
+
     let groupMetadata = {};
     if (m.isGroup) {
       try {
@@ -114,13 +107,13 @@ export async function handler(chatUpdate) {
           groupMetadata = chatData.metadata;
         } else {
           groupMetadata = await safe(() => this.groupMetadata(m.chat), {});
-          
+
           if (groupMetadata && Object.keys(groupMetadata).length > 0) {
             const dataToSave = {
               id: m.chat,
               metadata: groupMetadata,
               isChats: true,
-              lastSync: Date.now()
+              lastSync: Date.now(),
             };
             await this.setChat(m.chat, dataToSave);
           }
@@ -129,7 +122,7 @@ export async function handler(chatUpdate) {
         groupMetadata = await safe(() => this.groupMetadata(m.chat), {});
       }
     }
-    
+
     const participants = groupMetadata?.participants || [];
     const participantMap = Object.fromEntries(
       participants.map((p) => [p.id, p]),
@@ -140,16 +133,16 @@ export async function handler(chatUpdate) {
     const isRAdmin = user?.admin === "superadmin";
     const isAdmin = isRAdmin || user?.admin === "admin";
     const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
-    
+
     const __dirname = dirname(Bun.fileURLToPath(import.meta.url));
     const pluginDir = join(__dirname, "./plugins");
-    
+
     for (const name in global.plugins) {
       const plugin = global.plugins[name];
       if (!plugin || plugin.disabled) continue;
-      
+
       const __filename = join(pluginDir, name);
-      
+
       if (typeof plugin.all === "function") {
         await safe(() =>
           plugin.all.call(this, m, {
@@ -159,13 +152,13 @@ export async function handler(chatUpdate) {
           }),
         );
       }
-      
+
       if (typeof plugin !== "function") continue;
-      
+
       const prefix = parsePrefix(this.prefix, plugin.customPrefix);
       const body = typeof m.text === "string" ? m.text : "";
       const match = matchPrefix(prefix, body).find((p) => p[1]);
-      
+
       let usedPrefix;
       if ((usedPrefix = (match?.[0] || "")[0])) {
         const noPrefix = body.replace(usedPrefix, "");
@@ -173,43 +166,43 @@ export async function handler(chatUpdate) {
         const [rawCmd, ...argsArr] = parts;
         const command = (rawCmd || "").toLowerCase();
         const text = parts.slice(1).join(" ");
-        
+
         if (!isCmdMatch(command, plugin.command)) continue;
-        
+
         m.plugin = name;
         const chat = global.db?.data?.chats?.[m.chat] || {};
-        
+
         if (!m.fromMe && settings?.self && !isOwner) return;
-        
+
         if (settings?.gconly && !m.isGroup && !isOwner) {
           return;
         }
-        
+
         if (!isAdmin && !isOwner && chat?.adminOnly) return;
         if (!isOwner && chat?.mute) return;
-        
+
         const fail = plugin.fail || global.dfail;
-        
+
         if (plugin.owner && !isOwner) {
           fail("owner", m, this);
           continue;
         }
-        
+
         if (plugin.group && !m.isGroup) {
           fail("group", m, this);
           continue;
         }
-        
+
         if (plugin.botAdmin && !isBotAdmin) {
           fail("botAdmin", m, this);
           continue;
         }
-        
+
         if (plugin.admin && !isAdmin) {
           fail("admin", m, this);
           continue;
         }
-        
+
         const extra = {
           match,
           usedPrefix,
@@ -230,21 +223,20 @@ export async function handler(chatUpdate) {
           __dirname: pluginDir,
           __filename,
         };
-        
+
         try {
           await plugin.call(this, m, extra);
         } catch (e) {
           global.logger.error(e);
           await safe(() => m.reply("Something went wrong."));
         }
-        
+
         break;
       }
     }
-    
+
     await safe(() => printMessage(m, this));
   } catch (e) {
-    global.logger.error({ error: e.message, stack: e.stack },
-      "Handler error");
+    global.logger.error({ error: e.message, stack: e.stack }, "Handler error");
   }
 }
