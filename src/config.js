@@ -1,5 +1,4 @@
-import pino from "pino";
-import { join } from "path";
+import { join } from "node:path";
 import { Database } from "bun:sqlite";
 
 const PRESENCE_DELAY = 800;
@@ -26,11 +25,6 @@ const sanitizeUrl = (url, fallback) => {
     }
 };
 
-const parseBoolean = (value, fallback = false) => {
-    if (typeof value !== "string") return fallback;
-    return ["true", "1", "yes", "on"].includes(value.toLowerCase());
-};
-
 const generatePairingCode = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let code = "";
@@ -40,33 +34,205 @@ const generatePairingCode = () => {
     return code;
 };
 
+const parseBoolean = (value, defaultValue) => {
+    if (value === undefined || value === null) return defaultValue;
+    if (typeof value === "boolean") return value;
+    if (typeof value === "string") {
+        const lower = value.toLowerCase();
+        if (lower === "true") return true;
+        if (lower === "false") return false;
+    }
+    return defaultValue;
+};
+
 const initializeLogger = () => {
-    if (global.logger) return global.logger;
+    if (globalThis.logger) return globalThis.logger;
 
-    const logLevel = (process.env.LOG_LEVEL || "info").toLowerCase();
-    const usePretty = parseBoolean(process.env.LOG_PRETTY, true);
+    const logLevel = (Bun.env.LOG_LEVEL || "info").toLowerCase();
+    const usePretty = parseBoolean(Bun.env.LOG_PRETTY, true);
 
-    global.logger = pino(
-        { level: logLevel },
-        usePretty
-            ? pino.transport({
-                  target: "pino-pretty",
-                  options: {
-                      colorize: true,
-                      translateTime: "HH:MM",
-                      ignore: "pid,hostname",
-                  },
-              })
-            : undefined
-    );
+    const LEVEL_NUMBERS = {
+        fatal: 60,
+        error: 50,
+        warn: 40,
+        info: 30,
+        debug: 20,
+        trace: 10,
+    };
 
-    return global.logger;
+    const COLORS = {
+        reset: '\x1b[0m',
+        bright: '\x1b[1m',
+        red: '\x1b[31m',
+        green: '\x1b[32m',
+        yellow: '\x1b[33m',
+        blue: '\x1b[34m',
+        cyan: '\x1b[36m',
+        gray: '\x1b[90m',
+        magenta: '\x1b[35m',
+    };
+
+    const LEVEL_COLORS = {
+        fatal: `${COLORS.bright}${COLORS.red}`,
+        error: COLORS.red,
+        warn: COLORS.yellow,
+        info: COLORS.green,
+        debug: COLORS.cyan,
+        trace: COLORS.gray,
+    };
+
+    const LEVEL_NAMES = {
+        fatal: 'FATAL',
+        error: 'ERROR',
+        warn: 'WARN',
+        info: 'INFO',
+        debug: 'DEBUG',
+        trace: 'TRACE',
+    };
+
+    const currentLevelNumber = logLevel === 'silent' ? 100 : LEVEL_NUMBERS[logLevel] || LEVEL_NUMBERS.info;
+
+    const formatTime = () => {
+        const now = new Date();
+        return now.toTimeString().slice(0, 5);
+    };
+
+    const formatObject = (obj, indent = '    ') => {
+        const lines = [];
+        for (const [key, value] of Object.entries(obj)) {
+            let formattedValue = value;
+            
+            if (value === null) formattedValue = 'null';
+            else if (value === undefined) formattedValue = 'undefined';
+            else if (typeof value === 'object') {
+                try {
+                    formattedValue = JSON.stringify(value);
+                } catch {
+                    formattedValue = Bun.inspect(value, { colors: false, depth: 1 });
+                }
+            } else if (typeof value === 'boolean') {
+                formattedValue = value ? 'true' : 'false';
+            } else if (typeof value === 'number') {
+                formattedValue = value.toString();
+            }
+            
+            lines.push(`${indent}${COLORS.magenta}${key}${COLORS.reset} : ${formattedValue}`);
+        }
+        return lines.join('\n');
+    };
+
+    const formatPretty = (level, args) => {
+        const timeStr = `${COLORS.gray}[${formatTime()}]${COLORS.reset}`;
+        const levelColor = LEVEL_COLORS[level] || COLORS.reset;
+        const levelName = LEVEL_NAMES[level] || level.toUpperCase();
+
+        let message = '';
+        let objectLines = '';
+
+        const strings = [];
+        let object = null;
+
+        for (const arg of args) {
+            if (typeof arg === 'object' && arg !== null && !(arg instanceof Error)) {
+                object = arg;
+            } else {
+                strings.push(String(arg));
+            }
+        }
+
+        message = strings.join(' ');
+        
+        if (object) {
+            objectLines = '\n' + formatObject(object);
+        }
+
+        return `${timeStr} ${levelColor}${levelName}${COLORS.reset}: ${message}${objectLines}`;
+    };
+
+    const formatJson = (level, args) => {
+        let message = '';
+        let extraObject = {};
+
+        const strings = [];
+
+        for (const arg of args) {
+            if (typeof arg === 'object' && arg !== null && !(arg instanceof Error)) {
+                extraObject = { ...extraObject, ...arg };
+            } else {
+                strings.push(String(arg));
+            }
+        }
+
+        message = strings.join(' ');
+
+        const logEntry = {
+            level: LEVEL_NUMBERS[level],
+            time: Date.now(),
+            msg: message,
+            pid: process.pid,
+            ...extraObject,
+        };
+
+        return JSON.stringify(logEntry);
+    };
+
+    const log = (level, ...args) => {
+        const levelNumber = LEVEL_NUMBERS[level];
+        if (levelNumber === undefined || levelNumber < currentLevelNumber) return;
+        if (logLevel === 'silent') return;
+
+        const logMessage = usePretty ? formatPretty(level, args) : formatJson(level, args);
+        console.log(logMessage);
+    };
+
+    const logger = {
+        fatal: (...args) => log('fatal', ...args),
+        error: (...args) => log('error', ...args),
+        warn: (...args) => log('warn', ...args),
+        info: (...args) => log('info', ...args),
+        debug: (...args) => log('debug', ...args),
+        trace: (...args) => log('trace', ...args),
+
+        child: (bindings) => {
+            const childLogger = {
+                fatal: (...args) => log('fatal', bindings, ...args),
+                error: (...args) => log('error', bindings, ...args),
+                warn: (...args) => log('warn', bindings, ...args),
+                info: (...args) => log('info', bindings, ...args),
+                debug: (...args) => log('debug', bindings, ...args),
+                trace: (...args) => log('trace', bindings, ...args),
+                child: (additionalBindings) => logger.child({ ...bindings, ...additionalBindings }),
+                level: logLevel,
+                isLevelEnabled: (level) => {
+                    const levelKey = level.toLowerCase();
+                    const levelNum = LEVEL_NUMBERS[levelKey];
+                    return levelNum !== undefined && levelNum >= currentLevelNumber;
+                },
+            };
+
+            return childLogger;
+        },
+
+        isLevelEnabled: (level) => {
+            const levelKey = level.toLowerCase();
+            const levelNum = LEVEL_NUMBERS[levelKey];
+            return levelNum !== undefined && levelNum >= currentLevelNumber;
+        },
+
+        level: logLevel,
+    };
+
+    globalThis.logger = logger;
+    return logger;
 };
 
 const logger = initializeLogger();
 
+export default logger;
+export { initializeLogger };
+
 const initializeConfig = () => {
-    const owners = safeJSONParse(process.env.OWNERS, []);
+    const owners = safeJSONParse(Bun.env.OWNERS, []);
 
     if (!Array.isArray(owners)) {
         logger.warn("OWNERS must be a valid JSON array");
@@ -76,13 +242,11 @@ const initializeConfig = () => {
         owner: Array.isArray(owners)
             ? owners.filter((owner) => typeof owner === "string" && owner.trim() !== "")
             : [],
-        pairingNumber: (process.env.PAIRING_NUMBER || "").trim(),
-        pairingCode: (process.env.PAIRING_CODE || "").trim().toUpperCase() || generatePairingCode(),
-        watermark: (process.env.WATERMARK || "Liora").trim(),
-        author: (process.env.AUTHOR || "Naruya Izumi").trim(),
-        stickpack: (process.env.STICKPACK || "Liora").trim(),
-        stickauth: (process.env.STICKAUTH || "© Naruya Izumi").trim(),
-        thumbnailUrl: sanitizeUrl(process.env.THUMBNAIL_URL, DEFAULT_THUMBNAIL),
+        pairingNumber: (Bun.env.PAIRING_NUMBER || "").trim(),
+        pairingCode: (Bun.env.PAIRING_CODE || "").trim().toUpperCase() || generatePairingCode(),
+        watermark: (Bun.env.WATERMARK || "Liora").trim(),
+        author: (Bun.env.AUTHOR || "Naruya Izumi").trim(),
+        thumbnailUrl: sanitizeUrl(Bun.env.THUMBNAIL_URL, DEFAULT_THUMBNAIL)
     };
 
     if (config.pairingCode.length !== 8 || !/^[A-Z0-9]{8}$/.test(config.pairingCode)) {
@@ -95,175 +259,20 @@ const initializeConfig = () => {
 
 global.config = initializeConfig();
 
-global.timestamp = { start: new Date() };
-
 const DB_PATH = join(process.cwd(), "src", "database", "database.db");
-
-const TYPE_NULL = 0x00;
-const TYPE_BOOLEAN_TRUE = 0x01;
-const TYPE_BOOLEAN_FALSE = 0x02;
-const TYPE_NUMBER = 0x03;
-const TYPE_STRING = 0x04;
-const TYPE_OBJECT = 0x05;
-const TYPE_ARRAY = 0x06;
-
-class BinaryCodec {
-    static encode(value) {
-        if (value === null || value === undefined) {
-            return Buffer.from([TYPE_NULL]);
-        }
-
-        const type = typeof value;
-
-        if (type === "boolean") {
-            return Buffer.from([value ? TYPE_BOOLEAN_TRUE : TYPE_BOOLEAN_FALSE]);
-        }
-
-        if (type === "number") {
-            const buf = Buffer.allocUnsafe(9);
-            buf[0] = TYPE_NUMBER;
-            buf.writeDoubleBE(value, 1);
-            return buf;
-        }
-
-        if (type === "string") {
-            const strBuf = Buffer.from(value, "utf8");
-            const lenBuf = Buffer.allocUnsafe(5);
-            lenBuf[0] = TYPE_STRING;
-            lenBuf.writeUInt32BE(strBuf.length, 1);
-            return Buffer.concat([lenBuf, strBuf]);
-        }
-
-        if (Array.isArray(value)) {
-            const chunks = [Buffer.allocUnsafe(5)];
-            chunks[0][0] = TYPE_ARRAY;
-            chunks[0].writeUInt32BE(value.length, 1);
-
-            for (let i = 0; i < value.length; i++) {
-                chunks.push(this.encode(value[i]));
-            }
-            return Buffer.concat(chunks);
-        }
-
-        if (type === "object") {
-            const keys = Object.keys(value);
-            const chunks = [Buffer.allocUnsafe(5)];
-            chunks[0][0] = TYPE_OBJECT;
-            chunks[0].writeUInt32BE(keys.length, 1);
-
-            for (const key of keys) {
-                const keyBuf = Buffer.from(key, "utf8");
-                const keyLenBuf = Buffer.allocUnsafe(4);
-                keyLenBuf.writeUInt32BE(keyBuf.length, 0);
-                chunks.push(keyLenBuf, keyBuf, this.encode(value[key]));
-            }
-            return Buffer.concat(chunks);
-        }
-
-        return Buffer.from([TYPE_NULL]);
-    }
-
-    static decode(buffer) {
-        if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
-            return null;
-        }
-
-        const state = { offset: 0 };
-        return this._decodeValue(buffer, state);
-    }
-
-    static _decodeValue(buf, state) {
-        if (state.offset >= buf.length) return null;
-
-        const type = buf[state.offset++];
-
-        switch (type) {
-            case TYPE_NULL:
-                return null;
-
-            case TYPE_BOOLEAN_TRUE:
-                return true;
-
-            case TYPE_BOOLEAN_FALSE:
-                return false;
-
-            case TYPE_NUMBER: {
-                if (state.offset + 8 > buf.length) return null;
-                const val = buf.readDoubleBE(state.offset);
-                state.offset += 8;
-                return val;
-            }
-
-            case TYPE_STRING: {
-                if (state.offset + 4 > buf.length) return null;
-                const len = buf.readUInt32BE(state.offset);
-                state.offset += 4;
-
-                if (state.offset + len > buf.length) return null;
-                const str = buf.toString("utf8", state.offset, state.offset + len);
-                state.offset += len;
-                return str;
-            }
-
-            case TYPE_ARRAY: {
-                if (state.offset + 4 > buf.length) return null;
-                const len = buf.readUInt32BE(state.offset);
-                state.offset += 4;
-
-                const arr = new Array(len);
-                for (let i = 0; i < len; i++) {
-                    arr[i] = this._decodeValue(buf, state);
-                }
-                return arr;
-            }
-
-            case TYPE_OBJECT: {
-                if (state.offset + 4 > buf.length) return null;
-                const len = buf.readUInt32BE(state.offset);
-                state.offset += 4;
-
-                const obj = {};
-                for (let i = 0; i < len; i++) {
-                    if (state.offset + 4 > buf.length) return null;
-                    const keyLen = buf.readUInt32BE(state.offset);
-                    state.offset += 4;
-
-                    if (state.offset + keyLen > buf.length) return null;
-                    const key = buf.toString("utf8", state.offset, state.offset + keyLen);
-                    state.offset += keyLen;
-
-                    obj[key] = this._decodeValue(buf, state);
-                }
-                return obj;
-            }
-
-            default:
-                return null;
-        }
-    }
-
-    static checksum(buffer) {
-        let hash = 0;
-        for (let i = 0; i < buffer.length; i++) {
-            hash = ((hash << 5) - hash + buffer[i]) | 0;
-        }
-        return hash;
-    }
-}
 
 const sqlite = new Database(DB_PATH, {
     create: true,
     readwrite: true,
-    strict: true,
 });
 
 sqlite.exec("PRAGMA journal_mode = WAL");
 sqlite.exec("PRAGMA synchronous = NORMAL");
-sqlite.exec("PRAGMA cache_size = -128000");
+sqlite.exec("PRAGMA cache_size = -8000");
 sqlite.exec("PRAGMA temp_store = MEMORY");
-sqlite.exec("PRAGMA mmap_size = 30000000000");
-sqlite.exec("PRAGMA page_size = 8192");
-sqlite.exec("PRAGMA wal_autocheckpoint = 1000");
+sqlite.exec("PRAGMA mmap_size = 268435456");
+sqlite.exec("PRAGMA page_size = 4096");
+sqlite.exec("PRAGMA locking_mode = NORMAL");
 
 const SCHEMAS = {
     chats: {
@@ -296,23 +305,9 @@ const SCHEMAS = {
     meta: {
         columns: {
             key: "TEXT PRIMARY KEY",
-            value: "BLOB",
-            checksum: "INTEGER DEFAULT 0",
+            value: "TEXT",
         },
         indices: ["CREATE INDEX IF NOT EXISTS idx_meta_key ON meta(key)"],
-    },
-    binary_cache: {
-        columns: {
-            table_name: "TEXT",
-            jid: "TEXT",
-            data: "BLOB NOT NULL",
-            checksum: "INTEGER NOT NULL",
-            updated_at: "INTEGER DEFAULT (unixepoch())",
-        },
-        indices: [
-            "CREATE UNIQUE INDEX IF NOT EXISTS idx_binary_cache_unique ON binary_cache(table_name, jid)",
-            "CREATE INDEX IF NOT EXISTS idx_binary_cache_updated ON binary_cache(updated_at DESC)",
-        ],
     },
 };
 
@@ -326,7 +321,7 @@ function ensureTable(tableName, schema) {
         .join(", ");
 
     if (!exists) {
-        sqlite.exec(`CREATE TABLE ${tableName} (${columnDefs}) STRICT`);
+        sqlite.exec(`CREATE TABLE ${tableName} (${columnDefs})`);
 
         if (schema.indices) {
             for (const idx of schema.indices) {
@@ -341,13 +336,7 @@ function ensureTable(tableName, schema) {
 
         for (const [col, def] of Object.entries(schema.columns)) {
             if (!existingCols.includes(col)) {
-                try {
-                    sqlite.exec(`ALTER TABLE ${tableName} ADD COLUMN ${col} ${def}`);
-                } catch (e) {
-                    if (logger) {
-                        logger.error({ column: col, error: e.message }, `Failed to add column`);
-                    }
-                }
+                sqlite.exec(`ALTER TABLE ${tableName} ADD COLUMN ${col} ${def}`);
             }
         }
     }
@@ -357,192 +346,137 @@ for (const [tableName, schema] of Object.entries(SCHEMAS)) {
     ensureTable(tableName, schema);
 }
 
-sqlite.exec("PRAGMA wal_checkpoint(TRUNCATE)");
 sqlite.exec("PRAGMA optimize");
 
 const STMTS = {
-    getCached: sqlite.query(
-        "SELECT data, checksum FROM binary_cache WHERE table_name = ? AND jid = ?"
-    ),
-    setCached: sqlite.query(`
-        INSERT INTO binary_cache (table_name, jid, data, checksum, updated_at)
-        VALUES (?, ?, ?, ?, unixepoch())
-        ON CONFLICT(table_name, jid) DO UPDATE SET
-            data = excluded.data,
-            checksum = excluded.checksum,
-            updated_at = unixepoch()
-    `),
-    deleteCached: sqlite.query("DELETE FROM binary_cache WHERE table_name = ? AND jid = ?"),
-    getRow: (table) => sqlite.query(`SELECT * FROM ${table} WHERE jid = ?`),
-    insertRow: (table) => sqlite.query(`INSERT OR IGNORE INTO ${table} (jid) VALUES (?)`),
-    updateCol: (table, col) => sqlite.query(`UPDATE ${table} SET ${col} = ? WHERE jid = ?`),
+    getRow: {},
+    insertRow: {},
+    updateCol: {},
+    deleteRow: {},
 };
 
-class CacheManager {
-    constructor() {
-        this.cache = new Map();
-        this.dirty = new Set();
-        this.flushTimer = null;
-        this._startFlushTimer();
-    }
+const TABLES_WITH_JID = ['chats', 'settings'];
 
-    _startFlushTimer() {
-        this.flushTimer = setInterval(() => {
-            this.flush();
-        }, 2000);
-    }
-
-    get(table, jid) {
-        const key = `${table}:${jid}`;
-
-        if (this.cache.has(key)) {
-            return this.cache.get(key);
+for (const table of TABLES_WITH_JID) {
+    STMTS.getRow[table] = sqlite.query(`SELECT * FROM ${table} WHERE jid = ?`);
+    STMTS.insertRow[table] = sqlite.query(`INSERT OR IGNORE INTO ${table} (jid) VALUES (?)`);
+    STMTS.deleteRow[table] = sqlite.query(`DELETE FROM ${table} WHERE jid = ?`);
+    
+    STMTS.updateCol[table] = {};
+    for (const col of Object.keys(SCHEMAS[table].columns)) {
+        if (col !== 'jid') {
+            STMTS.updateCol[table][col] = sqlite.query(`UPDATE ${table} SET ${col} = ? WHERE jid = ?`);
         }
-
-        const cached = STMTS.getCached.get(table, jid);
-        if (cached) {
-            const expectedChecksum = BinaryCodec.checksum(cached.data);
-            if (expectedChecksum === cached.checksum) {
-                const decoded = BinaryCodec.decode(cached.data);
-                if (decoded) {
-                    this.cache.set(key, decoded);
-                    return decoded;
-                }
-            } else if (logger) {
-                logger.warn({ table, jid }, "Cache checksum mismatch");
-            }
-        }
-
-        return null;
-    }
-
-    set(table, jid, data) {
-        const key = `${table}:${jid}`;
-        this.cache.set(key, data);
-        this.dirty.add(key);
-    }
-
-    delete(table, jid) {
-        const key = `${table}:${jid}`;
-        this.cache.delete(key);
-        this.dirty.delete(key);
-
-        try {
-            STMTS.deleteCached.run(table, jid);
-        } catch (e) {
-            if (logger) {
-                logger.error({ table, jid, error: e.message }, "Cache delete failed");
-            }
-        }
-    }
-
-    flush() {
-        if (this.dirty.size === 0) return;
-
-        const snapshot = new Set(this.dirty);
-        this.dirty.clear();
-
-        sqlite.transaction(() => {
-            for (const key of snapshot) {
-                const [table, jid] = key.split(":");
-                const data = this.cache.get(key);
-
-                if (!data) continue;
-
-                try {
-                    const encoded = BinaryCodec.encode(data);
-                    const checksum = BinaryCodec.checksum(encoded);
-
-                    STMTS.setCached.run(table, jid, encoded, checksum);
-                } catch (e) {
-                    if (logger) {
-                        logger.error({ table, jid, error: e.message }, "Cache flush failed");
-                    }
-                }
-            }
-        })();
-    }
-
-    dispose() {
-        if (this.flushTimer) {
-            clearInterval(this.flushTimer);
-            this.flushTimer = null;
-        }
-        this.flush();
-        this.cache.clear();
-        this.dirty.clear();
     }
 }
 
-const cacheManager = new CacheManager();
+STMTS.meta = {
+    get: sqlite.query(`SELECT value FROM meta WHERE key = ?`),
+    set: sqlite.query(`INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)`),
+    delete: sqlite.query(`DELETE FROM meta WHERE key = ?`),
+    getAll: sqlite.query(`SELECT * FROM meta`),
+};
+
+class RowCache {
+    constructor(maxSize = 100) {
+        this.cache = new Map();
+        this.maxSize = maxSize;
+    }
+    
+    get(key) {
+        return this.cache.get(key);
+    }
+    
+    set(key, value) {
+        if (this.cache.size >= this.maxSize) {
+            const firstKey = this.cache.keys().next().value;
+            this.cache.delete(firstKey);
+        }
+        this.cache.set(key, value);
+    }
+    
+    delete(key) {
+        this.cache.delete(key);
+    }
+    
+    clear() {
+        this.cache.clear();
+    }
+}
 
 class DataWrapper {
     constructor() {
+        this.rowCaches = {
+            chats: new RowCache(100),
+            settings: new RowCache(50),
+        };
+        
         this.data = {
             chats: this._createProxy("chats"),
             settings: this._createProxy("settings"),
         };
+        
+        this.meta = {
+            get: (key) => {
+                const result = STMTS.meta.get.get(key);
+                return result ? safeJSONParse(result.value, null) : null;
+            },
+            set: (key, value) => {
+                const strValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+                STMTS.meta.set.run(key, strValue);
+                return true;
+            },
+            delete: (key) => {
+                STMTS.meta.delete.run(key);
+                return true;
+            },
+            getAll: () => {
+                const rows = STMTS.meta.getAll.all();
+                const result = {};
+                for (const row of rows) {
+                    result[row.key] = safeJSONParse(row.value, row.value);
+                }
+                return result;
+            }
+        };
     }
 
     _createProxy(table) {
-        const getRowStmt = STMTS.getRow(table);
-        const insertRowStmt = STMTS.insertRow(table);
-
+        const cache = this.rowCaches[table];
+        
         return new Proxy(
             {},
             {
                 get: (_, jid) => {
                     if (typeof jid !== "string") return undefined;
+                    
+                    const cacheKey = `${table}:${jid}`;
+                    let cached = cache.get(cacheKey);
+                    if (cached) return cached;
 
-                    let cached = cacheManager.get(table, jid);
-                    if (cached) return this._createRowProxy(table, jid, cached);
-
-                    let row = getRowStmt.get(jid);
+                    let row = STMTS.getRow[table].get(jid);
 
                     if (!row) {
-                        insertRowStmt.run(jid);
-                        row = getRowStmt.get(jid);
+                        STMTS.insertRow[table].run(jid);
+                        row = STMTS.getRow[table].get(jid);
                     }
 
-                    const rowData = { ...row };
-                    cacheManager.set(table, jid, rowData);
-
-                    return this._createRowProxy(table, jid, rowData);
-                },
-
-                set: (_, jid, value) => {
-                    if (typeof jid !== "string" || typeof value !== "object") {
-                        return false;
-                    }
-
-                    cacheManager.set(table, jid, value);
-                    return true;
+                    const proxy = this._createRowProxy(table, jid, row);
+                    cache.set(cacheKey, proxy);
+                    return proxy;
                 },
 
                 has: (_, jid) => {
                     if (typeof jid !== "string") return false;
-
-                    const cached = cacheManager.get(table, jid);
-                    if (cached) return true;
-
-                    const row = getRowStmt.get(jid);
+                    const row = STMTS.getRow[table].get(jid);
                     return !!row;
                 },
 
                 deleteProperty: (_, jid) => {
                     if (typeof jid !== "string") return false;
-
-                    cacheManager.delete(table, jid);
-
-                    try {
-                        sqlite.query(`DELETE FROM ${table} WHERE jid = ?`).run(jid);
-                        return true;
-                    } catch (e) {
-                        if (logger) {
-                            logger.error({ table, jid, error: e.message }, "Delete failed");
-                        }
-                        return false;
-                    }
+                    STMTS.deleteRow[table].run(jid);
+                    cache.delete(`${table}:${jid}`);
+                    return true;
                 },
             }
         );
@@ -552,30 +486,20 @@ class DataWrapper {
         return new Proxy(rowData, {
             set: (obj, prop, value) => {
                 if (!Object.prototype.hasOwnProperty.call(SCHEMAS[table].columns, prop)) {
-                    if (logger) {
-                        logger.warn({ table, prop }, "Unknown column");
-                    }
+                    logger.warn({ table, prop }, "Unknown column");
                     return false;
                 }
 
                 const normalizedValue = typeof value === "boolean" ? (value ? 1 : 0) : value;
 
-                try {
-                    const updateStmt = STMTS.updateCol(table, prop);
-                    updateStmt.run(normalizedValue, jid);
-
+                const stmt = STMTS.updateCol[table][prop];
+                if (stmt) {
+                    stmt.run(normalizedValue, jid);
                     obj[prop] = normalizedValue;
-                    rowData[prop] = normalizedValue;
-
-                    cacheManager.set(table, jid, rowData);
-
                     return true;
-                } catch (e) {
-                    if (logger) {
-                        logger.error({ table, prop, error: e.message }, "Update failed");
-                    }
-                    return false;
                 }
+
+                return false;
             },
 
             get: (obj, prop) => {
@@ -586,24 +510,41 @@ class DataWrapper {
             },
         });
     }
+    
+    clearCache(table) {
+        if (table) {
+            this.rowCaches[table]?.clear();
+        } else {
+            for (const cache of Object.values(this.rowCaches)) {
+                cache.clear();
+            }
+        }
+    }
 }
 
 const db = new DataWrapper();
 global.db = db;
 
+setInterval(() => {
+    const stats = {
+        chats: db.rowCaches.chats.cache.size,
+        settings: db.rowCaches.settings.cache.size,
+    };
+    
+    if (stats.chats > 80 || stats.settings > 40) {
+        logger.debug({ stats }, "Cache size check");
+    }
+}, 60000);
+
 global.loading = async (m, conn, back = false) => {
     if (!conn || !m || !m.chat) return;
 
-    try {
-        if (back) {
-            await conn.sendPresenceUpdate("paused", m.chat);
-            await new Promise((resolve) => setTimeout(resolve, PRESENCE_DELAY));
-            await conn.sendPresenceUpdate("available", m.chat);
-        } else {
-            await conn.sendPresenceUpdate("composing", m.chat);
-        }
-    } catch {
-        //
+    if (back) {
+        await conn.sendPresenceUpdate("paused", m.chat);
+        await new Promise((resolve) => setTimeout(resolve, PRESENCE_DELAY));
+        await conn.sendPresenceUpdate("available", m.chat);
+    } else {
+        await conn.sendPresenceUpdate("composing", m.chat);
     }
 };
 
@@ -656,10 +597,14 @@ global.dfail = async (type, m, conn) => {
             { quoted: m }
         );
     } catch {
-        try {
-            await conn.sendMessage(m.chat, { text: messageText }, { quoted: m });
-        } catch {
-            //
-        }
+        await conn.sendMessage(m.chat, { text: messageText }, { quoted: m });
     }
 };
+
+process.on("SIGTERM", () => {
+    sqlite.close();
+});
+
+process.on("SIGINT", () => {
+    sqlite.close();
+});

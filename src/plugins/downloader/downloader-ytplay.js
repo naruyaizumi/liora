@@ -1,6 +1,5 @@
-import { convert } from "#cpp";
+import { convert } from "#lib/convert.js";
 import { play } from "#api/play.js";
-import { canvas } from "#canvas/play.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0])
@@ -12,8 +11,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             args.join(" ")
         );
         if (!success) throw new Error(error);
-
-        const canvasBuffer = await canvas(cover, title, channel);
 
         const audioRes = await fetch(downloadUrl);
         if (!audioRes.ok) throw new Error(`Failed to fetch audio. Status: ${audioRes.status}`);
@@ -47,9 +44,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                     externalAdReply: {
                         title,
                         body: channel,
-                        thumbnail: canvasBuffer,
+                        thumbnailUrl: cover,
                         mediaUrl: url,
-                        mediaType: 1,
+                        mediaType: 2,
                         renderLargerThumbnail: true,
                     },
                 },

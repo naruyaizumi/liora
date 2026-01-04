@@ -1,29 +1,87 @@
-/* global conn */
 import "./config.js";
 import { serialize } from "#core/message.js";
 import { useSQLAuthState } from "#auth";
 import { Browsers, fetchLatestBaileysVersion } from "baileys";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
-import pino from "pino";
+import { dirname, join } from "node:path";
 import {
-    PluginCache,
     getAllPlugins,
     loadPlugins,
-    initHotReload,
     EventManager,
     handleDisconnect,
     cleanupReconnect,
+    reloadAllPlugins,
+    reloadSinglePlugin
 } from "#core/connection.js";
 import { naruyaizumi } from "#core/socket.js";
 
-const pluginCache = new PluginCache(5000);
 const pairingNumber = global.config.pairingNumber;
 const pairingCode = global.config.pairingCode;
 
 let authState = null;
-let hotReloadCleanup = null;
 let isShuttingDown = false;
+
+const baileysLogger = () => {
+    const LEVELS = {
+        fatal: 60,
+        error: 50,
+        warn: 40,
+        info: 30,
+        debug: 20,
+        trace: 10,
+    };
+
+    const currentLevel = LEVELS[Bun.env.BAILEYS_LOG_LEVEL?.toLowerCase() || 'silent'];
+    const shouldLog = (level) => LEVELS[level] >= currentLevel;
+
+    const formatValue = (value) => {
+        if (value === null) return 'null';
+        if (value === undefined) return 'undefined';
+        if (value instanceof Error) return value.message || value.toString();
+        if (typeof value === 'object') {
+            try {
+                return JSON.stringify(value);
+            } catch {
+                return value.toString();
+            }
+        }
+        return String(value);
+    };
+
+    const formatLog = (level, ...args) => {
+        const time = new Date().toTimeString().slice(0, 5);
+        const levelName = level.toUpperCase();
+        const formattedArgs = args.map(arg => formatValue(arg));
+        
+        let message = '';
+        let object = null;
+        
+        if (args.length > 0 && typeof args[0] === 'object' && args[0] !== null) {
+            object = args[0];
+            message = formattedArgs.slice(1).join(' ');
+        } else {
+            message = formattedArgs.join(' ');
+        }
+        
+        if (object && Object.keys(object).length > 0) {
+            const objectLines = Object.entries(object)
+                .map(([key, value]) => `    ${key}: ${formatValue(value)}`)
+                .join('\n');
+            return `[${time}] ${levelName}: ${message}\n${objectLines}`;
+        }
+        return `[${time}] ${levelName}: ${message}`;
+    };
+
+    return {
+        level: 'silent',
+        fatal: (...args) => { if (shouldLog('fatal')) console.error(formatLog('fatal', ...args)); },
+        error: (...args) => { if (shouldLog('error')) console.error(formatLog('error', ...args)); },
+        warn: (...args) => { if (shouldLog('warn')) console.warn(formatLog('warn', ...args)); },
+        info: (...args) => { if (shouldLog('info')) console.log(formatLog('info', ...args)); },
+        debug: (...args) => { if (shouldLog('debug')) console.debug(formatLog('debug', ...args)); },
+        trace: (...args) => { if (shouldLog('trace')) console.trace(formatLog('trace', ...args)); },
+        child: () => baileysLogger(),
+    };
+};
 
 async function setupPairingCode(conn) {
     return new Promise((resolve) => {
@@ -52,25 +110,9 @@ async function LIORA() {
 
     const { state, saveCreds } = authState;
     const { version: baileysVersion } = await fetchLatestBaileysVersion();
-
-    global.logger.info(
-        `[baileys] v${baileysVersion.join(".")} on ${process.platform.toUpperCase()}`
-    );
-
     const connectionOptions = {
         version: baileysVersion,
-        logger: pino({
-            level: "error",
-            base: { module: "BAILEYS" },
-            transport: {
-                target: "pino-pretty",
-                options: {
-                    colorize: true,
-                    translateTime: "HH:MM",
-                    ignore: "pid,hostname",
-                },
-            },
-        }),
+        logger: baileysLogger(),
         browser: Browsers.macOS("Safari"),
         auth: state,
     };
@@ -90,84 +132,21 @@ async function LIORA() {
     global.conn.ev.on("connection.update", global.conn.connectionUpdate);
     global.reloadHandler = await eventManager.createReloadHandler(connectionOptions, saveCreds);
 
-    const filename = fileURLToPath(import.meta.url);
+    const filename = Bun.fileURLToPath(import.meta.url);
     const srcFolder = dirname(filename);
     const pluginFolder = join(srcFolder, "./plugins");
 
-    await loadPlugins(pluginFolder, (dir, skipCache) =>
-        getAllPlugins(dir, pluginCache, skipCache)
-    );
+    await loadPlugins(pluginFolder, (dir) => getAllPlugins(dir));
 
-    hotReloadCleanup = initHotReload(
-        srcFolder,
-        pluginFolder,
-        async (filename, module, isPlugin) => {
-            try {
-                if (module === null) {
-                    if (isPlugin) {
-                        const oldPlugin = global.plugins[filename];
-
-                        if (oldPlugin && typeof oldPlugin.cleanup === "function") {
-                            try {
-                                await oldPlugin.cleanup();
-                            } catch {
-                                //
-                            }
-                        }
-
-                        delete global.plugins[filename];
-                    }
-
-                    global.logger.info({ file: filename, isPlugin }, "File removed");
-                } else {
-                    if (isPlugin) {
-                        const oldPlugin = global.plugins[filename];
-
-                        if (typeof module === "function" || typeof module === "object") {
-                            if (oldPlugin && typeof oldPlugin.cleanup === "function") {
-                                try {
-                                    await oldPlugin.cleanup();
-                                } catch {
-                                    //
-                                }
-                            }
-
-                            global.plugins[filename] = module;
-
-                            if (typeof module.init === "function") {
-                                try {
-                                    await module.init();
-                                } catch {
-                                    //
-                                }
-                            }
-                        } else {
-                            throw new Error("Invalid plugin structure");
-                        }
-                    }
-
-                    global.logger.info({ file: filename, isPlugin }, "File reloaded");
-
-                    if (
-                        !isPlugin &&
-                        !filename.includes("main.js") &&
-                        !filename.includes("config.js") &&
-                        !filename.includes("index.js")
-                    ) {
-                        await global.reloadHandler(false);
-                    }
-                }
-            } catch (e) {
-                global.logger.error(
-                    {
-                        file: filename,
-                        error: e.message,
-                    },
-                    "File reload error"
-                );
-            }
-        }
-    );
+    global.pluginFolder = pluginFolder;
+    
+    global.reloadAllPlugins = async () => {
+        return reloadAllPlugins(pluginFolder);
+    };
+    
+    global.reloadSinglePlugin = async (filepath) => {
+        return reloadSinglePlugin(filepath, pluginFolder);
+    };
 
     await global.reloadHandler();
     serialize();
@@ -180,11 +159,6 @@ async function gracefulShutdown(signal) {
     global.logger.info(`Shutting down (${signal})...`);
 
     try {
-        if (hotReloadCleanup) {
-            hotReloadCleanup();
-            hotReloadCleanup = null;
-        }
-
         cleanupReconnect();
 
         if (global.conn?.ws) {
@@ -200,27 +174,25 @@ async function gracefulShutdown(signal) {
             try {
                 global.conn.ev.removeAllListeners();
             } catch (e) {
-                global.logger.warn({ error: e.message }, "Event listener cleanup warning");
+                global.logger.warn({ error: e.message }, "Event cleanup warning");
             }
         }
 
         if (authState && typeof authState.dispose === "function") {
             try {
-                global.logger.info("Disposing auth state...");
                 await Promise.race([
                     authState.dispose(),
                     new Promise((_, reject) => 
-                        setTimeout(() => reject(new Error("Auth dispose timeout")), 5000)
+                        setTimeout(() => reject(new Error("Dispose timeout")), 5000)
                     )
                 ]);
-                global.logger.info("Auth state disposed");
                 authState = null;
             } catch (e) {
-                global.logger.error({ error: e.message }, "Auth dispose error");
+                global.logger.error({ error: e.message }, "Dispose error");
             }
         }
 
-        global.logger.info("Shutdown completed successfully");
+        global.logger.info("Shutdown completed");
     } catch (e) {
         global.logger.error({ error: e.message, stack: e.stack }, "Shutdown error");
     }
@@ -249,7 +221,7 @@ process.on("unhandledRejection", async (e) => {
 });
 
 LIORA().catch(async (e) => {
-    global.logger.fatal({ error: e.message, stack: e.stack }, "Fatal initialization error");
+    global.logger.fatal({ error: e.message, stack: e.stack }, "Fatal error");
     await gracefulShutdown("fatal");
     process.exit(1);
 });

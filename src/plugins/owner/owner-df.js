@@ -1,7 +1,6 @@
-import { unlink, access } from "fs/promises";
-import path from "path";
+import path from "node:path";
 
-let handler = async (m, { args, usedPrefix, command }) => {
+let handler = async (m, { args, usedPrefix, command, conn }) => {
     if (!args.length)
         return m.reply(
             `Enter the file path to delete.\n› Example: ${usedPrefix + command} plugins/owner/owner-sf`
@@ -12,16 +11,15 @@ let handler = async (m, { args, usedPrefix, command }) => {
     const filepath = path.resolve(process.cwd(), target);
 
     try {
-        await access(filepath);
-        await unlink(filepath);
+        const file = Bun.file(filepath);
+        const exists = await file.exists();
+        if (!exists) throw new Error(`File not found: ${filepath}`);
+
+        await file.delete();
         m.reply("File deleted successfully.");
     } catch (e) {
-        global.logger.error(e);
-        if (e.code === "ENOENT") {
-            m.reply(`File not found: ${filepath}`);
-        } else {
-            m.reply(`Error: ${e.message}`);
-        }
+        conn.logger.error(e);
+        m.reply(`Error: ${e.message}`);
     }
 };
 

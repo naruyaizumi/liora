@@ -2,7 +2,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
         if (!text) {
             return m.reply(
-                `Usage: ${usedPrefix + command} <package>\nExample: ${usedPrefix + command} sharp`
+                `Usage: ${usedPrefix + command} <package>\nExample: ${usedPrefix + command} baileys`
             );
         }
 

@@ -1,6 +1,5 @@
 bug:
   - '\b(bug|error|crash|exception|fail|broken|not working)\b'
-  - '\b(segfault|memory leak|undefined behavior)\b'
 
 priority-high:
   - '\b(critical|urgent|blocker|severe)\b'
@@ -36,31 +35,31 @@ media-processing:
   - '\b(video|audio|image|ffmpeg|conversion)\b'
   - '\b(webp|mp4|mp3|converter)\b'
 
-cpp:
-  - '\b(c\+\+|native|addon|binding|gyp)\b'
-  - '\b(memory leak|segfault|valgrind)\b'
-
 api:
   - '\b(api|endpoint|integration)\b'
   - '\b(tiktok|instagram|twitter|spotify|youtube)\b'
 
-# Performance
 performance:
   - '\b(slow|performance|speed|optimize|latency)\b'
   - '\b(memory usage|cpu usage|resource)\b'
 
 installation:
   - '\b(install|setup|configure|deployment)\b'
-  - '\b(dependencies|npm|node-gyp)\b'
+  - '\b(dependencies|bun)\b'
+
+database:
+  - '\b(postgresql|postgres|database|session|auth)\b'
+  - '\b(sql|query|connection)\b'
+
+redis:
+  - '\b(redis|cache|caching)\b'
+  - '\b(memory store|data store)\b'
 
 ubuntu:
   - '\bubuntu\b'
 
 debian:
   - '\bdebian\b'
-
-windows:
-  - '\bwindows\b'
 
 testing:
   - '\b(test|testing|unit test|integration test)\b'

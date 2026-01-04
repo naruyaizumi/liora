@@ -1,23 +1,11 @@
 /* global conn */
-import { fileTypeFromBuffer } from "file-type";
-
-const DEFAULT_HEADERS = {
-    "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    Accept: "*/*",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Cache-Control": "no-cache",
-    Pragma: "no-cache",
-};
-
-const UPLOAD_TIMEOUT = 60000;
+import { fileType, getBrowserHeaders } from "./file-type.js";
 
 async function uploader1(buffer) {
     try {
         if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
 
-        const type = await fileTypeFromBuffer(buffer);
+        const type = await fileType(buffer);
         if (!type) throw new Error("Unrecognized file format");
 
         const formData = new FormData();
@@ -27,9 +15,9 @@ async function uploader1(buffer) {
 
         const response = await fetch("https://catbox.moe/user/api.php", {
             method: "POST",
-            headers: DEFAULT_HEADERS,
+            headers: getBrowserHeaders(),
             body: formData,
-            signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
+            signal: AbortSignal.timeout(60000),
         });
 
         if (!response.ok) throw new Error(`Catbox HTTP ${response.status}: ${response.statusText}`);
@@ -49,7 +37,7 @@ async function uploader2(buffer) {
     try {
         if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
 
-        const type = await fileTypeFromBuffer(buffer);
+        const type = fileType(buffer);
         if (!type) throw new Error("Unrecognized file format");
 
         const formData = new FormData();
@@ -58,9 +46,9 @@ async function uploader2(buffer) {
 
         const response = await fetch("https://uguu.se/upload.php", {
             method: "POST",
-            headers: DEFAULT_HEADERS,
+            headers: getBrowserHeaders(),
             body: formData,
-            signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
+            signal: AbortSignal.timeout(60000),
         });
 
         if (!response.ok) throw new Error(`Uguu HTTP ${response.status}: ${response.statusText}`);
@@ -79,7 +67,7 @@ async function uploader3(buffer) {
     try {
         if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
 
-        const type = await fileTypeFromBuffer(buffer);
+        const type = fileType(buffer);
         if (!type) throw new Error("Unrecognized file format");
 
         const formData = new FormData();
@@ -88,9 +76,9 @@ async function uploader3(buffer) {
 
         const response = await fetch("https://qu.ax/upload.php", {
             method: "POST",
-            headers: DEFAULT_HEADERS,
+            headers: getBrowserHeaders(),
             body: formData,
-            signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
+            signal: AbortSignal.timeout(60000),
         });
 
         if (!response.ok) throw new Error(`Qu.ax HTTP ${response.status}: ${response.statusText}`);
@@ -109,18 +97,18 @@ async function uploader4(buffer) {
     try {
         if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
 
-        const type = await fileTypeFromBuffer(buffer);
+        const type = fileType(buffer);
         if (!type) throw new Error("Unrecognized file format");
 
         const response = await fetch("https://put.icu/upload/", {
             method: "PUT",
             headers: {
-                ...DEFAULT_HEADERS,
+                ...getBrowserHeaders(),
                 "Content-Type": type.mime,
                 Accept: "application/json",
             },
             body: buffer,
-            signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
+            signal: AbortSignal.timeout(60000),
         });
 
         if (!response.ok)
@@ -140,7 +128,7 @@ async function uploader5(buffer) {
     try {
         if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
 
-        const type = await fileTypeFromBuffer(buffer);
+        const type = fileType(buffer);
         if (!type) throw new Error("Unrecognized file format");
 
         const formData = new FormData();
@@ -149,9 +137,9 @@ async function uploader5(buffer) {
 
         const response = await fetch("https://tmpfiles.org/api/v1/upload", {
             method: "POST",
-            headers: DEFAULT_HEADERS,
+            headers: getBrowserHeaders(),
             body: formData,
-            signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
+            signal: AbortSignal.timeout(60000),
         });
 
         if (!response.ok)
@@ -171,60 +159,10 @@ async function uploader6(buffer) {
     try {
         if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
 
-        const type = await fileTypeFromBuffer(buffer);
+        const type = fileType(buffer);
         if (!type) throw new Error("Unrecognized file format");
-
-        const formData = new FormData();
-        const blob = new Blob([buffer], { type: type.mime });
-
-        const { createHash, randomBytes } = await import("crypto");
-
-        const timestamp = Date.now();
-        const rand = randomBytes(12).toString("hex");
-        const hashBuffer = createHash("sha256").update(`${timestamp}${rand}`).digest();
-
-        let filename = hashBuffer.toString("base64url");
-        filename = filename
-            .split("")
-            .sort(() => Math.random() - 0.5)
-            .join("");
-        filename = filename.substring(0, 32);
-
-        formData.append("filename", filename);
-        formData.append("file", blob, filename);
-
-        const response = await fetch("https://api.nekolabs.web.id/tools/uploader/alibaba/v1", {
-            method: "POST",
-            headers: {
-                ...DEFAULT_HEADERS,
-                Accept: "application/json",
-            },
-            body: formData,
-            signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
-        });
-
-        if (!response.ok)
-            throw new Error(`Alibaba HTTP ${response.status}: ${response.statusText}`);
-
-        const json = await response.json();
-
-        if (!json?.success || !json?.result) throw new Error("Alibaba invalid response format");
-
-        return json.result.trim();
-    } catch (e) {
-        conn?.logger?.error(e.message);
-        throw e;
-    }
-}
-
-async function uploader7(buffer) {
-    try {
-        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
-
-        const type = await fileTypeFromBuffer(buffer);
-        if (!type) throw new Error("Unrecognized file format");
-        if (!type.mime.startsWith("video/")) {
-            throw new Error("Videy uploader only supports videos");
+        if (!type.mime.startsWith('video/')) {
+            throw new Error("Videy uploader only supports videos (MP4, MOV, AVI, MKV)");
         }
 
         const formData = new FormData();
@@ -238,7 +176,7 @@ async function uploader7(buffer) {
                 Accept: "*/*",
             },
             body: formData,
-            signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
+            signal: AbortSignal.timeout(60000),
         });
 
         if (!response.ok) throw new Error(`Videy HTTP ${response.status}: ${response.statusText}`);
@@ -256,14 +194,14 @@ async function uploader7(buffer) {
     }
 }
 
-async function uploader8(buffer) {
+async function uploader7(buffer) {
     try {
         if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
 
-        const type = await fileTypeFromBuffer(buffer);
+        const type = fileType(buffer);
         if (!type) throw new Error("Unrecognized file format");
-        if (!type.mime.startsWith("image/")) {
-            throw new Error("GoFile uploader only supports images");
+        if (!type.mime.startsWith('image/')) {
+            throw new Error("GoFile uploader only supports images (JPG, PNG, GIF, WEBP, HEIC)");
         }
 
         const formData = new FormData();
@@ -277,7 +215,7 @@ async function uploader8(buffer) {
                 Accept: "*/*",
             },
             body: formData,
-            signal: AbortSignal.timeout(UPLOAD_TIMEOUT),
+            signal: AbortSignal.timeout(60000),
         });
 
         if (!response.ok) throw new Error(`GoFile HTTP ${response.status}: ${response.statusText}`);
@@ -302,7 +240,6 @@ async function uploader(buffer) {
         { name: "Qu.ax", fn: uploader3 },
         { name: "Put.icu", fn: uploader4 },
         { name: "Tmpfiles", fn: uploader5 },
-        { name: "Alibaba", fn: uploader6 },
     ];
 
     const attempts = [];
@@ -360,6 +297,5 @@ export {
     uploader5,
     uploader6,
     uploader7,
-    uploader8,
     uploader,
 };

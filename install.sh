@@ -1,51 +1,14 @@
 #!/bin/bash
-# Liora Bot - Main Script
-# Version: 1.0.0
-# Description: WhatsApp bot installer
 
 set -euo pipefail
 
-GITHUB_RAW_BASE="https://raw.githubusercontent.com/naruyaizumi/liora/main/src/lib/shell"
-
-load_library() {
-    local lib_name="$1"
-    local lib_url="${GITHUB_RAW_BASE}/${lib_name}"
-    local temp_file="/tmp/${lib_name}"
-    
-    print_info "Loading library: ${lib_name}"
-    
-    if ! curl -sSf "${lib_url}" -o "${temp_file}"; then
-        echo "[ERROR] Failed to download library ${lib_name}"
-        exit 1
-    fi
-    
-    source "${temp_file}"
-    rm -f "${temp_file}"
-}
-
-curl -sSf "${GITHUB_RAW_BASE}/logger.sh" -o /tmp/logger.sh
-source /tmp/logger.sh
-rm -f /tmp/logger.sh
-
-load_library "distro.sh"
-load_library "cleanup.sh"
-load_library "git.sh"
-load_library "nodejs.sh"
-load_library "postgres.sh"
-load_library "redis.sh"
-load_library "rust.sh"
-load_library "bun.sh"
-load_library "ffmpeg.sh"
-load_library "liora.sh"
-load_library "systemd.sh"
-load_library "cli.sh"
-
+GITHUB_RAW="https://raw.githubusercontent.com/naruyaizumi/liora/main/src/lib/shell"
 SERVICE_NAME="liora"
 SERVICE_FILE="/etc/systemd/system/liora.service"
 HELPER_FILE="/usr/local/bin/bot"
 WORK_DIR="/root/liora"
 BUN_PATH="/root/.bun/bin/bun"
-SUPERVISOR_PATH="${WORK_DIR}/src/lib/rs/target/release/liora-rs"
+REPO_URL="https://github.com/naruyaizumi/liora.git"
 TIME_ZONE="Asia/Jakarta"
 DB_NAME="liora"
 DB_USER="liora"
@@ -54,52 +17,68 @@ DB_HOST="localhost"
 DB_PORT="5432"
 REDIS_HOST="localhost"
 REDIS_PORT="6379"
-REPO_URL="https://github.com/naruyaizumi/liora.git"
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+print_error() { echo -e "${RED}[ERROR]${NC} $1" >&2; }
+print_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
+print_info() { echo -e "[INFO] $1"; }
+print_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 
 if ! command -v curl &> /dev/null; then
     echo "[INFO] Installing curl..."
     if command -v apt-get &> /dev/null; then
         apt-get update && apt-get install -y curl
-    elif command -v yum &> /dev/null; then
-        yum install -y curl
     elif command -v dnf &> /dev/null; then
         dnf install -y curl
     elif command -v pacman &> /dev/null; then
         pacman -Sy --noconfirm curl
-    elif command -v apk &> /dev/null; then
-        apk add curl
     else
-        echo "[ERROR] Could not install curl. Please install it manually."
+        print_error "Cannot install curl automatically"
         exit 1
     fi
 fi
+
+load_script() {
+    local script="$1"
+    local url="${GITHUB_RAW}/${script}"
+    local temp="/tmp/${script}"
+    
+    print_info "Loading ${script}..."
+    curl -sSf "$url" -o "$temp" || {
+        print_error "Failed to download ${script}"
+        exit 1
+    }
+    source "$temp"
+    rm -f "$temp"
+}
+
+cleanup_on_error() {
+    print_error "Installation failed. Cleaning up..."
+    systemctl stop "$SERVICE_NAME" 2>/dev/null || true
+    systemctl disable "$SERVICE_NAME" 2>/dev/null || true
+    rm -f "$SERVICE_FILE" "$HELPER_FILE"
+    systemctl daemon-reload 2>/dev/null || true
+    exit 1
+}
 
 trap cleanup_on_error ERR
 
 main() {
     print_info "Starting Liora Bot installation..."
     echo ""
-    validate_os
-    install_system_dependencies
-    install_ffmpeg
-    validate_ffmpeg
-    install_nodejs
-    install_postgresql
-    setup_postgresql_database
-    configure_postgresql_auth
-    test_postgresql_connection
-    install_redis
-    configure_redis
-    test_redis_connection
-    install_rust
-    install_bun
-    setup_liora
-    create_env_files
-    install_liora_dependencies
-    build_rust_supervisor
-    create_systemd_service
-    create_cli_helper
-    print_completion_message
+    
+    load_script "deps.sh"
+    load_script "setup.sh"
+    load_script "service.sh"
+    load_script "cli.sh"
+    install_dependencies
+    setup_environment
+    create_service
+    create_cli
+    print_completion
 }
 
 main "$@"

@@ -5,10 +5,11 @@ const SYM_CONN = Symbol.for("smsg.conn");
 
 let cachedBotId = null;
 let cachedBotIdTime = 0;
-const BOT_ID_CACHE_TTL = 300000;
+const BOT_ID_CACHE_TTL = 60000;
 
 export function smsg(conn, m) {
     if (!m) return m;
+    
     if (m[SYM_PROCESSED]) {
         if (m[SYM_CONN] !== conn) {
             m.conn = conn;
@@ -16,6 +17,7 @@ export function smsg(conn, m) {
         }
         return m;
     }
+    
     const M = proto.WebMessageInfo;
     if (M?.create) {
         try {
@@ -25,8 +27,10 @@ export function smsg(conn, m) {
             return m;
         }
     }
+    
     m.conn = conn;
     m[SYM_CONN] = conn;
+    
     const msg = m.message;
     if (!msg) {
         m[SYM_PROCESSED] = true;

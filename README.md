@@ -5,7 +5,7 @@
 
 ![Liora Banner](https://files.catbox.moe/3xv7p0.png)
 
-**Built on Baileys • Powered by Nodejs**
+**Built on Baileys • Powered by Node.js & Bun**
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
@@ -16,6 +16,8 @@
 <div align="center">
 
 **Liora** is not just another WhatsApp bot—it's a **production-ready framework** designed for developers who demand **performance**, **reliability**, and **scalability**. Built with modern technologies and battle-tested architecture patterns.
+
+**🚀 Pure JavaScript** • **⚡ PostgreSQL Sessions** • **💾 Redis Caching** • **📦 SQLite Local DB**
 
 </div>
 
@@ -72,44 +74,312 @@ Apache 2.0 allows free use with attribution. **Do not** remove credits or rebran
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 </div>
 
+## 🏗️ Architecture
+
+<div align="center">
+
+<table>
+<tr>
+<td width="25%" align="center">
+
+**📝 Pure JavaScript**
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Laptop.png" width="60" />
+
+100% JavaScript codebase
+No native bindings
+Easy to maintain & debug
+
+</td>
+<td width="25%" align="center">
+
+**🔐 PostgreSQL**
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Locked.png" width="60" />
+
+Session & Auth storage
+Multi-device support
+ACID compliance
+
+</td>
+<td width="25%" align="center">
+
+**⚡ Redis**
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Fire.png" width="60" />
+
+Chat data caching
+Real-time messaging
+High-speed performance
+
+</td>
+<td width="25%" align="center">
+
+**💾 SQLite**
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/File%20Folder.png" width="60" />
+
+Local user database
+Zero-config setup
+Embedded storage
+
+</td>
+</tr>
+</table>
+
+</div>
+
+<div align="center">
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
+</div>
+
 ## 🚀 Quick Start
 
 <div align="center">
 
-**⚡ One-Line Installation**
+### ⚡ One-Line Installation (Systemd)
+
+**Recommended for production deployment with auto-restart**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh | bash
 ```
 
-**🌩️ Or manual installation**
+After installation:
+```bash
+# Configure bot
+bot config
+
+# Start bot
+bot start
+
+# View logs
+bot log
+
+# Check status
+bot status
+```
+
+---
+
+### 📦 Manual Installation
 
 </div>
 
-```bash
-# Install system dependencies
-sudo apt-get update
-sudo apt-get install -y \
-    ffmpeg libwebp-dev libavformat-dev \
-    libavcodec-dev libavutil-dev libswresample-dev \
-    libswscale-dev libavfilter-dev build-essential \
-    python3 g++ pkg-config jq cmake
+#### Install System Dependencies
 
-# Clone the repository
+```bash
+# Update system
+sudo apt-get update
+
+# Install required packages
+sudo apt-get install -y \
+    ffmpeg \
+    build-essential \
+    python3 \
+    git \
+    curl \
+    wget \
+    postgresql \
+    redis-server
+```
+
+#### Install Bun (Required)
+
+```bash
+# Install Bun
+curl -fsSL https://bun.sh/install | bash
+
+# Load Bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# Verify installation
+bun --version
+```
+
+#### Install Node.js via NVM
+
+```bash
+# Install NVM
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+# Load NVM
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# Install Node.js v24
+nvm install 24
+nvm use 24
+nvm alias default 24
+
+# Verify installation
+node -v
+npm -v
+```
+
+#### Setup PostgreSQL
+
+```bash
+# Start PostgreSQL
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+
+# Create database and user
+sudo -u postgres psql <<EOF
+CREATE USER liora WITH PASSWORD 'your_password_here';
+CREATE DATABASE liora OWNER liora;
+GRANT ALL PRIVILEGES ON DATABASE liora TO liora;
+EOF
+```
+
+#### Setup Redis
+
+```bash
+# Start Redis
+sudo systemctl start redis-server
+sudo systemctl enable redis-server
+
+# Test Redis
+redis-cli ping
+# Should return: PONG
+```
+
+#### Clone & Configure
+
+```bash
+# Clone repository
 git clone https://github.com/naruyaizumi/liora.git
 cd liora
 
-# Environment setup
-cp .env.example .env
+# Create .env file
+cat > .env <<EOF
+# Bot Configuration
+OWNERS=[]
+PAIRING_NUMBER=6281234567890
+PAIRING_CODE=CUMICUMI
+
+# Bot Metadata
+WATERMARK=Liora
+AUTHOR=Naruya Izumi
+THUMBNAIL_URL=https://qu.ax/DdwBH.jpg
+
+# Logger
+LOG_LEVEL=info
+LOG_PRETTY=true
+LOG_COLORIZE=true
+
+# Database (PostgreSQL)
+DATABASE_URL=postgresql://liora:your_password_here@localhost:5432/liora
+
+# Redis
+REDIS_URL=redis://localhost:6379
+EOF
+
+# Edit configuration
 nano .env
+```
 
-npm install
+#### Install Dependencies
 
-npm start
+```bash
+bun install
+```
 
+#### Run the Bot
+
+**Option A: Direct Run**
+```bash
+bun start
+```
+
+**Option B: Using PM2 (Recommended for Production)**
+
+```bash
+# Install PM2 globally
+npm install -g pm2
+
+# Create PM2 ecosystem file
+cat > ecosystem.config.js <<'EOF'
+module.exports = {
+  apps: [{
+    name: 'liora',
+    script: './src/index.js',
+    interpreter: 'bun',
+    instances: 1,
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '1G',
+    env: {
+      NODE_ENV: 'production'
+    },
+    error_file: './logs/error.log',
+    out_file: './logs/out.log',
+    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+    merge_logs: true
+  }]
+};
+EOF
+
+# Start with PM2
+pm2 start ecosystem.config.js
+
+# Save PM2 configuration
+pm2 save
+
+# Enable PM2 startup
+pm2 startup
+
+# View logs
+pm2 logs liora
+
+# Monitor
+pm2 monit
+
+# Other PM2 commands
+pm2 status           # Check status
+pm2 restart liora    # Restart bot
+pm2 stop liora       # Stop bot
+pm2 delete liora     # Remove from PM2
 ```
 
 <div align="center">
+
+---
+
+### 🎮 PM2 Management Commands
+
+<table>
+<tr>
+<td width="50%">
+
+**Basic Commands**
+```bash
+pm2 start ecosystem.config.js
+pm2 stop liora
+pm2 restart liora
+pm2 delete liora
+pm2 logs liora
+```
+
+</td>
+<td width="50%">
+
+**Monitoring**
+```bash
+pm2 status
+pm2 monit
+pm2 describe liora
+pm2 logs liora --lines 100
+pm2 flush
+```
+
+</td>
+</tr>
+</table>
+
+---
+
 <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Backhand%20Index%20Pointing%20Down.png" width="40" />
 
 **Minimum Requirements**
@@ -120,9 +390,12 @@ npm start
 
 **System**
 
-- **OS**: Linux
-- **Distribution**: Ubuntu 24.04+, Debian 12+
+- **OS**: Linux (Ubuntu, Debian)
 - **Architecture**: x86_64
+- **Bun**: v1.3.x (required)
+- **Node.js**: v24.x
+- **PostgreSQL**: 16+
+- **Redis**: 7+
 
 </td>
 <td width="50%">
@@ -130,8 +403,9 @@ npm start
 **Hardware**
 
 - **CPU**: 2 cores minimum
-- **RAM**: 4GB
+- **RAM**: 4GB minimum
 - **Storage**: 10GB SSD recommended
+- **Network**: Stable internet connection
 
 </td>
 </tr>
@@ -189,7 +463,7 @@ Report issues or suggest features
 </td>
 <td align="center" width="33%">
 
-**🍽️ Fork & Contribute**<br>
+**🍴 Fork & Contribute**<br>
 Help improve Liora for everyone
 
 </td>

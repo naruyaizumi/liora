@@ -1,4 +1,4 @@
-import bind from "./storage/event.js";
+import bind from "./store/store.js";
 import { smsg } from "./smsg.js";
 import {
     proto,

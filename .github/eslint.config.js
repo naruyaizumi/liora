@@ -7,23 +7,16 @@ export default [
         files: ["**/*.js"],
         ignores: [
             "node_modules/",
-            "build/",
-            ".cache/",
             ".github/",
-            "*.log",
-            "tmp/",
-            "temp/",
-            ".DS_Store",
-            ".oven/",
-            "coverage/",
-            "**/cache/**",
-            "**/dist/**",
-            "**/Release/**",
         ],
         languageOptions: {
             globals: {
                 ...globals.node,
+                ...globals.es2021,
+                Bun: "readonly",
             },
+            ecmaVersion: "latest",
+            sourceType: "module",
         },
     },
 ];

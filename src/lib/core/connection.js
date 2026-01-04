@@ -1,40 +1,8 @@
-import { readdir, stat, access } from "fs/promises";
-import { join, relative, normalize } from "path";
-import chokidar from "chokidar";
+import { readdir, stat } from "node:fs/promises";
+import { join, relative, normalize } from "node:path";
 import { naruyaizumi } from "./socket.js";
 
-export class PluginCache {
-    constructor(ttl = 5000) {
-        this.cache = null;
-        this.cacheTime = 0;
-        this.ttl = ttl;
-    }
-
-    isValid() {
-        return this.cache && Date.now() - this.cacheTime < this.ttl;
-    }
-
-    get() {
-        return this.isValid() ? this.cache : null;
-    }
-
-    set(plugins) {
-        this.cache = plugins;
-        this.cacheTime = Date.now();
-    }
-
-    clear() {
-        this.cache = null;
-        this.cacheTime = 0;
-    }
-}
-
-export async function getAllPlugins(dir, cacheManager, skipCache = false) {
-    if (!skipCache) {
-        const cached = cacheManager.get();
-        if (cached) return cached;
-    }
-
+export async function getAllPlugins(dir) {
     const results = [];
 
     try {
@@ -47,7 +15,7 @@ export async function getAllPlugins(dir, cacheManager, skipCache = false) {
                 const stats = await stat(filepath);
 
                 if (stats.isDirectory()) {
-                    const nested = await getAllPlugins(filepath, cacheManager, true);
+                    const nested = await getAllPlugins(filepath);
                     results.push(...nested);
                 } else if (file.endsWith(".js")) {
                     results.push(filepath);
@@ -60,13 +28,24 @@ export async function getAllPlugins(dir, cacheManager, skipCache = false) {
         global.logger?.error?.({ error: e.message }, "Error reading plugin directory");
     }
 
-    cacheManager.set(results);
     return results;
 }
 
 export async function loadPlugins(pluginFolder, getAllPluginsFn) {
     let success = 0,
         failed = 0;
+        
+    const oldPlugins = global.plugins || {};
+    for (const [filename, plugin] of Object.entries(oldPlugins)) {
+        if (typeof plugin.cleanup === "function") {
+            try {
+                await plugin.cleanup();
+            } catch (e) {
+                global.logger?.warn?.({ file: filename, error: e.message }, "Plugin cleanup error");
+            }
+        }
+    }
+
     global.plugins = {};
 
     try {
@@ -77,6 +56,13 @@ export async function loadPlugins(pluginFolder, getAllPluginsFn) {
 
             try {
                 const module = await import(`${filepath}?init=${Date.now()}`);
+                
+                if (typeof module.default?.init === "function") {
+                    await module.default.init();
+                } else if (typeof module.init === "function") {
+                    await module.init();
+                }
+                
                 global.plugins[filename] = module.default || module;
                 success++;
             } catch (e) {
@@ -94,215 +80,6 @@ export async function loadPlugins(pluginFolder, getAllPluginsFn) {
         global.logger?.error?.({ error: e.message }, "Error loading plugins");
         throw e;
     }
-}
-
-const IGNORED_PATTERNS = [
-    /(^|[/\\])\../,
-    /database/,
-    /\.db$/,
-    /\.db-shm$/,
-    /\.db-wal$/,
-    /\.cpp$/,
-    /\.h$/,
-    /\.c$/,
-    /\.sh$/,
-    /\.ttf$/,
-    /\.log$/,
-    /\.tmp$/,
-    /main\.js$/,
-    /index\.js$/,
-    /config\.js$/,
-];
-
-const MAX_RELOAD_ATTEMPTS = 3;
-const RELOAD_TIMEOUT = 5000;
-
-export function initHotReload(srcFolder, pluginFolder, onReload) {
-    const reloadLocks = new Map();
-    const failedReloads = new Map();
-    let reloadCounter = 0;
-    let isClosed = false;
-
-    async function reloadFile(filepath) {
-        if (isClosed) return;
-
-        const relativeToPlugins = normalize(relative(pluginFolder, filepath)).replace(/\\/g, "/");
-        const relativeToSrc = normalize(relative(srcFolder, filepath)).replace(/\\/g, "/");
-        
-        const isPlugin = !relativeToPlugins.startsWith("..");
-        const filename = isPlugin ? relativeToPlugins : relativeToSrc;
-
-        if (!filename.endsWith(".js")) return;
-
-        if (reloadLocks.has(filename)) {
-            return reloadLocks.get(filename);
-        }
-
-        const failCount = failedReloads.get(filename) || 0;
-        if (failCount >= MAX_RELOAD_ATTEMPTS) {
-            global.logger?.warn?.(
-                { file: filename, attempts: failCount },
-                "Max reload attempts reached, skipping"
-            );
-            return;
-        }
-
-        const reloadPromise = (async () => {
-            const timeoutId = setTimeout(() => {
-                global.logger?.warn?.(
-                    { file: filename },
-                    "Reload taking too long, may have issues"
-                );
-            }, RELOAD_TIMEOUT);
-
-            try {
-                try {
-                    await access(filepath);
-                } catch {
-                    clearTimeout(timeoutId);
-                    await onReload(filename, null, isPlugin, filepath);
-                    failedReloads.delete(filename);
-                    global.logger?.info?.({ file: filename, isPlugin }, "File removed");
-                    return;
-                }
-
-                const cacheKey = `${Date.now()}-${++reloadCounter}`;
-                const module = await import(`${filepath}?v=${cacheKey}`);
-
-                if (!module || (typeof module !== "object" && typeof module !== "function")) {
-                    throw new Error("Invalid module export");
-                }
-
-                await Promise.race([
-                    onReload(filename, module.default || module, isPlugin, filepath),
-                    new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error("Reload timeout")), RELOAD_TIMEOUT)
-                    ),
-                ]);
-
-                clearTimeout(timeoutId);
-                failedReloads.delete(filename);
-                global.logger?.info?.({ file: filename, isPlugin }, "File reloaded");
-            } catch (e) {
-                clearTimeout(timeoutId);
-
-                const newFailCount = failCount + 1;
-                failedReloads.set(filename, newFailCount);
-
-                global.logger?.error?.(
-                    {
-                        file: filename,
-                        error: e.message,
-                        stack: e.stack,
-                        attempts: newFailCount,
-                    },
-                    "Reload failed"
-                );
-            } finally {
-                setTimeout(() => reloadLocks.delete(filename), 1000);
-            }
-        })();
-
-        reloadLocks.set(filename, reloadPromise);
-        return reloadPromise;
-    }
-
-    const debounceTimers = new Map();
-    const lastReloadTimes = new Map();
-    
-    const debouncedReload = (filepath) => {
-        if (isClosed) return;
-
-        if (!filepath.endsWith(".js")) return;
-        
-        const now = Date.now();
-        const lastTime = lastReloadTimes.get(filepath) || 0;
-        if (now - lastTime < 1000) {
-            return;
-        }
-
-        const existingTimer = debounceTimers.get(filepath);
-        if (existingTimer) {
-            clearTimeout(existingTimer);
-        }
-
-        const timer = setTimeout(() => {
-            debounceTimers.delete(filepath);
-            lastReloadTimes.set(filepath, Date.now());
-            
-            reloadFile(filepath).catch((e) => {
-                global.logger?.debug?.({ error: e.message }, "Debounced reload error");
-            });
-        }, 500);
-
-        debounceTimers.set(filepath, timer);
-    };
-
-    let watcher = null;
-
-    try {
-        watcher = chokidar.watch(srcFolder, {
-            ignored: IGNORED_PATTERNS,
-            persistent: true,
-            ignoreInitial: true,
-            awaitWriteFinish: {
-                stabilityThreshold: 500,
-                pollInterval: 100,
-            },
-            depth: 99,
-            usePolling: false,
-            atomic: true,
-            ignorePermissionErrors: true,
-        });
-
-        watcher
-            .on("change", debouncedReload)
-            .on("add", debouncedReload)
-            .on("unlink", (filepath) => {
-                if (isClosed) return;
-
-                if (filepath.endsWith(".js")) {
-                    const relativeToPlugins = normalize(relative(pluginFolder, filepath)).replace(/\\/g, "/");
-                    const relativeToSrc = normalize(relative(srcFolder, filepath)).replace(/\\/g, "/");
-                    const isPlugin = !relativeToPlugins.startsWith("..");
-                    const filename = isPlugin ? relativeToPlugins : relativeToSrc;
-
-                    onReload(filename, null, isPlugin, filepath).catch((e) => {
-                        global.logger?.error?.({ error: e.message }, "Unlink error");
-                    });
-                }
-            })
-            .on("error", (e) => {
-                if (!isClosed) {
-                    global.logger?.error?.({ error: e.message }, "Watcher error");
-                }
-            });
-
-        global.logger?.info?.({ watchPath: srcFolder }, "Hot reload initialized");
-    } catch (e) {
-        global.logger?.error?.({ error: e.message }, "Failed to initialize watcher");
-        throw e;
-    }
-
-    return () => {
-        isClosed = true;
-
-        if (watcher) {
-            try {
-                watcher.close();
-            } catch (e) {
-                global.logger?.error?.({ error: e.message }, "Watcher close error");
-            }
-        }
-
-        debounceTimers.forEach((timer) => clearTimeout(timer));
-        debounceTimers.clear();
-        lastReloadTimes.clear();
-        reloadLocks.clear();
-        failedReloads.clear();
-
-        global.logger?.info?.("Hot reload stopped");
-    };
 }
 
 export class EventManager {
@@ -363,13 +140,12 @@ export class EventManager {
                 }
             } catch (e) {
                 global.logger?.error?.({ error: e.message }, "Handler reload error");
+                return false;
             }
 
             if (!handler) return false;
 
             if (restartConn) {
-                const oldChats = global.conn?.chats || {};
-
                 try {
                     if (global.conn?.ev) {
                         global.conn.ev.removeAllListeners();
@@ -385,7 +161,7 @@ export class EventManager {
                     global.logger?.error?.({ error: e.message }, "Restart error");
                 }
 
-                global.conn = naruyaizumi(connectionOptions, { chats: oldChats });
+                global.conn = naruyaizumi(connectionOptions);
                 self.isInit = true;
             }
 
@@ -525,4 +301,38 @@ export function cleanupReconnect() {
     RECONNECT_STATE.attempts = 0;
     RECONNECT_STATE.cooldownUntil = 0;
     RECONNECT_STATE.inflight = false;
+}
+
+export async function reloadSinglePlugin(filepath, pluginFolder) {
+    try {
+        const filename = normalize(relative(pluginFolder, filepath)).replace(/\\/g, "/");
+        const oldPlugin = global.plugins[filename];
+
+        if (oldPlugin && typeof oldPlugin.cleanup === "function") {
+            try {
+                await oldPlugin.cleanup();
+            } catch (e) {
+                global.logger?.warn?.({ file: filename, error: e.message }, "Plugin cleanup error");
+            }
+        }
+
+        const module = await import(`${filepath}?reload=${Date.now()}`);
+        
+        if (typeof module.default?.init === "function") {
+            await module.default.init();
+        } else if (typeof module.init === "function") {
+            await module.init();
+        }
+        
+        global.plugins[filename] = module.default || module;
+        global.logger?.info?.({ file: filename }, "Plugin reloaded");
+        return true;
+    } catch (e) {
+        global.logger?.error?.({ file: filepath, error: e.message }, "Failed to reload plugin");
+        return false;
+    }
+}
+
+export async function reloadAllPlugins(pluginFolder) {
+    return loadPlugins(pluginFolder, (dir) => getAllPlugins(dir));
 }

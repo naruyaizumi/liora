@@ -1,5 +1,5 @@
 import { BufferJSON } from "baileys";
-import { fileTypeFromBuffer } from "file-type";
+import { fileType, getCategory, getExtension, formatBytes } from "#lib/file-type.js";
 
 let handler = async (m, { conn }) => {
     if (!m.quoted) return;
@@ -111,14 +111,18 @@ ${inspect(q)}
     
     let mime = node.mimetype;
     let detectedMime = mime;
+    let detectedExt = null;
+    let detectedCategory = null;
     let bufferSize = 0;
     
     if (buffer && buffer.length) {
         bufferSize = buffer.length;
         try {
-            const fileInfo = await fileTypeFromBuffer(buffer);
+            const fileInfo = await fileType(buffer);
             if (fileInfo) {
                 detectedMime = fileInfo.mime;
+                detectedExt = fileInfo.ext;
+                detectedCategory = await getCategory(fileInfo);
             }
         } catch {
             //
@@ -143,6 +147,8 @@ ${inspect(q)}
 • Type: ${type}
 • Original MIME: ${mime || "N/A"}
 • Detected MIME: ${detectedMime || "N/A"}
+${detectedExt ? `• Detected Extension: .${detectedExt}` : ''}
+${detectedCategory ? `• Category: ${detectedCategory}` : ''}
 ${bufferSize > 0 ? `• Size: ${formatBytes(bufferSize)}` : ''}
 • URL: ${node.url || "N/A"}
 • Direct Path: ${node.directPath || "N/A"}
@@ -155,6 +161,7 @@ ${inspect(q)}
     
     if (sendMediaTypes.includes(type) && buffer && buffer.length) {
         const finalMime = detectedMime || mime;
+        const finalExt = detectedExt || await getExtension(finalMime);
         
         if (type === 'image') {
             await conn.sendMessage(
@@ -181,7 +188,7 @@ ${inspect(q)}
                     document: buffer,
                     mimetype: finalMime,
                     fileName: fileName !== "N/A" ? fileName :
-                        `document.${getExtension(finalMime)}`,
+                        `document.${finalExt}`,
                     caption: debugInfo
                 }, { quoted: m }
             );
@@ -192,32 +199,6 @@ ${inspect(q)}
         );
     }
 };
-
-function formatBytes(bytes) {
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-}
-
-function getExtension(mime) {
-    const mimeToExt = {
-        'application/pdf': 'pdf',
-        'application/vnd.ms-excel': 'xls',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
-        'application/msword': 'doc',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
-        'text/plain': 'txt',
-        'text/javascript': 'js',
-        'application/json': 'json',
-        'image/jpeg': 'jpg',
-        'image/png': 'png',
-        'video/mp4': 'mp4',
-        'audio/mpeg': 'mp3'
-    };
-    return mimeToExt[mime] || 'bin';
-}
 
 function isByteArray(obj) {
     return (

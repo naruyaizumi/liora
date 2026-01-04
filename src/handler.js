@@ -1,8 +1,7 @@
 /* global conn */
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 import { smsg } from "#core/smsg.js";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { join, dirname } from "node:path";
 import printMessage from "#lib/console.js";
 
 const CMD_PREFIX_RE = /^[/!.]/;
@@ -81,22 +80,20 @@ export async function handler(chatUpdate) {
         const senderLid = await resolveLid(m.sender);
         const regOwners = global.config.owner.map((id) => id.toString().split("@")[0]);
         const isOwner = m.fromMe || regOwners.includes(senderLid);
+        
         const groupMetadata = m.isGroup
-            ? this.chats?.[m.chat]?.metadata || (await safe(() => this.groupMetadata(m.chat), {}))
+            ? (await this.chats[m.chat])?.metadata || (await safe(() => this.groupMetadata(m.chat), {}))
             : {};
-
         const participants = groupMetadata?.participants || [];
         const participantMap = Object.fromEntries(participants.map((p) => [p.id, p]));
-
         const botId = this.decodeJid(this.user.lid);
         const user = participantMap[m.sender] || {};
         const bot = participantMap[botId] || {};
-
         const isRAdmin = user?.admin === "superadmin";
         const isAdmin = isRAdmin || user?.admin === "admin";
         const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
 
-        const __dirname = dirname(fileURLToPath(import.meta.url));
+        const __dirname = dirname(Bun.fileURLToPath(import.meta.url));
         const pluginDir = join(__dirname, "./plugins");
 
         for (const name in global.plugins) {

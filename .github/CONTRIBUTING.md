@@ -33,7 +33,7 @@ Before creating bug reports, please check existing issues as you might find that
 - **Describe the exact steps to reproduce the problem**
 - **Provide specific examples** (code snippets, screenshots)
 - **Describe the behavior you observed** and what you expected
-- **Include your environment details** (OS, Node version)
+- **Include your environment details** (OS, Bun version, Node version)
 
 Use our [Bug Report Template](.github/ISSUE_TEMPLATE/bug_report.yml).
 
@@ -68,18 +68,65 @@ Unsure where to begin? You can start by looking through `good-first-issue` and `
 
 ### Prerequisites
 
+- **Bun** >= 1.0.0 (required)
 - **Node.js** >= 24.0.0
 - **Git**
+- **PostgreSQL** >= 14
+- **Redis** >= 6
 - **System dependencies**:
 
     ```bash
     # Ubuntu/Debian
     sudo apt-get install -y \
-        ffmpeg libwebp-dev libavformat-dev \
-        libavcodec-dev libavutil-dev libswresample-dev \
-        libswscale-dev libavfilter-dev build-essential \
-        python3 g++ pkg-config jq \
-        cmake git curl unzip wget ca-certificates gnupg lsb-release
+        ffmpeg build-essential python3 git curl wget \
+        ca-certificates postgresql redis-server
+    ```
+
+### Setup Instructions
+
+1. **Install Bun** (required):
+    ```bash
+    curl -fsSL https://bun.sh/install | bash
+    ```
+
+2. **Install Node.js via NVM**:
+    ```bash
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+    nvm install 24
+    nvm use 24
+    ```
+
+3. **Clone and setup**:
+    ```bash
+    git clone https://github.com/YOUR-USERNAME/liora.git
+    cd liora
+    bun install
+    ```
+
+4. **Setup PostgreSQL**:
+    ```bash
+    sudo -u postgres psql <<EOF
+    CREATE USER liora WITH PASSWORD 'liora';
+    CREATE DATABASE liora OWNER liora;
+    GRANT ALL PRIVILEGES ON DATABASE liora TO liora;
+    EOF
+    ```
+
+5. **Setup Redis**:
+    ```bash
+    sudo systemctl start redis-server
+    sudo systemctl enable redis-server
+    ```
+
+6. **Configure environment**:
+    ```bash
+    cp .env.example .env
+    nano .env
+    ```
+
+7. **Run the bot**:
+    ```bash
+    bun src/index.js
     ```
 
 ## Coding Standards
@@ -90,6 +137,31 @@ Unsure where to begin? You can start by looking through `good-first-issue` and `
 - Use meaningful variable and function names
 - Write comments for complex logic
 - Keep functions small and focused
+- Use modern JavaScript features (ES6+)
+
+### Code Formatting
+
+Before committing, ensure your code is properly formatted:
+
+```bash
+# Install Prettier
+bun add -D prettier
+
+# Format code
+bunx prettier --write .
+```
+
+### Linting
+
+Run ESLint to check for code quality issues:
+
+```bash
+# Install ESLint
+bun add -D eslint @eslint/js globals
+
+# Run linter
+bunx eslint .
+```
 
 ## Commit Guidelines
 
@@ -118,6 +190,19 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/) specifica
 - **ci**: Changes to CI configuration
 - **chore**: Other changes that don't modify src or test files
 
+### Scope
+
+The scope should be the name of the affected module:
+
+- **api** - API integrations
+- **auth** - Authentication
+- **core** - Core functionality
+- **cli** - Command line interface
+- **deps** - Dependencies
+- **ci** - CI/CD
+- **database** - PostgreSQL related
+- **redis** - Redis cache related
+
 ### Examples
 
 ```bash
@@ -133,21 +218,10 @@ Closes #123
 fix(auth): resolve session timeout issue
 
 Fix bug where sessions would timeout prematurely
-Update keep-alive logic
+Update keep-alive logic in PostgreSQL store
 
 Fixes #456
 ```
-
-### Scope
-
-The scope should be the name of the affected module:
-
-- **api** - API integrations
-- **auth** - Authentication
-- **core** - Core functionality
-- **cli** - Command line interface
-- **deps** - Dependencies
-- **ci** - CI/CD
 
 ## Pull Request Process
 
@@ -191,6 +265,16 @@ The scope should be the name of the affected module:
 - Ensure tests are deterministic
 - Use descriptive test names
 - Keep tests focused and simple
+
+## Architecture Overview
+
+Liora uses a modern, pure JavaScript architecture:
+
+- **Pure JavaScript**: 100% JavaScript, no native bindings
+- **PostgreSQL**: Session and authentication storage
+- **Redis**: Real-time chat data caching
+- **SQLite**: Local user database
+- **Bun**: Primary runtime for performance
 
 ## Community
 

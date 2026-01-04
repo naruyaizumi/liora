@@ -6,7 +6,6 @@ import {
     uploader5,
     uploader6,
     uploader7,
-    uploader8,
     uploader,
 } from "#lib/uploader.js";
 
@@ -16,9 +15,8 @@ const uploaders = {
     3: { name: "Qu.ax", fn: uploader3 },
     4: { name: "Put.icu", fn: uploader4 },
     5: { name: "Tmpfiles.org", fn: uploader5 },
-    6: { name: "Alibaba Cloud", fn: uploader6 },
-    7: { name: "Videy", fn: uploader7 },
-    8: { name: "GoFile", fn: uploader8 },
+    6: { name: "Videy", fn: uploader6 },
+    7: { name: "GoFile", fn: uploader7 },
 };
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -29,14 +27,14 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         if (!args[0]) {
             if (!mime) {
                 let listText = "*Upload Server Options*\n\n";
-                listText += "*Auto Upload (1-6):*\n";
-                for (let i = 1; i <= 6; i++) {
+                listText += "*Auto Upload (1-5):*\n";
+                for (let i = 1; i <= 5; i++) {
                     const { name } = uploaders[i];
                     listText += `${i}. ${name}\n`;
                 }
                 listText += "\n*Manual Only:*\n";
-                listText += `7. ${uploaders[7].name} — Video only\n`;
-                listText += `8. ${uploaders[8].name} — Image only\n`;
+                listText += `6. ${uploaders[6].name} — Video only\n`;
+                listText += `7. ${uploaders[7].name} — Image only\n`;
                 listText += `\nSelect upload server by number.\n› Example: ${usedPrefix + command} 1\n› Auto upload: send media without number`;
                 return m.reply(listText);
             } else {

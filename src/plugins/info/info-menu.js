@@ -1,5 +1,4 @@
 import os from "os";
-import { readFile } from "fs/promises";
 
 const CATEGORIES = ["ai", "downloader", "group", "info", "internet", "maker", "owner", "tools"];
 
@@ -42,7 +41,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
 
         return await showCategory(conn, m, help, categoryName, usedPrefix, timestamp);
     } catch (e) {
-        global.logger.error(e);
+        conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);
@@ -102,7 +101,7 @@ async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
         `Version    : ${pkg.version}`,
         `License    : ${pkg.license}`,
         `Type       : ${pkg.type}`,
-        `Runtime    : Node.js ${process.version}`,
+        `Runtime    : Bun ${Bun.version}`,
         `VPS Uptime : ${uptimeSys}`,
         `Bot Uptime : ${uptimeBot}`,
         "",
@@ -112,14 +111,6 @@ async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
         "Select a category below to view commands",
         "```",
     ].join("\n");
-
-    let timeID = new Intl.DateTimeFormat("en-US", {
-        timeZone: "Asia/Jakarta",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-    }).format(new Date());
 
     const sections = [
         {
@@ -145,23 +136,21 @@ async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
     return await conn.sendButton(
         m.chat,
         {
-            document: { url: "https://files.catbox.moe/s89sa4.jpg" },
-            mimetype: "application/pdf",
-            fileName: `🌸 ${global.config.watermark}`,
-            fileLength: 999999999999999,
-            pageCount: 999999999999999,
-            caption,
-            footer: global.config.author,
-            title: "Liora Menu",
-            contextInfo: {
-                externalAdReply: {
-                    title: global.config.author,
-                    body: timeID,
-                    mediaType: 1,
-                    thumbnailUrl: "https://files.catbox.moe/s89sa4.jpg",
-                    renderLargerThumbnail: true,
-                },
+            product: {
+                productImage: { url: "https://files.catbox.moe/1moinz.jpg" },
+                productId: "25015941284694382",
+                title: "Liora Menu",
+                description: "WhatsApp Bot Command Menu",
+                currencyCode: "USD",
+                priceAmount1000: "0",
+                retailerId: global.config.author,
+                url: "https://wa.me/p/25015941284694382/6283143663697",
+                productImageCount: 1,
             },
+            businessOwnerJid: "113748182302861@lid",
+            caption,
+            title: "Liora Menu",
+            footer: global.config.watermark || "Liora WhatsApp Bot",
             interactiveButtons: [
                 {
                     name: "single_select",
@@ -241,13 +230,10 @@ function formatTime(sec) {
     );
 }
 
-async function getPackageInfo() {
+function getPackageInfo() {
     try {
-        const packageJsonPath = `${process.cwd()}/package.json`;
-        const data = await readFile(packageJsonPath, "utf-8");
-        return JSON.parse(data);
-    } catch (e) {
-        global.logger.error(e);
+        return Bun.file("./package.json").json();
+    } catch {
         return {
             name: "Unknown",
             version: "?",

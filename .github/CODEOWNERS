@@ -6,35 +6,16 @@
 # Default owners
 * @naruyaizumi
 
-# GitHub Actions and CI/CD
 /.github/ @naruyaizumi
-/.github/workflows/ @naruyaizumi
 
-# Core application
 /src/ @naruyaizumi
-/src/lib/core/ @naruyaizumi
-/src/lib/auth/ @naruyaizumi
 
-# Plugins feature
-/src/plugins/ @naruyaizumi
-
-# APIs
-/src/lib/api/ @naruyaizumi
-
-# C++ code
-/src/lib/cpp/ @naruyaizumi
-binding.gyp @naruyaizumi
-
-# Configuration files
 package.json @naruyaizumi
-*.config.js @naruyaizumi
-*.config.json @naruyaizumi
 
-# Documentation
 *.md @naruyaizumi
-README.md @naruyaizumi
-CHANGELOG.md @naruyaizumi
 
-# Scripts
+README.md @naruyaizumi
+
 *.sh @naruyaizumi
+
 install.sh @naruyaizumi

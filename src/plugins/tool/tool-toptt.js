@@ -1,4 +1,4 @@
-import { convert } from "#cpp";
+import { convert } from "#lib/convert.js";
 
 let handler = async (m, { conn, usedPrefix, command }) => {
     try {

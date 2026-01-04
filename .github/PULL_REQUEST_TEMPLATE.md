@@ -71,22 +71,21 @@
 
 <!-- Ensure all items are checked before requesting review -->
 
-- [ ] Code follows the project's style guidelines (Prettier for JS, clang-format for C++)
+- [ ] Code follows the project's style guidelines (Prettier/ESLint)
 - [ ] Self-reviewed my own code
 - [ ] Commented hard-to-understand areas
 - [ ] Made corresponding changes to documentation
 - [ ] No new warnings generated
 - [ ] Added tests that prove the fix is effective or the feature works
 - [ ] New and existing unit tests pass locally
+- [ ] Code is formatted with Prettier
 
-## C++ Specific (if applicable)
+## Database/Cache Changes (if applicable)
 
-- [ ] No memory leaks (checked with valgrind or AddressSanitizer)
-- [ ] Uses RAII for resource management
-- [ ] Uses smart pointers instead of raw pointers where appropriate
-- [ ] Proper error handling in N-API bindings
-- [ ] No blocking operations in async workers
-- [ ] Follows C++20 best practices
+- [ ] PostgreSQL schema changes documented
+- [ ] Redis cache invalidation handled properly
+- [ ] Migration scripts provided (if needed)
+- [ ] Backward compatibility considered
 
 ## Breaking Changes
 
@@ -128,7 +127,5 @@
 
 **Note:** This PR will trigger automated checks:
 - ✅ Prettier/ESLint for JavaScript
-- ✅ clang-format/clang-tidy for C++
-- ✅ Security scans (CodeQL, Trivy)
-- ✅ Build tests (Ubuntu 24.04, Debian 12)
-- ✅ Memory safety checks (if C++ changes)
+- ✅ Security scans (CodeQL, Njsscan)
+- ✅ Dependency audit

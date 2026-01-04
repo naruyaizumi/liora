@@ -31,9 +31,12 @@ export default async function (
         const idFormat = getIdFormat(sender);
         const chatContext = getChatContext(chat);
 
-        global.logger.info(`${cmd} — ${user}`);
-        global.logger.debug(`↳ ${sender} [${idFormat}]`);
-        global.logger.debug(`↳ [${chatContext}]`);
+        global.logger.info({
+            user: user,
+            sender: sender,
+            idFormat: idFormat,
+            chatContext: chatContext,
+        }, `${cmd} executed`);
     } catch (e) {
         global.logger.error(e);
     }

@@ -1,5 +1,4 @@
-import { readFile } from "fs/promises";
-import { join, extname } from "path";
+import { join, extname } from "node:path";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args.length)
@@ -7,13 +6,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             `Enter the target file path.\n› Example: ${usedPrefix + command} plugins/owner/owner-sf`
         );
 
-    let target;
     try {
-        target = join(...args);
+        let target = join(...args);
         if (!extname(target)) target += ".js";
         const filepath = join(process.cwd(), target);
 
-        const fileBuffer = await readFile(filepath);
+        const fileBuffer = Buffer.from(await Bun.file(filepath).arrayBuffer());
         const fileName = target.split("/").pop();
 
         await conn.sendMessage(
@@ -26,7 +24,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             { quoted: m }
         );
     } catch (e) {
-        global.logger.error(e);
+        conn.logger.error(e);
         m.reply(`Error: ${e.message}`);
     }
 };

@@ -2,19 +2,17 @@ whatsapp:
   - changed-files:
       - any-glob-to-any-file:
           - "src/**/*"
-          - "lib/core/**/*"
-          - "lib/auth/**/*"
+          - "src/lib/core/**/*"
 
 api:
   - changed-files:
-      - any-glob-to-any-file: "lib/api/**/*"
+      - any-glob-to-any-file: "src/lib/api/**/*"
 
 documentation:
   - changed-files:
       - any-glob-to-any-file:
           - "**/*.md"
           - "README.md"
-          - "CHANGELOG.md"
 
 config:
   - changed-files:
@@ -24,25 +22,26 @@ config:
           - "*.yaml"
           - ".github/**/*"
 
-cpp:
+database:
   - changed-files:
       - any-glob-to-any-file:
-          - "lib/cpp/**/*"
-          - "**/*.cpp"
-          - "**/*.h"
-          - "**/*.cc"
-          - "binding.gyp"
+          - "src/lib/core/auth/*"
+
+redis:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/lib/core/store/*"
 
 ci-cd:
   - changed-files:
       - any-glob-to-any-file:
           - ".github/workflows/**/*"
-          - ".github/actions/**/*"
 
 dependencies:
   - changed-files:
       - any-glob-to-any-file:
           - "package.json"
+          - "bun.lockb"
 
 security:
   - changed-files:

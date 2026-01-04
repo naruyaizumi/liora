@@ -1,5 +1,3 @@
-import { canvas } from "#canvas/spsearch.js";
-
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text) {
         return m.reply(
@@ -29,8 +27,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             return m.reply(`No results found for "${text}".`);
         }
 
-        const imageBuffer = await canvas(tracks, text);
-
         const rows = tracks.map((track, index) => ({
             header: `Track ${index + 1}`,
             title: track.title,
@@ -39,7 +35,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         }));
 
         await conn.sendButton(m.chat, {
-            image: imageBuffer || tracks[0].cover,
+            image: tracks[0].cover,
             caption: "*Select a track from the results above*",
             title: "Spotify Search Results",
             footer: `Found ${tracks.length} results for "${text}"`,

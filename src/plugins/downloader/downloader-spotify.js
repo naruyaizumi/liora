@@ -1,6 +1,5 @@
-import { convert } from "#cpp";
+import { convert } from "#lib/convert.js";
 import { spotify } from "#api/spotify.js";
-import { canvas } from "#canvas/spotify.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0])
@@ -13,29 +12,27 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         );
         if (!success) throw new Error(error);
 
-        const canvasBuffer = await canvas(cover, title, channel, duration);
-
         const audioRes = await fetch(downloadUrl);
         if (!audioRes.ok) throw new Error(`Failed to fetch audio. Status: ${audioRes.status}`);
 
-        const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
+                const buffer = Buffer.from(await audioRes.arrayBuffer());
 
-        const converted = await convert(audioBuffer, {
+        const audio = await convert(buffer, {
             format: "opus",
-            bitrate: "128k",
-            channels: 1,
             sampleRate: 48000,
-            ptt: false,
+            channels: 1,
+            bitrate: "64k",
+            ptt: true,
         });
 
         const finalBuffer =
-            converted instanceof Buffer
-                ? converted
-                : converted?.buffer
-                  ? Buffer.from(converted.buffer)
-                  : converted?.data
-                    ? Buffer.from(converted.data)
-                    : Buffer.from(converted);
+            audio instanceof Buffer
+                ? audio
+                : audio?.buffer
+                  ? Buffer.from(audio.buffer)
+                  : audio?.data
+                    ? Buffer.from(audio.data)
+                    : Buffer.from(audio);
 
         await conn.sendMessage(
             m.chat,
@@ -47,7 +44,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                     externalAdReply: {
                         title,
                         body: channel,
-                        thumbnail: canvasBuffer,
+                        thumbnailUrl: cover,
                         mediaUrl: url,
                         mediaType: 1,
                         renderLargerThumbnail: true,

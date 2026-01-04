@@ -1,5 +1,3 @@
-import { canvas } from "#canvas/yts.js";
-
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text) {
         return m.reply(
@@ -29,8 +27,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             return m.reply(`No results found for "${text}".`);
         }
 
-        const imageBuffer = await canvas(videos, text);
-
         const rows = videos.map((video, index) => ({
             header: `Result ${index + 1}`,
             title: video.title,
@@ -39,7 +35,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         }));
 
         await conn.sendButton(m.chat, {
-            image: imageBuffer || videos[0].cover,
+            image: videos[0].cover,
             caption: "*Select a video from the results above*",
             title: "YouTube Search Results",
             footer: `Found ${videos.length} results for "${text}"`,
