@@ -18,6 +18,7 @@ import {
 
 const _isStr = (v) => typeof v === "string";
 const _isGroupJid = (id = "") => id && id.endsWith("@g.us");
+const _isStatusJid = (id) => !id || id === "status@broadcast";
 
 const _hidden = (target, key, value) =>
   Object.defineProperty(target, key, {
