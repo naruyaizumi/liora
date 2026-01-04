@@ -4,7 +4,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const url = args[0];
   if (!url)
     return m.reply(
-      `Please provide a valid Instagram link.\n› Example: ${usedPrefix + command} https://www.instagram.com/p/...`,
+      `Please provide a valid Instagram link.\n› Example: ${usedPrefix + command} https://www.instagram.com/p`,
     );
 
   if (!/^https?:\/\/(www\.)?instagram\.com\//i.test(url))

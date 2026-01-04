@@ -3,19 +3,19 @@ import core, { parse, makeKey } from "./core.js";
 
 function createKeyStore() {
   async function _getMany(type, ids) {
-    const out = {};
-    const missing = [];
+    if (ids.length === 0) return {};
 
+    const keys = ids.map(id => makeKey(type, id));
+    
+    const results = await core.getMany(keys);
+    
+    const out = {};
     for (const id of ids) {
       const k = makeKey(type, id);
-      missing.push({ id, k });
-    }
-
-    if (missing.length > 0) {
-      for (const { id, k } of missing) {
-        const row = await core.get(k);
-        const v = row ? parse(row.value) : null;
-
+      const row = results[k];
+      
+      if (row && row.value) {
+        const v = parse(row.value);
         if (v !== null) {
           out[id] = v;
         }
@@ -47,19 +47,24 @@ function createKeyStore() {
       }
     }
 
+    const promises = [];
+    
     if (Object.keys(flatData).length > 0) {
-      await core.setMany(flatData);
+      promises.push(core.setMany(flatData));
     }
 
     if (keysToDelete.length > 0) {
-      await core.deleteMany(keysToDelete);
+      promises.push(core.deleteMany(keysToDelete));
+    }
+
+    if (promises.length > 0) {
+      await Promise.all(promises);
     }
   }
 
   async function transaction(work) {
     try {
       const result = await work();
-      await core.flush();
       return result;
     } catch (e) {
       global.logger?.error(`Transaction error: ${e.message}`);
@@ -69,12 +74,8 @@ function createKeyStore() {
 
   async function clear() {
     try {
-      await core.flush();
-
       const db = core.db;
-      await db.begin(async (tx) => {
-        await tx`DELETE FROM baileys_state WHERE key LIKE '%-%'`;
-      });
+      await db`DELETE FROM baileys_state WHERE key LIKE '%-%'`;
     } catch (e) {
       global.logger?.error(`Clear error: ${e.message}`);
       throw e;
@@ -87,7 +88,7 @@ function createKeyStore() {
     clear,
     transaction,
     _dispose: async () => {
-      await core.flush();
+      //
     },
   };
 }
@@ -127,9 +128,9 @@ export async function useSQLAuthState() {
     },
   };
 
-  function saveCreds() {
+  async function saveCreds() {
     if (core.isHealthy()) {
-      core.set("creds", creds);
+      await core.set("creds", creds);
     }
   }
 

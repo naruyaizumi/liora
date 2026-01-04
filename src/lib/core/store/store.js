@@ -14,43 +14,6 @@ export default function bind(conn) {
 
   conn._redisStore = redisStore;
 
-  conn.chats = new Proxy(
-    {},
-    {
-      get(target, prop) {
-        if (typeof prop === "string" && prop !== "constructor") {
-          const chatData = redisStore.get(`${REDIS_PREFIX}${prop}`);
-          return chatData;
-        }
-        return target[prop];
-      },
-
-      set(target, prop, value) {
-        if (typeof prop === "string" && prop !== "constructor") {
-          redisStore.atomicSet(`${REDIS_PREFIX}${prop}`, value, "chat");
-          return true;
-        }
-        target[prop] = value;
-        return true;
-      },
-
-      has(target, prop) {
-        if (typeof prop === "string" && prop !== "constructor") {
-          return true;
-        }
-        return prop in target;
-      },
-
-      deleteProperty(target, prop) {
-        if (typeof prop === "string") {
-          redisStore.del(`${REDIS_PREFIX}${prop}`);
-          return true;
-        }
-        return delete target[prop];
-      },
-    },
-  );
-
   conn.getChat = async (jid) => {
     const key = `${REDIS_PREFIX}${jid}`;
     return await redisStore.get(key);

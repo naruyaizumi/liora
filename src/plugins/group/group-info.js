@@ -1,14 +1,36 @@
 let handler = async (m, { conn }) => {
   try {
     await global.loading(m, conn);
+    
     let groupMeta;
-
-    if (conn.chats[m.chat]?.metadata) {
-      groupMeta = conn.chats[m.chat].metadata;
-    } else {
-      return m.reply(
-        "Group metadata is not available. Please run groupUp first.",
-      );
+    try {
+      const chatData = await conn.getChat(m.chat);
+      if (chatData?.metadata && chatData.metadata.participants?.length > 0) {
+        groupMeta = chatData.metadata;
+      }
+    } catch {
+      //
+    }
+    
+    if (!groupMeta) {
+      try {
+        groupMeta = await conn.groupMetadata(m.chat);
+        
+        try {
+          const chatData = await conn.getChat(m.chat) || { id: m.chat };
+          chatData.metadata = groupMeta;
+          chatData.subject = groupMeta.subject;
+          chatData.isChats = true;
+          chatData.lastSync = Date.now();
+          await conn.setChat(m.chat, chatData);
+        } catch {
+          //
+        }
+      } catch (e) {
+        return m.reply(
+          `Failed to get group metadata. Error: ${e.message || "Unknown error"}`,
+        );
+      }
     }
 
     const participants = groupMeta.participants || [];
@@ -51,7 +73,7 @@ let handler = async (m, { conn }) => {
     try {
       pp = await conn.profilePictureUrl(m.chat, "image");
     } catch (e) {
-      global.logger.warn(
+      global.logger?.warn(
         `No profile picture for group ${m.chat}: ${e.message}`,
       );
     }
@@ -90,7 +112,7 @@ Announcement Only: ${groupMeta.announce ? "Yes" : "No"}
       });
     }
   } catch (e) {
-    global.logger.error(e);
+    global.logger?.error(e);
     m.reply(`Error: ${e.message}`);
   } finally {
     await global.loading(m, conn, true);
@@ -99,7 +121,7 @@ Announcement Only: ${groupMeta.announce ? "Yes" : "No"}
 
 handler.help = ["groupinfo"];
 handler.tags = ["group"];
-handler.command = /^(groupinfo|info(gro?up|gc))$/i;
+handler.command = /^(info(gro?up|gc))$/i;
 handler.group = true;
 handler.admin = true;
 

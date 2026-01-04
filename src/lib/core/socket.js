@@ -17,8 +17,6 @@ import {
 } from "baileys";
 
 const _isStr = (v) => typeof v === "string";
-const _now = () => Date.now();
-const _isStatusJid = (id) => !id || id === "status@broadcast";
 const _isGroupJid = (id = "") => id && id.endsWith("@g.us");
 
 const _hidden = (target, key, value) =>
@@ -29,307 +27,247 @@ const _hidden = (target, key, value) =>
     writable: true,
   });
 
-class LRUCache {
-  constructor(maxSize = 1000, ttl = 3600000) {
-    this.maxSize = maxSize;
-    this.ttl = ttl;
-    this.cache = new Map();
-  }
-
-  get(key) {
-    const item = this.cache.get(key);
-    if (!item) return null;
-
-    if (Date.now() - item.timestamp > this.ttl) {
-      this.cache.delete(key);
-      return null;
-    }
-
-    this.cache.delete(key);
-    this.cache.set(key, item);
-    return item.value;
-  }
-
-  set(key, value) {
-    if (this.cache.size >= this.maxSize) {
-      const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
-    }
-
-    this.cache.set(key, {
-      value,
-      timestamp: Date.now(),
-    });
-  }
-
-  delete(key) {
-    this.cache.delete(key);
-  }
-
-  clear() {
-    this.cache.clear();
-  }
-
-  get size() {
-    return this.cache.size;
-  }
-}
-
-const jidCache = new LRUCache(1000, 3600000);
-
 const _decode = (raw) => {
   if (!raw || typeof raw !== "string") return raw || null;
-
-  const cached = jidCache.get(raw);
-  if (cached) return cached;
-
+  
   const cleaned = raw.replace(/:\d+@/, "@");
-  const norm = cleaned.includes("@")
-    ? cleaned
-    : /^[0-9]+$/.test(cleaned)
-      ? cleaned + "@s.whatsapp.net"
-      : cleaned;
-
-  jidCache.set(raw, norm);
-  return norm;
+  return cleaned.includes("@") ?
+    cleaned :
+    /^[0-9]+$/.test(cleaned) ?
+    cleaned + "@s.whatsapp.net" :
+    cleaned;
 };
 
-class MessageIndex extends LRUCache {
-  constructor() {
-    super(5000, 1800000);
-  }
-
-  cleanup() {
-    const now = Date.now();
-    for (const [key, item] of this.cache.entries()) {
-      if (now - item.timestamp > this.ttl) {
-        this.cache.delete(key);
-      }
+const asyncPipeline = {
+  tasks: [],
+  running: false,
+  
+  async add(task) {
+    this.tasks.push(task);
+    if (!this.running) {
+      this.running = true;
+      setImmediate(() => this.process());
     }
+  },
+  
+  async process() {
+    while (this.tasks.length > 0) {
+      const batch = this.tasks.splice(0, 10);
+      await Promise.all(batch.map(task =>
+        task().catch(e => global.logger?.error({ error: e.message },
+          "Pipeline error"))
+      ));
+    }
+    this.running = false;
   }
-}
-
-class GroupMetadataCache extends LRUCache {
-  constructor() {
-    super(500, 600000);
-  }
-}
+};
 
 export function naruyaizumi(connectionOptions, options = {}) {
   const conn = makeWASocket(connectionOptions);
-
-  _hidden(conn, "_msgIndex", new MessageIndex());
-  _hidden(conn, "_groupMetaCache", new GroupMetadataCache());
-
-  const cleanupInterval = setInterval(() => {
-    conn._msgIndex.cleanup();
-  }, 300000);
-
+  
+  bind(conn);
+  
   Object.defineProperties(conn, {
-    chats: {
-      value: { ...(options.chats || {}) },
-      writable: true,
-    },
     decodeJid: {
       value(jid) {
         if (!jid || typeof jid !== "string") return jid || null;
         return _decode(jid);
       },
     },
-    /* todo
-        sendStatusMentions: {
-            async value(content, jids = []) {
-                if (!this.user?.id) {
-                    throw new Error("User not authenticated");
-                }
-                
-                const STORIES_JID = "status@broadcast";
-                
-                if (!jids || !Array.isArray(jids) || jids.length ===
-                    0) {
-                    throw new Error(
-                        "JIDs array is required and must not be empty"
-                        );
-                }
-                
-                if (jids.length > 5) {
-                    throw new Error(
-                        "Maximum 5 mentions per status allowed");
-                }
-                
-                const userJid = jidNormalizedUser(this.user.id);
-                let allUsers = new Set();
-                allUsers.add(userJid);
-                
-                for (const id of jids) {
-                    if (isJidGroup(id)) {
-                        try {
-                            const metadata = await this
-                                .groupMetadata(id);
-                            const participants = metadata
-                                .participants.map(p =>
-                                    jidNormalizedUser(p.id));
-                            participants.forEach(jid => allUsers
-                                .add(jid));
-                        } catch (e) {
-                            this.logger.error(e);
-                        }
-                    } else if (isPnUser(id)) {
-                        allUsers.add(jidNormalizedUser(id));
+    
+    sendStatusMentions: {
+      async value(content, jids = []) {
+        if (!this.user?.id) {
+          throw new Error("User not authenticated");
+        }
+        
+        const STORIES_JID = "status@broadcast";
+        
+        if (!jids || !Array.isArray(jids) || jids.length ===
+          0) {
+          throw new Error(
+            "JIDs array is required and must not be empty"
+          );
+        }
+        
+        if (jids.length > 5) {
+          throw new Error(
+            "Maximum 5 mentions per status allowed");
+        }
+        
+        const userJid = jidNormalizedUser(this.user.id);
+        let allUsers = new Set();
+        allUsers.add(userJid);
+        
+        for (const id of jids) {
+          if (isJidGroup(id)) {
+            try {
+              const metadata = await this
+                .groupMetadata(id);
+              const participants = metadata
+                .participants.map(p =>
+                  jidNormalizedUser(p.id));
+              participants.forEach(jid => allUsers
+                .add(jid));
+            } catch (e) {
+              this.logger.error(e);
+            }
+          } else if (isPnUser(id)) {
+            allUsers.add(jidNormalizedUser(id));
+          }
+        }
+        
+        const uniqueUsers = Array.from(allUsers);
+        const getRandomHexColor = () => "#" + Math.floor(
+            Math.random() * 16777215).toString(16)
+          .padStart(6, "0");
+        
+        const isMedia = content.image || content.video ||
+          content.audio;
+        const isAudio = !!content.audio;
+        
+        const messageContent = { ...content };
+        
+        if (isMedia && !isAudio) {
+          if (messageContent.text) {
+            messageContent.caption = messageContent
+              .text;
+            delete messageContent.text;
+          }
+          
+          delete messageContent.ptt;
+          delete messageContent.font;
+          delete messageContent.backgroundColor;
+          delete messageContent.textColor;
+        }
+        
+        if (isAudio) {
+          delete messageContent.text;
+          delete messageContent.caption;
+          delete messageContent.font;
+          delete messageContent.textColor;
+        }
+        
+        const font = !isMedia ? (content.font || Math.floor(
+          Math.random() * 9)) : undefined;
+        const textColor = !isMedia ? (content.textColor ||
+          getRandomHexColor()) : undefined;
+        const backgroundColor = (!isMedia || isAudio) ? (
+          content.backgroundColor ||
+          getRandomHexColor()) : undefined;
+        const ptt = isAudio ? (typeof content.ptt ===
+          'boolean' ? content.ptt : true) : undefined;
+        
+        let msg;
+        try {
+          msg = await generateWAMessage(
+            STORIES_JID,
+            messageContent,
+            {
+              userJid,
+              upload: this.waUploadToServer,
+              font,
+              textColor,
+              backgroundColor,
+              ptt,
+              getUrlInfo: text => {
+                return undefined;
+              }
+            }
+          );
+        } catch (e) {
+          this.logger.error(e);
+          throw e;
+        }
+        
+        await this.relayMessage(STORIES_JID, msg.message, {
+          messageId: msg.key.id,
+          statusJidList: uniqueUsers,
+          additionalNodes: [
+          {
+            tag: 'meta',
+            attrs: {},
+            content: [
+            {
+              tag: 'mentioned_users',
+              attrs: {},
+              content: jids
+                .map(jid =>
+                  ({
+                    tag: 'to',
+                    attrs: {
+                      jid: jidNormalizedUser(
+                        jid
+                      )
                     }
+                  }))
+            }]
+          }]
+        });
+        
+        for (const id of jids) {
+          try {
+            const normalizedId = jidNormalizedUser(id);
+            const isPrivate = isPnUser(normalizedId);
+            const type = isPrivate ?
+              'statusMentionMessage' :
+              'groupStatusMentionMessage';
+            
+            const messageSecret = new Uint8Array(32);
+            crypto.getRandomValues(messageSecret);
+            
+            const protocolMessage = {
+              [type]: {
+                message: {
+                  protocolMessage: {
+                    key: msg.key,
+                    type: 25
+                  }
                 }
-                
-                const uniqueUsers = Array.from(allUsers);
-                const getRandomHexColor = () => "#" + Math.floor(
-                        Math.random() * 16777215).toString(16)
-                    .padStart(6, "0");
-                
-                const isMedia = content.image || content.video ||
-                    content.audio;
-                const isAudio = !!content.audio;
-                
-                const messageContent = { ...content };
-                
-                if (isMedia && !isAudio) {
-                    if (messageContent.text) {
-                        messageContent.caption = messageContent
-                        .text;
-                        delete messageContent.text;
-                    }
-                    
-                    delete messageContent.ptt;
-                    delete messageContent.font;
-                    delete messageContent.backgroundColor;
-                    delete messageContent.textColor;
+              },
+              messageContextInfo: {
+                messageSecret: Buffer.from(
+                  messageSecret)
+              }
+            };
+            
+            const statusMsg =
+              await generateWAMessageFromContent(
+                normalizedId,
+                protocolMessage,
+                {
+                  userJid: this.user.id
                 }
-                
-                if (isAudio) {
-                    delete messageContent.text;
-                    delete messageContent.caption;
-                    delete messageContent.font;
-                    delete messageContent.textColor;
-                }
-                
-                const font = !isMedia ? (content.font || Math.floor(
-                    Math.random() * 9)) : undefined;
-                const textColor = !isMedia ? (content.textColor ||
-                    getRandomHexColor()) : undefined;
-                const backgroundColor = (!isMedia || isAudio) ? (
-                    content.backgroundColor ||
-                    getRandomHexColor()) : undefined;
-                const ptt = isAudio ? (typeof content.ptt ===
-                    'boolean' ? content.ptt : true) : undefined;
-                
-                let msg;
-                try {
-                    msg = await generateWAMessage(
-                        STORIES_JID,
-                        messageContent,
-                        {
-                            userJid,
-                            upload: this.waUploadToServer,
-                            font,
-                            textColor,
-                            backgroundColor,
-                            ptt,
-                            getUrlInfo: text => {
-                                return undefined;
-                            }
-                        }
-                    );
-                } catch (e) {
-                    this.logger.error(e);
-                    throw e;
-                }
-                
-                await this.relayMessage(STORIES_JID, msg.message, {
-                    messageId: msg.key.id,
-                    statusJidList: uniqueUsers,
-                    additionalNodes: [
-                    {
-                        tag: 'meta',
-                        attrs: {},
-                        content: [
-                        {
-                            tag: 'mentioned_users',
-                            attrs: {},
-                            content: jids
-                                .map(jid =>
-                                    ({
-                                        tag: 'to',
-                                        attrs: { jid: jidNormalizedUser(
-                                                jid
-                                                ) }
-                                    }))
-                        }]
-                    }]
-                });
-                
-                for (const id of jids) {
-                    try {
-                        const normalizedId = jidNormalizedUser(id);
-                        const isPrivate = isPnUser(normalizedId);
-                        const type = isPrivate ?
-                            'statusMentionMessage' :
-                            'groupStatusMentionMessage';
-                        
-                        const messageSecret = new Uint8Array(32);
-                        crypto.getRandomValues(messageSecret);
-                        
-                        const protocolMessage = {
-                            [type]: {
-                                message: {
-                                    protocolMessage: {
-                                        key: msg.key,
-                                        type: 25
-                                    }
-                                }
-                            },
-                            messageContextInfo: {
-                                messageSecret: Buffer.from(
-                                    messageSecret)
-                            }
-                        };
-                        
-                        const statusMsg =
-                            await generateWAMessageFromContent(
-                                normalizedId,
-                                protocolMessage,
-                                {
-                                    userJid: this.user.id
-                                }
-                            );
-                        
-                        await this.relayMessage(
-                            normalizedId,
-                            statusMsg.message,
-                            {
-                                additionalNodes: [{
-                                    tag: 'meta',
-                                    attrs: isPrivate ?
-                                    { is_status_mention: 'true' } :
-                                    { is_group_status_mention: 'true' }
-                                }]
-                            }
-                        );
-                        
-                        await new Promise(r => setTimeout(r, 2000));
-                    } catch (e) {
-                        this.logger.error(e);
-                    }
-                }
-                
-                return msg;
-            },
-            enumerable: true
-        },
-        */
+              );
+            
+            await this.relayMessage(
+              normalizedId,
+              statusMsg.message,
+              {
+                additionalNodes: [{
+                  tag: 'meta',
+                  attrs: isPrivate ? { is_status_mention: 'true' } :
+                  { is_group_status_mention: 'true' }
+                }]
+              }
+            );
+            
+            await new Promise(r => setTimeout(r, 2000));
+          } catch (e) {
+            this.logger.error(e);
+          }
+        }
+        
+        return msg;
+      },
+      enumerable: true
+    },
     sendAlbum: {
       async value(jid, content, options = {}) {
         if (!this.user?.id) {
           throw new Error("User not authenticated");
         }
-
+        
         if (
           !content?.album ||
           !Array.isArray(content.album) ||
@@ -337,15 +275,17 @@ export function naruyaizumi(connectionOptions, options = {}) {
         ) {
           throw new Error("Album content with items array is required");
         }
-
+        
         const items = content.album;
-
-        const expectedImageCount = items.filter((item) => item?.image).length;
-        const expectedVideoCount = items.filter((item) => item?.video).length;
-
+        
+        const expectedImageCount = items.filter((item) => item?.image)
+          .length;
+        const expectedVideoCount = items.filter((item) => item?.video)
+          .length;
+        
         const messageSecret = new Uint8Array(32);
         crypto.getRandomValues(messageSecret);
-
+        
         const messageContent = {
           albumMessage: {
             expectedImageCount,
@@ -355,34 +295,34 @@ export function naruyaizumi(connectionOptions, options = {}) {
             messageSecret: Buffer.from(messageSecret),
           },
         };
-
+        
         const generationOptions = {
           userJid: this.user.id,
           upload: this.waUploadToServer,
           quoted: options?.quoted || null,
           ephemeralExpiration: options?.quoted?.expiration ?? 0,
         };
-
+        
         const album = generateWAMessageFromContent(
           jid,
           messageContent,
           generationOptions,
         );
-
+        
         await this.relayMessage(album.key.remoteJid, album.message, {
           messageId: album.key.id,
         });
-
+        
         const mediaMessages = [];
-
+        
         for (let i = 0; i < items.length; i++) {
           const contentItem = items[i];
-
+          
           const mediaSecret = new Uint8Array(32);
           crypto.getRandomValues(mediaSecret);
-
+          
           let mediaMsg;
-
+          
           if (contentItem.image) {
             const mediaInput = {};
             if (Buffer.isBuffer(contentItem.image)) {
@@ -399,11 +339,11 @@ export function naruyaizumi(connectionOptions, options = {}) {
                 url: contentItem.image,
               };
             }
-
+            
             if (contentItem.caption) {
               mediaInput.caption = contentItem.caption;
             }
-
+            
             mediaMsg = await generateWAMessage(
               album.key.remoteJid,
               mediaInput,
@@ -428,15 +368,15 @@ export function naruyaizumi(connectionOptions, options = {}) {
                 url: contentItem.video,
               };
             }
-
+            
             if (contentItem.caption) {
               mediaInput.caption = contentItem.caption;
             }
-
+            
             if (contentItem.mimetype) {
               mediaInput.mimetype = contentItem.mimetype;
             }
-
+            
             mediaMsg = await generateWAMessage(
               album.key.remoteJid,
               mediaInput,
@@ -450,7 +390,7 @@ export function naruyaizumi(connectionOptions, options = {}) {
               `Item at index ${i} must contain either image or video`,
             );
           }
-
+          
           mediaMsg.message.messageContextInfo = {
             messageSecret: Buffer.from(mediaSecret),
             messageAssociation: {
@@ -458,18 +398,19 @@ export function naruyaizumi(connectionOptions, options = {}) {
               parentMessageKey: album.key,
             },
           };
-
+          
           mediaMessages.push(mediaMsg);
-
-          await this.relayMessage(mediaMsg.key.remoteJid, mediaMsg.message, {
-            messageId: mediaMsg.key.id,
-          });
-
+          
+          await this.relayMessage(mediaMsg.key.remoteJid, mediaMsg
+            .message, {
+              messageId: mediaMsg.key.id,
+            });
+          
           if (i < items.length - 1) {
             await new Promise((resolve) => setTimeout(resolve, 100));
           }
         }
-
+        
         return {
           album,
           mediaMessages,
@@ -482,17 +423,17 @@ export function naruyaizumi(connectionOptions, options = {}) {
         if (!this.user?.id) {
           throw new Error("User not authenticated");
         }
-
+        
         const { backgroundColor, ...contentWithoutBg } = content;
-
+        
         const inside = await generateWAMessageContent(contentWithoutBg, {
           upload: this.waUploadToServer,
           backgroundColor: backgroundColor || undefined,
         });
-
+        
         const messageSecret = new Uint8Array(32);
         crypto.getRandomValues(messageSecret);
-
+        
         const msg = generateWAMessageFromContent(
           jid,
           {
@@ -513,11 +454,11 @@ export function naruyaizumi(connectionOptions, options = {}) {
             quoted: options?.quoted || null,
           },
         );
-
+        
         await this.relayMessage(jid, msg.message, {
           messageId: msg.key.id,
         });
-
+        
         return msg;
       },
       enumerable: true,
@@ -527,27 +468,29 @@ export function naruyaizumi(connectionOptions, options = {}) {
         if (!this.user?.id) {
           throw new Error("User not authenticated");
         }
-
+        
         if (!content?.groupInvite) {
           throw new Error("Group invite content is required");
         }
-
+        
         const { groupInvite } = content;
-
+        
         if (!groupInvite.jid || !groupInvite.code) {
           throw new Error("Group JID and invite code are required");
         }
-
+        
         let inviteExpiration;
         if (groupInvite.expiration) {
           const expirationNum = parseInt(groupInvite.expiration);
-          inviteExpiration = Math.floor(Date.now() / 1000) + expirationNum;
+          inviteExpiration = Math.floor(Date.now() / 1000) +
+            expirationNum;
         } else {
-          inviteExpiration = Math.floor(Date.now() / 1000) + 3 * 24 * 60 * 60;
+          inviteExpiration = Math.floor(Date.now() / 1000) + 3 * 24 * 60 *
+            60;
         }
-
+        
         let jpegThumbnail = null;
-
+        
         if (
           groupInvite.jpegThumbnail &&
           Buffer.isBuffer(groupInvite.jpegThumbnail)
@@ -562,13 +505,14 @@ export function naruyaizumi(connectionOptions, options = {}) {
               const arrayBuffer = await response.arrayBuffer();
               jpegThumbnail = Buffer.from(arrayBuffer);
             } catch (error) {
-              global.logger.error("Failed to fetch thumbnail from URL:", error);
+              global.logger.error("Failed to fetch thumbnail from URL:",
+                error);
             }
           } else if (Buffer.isBuffer(groupInvite.thumbnail)) {
             jpegThumbnail = groupInvite.thumbnail;
           }
         }
-
+        
         const msg = proto.Message.create({
           groupInviteMessage: {
             inviteCode: groupInvite.code,
@@ -576,20 +520,21 @@ export function naruyaizumi(connectionOptions, options = {}) {
             groupJid: groupInvite.jid,
             groupName: groupInvite.name || "Unknown Group",
             jpegThumbnail: jpegThumbnail,
-            caption:
-              groupInvite.caption || "Invitation to join my WhatsApp group",
+            caption: groupInvite.caption ||
+              "Invitation to join my WhatsApp group",
             contextInfo: {
               ...(groupInvite.contextInfo || {}),
-              mentionedJid: groupInvite.mentions || options.mentions || [],
+              mentionedJid: groupInvite.mentions || options
+                .mentions || [],
             },
           },
         });
-
+        
         const message = generateWAMessageFromContent(jid, msg, {
           userJid: this.user.id,
           ...options,
         });
-
+        
         return await this.relayMessage(jid, message.message, {
           messageId: message.key.id,
         });
@@ -601,27 +546,28 @@ export function naruyaizumi(connectionOptions, options = {}) {
         if (!this.user?.id) {
           throw new Error("User not authenticated");
         }
-
+        
         if (!content?.adminInvite) {
           throw new Error("Admin invite content is required");
         }
-
+        
         const { adminInvite } = content;
-
+        
         if (!adminInvite.jid) {
           throw new Error("Newsletter JID is required");
         }
-
+        
         let inviteExpiration;
         if (adminInvite.expiration) {
           const expirationNum = parseInt(adminInvite.expiration);
-          inviteExpiration = Math.floor(Date.now() / 1000) + expirationNum;
+          inviteExpiration = Math.floor(Date.now() / 1000) +
+            expirationNum;
         } else {
           inviteExpiration = Math.floor(Date.now() / 1000) + 86400;
         }
-
+        
         let jpegThumbnail = null;
-
+        
         if (
           adminInvite.jpegThumbnail &&
           Buffer.isBuffer(adminInvite.jpegThumbnail)
@@ -636,18 +582,19 @@ export function naruyaizumi(connectionOptions, options = {}) {
               const arrayBuffer = await response.arrayBuffer();
               jpegThumbnail = Buffer.from(arrayBuffer);
             } catch (error) {
-              global.logger.error("Failed to fetch thumbnail from URL:", error);
+              global.logger.error("Failed to fetch thumbnail from URL:",
+                error);
             }
           } else if (Buffer.isBuffer(adminInvite.thumbnail)) {
             jpegThumbnail = adminInvite.thumbnail;
           }
         }
-
+        
         let contextInfo = adminInvite.contextInfo || {};
         if (adminInvite.mentions && adminInvite.mentions.length > 0) {
           contextInfo.mentionedJid = adminInvite.mentions;
         }
-
+        
         const msg = proto.Message.create({
           newsletterAdminInviteMessage: {
             newsletterJid: adminInvite.jid,
@@ -655,16 +602,16 @@ export function naruyaizumi(connectionOptions, options = {}) {
             caption: adminInvite.caption || "",
             inviteExpiration: inviteExpiration,
             jpegThumbnail: jpegThumbnail,
-            contextInfo:
-              Object.keys(contextInfo).length > 0 ? contextInfo : undefined,
+            contextInfo: Object.keys(contextInfo).length > 0 ?
+              contextInfo : undefined,
           },
         });
-
+        
         const message = generateWAMessageFromContent(jid, msg, {
           userJid: this.user.id,
           ...options,
         });
-
+        
         return await this.relayMessage(jid, message.message, {
           messageId: message.key.id,
         });
@@ -676,49 +623,52 @@ export function naruyaizumi(connectionOptions, options = {}) {
         if (!this.user?.id) {
           throw new Error("User not authenticated");
         }
-
+        
         if (!content?.pollResult) {
           throw new Error("Poll result content is required");
         }
-
+        
         const { pollResult } = content;
-
+        
         if (!pollResult.name) {
           throw new Error("Poll result name is required");
         }
-
+        
         if (!Array.isArray(pollResult.values)) {
           throw new Error("Poll result values must be an array");
         }
-
+        
         for (const [index, value] of pollResult.values.entries()) {
           if (!Array.isArray(value) || value.length !== 2) {
             throw new Error(
               `Poll result value at index ${index} must be an array with [optionName, optionVoteCount]`,
             );
           }
-
+          
           const [optionName, optionVoteCount] = value;
-
+          
           if (typeof optionName !== "string") {
-            throw new Error(`Option name at index ${index} must be a string`);
+            throw new Error(
+              `Option name at index ${index} must be a string`);
           }
-
+          
           if (typeof optionVoteCount !== "number") {
             throw new Error(
               `Option vote count at index ${index} must be a number`,
             );
           }
         }
-
+        
         const pollResultSnapshotMessage = {
           name: pollResult.name,
-          pollVotes: pollResult.values.map(([optionName, optionVoteCount]) => ({
+          pollVotes: pollResult.values.map(([optionName,
+            optionVoteCount
+          ]) => ({
             optionName,
             optionVoteCount,
           })),
         };
-
+        
         let contextInfo = {};
         if (pollResult.mentions && pollResult.mentions.length > 0) {
           contextInfo.mentionedJid = pollResult.mentions;
@@ -729,19 +679,20 @@ export function naruyaizumi(connectionOptions, options = {}) {
             ...pollResult.contextInfo,
           };
         }
-
+        
         const msg = proto.Message.create({
           pollResultSnapshotMessage: {
             ...pollResultSnapshotMessage,
-            ...(Object.keys(contextInfo).length > 0 ? { contextInfo } : {}),
+            ...(Object.keys(contextInfo).length > 0 ?
+              { contextInfo } : {}),
           },
         });
-
+        
         const message = generateWAMessageFromContent(jid, msg, {
           userJid: this.user.id,
           ...options,
         });
-
+        
         return await this.relayMessage(jid, message.message, {
           messageId: message.key.id,
         });
@@ -759,7 +710,7 @@ export function naruyaizumi(connectionOptions, options = {}) {
         if (!this.user?.id) {
           throw new Error("User not authenticated");
         }
-
+        
         const requestPaymentMessage = {
           amount: {
             currencyCode: currency,
@@ -775,34 +726,35 @@ export function naruyaizumi(connectionOptions, options = {}) {
               text: note,
               contextInfo: {
                 ...(options.contextInfo || {}),
-                ...(options.mentions
-                  ? {
-                      mentionedJid: options.mentions,
-                    }
-                  : {}),
+                ...(options.mentions ?
+                {
+                  mentionedJid: options.mentions,
+                } : {}),
               },
             },
           },
           background: {
-            placeholderArgb: options.image?.placeholderArgb || 4278190080,
+            placeholderArgb: options.image?.placeholderArgb ||
+              4278190080,
             textArgb: options.image?.textArgb || 4294967295,
             subtextArgb: options.image?.subtextArgb || 4294967295,
             type: 1,
           },
         };
-
+        
         const msg = proto.Message.create({
           requestPaymentMessage,
         });
-
+        
         const message = generateWAMessageFromContent(jid, msg, {
           userJid: this.user.id,
           ...options,
         });
-
-        return await this.relayMessage(message.key.remoteJid, message.message, {
-          messageId: message.key.id,
-        });
+        
+        return await this.relayMessage(message.key.remoteJid, message
+          .message, {
+            messageId: message.key.id,
+          });
       },
       enumerable: true,
     },
@@ -811,7 +763,7 @@ export function naruyaizumi(connectionOptions, options = {}) {
         if (!this.user?.id) {
           throw new Error("User not authenticated");
         }
-
+        
         let thumbnail = null;
         if (orderData.thumbnail) {
           if (Buffer.isBuffer(orderData.thumbnail)) {
@@ -826,23 +778,21 @@ export function naruyaizumi(connectionOptions, options = {}) {
                 thumbnail = Buffer.from(orderData.thumbnail, "base64");
               }
             } catch (e) {
-              global.logger?.warn(
-                { err: e.message },
+              global.logger?.warn({ err: e.message },
                 "Failed to fetch/convert thumbnail",
               );
               thumbnail = null;
             }
           }
         }
-
+        
         const orderMessage = proto.Message.OrderMessage.fromObject({
           orderId: orderData.orderId || generateMessageID(),
           thumbnail: thumbnail,
           itemCount: orderData.itemCount || 1,
-          status:
-            orderData.status || proto.Message.OrderMessage.OrderStatus.INQUIRY,
-          surface:
-            orderData.surface ||
+          status: orderData.status || proto.Message.OrderMessage
+            .OrderStatus.INQUIRY,
+          surface: orderData.surface ||
             proto.Message.OrderMessage.OrderSurface.CATALOG,
           message: orderData.message || "",
           orderTitle: orderData.orderTitle || "Order",
@@ -852,18 +802,17 @@ export function naruyaizumi(connectionOptions, options = {}) {
           totalCurrencyCode: orderData.totalCurrencyCode || "IDR",
           contextInfo: {
             ...(options.contextInfo || {}),
-            ...(options.mentions
-              ? {
-                  mentionedJid: options.mentions,
-                }
-              : {}),
+            ...(options.mentions ?
+            {
+              mentionedJid: options.mentions,
+            } : {}),
           },
         });
-
+        
         const msg = proto.Message.create({
           orderMessage,
         });
-
+        
         const message = generateWAMessageFromContent(jid, msg, {
           userJid: this.user.id,
           timestamp: options.timestamp || new Date(),
@@ -871,10 +820,11 @@ export function naruyaizumi(connectionOptions, options = {}) {
           ephemeralExpiration: options.ephemeralExpiration || 0,
           messageId: options.messageId || null,
         });
-
-        return await this.relayMessage(message.key.remoteJid, message.message, {
-          messageId: message.key.id,
-        });
+        
+        return await this.relayMessage(message.key.remoteJid, message
+          .message, {
+            messageId: message.key.id,
+          });
       },
       enumerable: true,
     },
@@ -883,22 +833,23 @@ export function naruyaizumi(connectionOptions, options = {}) {
         if (!this.user?.id) {
           throw new Error("User not authenticated");
         }
-
-        const { text = "", title = "", footer = "", cards = [] } = content;
-
+        
+        const { text = "", title = "", footer = "", cards = [] } = content
+        ;
+        
         if (!Array.isArray(cards) || cards.length === 0) {
           throw new Error("Cards must be a non-empty array");
         }
-
+        
         if (cards.length > 10) {
           throw new Error("Maximum 10 cards allowed");
         }
-
+        
         const carouselCards = await Promise.all(
           cards.map(async (card) => {
             let mediaType = null;
             let mediaContent = null;
-
+            
             if (card.image) {
               mediaType = "image";
               mediaContent = card.image;
@@ -906,13 +857,15 @@ export function naruyaizumi(connectionOptions, options = {}) {
               mediaType = "video";
               mediaContent = card.video;
             } else {
-              throw new Error("Card must have 'image' or 'video' property");
+              throw new Error(
+                "Card must have 'image' or 'video' property");
             }
-
+            
             const mediaInput = {};
             if (Buffer.isBuffer(mediaContent)) {
               mediaInput[mediaType] = mediaContent;
-            } else if (typeof mediaContent === "object" && mediaContent.url) {
+            } else if (typeof mediaContent === "object" &&
+              mediaContent.url) {
               mediaInput[mediaType] = {
                 url: mediaContent.url,
               };
@@ -923,11 +876,12 @@ export function naruyaizumi(connectionOptions, options = {}) {
                 "Media must be Buffer, URL string, or { url: string }",
               );
             }
-
-            const preparedMedia = await prepareWAMessageMedia(mediaInput, {
-              upload: this.waUploadToServer,
-            });
-
+            
+            const preparedMedia = await prepareWAMessageMedia(
+              mediaInput, {
+                upload: this.waUploadToServer,
+              });
+            
             const cardObj = {
               header: {
                 title: card.title || "",
@@ -940,26 +894,30 @@ export function naruyaizumi(connectionOptions, options = {}) {
                 text: card.footer || "",
               },
             };
-
+            
             if (mediaType === "image") {
-              cardObj.header.imageMessage = preparedMedia.imageMessage;
+              cardObj.header.imageMessage = preparedMedia
+                .imageMessage;
             } else if (mediaType === "video") {
-              cardObj.header.videoMessage = preparedMedia.videoMessage;
+              cardObj.header.videoMessage = preparedMedia
+                .videoMessage;
             }
-
-            if (Array.isArray(card.buttons) && card.buttons.length > 0) {
+            
+            if (Array.isArray(card.buttons) && card.buttons.length >
+              0) {
               cardObj.nativeFlowMessage = {
                 buttons: card.buttons.map((btn) => ({
                   name: btn.name || "quick_reply",
-                  buttonParamsJson: btn.buttonParamsJson || JSON.stringify(btn),
+                  buttonParamsJson: btn.buttonParamsJson ||
+                    JSON.stringify(btn),
                 })),
               };
             }
-
+            
             return cardObj;
           }),
         );
-
+        
         const payload = proto.Message.InteractiveMessage.create({
           body: { text: text },
           footer: { text: footer },
@@ -969,7 +927,7 @@ export function naruyaizumi(connectionOptions, options = {}) {
             messageVersion: 1,
           },
         });
-
+        
         const msg = generateWAMessageFromContent(
           jid,
           {
@@ -984,11 +942,11 @@ export function naruyaizumi(connectionOptions, options = {}) {
             quoted: options?.quoted || null,
           },
         );
-
+        
         await this.relayMessage(jid, msg.message, {
           messageId: msg.key.id,
         });
-
+        
         return msg;
       },
       enumerable: true,
@@ -998,18 +956,19 @@ export function naruyaizumi(connectionOptions, options = {}) {
         if (!this.user?.id) {
           throw new Error("User not authenticated");
         }
-
-        const { text = "", footer = "", interactiveButtons = [] } = content;
-
+        
+        const { text = "", footer = "", interactiveButtons = [] } =
+        content;
+        
         if (
           !Array.isArray(interactiveButtons) ||
           interactiveButtons.length === 0
         ) {
           throw new Error("interactiveButtons must be a non-empty array");
         }
-
+        
         const firstButtonName = interactiveButtons[0]?.name;
-
+        
         if (
           firstButtonName !== "payment_info" &&
           firstButtonName !== "review_and_pay"
@@ -1018,61 +977,60 @@ export function naruyaizumi(connectionOptions, options = {}) {
             "First interactive button must be either 'payment_info' or 'review_and_pay'",
           );
         }
-
+        
         const processedButtons = [];
-
+        
         for (let i = 0; i < interactiveButtons.length; i++) {
           const btn = interactiveButtons[i];
-
+          
           if (!btn || typeof btn !== "object") {
             throw new Error(`interactiveButton[${i}] must be an object`);
           }
-
+          
           if (btn.name && btn.buttonParamsJson) {
             try {
               JSON.parse(btn.buttonParamsJson);
             } catch (e) {
-              throw new Error(`Invalid JSON in buttonParamsJson: ${e.message}`);
+              throw new Error(
+                `Invalid JSON in buttonParamsJson: ${e.message}`);
             }
-
+            
             processedButtons.push({
               name: btn.name,
               buttonParamsJson: btn.buttonParamsJson,
             });
             continue;
           }
-
+          
           throw new Error(`interactiveButton[${i}] has invalid shape`);
         }
-
+        
         let messageContent = {};
-
+        
         if (text !== undefined) {
           messageContent.body = { text: text };
         }
-
+        
         if (footer) {
           messageContent.footer = { text: footer };
         }
-
+        
         messageContent.nativeFlowMessage = {
           buttons: processedButtons,
         };
-
+        
         const additionalNodes = [
-          {
-            tag: "biz",
-            attrs: {
-              native_flow_name:
-                firstButtonName === "review_and_pay"
-                  ? "order_details"
-                  : firstButtonName,
-            },
+        {
+          tag: "biz",
+          attrs: {
+            native_flow_name: firstButtonName === "review_and_pay" ?
+              "order_details" : firstButtonName,
           },
-        ];
-
-        const payload = proto.Message.InteractiveMessage.create(messageContent);
-
+        }, ];
+        
+        const payload = proto.Message.InteractiveMessage.create(
+          messageContent);
+        
         const msg = generateWAMessageFromContent(
           jid,
           {
@@ -1083,12 +1041,12 @@ export function naruyaizumi(connectionOptions, options = {}) {
             quoted: options?.quoted || null,
           },
         );
-
+        
         await this.relayMessage(jid, msg.message, {
           messageId: msg.key.id,
           additionalNodes,
         });
-
+        
         return msg;
       },
       enumerable: true,
@@ -1098,60 +1056,61 @@ export function naruyaizumi(connectionOptions, options = {}) {
         if (!this.user?.id) {
           throw new Error("User not authenticated");
         }
-
+        
         const {
           text = "",
-          caption = "",
-          title = "",
-          footer = "",
-          interactiveButtons = [],
-          hasMediaAttachment = false,
-          image = null,
-          video = null,
-          document = null,
-          mimetype = null,
-          fileName = null,
-          fileLength = null,
-          pageCount = null,
-          jpegThumbnail = null,
-          location = null,
-          product = null,
-          businessOwnerJid = null,
-          contextInfo = null,
-          externalAdReply = null,
+            caption = "",
+            title = "",
+            footer = "",
+            interactiveButtons = [],
+            hasMediaAttachment = false,
+            image = null,
+            video = null,
+            document = null,
+            mimetype = null,
+            fileName = null,
+            fileLength = null,
+            pageCount = null,
+            jpegThumbnail = null,
+            location = null,
+            product = null,
+            businessOwnerJid = null,
+            contextInfo = null,
+            externalAdReply = null,
         } = content;
-
+        
         if (
           !Array.isArray(interactiveButtons) ||
           interactiveButtons.length === 0
         ) {
           throw new Error("interactiveButtons must be a non-empty array");
         }
-
+        
         const processedButtons = [];
         for (let i = 0; i < interactiveButtons.length; i++) {
           const btn = interactiveButtons[i];
-
+          
           if (!btn || typeof btn !== "object") {
             throw new Error(`interactiveButton[${i}] must be an object`);
           }
-
+          
           if (btn.name && btn.buttonParamsJson) {
             processedButtons.push(btn);
             continue;
           }
-
+          
           if (btn.id || btn.text || btn.displayText) {
             processedButtons.push({
               name: "quick_reply",
               buttonParamsJson: JSON.stringify({
-                display_text: btn.text || btn.displayText || `Button ${i + 1}`,
+                display_text: btn.text || btn.displayText ||
+                  `Button ${i + 1}`,
                 id: btn.id || `quick_${i + 1}`,
               }),
             });
             continue;
           }
-
+          
           if (btn.buttonId && btn.buttonText?.displayText) {
             processedButtons.push({
               name: "quick_reply",
@@ -1162,12 +1121,12 @@ export function naruyaizumi(connectionOptions, options = {}) {
             });
             continue;
           }
-
+          
           throw new Error(`interactiveButton[${i}] has invalid shape`);
         }
-
+        
         let messageContent = {};
-
+        
         if (image) {
           const mediaInput = {};
           if (Buffer.isBuffer(image)) {
@@ -1177,11 +1136,11 @@ export function naruyaizumi(connectionOptions, options = {}) {
           } else if (typeof image === "string") {
             mediaInput.image = { url: image };
           }
-
+          
           const preparedMedia = await prepareWAMessageMedia(mediaInput, {
             upload: this.waUploadToServer,
           });
-
+          
           messageContent.header = {
             title: title || "",
             hasMediaAttachment: hasMediaAttachment || true,
@@ -1196,11 +1155,11 @@ export function naruyaizumi(connectionOptions, options = {}) {
           } else if (typeof video === "string") {
             mediaInput.video = { url: video };
           }
-
+          
           const preparedMedia = await prepareWAMessageMedia(mediaInput, {
             upload: this.waUploadToServer,
           });
-
+          
           messageContent.header = {
             title: title || "",
             hasMediaAttachment: hasMediaAttachment || true,
@@ -1208,7 +1167,7 @@ export function naruyaizumi(connectionOptions, options = {}) {
           };
         } else if (document) {
           const mediaInput = { document: {} };
-
+          
           if (Buffer.isBuffer(document)) {
             mediaInput.document = document;
             mediaInput.document = {
@@ -1235,7 +1194,7 @@ export function naruyaizumi(connectionOptions, options = {}) {
               ...(pageCount !== null && { pageCount }),
             };
           }
-
+          
           if (jpegThumbnail) {
             if (Buffer.isBuffer(jpegThumbnail)) {
               if (typeof mediaInput.document === "object") {
@@ -1246,27 +1205,31 @@ export function naruyaizumi(connectionOptions, options = {}) {
                 const response = await fetch(jpegThumbnail);
                 const arrayBuffer = await response.arrayBuffer();
                 if (typeof mediaInput.document === "object") {
-                  mediaInput.document.jpegThumbnail = Buffer.from(arrayBuffer);
+                  mediaInput.document.jpegThumbnail = Buffer.from(
+                    arrayBuffer);
                 }
               } catch {
-                // Silent fail
+                //
               }
             }
           }
-
+          
           const preparedMedia = await prepareWAMessageMedia(mediaInput, {
             upload: this.waUploadToServer,
           });
-
+          
           if (preparedMedia.documentMessage) {
-            if (fileName) preparedMedia.documentMessage.fileName = fileName;
+            if (fileName) preparedMedia.documentMessage.fileName =
+              fileName;
             if (fileLength !== null)
-              preparedMedia.documentMessage.fileLength = fileLength.toString();
+              preparedMedia.documentMessage.fileLength = fileLength
+              .toString();
             if (pageCount !== null)
               preparedMedia.documentMessage.pageCount = pageCount;
-            if (mimetype) preparedMedia.documentMessage.mimetype = mimetype;
+            if (mimetype) preparedMedia.documentMessage.mimetype =
+              mimetype;
           }
-
+          
           messageContent.header = {
             title: title || "",
             hasMediaAttachment: hasMediaAttachment || true,
@@ -1277,10 +1240,10 @@ export function naruyaizumi(connectionOptions, options = {}) {
             title: title || location.name || "Location",
             hasMediaAttachment: hasMediaAttachment || false,
             locationMessage: {
-              degreesLatitude:
-                location.degressLatitude || location.degreesLatitude || 0,
-              degreesLongitude:
-                location.degressLongitude || location.degreesLongitude || 0,
+              degreesLatitude: location.degressLatitude || location
+                .degreesLatitude || 0,
+              degreesLongitude: location.degressLongitude || location
+                .degreesLongitude || 0,
               name: location.name || "",
               address: location.address || "",
             },
@@ -1303,13 +1266,14 @@ export function naruyaizumi(connectionOptions, options = {}) {
                 url: product.productImage,
               };
             }
-
-            const preparedMedia = await prepareWAMessageMedia(mediaInput, {
-              upload: this.waUploadToServer,
-            });
+            
+            const preparedMedia = await prepareWAMessageMedia(
+              mediaInput, {
+                upload: this.waUploadToServer,
+              });
             productImageMessage = preparedMedia.imageMessage;
           }
-
+          
           messageContent.header = {
             title: title || product.title || "Product",
             hasMediaAttachment: hasMediaAttachment || false,
@@ -1325,8 +1289,8 @@ export function naruyaizumi(connectionOptions, options = {}) {
                 url: product.url || "",
                 productImageCount: product.productImageCount || 1,
               },
-              businessOwnerJid:
-                businessOwnerJid || product.businessOwnerJid || this.user.id,
+              businessOwnerJid: businessOwnerJid || product
+                .businessOwnerJid || this.user.id,
             },
           };
         } else if (title) {
@@ -1335,37 +1299,42 @@ export function naruyaizumi(connectionOptions, options = {}) {
             hasMediaAttachment: false,
           };
         }
-
-        const hasMedia = !!(image || video || document || location || product);
+        
+        const hasMedia = !!(image || video || document || location ||
+          product);
         const bodyText = hasMedia ? caption : text || caption;
-
+        
         if (bodyText) {
           messageContent.body = { text: bodyText };
         }
-
+        
         if (footer) {
           messageContent.footer = { text: footer };
         }
-
+        
         messageContent.nativeFlowMessage = {
           buttons: processedButtons,
         };
-
+        
         if (contextInfo && typeof contextInfo === "object") {
           messageContent.contextInfo = { ...contextInfo };
-        } else if (externalAdReply && typeof externalAdReply === "object") {
+        } else if (externalAdReply && typeof externalAdReply ===
+          "object") {
           messageContent.contextInfo = {
             externalAdReply: {
               title: externalAdReply.title || "",
               body: externalAdReply.body || "",
               mediaType: externalAdReply.mediaType || 1,
-              sourceUrl: externalAdReply.sourceUrl || externalAdReply.url || "",
-              thumbnailUrl:
-                externalAdReply.thumbnailUrl || externalAdReply.thumbnail || "",
-              renderLargerThumbnail:
-                externalAdReply.renderLargerThumbnail || false,
-              showAdAttribution: externalAdReply.showAdAttribution !== false,
-              containsAutoReply: externalAdReply.containsAutoReply || false,
+              sourceUrl: externalAdReply.sourceUrl || externalAdReply
+                .url || "",
+              thumbnailUrl: externalAdReply.thumbnailUrl ||
+                externalAdReply.thumbnail || "",
+              renderLargerThumbnail: externalAdReply
+                .renderLargerThumbnail || false,
+              showAdAttribution: externalAdReply.showAdAttribution !==
+                false,
+              containsAutoReply: externalAdReply.containsAutoReply ||
+                false,
               ...(externalAdReply.mediaUrl && {
                 mediaUrl: externalAdReply.mediaUrl,
               }),
@@ -1379,19 +1348,21 @@ export function naruyaizumi(connectionOptions, options = {}) {
             },
           };
         }
-
+        
         if (options.mentionedJid) {
           if (messageContent.contextInfo) {
-            messageContent.contextInfo.mentionedJid = options.mentionedJid;
+            messageContent.contextInfo.mentionedJid = options
+              .mentionedJid;
           } else {
             messageContent.contextInfo = {
               mentionedJid: options.mentionedJid,
             };
           }
         }
-
-        const payload = proto.Message.InteractiveMessage.create(messageContent);
-
+        
+        const payload = proto.Message.InteractiveMessage.create(
+          messageContent);
+        
         const msg = generateWAMessageFromContent(
           jid,
           {
@@ -1406,102 +1377,83 @@ export function naruyaizumi(connectionOptions, options = {}) {
             quoted: options?.quoted || null,
           },
         );
-
+        
         const additionalNodes = [
+        {
+          tag: "biz",
+          attrs: {},
+          content: [
           {
-            tag: "biz",
-            attrs: {},
+            tag: "interactive",
+            attrs: {
+              type: "native_flow",
+              v: "1",
+            },
             content: [
-              {
-                tag: "interactive",
-                attrs: {
-                  type: "native_flow",
-                  v: "1",
-                },
-                content: [
-                  {
-                    tag: "native_flow",
-                    attrs: {
-                      v: "9",
-                      name: "mixed",
-                    },
-                  },
-                ],
+            {
+              tag: "native_flow",
+              attrs: {
+                v: "9",
+                name: "mixed",
               },
-            ],
-          },
-        ];
-
+            }, ],
+          }, ],
+        }, ];
+        
         await this.relayMessage(jid, msg.message, {
           messageId: msg.key.id,
           additionalNodes,
         });
-
+        
         return msg;
       },
       enumerable: true,
     },
     reply: {
       async value(jid, text = "", quoted, options = {}) {
-        const chat = conn.chats[jid];
-        const ephemeral =
-          chat?.metadata?.ephemeralDuration || chat?.ephemeralDuration || false;
-
-        const thumbs = [
-          "https://files.catbox.moe/x1aogp.png",
-          "https://files.catbox.moe/x1aogp.png",
-          "https://files.catbox.moe/x1aogp.png",
-          "https://files.catbox.moe/x1aogp.png",
-          "https://files.catbox.moe/x1aogp.png",
-        ];
-        const thumb = thumbs[Math.floor(Math.random() * thumbs.length)];
-
+        let ephemeral = false;
+        try {
+          const chat = await conn.getChat(jid);
+          ephemeral = chat?.metadata?.ephemeralDuration ||
+            chat?.ephemeralDuration ||
+            false;
+        } catch (e) {
+          global.logger?.error({ error: e.message, jid },
+            "getChat error");
+        }
+        
         text = _isStr(text) ? text.trim() : String(text || "");
-
+        
         const isGroup = jid.endsWith("@g.us");
         const baseOptions = {
           quoted,
           ephemeralExpiration: ephemeral,
         };
-
+        
         const messageContent = { text, ...options };
-
-        if (global.db?.data?.settings?.[conn.user?.lid]?.adReply) {
-          messageContent.contextInfo = {
-            externalAdReply: {
-              title: global.config?.watermark || "",
-              body: global.config?.author || "",
-              thumbnailUrl: thumb,
-              mediaType: 1,
-              renderLargerThumbnail: false,
-            },
-          };
-        }
-
+        
         if (isGroup) {
           return conn.sendMessage(jid, messageContent, baseOptions);
         }
-
+        
         const msg = generateWAMessageFromContent(
-          jid,
-          { extendedTextMessage: messageContent },
+          jid, { extendedTextMessage: messageContent },
           {
             userJid: conn.user.lid,
             quoted: quoted || null,
           },
         );
-
+        
         await conn.relayMessage(jid, msg.message, {
           messageId: msg.key.id,
           ephemeralExpiration: ephemeral,
           additionalNodes: [
-            {
-              tag: "bot",
-              attrs: { biz_bot: "1" },
-            },
-          ],
+          {
+            tag: "bot",
+            attrs: { biz_bot: "1" },
+          }, ],
         });
-
+        
         return msg;
       },
       enumerable: true,
@@ -1509,107 +1461,100 @@ export function naruyaizumi(connectionOptions, options = {}) {
     downloadM: {
       async value(m, type) {
         if (!m || !(m.url || m.directPath)) return Buffer.alloc(0);
-
+        
         const stream = await downloadContentFromMessage(m, type);
         const chunks = [];
-
+        
         for await (const chunk of stream) {
           chunks.push(chunk);
         }
-
+        
         return Buffer.concat(chunks);
       },
       enumerable: true,
     },
+    
     getName: {
-      value: async function (jid = "", withoutContact = false) {
+      value: async function(jid = "", withoutContact = false) {
         jid = conn.decodeJid(jid);
-        withoutContact = conn.withoutContact || withoutContact;
-
-        if (!jid) return "";
-
+        if (!jid || withoutContact) return jid || "";
+        
         if (_isGroupJid(jid)) {
-          const chat = conn.chats[jid];
-          if (chat?.subject) return chat.subject;
-
-          const cached = conn._groupMetaCache.get(jid);
-          if (cached) return cached.subject;
-
           try {
+            const chat = await conn.getChat(jid);
+            if (chat?.subject) return chat.subject;
+            
             const md = await conn.groupMetadata(jid);
-            if (md) {
-              conn._groupMetaCache.set(jid, md);
-              return md.subject || chat?.name || jid;
+            if (md?.subject) {
+              conn.setChat(jid, {
+                ...(chat || { id: jid }),
+                subject: md.subject,
+                metadata: md,
+              }).catch(() => {});
+              return md.subject;
             }
           } catch {
-            return chat?.name || jid;
+            return jid;
           }
         }
-
-        const self =
-          conn.user?.lid && areJidsSameUser
-            ? areJidsSameUser(jid, conn.user.lid)
-            : false;
-
-        const v =
-          jid === "12066409886@s.whatsapp.net"
-            ? {
-                jid,
-                vname: "WhatsApp",
-              }
-            : self
-              ? conn.user
-              : conn.chats[jid] || {};
-
-        const name =
-          v.name || v.vname || v.notify || v.verifiedName || v.subject;
-        return withoutContact ? "" : name || jid;
+        
+        const self = conn.user?.lid && areJidsSameUser ?
+          areJidsSameUser(jid, conn.user.lid) :
+          false;
+        
+        if (self) return conn.user?.name || jid;
+        
+        try {
+          const chat = await conn.getChat(jid);
+          return chat?.name || chat?.notify || jid;
+        } catch {
+          return jid;
+        }
       },
       enumerable: true,
     },
+    
     loadMessage: {
-      value(messageID) {
+      async value(messageID) {
         if (!messageID) return null;
-
-        const cached = conn._msgIndex.get(messageID);
-        if (cached) return cached;
-
-        for (const chatData of Object.values(conn.chats || {})) {
-          const msg = chatData?.messages?.[messageID];
-          if (msg) {
-            conn._msgIndex.set(messageID, msg);
-            return msg;
+        
+        try {
+          const allChats = await conn.getAllChats();
+          for (const chatData of allChats) {
+            const msg = chatData?.messages?.[messageID];
+            if (msg) return msg;
           }
+        } catch (e) {
+          global.logger?.error({ error: e.message }, "loadMessage error");
         }
-
+        
         return null;
       },
-      writable: true,
       enumerable: true,
-      configurable: true,
     },
+    
     processMessageStubType: {
       async value(m) {
         if (!m?.messageStubType) return;
-
+        
         const chat = conn.decodeJid(
           m.key?.remoteJid ||
-            m.message?.senderKeyDistributionMessage?.groupId ||
-            "",
+          m.message?.senderKeyDistributionMessage?.groupId ||
+          "",
         );
-
+        
         if (!chat || _isStatusJid(chat)) return;
-
+        
         const name =
           Object.entries(WAMessageStubType).find(
             ([, v]) => v === m.messageStubType,
           )?.[0] || "UNKNOWN";
-
+        
         const author = conn.decodeJid(
           m.key?.participant || m.participant || m.key?.remoteJid || "",
         );
-
-        global.logger.warn({
+        
+        global.logger?.warn({
           module: "PROTOCOL",
           event: name,
           chat,
@@ -1619,240 +1564,259 @@ export function naruyaizumi(connectionOptions, options = {}) {
       },
       enumerable: true,
     },
+    
     insertAllGroup: {
       async value() {
         try {
           const allGroups = await conn
             .groupFetchAllParticipating()
             .catch(() => ({}));
-
+          
           if (!allGroups || typeof allGroups !== "object") {
-            return conn.chats || {};
+            return {};
           }
-
-          const existing = conn.chats || (conn.chats = Object.create(null));
-          const now = _now();
-          const activeGroups = new Set();
-
-          for (const [gid, meta] of Object.entries(allGroups)) {
-            if (!_isGroupJid(gid)) continue;
-
-            activeGroups.add(gid);
-            const chat = existing[gid] || (existing[gid] = { id: gid });
-
-            chat.subject = meta.subject || chat.subject || "";
-            chat.metadata = meta;
-            chat.isChats = true;
-            chat.lastSync = now;
-
-            conn._groupMetaCache.set(gid, meta);
+          
+          const groupEntries = Object.entries(allGroups);
+          const batchSize = 10;
+          
+          for (let i = 0; i < groupEntries.length; i += batchSize) {
+            const batch = groupEntries.slice(i, i + batchSize);
+            
+            await Promise.all(
+              batch.map(async ([gid, meta]) => {
+                if (!_isGroupJid(gid)) return;
+                
+                const chat = {
+                  id: gid,
+                  subject: meta.subject || "",
+                  metadata: meta,
+                  isChats: true,
+                  lastSync: Date.now(),
+                };
+                
+                await conn.setChat(gid, chat);
+              })
+            );
           }
-
-          for (const jid in existing) {
-            if (_isGroupJid(jid) && !activeGroups.has(jid)) {
-              const chatData = existing[jid];
-              if (chatData?.lastSync !== now) {
-                delete existing[jid];
-              }
-            }
-          }
-
-          return existing;
+          
+          return allGroups;
         } catch (e) {
-          global.logger.error(e);
-          return conn.chats || {};
+          global.logger?.error(e);
+          return {};
         }
       },
       enumerable: true,
     },
+    
     pushMessage: {
       async value(m) {
         if (!m) return;
-
+        
         const messages = Array.isArray(m) ? m : [m];
-
-        for (const message of messages) {
-          if (!message) continue;
-
-          try {
-            if (
-              message.messageStubType &&
-              message.messageStubType !== WAMessageStubType.CIPHERTEXT
-            ) {
-              conn
-                .processMessageStubType(message)
-                .catch((e) => global.logger.error(e));
-            }
-
-            const msgObj = message.message || {};
-            const mtypeKeys = Object.keys(msgObj);
-            if (!mtypeKeys.length) continue;
-
-            let mtype = mtypeKeys.find(
-              (k) =>
+        
+        messages.forEach(message => {
+          asyncPipeline.add(async () => {
+            try {
+              if (
+                message.messageStubType &&
+                message.messageStubType !== WAMessageStubType
+                .CIPHERTEXT
+              ) {
+                await conn.processMessageStubType(message);
+              }
+              
+              const msgObj = message.message || {};
+              const mtypeKeys = Object.keys(msgObj);
+              if (!mtypeKeys.length) return;
+              
+              let mtype = mtypeKeys.find(
+                (k) =>
                 k !== "senderKeyDistributionMessage" &&
                 k !== "messageContextInfo",
-            );
-            if (!mtype) mtype = mtypeKeys[mtypeKeys.length - 1];
-
-            const chat = conn.decodeJid(
-              message.key?.remoteJid ||
-                msgObj?.senderKeyDistributionMessage?.groupId ||
-                "",
-            );
-
-            if (!chat || _isStatusJid(chat)) continue;
-
-            const isGroup = _isGroupJid(chat);
-            let chats = conn.chats[chat];
-
-            if (!chats) {
-              chats = conn.chats[chat] = {
-                id: chat,
-                isChats: true,
-              };
-
-              if (isGroup && !conn._groupMetaCache.get(chat)) {
-                conn
-                  .groupMetadata(chat)
-                  .then((md) => {
-                    if (md) {
-                      chats.subject = md.subject;
-                      chats.metadata = md;
-                      conn._groupMetaCache.set(chat, md);
-                    }
-                  })
-                  .catch(() => {});
-              }
-            }
-            const ctx = msgObj[mtype]?.contextInfo;
-            if (ctx?.quotedMessage && ctx.stanzaId) {
-              const qChat = conn.decodeJid(
-                ctx.remoteJid || ctx.participant || chat,
               );
-
-              if (qChat && !_isStatusJid(qChat)) {
-                const quotedMsg = {
-                  key: {
-                    remoteJid: qChat,
-                    fromMe:
-                      conn.user?.lid && areJidsSameUser
-                        ? areJidsSameUser(conn.user.lid, qChat)
-                        : false,
-                    id: ctx.stanzaId,
-                    participant: conn.decodeJid(ctx.participant),
-                  },
-                  message: ctx.quotedMessage,
-                  ...(qChat.endsWith("@g.us")
-                    ? {
-                        participant: conn.decodeJid(ctx.participant),
-                      }
-                    : {}),
-                };
-
-                const qm =
-                  conn.chats[qChat] ||
-                  (conn.chats[qChat] = {
-                    id: qChat,
-                    isChats: !_isGroupJid(qChat),
-                  });
-                qm.messages ||= Object.create(null);
-
-                if (!qm.messages[ctx.stanzaId]) {
-                  qm.messages[ctx.stanzaId] = quotedMsg;
-                  conn._msgIndex.set(ctx.stanzaId, quotedMsg);
+              if (!mtype) mtype = mtypeKeys[mtypeKeys.length -
+                1];
+              
+              const chat = conn.decodeJid(
+                message.key?.remoteJid ||
+                msgObj?.senderKeyDistributionMessage
+                ?.groupId ||
+                "",
+              );
+              
+              if (!chat || _isStatusJid(chat)) return;
+              
+              let chatData = await conn.getChat(chat);
+              if (!chatData) {
+                chatData = { id: chat, isChats: true };
+              }
+              
+              const isGroup = _isGroupJid(chat);
+              
+              if (isGroup && !chatData.metadata) {
+                try {
+                  const md = await conn.groupMetadata(chat);
+                  chatData.subject = md.subject;
+                  chatData.metadata = md;
+                } catch (e) {
+                  //
                 }
-                const msgKeys = Object.keys(qm.messages);
-                if (msgKeys.length > 40) {
-                  for (let i = 0; i < msgKeys.length - 30; i++) {
-                    delete qm.messages[msgKeys[i]];
+              }
+              
+              const ctx = msgObj[mtype]?.contextInfo;
+              if (ctx?.quotedMessage && ctx.stanzaId) {
+                const qChat = conn.decodeJid(
+                  ctx.remoteJid || ctx.participant || chat,
+                );
+                
+                if (qChat && !_isStatusJid(qChat)) {
+                  try {
+                    let qm = await conn.getChat(qChat);
+                    if (!qm) {
+                      qm = {
+                        id: qChat,
+                        isChats: !_isGroupJid(
+                          qChat)
+                      };
+                    }
+                    
+                    qm.messages ||= {};
+                    
+                    if (!qm.messages[ctx.stanzaId]) {
+                      const quotedMsg = {
+                        key: {
+                          remoteJid: qChat,
+                          fromMe: conn.user?.lid &&
+                            areJidsSameUser ?
+                            areJidsSameUser(conn.user.lid,
+                              qChat) : false,
+                          id: ctx.stanzaId,
+                          participant: conn.decodeJid(ctx
+                            .participant),
+                        },
+                        message: ctx.quotedMessage,
+                        ...(qChat.endsWith("@g.us") ?
+                        {
+                          participant: conn.decodeJid(ctx
+                            .participant),
+                        } : {}),
+                      };
+                      
+                      qm.messages[ctx.stanzaId] = quotedMsg;
+                      
+                      const msgKeys = Object.keys(qm.messages);
+                      if (msgKeys.length > 30) {
+                        for (let i = 0; i < msgKeys.length -
+                          20; i++) {
+                          delete qm.messages[msgKeys[i]];
+                        }
+                      }
+                      
+                      await conn.setChat(qChat, qm);
+                    }
+                  } catch (e) {
+                    //
                   }
                 }
               }
-            }
-            let sender;
-            if (isGroup) {
-              sender = conn.decodeJid(
-                (message.key?.fromMe && conn.user?.lid) ||
+              
+              if (!isGroup) {
+                const sender = message.key?.fromMe && conn.user
+                  ?.lid ?
+                  conn.user.lid :
+                  chat;
+                chatData.name = message.pushName || chatData
+                  .name || "";
+              } else {
+                const sender = conn.decodeJid(
+                  (message.key?.fromMe && conn.user?.lid) ||
                   message.participant ||
                   message.key?.participant ||
                   chat,
-              );
-
-              if (sender && sender !== chat) {
-                const sChat =
-                  conn.chats[sender] ||
-                  (conn.chats[sender] = {
-                    id: sender,
-                  });
-                sChat.name ||= message.pushName || sChat.name || "";
-              }
-            } else {
-              sender =
-                message.key?.fromMe && conn.user?.lid ? conn.user.lid : chat;
-              chats.name ||= message.pushName || chats.name || "";
-            }
-
-            if (
-              mtype !== "senderKeyDistributionMessage" &&
-              mtype !== "messageContextInfo" &&
-              mtype !== "protocolMessage"
-            ) {
-              const fromMe =
-                message.key?.fromMe ||
-                (conn.user?.lid && sender && areJidsSameUser
-                  ? areJidsSameUser(sender, conn.user.lid)
-                  : false);
-
-              if (
-                !fromMe &&
-                message.message &&
-                message.messageStubType !== WAMessageStubType.CIPHERTEXT &&
-                message.key?.id
-              ) {
-                delete msgObj.messageContextInfo;
-                delete msgObj.senderKeyDistributionMessage;
-
-                chats.messages ||= Object.create(null);
-                chats.messages[message.key.id] = message;
-                conn._msgIndex.set(message.key.id, message);
-
-                const msgKeys = Object.keys(chats.messages);
-                if (msgKeys.length > 40) {
-                  for (let i = 0; i < msgKeys.length - 30; i++) {
-                    delete chats.messages[msgKeys[i]];
+                );
+                
+                if (sender && sender !== chat) {
+                  try {
+                    const sChat = await conn.getChat(sender) ||
+                    { id: sender };
+                    sChat.name = message.pushName || sChat
+                      .name || "";
+                    await conn.setChat(sender, sChat);
+                  } catch (e) {
+                    //
                   }
                 }
               }
+              
+              if (
+                mtype !== "senderKeyDistributionMessage"
+              ) {
+                const sender = isGroup ?
+                  conn.decodeJid(
+                    (message.key?.fromMe && conn.user?.lid) ||
+                    message.participant ||
+                    message.key?.participant ||
+                    chat,
+                  ) :
+                  (message.key?.fromMe && conn.user?.lid) ? conn
+                  .user.lid : chat;
+                
+                const fromMe =
+                  message.key?.fromMe ||
+                  (conn.user?.lid && sender && areJidsSameUser ?
+                    areJidsSameUser(sender, conn.user.lid) :
+                    false);
+                
+                if (
+                  !fromMe &&
+                  message.message &&
+                  message.messageStubType !== WAMessageStubType
+                  .CIPHERTEXT &&
+                  message.key?.id
+                ) {
+                  const cleanMsg = { ...message };
+                  if (cleanMsg.message) {
+                    delete cleanMsg.message.messageContextInfo;
+                    delete cleanMsg.message
+                      .senderKeyDistributionMessage;
+                  }
+                  
+                  chatData.messages ||= {};
+                  chatData.messages[message.key.id] = cleanMsg;
+                  
+                  const msgKeys = Object.keys(chatData
+                    .messages);
+                  if (msgKeys.length > 20) {
+                    for (let i = 0; i < msgKeys.length -
+                      15; i++) {
+                      delete chatData.messages[msgKeys[i]];
+                    }
+                  }
+                }
+              }
+              
+              await conn.setChat(chat, chatData);
+              
+            } catch (e) {
+              global.logger?.error({ error: e.message },
+                "pushMessage error");
             }
-
-            chats.isChats = true;
-          } catch (e) {
-            global.logger.error(e);
-          }
-        }
+          });
+        });
       },
       enumerable: true,
     },
+    
     serializeM: {
       value(m) {
         return smsg(conn, m);
       },
     },
-    cleanup: {
-      value() {
-        clearInterval(cleanupInterval);
-        conn._msgIndex.clear();
-        conn._groupMetaCache.clear();
-        jidCache.clear();
-      },
-    },
   });
-
+  
   if (conn.user?.lid) {
     conn.user.lid = conn.decodeJid(conn.user.lid);
   }
-
-  bind(conn);
+  
   return conn;
 }
