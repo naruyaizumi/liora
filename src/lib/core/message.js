@@ -79,7 +79,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
       enumerable: true,
     },
     sender: {
-      async get() {
+      get() {
         const raw = ctx.participant || this.chat || "";
         const conn = self.conn;
         if (conn?.decodeJid) return conn.decodeJid(raw);
@@ -89,12 +89,9 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
       enumerable: true,
     },
     fromMe: {
-      async get() {
-        const conn = self.conn;
-        if (!conn?.user?.id) return false;
-
-        const sender = await this.sender;
-        return areJidsSameUser?.(sender, conn.user.id) || false;
+      get() {
+        const connId = self.conn?.user?.id;
+        return connId ? areJidsSameUser?.(this.sender, connId) || false : false;
       },
       enumerable: true,
     },
@@ -117,15 +114,10 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
       enumerable: true,
     },
     name: {
-      async get() {
-        const s = await this.sender;
+      get() {
+        const s = this.sender;
         if (!s) return "";
-
-        try {
-          return (await self.conn?.getName?.(s)) || "";
-        } catch {
-          return "";
-        }
+        return self.conn?.getName?.(s) || "";
       },
       enumerable: true,
     },
@@ -158,13 +150,11 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
       configurable: true,
     },
     reply: {
-      async value(text, chatId, options = {}) {
+      value(text, chatId, options = {}) {
         if (!self.conn?.reply) {
           return Promise.reject(new Error("Connection not available"));
         }
-
-        const quoted = this.vM;
-        return self.conn.reply(chatId || this.chat, text, quoted, options);
+        return self.conn.reply(chatId || this.chat, text, this.vM, options);
       },
       enumerable: true,
     },
@@ -361,18 +351,14 @@ export function serialize() {
       enumerable: true,
     },
     name: {
-      async get() {
+      get() {
         const pn = this.pushName;
         if (pn != null && pn !== "") return pn;
 
         const sender = this.sender;
         if (!sender) return "";
 
-        try {
-          return (await this.conn?.getName?.(sender)) || "";
-        } catch {
-          return "";
-        }
+        return this.conn?.getName?.(sender) || "";
       },
       enumerable: true,
     },
@@ -391,7 +377,7 @@ export function serialize() {
       configurable: true,
     },
     reply: {
-      async value(text, chatId, options = {}) {
+      value(text, chatId, options = {}) {
         if (!this.conn?.reply) {
           return Promise.reject(new Error("Connection not available"));
         }
@@ -421,11 +407,11 @@ export function serialize() {
       enumerable: true,
     },
     getQuotedObj: {
-      async value() {
+      value() {
         const q = this.quoted;
         if (!q?.id || !this.conn) return null;
 
-        const M = (await this.conn.loadMessage?.(q.id)) || q.vM;
+        const M = this.conn.loadMessage?.(q.id) || q.vM;
         if (!M) return null;
 
         return smsg(this.conn, proto.WebMessageInfo.fromObject(M));
