@@ -3,47 +3,47 @@ import { Database } from "bun:sqlite";
 
 const encodeMeta = (value) => {
   if (value === null || value === undefined) return null;
-  
-  if (typeof value === 'string') {
+
+  if (typeof value === "string") {
     return new TextEncoder().encode(value);
   }
-  
-  if (typeof value === 'number') {
+
+  if (typeof value === "number") {
     const buffer = new Uint8Array(8);
     new DataView(buffer.buffer).setFloat64(0, value, true);
     return buffer;
   }
-  
-  if (typeof value === 'boolean') {
+
+  if (typeof value === "boolean") {
     return new Uint8Array([value ? 1 : 0]);
   }
-  
-  if (typeof value === 'object') {
+
+  if (typeof value === "object") {
     const str = Bun.inspect(value);
     return new TextEncoder().encode(str);
   }
-  
+
   return null;
 };
 
 const decodeMeta = (bytes) => {
   if (!bytes || bytes.length === 0) return null;
-  
+
   if (!(bytes instanceof Uint8Array)) {
     bytes = new Uint8Array(bytes);
   }
-  
+
   try {
     const text = new TextDecoder().decode(bytes);
-    
+
     if (/^-?\d+\.?\d*$/.test(text)) {
       const num = parseFloat(text);
       if (!isNaN(num)) return num;
     }
-    
-    if (text === 'true') return true;
-    if (text === 'false') return false;
-    
+
+    if (text === "true") return true;
+    if (text === "false") return false;
+
     return text;
   } catch {
     return null;
@@ -191,7 +191,9 @@ const initializeLogger = () => {
     for (const arg of args) {
       if (typeof arg === "object" && arg !== null && !(arg instanceof Error)) {
         for (const [key, value] of Object.entries(arg)) {
-          extraFields.push(`"${key}":${typeof value === 'string' ? `"${value}"` : value}`);
+          extraFields.push(
+            `"${key}":${typeof value === "string" ? `"${value}"` : value}`,
+          );
         }
       } else {
         message += String(arg) + " ";
@@ -203,10 +205,10 @@ const initializeLogger = () => {
       `"time":${Date.now()}`,
       `"msg":"${message.trim()}"`,
       `"pid":${process.pid}`,
-      ...extraFields
+      ...extraFields,
     ];
 
-    return `{${fields.join(',')}}`;
+    return `{${fields.join(",")}}`;
   };
 
   const log = (level, ...args) => {
@@ -267,15 +269,18 @@ const logger = initializeLogger();
 const initializeConfig = () => {
   const ownersEnv = (Bun.env.OWNERS || "").trim();
   let owners = [];
-  
+
   if (ownersEnv) {
-    if (ownersEnv.includes(',')) {
-      owners = ownersEnv.split(',').map(o => o.trim()).filter(Boolean);
-    } else if (ownersEnv.startsWith('[')) {
+    if (ownersEnv.includes(",")) {
+      owners = ownersEnv
+        .split(",")
+        .map((o) => o.trim())
+        .filter(Boolean);
+    } else if (ownersEnv.startsWith("[")) {
       try {
         const parsed = JSON.parse(ownersEnv);
         if (Array.isArray(parsed)) {
-          owners = parsed.filter(o => typeof o === 'string' && o.trim());
+          owners = parsed.filter((o) => typeof o === "string" && o.trim());
         }
       } catch {
         logger.warn("Invalid OWNERS format, use comma-separated values");

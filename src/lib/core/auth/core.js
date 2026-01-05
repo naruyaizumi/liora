@@ -94,9 +94,9 @@ export class DatabaseCore {
       const result = await this.db`
         SELECT value FROM baileys_state WHERE key = ${key}
       `;
-      
+
       if (result.length === 0) return undefined;
-      
+
       const bytes = result[0].value;
       return { value: deserialize(bytes) };
     } catch (e) {
@@ -137,7 +137,7 @@ export class DatabaseCore {
     const writePromise = (async () => {
       try {
         const bytes = serialize(value);
-        
+
         if (bytes === null) {
           await this.del(key);
           return;
@@ -201,7 +201,7 @@ export class DatabaseCore {
         const writePromise = (async () => {
           try {
             const bytes = serialize(value);
-            
+
             if (bytes === null) {
               await this.db`DELETE FROM baileys_state WHERE key = ${key}`;
               return;

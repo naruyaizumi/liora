@@ -24,7 +24,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     const audioRes = await fetch(downloadUrl);
     if (!audioRes.ok) {
-      throw new Error(`Failed to fetch audio: ${audioRes.status} ${audioRes.statusText}`);
+      throw new Error(
+        `Failed to fetch audio: ${audioRes.status} ${audioRes.statusText}`,
+      );
     }
 
     const audioArrayBuffer = await audioRes.arrayBuffer();
@@ -46,7 +48,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       throw new Error("Audio conversion failed");
     }
 
-    const audioBuffer = Buffer.from(converted.buffer, converted.byteOffset, converted.byteLength);
+    const audioBuffer = Buffer.from(
+      converted.buffer,
+      converted.byteOffset,
+      converted.byteLength,
+    );
 
     await conn.sendMessage(
       m.chat,
@@ -67,7 +73,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       },
       { quoted: m },
     );
-
   } catch (e) {
     global.logger.error(e);
     m.reply(`Error: ${e.message}`);

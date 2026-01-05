@@ -19,15 +19,20 @@ let handler = async (m, { conn, command, usedPrefix }) => {
     const data = await q.download().catch(() => null);
     if (!data || !(data instanceof Uint8Array))
       return m.reply("Invalid image data.");
-      
+
     const { success, resultUrl, resultBuffer, error } = await remini(data);
     if (!success) throw new Error(error || "Enhancement failed");
 
     if (resultBuffer) {
-      const buffer = resultBuffer instanceof Uint8Array
-        ? Buffer.from(resultBuffer.buffer, resultBuffer.byteOffset, resultBuffer.byteLength)
-        : resultBuffer;
-      
+      const buffer =
+        resultBuffer instanceof Uint8Array
+          ? Buffer.from(
+              resultBuffer.buffer,
+              resultBuffer.byteOffset,
+              resultBuffer.byteLength,
+            )
+          : resultBuffer;
+
       await conn.sendMessage(
         m.chat,
         {

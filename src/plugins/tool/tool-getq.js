@@ -167,9 +167,10 @@ ${data instanceof Uint8Array ? `• Data Bytes: ${data.length}` : ""}
     const finalMime = detectedMime || mime;
     const finalExt = detectedExt || (await getExtension(finalMime));
 
-    const buffer = data instanceof Uint8Array 
-      ? Buffer.from(data.buffer, data.byteOffset, data.byteLength)
-      : Buffer.from(data || []);
+    const buffer =
+      data instanceof Uint8Array
+        ? Buffer.from(data.buffer, data.byteOffset, data.byteLength)
+        : Buffer.from(data || []);
 
     if (type === "image") {
       await conn.sendMessage(

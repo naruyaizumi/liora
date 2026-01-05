@@ -26,7 +26,10 @@ const getFirstKey = (obj) => {
 const firstMeaningfulType = (msg) => {
   if (!msg) return "";
   for (const key in msg) {
-    if (Object.prototype.hasOwnProperty.call(msg, key) && !SKIP_TYPES.has(key)) {
+    if (
+      Object.prototype.hasOwnProperty.call(msg, key) &&
+      !SKIP_TYPES.has(key)
+    ) {
       return key;
     }
   }
@@ -57,10 +60,13 @@ class QuotedMessage {
     this._rawNode = rawNode;
     this._type = type;
     this._textNode = typeof rawNode === "string" ? rawNode : rawNode?.text;
-    
+
     if (rawNode && typeof rawNode === "object") {
       for (const key in rawNode) {
-        if (Object.prototype.hasOwnProperty.call(rawNode, key) && key !== 'text') {
+        if (
+          Object.prototype.hasOwnProperty.call(rawNode, key) &&
+          key !== "text"
+        ) {
           this[key] = rawNode[key];
         }
       }
@@ -144,10 +150,10 @@ class QuotedMessage {
   async download() {
     const t = this.mediaType;
     if (!t || !this._parent.conn?.downloadM) return null;
-    
+
     const data = await this._parent.conn.downloadM(
       this.mediaMessage[t],
-      t.replace(/message/i, "")
+      t.replace(/message/i, ""),
     );
     return data instanceof Uint8Array ? data : new Uint8Array(data || []);
   }
@@ -173,7 +179,7 @@ class QuotedMessage {
     return this._parent.conn.sendMessage(
       jid,
       { forward: this.vM, force, ...options },
-      options
+      options,
     );
   }
 
@@ -239,7 +245,7 @@ export class Message {
       this._raw.key?.remoteJid ||
       (skdm && skdm !== "status@broadcast" ? skdm : "") ||
       "";
-    
+
     const conn = this._conn;
     if (conn?.decodeJid) return conn.decodeJid(raw);
     return raw;
@@ -265,7 +271,7 @@ export class Message {
       key?.participant ||
       this.chat ||
       "";
-    
+
     if (conn?.decodeJid) return conn.decodeJid(cand);
     return cand;
   }
@@ -304,12 +310,12 @@ export class Message {
     const baseMsg = this.msg;
     const ctx = baseMsg?.contextInfo;
     const quoted = ctx?.quotedMessage;
-    
+
     if (!baseMsg || !ctx || !quoted) return null;
-    
+
     const type = getFirstKey(quoted);
     if (!type) return null;
-    
+
     const rawNode = quoted[type];
     return new QuotedMessage(this, ctx, quoted, rawNode, type);
   }
@@ -318,13 +324,13 @@ export class Message {
     const msg = this.msg;
     if (!msg) return "";
     if (typeof msg === "string") return msg;
-    
+
     if (msg.text) return msg.text;
     if (msg.caption) return msg.caption;
     if (msg.contentText) return msg.contentText;
     if (msg.selectedId) return msg.selectedId;
     if (msg.selectedDisplayText) return msg.selectedDisplayText;
-    
+
     const nfr = msg.nativeFlowResponseMessage?.paramsJson;
     if (nfr) {
       try {
@@ -332,7 +338,7 @@ export class Message {
         if (idMatch) return idMatch[1];
       } catch {}
     }
-    
+
     return msg.hydratedTemplate?.hydratedContentText || "";
   }
 
@@ -345,20 +351,20 @@ export class Message {
   get name() {
     const pn = this._raw.pushName;
     if (pn != null && pn !== "") return pn;
-    
+
     const sender = this.sender;
     if (!sender) return "";
-    
+
     return this._conn?.getName?.(sender) || "";
   }
 
   async download() {
     const t = this.mediaType;
     if (!t || !this._conn?.downloadM) return null;
-    
+
     const data = await this._conn.downloadM(
       this.mediaMessage[t],
-      t.replace(/message/i, "")
+      t.replace(/message/i, ""),
     );
     return data instanceof Uint8Array ? data : new Uint8Array(data || []);
   }
@@ -384,17 +390,17 @@ export class Message {
     return this._conn.sendMessage(
       jid,
       { forward: this._raw, force, ...options },
-      options
+      options,
     );
   }
 
   getQuotedObj() {
     const q = this.quoted;
     if (!q?.id || !this._conn) return null;
-    
+
     const M = this._conn.loadMessage?.(q.id) || q.vM;
     if (!M) return null;
-    
+
     const smsg = getSmsg();
     return smsg(this._conn, proto.WebMessageInfo.fromObject(M));
   }
@@ -412,10 +418,10 @@ export class Message {
 
   _getBotId() {
     const now = Date.now();
-    if (this._botIdCache && (now - this._botIdCacheTime < 60000)) {
+    if (this._botIdCache && now - this._botIdCacheTime < 60000) {
       return this._botIdCache;
     }
-    
+
     const conn = this._conn;
     const botId = conn?.decodeJid?.(conn.user?.lid || "") || "";
     this._botIdCache = botId;
@@ -425,7 +431,7 @@ export class Message {
 
   process() {
     if (this._processed) return this;
-    
+
     const msg = this._raw.message;
     if (!msg) {
       this._processed = true;
@@ -446,7 +452,10 @@ export class Message {
           key.remoteJid = this.chat;
         }
 
-        if ((!key.participant || key.participant === "status_me") && this.sender) {
+        if (
+          (!key.participant || key.participant === "status_me") &&
+          this.sender
+        ) {
           key.participant = this.sender;
         }
 
@@ -468,7 +477,7 @@ export class Message {
       if (q && !q.mediaMessage && q.download !== undefined) {
         delete q.download;
       }
-      
+
       if (!this.mediaMessage && this.download !== undefined) {
         delete this.download;
       }
