@@ -109,7 +109,6 @@ const checkPermissions = (m, settings, isOwner, isAdmin, isBotAdmin, chat) => {
   return { allowed: true };
 };
 
-// FUNGSI PRINT MESSAGE (gabung dari console.js)
 async function printMessage(m, conn = {
   user: {},
   decodeJid: (id) => id,
