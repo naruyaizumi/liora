@@ -8,18 +8,33 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     );
 
   await global.loading(m, conn);
+
   try {
-    const { success, title, channel, cover, url, downloadUrl, error } =
-      await play(args.join(" "));
-    if (!success) throw new Error(error);
+    const result = await play(args.join(" "));
+
+    if (!result?.success) {
+      throw new Error(result?.error || "Failed to get audio");
+    }
+
+    const { title, channel, cover, url, downloadUrl } = result;
+
+    if (!downloadUrl) {
+      throw new Error("No download URL returned");
+    }
 
     const audioRes = await fetch(downloadUrl);
-    if (!audioRes.ok)
-      throw new Error(`Failed to fetch audio. Status: ${audioRes.status}`);
+    if (!audioRes.ok) {
+      throw new Error(`Failed to fetch audio: ${audioRes.status} ${audioRes.statusText}`);
+    }
 
-    const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
+    const audioArrayBuffer = await audioRes.arrayBuffer();
+    const audioUint8 = new Uint8Array(audioArrayBuffer);
 
-    const converted = await convert(audioBuffer, {
+    if (audioUint8.length === 0) {
+      throw new Error("Audio data is empty");
+    }
+
+    const converted = await convert(audioUint8, {
       format: "opus",
       bitrate: "128k",
       channels: 1,
@@ -27,24 +42,21 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       ptt: true,
     });
 
-    const finalBuffer =
-      converted instanceof Buffer
-        ? converted
-        : converted?.buffer
-          ? Buffer.from(converted.buffer)
-          : converted?.data
-            ? Buffer.from(converted.data)
-            : Buffer.from(converted);
+    if (!converted || converted.length === 0) {
+      throw new Error("Audio conversion failed");
+    }
+
+    const audioBuffer = Buffer.from(converted.buffer, converted.byteOffset, converted.byteLength);
 
     await conn.sendMessage(
       m.chat,
       {
-        audio: finalBuffer,
+        audio: audioBuffer,
         mimetype: "audio/ogg; codecs=opus",
         ptt: true,
         contextInfo: {
           externalAdReply: {
-            title,
+            title: title,
             body: channel,
             thumbnailUrl: cover,
             mediaUrl: url,
@@ -55,6 +67,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       },
       { quoted: m },
     );
+
   } catch (e) {
     global.logger.error(e);
     m.reply(`Error: ${e.message}`);

@@ -1,16 +1,52 @@
 import { join } from "node:path";
 import { Database } from "bun:sqlite";
 
-const PRESENCE_DELAY = 800;
-const DEFAULT_THUMBNAIL = "https://qu.ax/DdwBH.jpg";
+const encodeMeta = (value) => {
+  if (value === null || value === undefined) return null;
+  
+  if (typeof value === 'string') {
+    return new TextEncoder().encode(value);
+  }
+  
+  if (typeof value === 'number') {
+    const buffer = new Uint8Array(8);
+    new DataView(buffer.buffer).setFloat64(0, value, true);
+    return buffer;
+  }
+  
+  if (typeof value === 'boolean') {
+    return new Uint8Array([value ? 1 : 0]);
+  }
+  
+  if (typeof value === 'object') {
+    const str = Bun.inspect(value);
+    return new TextEncoder().encode(str);
+  }
+  
+  return null;
+};
 
-const safeJSONParse = (jsonString, fallback) => {
+const decodeMeta = (bytes) => {
+  if (!bytes || bytes.length === 0) return null;
+  
+  if (!(bytes instanceof Uint8Array)) {
+    bytes = new Uint8Array(bytes);
+  }
+  
   try {
-    if (!jsonString || jsonString.trim() === "") return fallback;
-    const parsed = JSON.parse(jsonString);
-    return parsed ?? fallback;
+    const text = new TextDecoder().decode(bytes);
+    
+    if (/^-?\d+\.?\d*$/.test(text)) {
+      const num = parseFloat(text);
+      if (!isNaN(num)) return num;
+    }
+    
+    if (text === 'true') return true;
+    if (text === 'false') return false;
+    
+    return text;
   } catch {
-    return fallback;
+    return null;
   }
 };
 
@@ -106,11 +142,7 @@ const initializeLogger = () => {
       if (value === null) formattedValue = "null";
       else if (value === undefined) formattedValue = "undefined";
       else if (typeof value === "object") {
-        try {
-          formattedValue = JSON.stringify(value);
-        } catch {
-          formattedValue = Bun.inspect(value, { colors: false, depth: 1 });
-        }
+        formattedValue = Bun.inspect(value, { colors: false, depth: 1 });
       } else if (typeof value === "boolean") {
         formattedValue = value ? "true" : "false";
       } else if (typeof value === "number") {
@@ -154,29 +186,27 @@ const initializeLogger = () => {
 
   const formatJson = (level, args) => {
     let message = "";
-    let extraObject = {};
-
-    const strings = [];
+    const extraFields = [];
 
     for (const arg of args) {
       if (typeof arg === "object" && arg !== null && !(arg instanceof Error)) {
-        extraObject = { ...extraObject, ...arg };
+        for (const [key, value] of Object.entries(arg)) {
+          extraFields.push(`"${key}":${typeof value === 'string' ? `"${value}"` : value}`);
+        }
       } else {
-        strings.push(String(arg));
+        message += String(arg) + " ";
       }
     }
 
-    message = strings.join(" ");
+    const fields = [
+      `"level":${LEVEL_NUMBERS[level]}`,
+      `"time":${Date.now()}`,
+      `"msg":"${message.trim()}"`,
+      `"pid":${process.pid}`,
+      ...extraFields
+    ];
 
-    const logEntry = {
-      level: LEVEL_NUMBERS[level],
-      time: Date.now(),
-      msg: message,
-      pid: process.pid,
-      ...extraObject,
-    };
-
-    return JSON.stringify(logEntry);
+    return `{${fields.join(',')}}`;
   };
 
   const log = (level, ...args) => {
@@ -234,29 +264,36 @@ const initializeLogger = () => {
 
 const logger = initializeLogger();
 
-export default logger;
-export { initializeLogger };
-
 const initializeConfig = () => {
-  const owners = safeJSONParse(Bun.env.OWNERS, []);
-
-  if (!Array.isArray(owners)) {
-    logger.warn("OWNERS must be a valid JSON array");
+  const ownersEnv = (Bun.env.OWNERS || "").trim();
+  let owners = [];
+  
+  if (ownersEnv) {
+    if (ownersEnv.includes(',')) {
+      owners = ownersEnv.split(',').map(o => o.trim()).filter(Boolean);
+    } else if (ownersEnv.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(ownersEnv);
+        if (Array.isArray(parsed)) {
+          owners = parsed.filter(o => typeof o === 'string' && o.trim());
+        }
+      } catch {
+        logger.warn("Invalid OWNERS format, use comma-separated values");
+      }
+    } else {
+      owners = [ownersEnv];
+    }
   }
 
   const config = {
-    owner: Array.isArray(owners)
-      ? owners.filter(
-          (owner) => typeof owner === "string" && owner.trim() !== "",
-        )
-      : [],
+    owner: owners,
     pairingNumber: (Bun.env.PAIRING_NUMBER || "").trim(),
     pairingCode:
       (Bun.env.PAIRING_CODE || "").trim().toUpperCase() ||
       generatePairingCode(),
     watermark: (Bun.env.WATERMARK || "Liora").trim(),
     author: (Bun.env.AUTHOR || "Naruya Izumi").trim(),
-    thumbnailUrl: sanitizeUrl(Bun.env.THUMBNAIL_URL, DEFAULT_THUMBNAIL),
+    thumbnailUrl: sanitizeUrl(Bun.env.THUMBNAIL_URL),
   };
 
   if (
@@ -306,7 +343,7 @@ const SCHEMAS = {
   meta: {
     columns: {
       key: "TEXT PRIMARY KEY",
-      value: "TEXT",
+      value: "BLOB",
     },
     indices: ["CREATE INDEX IF NOT EXISTS idx_meta_key ON meta(key)"],
   },
@@ -424,12 +461,12 @@ class DataWrapper {
     this.meta = {
       get: (key) => {
         const result = STMTS.meta.get.get(key);
-        return result ? safeJSONParse(result.value, null) : null;
+        return result ? decodeMeta(result.value) : null;
       },
       set: (key, value) => {
-        const strValue =
-          typeof value === "object" ? JSON.stringify(value) : String(value);
-        STMTS.meta.set.run(key, strValue);
+        const bytes = encodeMeta(value);
+        if (bytes === null) return false;
+        STMTS.meta.set.run(key, bytes);
         return true;
       },
       delete: (key) => {
@@ -440,7 +477,7 @@ class DataWrapper {
         const rows = STMTS.meta.getAll.all();
         const result = {};
         for (const row of rows) {
-          result[row.key] = safeJSONParse(row.value, row.value);
+          result[row.key] = decodeMeta(row.value);
         }
         return result;
       },
@@ -529,10 +566,15 @@ class DataWrapper {
       }
     }
   }
+
+  close() {
+    this.clearCache();
+  }
 }
 
 const db = new DataWrapper();
 global.db = db;
+global.sqlite = sqlite;
 
 setInterval(() => {
   const stats = {
@@ -550,7 +592,7 @@ global.loading = async (m, conn, back = false) => {
 
   if (back) {
     await conn.sendPresenceUpdate("paused", m.chat);
-    await new Promise((resolve) => setTimeout(resolve, PRESENCE_DELAY));
+    await new Promise((resolve) => setTimeout(resolve, 800));
     await conn.sendPresenceUpdate("available", m.chat);
   } else {
     await conn.sendPresenceUpdate("composing", m.chat);
@@ -609,11 +651,3 @@ global.dfail = async (type, m, conn) => {
     await conn.sendMessage(m.chat, { text: messageText }, { quoted: m });
   }
 };
-
-process.on("SIGTERM", () => {
-  sqlite.close();
-});
-
-process.on("SIGINT", () => {
-  sqlite.close();
-});

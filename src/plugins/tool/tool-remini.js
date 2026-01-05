@@ -16,17 +16,22 @@ let handler = async (m, { conn, command, usedPrefix }) => {
 
   try {
     await global.loading(m, conn);
-    const media = await q.download().catch(() => null);
-    if (!media || !Buffer.isBuffer(media))
-      return m.reply("Invalid image buffer.");
-    const { success, resultUrl, resultBuffer, error } = await remini(media);
+    const data = await q.download().catch(() => null);
+    if (!data || !(data instanceof Uint8Array))
+      return m.reply("Invalid image data.");
+      
+    const { success, resultUrl, resultBuffer, error } = await remini(data);
     if (!success) throw new Error(error || "Enhancement failed");
 
     if (resultBuffer) {
+      const buffer = resultBuffer instanceof Uint8Array
+        ? Buffer.from(resultBuffer.buffer, resultBuffer.byteOffset, resultBuffer.byteLength)
+        : resultBuffer;
+      
       await conn.sendMessage(
         m.chat,
         {
-          image: resultBuffer,
+          image: buffer,
           caption: "Image enhancement successful.",
         },
         { quoted: m },

@@ -1,5 +1,6 @@
 let handler = async (m, { conn, usedPrefix, command }) => {
   const quoted = m.quoted ? m.quoted : m;
+  const mediaType = quoted.mtype || "";
   const mime = (quoted.msg || quoted).mimetype || "";
 
   const textToParse = m.text || "";
@@ -8,7 +9,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     .trim();
 
   try {
-    if (!mime && !caption) {
+    if (!mediaType && !caption) {
       return m.reply(
         `Reply to media or provide text.\nExamples: ${usedPrefix + command} Hello everyone! or ${usedPrefix + command} reply to image/video/audio`,
       );
@@ -16,34 +17,40 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
     await global.loading(m, conn);
 
-    let payload = {};
+    let content = {};
 
-    if (/image/.test(mime)) {
-      const buffer = await quoted.download();
-      if (!buffer) return m.reply("Failed to download image.");
-
-      payload = {
+    if (mediaType === 'imageMessage' || /image/.test(mime)) {
+      const uint8Array = await quoted.download();
+      if (!uint8Array) return m.reply("Failed to download image.");
+      
+      const buffer = Buffer.from(uint8Array.buffer, uint8Array.byteOffset, uint8Array.byteLength);
+      
+      content = {
         image: buffer,
         caption: caption || "",
       };
-    } else if (/video/.test(mime)) {
-      const buffer = await quoted.download();
-      if (!buffer) return m.reply("Failed to download video.");
-
-      payload = {
+    } else if (mediaType === 'videoMessage' || /video/.test(mime)) {
+      const uint8Array = await quoted.download();
+      if (!uint8Array) return m.reply("Failed to download video.");
+      
+      const buffer = Buffer.from(uint8Array.buffer, uint8Array.byteOffset, uint8Array.byteLength);
+      
+      content = {
         video: buffer,
         caption: caption || "",
       };
-    } else if (/audio/.test(mime)) {
-      const buffer = await quoted.download();
-      if (!buffer) return m.reply("Failed to download audio.");
-
-      payload = {
+    } else if (mediaType === 'audioMessage' || mediaType === 'ptt' || /audio/.test(mime)) {
+      const uint8Array = await quoted.download();
+      if (!uint8Array) return m.reply("Failed to download audio.");
+      
+      const buffer = Buffer.from(uint8Array.buffer, uint8Array.byteOffset, uint8Array.byteLength);
+      
+      content = {
         audio: buffer,
         mimetype: "audio/mp4",
       };
     } else if (caption) {
-      payload = {
+      content = {
         text: caption,
       };
     } else {
@@ -52,7 +59,43 @@ let handler = async (m, { conn, usedPrefix, command }) => {
       );
     }
 
-    await conn.sendGroupStatus(m.chat, payload);
+    const { generateWAMessageContent, generateWAMessageFromContent } = 
+      await import('baileys');
+
+    const { backgroundColor, ...contentWithoutBg } = content;
+
+    const inside = await generateWAMessageContent(contentWithoutBg, {
+      upload: conn.waUploadToServer,
+      backgroundColor: backgroundColor || undefined,
+    });
+
+    const messageSecret = new Uint8Array(32);
+    crypto.getRandomValues(messageSecret);
+
+    const msg = generateWAMessageFromContent(
+      m.chat,
+      {
+        messageContextInfo: {
+          messageSecret,
+        },
+        groupStatusMessageV2: {
+          message: {
+            ...inside,
+            messageContextInfo: {
+              messageSecret,
+            },
+          },
+        },
+      },
+      {
+        userJid: conn.user.id,
+        quoted: m,
+      }
+    );
+
+    await conn.relayMessage(m.chat, msg.message, {
+      messageId: msg.key.id,
+    });
 
     m.reply("Group status sent successfully.");
   } catch (e) {

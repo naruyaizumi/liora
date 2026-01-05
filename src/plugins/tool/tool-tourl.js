@@ -41,8 +41,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       } else {
         await global.loading(m, conn);
         const buffer = await q.download?.();
-        if (!Buffer.isBuffer(buffer) || !buffer.length)
-          return m.reply("Failed to get media buffer.");
 
         const sizeKB = (buffer.length / 1024).toFixed(2);
         const sizeMB = (buffer.length / 1024 / 1024).toFixed(2);
@@ -51,7 +49,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         let result = await uploader(buffer);
         if (result && result.success) {
-          return conn.sendButton(
+          return conn.client(
             m.chat,
             {
               text: `Uploaded\nServer: ${result.provider}\nSize: ${sizeDisplay}`,
@@ -81,9 +79,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     await global.loading(m, conn);
 
     const buffer = await q.download?.();
-    if (!Buffer.isBuffer(buffer) || !buffer.length)
-      return m.reply("Failed to get media buffer.");
-
     const sizeKB = (buffer.length / 1024).toFixed(2);
     const sizeMB = (buffer.length / 1024 / 1024).toFixed(2);
     const sizeDisplay =
@@ -112,7 +107,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       return m.reply(`Upload failed.\nFile: ${sizeDisplay}`);
     }
 
-    return conn.sendButton(
+    return conn.client(
       m.chat,
       {
         text: caption,

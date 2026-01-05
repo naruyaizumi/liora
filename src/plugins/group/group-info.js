@@ -123,6 +123,6 @@ handler.help = ["groupinfo"];
 handler.tags = ["group"];
 handler.command = /^(info(gro?up|gc))$/i;
 handler.group = true;
-handler.admin = true;
+//handler.admin = true;
 
 export default handler;

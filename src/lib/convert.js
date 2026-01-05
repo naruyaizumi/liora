@@ -133,7 +133,7 @@ function buildFFmpegArgs(options = {}) {
   return args;
 }
 
-async function spawnFFmpeg(args, inputBuffer, timeout = FFMPEG_TIMEOUT) {
+async function spawnFFmpeg(args, inputUint8, timeout = FFMPEG_TIMEOUT) {
   const proc = Bun.spawn(["ffmpeg", ...args], {
     stdin: "pipe",
     stdout: "pipe",
@@ -150,7 +150,7 @@ async function spawnFFmpeg(args, inputBuffer, timeout = FFMPEG_TIMEOUT) {
 
   const writerPromise = (async () => {
     try {
-      await proc.stdin.write(inputBuffer);
+      await proc.stdin.write(inputUint8);
       await proc.stdin.end();
     } catch (err) {
       if (!killed) throw err;
@@ -179,7 +179,7 @@ async function spawnFFmpeg(args, inputBuffer, timeout = FFMPEG_TIMEOUT) {
       throw new Error("FFmpeg produced empty output");
     }
 
-    return Buffer.from(output);
+    return new Uint8Array(output);
   } catch (err) {
     clearTimeout(timeoutId);
     if (!killed) {
@@ -191,17 +191,15 @@ async function spawnFFmpeg(args, inputBuffer, timeout = FFMPEG_TIMEOUT) {
 }
 
 export async function convert(input, options = {}) {
-  const buf = Buffer.isBuffer(input) ? input : input?.data;
-
-  if (!Buffer.isBuffer(buf)) {
-    throw new TypeError(`convert() requires a Buffer, got ${typeof buf}`);
+  if (!(input instanceof Uint8Array)) {
+    throw new TypeError(`convert() requires a Uint8Array, got ${typeof input}`);
   }
 
-  if (buf.length === 0) {
-    throw new Error("convert() received empty buffer");
+  if (input.length === 0) {
+    throw new Error("convert() received empty Uint8Array");
   }
 
-  if (buf.length > MAX_BUFFER_SIZE) {
+  if (input.length > MAX_BUFFER_SIZE) {
     throw new Error(`Input size exceeds limit: ${MAX_BUFFER_SIZE} bytes`);
   }
 
@@ -224,7 +222,7 @@ export async function convert(input, options = {}) {
   }
 
   const args = buildFFmpegArgs(options);
-  const result = await spawnFFmpeg(args, buf);
+  const result = await spawnFFmpeg(args, input);
 
   return result;
 }

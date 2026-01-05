@@ -12,18 +12,20 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
     await global.loading(m, conn);
 
-    const buffer = await q.download?.();
-    if (!Buffer.isBuffer(buffer))
-      return m.reply("Failed to fetch media buffer.");
+    const data = await q.download?.();
+    if (!data || !(data instanceof Uint8Array) || data.length === 0)
+      return m.reply("Failed to fetch media data.");
 
-    const audio = await convert(buffer, { format: "mp3" });
-    if (!Buffer.isBuffer(audio) || !audio.length)
+    const audioUint8 = await convert(data, { format: "mp3" });
+    if (!audioUint8 || !(audioUint8 instanceof Uint8Array) || audioUint8.length === 0)
       return m.reply("Conversion failed: empty result.");
+
+    const audioBuffer = Buffer.from(audioUint8.buffer, audioUint8.byteOffset, audioUint8.byteLength);
 
     await conn.sendMessage(
       m.chat,
       {
-        audio,
+        audio: audioBuffer,
         mimetype: "audio/mpeg",
         fileName: "output.mp3",
       },

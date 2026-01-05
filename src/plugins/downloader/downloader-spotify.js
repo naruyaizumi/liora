@@ -25,9 +25,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!audioRes.ok)
       throw new Error(`Failed to fetch audio. Status: ${audioRes.status}`);
 
-    const buffer = Buffer.from(await audioRes.arrayBuffer());
+    const arrayBuffer = await audioRes.arrayBuffer();
+    const audioUint8 = new Uint8Array(arrayBuffer);
 
-    const audio = await convert(buffer, {
+    const convertedUint8 = await convert(audioUint8, {
       format: "opus",
       sampleRate: 48000,
       channels: 1,
@@ -35,19 +36,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       ptt: true,
     });
 
-    const finalBuffer =
-      audio instanceof Buffer
-        ? audio
-        : audio?.buffer
-          ? Buffer.from(audio.buffer)
-          : audio?.data
-            ? Buffer.from(audio.data)
-            : Buffer.from(audio);
+    const audioBuffer = Buffer.from(convertedUint8.buffer, convertedUint8.byteOffset, convertedUint8.byteLength);
 
     await conn.sendMessage(
       m.chat,
       {
-        audio: finalBuffer,
+        audio: audioBuffer,
         mimetype: "audio/ogg; codecs=opus",
         ptt: true,
         contextInfo: {

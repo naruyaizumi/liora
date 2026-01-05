@@ -7,7 +7,7 @@
   "type": "module",
   "license": "Apache-2.0",
   "dependencies": {
-    "baileys": "github:naruyaizumi/baileys"
+    "baileys": "^7.0.0-rc.9"
   },
   "imports": {
     "#api/*": "./src/lib/api/*",
@@ -18,8 +18,5 @@
   "trustedDependencies": [
     "baileys",
     "protobufjs"
-  ],
-  "devDependencies": {
-    "prettier": "^3.7.4"
-  }
+  ]
 }

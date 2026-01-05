@@ -1,5 +1,6 @@
 import { initAuthCreds } from "baileys";
-import core, { parse, makeKey } from "./core.js";
+import core, { makeKey } from "./core.js";
+import { deserialize } from "./binary.js";
 
 function createKeyStore() {
   async function _getMany(type, ids) {
@@ -14,11 +15,8 @@ function createKeyStore() {
       const k = makeKey(type, id);
       const row = results[k];
 
-      if (row && row.value) {
-        const v = parse(row.value);
-        if (v !== null) {
-          out[id] = v;
-        }
+      if (row && row.value !== null && row.value !== undefined) {
+        out[id] = row.value;
       }
     }
 
@@ -100,7 +98,7 @@ export async function useSQLAuthState() {
     try {
       const row = await core.get("creds");
       if (row && row.value) {
-        creds = parse(row.value) || initAuthCreds();
+        creds = row.value;
       } else {
         creds = initAuthCreds();
       }

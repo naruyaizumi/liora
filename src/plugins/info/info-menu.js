@@ -150,7 +150,7 @@ async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
     },
   ];
 
-  return await conn.sendButton(
+  return await conn.client(
     m.chat,
     {
       product: {

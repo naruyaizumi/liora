@@ -32,7 +32,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
           image: { url: img },
           caption: `Slide ${i + 1} of ${images.length}`,
         }));
-        await conn.sendAlbum(m.chat, album, { quoted: m });
+        await conn.client(m.chat, album, { quoted: m });
       }
     } else {
       throw new Error("No media found in this Threads post.");

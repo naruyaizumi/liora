@@ -1,4 +1,3 @@
-import { BufferJSON } from "baileys";
 import {
   fileType,
   getCategory,
@@ -75,8 +74,7 @@ let handler = async (m, { conn }) => {
 • Length: ${q.text.length} characters
 • Text Preview: ${q.text.substring(0, 100)}${q.text.length > 100 ? "..." : ""}
 
-📋 FULL DATA:
-${inspect(q)}
+📋 DATA TYPE: ${typeof q}
 `.trim();
 
       return conn.sendMessage(m.chat, { text: debugInfo }, { quoted: m });
@@ -89,8 +87,7 @@ ${inspect(q)}
 • Has Text: ${!!q.text}
 • Text Length: ${q.text?.length || 0}
 
-📋 FULL DATA:
-${inspect(q)}
+📋 DATA TYPE: ${typeof q}
 `.trim();
 
     return conn.sendMessage(m.chat, { text: debugInfo }, { quoted: m });
@@ -99,15 +96,15 @@ ${inspect(q)}
   const { node, type } = found;
 
   const sendMediaTypes = ["image", "video", "document"];
-  let buffer = null;
+  let data = null;
 
   if (sendMediaTypes.includes(type)) {
     try {
-      buffer = await conn.downloadM(node, type);
+      data = await conn.downloadM(node, type);
     } catch {
       if (q.download && typeof q.download === "function") {
         try {
-          buffer = await q.download();
+          data = await q.download();
         } catch {
           //
         }
@@ -119,12 +116,12 @@ ${inspect(q)}
   let detectedMime = mime;
   let detectedExt = null;
   let detectedCategory = null;
-  let bufferSize = 0;
+  let dataSize = 0;
 
-  if (buffer && buffer.length) {
-    bufferSize = buffer.length;
+  if (data && data.length) {
+    dataSize = data.length;
     try {
-      const fileInfo = await fileType(buffer);
+      const fileInfo = await fileType(data);
       if (fileInfo) {
         detectedMime = fileInfo.mime;
         detectedExt = fileInfo.ext;
@@ -155,19 +152,24 @@ ${inspect(q)}
 • Detected MIME: ${detectedMime || "N/A"}
 ${detectedExt ? `• Detected Extension: .${detectedExt}` : ""}
 ${detectedCategory ? `• Category: ${detectedCategory}` : ""}
-${bufferSize > 0 ? `• Size: ${formatBytes(bufferSize)}` : ""}
+${dataSize > 0 ? `• Size: ${formatBytes(dataSize)}` : ""}
 • URL: ${node.url || "N/A"}
 • Direct Path: ${node.directPath || "N/A"}
 • File Name: ${fileName}
 ${q.text ? `• Has Text: Yes (${q.text.length} chars)` : ""}
 
-${q.text ? `📝 TEXT PREVIEW:\n${q.text.substring(0, 200)}${q.text.length > 200 ? "..." : ""}\n\n` : ""}📋 FULL DATA:
-${inspect(q)}
+${q.text ? `📝 TEXT PREVIEW:\n${q.text.substring(0, 200)}${q.text.length > 200 ? "..." : ""}\n\n` : ""}📋 DATA TYPE: ${typeof q}
+• Is Uint8Array: ${data instanceof Uint8Array}
+${data instanceof Uint8Array ? `• Data Bytes: ${data.length}` : ""}
 `.trim();
 
-  if (sendMediaTypes.includes(type) && buffer && buffer.length) {
+  if (sendMediaTypes.includes(type) && data && data.length) {
     const finalMime = detectedMime || mime;
     const finalExt = detectedExt || (await getExtension(finalMime));
+
+    const buffer = data instanceof Uint8Array 
+      ? Buffer.from(data.buffer, data.byteOffset, data.byteLength)
+      : Buffer.from(data || []);
 
     if (type === "image") {
       await conn.sendMessage(
@@ -205,54 +207,6 @@ ${inspect(q)}
     await conn.sendMessage(m.chat, { text: debugInfo }, { quoted: m });
   }
 };
-
-function isByteArray(obj) {
-  return (
-    typeof obj === "object" &&
-    obj !== null &&
-    Object.keys(obj).every((k) => /^\d+$/.test(k)) &&
-    Object.values(obj).every((v) => typeof v === "number" && v >= 0 && v <= 255)
-  );
-}
-
-function inspect(obj, depth = 0, seen = new WeakSet()) {
-  if (obj === null) return "null";
-  if (obj === undefined) return "undefined";
-  if (typeof obj !== "object") return JSON.stringify(obj);
-  if (seen.has(obj)) return "[Circular]";
-  seen.add(obj);
-  if (depth > 15) return "[Depth limit reached]";
-
-  const result = {};
-  for (const key of Reflect.ownKeys(obj)) {
-    try {
-      const desc = Object.getOwnPropertyDescriptor(obj, key);
-      let value = desc?.get ? desc.get.call(obj) : obj[key];
-
-      if (Buffer.isBuffer(value)) {
-        const hex = BufferJSON.toJSON(value)
-          .data.map((v) => v.toString(16).padStart(2, "0"))
-          .join("");
-        result[key] = `<Buffer ${hex}>`;
-      } else if (isByteArray(value)) {
-        const hex = Object.values(value)
-          .map((v) => v.toString(16).padStart(2, "0"))
-          .join("");
-        result[key] = `<ByteArray ${hex}>`;
-      } else if (typeof value === "function") {
-        result[key] = `[Function ${value.name || "anonymous"}]`;
-      } else if (typeof value === "object" && value !== null) {
-        result[key] = inspect(value, depth + 1, seen);
-      } else {
-        result[key] = value;
-      }
-    } catch (e) {
-      result[key] = `[Error: ${e.message}]`;
-    }
-  }
-
-  return depth === 0 ? JSON.stringify(result, null, 2) : result;
-}
 
 handler.help = ["debug"];
 handler.tags = ["tools"];

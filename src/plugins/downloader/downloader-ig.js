@@ -38,7 +38,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
           image: { url: img },
           caption: `Slide ${i + 1} of ${urls.length}`,
         }));
-        await conn.sendAlbum(m.chat, album, { quoted: m });
+        await conn.client(m.chat, album, { quoted: m });
       }
     }
   } catch (e) {

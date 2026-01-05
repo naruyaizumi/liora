@@ -1,19 +1,7 @@
 import { SQL } from "bun";
-import { BufferJSON } from "baileys";
+import { serialize, deserialize, makeKey } from "./binary.js";
 
-const stringify = (obj) => JSON.stringify(obj, BufferJSON.replacer);
-
-export const parse = (str) => {
-  if (!str) return null;
-  try {
-    return JSON.parse(str, BufferJSON.reviver);
-  } catch (e) {
-    global.logger?.error(e.message);
-    return null;
-  }
-};
-
-export const makeKey = (type, id) => `${type}-${id}`;
+export { makeKey };
 
 export class DatabaseCore {
   constructor(options = {}) {
@@ -47,7 +35,7 @@ export class DatabaseCore {
       await this.db`
         CREATE TABLE IF NOT EXISTS baileys_state (
           key TEXT PRIMARY KEY,
-          value TEXT NOT NULL,
+          value BYTEA NOT NULL,
           created_at TIMESTAMPTZ DEFAULT NOW(),
           updated_at TIMESTAMPTZ DEFAULT NOW()
         )
@@ -106,7 +94,11 @@ export class DatabaseCore {
       const result = await this.db`
         SELECT value FROM baileys_state WHERE key = ${key}
       `;
-      return result.length > 0 ? result[0] : undefined;
+      
+      if (result.length === 0) return undefined;
+      
+      const bytes = result[0].value;
+      return { value: deserialize(bytes) };
     } catch (e) {
       global.logger?.error(`Get error for key ${key}: ${e.message}`);
       return undefined;
@@ -144,9 +136,16 @@ export class DatabaseCore {
 
     const writePromise = (async () => {
       try {
+        const bytes = serialize(value);
+        
+        if (bytes === null) {
+          await this.del(key);
+          return;
+        }
+
         await this.db`
           INSERT INTO baileys_state (key, value) 
-          VALUES (${key}, ${stringify(value)}) 
+          VALUES (${key}, ${bytes}) 
           ON CONFLICT (key) 
           DO UPDATE SET value = EXCLUDED.value
         `;
@@ -184,13 +183,10 @@ export class DatabaseCore {
 
     try {
       const pendingKeys = new Set();
-      const canExecuteNow = [];
 
-      for (const [key, value] of entries) {
+      for (const [key] of entries) {
         if (this.writeQueue.has(key)) {
           pendingKeys.add(key);
-        } else {
-          canExecuteNow.push([key, value]);
         }
       }
 
@@ -202,14 +198,25 @@ export class DatabaseCore {
       }
 
       const promises = entries.map(([key, value]) => {
-        const writePromise = this.db`
-          INSERT INTO baileys_state (key, value) 
-          VALUES (${key}, ${stringify(value)}) 
-          ON CONFLICT (key) 
-          DO UPDATE SET value = EXCLUDED.value
-        `.finally(() => {
-          this.writeQueue.delete(key);
-        });
+        const writePromise = (async () => {
+          try {
+            const bytes = serialize(value);
+            
+            if (bytes === null) {
+              await this.db`DELETE FROM baileys_state WHERE key = ${key}`;
+              return;
+            }
+
+            await this.db`
+              INSERT INTO baileys_state (key, value) 
+              VALUES (${key}, ${bytes}) 
+              ON CONFLICT (key) 
+              DO UPDATE SET value = EXCLUDED.value
+            `;
+          } finally {
+            this.writeQueue.delete(key);
+          }
+        })();
 
         this.writeQueue.set(key, writePromise);
         return writePromise;
