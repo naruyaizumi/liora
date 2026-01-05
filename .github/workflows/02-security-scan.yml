@@ -75,7 +75,7 @@ jobs:
         run: njsscan --json > report.json
 
       - name: Upload Njsscan Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: njsscan-report
           path: report.json
