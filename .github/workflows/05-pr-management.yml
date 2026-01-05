@@ -37,7 +37,7 @@ jobs:
       github.event.action == 'opened'
     steps:
       - name: Approve Release PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             await github.rest.pulls.createReview({
