@@ -1,11 +1,9 @@
 import { SQL } from "bun";
-import { serialize, deserialize, makeKey } from "./binary.js";
-
-export { makeKey };
+import { serialize, deserialize } from "./binary.js";
 
 export class DatabaseCore {
   constructor(options = {}) {
-    this.instanceId = `DatabaseCore-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    this.instanceId = `IZUMI-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     const connectionString =
       Bun.env.DATABASE_URL ||
@@ -19,10 +17,7 @@ export class DatabaseCore {
 
     this.initialized = false;
     this.initPromise = this._initDatabase().catch((err) => {
-      global.logger?.error(
-        { error: err.message },
-        "Database initialization failed",
-      );
+      global.logger?.error({ error: err.message }, "Database initialization failed");
       throw err;
     });
 
@@ -57,24 +52,18 @@ export class DatabaseCore {
           $$ LANGUAGE plpgsql
         `;
 
-        await this
-          .db`DROP TRIGGER IF EXISTS baileys_updated_at ON baileys_state`;
+        await this.db`DROP TRIGGER IF EXISTS baileys_updated_at ON baileys_state`;
         await this.db`
           CREATE TRIGGER baileys_updated_at
           BEFORE UPDATE ON baileys_state
           FOR EACH ROW
           EXECUTE FUNCTION update_baileys_timestamp()
         `;
-      } catch {
-        //
-      }
+      } catch {}
 
       this.initialized = true;
     } catch (e) {
-      global.logger?.fatal(
-        { error: e.message, stack: e.stack },
-        "Database initialization failed",
-      );
+      global.logger?.fatal({ error: e.message, stack: e.stack }, "Database initialization failed");
       throw e;
     }
   }
@@ -98,6 +87,9 @@ export class DatabaseCore {
       if (result.length === 0) return undefined;
       
       const bytes = result[0].value;
+      if (!(bytes instanceof Uint8Array)) {
+        return { value: deserialize(new Uint8Array(bytes)) };
+      }
       return { value: deserialize(bytes) };
     } catch (e) {
       global.logger?.error(`Get error for key ${key}: ${e.message}`);
@@ -110,14 +102,19 @@ export class DatabaseCore {
     await this._ensureInitialized();
 
     try {
-      const promises = keys.map((key) => this.get(key));
-      const results = await Promise.all(promises);
+      const result = await this.db`
+        SELECT key, value 
+        FROM baileys_state 
+        WHERE key = ANY(${keys})
+      `;
 
       const out = {};
-      for (let i = 0; i < keys.length; i++) {
-        if (results[i]) {
-          out[keys[i]] = results[i];
-        }
+      for (const row of result) {
+        const bytes = row.value;
+        const value = deserialize(
+          bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes)
+        );
+        out[row.key] = { value };
       }
       return out;
     } catch (e) {
@@ -158,7 +155,6 @@ export class DatabaseCore {
     })();
 
     this.writeQueue.set(key, writePromise);
-
     return writePromise;
   }
 
@@ -191,36 +187,59 @@ export class DatabaseCore {
       }
 
       if (pendingKeys.size > 0) {
-        const waitPromises = Array.from(pendingKeys).map((k) =>
-          this.writeQueue.get(k),
-        );
-        await Promise.all(waitPromises);
+        await Promise.all(Array.from(pendingKeys, k => this.writeQueue.get(k)));
       }
 
-      const promises = entries.map(([key, value]) => {
-        const writePromise = (async () => {
-          try {
-            const bytes = serialize(value);
-            
-            if (bytes === null) {
-              await this.db`DELETE FROM baileys_state WHERE key = ${key}`;
-              return;
+      const validEntries = [];
+      const deleteKeys = [];
+
+      for (const [key, value] of entries) {
+        const bytes = serialize(value);
+        if (bytes === null) {
+          deleteKeys.push(key);
+        } else {
+          validEntries.push({ key, bytes });
+        }
+      }
+
+      const promises = [];
+
+      if (validEntries.length > 0) {
+        const batchSize = 100;
+        for (let i = 0; i < validEntries.length; i += batchSize) {
+          const batch = validEntries.slice(i, i + batchSize);
+          
+          const writePromise = (async () => {
+            try {
+              const values = batch.map(({ key, bytes }) => [key, bytes]);
+              
+              await this.db`
+                INSERT INTO baileys_state (key, value)
+                SELECT * FROM UNNEST(
+                  ${values.map(v => v[0])}::text[],
+                  ${values.map(v => v[1])}::bytea[]
+                )
+                ON CONFLICT (key) 
+                DO UPDATE SET value = EXCLUDED.value
+              `;
+            } finally {
+              for (const { key } of batch) {
+                this.writeQueue.delete(key);
+              }
             }
+          })();
 
-            await this.db`
-              INSERT INTO baileys_state (key, value) 
-              VALUES (${key}, ${bytes}) 
-              ON CONFLICT (key) 
-              DO UPDATE SET value = EXCLUDED.value
-            `;
-          } finally {
-            this.writeQueue.delete(key);
+          for (const { key } of batch) {
+            this.writeQueue.set(key, writePromise);
           }
-        })();
+          
+          promises.push(writePromise);
+        }
+      }
 
-        this.writeQueue.set(key, writePromise);
-        return writePromise;
-      });
+      if (deleteKeys.length > 0) {
+        promises.push(this.deleteMany(deleteKeys));
+      }
 
       await Promise.all(promises);
     } catch (error) {
@@ -234,11 +253,10 @@ export class DatabaseCore {
     await this._ensureInitialized();
 
     try {
-      const promises = keys.map(
-        (key) => this.db`DELETE FROM baileys_state WHERE key = ${key}`,
-      );
-
-      await Promise.all(promises);
+      await this.db`
+        DELETE FROM baileys_state 
+        WHERE key = ANY(${keys})
+      `;
     } catch (error) {
       global.logger?.error(`Batch delete error: ${error.message}`);
       throw error;

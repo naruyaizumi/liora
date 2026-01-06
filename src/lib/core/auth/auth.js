@@ -1,6 +1,6 @@
 import { initAuthCreds } from "baileys";
-import core, { makeKey } from "./core.js";
-import { deserialize } from "./binary.js";
+import core from "./core.js";
+import { deserialize, makeKey } from "./binary.js";
 
 function createKeyStore() {
   async function _getMany(type, ids) {

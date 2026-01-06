@@ -6,7 +6,6 @@ const REDIS_MESSAGE_PREFIX = "liora:message:";
 const REDIS_CONTACT_PREFIX = "liora:contact:";
 const REDIS_GROUP_PREFIX = "liora:group:";
 const REDIS_CALL_PREFIX = "liora:call:";
-const REDIS_LABEL_PREFIX = "liora:label:";
 const REDIS_BLOCKLIST_PREFIX = "liora:blocklist:";
 const REDIS_PROCESSED_PREFIX = "liora:processed:";
 const REDIS_LOCK_PREFIX = "liora:lock:";
@@ -18,27 +17,29 @@ const EVENT_PRIORITY = {
 };
 
 const TTL_STRATEGY = {
-  message: 60 * 60 * 24 * 7,
-  chat: 60 * 60 * 24 * 7,
-  contact: 60 * 60 * 24 * 30,
-  group: 60 * 60 * 24 * 7,
-  presence: 60 * 5,
+  message: 604800,
+  chat: 604800,
+  contact: 2592000,
+  group: 604800,
+  presence: 300,
   typing: 60,
-  receipt: 60 * 60 * 24,
-  call: 60 * 60 * 24 * 3,
-  label: 60 * 60 * 24 * 30,
-  blocklist: 60 * 60 * 24 * 30,
-  processed: 60 * 15,
+  receipt: 86400,
+  call: 259200,
+  blocklist: 2592000,
+  processed: 900,
   lock: 30,
 };
 
-const MAX_QUEUE_SIZE_PER_PRIORITY = 100;
-const MAX_INFLIGHT_OPS = 50;
+const MAX_QUEUE_SIZE_PER_PRIORITY = 200;
+const MAX_INFLIGHT_OPS = 100;
 const BACKPRESSURE_THRESHOLD = 0.8;
-const MAX_PROCESSED_EVENTS = 1000;
+const MAX_PROCESSED_EVENTS = 2000;
 
-const CLEANUP_INTERVAL = 60 * 60 * 24 * 1000;
-const OLD_DATA_THRESHOLD = 60 * 60 * 24 * 7;
+const CLEANUP_INTERVAL = 86400000;
+const OLD_DATA_THRESHOLD = 604800;
+
+const textEncoder = new TextEncoder();
+const textDecoder = new TextDecoder();
 
 export class RedisStore {
   constructor() {
@@ -82,7 +83,7 @@ export class RedisStore {
   _startEventProcessor() {
     setInterval(() => {
       this._processEventQueue();
-    }, 50);
+    }, 25);
   }
 
   async _processEventQueue() {
@@ -97,7 +98,8 @@ export class RedisStore {
 
       if (queue.length === 0) continue;
 
-      const batch = queue.splice(0, 10);
+      const batchSize = Math.min(20, queue.length);
+      const batch = queue.splice(0, batchSize);
 
       for (const event of batch) {
         if (this.inflightOps >= MAX_INFLIGHT_OPS) {
@@ -150,7 +152,7 @@ export class RedisStore {
 
     if (this.processedEvents.size > MAX_PROCESSED_EVENTS) {
       const iterator = this.processedEvents.values();
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 200; i++) {
         const { value } = iterator.next();
         if (value) this.processedEvents.delete(value);
       }
@@ -193,7 +195,7 @@ export class RedisStore {
           "Backpressure: dropping noise events",
         );
       }
-    }, 1000);
+    }, 500);
   }
 
   _startAutoCleanup() {
@@ -228,8 +230,9 @@ export class RedisStore {
         try {
           const data = await this.redis.get(key);
           if (data) {
-            const parsed = JSON.parse(data);
-            const timestamp = parsed.messageTimestamp || parsed.timestamp || 0;
+            const uint8 = textEncoder.encode(data);
+            const obj = Bun.read(uint8);
+            const timestamp = obj?.messageTimestamp || obj?.timestamp || 0;
             
             if (timestamp < threshold) {
               await this.redis.del(key);
@@ -241,14 +244,15 @@ export class RedisStore {
         }
       }
 
-      const presenceThreshold = now - (60 * 60 * 1000);
+      const presenceThreshold = now - 3600000;
       const presenceKeys = await this.redis.keys(`${REDIS_PRESENCE_PREFIX}*`);
       for (const key of presenceKeys) {
         try {
           const data = await this.redis.get(key);
           if (data) {
-            const parsed = JSON.parse(data);
-            const timestamp = parsed.timestamp || 0;
+            const uint8 = textEncoder.encode(data);
+            const obj = Bun.read(uint8);
+            const timestamp = obj?.timestamp || 0;
             
             if (timestamp < presenceThreshold) {
               await this.redis.del(key);
@@ -260,14 +264,15 @@ export class RedisStore {
         }
       }
 
-      const callThreshold = now - (3 * 24 * 60 * 60 * 1000);
+      const callThreshold = now - 259200000;
       const callKeys = await this.redis.keys(`${REDIS_CALL_PREFIX}*`);
       for (const key of callKeys) {
         try {
           const data = await this.redis.get(key);
           if (data) {
-            const parsed = JSON.parse(data);
-            const timestamp = parsed.timestamp || 0;
+            const uint8 = textEncoder.encode(data);
+            const obj = Bun.read(uint8);
+            const timestamp = obj?.timestamp || 0;
             
             if (timestamp < callThreshold) {
               await this.redis.del(key);
@@ -317,16 +322,7 @@ export class RedisStore {
       return TTL_STRATEGY.presence;
     }
 
-    if (type === "typing") return TTL_STRATEGY.typing;
-    if (type === "message") return TTL_STRATEGY.message;
-    if (type === "receipt") return TTL_STRATEGY.receipt;
-    if (type === "contact") return TTL_STRATEGY.contact;
-    if (type === "group") return TTL_STRATEGY.group;
-    if (type === "call") return TTL_STRATEGY.call;
-    if (type === "label") return TTL_STRATEGY.label;
-    if (type === "blocklist") return TTL_STRATEGY.blocklist;
-
-    return TTL_STRATEGY.chat;
+    return TTL_STRATEGY[type] || TTL_STRATEGY.chat;
   }
 
   async atomicSet(key, value, type = "chat") {
@@ -345,16 +341,18 @@ export class RedisStore {
       if (acquired === 1) {
         await this.redis.expire(lockKey, TTL_STRATEGY.lock);
 
-        await this.redis.setex(key, ttl, JSON.stringify(value));
+        const serialized = Bun.write(value);
+        await this.redis.setex(key, ttl, textDecoder.decode(serialized));
 
         await this.redis.del(lockKey);
       } else {
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 5));
         
         const retryAcquired = await this.redis.setnx(lockKey, lockValue);
         if (retryAcquired === 1) {
           await this.redis.expire(lockKey, TTL_STRATEGY.lock);
-          await this.redis.setex(key, ttl, JSON.stringify(value));
+          const serialized = Bun.write(value);
+          await this.redis.setex(key, ttl, textDecoder.decode(serialized));
           await this.redis.del(lockKey);
         }
       }
@@ -374,7 +372,10 @@ export class RedisStore {
 
     try {
       const data = await this.redis.get(key);
-      return data ? JSON.parse(data) : null;
+      if (!data) return null;
+      
+      const uint8 = textEncoder.encode(data);
+      return Bun.read(uint8);
     } catch (e) {
       global.logger?.error({ error: e.message, key }, "Get error");
       return null;
@@ -421,7 +422,8 @@ export class RedisStore {
       return values.map((v) => {
         if (!v) return null;
         try {
-          return JSON.parse(v);
+          const uint8 = textEncoder.encode(v);
+          return Bun.read(uint8);
         } catch {
           return null;
         }
@@ -478,6 +480,5 @@ export {
   REDIS_CONTACT_PREFIX,
   REDIS_GROUP_PREFIX,
   REDIS_CALL_PREFIX,
-  REDIS_LABEL_PREFIX,
   REDIS_BLOCKLIST_PREFIX,
 };

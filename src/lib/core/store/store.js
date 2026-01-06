@@ -7,7 +7,6 @@ import {
   REDIS_CONTACT_PREFIX,
   REDIS_GROUP_PREFIX,
   REDIS_CALL_PREFIX,
-  REDIS_LABEL_PREFIX,
   REDIS_BLOCKLIST_PREFIX,
 } from "./core.js";
 
@@ -22,8 +21,7 @@ export default function bind(conn) {
   
   conn.getChat = async (jid) => {
     const key = `${REDIS_PREFIX}${jid}`;
-    const data = await redisStore.get(key);
-    return data || null;
+    return await redisStore.get(key);
   };
 
   conn.setChat = async (jid, data) => {
@@ -102,16 +100,6 @@ export default function bind(conn) {
   conn.setCall = async (callId, callData) => {
     const key = `${REDIS_CALL_PREFIX}${callId}`;
     await redisStore.atomicSet(key, callData, "call");
-  };
-
-  conn.getLabel = async (labelId) => {
-    const key = `${REDIS_LABEL_PREFIX}${labelId}`;
-    return await redisStore.get(key);
-  };
-
-  conn.setLabel = async (labelId, labelData) => {
-    const key = `${REDIS_LABEL_PREFIX}${labelId}`;
-    await redisStore.atomicSet(key, labelData, "label");
   };
 
   conn.getBlocklist = async () => {
@@ -620,37 +608,6 @@ export default function bind(conn) {
             status: call.status,
           });
         }
-      }
-    } catch (e) {
-      global.logger?.error(e);
-    }
-  });
-
-  conn.ev.on("labels.edit", async (label) => {
-    redisStore.enqueueEvent("labels.edit", label, EVENT_PRIORITY.AUX);
-
-    try {
-      await conn.setLabel(label.id, label);
-    } catch (e) {
-      global.logger?.error(e);
-    }
-  });
-
-  conn.ev.on("labels.association", async ({ association, type }) => {
-    redisStore.enqueueEvent("labels.association", { association, type }, EVENT_PRIORITY.AUX);
-
-    try {
-      const { chatId, labelId } = association;
-      const chat = await conn.getChat(chatId);
-      
-      if (chat) {
-        chat.labels ||= [];
-        if (type === "add" && !chat.labels.includes(labelId)) {
-          chat.labels.push(labelId);
-        } else if (type === "remove") {
-          chat.labels = chat.labels.filter(l => l !== labelId);
-        }
-        await conn.setChat(chatId, chat);
       }
     } catch (e) {
       global.logger?.error(e);
