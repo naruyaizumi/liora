@@ -1,274 +1,210 @@
 import { SQL } from "bun";
-import { serialize, deserialize, makeKey } from "./binary.js";
 
-export { makeKey };
+export const makeKey = (type, id) => `${type}:${id}`;
 
 export class DatabaseCore {
-  constructor(options = {}) {
-    this.instanceId = `DatabaseCore-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-    const connectionString =
-      Bun.env.DATABASE_URL ||
-      "postgres://postgres:postgres@localhost:5432/liora";
-
-    this.db = new SQL(connectionString, {
-      max: 30,
-      idleTimeout: 30000,
-      connectionTimeout: 3000,
+  constructor() {
+    this.instanceId = `db-${Date.now()}`;
+    
+    const url = Bun.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/liora";
+    
+    this.db = new SQL(url, {
+      max: 80,
+      idleTimeout: 10000,
+      connectionTimeout: 2000,
     });
 
     this.initialized = false;
-    this.initPromise = this._initDatabase().catch((err) => {
-      global.logger?.error(
-        { error: err.message },
-        "Database initialization failed",
-      );
-      throw err;
-    });
-
     this.disposed = false;
-    this.writeQueue = new Map();
   }
 
-  async _initDatabase() {
+  async init() {
+    if (this.initialized) return;
+    
     try {
       await this.db`
-        CREATE TABLE IF NOT EXISTS baileys_state (
-          key TEXT PRIMARY KEY,
-          value BYTEA NOT NULL,
-          created_at TIMESTAMPTZ DEFAULT NOW(),
-          updated_at TIMESTAMPTZ DEFAULT NOW()
+        CREATE TABLE IF NOT EXISTS baileys_keys (
+          k TEXT PRIMARY KEY,
+          v BYTEA NOT NULL
         )
       `;
 
       await this.db`
-        CREATE INDEX IF NOT EXISTS idx_baileys_key_hash 
-        ON baileys_state USING hash(key)
+        CREATE INDEX IF NOT EXISTS idx_baileys_keys_hash 
+        ON baileys_keys USING hash(k)
       `;
 
-      try {
-        await this.db`
-          CREATE OR REPLACE FUNCTION update_baileys_timestamp()
-          RETURNS TRIGGER AS $$
-          BEGIN
-            NEW.updated_at = NOW();
-            RETURN NEW;
-          END;
-          $$ LANGUAGE plpgsql
-        `;
-
-        await this
-          .db`DROP TRIGGER IF EXISTS baileys_updated_at ON baileys_state`;
-        await this.db`
-          CREATE TRIGGER baileys_updated_at
-          BEFORE UPDATE ON baileys_state
-          FOR EACH ROW
-          EXECUTE FUNCTION update_baileys_timestamp()
-        `;
-      } catch {
-        //
-      }
-
       this.initialized = true;
+      global.logger?.info("PostgresSQL initialized");
     } catch (e) {
-      global.logger?.fatal(
-        { error: e.message, stack: e.stack },
-        "Database initialization failed",
-      );
+      global.logger?.fatal({ error: e.message }, "DB init failed");
       throw e;
     }
   }
 
-  async _ensureInitialized() {
-    if (!this.initialized && this.initPromise) {
-      await this.initPromise;
-    }
-    return this.initialized;
-  }
-
   async get(key) {
-    if (this.disposed) return undefined;
-    await this._ensureInitialized();
+    if (this.disposed) return null;
+    if (!this.initialized) await this.init();
 
     try {
-      const result = await this.db`
-        SELECT value FROM baileys_state WHERE key = ${key}
+      const rows = await this.db`
+        SELECT v FROM baileys_keys WHERE k = ${key}
       `;
-
-      if (result.length === 0) return undefined;
-
-      const bytes = result[0].value;
-      return { value: deserialize(bytes) };
+      if (rows.length === 0) return null;
+      
+      const buf = rows[0].v;
+      return buf instanceof Uint8Array ? buf : new Uint8Array(buf);
     } catch (e) {
-      global.logger?.error(`Get error for key ${key}: ${e.message}`);
-      return undefined;
+      global.logger?.error(`Get error: ${key} - ${e.message}`);
+      return null;
     }
   }
 
   async getMany(keys) {
     if (this.disposed || keys.length === 0) return {};
-    await this._ensureInitialized();
+    if (!this.initialized) await this.init();
 
-    try {
-      const promises = keys.map((key) => this.get(key));
-      const results = await Promise.all(promises);
-
-      const out = {};
-      for (let i = 0; i < keys.length; i++) {
-        if (results[i]) {
-          out[keys[i]] = results[i];
+    const result = {};
+    
+    if (keys.length === 1) {
+      try {
+        const rows = await this.db`
+          SELECT k, v FROM baileys_keys WHERE k = ${keys[0]}
+        `;
+        if (rows.length > 0) {
+          const buf = rows[0].v;
+          result[rows[0].k] = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
         }
+      } catch (e) {
+        global.logger?.error(`GetMany single error: ${e.message}`);
       }
-      return out;
-    } catch (e) {
-      global.logger?.error(`GetMany error: ${e.message}`);
-      return {};
+      return result;
     }
+    
+    const batchSize = 50;
+    for (let i = 0; i < keys.length; i += batchSize) {
+      const batch = keys.slice(i, i + batchSize);
+      
+      try {
+        const rows = await this.db`
+          SELECT k, v FROM baileys_keys WHERE k IN (${batch})
+        `;
+        
+        for (const row of rows) {
+          const buf = row.v;
+          result[row.k] = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+        }
+      } catch (e) {
+        global.logger?.error(`GetMany batch error: ${e.message}`);
+      }
+    }
+    
+    return result;
   }
 
   async set(key, value) {
     if (this.disposed) return;
-    await this._ensureInitialized();
-
-    if (this.writeQueue.has(key)) {
-      await this.writeQueue.get(key);
-    }
-
-    const writePromise = (async () => {
-      try {
-        const bytes = serialize(value);
-
-        if (bytes === null) {
-          await this.del(key);
-          return;
-        }
-
-        await this.db`
-          INSERT INTO baileys_state (key, value) 
-          VALUES (${key}, ${bytes}) 
-          ON CONFLICT (key) 
-          DO UPDATE SET value = EXCLUDED.value
-        `;
-      } catch (e) {
-        global.logger?.error(`Set error for key ${key}: ${e.message}`);
-        throw e;
-      } finally {
-        this.writeQueue.delete(key);
-      }
-    })();
-
-    this.writeQueue.set(key, writePromise);
-
-    return writePromise;
-  }
-
-  async del(key) {
-    if (this.disposed) return;
-    await this._ensureInitialized();
+    if (!this.initialized) await this.init();
 
     try {
-      await this.db`DELETE FROM baileys_state WHERE key = ${key}`;
+      if (!value) {
+        await this.del(key);
+        return;
+      }
+
+      const buf = value instanceof Uint8Array ? value : new Uint8Array(value);
+      await this.db`
+        INSERT INTO baileys_keys (k, v) 
+        VALUES (${key}, ${buf})
+        ON CONFLICT (k) 
+        DO UPDATE SET v = EXCLUDED.v
+      `;
     } catch (e) {
-      global.logger?.error(`Delete error for key ${key}: ${e.message}`);
+      global.logger?.error(`Set error: ${key} - ${e.message}`);
       throw e;
     }
   }
 
-  async setMany(data) {
+  async del(key) {
     if (this.disposed) return;
-    await this._ensureInitialized();
-
-    const entries = Object.entries(data);
-    if (entries.length === 0) return;
+    if (!this.initialized) await this.init();
 
     try {
-      const pendingKeys = new Set();
+      await this.db`
+        DELETE FROM baileys_keys WHERE k = ${key}
+      `;
+    } catch (e) {
+      global.logger?.error(`Del error: ${key} - ${e.message}`);
+    }
+  }
 
-      for (const [key] of entries) {
-        if (this.writeQueue.has(key)) {
-          pendingKeys.add(key);
+  async setMany(data) {
+    if (this.disposed || Object.keys(data).length === 0) return;
+    if (!this.initialized) await this.init();
+
+    for (const [key, value] of Object.entries(data)) {
+      try {
+        if (!value) {
+          await this.del(key);
+        } else {
+          const buf = value instanceof Uint8Array ? value : new Uint8Array(value);
+          await this.db`
+            INSERT INTO baileys_keys (k, v) 
+            VALUES (${key}, ${buf})
+            ON CONFLICT (k) 
+            DO UPDATE SET v = EXCLUDED.v
+          `;
         }
+      } catch (e) {
+        global.logger?.error(`SetMany error for ${key}: ${e.message}`);
       }
-
-      if (pendingKeys.size > 0) {
-        const waitPromises = Array.from(pendingKeys).map((k) =>
-          this.writeQueue.get(k),
-        );
-        await Promise.all(waitPromises);
-      }
-
-      const promises = entries.map(([key, value]) => {
-        const writePromise = (async () => {
-          try {
-            const bytes = serialize(value);
-
-            if (bytes === null) {
-              await this.db`DELETE FROM baileys_state WHERE key = ${key}`;
-              return;
-            }
-
-            await this.db`
-              INSERT INTO baileys_state (key, value) 
-              VALUES (${key}, ${bytes}) 
-              ON CONFLICT (key) 
-              DO UPDATE SET value = EXCLUDED.value
-            `;
-          } finally {
-            this.writeQueue.delete(key);
-          }
-        })();
-
-        this.writeQueue.set(key, writePromise);
-        return writePromise;
-      });
-
-      await Promise.all(promises);
-    } catch (error) {
-      global.logger?.error(`Batch set error: ${error.message}`);
-      throw error;
     }
   }
 
   async deleteMany(keys) {
     if (this.disposed || keys.length === 0) return;
-    await this._ensureInitialized();
+    if (!this.initialized) await this.init();
 
-    try {
-      const promises = keys.map(
-        (key) => this.db`DELETE FROM baileys_state WHERE key = ${key}`,
-      );
-
-      await Promise.all(promises);
-    } catch (error) {
-      global.logger?.error(`Batch delete error: ${error.message}`);
-      throw error;
+    if (keys.length === 1) {
+      try {
+        await this.db`
+          DELETE FROM baileys_keys WHERE k = ${keys[0]}
+        `;
+      } catch (e) {
+        global.logger?.error(`DeleteMany single error: ${e.message}`);
+      }
+      return;
     }
-  }
-
-  async flush() {
-    return Promise.resolve();
+    
+    const batchSize = 50;
+    for (let i = 0; i < keys.length; i += batchSize) {
+      const batch = keys.slice(i, i + batchSize);
+      
+      try {
+        await this.db`
+          DELETE FROM baileys_keys WHERE k IN (${batch})
+        `;
+      } catch (e) {
+        global.logger?.error(`DeleteMany batch error: ${e.message}`);
+      }
+    }
   }
 
   async dispose() {
     if (this.disposed) return;
 
     try {
-      await this.db`VACUUM ANALYZE baileys_state`;
+      await this.db.close();
     } catch (e) {
-      global.logger?.error(`Dispose cleanup error: ${e.message}`);
+      global.logger?.error(`Dispose error: ${e.message}`);
     } finally {
-      try {
-        await this.db.close();
-      } catch {}
-
       this.disposed = true;
       this.db = null;
-      this.initialized = false;
     }
   }
 
   isHealthy() {
-    return !this.disposed && this.db !== null && this.initialized;
+    return !this.disposed && this.db && this.initialized;
   }
 }
 

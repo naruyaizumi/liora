@@ -2,32 +2,21 @@ import { RedisClient } from "bun";
 
 const REDIS_PREFIX = "liora:chat:";
 const REDIS_PRESENCE_PREFIX = "liora:presence:";
-const REDIS_MESSAGE_PREFIX = "liora:message:";
 const REDIS_CONTACT_PREFIX = "liora:contact:";
 const REDIS_GROUP_PREFIX = "liora:group:";
-const REDIS_CALL_PREFIX = "liora:call:";
-const REDIS_LABEL_PREFIX = "liora:label:";
-const REDIS_BLOCKLIST_PREFIX = "liora:blocklist:";
 const REDIS_PROCESSED_PREFIX = "liora:processed:";
 const REDIS_LOCK_PREFIX = "liora:lock:";
 
 const EVENT_PRIORITY = {
   CORE: 0,
   AUX: 1,
-  NOISE: 2,
 };
 
 const TTL_STRATEGY = {
-  message: 60 * 60 * 24 * 7, // 7 days
   chat: 60 * 60 * 24 * 7, // 7 days
   contact: 60 * 60 * 24 * 30, // 30 days
   group: 60 * 60 * 24 * 7, // 7 days
   presence: 60 * 5, // 5 minutes
-  typing: 60, // 1 minute
-  receipt: 60 * 60 * 24, // 1 day
-  call: 60 * 60 * 24 * 3, // 3 days
-  label: 60 * 60 * 24 * 30, // 30 days
-  blocklist: 60 * 60 * 24 * 30, // 30 days
   processed: 60 * 15, // 15 minutes
   lock: 30, // 30 seconds
 };
@@ -48,7 +37,6 @@ export class RedisStore {
     this.eventQueue = {
       [EVENT_PRIORITY.CORE]: [],
       [EVENT_PRIORITY.AUX]: [],
-      [EVENT_PRIORITY.NOISE]: [],
     };
 
     this.inflightOps = 0;
@@ -90,7 +78,7 @@ export class RedisStore {
 
     for (
       let priority = EVENT_PRIORITY.CORE;
-      priority <= EVENT_PRIORITY.NOISE;
+      priority <= EVENT_PRIORITY.AUX;
       priority++
     ) {
       const queue = this.eventQueue[priority];
@@ -167,7 +155,7 @@ export class RedisStore {
   }
 
   async _executeEvent(type, data) {
-    // Events are handled in store.js bindings
+    //
   }
 
   _startBackpressureMonitor() {
@@ -177,11 +165,11 @@ export class RedisStore {
         0,
       );
 
-      const pressure = totalQueued / (MAX_QUEUE_SIZE_PER_PRIORITY * 3);
+      const pressure = totalQueued / (MAX_QUEUE_SIZE_PER_PRIORITY * 2);
 
       if (pressure > BACKPRESSURE_THRESHOLD) {
-        const dropped = this.eventQueue[EVENT_PRIORITY.NOISE].length;
-        this.eventQueue[EVENT_PRIORITY.NOISE] = [];
+        const dropped = this.eventQueue[EVENT_PRIORITY.AUX].length;
+        this.eventQueue[EVENT_PRIORITY.AUX] = [];
         this.droppedEvents += dropped;
 
         global.logger?.warn(
@@ -190,7 +178,7 @@ export class RedisStore {
             pressure: (pressure * 100).toFixed(2) + "%",
             dropped,
           },
-          "Backpressure: dropping noise events",
+          "Backpressure: dropping aux events",
         );
       }
     }, 1000);
@@ -223,24 +211,6 @@ export class RedisStore {
     try {
       let cleaned = 0;
 
-      const messageKeys = await this.redis.keys(`${REDIS_MESSAGE_PREFIX}*`);
-      for (const key of messageKeys) {
-        try {
-          const data = await this.redis.get(key);
-          if (data) {
-            const parsed = JSON.parse(data);
-            const timestamp = parsed.messageTimestamp || parsed.timestamp || 0;
-
-            if (timestamp < threshold) {
-              await this.redis.del(key);
-              cleaned++;
-            }
-          }
-        } catch {
-          //
-        }
-      }
-
       const presenceThreshold = now - 60 * 60 * 1000;
       const presenceKeys = await this.redis.keys(`${REDIS_PRESENCE_PREFIX}*`);
       for (const key of presenceKeys) {
@@ -251,25 +221,6 @@ export class RedisStore {
             const timestamp = parsed.timestamp || 0;
 
             if (timestamp < presenceThreshold) {
-              await this.redis.del(key);
-              cleaned++;
-            }
-          }
-        } catch {
-          //
-        }
-      }
-
-      const callThreshold = now - 3 * 24 * 60 * 60 * 1000;
-      const callKeys = await this.redis.keys(`${REDIS_CALL_PREFIX}*`);
-      for (const key of callKeys) {
-        try {
-          const data = await this.redis.get(key);
-          if (data) {
-            const parsed = JSON.parse(data);
-            const timestamp = parsed.timestamp || 0;
-
-            if (timestamp < callThreshold) {
               await this.redis.del(key);
               cleaned++;
             }
@@ -298,11 +249,6 @@ export class RedisStore {
     const queue = this.eventQueue[priority];
 
     if (queue.length >= MAX_QUEUE_SIZE_PER_PRIORITY) {
-      if (priority === EVENT_PRIORITY.NOISE) {
-        this.droppedEvents++;
-        return;
-      }
-
       queue.shift();
     }
 
@@ -313,18 +259,12 @@ export class RedisStore {
   _getAdaptiveTTL(type, data) {
     if (type === "presence") {
       const timeSinceUpdate = Date.now() - (data?.timestamp || Date.now());
-      if (timeSinceUpdate < 60000) return TTL_STRATEGY.typing;
+      if (timeSinceUpdate < 60000) return 60;
       return TTL_STRATEGY.presence;
     }
 
-    if (type === "typing") return TTL_STRATEGY.typing;
-    if (type === "message") return TTL_STRATEGY.message;
-    if (type === "receipt") return TTL_STRATEGY.receipt;
     if (type === "contact") return TTL_STRATEGY.contact;
     if (type === "group") return TTL_STRATEGY.group;
-    if (type === "call") return TTL_STRATEGY.call;
-    if (type === "label") return TTL_STRATEGY.label;
-    if (type === "blocklist") return TTL_STRATEGY.blocklist;
 
     return TTL_STRATEGY.chat;
   }
@@ -441,7 +381,6 @@ export class RedisStore {
       this.eventQueue = {
         [EVENT_PRIORITY.CORE]: [],
         [EVENT_PRIORITY.AUX]: [],
-        [EVENT_PRIORITY.NOISE]: [],
       };
       this.processedEvents.clear();
     } catch (e) {
@@ -474,10 +413,6 @@ export {
   EVENT_PRIORITY,
   REDIS_PREFIX,
   REDIS_PRESENCE_PREFIX,
-  REDIS_MESSAGE_PREFIX,
   REDIS_CONTACT_PREFIX,
   REDIS_GROUP_PREFIX,
-  REDIS_CALL_PREFIX,
-  REDIS_LABEL_PREFIX,
-  REDIS_BLOCKLIST_PREFIX,
 };

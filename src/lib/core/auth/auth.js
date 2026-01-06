@@ -1,92 +1,92 @@
-import { initAuthCreds } from "baileys";
+import { initAuthCreds, proto } from "baileys";
 import core, { makeKey } from "./core.js";
-import { deserialize } from "./binary.js";
+import { encode as msgpackEncode, decode as msgpackDecode } from "@msgpack/msgpack";
+
+function encodeAuthCreds(creds) {
+  return msgpackEncode(creds);
+}
+
+function decodeAuthCreds(buf) {
+  return msgpackDecode(buf);
+}
 
 function createKeyStore() {
-  async function _getMany(type, ids) {
-    if (ids.length === 0) return {};
+  return {
+    async get(type, ids) {
+      if (ids.length === 0) return {};
 
-    const keys = ids.map((id) => makeKey(type, id));
+      const keys = ids.map((id) => makeKey(type, id));
+      const results = await core.getMany(keys);
 
-    const results = await core.getMany(keys);
-
-    const out = {};
-    for (const id of ids) {
-      const k = makeKey(type, id);
-      const row = results[k];
-
-      if (row && row.value !== null && row.value !== undefined) {
-        out[id] = row.value;
-      }
-    }
-
-    return out;
-  }
-
-  async function get(type, ids) {
-    return _getMany(type, ids);
-  }
-
-  async function set(data) {
-    const flatData = {};
-    const keysToDelete = [];
-
-    for (const type in data) {
-      const bucket = data[type] || {};
-      for (const id in bucket) {
-        const v = bucket[id];
+      const out = {};
+      for (const id of ids) {
         const k = makeKey(type, id);
-
-        if (v === null || v === undefined) {
-          keysToDelete.push(k);
-        } else {
-          flatData[k] = v;
+        const buf = results[k];
+        
+        if (buf) {
+          if (type === "app-state-sync-key") {
+            try {
+              out[id] = proto.Message.AppStateSyncKeyData.decode(buf);
+            } catch (e) {
+              global.logger?.error(`Decode error for ${k}: ${e.message}`);
+            }
+          } else {
+            out[id] = buf;
+          }
         }
       }
-    }
 
-    const promises = [];
+      return out;
+    },
 
-    if (Object.keys(flatData).length > 0) {
-      promises.push(core.setMany(flatData));
-    }
+    async set(data) {
+      const toSet = {};
+      const toDelete = [];
 
-    if (keysToDelete.length > 0) {
-      promises.push(core.deleteMany(keysToDelete));
-    }
+      for (const type in data) {
+        for (const id in data[type]) {
+          const value = data[type][id];
+          const key = makeKey(type, id);
 
-    if (promises.length > 0) {
-      await Promise.all(promises);
-    }
-  }
+          if (!value) {
+            toDelete.push(key);
+            continue;
+          }
 
-  async function transaction(work) {
-    try {
-      const result = await work();
-      return result;
-    } catch (e) {
-      global.logger?.error(`Transaction error: ${e.message}`);
-      throw e;
-    }
-  }
+          if (type === "app-state-sync-key") {
+            try {
+              const encoded = proto.Message.AppStateSyncKeyData.encode(value).finish();
+              toSet[key] = encoded;
+            } catch (e) {
+              global.logger?.error(`Encode error for ${key}: ${e.message}`);
+            }
+          } else {
+            toSet[key] = value instanceof Uint8Array ? value : new Uint8Array(value);
+          }
+        }
+      }
 
-  async function clear() {
-    try {
-      const db = core.db;
-      await db`DELETE FROM baileys_state WHERE key LIKE '%-%'`;
-    } catch (e) {
-      global.logger?.error(`Clear error: ${e.message}`);
-      throw e;
-    }
-  }
+      const promises = [];
+      
+      if (Object.keys(toSet).length > 0) {
+        promises.push(core.setMany(toSet));
+      }
 
-  return {
-    get,
-    set,
-    clear,
-    transaction,
-    _dispose: async () => {
-      //
+      if (toDelete.length > 0) {
+        promises.push(core.deleteMany(toDelete));
+      }
+
+      if (promises.length > 0) {
+        await Promise.all(promises);
+      }
+    },
+
+    async clear() {
+      try {
+        await core.db`DELETE FROM baileys_keys WHERE k LIKE '%:%'`;
+      } catch (e) {
+        global.logger?.error(`Clear error: ${e.message}`);
+      }
     },
   };
 }
@@ -96,9 +96,10 @@ export async function useSQLAuthState() {
 
   async function loadCreds() {
     try {
-      const row = await core.get("creds");
-      if (row && row.value) {
-        creds = row.value;
+      const buf = await core.get("creds");
+      
+      if (buf) {
+        creds = decodeAuthCreds(buf);
       } else {
         creds = initAuthCreds();
       }
@@ -110,31 +111,21 @@ export async function useSQLAuthState() {
 
   await loadCreds();
 
-  const keyStore = createKeyStore();
-
-  const keys = {
-    async get(type, ids) {
-      return keyStore.get(type, ids);
-    },
-
-    async set(data) {
-      return keyStore.set(data);
-    },
-
-    async clear() {
-      return keyStore.clear();
-    },
-  };
+  const keys = createKeyStore();
 
   async function saveCreds() {
-    if (core.isHealthy()) {
-      await core.set("creds", creds);
+    if (!core.isHealthy()) return;
+
+    try {
+      const buf = encodeAuthCreds(creds);
+      await core.set("creds", buf);
+    } catch (e) {
+      global.logger?.error(`Save creds error: ${e.message}`);
     }
   }
 
   async function dispose() {
     try {
-      await keyStore._dispose();
       await core.dispose();
     } catch (e) {
       global.logger?.error(`Auth dispose error: ${e.message}`);
