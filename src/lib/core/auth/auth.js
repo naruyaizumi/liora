@@ -1,19 +1,25 @@
 import { initAuthCreds } from "baileys";
 import core, { makeKey } from "./core.js";
+import { deserialize } from "./binary.js";
 
 function createKeyStore() {
   async function _getMany(type, ids) {
     if (ids.length === 0) return {};
+
     const keys = ids.map((id) => makeKey(type, id));
+
     const results = await core.getMany(keys);
+
     const out = {};
     for (const id of ids) {
       const k = makeKey(type, id);
       const row = results[k];
+
       if (row && row.value !== null && row.value !== undefined) {
         out[id] = row.value;
       }
     }
+
     return out;
   }
 
@@ -24,11 +30,13 @@ function createKeyStore() {
   async function set(data) {
     const flatData = {};
     const keysToDelete = [];
+
     for (const type in data) {
       const bucket = data[type] || {};
       for (const id in bucket) {
         const v = bucket[id];
         const k = makeKey(type, id);
+
         if (v === null || v === undefined) {
           keysToDelete.push(k);
         } else {
@@ -36,13 +44,17 @@ function createKeyStore() {
         }
       }
     }
+
     const promises = [];
+
     if (Object.keys(flatData).length > 0) {
       promises.push(core.setMany(flatData));
     }
+
     if (keysToDelete.length > 0) {
       promises.push(core.deleteMany(keysToDelete));
     }
+
     if (promises.length > 0) {
       await Promise.all(promises);
     }
@@ -50,19 +62,22 @@ function createKeyStore() {
 
   async function transaction(work) {
     try {
-      await core.db.begin();
       const result = await work();
-      await core.db.commit();
       return result;
     } catch (e) {
-      await core.db.rollback();
+      global.logger?.error(`Transaction error: ${e.message}`);
       throw e;
     }
   }
 
   async function clear() {
-    const db = core.db;
-    await db`DELETE FROM baileys_state WHERE key LIKE '%-%'`;
+    try {
+      const db = core.db;
+      await db`DELETE FROM baileys_state WHERE key LIKE '%-%'`;
+    } catch (e) {
+      global.logger?.error(`Clear error: ${e.message}`);
+      throw e;
+    }
   }
 
   return {
@@ -70,7 +85,9 @@ function createKeyStore() {
     set,
     clear,
     transaction,
-    _dispose: async () => {},
+    _dispose: async () => {
+      //
+    },
   };
 }
 
@@ -85,20 +102,25 @@ export async function useSQLAuthState() {
       } else {
         creds = initAuthCreds();
       }
-    } catch {
+    } catch (e) {
+      global.logger?.error(`Load creds error: ${e.message}`);
       creds = initAuthCreds();
     }
   }
 
   await loadCreds();
+
   const keyStore = createKeyStore();
+
   const keys = {
     async get(type, ids) {
       return keyStore.get(type, ids);
     },
+
     async set(data) {
       return keyStore.set(data);
     },
+
     async clear() {
       return keyStore.clear();
     },
@@ -114,7 +136,9 @@ export async function useSQLAuthState() {
     try {
       await keyStore._dispose();
       await core.dispose();
-    } catch {}
+    } catch (e) {
+      global.logger?.error(`Auth dispose error: ${e.message}`);
+    }
   }
 
   return {

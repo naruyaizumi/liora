@@ -22,19 +22,14 @@ let crashCount = 0;
 let lastCrash = 0;
 const MAX_CRASHES = 5;
 const CRASH_WINDOW = 60000;
-const MIN_UPTIME = 5000;
-
-const backoff = (attempt) => {
-  const delays = [1000, 2000, 5000, 10000, 30000];
-  return delays[Math.min(attempt - 1, delays.length - 1)];
-};
+const COOLDOWN_TIME = 10000;
+const RESTART_DELAY = 2000;
 
 async function start(file) {
   if (shuttingDown) return 1;
 
   const scriptPath = join(rootDir, "src", file);
   const args = [scriptPath, ...process.argv.slice(2)];
-  const startTime = Date.now();
 
   return new Promise((resolve) => {
     try {
@@ -46,8 +41,6 @@ async function start(file) {
         stderr: "inherit",
         env: process.env,
         onExit(proc, exitCode, signalCode, error) {
-          const uptime = Date.now() - startTime;
-
           if (error) {
             global.logger.error(error.message);
           }
@@ -55,17 +48,12 @@ async function start(file) {
           if (!shuttingDown) {
             if (exitCode !== 0) {
               global.logger.warn(
-                `Child exited with code ${exitCode}${signalCode ? ` (signal: ${signalCode})` : ""} after ${Math.floor(uptime / 1000)}s`,
-              );
-            }
-
-            if (uptime < MIN_UPTIME) {
-              global.logger.warn(
-                `Process crashed too quickly (${Math.floor(uptime / 1000)}s < ${MIN_UPTIME / 1000}s)`,
+                `Child process exited with code ${exitCode}${
+                  signalCode ? ` (signal: ${signalCode})` : ""
+                }`,
               );
             }
           }
-
           childProcess = null;
           resolve(exitCode || 0);
         },
@@ -88,15 +76,19 @@ async function stopChild(signal = "SIGTERM") {
 
   global.logger.info(`Shutting down gracefully (signal: ${signal})...`);
 
+  const controller = new AbortController();
   const timeout = setTimeout(() => {
     if (childProcess && !childProcess.killed) {
-      global.logger.warn("Child unresponsive after 8s, force killing...");
+      global.logger.warn(
+        "Child process unresponsive after 8s, force killing...",
+      );
       try {
         childProcess.kill("SIGKILL");
       } catch (e) {
         global.logger.error(e.message);
       }
     }
+    controller.abort();
   }, 8000);
 
   try {
@@ -128,7 +120,7 @@ async function supervise() {
     const code = await start("main.js");
 
     if (shuttingDown || code === 0) {
-      global.logger.info("Supervisor shutting down cleanly");
+      global.logger.info("Supervisor shutting down");
       break;
     }
 
@@ -141,20 +133,19 @@ async function supervise() {
     lastCrash = now;
 
     if (crashCount >= MAX_CRASHES) {
-      const cooldown = 5 * 60 * 1000;
-      global.logger.error(
-        `Too many crashes (${crashCount}/${MAX_CRASHES} in ${CRASH_WINDOW / 1000}s). Cooling down for ${cooldown / 1000}s...`,
+      global.logger.warn(
+        `Too many crashes (${crashCount}/${MAX_CRASHES} in ${CRASH_WINDOW / 1000}s). ` +
+          `Cooling down for ${COOLDOWN_TIME / 1000}s...`,
       );
-      await Bun.sleep(cooldown);
+      await Bun.sleep(COOLDOWN_TIME);
       crashCount = 0;
-      continue;
+    } else {
+      global.logger.info(
+        `Restarting after crash (${crashCount}/${MAX_CRASHES})... ` +
+          `Waiting ${RESTART_DELAY / 1000}s`,
+      );
+      await Bun.sleep(RESTART_DELAY);
     }
-
-    const delay = backoff(crashCount);
-    global.logger.info(
-      `Restarting after crash (${crashCount}/${MAX_CRASHES})... Waiting ${delay / 1000}s`,
-    );
-    await Bun.sleep(delay);
   }
 }
 
@@ -179,7 +170,7 @@ process.on("uncaughtException", (e) => {
 });
 
 process.on("unhandledRejection", (e) => {
-  global.logger.error(e?.message || "Unknown rejection");
+  global.logger.error(e.message);
   stopChild("SIGTERM").catch(() => process.exit(1));
 });
 

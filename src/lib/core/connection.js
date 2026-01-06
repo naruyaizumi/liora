@@ -20,10 +20,12 @@ export async function getAllPlugins(dir) {
         } else if (file.endsWith(".js")) {
           results.push(filepath);
         }
-      } catch {}
+      } catch {
+        //
+      }
     }
   } catch (e) {
-    global.logger?.error(
+    global.logger?.error?.(
       { error: e.message },
       "Error reading plugin directory",
     );
@@ -42,7 +44,7 @@ export async function loadPlugins(pluginFolder, getAllPluginsFn) {
       try {
         await plugin.cleanup();
       } catch (e) {
-        global.logger?.warn(
+        global.logger?.warn?.(
           { file: filename, error: e.message },
           "Plugin cleanup error",
         );
@@ -75,16 +77,16 @@ export async function loadPlugins(pluginFolder, getAllPluginsFn) {
       } catch (e) {
         delete global.plugins[filename];
         failed++;
-        global.logger?.warn(
+        global.logger?.warn?.(
           { file: filename, error: e.message },
           "Failed to load plugin",
         );
       }
     }
 
-    global.logger?.info(`Plugins loaded: ${success} OK, ${failed} failed`);
+    global.logger?.info?.(`Plugins loaded: ${success} OK, ${failed} failed`);
   } catch (e) {
-    global.logger?.error({ error: e.message }, "Error loading plugins");
+    global.logger?.error?.({ error: e.message }, "Error loading plugins");
     throw e;
   }
 }
@@ -92,6 +94,7 @@ export async function loadPlugins(pluginFolder, getAllPluginsFn) {
 export class EventManager {
   constructor() {
     this.handlers = new Map();
+    this.isInit = true;
     this.currentHandler = null;
   }
 
@@ -102,36 +105,26 @@ export class EventManager {
   register(conn, handler, saveCreds) {
     const messageHandler = handler?.handler?.bind(conn) || (() => {});
     const credsHandler = saveCreds?.bind(conn) || (() => {});
-    const connectionHandler =
-      handler?.handleDisconnect?.bind(conn) ||
-      global.handleDisconnect?.bind(conn);
+
+    conn.handler = messageHandler;
+    conn.credsUpdate = credsHandler;
 
     if (conn?.ev) {
       conn.ev.on("messages.upsert", messageHandler);
       conn.ev.on("creds.update", credsHandler);
 
-      if (connectionHandler) {
-        conn.ev.on("connection.update", connectionHandler);
-        this.handlers.set("connection.update", connectionHandler);
-      }
-
       this.handlers.set("messages.upsert", messageHandler);
       this.handlers.set("creds.update", credsHandler);
     }
-
-    conn.handler = messageHandler;
-    conn.credsUpdate = credsHandler;
-
-    return conn;
   }
 
   unregister(conn) {
-    if (conn?.ev) {
+    if (!this.isInit && conn?.ev) {
       for (const [event, handler] of this.handlers) {
         try {
           conn.ev.off(event, handler);
         } catch (e) {
-          global.logger?.error(
+          global.logger?.error?.(
             { error: e.message, event },
             "Failed to unregister handler",
           );
@@ -155,7 +148,7 @@ export class EventManager {
           self.setHandler(handler);
         }
       } catch (e) {
-        global.logger?.error({ error: e.message }, "Handler reload error");
+        global.logger?.error?.({ error: e.message }, "Handler reload error");
         return false;
       }
 
@@ -163,24 +156,28 @@ export class EventManager {
 
       if (restartConn) {
         try {
-          self.unregister(global.conn);
+          if (global.conn?.ev) {
+            global.conn.ev.removeAllListeners();
+          }
 
           if (global.conn?.ws) {
             global.conn.ws.close();
           }
 
-          await new Promise((r) => setTimeout(r, 500));
-
-          global.conn = naruyaizumi(connectionOptions);
+          global.conn = null;
+          await new Promise((r) => setTimeout(r, 100));
         } catch (e) {
-          global.logger?.error({ error: e.message }, "Restart error");
-          return false;
+          global.logger?.error?.({ error: e.message }, "Restart error");
         }
-      } else {
-        self.unregister(global.conn);
+
+        global.conn = naruyaizumi(connectionOptions);
+        self.isInit = true;
       }
 
+      self.unregister(global.conn);
       self.register(global.conn, handler, saveCreds);
+
+      self.isInit = false;
       return true;
     };
   }
@@ -253,24 +250,24 @@ export async function handleDisconnect({
 
   switch (connection) {
     case "connecting":
-      global.logger?.info("Connecting…");
+      global.logger?.info?.("Connecting…");
       break;
     case "open":
-      global.logger?.info("Connected to WhatsApp");
+      global.logger?.info?.("Connected to WhatsApp");
       RECONNECT_STATE.attempts = 0;
       RECONNECT_STATE.cooldownUntil = 0;
       break;
     case "close":
-      global.logger?.warn(`Connection closed — reason=${reason}`);
+      global.logger?.warn?.(`Connection closed — reason=${reason}`);
       break;
   }
 
-  if (!lastDisconnect?.error || connection !== "close") return;
+  if (!lastDisconnect?.error) return;
 
   const baseDelay = getBaseDelay(reason);
 
   if (baseDelay === null) {
-    global.logger?.error(`Session requires manual fix (${reason})`);
+    global.logger?.error?.(`Session requires manual fix (${reason})`);
     return;
   }
 
@@ -283,7 +280,7 @@ export async function handleDisconnect({
   if (RECONNECT_STATE.attempts >= 6) {
     RECONNECT_STATE.cooldownUntil = Date.now() + 5 * 60_000;
     RECONNECT_STATE.attempts = 0;
-    global.logger?.warn("Too many failures; entering 5m cooldown");
+    global.logger?.warn?.("Too many failures; entering 5m cooldown");
     return;
   }
 
@@ -300,16 +297,18 @@ export async function handleDisconnect({
       RECONNECT_STATE.attempts += 1;
       RECONNECT_STATE.lastAt = Date.now();
 
-      global.logger?.info(`Reconnected (attempt ${RECONNECT_STATE.attempts})`);
+      global.logger?.info?.(
+        `Reconnected (attempt ${RECONNECT_STATE.attempts})`,
+      );
     } catch (e) {
-      global.logger?.error({ error: e.message }, "Reconnect failed");
+      global.logger?.error?.({ error: e.message }, "Reconnect failed");
       RECONNECT_STATE.attempts += 1;
     } finally {
       RECONNECT_STATE.inflight = false;
     }
   }, delay);
 
-  global.logger?.warn(`Reconnecting in ${Math.ceil(delay / 1000)}s`);
+  global.logger?.warn?.(`Reconnecting in ${Math.ceil(delay / 1000)}s`);
 }
 
 export function cleanupReconnect() {
@@ -334,7 +333,7 @@ export async function reloadSinglePlugin(filepath, pluginFolder) {
       try {
         await oldPlugin.cleanup();
       } catch (e) {
-        global.logger?.warn(
+        global.logger?.warn?.(
           { file: filename, error: e.message },
           "Plugin cleanup error",
         );
@@ -350,10 +349,10 @@ export async function reloadSinglePlugin(filepath, pluginFolder) {
     }
 
     global.plugins[filename] = module.default || module;
-    global.logger?.info({ file: filename }, "Plugin reloaded");
+    global.logger?.info?.({ file: filename }, "Plugin reloaded");
     return true;
   } catch (e) {
-    global.logger?.error(
+    global.logger?.error?.(
       { file: filepath, error: e.message },
       "Failed to reload plugin",
     );
