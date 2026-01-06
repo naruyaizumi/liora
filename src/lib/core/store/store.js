@@ -7,6 +7,7 @@ import {
   REDIS_CONTACT_PREFIX,
   REDIS_GROUP_PREFIX,
   REDIS_CALL_PREFIX,
+  REDIS_LABEL_PREFIX,
   REDIS_BLOCKLIST_PREFIX,
 } from "./core.js";
 
@@ -18,10 +19,11 @@ export default function bind(conn) {
   });
 
   conn._redisStore = redisStore;
-  
+
   conn.getChat = async (jid) => {
     const key = `${REDIS_PREFIX}${jid}`;
-    return await redisStore.get(key);
+    const data = await redisStore.get(key);
+    return data || null;
   };
 
   conn.setChat = async (jid, data) => {
@@ -39,7 +41,7 @@ export default function bind(conn) {
     const chats = await redisStore.mget(keys);
     return chats.filter(c => c !== null);
   };
-  
+
   conn.getContact = async (jid) => {
     const key = `${REDIS_CONTACT_PREFIX}${jid}`;
     return await redisStore.get(key);
@@ -81,7 +83,7 @@ export default function bind(conn) {
     const key = `${REDIS_GROUP_PREFIX}${groupId}`;
     await redisStore.atomicSet(key, metadata, "group");
   };
-  
+
   conn.getPresence = async (jid) => {
     const key = `${REDIS_PRESENCE_PREFIX}${jid}`;
     return await redisStore.get(key);
@@ -100,6 +102,16 @@ export default function bind(conn) {
   conn.setCall = async (callId, callData) => {
     const key = `${REDIS_CALL_PREFIX}${callId}`;
     await redisStore.atomicSet(key, callData, "call");
+  };
+
+  conn.getLabel = async (labelId) => {
+    const key = `${REDIS_LABEL_PREFIX}${labelId}`;
+    return await redisStore.get(key);
+  };
+
+  conn.setLabel = async (labelId, labelData) => {
+    const key = `${REDIS_LABEL_PREFIX}${labelId}`;
+    await redisStore.atomicSet(key, labelData, "label");
   };
 
   conn.getBlocklist = async () => {
@@ -164,7 +176,7 @@ export default function bind(conn) {
           }
         }
       }
-      
+
       if (contacts) {
         for (const contact of contacts) {
           const id = conn.decodeJid(contact.id);
@@ -243,7 +255,7 @@ export default function bind(conn) {
       global.logger?.error(e);
     }
   });
-
+  
   conn.ev.on("messages.update", async (updates) => {
     redisStore.enqueueEvent("messages.update", updates, EVENT_PRIORITY.CORE);
 
@@ -481,7 +493,7 @@ export default function bind(conn) {
       global.logger?.error(e);
     }
   });
-  
+
   conn.ev.on("contacts.upsert", async (contacts) => {
     redisStore.enqueueEvent("contacts.upsert", contacts, EVENT_PRIORITY.CORE);
 
@@ -505,7 +517,7 @@ export default function bind(conn) {
       global.logger?.error(e);
     }
   });
-  
+
   conn.ev.on("contacts.update", async (updates) => {
     redisStore.enqueueEvent("contacts.update", updates, EVENT_PRIORITY.AUX);
 
@@ -544,7 +556,7 @@ export default function bind(conn) {
       global.logger?.error(e);
     }
   });
-  
+
   conn.ev.on("groups.update", async (updates) => {
     redisStore.enqueueEvent("groups.update", updates, EVENT_PRIORITY.CORE);
 
@@ -608,6 +620,37 @@ export default function bind(conn) {
             status: call.status,
           });
         }
+      }
+    } catch (e) {
+      global.logger?.error(e);
+    }
+  });
+
+  conn.ev.on("labels.edit", async (label) => {
+    redisStore.enqueueEvent("labels.edit", label, EVENT_PRIORITY.AUX);
+
+    try {
+      await conn.setLabel(label.id, label);
+    } catch (e) {
+      global.logger?.error(e);
+    }
+  });
+
+  conn.ev.on("labels.association", async ({ association, type }) => {
+    redisStore.enqueueEvent("labels.association", { association, type }, EVENT_PRIORITY.AUX);
+
+    try {
+      const { chatId, labelId } = association;
+      const chat = await conn.getChat(chatId);
+      
+      if (chat) {
+        chat.labels ||= [];
+        if (type === "add" && !chat.labels.includes(labelId)) {
+          chat.labels.push(labelId);
+        } else if (type === "remove") {
+          chat.labels = chat.labels.filter(l => l !== labelId);
+        }
+        await conn.setChat(chatId, chat);
       }
     } catch (e) {
       global.logger?.error(e);
