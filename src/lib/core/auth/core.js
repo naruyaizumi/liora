@@ -6,12 +6,14 @@ export { makeKey };
 export class DatabaseCore {
   constructor() {
     this.instanceId = `DatabaseCore-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const connectionString = Bun.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/liora";
+    const connectionString =
+      Bun.env.DATABASE_URL ||
+      "postgres://postgres:postgres@localhost:5432/liora";
     this.db = new SQL(connectionString, {
       max: 50,
       idleTimeout: 60000,
       connectionTimeout: 10000,
-      maxLifetime: 300000
+      maxLifetime: 300000,
     });
     this.initialized = false;
     this.initPromise = this._initDatabase();
@@ -91,10 +93,10 @@ export class DatabaseCore {
     await this._ensureInitialized();
     const entries = Object.entries(data);
     if (entries.length === 0) return;
-    
+
     const toInsert = [];
     const toDelete = [];
-    
+
     for (const [key, value] of entries) {
       const bytes = serialize(value);
       if (bytes === null) {
@@ -103,14 +105,15 @@ export class DatabaseCore {
         toInsert.push({ key, bytes });
       }
     }
-    
+
     if (toDelete.length > 0) {
-      await this.db`DELETE FROM baileys_state WHERE key IN ${this.db(toDelete)}`;
+      await this
+        .db`DELETE FROM baileys_state WHERE key IN ${this.db(toDelete)}`;
     }
-    
+
     if (toInsert.length > 0) {
-      const keys = toInsert.map(item => item.key);
-      const values = toInsert.map(item => item.bytes);
+      const keys = toInsert.map((item) => item.key);
+      const values = toInsert.map((item) => item.bytes);
       await this.db`
         INSERT INTO baileys_state (key, value)
         SELECT unnest(${keys}::text[]), unnest(${values}::bytea[])

@@ -70,13 +70,13 @@ function createKeyStore() {
     set,
     clear,
     transaction,
-    _dispose: async () => {}
+    _dispose: async () => {},
   };
 }
 
 export async function useSQLAuthState() {
   let creds;
-  
+
   async function loadCreds() {
     try {
       const row = await core.get("creds");
@@ -101,7 +101,7 @@ export async function useSQLAuthState() {
     },
     async clear() {
       return keyStore.clear();
-    }
+    },
   };
 
   async function saveCreds() {
@@ -123,6 +123,6 @@ export async function useSQLAuthState() {
     dispose,
     get closed() {
       return core.disposed;
-    }
+    },
   };
 }

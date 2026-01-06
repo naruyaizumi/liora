@@ -38,8 +38,8 @@ const bufferPool = new BufferPool();
 export function serialize(value) {
   if (value === null || value === undefined) return null;
   if (value instanceof Uint8Array) return value;
-  if (value?.constructor?.name === 'Buffer') return new Uint8Array(value);
-  
+  if (value?.constructor?.name === "Buffer") return new Uint8Array(value);
+
   const chunks = [];
   const size = 1 + calculateSize(value, chunks);
   const buffer = bufferPool.acquire(size);
@@ -53,7 +53,7 @@ export function serialize(value) {
 export function deserialize(bytes) {
   if (!bytes || bytes.length === 0) return null;
   if (!(bytes instanceof Uint8Array)) bytes = new Uint8Array(bytes);
-  
+
   if (bytes.length > 0 && bytes[0] === VERSION) {
     try {
       const { value } = readValue(bytes, 1);
@@ -68,17 +68,17 @@ export function deserialize(bytes) {
 function calculateSize(value, chunks) {
   if (value === null || value === undefined) return 1;
   if (value instanceof Uint8Array) return 1 + 4 + value.length;
-  
-  if (typeof value === 'string') {
+
+  if (typeof value === "string") {
     const encoder = new TextEncoder();
     const bytes = encoder.encode(value);
     chunks.push(bytes);
     return 1 + 4 + bytes.byteLength;
   }
-  
-  if (typeof value === 'number') return 1 + 8;
-  if (typeof value === 'boolean') return 1 + 1;
-  
+
+  if (typeof value === "number") return 1 + 8;
+  if (typeof value === "boolean") return 1 + 1;
+
   if (Array.isArray(value)) {
     let size = 1 + 4;
     const childChunks = [];
@@ -90,13 +90,13 @@ function calculateSize(value, chunks) {
     chunks.push(childChunks);
     return size;
   }
-  
-  if (typeof value === 'object') {
+
+  if (typeof value === "object") {
     const entries = Object.entries(value);
     let size = 1 + 4;
     const entryChunks = [];
     const encoder = new TextEncoder();
-    
+
     for (const [key, val] of entries) {
       const keyBytes = encoder.encode(key);
       const valChunks = [];
@@ -104,23 +104,23 @@ function calculateSize(value, chunks) {
       size += 4 + keyBytes.byteLength + valSize;
       entryChunks.push({ keyBytes, valChunks });
     }
-    
+
     chunks.push(entryChunks);
     return size;
   }
-  
+
   return 1;
 }
 
 function writeValue(buffer, offset, value, chunks) {
   const view = new DataView(buffer.buffer, buffer.byteOffset);
   let pos = offset;
-  
+
   if (value === null || value === undefined) {
     view.setUint8(pos, TYPE_NULL);
     return pos + 1;
   }
-  
+
   if (value instanceof Uint8Array) {
     view.setUint8(pos, TYPE_RAW_BINARY);
     pos += 1;
@@ -129,8 +129,8 @@ function writeValue(buffer, offset, value, chunks) {
     buffer.set(value, pos);
     return pos + value.length;
   }
-  
-  if (typeof value === 'string') {
+
+  if (typeof value === "string") {
     const bytes = chunks.shift();
     view.setUint8(pos, TYPE_STRING);
     pos += 1;
@@ -139,21 +139,21 @@ function writeValue(buffer, offset, value, chunks) {
     buffer.set(bytes, pos);
     return pos + bytes.byteLength;
   }
-  
-  if (typeof value === 'number') {
+
+  if (typeof value === "number") {
     view.setUint8(pos, TYPE_NUMBER);
     pos += 1;
     view.setFloat64(pos, value, true);
     return pos + 8;
   }
-  
-  if (typeof value === 'boolean') {
+
+  if (typeof value === "boolean") {
     view.setUint8(pos, TYPE_BOOLEAN);
     pos += 1;
     view.setUint8(pos, value ? 1 : 0);
     return pos + 1;
   }
-  
+
   if (Array.isArray(value)) {
     view.setUint8(pos, TYPE_ARRAY);
     pos += 1;
@@ -165,15 +165,15 @@ function writeValue(buffer, offset, value, chunks) {
     }
     return pos;
   }
-  
-  if (typeof value === 'object') {
+
+  if (typeof value === "object") {
     const entries = Object.entries(value);
     view.setUint8(pos, TYPE_OBJECT);
     pos += 1;
     view.setUint32(pos, entries.length, true);
     pos += 4;
     const entryChunks = chunks.shift();
-    
+
     for (let i = 0; i < entries.length; i++) {
       const [key, val] = entries[i];
       const { keyBytes, valChunks } = entryChunks[i];
@@ -183,10 +183,10 @@ function writeValue(buffer, offset, value, chunks) {
       pos += keyBytes.byteLength;
       pos = writeValue(buffer, pos, val, valChunks);
     }
-    
+
     return pos;
   }
-  
+
   view.setUint8(pos, TYPE_NULL);
   return pos + 1;
 }
@@ -196,7 +196,7 @@ function readValue(buffer, offset) {
   let pos = offset;
   const type = view.getUint8(pos);
   pos += 1;
-  
+
   if (type === TYPE_NULL) return { value: null, offset: pos };
   if (type === TYPE_RAW_BINARY) {
     const len = view.getUint32(pos, true);
