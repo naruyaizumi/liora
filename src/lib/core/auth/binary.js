@@ -16,22 +16,22 @@ class BufferPool {
 
   acquire(size) {
     const bucketSize = 1 << (32 - Math.clz32(size - 1));
-    
+
     const pool = this.pools.get(bucketSize);
     if (pool && pool.length > 0) {
       return pool.pop();
     }
-    
+
     return new Uint8Array(bucketSize);
   }
 
   release(buffer) {
     const size = buffer.byteLength;
-    
+
     if (!this.pools.has(size)) {
       this.pools.set(size, []);
     }
-    
+
     const pool = this.pools.get(size);
     if (pool.length < this.maxPoolSize) {
       buffer.fill(0);
@@ -63,15 +63,15 @@ export function serialize(value) {
 
   const chunks = [];
   const size = 1 + calculateSize(value, chunks);
-  
+
   const buffer = bufferPool.acquire(size);
   buffer[0] = VERSION;
-  
+
   const actualSize = writeValue(buffer, 1, value, chunks);
-  
+
   const result = buffer.subarray(0, actualSize);
   bufferPool.release(buffer);
-  
+
   return result;
 }
 
@@ -109,17 +109,17 @@ function calculateSize(value, chunks) {
     return 5 + value.byteLength;
   }
 
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const bytes = textEncoder.encode(value);
     chunks.push(bytes);
     return 5 + bytes.byteLength;
   }
 
-  if (typeof value === 'number') {
+  if (typeof value === "number") {
     return 9;
   }
 
-  if (typeof value === 'boolean') {
+  if (typeof value === "boolean") {
     return 2;
   }
 
@@ -135,20 +135,20 @@ function calculateSize(value, chunks) {
     return size;
   }
 
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     const entries = Object.entries(value);
     let size = 5;
     const entryChunks = [];
-    
+
     for (const [key, val] of entries) {
       const keyBytes = textEncoder.encode(key);
       const valChunks = [];
       const valSize = calculateSize(val, valChunks);
-      
+
       size += 4 + keyBytes.byteLength + valSize;
       entryChunks.push({ keyBytes, valChunks });
     }
-    
+
     chunks.push(entryChunks);
     return size;
   }
@@ -157,7 +157,11 @@ function calculateSize(value, chunks) {
 }
 
 function writeValue(buffer, offset, value, chunks) {
-  const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+  const view = new DataView(
+    buffer.buffer,
+    buffer.byteOffset,
+    buffer.byteLength,
+  );
   let pos = offset;
 
   if (value === null || value === undefined) {
@@ -172,7 +176,7 @@ function writeValue(buffer, offset, value, chunks) {
     return pos + 5 + value.byteLength;
   }
 
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const bytes = chunks.shift();
     view.setUint8(pos, TYPE_STRING);
     view.setUint32(pos + 1, bytes.byteLength, true);
@@ -180,13 +184,13 @@ function writeValue(buffer, offset, value, chunks) {
     return pos + 5 + bytes.byteLength;
   }
 
-  if (typeof value === 'number') {
+  if (typeof value === "number") {
     view.setUint8(pos, TYPE_NUMBER);
     view.setFloat64(pos + 1, value, true);
     return pos + 9;
   }
 
-  if (typeof value === 'boolean') {
+  if (typeof value === "boolean") {
     view.setUint8(pos, TYPE_BOOLEAN);
     view.setUint8(pos + 1, value ? 1 : 0);
     return pos + 2;
@@ -204,7 +208,7 @@ function writeValue(buffer, offset, value, chunks) {
     return pos;
   }
 
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     const entries = Object.entries(value);
     view.setUint8(pos, TYPE_OBJECT);
     view.setUint32(pos + 1, entries.length, true);
@@ -229,7 +233,11 @@ function writeValue(buffer, offset, value, chunks) {
 }
 
 function readValue(buffer, offset) {
-  const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+  const view = new DataView(
+    buffer.buffer,
+    buffer.byteOffset,
+    buffer.byteLength,
+  );
   let pos = offset;
 
   const type = view.getUint8(pos);

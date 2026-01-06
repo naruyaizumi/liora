@@ -17,7 +17,10 @@ export class DatabaseCore {
 
     this.initialized = false;
     this.initPromise = this._initDatabase().catch((err) => {
-      global.logger?.error({ error: err.message }, "Database initialization failed");
+      global.logger?.error(
+        { error: err.message },
+        "Database initialization failed",
+      );
       throw err;
     });
 
@@ -52,7 +55,8 @@ export class DatabaseCore {
           $$ LANGUAGE plpgsql
         `;
 
-        await this.db`DROP TRIGGER IF EXISTS baileys_updated_at ON baileys_state`;
+        await this
+          .db`DROP TRIGGER IF EXISTS baileys_updated_at ON baileys_state`;
         await this.db`
           CREATE TRIGGER baileys_updated_at
           BEFORE UPDATE ON baileys_state
@@ -63,7 +67,10 @@ export class DatabaseCore {
 
       this.initialized = true;
     } catch (e) {
-      global.logger?.fatal({ error: e.message, stack: e.stack }, "Database initialization failed");
+      global.logger?.fatal(
+        { error: e.message, stack: e.stack },
+        "Database initialization failed",
+      );
       throw e;
     }
   }
@@ -83,9 +90,9 @@ export class DatabaseCore {
       const result = await this.db`
         SELECT value FROM baileys_state WHERE key = ${key}
       `;
-      
+
       if (result.length === 0) return undefined;
-      
+
       const bytes = result[0].value;
       if (!(bytes instanceof Uint8Array)) {
         return { value: deserialize(new Uint8Array(bytes)) };
@@ -112,7 +119,7 @@ export class DatabaseCore {
       for (const row of result) {
         const bytes = row.value;
         const value = deserialize(
-          bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes)
+          bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes),
         );
         out[row.key] = { value };
       }
@@ -134,7 +141,7 @@ export class DatabaseCore {
     const writePromise = (async () => {
       try {
         const bytes = serialize(value);
-        
+
         if (bytes === null) {
           await this.del(key);
           return;
@@ -187,7 +194,9 @@ export class DatabaseCore {
       }
 
       if (pendingKeys.size > 0) {
-        await Promise.all(Array.from(pendingKeys, k => this.writeQueue.get(k)));
+        await Promise.all(
+          Array.from(pendingKeys, (k) => this.writeQueue.get(k)),
+        );
       }
 
       const validEntries = [];
@@ -208,16 +217,16 @@ export class DatabaseCore {
         const batchSize = 100;
         for (let i = 0; i < validEntries.length; i += batchSize) {
           const batch = validEntries.slice(i, i + batchSize);
-          
+
           const writePromise = (async () => {
             try {
               const values = batch.map(({ key, bytes }) => [key, bytes]);
-              
+
               await this.db`
                 INSERT INTO baileys_state (key, value)
                 SELECT * FROM UNNEST(
-                  ${values.map(v => v[0])}::text[],
-                  ${values.map(v => v[1])}::bytea[]
+                  ${values.map((v) => v[0])}::text[],
+                  ${values.map((v) => v[1])}::bytea[]
                 )
                 ON CONFLICT (key) 
                 DO UPDATE SET value = EXCLUDED.value
@@ -232,7 +241,7 @@ export class DatabaseCore {
           for (const { key } of batch) {
             this.writeQueue.set(key, writePromise);
           }
-          
+
           promises.push(writePromise);
         }
       }

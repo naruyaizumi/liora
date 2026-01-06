@@ -208,8 +208,8 @@ export class RedisStore {
     }, CLEANUP_INTERVAL);
 
     setTimeout(() => {
-      this._cleanupOldData().catch(e =>
-        global.logger?.error({ error: e.message }, "Initial cleanup error")
+      this._cleanupOldData().catch((e) =>
+        global.logger?.error({ error: e.message }, "Initial cleanup error"),
       );
     }, 60000);
   }
@@ -218,7 +218,7 @@ export class RedisStore {
     if (this.useFallback) return;
 
     const now = Date.now();
-    const threshold = now - (OLD_DATA_THRESHOLD * 1000);
+    const threshold = now - OLD_DATA_THRESHOLD * 1000;
 
     global.logger?.info("Starting auto cleanup of old data...");
 
@@ -233,7 +233,7 @@ export class RedisStore {
             const uint8 = textEncoder.encode(data);
             const obj = Bun.read(uint8);
             const timestamp = obj?.messageTimestamp || obj?.timestamp || 0;
-            
+
             if (timestamp < threshold) {
               await this.redis.del(key);
               cleaned++;
@@ -253,7 +253,7 @@ export class RedisStore {
             const uint8 = textEncoder.encode(data);
             const obj = Bun.read(uint8);
             const timestamp = obj?.timestamp || 0;
-            
+
             if (timestamp < presenceThreshold) {
               await this.redis.del(key);
               cleaned++;
@@ -273,7 +273,7 @@ export class RedisStore {
             const uint8 = textEncoder.encode(data);
             const obj = Bun.read(uint8);
             const timestamp = obj?.timestamp || 0;
-            
+
             if (timestamp < callThreshold) {
               await this.redis.del(key);
               cleaned++;
@@ -337,7 +337,7 @@ export class RedisStore {
 
     try {
       const acquired = await this.redis.setnx(lockKey, lockValue);
-      
+
       if (acquired === 1) {
         await this.redis.expire(lockKey, TTL_STRATEGY.lock);
 
@@ -346,8 +346,8 @@ export class RedisStore {
 
         await this.redis.del(lockKey);
       } else {
-        await new Promise(resolve => setTimeout(resolve, 5));
-        
+        await new Promise((resolve) => setTimeout(resolve, 5));
+
         const retryAcquired = await this.redis.setnx(lockKey, lockValue);
         if (retryAcquired === 1) {
           await this.redis.expire(lockKey, TTL_STRATEGY.lock);
@@ -373,7 +373,7 @@ export class RedisStore {
     try {
       const data = await this.redis.get(key);
       if (!data) return null;
-      
+
       const uint8 = textEncoder.encode(data);
       return Bun.read(uint8);
     } catch (e) {
@@ -417,7 +417,7 @@ export class RedisStore {
 
     try {
       if (keys.length === 0) return [];
-      
+
       const values = await this.redis.mget(keys);
       return values.map((v) => {
         if (!v) return null;
@@ -472,9 +472,9 @@ export class RedisStore {
   }
 }
 
-export { 
-  EVENT_PRIORITY, 
-  REDIS_PREFIX, 
+export {
+  EVENT_PRIORITY,
+  REDIS_PREFIX,
   REDIS_PRESENCE_PREFIX,
   REDIS_MESSAGE_PREFIX,
   REDIS_CONTACT_PREFIX,
