@@ -1,6 +1,9 @@
 import { initAuthCreds, proto } from "baileys";
 import core, { makeKey } from "./core.js";
-import { encode as msgpackEncode, decode as msgpackDecode } from "@msgpack/msgpack";
+import {
+  encode as msgpackEncode,
+  decode as msgpackDecode,
+} from "@msgpack/msgpack";
 
 function encodeAuthCreds(creds) {
   return msgpackEncode(creds);
@@ -22,7 +25,7 @@ function createKeyStore() {
       for (const id of ids) {
         const k = makeKey(type, id);
         const buf = results[k];
-        
+
         if (buf) {
           if (type === "app-state-sync-key") {
             try {
@@ -55,19 +58,21 @@ function createKeyStore() {
 
           if (type === "app-state-sync-key") {
             try {
-              const encoded = proto.Message.AppStateSyncKeyData.encode(value).finish();
+              const encoded =
+                proto.Message.AppStateSyncKeyData.encode(value).finish();
               toSet[key] = encoded;
             } catch (e) {
               global.logger?.error(`Encode error for ${key}: ${e.message}`);
             }
           } else {
-            toSet[key] = value instanceof Uint8Array ? value : new Uint8Array(value);
+            toSet[key] =
+              value instanceof Uint8Array ? value : new Uint8Array(value);
           }
         }
       }
 
       const promises = [];
-      
+
       if (Object.keys(toSet).length > 0) {
         promises.push(core.setMany(toSet));
       }
@@ -97,7 +102,7 @@ export async function useSQLAuthState() {
   async function loadCreds() {
     try {
       const buf = await core.get("creds");
-      
+
       if (buf) {
         creds = decodeAuthCreds(buf);
       } else {

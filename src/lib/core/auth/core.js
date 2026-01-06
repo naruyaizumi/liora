@@ -5,9 +5,11 @@ export const makeKey = (type, id) => `${type}:${id}`;
 export class DatabaseCore {
   constructor() {
     this.instanceId = `db-${Date.now()}`;
-    
-    const url = Bun.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/liora";
-    
+
+    const url =
+      Bun.env.DATABASE_URL ||
+      "postgres://postgres:postgres@localhost:5432/liora";
+
     this.db = new SQL(url, {
       max: 80,
       idleTimeout: 10000,
@@ -20,7 +22,7 @@ export class DatabaseCore {
 
   async init() {
     if (this.initialized) return;
-    
+
     try {
       await this.db`
         CREATE TABLE IF NOT EXISTS baileys_keys (
@@ -51,7 +53,7 @@ export class DatabaseCore {
         SELECT v FROM baileys_keys WHERE k = ${key}
       `;
       if (rows.length === 0) return null;
-      
+
       const buf = rows[0].v;
       return buf instanceof Uint8Array ? buf : new Uint8Array(buf);
     } catch (e) {
@@ -65,7 +67,7 @@ export class DatabaseCore {
     if (!this.initialized) await this.init();
 
     const result = {};
-    
+
     if (keys.length === 1) {
       try {
         const rows = await this.db`
@@ -73,23 +75,24 @@ export class DatabaseCore {
         `;
         if (rows.length > 0) {
           const buf = rows[0].v;
-          result[rows[0].k] = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+          result[rows[0].k] =
+            buf instanceof Uint8Array ? buf : new Uint8Array(buf);
         }
       } catch (e) {
         global.logger?.error(`GetMany single error: ${e.message}`);
       }
       return result;
     }
-    
+
     const batchSize = 50;
     for (let i = 0; i < keys.length; i += batchSize) {
       const batch = keys.slice(i, i + batchSize);
-      
+
       try {
         const rows = await this.db`
           SELECT k, v FROM baileys_keys WHERE k IN (${batch})
         `;
-        
+
         for (const row of rows) {
           const buf = row.v;
           result[row.k] = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
@@ -98,7 +101,7 @@ export class DatabaseCore {
         global.logger?.error(`GetMany batch error: ${e.message}`);
       }
     }
-    
+
     return result;
   }
 
@@ -147,7 +150,8 @@ export class DatabaseCore {
         if (!value) {
           await this.del(key);
         } else {
-          const buf = value instanceof Uint8Array ? value : new Uint8Array(value);
+          const buf =
+            value instanceof Uint8Array ? value : new Uint8Array(value);
           await this.db`
             INSERT INTO baileys_keys (k, v) 
             VALUES (${key}, ${buf})
@@ -175,11 +179,11 @@ export class DatabaseCore {
       }
       return;
     }
-    
+
     const batchSize = 50;
     for (let i = 0; i < keys.length; i += batchSize) {
       const batch = keys.slice(i, i + batchSize);
-      
+
       try {
         await this.db`
           DELETE FROM baileys_keys WHERE k IN (${batch})
