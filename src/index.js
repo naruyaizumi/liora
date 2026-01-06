@@ -55,12 +55,14 @@ async function start(file) {
           if (!shuttingDown) {
             if (exitCode !== 0) {
               global.logger.warn(
-                `Child exited with code ${exitCode}${signalCode ? ` (signal: ${signalCode})` : ""} after ${Math.floor(uptime / 1000)}s`
+                `Child exited with code ${exitCode}${signalCode ? ` (signal: ${signalCode})` : ""} after ${Math.floor(uptime / 1000)}s`,
               );
             }
 
             if (uptime < MIN_UPTIME) {
-              global.logger.warn(`Process crashed too quickly (${Math.floor(uptime / 1000)}s < ${MIN_UPTIME / 1000}s)`);
+              global.logger.warn(
+                `Process crashed too quickly (${Math.floor(uptime / 1000)}s < ${MIN_UPTIME / 1000}s)`,
+              );
             }
           }
 
@@ -141,7 +143,7 @@ async function supervise() {
     if (crashCount >= MAX_CRASHES) {
       const cooldown = 5 * 60 * 1000;
       global.logger.error(
-        `Too many crashes (${crashCount}/${MAX_CRASHES} in ${CRASH_WINDOW / 1000}s). Cooling down for ${cooldown / 1000}s...`
+        `Too many crashes (${crashCount}/${MAX_CRASHES} in ${CRASH_WINDOW / 1000}s). Cooling down for ${cooldown / 1000}s...`,
       );
       await Bun.sleep(cooldown);
       crashCount = 0;
@@ -150,7 +152,7 @@ async function supervise() {
 
     const delay = backoff(crashCount);
     global.logger.info(
-      `Restarting after crash (${crashCount}/${MAX_CRASHES})... Waiting ${delay / 1000}s`
+      `Restarting after crash (${crashCount}/${MAX_CRASHES})... Waiting ${delay / 1000}s`,
     );
     await Bun.sleep(delay);
   }

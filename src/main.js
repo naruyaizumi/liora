@@ -30,7 +30,8 @@ const baileysLogger = () => {
     trace: 10,
   };
 
-  const currentLevel = LEVELS[Bun.env.BAILEYS_LOG_LEVEL?.toLowerCase() || "silent"];
+  const currentLevel =
+    LEVELS[Bun.env.BAILEYS_LOG_LEVEL?.toLowerCase() || "silent"];
   const shouldLog = (level) => LEVELS[level] >= currentLevel;
 
   const formatValue = (value) => {
@@ -194,7 +195,7 @@ async function gracefulShutdown(signal) {
         await Promise.race([
           authState.dispose(),
           new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("Dispose timeout")), 5000)
+            setTimeout(() => reject(new Error("Dispose timeout")), 5000),
           ),
         ]);
         authState = null;
@@ -239,13 +240,19 @@ process.on("SIGINT", async () => {
 });
 
 process.on("uncaughtException", async (e) => {
-  global.logger.error({ error: e.message, stack: e.stack }, "Uncaught exception");
+  global.logger.error(
+    { error: e.message, stack: e.stack },
+    "Uncaught exception",
+  );
   await gracefulShutdown("uncaughtException");
   process.exit(1);
 });
 
 process.on("unhandledRejection", async (e) => {
-  global.logger.error({ error: e?.message, stack: e?.stack }, "Unhandled rejection");
+  global.logger.error(
+    { error: e?.message, stack: e?.stack },
+    "Unhandled rejection",
+  );
   await gracefulShutdown("unhandledRejection");
   process.exit(1);
 });

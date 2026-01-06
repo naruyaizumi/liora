@@ -23,14 +23,18 @@ export async function getAllPlugins(dir) {
       } catch {}
     }
   } catch (e) {
-    global.logger?.error({ error: e.message }, "Error reading plugin directory");
+    global.logger?.error(
+      { error: e.message },
+      "Error reading plugin directory",
+    );
   }
 
   return results;
 }
 
 export async function loadPlugins(pluginFolder, getAllPluginsFn) {
-  let success = 0, failed = 0;
+  let success = 0,
+    failed = 0;
 
   const oldPlugins = global.plugins || {};
   for (const [filename, plugin] of Object.entries(oldPlugins)) {
@@ -38,7 +42,10 @@ export async function loadPlugins(pluginFolder, getAllPluginsFn) {
       try {
         await plugin.cleanup();
       } catch (e) {
-        global.logger?.warn({ file: filename, error: e.message }, "Plugin cleanup error");
+        global.logger?.warn(
+          { file: filename, error: e.message },
+          "Plugin cleanup error",
+        );
       }
     }
   }
@@ -49,7 +56,10 @@ export async function loadPlugins(pluginFolder, getAllPluginsFn) {
     const files = await getAllPluginsFn(pluginFolder);
 
     for (const filepath of files) {
-      const filename = normalize(relative(pluginFolder, filepath)).replace(/\\/g, "/");
+      const filename = normalize(relative(pluginFolder, filepath)).replace(
+        /\\/g,
+        "/",
+      );
 
       try {
         const module = await import(`${filepath}?init=${Date.now()}`);
@@ -65,7 +75,10 @@ export async function loadPlugins(pluginFolder, getAllPluginsFn) {
       } catch (e) {
         delete global.plugins[filename];
         failed++;
-        global.logger?.warn({ file: filename, error: e.message }, "Failed to load plugin");
+        global.logger?.warn(
+          { file: filename, error: e.message },
+          "Failed to load plugin",
+        );
       }
     }
 
@@ -89,12 +102,14 @@ export class EventManager {
   register(conn, handler, saveCreds) {
     const messageHandler = handler?.handler?.bind(conn) || (() => {});
     const credsHandler = saveCreds?.bind(conn) || (() => {});
-    const connectionHandler = handler?.handleDisconnect?.bind(conn) || global.handleDisconnect?.bind(conn);
+    const connectionHandler =
+      handler?.handleDisconnect?.bind(conn) ||
+      global.handleDisconnect?.bind(conn);
 
     if (conn?.ev) {
       conn.ev.on("messages.upsert", messageHandler);
       conn.ev.on("creds.update", credsHandler);
-      
+
       if (connectionHandler) {
         conn.ev.on("connection.update", connectionHandler);
         this.handlers.set("connection.update", connectionHandler);
@@ -106,7 +121,7 @@ export class EventManager {
 
     conn.handler = messageHandler;
     conn.credsUpdate = credsHandler;
-    
+
     return conn;
   }
 
@@ -116,7 +131,10 @@ export class EventManager {
         try {
           conn.ev.off(event, handler);
         } catch (e) {
-          global.logger?.error({ error: e.message, event }, "Failed to unregister handler");
+          global.logger?.error(
+            { error: e.message, event },
+            "Failed to unregister handler",
+          );
         }
       }
       this.handlers.clear();
@@ -180,11 +198,16 @@ const backoff = (baseMs, factor = 1.8, maxMs = 60_000) => {
   const n = Math.max(0, RECONNECT_STATE.attempts - 1);
   const raw = Math.min(maxMs, Math.round(baseMs * Math.pow(factor, n)));
   const jitter = raw * (0.2 + Math.random() * 0.3);
-  return Math.max(500, raw + Math.round((Math.random() < 0.5 ? -1 : 1) * jitter));
+  return Math.max(
+    500,
+    raw + Math.round((Math.random() < 0.5 ? -1 : 1) * jitter),
+  );
 };
 
 const getDisconnectReason = (error) => {
-  const code = String(error?.output?.statusCode ?? error?.statusCode ?? error?.code ?? 0).toUpperCase();
+  const code = String(
+    error?.output?.statusCode ?? error?.statusCode ?? error?.code ?? 0,
+  ).toUpperCase();
 
   const reasons = {
     428: "replaced_by_another_session",
@@ -217,7 +240,11 @@ const getBaseDelay = (reason) => {
   }
 };
 
-export async function handleDisconnect({ lastDisconnect, connection, isNewLogin }) {
+export async function handleDisconnect({
+  lastDisconnect,
+  connection,
+  isNewLogin,
+}) {
   const reason = getDisconnectReason(lastDisconnect?.error);
 
   if (isNewLogin) {
@@ -297,14 +324,20 @@ export function cleanupReconnect() {
 
 export async function reloadSinglePlugin(filepath, pluginFolder) {
   try {
-    const filename = normalize(relative(pluginFolder, filepath)).replace(/\\/g, "/");
+    const filename = normalize(relative(pluginFolder, filepath)).replace(
+      /\\/g,
+      "/",
+    );
     const oldPlugin = global.plugins[filename];
 
     if (oldPlugin && typeof oldPlugin.cleanup === "function") {
       try {
         await oldPlugin.cleanup();
       } catch (e) {
-        global.logger?.warn({ file: filename, error: e.message }, "Plugin cleanup error");
+        global.logger?.warn(
+          { file: filename, error: e.message },
+          "Plugin cleanup error",
+        );
       }
     }
 
@@ -320,7 +353,10 @@ export async function reloadSinglePlugin(filepath, pluginFolder) {
     global.logger?.info({ file: filename }, "Plugin reloaded");
     return true;
   } catch (e) {
-    global.logger?.error({ file: filepath, error: e.message }, "Failed to reload plugin");
+    global.logger?.error(
+      { file: filepath, error: e.message },
+      "Failed to reload plugin",
+    );
     return false;
   }
 }
