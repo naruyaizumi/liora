@@ -18,5 +18,8 @@
   "trustedDependencies": [
     "baileys",
     "protobufjs"
-  ]
+  ],
+  "devDependencies": {
+    "prettier": "^3.7.4"
+  }
 }

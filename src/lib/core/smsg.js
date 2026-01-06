@@ -29,7 +29,7 @@ export function smsg(conn, m) {
   }
 
   const wrapped = new Message(raw, conn);
-  
+
   try {
     wrapped.process();
   } catch (e) {

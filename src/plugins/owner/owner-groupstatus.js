@@ -19,32 +19,48 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
     let content = {};
 
-    if (mediaType === 'imageMessage' || /image/.test(mime)) {
+    if (mediaType === "imageMessage" || /image/.test(mime)) {
       const uint8Array = await quoted.download();
       if (!uint8Array) return m.reply("Failed to download image.");
-      
-      const buffer = Buffer.from(uint8Array.buffer, uint8Array.byteOffset, uint8Array.byteLength);
-      
+
+      const buffer = Buffer.from(
+        uint8Array.buffer,
+        uint8Array.byteOffset,
+        uint8Array.byteLength,
+      );
+
       content = {
         image: buffer,
         caption: caption || "",
       };
-    } else if (mediaType === 'videoMessage' || /video/.test(mime)) {
+    } else if (mediaType === "videoMessage" || /video/.test(mime)) {
       const uint8Array = await quoted.download();
       if (!uint8Array) return m.reply("Failed to download video.");
-      
-      const buffer = Buffer.from(uint8Array.buffer, uint8Array.byteOffset, uint8Array.byteLength);
-      
+
+      const buffer = Buffer.from(
+        uint8Array.buffer,
+        uint8Array.byteOffset,
+        uint8Array.byteLength,
+      );
+
       content = {
         video: buffer,
         caption: caption || "",
       };
-    } else if (mediaType === 'audioMessage' || mediaType === 'ptt' || /audio/.test(mime)) {
+    } else if (
+      mediaType === "audioMessage" ||
+      mediaType === "ptt" ||
+      /audio/.test(mime)
+    ) {
       const uint8Array = await quoted.download();
       if (!uint8Array) return m.reply("Failed to download audio.");
-      
-      const buffer = Buffer.from(uint8Array.buffer, uint8Array.byteOffset, uint8Array.byteLength);
-      
+
+      const buffer = Buffer.from(
+        uint8Array.buffer,
+        uint8Array.byteOffset,
+        uint8Array.byteLength,
+      );
+
       content = {
         audio: buffer,
         mimetype: "audio/mp4",
@@ -59,8 +75,8 @@ let handler = async (m, { conn, usedPrefix, command }) => {
       );
     }
 
-    const { generateWAMessageContent, generateWAMessageFromContent } = 
-      await import('baileys');
+    const { generateWAMessageContent, generateWAMessageFromContent } =
+      await import("baileys");
 
     const { backgroundColor, ...contentWithoutBg } = content;
 
@@ -90,7 +106,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
       {
         userJid: conn.user.id,
         quoted: m,
-      }
+      },
     );
 
     await conn.relayMessage(m.chat, msg.message, {

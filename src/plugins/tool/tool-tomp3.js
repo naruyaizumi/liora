@@ -17,10 +17,18 @@ let handler = async (m, { conn, usedPrefix, command }) => {
       return m.reply("Failed to fetch media data.");
 
     const audioUint8 = await convert(data, { format: "mp3" });
-    if (!audioUint8 || !(audioUint8 instanceof Uint8Array) || audioUint8.length === 0)
+    if (
+      !audioUint8 ||
+      !(audioUint8 instanceof Uint8Array) ||
+      audioUint8.length === 0
+    )
       return m.reply("Conversion failed: empty result.");
 
-    const audioBuffer = Buffer.from(audioUint8.buffer, audioUint8.byteOffset, audioUint8.byteLength);
+    const audioBuffer = Buffer.from(
+      audioUint8.buffer,
+      audioUint8.byteOffset,
+      audioUint8.byteLength,
+    );
 
     await conn.sendMessage(
       m.chat,

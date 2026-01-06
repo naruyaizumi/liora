@@ -36,7 +36,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       ptt: true,
     });
 
-    const audioBuffer = Buffer.from(convertedUint8.buffer, convertedUint8.byteOffset, convertedUint8.byteLength);
+    const audioBuffer = Buffer.from(
+      convertedUint8.buffer,
+      convertedUint8.byteOffset,
+      convertedUint8.byteLength,
+    );
 
     await conn.sendMessage(
       m.chat,

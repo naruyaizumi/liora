@@ -32,7 +32,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     return m.reply(
       `Failed to add the member. Status: ${userResult?.status || "unknown"}`,
     );
-    
   } catch (e) {
     global.logger.error(e);
     return m.reply(`Error: ${e.message}`);
