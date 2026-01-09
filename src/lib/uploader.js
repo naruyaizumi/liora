@@ -173,7 +173,7 @@ async function uploader6(buffer) {
     if (!buffer || buffer.length === 0)
       throw new Error("Buffer cannot be empty");
 
-    const type = fileType(buffer);
+    const type = await fileType(buffer);
     if (!type) throw new Error("Unrecognized file format");
     if (!type.mime.startsWith("video/")) {
       throw new Error(
@@ -216,7 +216,7 @@ async function uploader7(buffer) {
     if (!buffer || buffer.length === 0)
       throw new Error("Buffer cannot be empty");
 
-    const type = fileType(buffer);
+    const type = await fileType(buffer);
     if (!type) throw new Error("Unrecognized file format");
     if (!type.mime.startsWith("image/")) {
       throw new Error(
