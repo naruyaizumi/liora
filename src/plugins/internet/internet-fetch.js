@@ -62,7 +62,7 @@ ${err.substring(0, 200)}${err.length > 200 ? "..." : ""}\`\`\``
     const detect = await fileType(buf)
 
     let mime = type.split(";")[0].trim()
-    let ext = "bin"
+    let ext
     if (detect) {
       mime = detect.mime
       ext = detect.ext
