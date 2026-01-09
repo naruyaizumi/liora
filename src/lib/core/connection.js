@@ -245,7 +245,7 @@ export class EventManager {
                     global.logger.error({ error: e.message }, "Restart error");
                 }
 
-                global.conn = naruyaizumi(connectionOptions, { chats: oldChats });
+                global.conn = naruyaizumi(connectionOptions);
                 eventManager.isInit = true;
             }
 
