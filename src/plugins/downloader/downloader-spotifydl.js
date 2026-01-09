@@ -1,21 +1,21 @@
-import { spotifydl } from "#api/spotifydl.js";
+import { spotifydl } from "#api/spotifydl.js"
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  if (!args[0])
-    return m.reply(
-      `Please provide a valid Spotify track URL.\n› Example: ${usedPrefix + command} https://open.spotify.com/track/...`,
-    );
+  if (!args[0]) {
+    return m.reply(`Need Spotify URL\nEx: ${usedPrefix + command} https://open.spotify.com/track/xxx`)
+  }
 
-  const url = args[0];
-  const spotifyRegex = /^https?:\/\/open\.spotify\.com\/track\/[\w-]+(\?.*)?$/i;
-  if (!spotifyRegex.test(url))
-    return m.reply("Invalid URL! Please provide a valid Spotify track link.");
+  const url = args[0]
+  const spotify = /^https?:\/\/open\.spotify\.com\/track\/[\w-]+(\?.*)?$/i
+  if (!spotify.test(url)) {
+    return m.reply("Invalid Spotify URL")
+  }
 
-  await global.loading(m, conn);
+  await global.loading(m, conn)
 
   try {
-    const { success, downloadUrl, error } = await spotifydl(url);
-    if (!success) throw new Error(error);
+    const { success, downloadUrl, error } = await spotifydl(url)
+    if (!success) throw new Error(error)
 
     await conn.sendMessage(
       m.chat,
@@ -24,17 +24,16 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         mimetype: "audio/mpeg",
       },
       { quoted: m },
-    );
+    )
   } catch (e) {
-    global.logger.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["spotifydl"];
-handler.tags = ["downloader"];
-handler.command = /^(spotifydl)$/i;
+handler.help = ["spotifydl"]
+handler.tags = ["downloader"]
+handler.command = /^(spotifydl)$/i
 
-export default handler;
+export default handler

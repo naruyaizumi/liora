@@ -1,9 +1,5 @@
-import { RedisClient } from "bun";
-
-const REDIS_PREFIX = "liora:chat:";
-const REDIS_PRESENCE_PREFIX = "liora:presence:";
-const REDIS_PROCESSED_PREFIX = "liora:processed:";
-const REDIS_LOCK_PREFIX = "liora:lock:";
+import { Database } from "bun:sqlite";
+import { encode, decode } from "@msgpack/msgpack";
 
 const EVENT_PRIORITY = {
   CORE: 0,
@@ -12,82 +8,98 @@ const EVENT_PRIORITY = {
 };
 
 const TTL_STRATEGY = {
-  message: 60 * 60 * 24 * 7,
-  chat: 60 * 60 * 24 * 7,
-  presence: 60 * 5,
+  message: 604800,
+  chat: 604800,
+  contact: 2592000,
+  group: 604800,
+  presence: 300,
   typing: 60,
-  receipt: 60 * 60 * 24,
-  processed: 60 * 15,
-  lock: 30,
+  receipt: 86400,
+  call: 259200,
+  blocklist: 2592000,
+  processed: 900,
 };
 
-const MAX_QUEUE_SIZE_PER_PRIORITY = 100;
-const MAX_INFLIGHT_OPS = 50;
-const BACKPRESSURE_THRESHOLD = 0.8;
-const MAX_PROCESSED_EVENTS = 1000;
+const MAX_QUEUE_SIZE = 500;
+const MAX_INFLIGHT_OPS = 100;
+const CLEANUP_INTERVAL = 3600000;
 
-export class RedisStore {
+export class MemoryStore {
   constructor() {
-    this.redis = null;
-    this.useFallback = false;
-
-    this.eventQueue = {
-      [EVENT_PRIORITY.CORE]: [],
-      [EVENT_PRIORITY.AUX]: [],
-      [EVENT_PRIORITY.NOISE]: [],
-    };
-
+    this.db = new Database(":memory:", { strict: true });
+    this._initDatabase();
+    this._prepareStatements();
+    
+    this.eventQueue = [];
     this.inflightOps = 0;
     this.droppedEvents = 0;
-    this.processedEvents = new Set();
-
-    this.initPromise = this._initRedis();
+    this.processing = false;
+    
     this._startEventProcessor();
-    this._startBackpressureMonitor();
+    this._startAutoCleanup();
   }
 
-  async _initRedis() {
-    try {
-      const redisUrl = Bun.env.REDIS_URL || "redis://localhost:6379";
-      this.redis = new RedisClient(redisUrl);
+  _initDatabase() {
+    this.db.exec("PRAGMA journal_mode = MEMORY");
+    this.db.exec("PRAGMA synchronous = OFF");
+    this.db.exec("PRAGMA temp_store = MEMORY");
+    this.db.exec("PRAGMA locking_mode = EXCLUSIVE");
+    this.db.exec("PRAGMA page_size = 8192");
+    this.db.exec("PRAGMA cache_size = -16384");
+    
+    this.db.exec(`
+      CREATE TABLE kv (
+        k TEXT PRIMARY KEY NOT NULL,
+        v BLOB NOT NULL,
+        t TEXT NOT NULL,
+        e INTEGER NOT NULL,
+        p INTEGER NOT NULL DEFAULT 0,
+        c INTEGER NOT NULL DEFAULT 0
+      ) WITHOUT ROWID;
+    `);
+    
+    this.db.exec("CREATE INDEX idx_expire ON kv(e) WHERE e > 0;");
+    this.db.exec("CREATE INDEX idx_type ON kv(t);");
+  }
 
-      await this.redis.ping();
-
-      this.useFallback = false;
-    } catch (e) {
-      global.logger?.error(
-        { error: e.message },
-        "Redis init failed - using fallback mode",
-      );
-      this.useFallback = true;
-    }
+  _prepareStatements() {
+    this.stmtGet = this.db.query("SELECT v FROM kv WHERE k = ? AND (e = 0 OR e > unixepoch())");
+    this.stmtSet = this.db.query("INSERT OR REPLACE INTO kv (k, v, t, e, p, c) VALUES (?, ?, ?, ?, ?, unixepoch())");
+    this.stmtDel = this.db.query("DELETE FROM kv WHERE k = ?");
+    this.stmtExists = this.db.query("SELECT 1 FROM kv WHERE k = ? AND (e = 0 OR e > unixepoch())");
+    this.stmtKeys = this.db.query("SELECT k FROM kv WHERE k LIKE ? AND (e = 0 OR e > unixepoch())");
+    this.stmtCleanup = this.db.query("DELETE FROM kv WHERE e > 0 AND e <= unixepoch()");
+    this.stmtTouch = this.db.query("UPDATE kv SET p = p + 1 WHERE k = ?");
+    this.stmtEvict = this.db.query(`
+      DELETE FROM kv WHERE k IN (
+        SELECT k FROM kv WHERE e = 0 ORDER BY p ASC, c ASC LIMIT ?
+      )
+    `);
+    
+    this.stmtBatchGet = this.db.prepare(`
+      SELECT k, v FROM kv 
+      WHERE k IN (SELECT value FROM json_each(?)) 
+      AND (e = 0 OR e > unixepoch())
+    `);
+    
+    this.stmtBatchSet = this.db.prepare(`
+      INSERT OR REPLACE INTO kv (k, v, t, e, p, c) 
+      VALUES (?, ?, ?, ?, ?, unixepoch())
+    `);
   }
 
   _startEventProcessor() {
-    setInterval(() => {
-      this._processEventQueue();
-    }, 50);
-  }
+    const process = () => {
+      if (this.processing || this.eventQueue.length === 0) {
+        setImmediate(process);
+        return;
+      }
 
-  async _processEventQueue() {
-    if (this.inflightOps >= MAX_INFLIGHT_OPS) return;
+      this.processing = true;
 
-    for (
-      let priority = EVENT_PRIORITY.CORE;
-      priority <= EVENT_PRIORITY.NOISE;
-      priority++
-    ) {
-      const queue = this.eventQueue[priority];
-
-      if (queue.length === 0) continue;
-
-      const batch = queue.splice(0, 10);
-
-      for (const event of batch) {
-        if (this.inflightOps >= MAX_INFLIGHT_OPS) {
-          queue.unshift(...batch.slice(batch.indexOf(event)));
-          break;
-        }
+      while (this.eventQueue.length > 0 && this.inflightOps < MAX_INFLIGHT_OPS) {
+        const event = this.eventQueue.shift();
+        if (!event) break;
 
         this.inflightOps++;
         this._processEvent(event).finally(() => {
@@ -95,259 +107,311 @@ export class RedisStore {
         });
       }
 
-      break;
-    }
+      this.processing = false;
+      setImmediate(process);
+    };
+
+    setImmediate(process);
   }
 
   async _processEvent(event) {
-    const { type, data, eventId } = event;
+    const { type, data } = event;
+    
+    try {
+      await this._executeEvent(type, data);
+    } catch (e) {
+      global.logger?.error({ error: e.message, type }, "Event processing error");
+    }
+  }
 
-    if (!(await this._isEventProcessed(eventId))) {
+  async _executeEvent() {
+    //
+  }
+
+  _startAutoCleanup() {
+    const cleanup = () => {
       try {
-        await this._executeEvent(type, data);
-        await this._markEventProcessed(eventId);
+        const deleted = this.stmtCleanup.run();
+        
+        if (deleted.changes > 0) {
+          global.logger?.debug({ deleted: deleted.changes }, "Expired entries cleaned");
+        }
+
+        const count = this.db.query("SELECT COUNT(*) as c FROM kv WHERE e = 0").get();
+        const maxNonExpiring = 10000;
+        
+        if (count.c > maxNonExpiring) {
+          const toEvict = count.c - maxNonExpiring;
+          this.stmtEvict.run(toEvict);
+          global.logger?.debug({ evicted: toEvict }, "LFU eviction performed");
+        }
       } catch (e) {
-        global.logger?.error(
-          { error: e.message, type },
-          "Event processing error",
-        );
+        global.logger?.error({ error: e.message }, "Cleanup error");
       }
-    }
-  }
+    };
 
-  async _isEventProcessed(eventId) {
-    if (this.useFallback) {
-      return this.processedEvents.has(eventId);
-    }
-
-    const key = `${REDIS_PROCESSED_PREFIX}${eventId}`;
-    try {
-      const exists = await this.redis.exists(key);
-      return exists === 1;
-    } catch {
-      return this.processedEvents.has(eventId);
-    }
-  }
-
-  async _markEventProcessed(eventId) {
-    this.processedEvents.add(eventId);
-
-    if (this.processedEvents.size > MAX_PROCESSED_EVENTS) {
-      const iterator = this.processedEvents.values();
-      for (let i = 0; i < 100; i++) {
-        const { value } = iterator.next();
-        if (value) this.processedEvents.delete(value);
-      }
-    }
-
-    if (this.useFallback) return;
-
-    const key = `${REDIS_PROCESSED_PREFIX}${eventId}`;
-    try {
-      await this.redis.setex(key, TTL_STRATEGY.processed, "1");
-    } catch {
-      //
-    }
-  }
-
-  async _executeEvent(type, data) {
-    switch (type) {
-      case "messages.upsert":
-      case "chats.set":
-      case "chats.upsert":
-      case "contacts.update":
-      case "group-participants.update":
-        if (data.id) {
-          const key = `${REDIS_PREFIX}${data.id}`;
-          await this.atomicSet(key, data, "chat");
-        }
-        break;
-      case "presence.update":
-        if (data.id) {
-          const key = `${REDIS_PRESENCE_PREFIX}${data.id}`;
-          await this.atomicSet(key, data, "presence");
-        }
-        break;
-    }
-  }
-
-  _startBackpressureMonitor() {
-    setInterval(() => {
-      const totalQueued = Object.values(this.eventQueue).reduce(
-        (sum, queue) => sum + queue.length,
-        0,
-      );
-
-      const pressure = totalQueued / (MAX_QUEUE_SIZE_PER_PRIORITY * 3);
-
-      if (pressure > BACKPRESSURE_THRESHOLD) {
-        const dropped = this.eventQueue[EVENT_PRIORITY.NOISE].length;
-        this.eventQueue[EVENT_PRIORITY.NOISE] = [];
-        this.droppedEvents += dropped;
-
-        global.logger?.warn(
-          {
-            queued: totalQueued,
-            pressure: (pressure * 100).toFixed(2) + "%",
-            dropped,
-          },
-          "Backpressure: dropping noise events",
-        );
-      }
-    }, 1000);
+    setInterval(cleanup, CLEANUP_INTERVAL);
+    setTimeout(cleanup, 60000);
   }
 
   enqueueEvent(type, data, priority = EVENT_PRIORITY.CORE) {
-    const queue = this.eventQueue[priority];
-
-    if (queue.length >= MAX_QUEUE_SIZE_PER_PRIORITY) {
+    if (this.eventQueue.length >= MAX_QUEUE_SIZE) {
       if (priority === EVENT_PRIORITY.NOISE) {
         this.droppedEvents++;
         return;
       }
-
-      queue.shift();
+      this.eventQueue.shift();
     }
 
-    const eventId = `${type}-${data?.id || Date.now()}`;
-    queue.push({ type, data, eventId, priority });
+    this.eventQueue.push({ type, data, priority });
   }
 
-  _getAdaptiveTTL(type, data) {
-    if (type === "presence") {
-      const timeSinceUpdate = Date.now() - (data?.timestamp || Date.now());
-      if (timeSinceUpdate < 60000) return TTL_STRATEGY.typing;
-      return TTL_STRATEGY.presence;
-    }
-
-    if (type === "typing") return TTL_STRATEGY.typing;
-    if (type === "message") return TTL_STRATEGY.message;
-    if (type === "receipt") return TTL_STRATEGY.receipt;
-
-    return TTL_STRATEGY.chat;
+  _getTTL(type) {
+    return TTL_STRATEGY[type] || TTL_STRATEGY.chat;
   }
 
-  async atomicSet(key, value, type = "chat") {
-    const lockKey = `${REDIS_LOCK_PREFIX}${key}`;
-    const lockValue = `${Date.now()}-${Math.random()}`;
-    const ttl = this._getAdaptiveTTL(type, value);
-
-    if (this.useFallback) {
-      global.logger?.warn("Redis unavailable - data not persisted");
-      return;
-    }
-
+  atomicSet(key, value, type = "chat") {
+    const ttl = this._getTTL(type);
+    const expireAt = ttl > 0 ? Math.floor(Date.now() / 1000) + ttl : 0;
+    
     try {
-      const acquired = await this.redis.setnx(lockKey, lockValue);
-      if (acquired === 1) {
-        await this.redis.expire(lockKey, TTL_STRATEGY.lock);
-
-        await this.redis.setex(key, ttl, JSON.stringify(value));
-
-        await this.redis.del(lockKey);
-      }
+      const serialized = encode(value);
+      this.stmtSet.run(key, serialized, type, expireAt, 0);
     } catch (e) {
-      global.logger?.error({ error: e.message, key }, "Atomic set error");
+      global.logger?.error({ 
+        error: e.message, 
+        key,
+        valueType: typeof value,
+        valueKeys: value && typeof value === 'object' ? Object.keys(value) : 'N/A'
+      }, "Atomic set error");
     }
   }
 
-  async set(key, value, ttl) {
-    return this.atomicSet(key, value);
+  set(key, value, type = "chat") {
+    return this.atomicSet(key, value, type);
   }
 
-  async get(key) {
-    if (this.useFallback) {
-      global.logger?.warn("Redis unavailable - cannot retrieve data");
-      return null;
-    }
-
+  get(key) {
     try {
-      const data = await this.redis.get(key);
-      return data ? JSON.parse(data) : null;
+      const row = this.stmtGet.get(key);
+      if (!row) return null;
+      
+      setImmediate(() => {
+        try {
+          this.stmtTouch.run(key);
+        } catch {
+          //
+        }
+      });
+      
+      return decode(row.v);
     } catch (e) {
       global.logger?.error({ error: e.message, key }, "Get error");
       return null;
     }
   }
 
-  async del(key) {
-    if (this.useFallback) return;
-
+  del(key) {
     try {
-      await this.redis.del(key);
+      this.stmtDel.run(key);
     } catch (e) {
       global.logger?.error({ error: e.message, key }, "Del error");
     }
   }
 
-  async exists(key) {
-    if (this.useFallback) return false;
-
+  exists(key) {
     try {
-      return (await this.redis.exists(key)) === 1;
+      return !!this.stmtExists.get(key);
     } catch {
       return false;
     }
   }
 
-  async keys(pattern) {
-    if (this.useFallback) return [];
-
+  keys(pattern) {
     try {
-      return await this.redis.keys(pattern);
+      const sqlPattern = pattern.replace(/\*/g, "%");
+      const rows = this.stmtKeys.all(sqlPattern);
+      return rows.map(r => r.k);
     } catch {
       return [];
     }
   }
 
-  async mget(keys) {
-    if (this.useFallback) return keys.map(() => null);
-
+  mget(keys) {
+    if (keys.length === 0) return [];
+    
     try {
-      const values = await this.redis.mget(keys);
-      return values.map((v) => (v ? JSON.parse(v) : null));
+      const stmt = this.db.query(`
+        SELECT k, v FROM kv 
+        WHERE k IN (${keys.map(() => '?').join(',')}) 
+        AND (e = 0 OR e > unixepoch())
+      `);
+      
+      const rows = stmt.all(...keys);
+      const map = new Map(rows.map(r => [r.k, decode(r.v)]));
+      
+      return keys.map(k => map.get(k) || null);
     } catch {
       return keys.map(() => null);
     }
   }
 
-  async disconnect() {
+  setMany(items, type = "chat") {
+    if (items.length === 0) return;
+    
+    const ttl = this._getTTL(type);
+    const expireAt = ttl > 0 ? Math.floor(Date.now() / 1000) + ttl : 0;
+    
     try {
-      if (this.redis) {
-        await this.redis.quit();
-        this.redis = null;
-      }
+      const transaction = this.db.transaction((items) => {
+        for (const [key, value] of items) {
+          const serialized = encode(value);
+          this.stmtBatchSet.run(key, serialized, type, expireAt, 0);
+        }
+      });
+      
+      transaction(items);
+    } catch (e) {
+      global.logger?.error({ error: e.message }, "SetMany error");
+    }
+  }
 
-      this.eventQueue = {
-        [EVENT_PRIORITY.CORE]: [],
-        [EVENT_PRIORITY.AUX]: [],
-        [EVENT_PRIORITY.NOISE]: [],
+  bulkGet(keys) {
+    if (keys.length === 0) return new Map();
+    
+    try {
+      const keysJson = JSON.stringify(keys);
+      const rows = this.stmtBatchGet.all(keysJson);
+      
+      const result = new Map();
+      for (const row of rows) {
+        try {
+          result.set(row.k, decode(row.v));
+        } catch (e) {
+          global.logger?.debug({ key: row.k, error: e.message }, "Failed to decode value");
+        }
+      }
+      
+      return result;
+    } catch (e) {
+      global.logger?.error({ error: e.message }, "BulkGet error");
+      return new Map();
+    }
+  }
+
+  scan(pattern, limit = 100) {
+    try {
+      const sqlPattern = pattern.replace(/\*/g, "%");
+      const rows = this.db.query(`
+        SELECT k, v FROM kv 
+        WHERE k LIKE ? AND (e = 0 OR e > unixepoch())
+        LIMIT ?
+      `).all(sqlPattern, limit);
+      
+      return rows.map(row => ({
+        key: row.k,
+        value: decode(row.v)
+      }));
+    } catch (e) {
+      global.logger?.error({ error: e.message, pattern }, "Scan error");
+      return [];
+    }
+  }
+
+  increment(key, amount = 1, type = "processed") {
+    const current = this.get(key) || 0;
+    const newValue = typeof current === 'number' ? current + amount : amount;
+    this.set(key, newValue, type);
+    return newValue;
+  }
+
+  getStats() {
+    try {
+      const stats = this.db.query(`
+        SELECT 
+          t as type,
+          COUNT(*) as count,
+          SUM(LENGTH(v)) as total_size
+        FROM kv 
+        WHERE e = 0 OR e > unixepoch()
+        GROUP BY t
+      `).all();
+      
+      const total = this.db.query("SELECT COUNT(*) as total FROM kv WHERE e = 0 OR e > unixepoch()").get();
+      
+      return {
+        healthy: true,
+        totalEntries: total.total,
+        queueSize: this.eventQueue.length,
+        inflightOps: this.inflightOps,
+        droppedEvents: this.droppedEvents,
+        types: stats
       };
-      this.processedEvents.clear();
+    } catch (e) {
+      return {
+        healthy: false,
+        error: e.message
+      };
+    }
+  }
+
+  disconnect() {
+    try {
+      this.stmtGet?.finalize();
+      this.stmtSet?.finalize();
+      this.stmtDel?.finalize();
+      this.stmtExists?.finalize();
+      this.stmtKeys?.finalize();
+      this.stmtCleanup?.finalize();
+      this.stmtTouch?.finalize();
+      this.stmtEvict?.finalize();
+      this.stmtBatchGet?.finalize();
+      this.stmtBatchSet?.finalize();
+      
+      this.db.close();
+      
+      this.eventQueue = [];
+      this.inflightOps = 0;
+      this.processing = false;
+      
+      global.logger?.info("MemoryStore disconnected");
     } catch (e) {
       global.logger?.error({ error: e.message }, "Disconnect error");
     }
   }
 
   isHealthy() {
-    return !this.useFallback && this.redis !== null;
+    try {
+      this.db.query("SELECT 1").get();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   getMetrics() {
-    const totalQueued = Object.values(this.eventQueue).reduce(
-      (sum, queue) => sum + queue.length,
-      0,
-    );
-
-    return {
-      healthy: this.isHealthy(),
-      fallback: this.useFallback,
-      inflightOps: this.inflightOps,
-      queueSize: totalQueued,
-      droppedEvents: this.droppedEvents,
-      processedEventsSize: this.processedEvents.size,
-    };
+    try {
+      const stats = this.db.query("SELECT COUNT(*) as total FROM kv WHERE e = 0 OR e > unixepoch()").get();
+      const memory = this.db.query("SELECT SUM(LENGTH(v)) as size FROM kv").get();
+      
+      return {
+        healthy: this.isHealthy(),
+        inflightOps: this.inflightOps,
+        queueSize: this.eventQueue.length,
+        droppedEvents: this.droppedEvents,
+        totalEntries: stats.total,
+        totalSize: memory.size || 0,
+        processing: this.processing
+      };
+    } catch {
+      return {
+        healthy: false,
+        inflightOps: this.inflightOps,
+        queueSize: this.eventQueue.length,
+        droppedEvents: this.droppedEvents
+      };
+    }
   }
 }
 
-export { EVENT_PRIORITY, REDIS_PREFIX, REDIS_PRESENCE_PREFIX };
+export { EVENT_PRIORITY };

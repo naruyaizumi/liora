@@ -1,47 +1,32 @@
-import { convert } from "#lib/convert.js";
-import { play } from "#api/play.js";
+import { play } from "#api/play.js"
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  if (!args[0])
-    return m.reply(
-      `Please provide a song title.\n› Example: ${usedPrefix + command} Bye`,
-    );
-
-  await global.loading(m, conn);
+  if (!args[0]) {
+    return m.reply(`Need song title\nEx: ${usedPrefix + command} Bye`)
+  }
+  
+  await global.loading(m, conn)
+  
   try {
-    const { success, title, channel, cover, url, downloadUrl, error } =
-      await play(args.join(" "));
-    if (!success) throw new Error(error);
-
-    const audioRes = await fetch(downloadUrl);
-    if (!audioRes.ok)
-      throw new Error(`Failed to fetch audio. Status: ${audioRes.status}`);
-
-    const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
-
-    const converted = await convert(audioBuffer, {
-      format: "opus",
-      bitrate: "128k",
-      channels: 1,
-      sampleRate: 48000,
-      ptt: true,
-    });
-
-    const finalBuffer =
-      converted instanceof Buffer
-        ? converted
-        : converted?.buffer
-          ? Buffer.from(converted.buffer)
-          : converted?.data
-            ? Buffer.from(converted.data)
-            : Buffer.from(converted);
-
+    const res = await play(args.join(" "))
+    
+    if (!res?.success) {
+      throw new Error(res?.error || "No audio")
+    }
+    
+    const { title, channel, cover, url, downloadUrl } = res
+    
+    if (!downloadUrl) {
+      throw new Error("No download URL")
+    }
+    
     await conn.sendMessage(
       m.chat,
       {
-        audio: finalBuffer,
-        mimetype: "audio/ogg; codecs=opus",
-        ptt: true,
+        audio: {
+          url: downloadUrl,
+        },
+        mimetype: "audio/mpeg",
         contextInfo: {
           externalAdReply: {
             title,
@@ -52,19 +37,17 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             renderLargerThumbnail: true,
           },
         },
-      },
-      { quoted: m },
-    );
+      }, { quoted: m },
+    )
   } catch (e) {
-    global.logger.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["play"];
-handler.tags = ["downloader"];
-handler.command = /^(play)$/i;
+handler.help = ["play"]
+handler.tags = ["downloader"]
+handler.command = /^(play)$/i
 
-export default handler;
+export default handler

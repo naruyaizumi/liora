@@ -42,627 +42,540 @@ export function makeProgressBar(used, total, length = 10) {
   return `[${bar}] ${percentage.toFixed(1)}% ${indicator}`;
 }
 
+async function safeExec(command, fallback = "") {
+  try {
+    const result = await $`sh -c ${command}`.text();
+    return result;
+  } catch {
+    return fallback;
+  }
+}
+
 export async function getOSInfo() {
-  try {
-    const osRelease =
-      await $`cat /etc/os-release 2>/dev/null || echo ""`.text();
-    const kernel = await $`uname -r 2>/dev/null || echo ""`.text();
+  const osRelease = await safeExec("cat /etc/os-release 2>/dev/null", "");
+  const kernel = await safeExec("uname -r 2>/dev/null", "unknown");
+  const hostname = await safeExec("hostname 2>/dev/null", "unknown");
+  const platform = await safeExec("uname -s 2>/dev/null", "unknown");
+  const machine = await safeExec("uname -m 2>/dev/null", "unknown");
+  const uptime = await safeExec("cat /proc/uptime 2>/dev/null", "0 0");
+  const debianVersion = await safeExec("cat /etc/debian_version 2>/dev/null", "");
+  const lsbRelease = await safeExec("lsb_release -cs 2>/dev/null", "");
+  
+  const info = Object.fromEntries(
+    osRelease
+      .split("\n")
+      .filter((line) => line.includes("="))
+      .map((line) => {
+        const [key, ...value] = line.split("=");
+        return [key.trim(), value.join("=").replace(/"/g, "").trim()];
+      }),
+  );
 
-    let osData = {
-      name: "",
-      version: "",
-      kernel: kernel.trim(),
-    };
-
-    if (osRelease) {
-      const info = Object.fromEntries(
-        osRelease
-          .split("\n")
-          .filter((line) => line.includes("="))
-          .map((line) => {
-            const [key, ...value] = line.split("=");
-            return [key.trim(), value.join("=").replace(/"/g, "").trim()];
-          }),
-      );
-
-      osData.name = info.PRETTY_NAME || info.NAME || "Unknown";
-      osData.version = info.VERSION_ID || "unknown";
-    } else {
-      const uname = await $`uname -srmo 2>/dev/null || echo ""`.text();
-      osData.name = uname.trim();
-      osData.version = kernel.trim();
-    }
-
-    return osData;
-  } catch {
-    return {
-      name: "Unknown System",
-      version: "unknown",
-      kernel: "unknown",
-    };
+  let codename = lsbRelease.trim() || info.VERSION_CODENAME || info.UBUNTU_CODENAME || "";
+  if (!codename && info.VERSION) {
+    const match = info.VERSION.match(/\(([^)]+)\)/);
+    if (match) codename = match[1];
   }
-}
 
-export async function getRedisInfo() {
-  try {
-    const version =
-      await $`redis-server --version | awk '{print $3}' | cut -d= -f2`.text();
-    return version.trim() || "Not installed";
-  } catch {
-    return "Not installed";
-  }
-}
-
-export async function getPostgresInfo() {
-  try {
-    const version = await $`psql -V | awk '{print $3}'`.text();
-    return version.trim() || "Not installed";
-  } catch {
-    return "Not installed";
-  }
-}
-
-export async function getRustInfo() {
-  try {
-    const version = await $`rustc --version | awk '{print $2}'`.text();
-    return version.trim() || "Not installed";
-  } catch {
-    return "Not installed";
-  }
-}
-
-export async function getSoftwareVersions() {
-  const [nodeVersion, bunVersion] = await Promise.all([
-    $`node --version 2>/dev/null || echo ""`.text(),
-    $`bun --version 2>/dev/null || echo ""`.text(),
-  ]);
+  const bits = machine.trim().includes("64") ? "64 Bit" : machine.trim().includes("32") ? "32 Bit" : "Unknown";
 
   return {
-    node: nodeVersion
-      .trim()
-      .replace("v", "")
-      .replace("Not installed", "Not installed"),
-    bun: bunVersion.trim().replace("Not installed", "Not installed"),
-    npm: await $`npm --version 2>/dev/null || echo ""`
-      .text()
-      .then((t) => t.trim()),
+    name: info.PRETTY_NAME || info.NAME || "Unknown",
+    distribution: info.NAME || "Unknown",
+    codename: codename,
+    base: info.ID_LIKE || info.ID || "debian",
+    version: info.VERSION_ID || info.VERSION || "unknown",
+    debianVersion: debianVersion.trim(),
+    kernel: kernel.trim(),
+    hostname: hostname.trim(),
+    platform: platform.trim(),
+    architecture: machine.trim(),
+    bits: bits,
+    uptime: parseFloat(uptime.split(" ")[0]),
+  };
+}
+
+export async function getSystemInfo() {
+  const shell = await safeExec("echo $SHELL 2>/dev/null", "unknown");
+  const shellVersion = await safeExec("$SHELL --version 2>/dev/null | head -1", "");
+  const dmidecode = await safeExec("dmidecode -s system-product-name 2>/dev/null", "");
+  const manufacturer = await safeExec("dmidecode -s system-manufacturer 2>/dev/null", "");
+  const biosVersion = await safeExec("dmidecode -s bios-version 2>/dev/null", "");
+  
+  let hostInfo = dmidecode.trim();
+  if (manufacturer.trim() && manufacturer.trim() !== "System manufacturer") {
+    hostInfo = `${manufacturer.trim()} ${hostInfo}`.trim();
+  }
+  if (biosVersion.trim()) {
+    hostInfo = `${hostInfo} ${biosVersion.trim()}`.trim();
+  }
+  
+  if (!hostInfo) {
+    const productName = await safeExec("cat /sys/class/dmi/id/product_name 2>/dev/null", "");
+    const boardName = await safeExec("cat /sys/class/dmi/id/board_name 2>/dev/null", "");
+    hostInfo = productName.trim() || boardName.trim() || "Unknown";
+  }
+
+  let shellName = shell.trim().split("/").pop();
+  const shellVersionClean = shellVersion.trim().split("\n")[0];
+  
+  if (shellVersionClean.includes("version")) {
+    const versionMatch = shellVersionClean.match(/version\s+([\d.]+)/i);
+    if (versionMatch) {
+      shellName = `${shellName} ${versionMatch[1]}`;
+    }
+  } else if (shellVersionClean.match(/\d+\.\d+/)) {
+    const versionMatch = shellVersionClean.match(/(\d+\.\d+[\d.]*)/);
+    if (versionMatch) {
+      shellName = `${shellName} ${versionMatch[1]}`;
+    }
+  }
+
+  return {
+    shell: shellName,
+    host: hostInfo || "Unknown",
+  };
+}
+
+export async function getCPUFeatures() {
+  const cpuinfo = await safeExec("cat /proc/cpuinfo 2>/dev/null", "");
+  const flags = cpuinfo.match(/flags\s*:\s*(.+)/)?.[1] || "";
+  
+  const aesni = flags.includes("aes");
+  const vmx = flags.includes("vmx");
+  const svm = flags.includes("svm");
+  const hypervisor = flags.includes("hypervisor");
+  
+  let virtualization = "None";
+  let isVM = "No";
+  
+  const dmidecodeSystem = await safeExec("dmidecode -s system-product-name 2>/dev/null", "");
+  const dmidecodeManufacturer = await safeExec("dmidecode -s system-manufacturer 2>/dev/null", "");
+  const systemVendor = await safeExec("cat /sys/class/dmi/id/sys_vendor 2>/dev/null", "");
+  const productName = await safeExec("cat /sys/class/dmi/id/product_name 2>/dev/null", "");
+  const boardName = await safeExec("cat /sys/class/dmi/id/board_name 2>/dev/null", "");
+  
+  const allInfo = `${dmidecodeSystem} ${dmidecodeManufacturer} ${systemVendor} ${productName} ${boardName}`.toLowerCase();
+  
+  if (allInfo.includes("vmware")) {
+    virtualization = "VMware";
+    isVM = "Yes (VMware)";
+  } else if (allInfo.includes("virtualbox")) {
+    virtualization = "VirtualBox";
+    isVM = "Yes (VirtualBox)";
+  } else if (allInfo.includes("qemu") || allInfo.includes("kvm")) {
+    virtualization = "KVM/QEMU";
+    isVM = "Yes (KVM)";
+  } else if (allInfo.includes("microsoft") || allInfo.includes("hyper-v") || allInfo.includes("virtual machine")) {
+    virtualization = "Microsoft Hyper-V";
+    isVM = "Yes (Hyper-V)";
+  } else if (allInfo.includes("xen")) {
+    virtualization = "Xen";
+    isVM = "Yes (Xen)";
+  } else if (allInfo.includes("bochs")) {
+    virtualization = "Bochs";
+    isVM = "Yes (Bochs)";
+  } else if (allInfo.includes("parallels")) {
+    virtualization = "Parallels";
+    isVM = "Yes (Parallels)";
+  } else if (hypervisor) {
+    virtualization = "Unknown Hypervisor";
+    isVM = "Yes";
+  }
+  
+  let vmxStatus = "✗ Disabled";
+  if (vmx || svm) {
+    vmxStatus = "✓ Enabled";
+  }
+
+  const tcpCongestion = await safeExec("sysctl net.ipv4.tcp_congestion_control 2>/dev/null", "net.ipv4.tcp_congestion_control = unknown");
+  const tcpCC = tcpCongestion.split("=")[1]?.trim() || "unknown";
+
+  return {
+    aesni: aesni ? "✓ Enabled" : "✗ Disabled",
+    virtualization: virtualization,
+    vmxAmdv: vmxStatus,
+    tcpCC: tcpCC,
+    isVM: isVM,
+  };
+}
+
+export async function getNetworkFeatures() {
+  const ipv4Check = await safeExec("timeout 3 curl -4 -s https://api.ipify.org 2>/dev/null", "");
+  const ipv6Check = await safeExec("timeout 3 curl -6 -s https://api64.ipify.org 2>/dev/null", "");
+
+  return {
+    ipv4: ipv4Check.trim() ? "Online" : "Offline",
+    ipv6: ipv6Check.trim() ? "Online" : "Offline",
+  };
+}
+
+export async function getIPInfo() {
+  try {
+    const response = await fetch("https://ipapi.co/json/", { 
+      signal: AbortSignal.timeout(5000) 
+    });
+    const data = await response.json();
+
+    const host = await safeExec("hostname -f 2>/dev/null || hostname 2>/dev/null", "unknown");
+
+    return {
+      host: host.trim(),
+      isp: data.org || "Unknown",
+      organization: data.org || "Unknown",
+      asn: data.asn || "Unknown",
+      location: `${data.city || "Unknown"}, ${data.country_name || "Unknown"}`,
+      region: data.region || "Unknown",
+      timezone: data.timezone || "Unknown",
+      continent: data.continent_code || "Unknown",
+    };
+  } catch {
+    const host = await safeExec("hostname -f 2>/dev/null || hostname 2>/dev/null", "unknown");
+    return {
+      host: host.trim(),
+      isp: "Unknown",
+      organization: "Unknown",
+      asn: "Unknown",
+      location: "Unknown",
+      region: "Unknown",
+      timezone: "Unknown",
+      continent: "Unknown",
+    };
+  }
+}
+
+export async function getSoftwareInfo() {
+  const nodeVersion = process.version.replace("v", "");
+  const bunVersion = await safeExec("bun --version 2>/dev/null", "unknown");
+  const processId = process.pid;
+  const parentProcessId = process.ppid;
+
+  const botStartTime = global.timestamp?.connect || new Date();
+  const botUptime = (Date.now() - new Date(botStartTime).getTime()) / 1000;
+
+  const nodeModules = await safeExec("find node_modules -maxdepth 1 -type d 2>/dev/null | wc -l", "0");
+  const packageJson = await safeExec("test -f package.json && echo 'Yes' || echo 'No'", "No");
+
+  return {
+    node: nodeVersion,
+    bun: bunVersion.trim(),
+    pid: processId,
+    ppid: parentProcessId,
+    botUptime: botUptime,
+    nodeModules: parseInt(nodeModules.trim()) - 1,
+    hasPackageJson: packageJson.trim(),
   };
 }
 
 export async function getCPUInfo() {
-  try {
-    const cpuInfo = await $`cat /proc/cpuinfo 2>/dev/null || echo ""`.text();
-    const loadAvg =
-      await $`cat /proc/loadavg 2>/dev/null || echo "0 0 0"`.text();
+  const cpuInfo = await safeExec("cat /proc/cpuinfo 2>/dev/null", "");
+  const loadAvg = await safeExec("cat /proc/loadavg 2>/dev/null", "0 0 0");
 
-    let model = "Unknown";
-    let cores = 0;
-    let mhz = 0;
+  let model = "Unknown";
+  let cores = 0;
+  let mhz = 0;
+  let cacheSize = "";
 
-    if (cpuInfo) {
-      const lines = cpuInfo.split("\n");
-      for (const line of lines) {
-        if (line.startsWith("model name")) {
-          model = line.split(":").slice(1).join(":").trim();
-        }
-        if (line.startsWith("processor")) {
-          cores++;
-        }
-        if (line.startsWith("cpu MHz") && mhz === 0) {
-          mhz = parseFloat(line.split(":")[1].trim());
-        }
-      }
+  const lines = cpuInfo.split("\n");
+  for (const line of lines) {
+    if (line.startsWith("model name")) {
+      model = line.split(":").slice(1).join(":").trim();
     }
-
-    if (cores === 0) {
-      try {
-        cores = parseInt(await $`nproc`.text()) || 1;
-      } catch {
-        cores = 1;
-      }
+    if (line.startsWith("processor")) {
+      cores++;
     }
-
-    const loads = loadAvg.split(/\s+/).slice(0, 3).map(Number);
-    const loadPercent = (load) =>
-      cores > 0 ? ((load / cores) * 100).toFixed(2) : "0.00";
-
-    let usage = "0.00";
-    try {
-      const stat = await $`cat /proc/stat`.text();
-      const cpuLine = stat.split("\n")[0];
-      const values = cpuLine.split(/\s+/).slice(1).map(Number);
-      const idle = values[3];
-      const total = values.reduce((a, b) => a + b, 0);
-
-      if (global._prevCPU) {
-        const idleDelta = idle - global._prevCPU.idle;
-        const totalDelta = total - global._prevCPU.total;
-        usage =
-          totalDelta > 0
-            ? (((totalDelta - idleDelta) * 100) / totalDelta).toFixed(2)
-            : "0.00";
-      }
-
-      global._prevCPU = { idle, total };
-    } catch (error) {
-      usage = "0.00";
+    if (line.startsWith("cpu MHz") && mhz === 0) {
+      mhz = parseFloat(line.split(":")[1].trim());
     }
-
-    return {
-      model: model.replace(/\s+/g, " "),
-      cores,
-      speed: mhz ? `${mhz.toFixed(2)} MHz` : "Unknown",
-      load1: loads[0]?.toFixed(2) || "0.00",
-      load5: loads[1]?.toFixed(2) || "0.00",
-      load15: loads[2]?.toFixed(2) || "0.00",
-      load1Pct: loadPercent(loads[0]),
-      load5Pct: loadPercent(loads[1]),
-      load15Pct: loadPercent(loads[2]),
-      usage: usage,
-      architecture: await $`uname -m`.text().then((t) => t.trim()),
-    };
-  } catch (error) {
-    return {
-      model: "Unknown",
-      cores: 1,
-      speed: "Unknown",
-      load1: "0.00",
-      load5: "0.00",
-      load15: "0.00",
-      load1Pct: "0.00",
-      load5Pct: "0.00",
-      load15Pct: "0.00",
-      usage: "0.00",
-      architecture: "unknown",
-    };
+    if (line.startsWith("cache size") && !cacheSize) {
+      cacheSize = line.split(":")[1].trim();
+    }
   }
+
+  if (cores === 0) {
+    const nproc = await safeExec("nproc 2>/dev/null", "1");
+    cores = parseInt(nproc.trim());
+  }
+
+  const loads = loadAvg.split(/\s+/).slice(0, 3).map(Number);
+  const loadPercent = (load) => ((load / cores) * 100).toFixed(2);
+
+  let usage = "0.00";
+  const stat = await safeExec("cat /proc/stat 2>/dev/null", "cpu 0 0 0 0");
+  const cpuLine = stat.split("\n")[0];
+  const values = cpuLine.split(/\s+/).slice(1).map(Number);
+  const idle = values[3] || 0;
+  const total = values.reduce((a, b) => a + b, 0);
+
+  if (global._prevCPU && total > 0) {
+    const idleDelta = idle - global._prevCPU.idle;
+    const totalDelta = total - global._prevCPU.total;
+    usage = totalDelta > 0 ? (((totalDelta - idleDelta) * 100) / totalDelta).toFixed(2) : "0.00";
+  }
+
+  global._prevCPU = { idle, total };
+
+  const arch = await safeExec("uname -m 2>/dev/null", "unknown");
+  const cpuFreq = await safeExec("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq 2>/dev/null", "");
+  const maxFreq = await safeExec("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 2>/dev/null", "");
+
+  let speedInfo = mhz > 0 ? `${mhz.toFixed(2)} MHz` : "Unknown";
+  if (cpuFreq) {
+    const currentMhz = (parseInt(cpuFreq) / 1000).toFixed(2);
+    const maxMhz = maxFreq ? (parseInt(maxFreq) / 1000).toFixed(2) : "";
+    speedInfo = maxMhz ? `${currentMhz} MHz (Max: ${maxMhz} MHz)` : `${currentMhz} MHz`;
+  }
+
+  return {
+    model: model.replace(/\s+/g, " "),
+    cores,
+    speed: speedInfo,
+    cache: cacheSize || "Unknown",
+    load1: loads[0]?.toFixed(2) || "0.00",
+    load5: loads[1]?.toFixed(2) || "0.00",
+    load15: loads[2]?.toFixed(2) || "0.00",
+    load1Pct: loadPercent(loads[0]),
+    load5Pct: loadPercent(loads[1]),
+    load15Pct: loadPercent(loads[2]),
+    usage: usage,
+    architecture: arch.trim(),
+  };
 }
 
 export async function getMemoryInfo() {
-  try {
-    const memInfo = await $`cat /proc/meminfo`.text();
-    const memLines = memInfo.split("\n");
+  const memInfo = await safeExec("cat /proc/meminfo 2>/dev/null", "");
+  const memLines = memInfo.split("\n");
 
-    let memTotal = 0,
-      memFree = 0,
-      memAvailable = 0,
-      buffers = 0,
-      cached = 0;
-    let swapTotal = 0,
-      swapFree = 0,
-      swapCached = 0;
+  let memTotal = 0, memFree = 0, memAvailable = 0, buffers = 0, cached = 0;
+  let swapTotal = 0, swapFree = 0, swapCached = 0;
 
-    for (const line of memLines) {
-      const [key, value] = line.split(":").map((s) => s.trim());
-      const numValue = parseInt(value) * 1024;
+  for (const line of memLines) {
+    if (!line.includes(":")) continue;
+    const [key, value] = line.split(":").map((s) => s.trim());
+    const numValue = parseInt(value) * 1024;
 
-      switch (key) {
-        case "MemTotal":
-          memTotal = numValue;
-          break;
-        case "MemFree":
-          memFree = numValue;
-          break;
-        case "MemAvailable":
-          memAvailable = numValue;
-          break;
-        case "Buffers":
-          buffers = numValue;
-          break;
-        case "Cached":
-          cached = numValue;
-          break;
-        case "SwapTotal":
-          swapTotal = numValue;
-          break;
-        case "SwapFree":
-          swapFree = numValue;
-          break;
-        case "SwapCached":
-          swapCached = numValue;
-          break;
-      }
-    }
-
-    const memUsed = memTotal - memAvailable;
-    const swapUsed = swapTotal - swapFree;
-
-    let active = 0,
-      inactive = 0,
-      dirty = 0,
-      writeback = 0;
-    try {
-      const vmstat = await $`cat /proc/vmstat 2>/dev/null`.text();
-      const lines = vmstat.split("\n");
-      for (const line of lines) {
-        if (line.startsWith("nr_active_file"))
-          active = parseInt(line.split(" ")[1]) * 4096;
-        if (line.startsWith("nr_inactive_file"))
-          inactive = parseInt(line.split(" ")[1]) * 4096;
-        if (line.startsWith("nr_dirty"))
-          dirty = parseInt(line.split(" ")[1]) * 4096;
-        if (line.startsWith("nr_writeback"))
-          writeback = parseInt(line.split(" ")[1]) * 4096;
-      }
-    } catch {
-      //
-    }
-
-    return {
-      total: memTotal,
-      used: memUsed,
-      free: memFree,
-      available: memAvailable,
-      buffers,
-      cached,
-      swapTotal,
-      swapUsed,
-      swapFree,
-      swapCached,
-      active,
-      inactive,
-      dirty,
-      writeback,
-      shmem: memTotal - memFree - buffers - cached,
-      slab: 0,
-    };
-  } catch (error) {
-    return {
-      total: 0,
-      used: 0,
-      free: 0,
-      available: 0,
-      buffers: 0,
-      cached: 0,
-      swapTotal: 0,
-      swapUsed: 0,
-      swapFree: 0,
-      swapCached: 0,
-      active: 0,
-      inactive: 0,
-      dirty: 0,
-      writeback: 0,
-      shmem: 0,
-      slab: 0,
-    };
+    if (key === "MemTotal") memTotal = numValue;
+    else if (key === "MemFree") memFree = numValue;
+    else if (key === "MemAvailable") memAvailable = numValue;
+    else if (key === "Buffers") buffers = numValue;
+    else if (key === "Cached") cached = numValue;
+    else if (key === "SwapTotal") swapTotal = numValue;
+    else if (key === "SwapFree") swapFree = numValue;
+    else if (key === "SwapCached") swapCached = numValue;
   }
+
+  const memUsed = memTotal - memAvailable;
+  const swapUsed = swapTotal - swapFree;
+
+  let active = 0, inactive = 0, dirty = 0, writeback = 0;
+  const vmstat = await safeExec("cat /proc/vmstat 2>/dev/null", "");
+  const vmLines = vmstat.split("\n");
+  for (const line of vmLines) {
+    if (line.startsWith("nr_active_file")) active = parseInt(line.split(" ")[1]) * 4096;
+    else if (line.startsWith("nr_inactive_file")) inactive = parseInt(line.split(" ")[1]) * 4096;
+    else if (line.startsWith("nr_dirty")) dirty = parseInt(line.split(" ")[1]) * 4096;
+    else if (line.startsWith("nr_writeback")) writeback = parseInt(line.split(" ")[1]) * 4096;
+  }
+
+  return {
+    total: memTotal,
+    used: memUsed,
+    free: memFree,
+    available: memAvailable,
+    buffers,
+    cached,
+    swapTotal,
+    swapUsed,
+    swapFree,
+    swapCached,
+    active,
+    inactive,
+    dirty,
+    writeback,
+    shmem: memTotal - memFree - buffers - cached,
+    slab: 0,
+  };
 }
 
 export async function getDiskInfo() {
-  try {
-    const dfOutput =
-      await $`df -B1 --output=source,fstype,size,used,avail,pcent,target,itotal,iused,iavail,ipcent 2>/dev/null || df -k`.text();
-    const lines = dfOutput.trim().split("\n").slice(1);
+  const dfOutput = await safeExec("df -B1 2>/dev/null | tail -n +2", "");
+  const lines = dfOutput.trim().split("\n");
 
-    const disks = [];
-    let totalSize = 0,
-      totalUsed = 0,
-      totalAvailable = 0;
+  const disks = [];
+  let totalSize = 0, totalUsed = 0, totalAvailable = 0;
 
-    for (const line of lines) {
-      const parts = line.trim().split(/\s+/);
-      if (parts.length >= 6) {
-        const size =
-          parseInt(parts[2]) *
-          (parts[2].includes("T")
-            ? 1024 * 1024 * 1024 * 1024
-            : parts[2].includes("G")
-              ? 1024 * 1024 * 1024
-              : parts[2].includes("M")
-                ? 1024 * 1024
-                : parts[2].includes("K")
-                  ? 1024
-                  : 1);
-        const used =
-          parseInt(parts[3]) *
-          (parts[3].includes("T")
-            ? 1024 * 1024 * 1024 * 1024
-            : parts[3].includes("G")
-              ? 1024 * 1024 * 1024
-              : parts[3].includes("M")
-                ? 1024 * 1024
-                : parts[3].includes("K")
-                  ? 1024
-                  : 1);
-        const avail =
-          parseInt(parts[4]) *
-          (parts[4].includes("T")
-            ? 1024 * 1024 * 1024 * 1024
-            : parts[4].includes("G")
-              ? 1024 * 1024 * 1024
-              : parts[4].includes("M")
-                ? 1024 * 1024
-                : parts[4].includes("K")
-                  ? 1024
-                  : 1);
+  for (const line of lines) {
+    const parts = line.trim().split(/\s+/);
+    if (parts.length < 6) continue;
 
-        disks.push({
-          filesystem: parts[0],
-          type: parts[1] || "unknown",
-          size,
-          used,
-          available: avail,
-          mountpoint: parts[6] || "/",
-          inodesTotal: parseInt(parts[7]) || 0,
-          inodesUsed: parseInt(parts[8]) || 0,
-          inodesAvailable: parseInt(parts[9]) || 0,
-        });
+    const size = parseInt(parts[1]) || 0;
+    const used = parseInt(parts[2]) || 0;
+    const avail = parseInt(parts[3]) || 0;
 
-        totalSize += size;
-        totalUsed += used;
-        totalAvailable += avail;
-      }
-    }
+    disks.push({
+      filesystem: parts[0],
+      type: "unknown",
+      size,
+      used,
+      available: avail,
+      mountpoint: parts[5] || "/",
+      inodesTotal: 0,
+      inodesUsed: 0,
+      inodesAvailable: 0,
+    });
 
-    let ioStats = { readBytes: 0, writeBytes: 0, readOps: 0, writeOps: 0 };
-    try {
-      const diskstats = await $`cat /proc/diskstats 2>/dev/null`.text();
-      const lines = diskstats.split("\n");
-      for (const line of lines) {
-        const parts = line.trim().split(/\s+/);
-        if (parts.length >= 14) {
-          ioStats.readBytes += parseInt(parts[5]) * 512;
-          ioStats.writeBytes += parseInt(parts[9]) * 512;
-          ioStats.readOps += parseInt(parts[3]);
-          ioStats.writeOps += parseInt(parts[7]);
-        }
-      }
-    } catch {
-      //
-    }
-
-    return {
-      disks,
-      total: {
-        size: totalSize,
-        used: totalUsed,
-        available: totalAvailable,
-      },
-      io: ioStats,
-    };
-  } catch (error) {
-    return {
-      disks: [],
-      total: { size: 0, used: 0, available: 0 },
-      io: { readBytes: 0, writeBytes: 0, readOps: 0, writeOps: 0 },
-    };
+    totalSize += size;
+    totalUsed += used;
+    totalAvailable += avail;
   }
+
+  let ioStats = { readBytes: 0, writeBytes: 0, readOps: 0, writeOps: 0 };
+  const diskstats = await safeExec("cat /proc/diskstats 2>/dev/null", "");
+  const diskLines = diskstats.split("\n");
+  for (const line of diskLines) {
+    const parts = line.trim().split(/\s+/);
+    if (parts.length >= 14) {
+      ioStats.readBytes += (parseInt(parts[5]) || 0) * 512;
+      ioStats.writeBytes += (parseInt(parts[9]) || 0) * 512;
+      ioStats.readOps += parseInt(parts[3]) || 0;
+      ioStats.writeOps += parseInt(parts[7]) || 0;
+    }
+  }
+
+  return {
+    disks,
+    total: {
+      size: totalSize,
+      used: totalUsed,
+      available: totalAvailable,
+    },
+    io: ioStats,
+  };
 }
 
 export async function getNetworkInfo() {
-  try {
-    const netDev = await $`cat /proc/net/dev 2>/dev/null`.text();
-    const lines = netDev.split("\n").slice(2);
+  const netDev = await safeExec("cat /proc/net/dev 2>/dev/null", "");
+  const lines = netDev.split("\n").slice(2);
 
-    let totalRx = 0,
-      totalTx = 0;
-    let totalRxPackets = 0,
-      totalTxPackets = 0;
-    const interfaces = [];
+  let totalRx = 0, totalTx = 0;
+  let totalRxPackets = 0, totalTxPackets = 0;
+  const interfaces = [];
 
-    for (const line of lines) {
-      if (!line.trim() || line.includes("lo:")) continue;
+  for (const line of lines) {
+    if (!line.trim() || line.includes("lo:")) continue;
 
-      const parts = line.trim().split(/\s+/);
-      const iface = parts[0].replace(":", "");
-      const rxBytes = parseInt(parts[1]) || 0;
-      const rxPackets = parseInt(parts[2]) || 0;
-      const txBytes = parseInt(parts[9]) || 0;
-      const txPackets = parseInt(parts[10]) || 0;
+    const parts = line.trim().split(/\s+/);
+    if (parts.length < 11) continue;
 
-      totalRx += rxBytes;
-      totalTx += txBytes;
-      totalRxPackets += rxPackets;
-      totalTxPackets += txPackets;
+    const iface = parts[0].replace(":", "");
+    const rxBytes = parseInt(parts[1]) || 0;
+    const rxPackets = parseInt(parts[2]) || 0;
+    const txBytes = parseInt(parts[9]) || 0;
+    const txPackets = parseInt(parts[10]) || 0;
 
-      interfaces.push({
-        name: iface,
-        rxBytes,
-        rxPackets,
-        txBytes,
-        txPackets,
-        rxErrors: parseInt(parts[3]) || 0,
-        txErrors: parseInt(parts[11]) || 0,
-      });
-    }
+    totalRx += rxBytes;
+    totalTx += txBytes;
+    totalRxPackets += rxPackets;
+    totalTxPackets += txPackets;
 
-    let connections = 0;
-    try {
-      const connOutput = await $`ss -tun state connected | wc -l`.text();
-      connections = parseInt(connOutput.trim()) - 1;
-    } catch (error) {
-      connections = 0;
-    }
-
-    let dnsServers = [];
-    try {
-      const resolv =
-        await $`cat /etc/resolv.conf 2>/dev/null | grep nameserver`.text();
-      dnsServers = resolv
-        .split("\n")
-        .filter((line) => line.includes("nameserver"))
-        .map((line) => line.split(/\s+/)[1])
-        .filter(Boolean);
-    } catch (error) {
-      dnsServers = [];
-    }
-
-    return {
-      total: {
-        rxBytes: totalRx,
-        txBytes: totalTx,
-        rxPackets: totalRxPackets,
-        txPackets: totalTxPackets,
-      },
-      interfaces,
-      connections,
-      dnsServers,
-    };
-  } catch (error) {
-    return {
-      total: { rxBytes: 0, txBytes: 0, rxPackets: 0, txPackets: 0 },
-      interfaces: [],
-      connections: 0,
-      dnsServers: [],
-    };
+    interfaces.push({
+      name: iface,
+      rxBytes,
+      rxPackets,
+      txBytes,
+      txPackets,
+      rxErrors: parseInt(parts[3]) || 0,
+      txErrors: parseInt(parts[11]) || 0,
+    });
   }
+
+  const connOutput = await safeExec("ss -tun state connected 2>/dev/null | wc -l", "1");
+  const connections = Math.max(0, parseInt(connOutput.trim()) - 1);
+
+  const resolv = await safeExec("cat /etc/resolv.conf 2>/dev/null | grep nameserver", "");
+  const dnsServers = resolv
+    .split("\n")
+    .filter((line) => line.includes("nameserver"))
+    .map((line) => line.split(/\s+/)[1])
+    .filter(Boolean);
+
+  return {
+    total: {
+      rxBytes: totalRx,
+      txBytes: totalTx,
+      rxPackets: totalRxPackets,
+      txPackets: totalTxPackets,
+    },
+    interfaces,
+    connections,
+    dnsServers,
+  };
 }
 
 export async function getProcessInfo() {
-  try {
-    const uptimeStr = await $`cat /proc/uptime`.text();
-    const uptimeSeconds = parseFloat(uptimeStr.split(" ")[0]);
+  const uptimeStr = await safeExec("cat /proc/uptime 2>/dev/null", "0 0");
+  const uptimeSeconds = parseFloat(uptimeStr.split(" ")[0]);
 
-    const processCount = await $`ps -e --no-headers | wc -l`.text();
+  const processCount = await safeExec("ps -e --no-headers 2>/dev/null | wc -l", "0");
+  const loadAvg = await safeExec("cat /proc/loadavg 2>/dev/null", "0 0 0");
+  const loads = loadAvg.split(" ").slice(0, 3).map(Number);
 
-    const loadAvg = await $`cat /proc/loadavg`.text();
-    const loads = loadAvg.split(" ").slice(0, 3).map(Number);
+  const zombies = await safeExec("ps aux 2>/dev/null | grep 'defunct' | grep -v grep | wc -l", "0");
+  const running = await safeExec("ps -e -o stat 2>/dev/null | grep R | wc -l", "0");
+  const sleeping = await safeExec("ps -e -o stat 2>/dev/null | grep S | wc -l", "0");
+  const stopped = await safeExec("ps -e -o stat 2>/dev/null | grep T | wc -l", "0");
+  const threads = await safeExec("ps -eL --no-headers 2>/dev/null | wc -l", "0");
+  const ctxt = await safeExec("cat /proc/stat 2>/dev/null | grep ctxt", "ctxt 0");
 
-    const zombies =
-      await $`ps aux | grep 'defunct' | grep -v grep | wc -l`.text();
-
-    const running = await $`ps -e -o stat | grep R | wc -l`.text();
-    const sleeping = await $`ps -e -o stat | grep S | wc -l`.text();
-    const stopped = await $`ps -e -o stat | grep T | wc -l`.text();
-
-    return {
-      total: parseInt(processCount.trim()),
-      running: parseInt(running.trim()),
-      sleeping: parseInt(sleeping.trim()),
-      stopped: parseInt(stopped.trim()),
-      zombies: parseInt(zombies.trim()),
-      uptime: uptimeSeconds,
-      load1: loads[0] || 0,
-      load5: loads[1] || 0,
-      load15: loads[2] || 0,
-      threads: await $`ps -eL --no-headers | wc -l`
-        .text()
-        .then((t) => parseInt(t.trim())),
-      contextSwitches: await $`cat /proc/stat | grep ctxt`
-        .text()
-        .then((t) => parseInt(t.split(" ")[1]) || 0),
-    };
-  } catch (error) {
-    return {
-      total: 0,
-      running: 0,
-      sleeping: 0,
-      stopped: 0,
-      zombies: 0,
-      uptime: 0,
-      load1: 0,
-      load5: 0,
-      load15: 0,
-      threads: 0,
-      contextSwitches: 0,
-    };
-  }
+  return {
+    total: parseInt(processCount.trim()) || 0,
+    running: parseInt(running.trim()) || 0,
+    sleeping: parseInt(sleeping.trim()) || 0,
+    stopped: parseInt(stopped.trim()) || 0,
+    zombies: parseInt(zombies.trim()) || 0,
+    uptime: uptimeSeconds,
+    load1: loads[0] || 0,
+    load5: loads[1] || 0,
+    load15: loads[2] || 0,
+    threads: parseInt(threads.trim()) || 0,
+    contextSwitches: parseInt(ctxt.split(" ")[1]) || 0,
+  };
 }
 
 export async function getContainerInfo() {
-  try {
-    const inContainer =
-      await $`cat /proc/1/cgroup 2>/dev/null | grep -q docker || echo $?`.text();
-    const isDocker = inContainer.trim() === "0";
+  const cgroup = await safeExec("cat /proc/1/cgroup 2>/dev/null", "");
+  const isDocker = cgroup.includes("docker");
+  const environ = await safeExec("cat /proc/1/environ 2>/dev/null | tr '\\0' '\\n'", "");
+  const isLxc = environ.includes("container=lxc");
+  const hasKube = await safeExec("env 2>/dev/null | grep KUBERNETES_SERVICE", "");
 
-    const isLxc =
-      await $`cat /proc/1/environ 2>/dev/null | tr '\\0' '\\n' | grep -q container=lxc || echo $?`.text();
+  let containerType = "None";
+  let containerId = "";
 
-    let containerType = "None";
-    let containerId = "";
-
-    if (isDocker) {
-      containerType = "Docker";
-      containerId =
-        await $`cat /proc/self/cgroup | grep "docker" | head -1 | cut -d/ -f3`
-          .text()
-          .then((t) => t.trim().slice(0, 12));
-    } else if (isLxc === "0") {
-      containerType = "LXC";
-    }
-
-    const hasKube = await $`env | grep -q KUBERNETES_SERVICE || echo $?`.text();
-    if (hasKube === "0") {
-      containerType = "Kubernetes";
-    }
-
-    const containerHostname = await $`hostname`.text();
-
-    return {
-      type: containerType,
-      id: containerId,
-      hostname: containerHostname.trim(),
-      isContainer: containerType !== "None",
-    };
-  } catch (error) {
-    return {
-      type: "Unknown",
-      id: "",
-      hostname: "",
-      isContainer: false,
-    };
+  if (isDocker) {
+    containerType = "Docker";
+    const cid = await safeExec("cat /proc/self/cgroup 2>/dev/null | grep 'docker' | head -1 | cut -d/ -f3", "");
+    containerId = cid.trim().slice(0, 12);
+  } else if (isLxc) {
+    containerType = "LXC";
+  } else if (hasKube.trim()) {
+    containerType = "Kubernetes";
   }
+
+  const hostname = await safeExec("hostname 2>/dev/null", "unknown");
+
+  return {
+    type: containerType,
+    id: containerId,
+    hostname: hostname.trim(),
+    isContainer: containerType !== "None",
+  };
 }
 
 export async function getSystemLoad() {
-  try {
-    const header = await $`vmstat`.text();
-    const headerLines = header.split("\n");
-    const data = await $`vmstat 1 2 | tail -1`.text();
-    const parts = data
-      .trim()
-      .split(/\s+/)
-      .filter((p) => p !== "");
-    if (parts.length >= 12) {
-      const cpuIndex = 12;
-
-      return {
-        procs: {
-          r: parseInt(parts[0]) || 0,
-          b: parseInt(parts[1]) || 0,
-        },
-        memory: {
-          swpd: parseInt(parts[2]) || 0,
-          free: parseInt(parts[3]) || 0,
-          buff: parseInt(parts[4]) || 0,
-          cache: parseInt(parts[5]) || 0,
-        },
-        swap: {
-          si: parseInt(parts[6]) || 0,
-          so: parseInt(parts[7]) || 0,
-        },
-        io: {
-          bi: parseInt(parts[8]) || 0,
-          bo: parseInt(parts[9]) || 0,
-        },
-        system: {
-          in: parseInt(parts[10]) || 0,
-          cs: parseInt(parts[11]) || 0,
-        },
-        cpu: {
-          us: cpuIndex < parts.length ? parseInt(parts[cpuIndex]) || 0 : 0,
-          sy:
-            cpuIndex + 1 < parts.length
-              ? parseInt(parts[cpuIndex + 1]) || 0
-              : 0,
-          id:
-            cpuIndex + 2 < parts.length
-              ? parseInt(parts[cpuIndex + 2]) || 0
-              : 100,
-          wa:
-            cpuIndex + 3 < parts.length
-              ? parseInt(parts[cpuIndex + 3]) || 0
-              : 0,
-          st:
-            cpuIndex + 4 < parts.length
-              ? parseInt(parts[cpuIndex + 4]) || 0
-              : 0,
-        },
-      };
-    }
-
-    throw new Error("Unexpected vmstat format");
-  } catch {
+  const data = await safeExec("vmstat 1 2 2>/dev/null | tail -1", "");
+  
+  if (!data.trim()) {
     return {
       procs: { r: 0, b: 0 },
       memory: { swpd: 0, free: 0, buff: 0, cache: 0 },
@@ -672,42 +585,76 @@ export async function getSystemLoad() {
       cpu: { us: 0, sy: 0, id: 100, wa: 0, st: 0 },
     };
   }
+
+  const parts = data.trim().split(/\s+/).filter((p) => p !== "");
+
+  if (parts.length < 12) {
+    return {
+      procs: { r: 0, b: 0 },
+      memory: { swpd: 0, free: 0, buff: 0, cache: 0 },
+      swap: { si: 0, so: 0 },
+      io: { bi: 0, bo: 0 },
+      system: { in: 0, cs: 0 },
+      cpu: { us: 0, sy: 0, id: 100, wa: 0, st: 0 },
+    };
+  }
+
+  const cpuIndex = 12;
+
+  return {
+    procs: {
+      r: parseInt(parts[0]) || 0,
+      b: parseInt(parts[1]) || 0,
+    },
+    memory: {
+      swpd: parseInt(parts[2]) || 0,
+      free: parseInt(parts[3]) || 0,
+      buff: parseInt(parts[4]) || 0,
+      cache: parseInt(parts[5]) || 0,
+    },
+    swap: {
+      si: parseInt(parts[6]) || 0,
+      so: parseInt(parts[7]) || 0,
+    },
+    io: {
+      bi: parseInt(parts[8]) || 0,
+      bo: parseInt(parts[9]) || 0,
+    },
+    system: {
+      in: parseInt(parts[10]) || 0,
+      cs: parseInt(parts[11]) || 0,
+    },
+    cpu: {
+      us: cpuIndex < parts.length ? parseInt(parts[cpuIndex]) || 0 : 0,
+      sy: cpuIndex + 1 < parts.length ? parseInt(parts[cpuIndex + 1]) || 0 : 0,
+      id: cpuIndex + 2 < parts.length ? parseInt(parts[cpuIndex + 2]) || 0 : 100,
+      wa: cpuIndex + 3 < parts.length ? parseInt(parts[cpuIndex + 3]) || 0 : 0,
+      st: cpuIndex + 4 < parts.length ? parseInt(parts[cpuIndex + 4]) || 0 : 0,
+    },
+  };
 }
 
 export async function getWarnings(cpu, memory, disk, processes) {
   const warnings = [];
 
   const cpuLoad1 = parseFloat(cpu.load1Pct);
-  if (cpuLoad1 > 90) {
-    warnings.push("⚠︎ CRITICAL: CPU load >90% - System overload!");
-  } else if (cpuLoad1 > 70) {
-    warnings.push("⚠︎ WARNING: High CPU load >70%");
-  }
+  if (cpuLoad1 > 90) warnings.push("⚠︎ CRITICAL: CPU load >90% - System overload!");
+  else if (cpuLoad1 > 70) warnings.push("⚠︎ WARNING: High CPU load >70%");
 
   const memUsage = (memory.used / memory.total) * 100;
-  if (memUsage > 95) {
-    warnings.push("⚠︎ CRITICAL: Memory usage >95% - OOM risk!");
-  } else if (memUsage > 85) {
-    warnings.push("⚠︎ WARNING: High memory usage >85%");
-  }
+  if (memUsage > 95) warnings.push("⚠︎ CRITICAL: Memory usage >95% - OOM risk!");
+  else if (memUsage > 85) warnings.push("⚠︎ WARNING: High memory usage >85%");
 
   if (memory.swapTotal > 0) {
     const swapUsage = (memory.swapUsed / memory.swapTotal) * 100;
-    if (swapUsage > 50) {
-      warnings.push("⚠︎ WARNING: High swap usage >50%");
-    }
+    if (swapUsage > 50) warnings.push("⚠︎ WARNING: High swap usage >50%");
   }
 
   const diskUsage = (disk.total.used / disk.total.size) * 100;
-  if (diskUsage > 95) {
-    warnings.push("⚠︎ CRITICAL: Disk usage >95% - Cleanup needed!");
-  } else if (diskUsage > 85) {
-    warnings.push("⚠︎ WARNING: High disk usage >85%");
-  }
+  if (diskUsage > 95) warnings.push("⚠︎ CRITICAL: Disk usage >95% - Cleanup needed!");
+  else if (diskUsage > 85) warnings.push("⚠︎ WARNING: High disk usage >85%");
 
-  if (processes.zombies > 10) {
-    warnings.push("⚠︎ WARNING: Many zombie processes (>10)");
-  }
+  if (processes.zombies > 10) warnings.push("⚠︎ WARNING: Many zombie processes (>10)");
 
   return warnings;
 }
@@ -724,75 +671,98 @@ export function getHeapInfo() {
 }
 
 export async function getServiceInfo() {
-  try {
-    const detailedServices = [];
-    const importantServices = ["liora", "postgresql", "redis", "ssh"];
-
-    for (const service of importantServices) {
-      try {
-        const status =
-          await $`systemctl is-active ${service} 2>/dev/null || echo "inactive"`.text();
-        if (status.trim() === "active") {
-          const info =
-            await $`systemctl status ${service} --no-pager 2>/dev/null || echo ""`.text();
-          if (info) {
-            const lines = info.split("\n");
-            const nameLine = lines.find((l) => l.includes(".service - "));
-            const activeLine = lines.find((l) => l.includes("Active:"));
-            const memoryLine = lines.find((l) => l.includes("Memory:"));
-            const cpuLine = lines.find((l) => l.includes("CPU:"));
-
-            if (nameLine) {
-              const serviceName = nameLine.split(".service - ")[0].trim();
-              const description =
-                nameLine.split(".service - ")[1]?.trim() || "";
-
-              detailedServices.push({
-                name: serviceName,
-                description: description.substring(0, 50),
-                status: "active",
-                active:
-                  activeLine?.split("Active: ")[1]?.split(";")[0]?.trim() || "",
-                memory: memoryLine?.split("Memory: ")[1]?.trim() || "",
-                cpu: cpuLine?.split("CPU: ")[1]?.trim() || "",
-              });
-            }
-          }
-        }
-      } catch {
-        continue;
-      }
+  const serviceName = "liora";
+  
+  const systemdStatus = await safeExec("systemctl is-active liora 2>/dev/null", "inactive");
+  
+  if (systemdStatus.trim() === "active") {
+    const info = await safeExec("systemctl status liora --no-pager 2>/dev/null", "");
+    if (!info) {
+      return {
+        name: serviceName,
+        type: "systemd",
+        description: "Active but status unavailable",
+        status: "active",
+        active: "N/A",
+        memory: "N/A",
+        cpu: "N/A",
+        tasks: "N/A",
+        mainPid: "N/A",
+      };
     }
 
+    const lines = info.split("\n");
+    const nameLine = lines.find((l) => l.includes(".service - "));
+    const activeLine = lines.find((l) => l.includes("Active:"));
+    const memoryLine = lines.find((l) => l.includes("Memory:"));
+    const cpuLine = lines.find((l) => l.includes("CPU:"));
+    const tasksLine = lines.find((l) => l.includes("Tasks:"));
+    const mainPidLine = lines.find((l) => l.includes("Main PID:"));
+
+    const description = nameLine?.split(".service - ")[1]?.trim() || "N/A";
+
     return {
-      total: detailedServices.length,
-      services: detailedServices,
-    };
-  } catch (error) {
-    return {
-      total: 0,
-      services: [],
+      name: serviceName,
+      type: "systemd",
+      description: description,
+      status: "active",
+      active: activeLine?.split("Active: ")[1]?.split(";")[0]?.trim() || "N/A",
+      memory: memoryLine?.split("Memory: ")[1]?.trim() || "N/A",
+      cpu: cpuLine?.split("CPU: ")[1]?.trim() || "N/A",
+      tasks: tasksLine?.split("Tasks: ")[1]?.split("(")[0]?.trim() || "N/A",
+      mainPid: mainPidLine?.split("Main PID: ")[1]?.split(" ")[0]?.trim() || "N/A",
     };
   }
+  
+  const pm2List = await safeExec("pm2 list 2>/dev/null | grep liora", "");
+  if (pm2List.trim()) {
+    const pm2Info = await safeExec("pm2 jlist 2>/dev/null", "[]");
+    try {
+      const processes = JSON.parse(pm2Info);
+      const lioraProcess = processes.find(p => p.name === "liora" || p.name.includes("liora"));
+      
+      if (lioraProcess) {
+        const uptime = lioraProcess.pm2_env?.pm_uptime ? Date.now() - lioraProcess.pm2_env.pm_uptime : 0;
+        return {
+          name: serviceName,
+          type: "pm2",
+          description: "Running under PM2",
+          status: lioraProcess.pm2_env?.status || "unknown",
+          active: `up ${formatTime(uptime / 1000)}`,
+          memory: lioraProcess.monit?.memory ? formatSize(lioraProcess.monit.memory) : "N/A",
+          cpu: lioraProcess.monit?.cpu ? `${lioraProcess.monit.cpu}%` : "N/A",
+          tasks: "N/A",
+          mainPid: lioraProcess.pid || "N/A",
+        };
+      }
+    } catch {
+      //
+    }
+  }
+  
+  return {
+    name: serviceName,
+    type: "none",
+    description: "Not running or not configured",
+    status: "inactive",
+    active: "N/A",
+    memory: "N/A",
+    cpu: "N/A",
+    tasks: "N/A",
+    mainPid: "N/A",
+  };
 }
 
 export async function getUserInfo() {
-  try {
-    const users = await $`who | wc -l`.text();
-    const lastLogin = await $`last -n 5`.text();
+  const users = await safeExec("who 2>/dev/null | wc -l", "0");
+  const lastLogin = await safeExec("last -n 5 2>/dev/null", "");
 
-    return {
-      loggedIn: parseInt(users.trim()),
-      recentLogins: lastLogin
-        .split("\n")
-        .filter((line) => line.trim() && !line.startsWith("wtmp"))
-        .slice(0, 5)
-        .map((line) => line.split(/\s+/).slice(0, 5).join(" ")),
-    };
-  } catch (error) {
-    return {
-      loggedIn: 0,
-      recentLogins: [],
-    };
-  }
+  return {
+    loggedIn: parseInt(users.trim()) || 0,
+    recentLogins: lastLogin
+      .split("\n")
+      .filter((line) => line.trim() && !line.startsWith("wtmp"))
+      .slice(0, 5)
+      .map((line) => line.split(/\s+/).slice(0, 5).join(" ")),
+  };
 }

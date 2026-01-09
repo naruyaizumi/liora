@@ -1,37 +1,35 @@
-import { join, extname } from "node:path";
+import { join, extname } from "node:path"
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  if (!args.length)
-    return m.reply(
-      `Enter the target file path.\n› Example: ${usedPrefix + command} plugins/owner/owner-sf`,
-    );
+  if (!args.length) {
+    return m.reply(`Need file path\nEx: ${usedPrefix + command} plugins/owner/owner-sf`)
+  }
 
   try {
-    let target = join(...args);
-    if (!extname(target)) target += ".js";
-    const filepath = join(process.cwd(), target);
+    let t = join(...args)
+    if (!extname(t)) t += ".js"
+    const fp = join(process.cwd(), t)
 
-    const fileBuffer = Buffer.from(await Bun.file(filepath).arrayBuffer());
-    const fileName = target.split("/").pop();
+    const buf = Buffer.from(await Bun.file(fp).arrayBuffer())
+    const name = t.split("/").pop()
 
     await conn.sendMessage(
       m.chat,
       {
-        document: fileBuffer,
-        fileName,
+        document: buf,
+        fileName: name,
         mimetype: "application/javascript",
       },
       { quoted: m },
-    );
+    )
   } catch (e) {
-    conn.logger.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   }
-};
+}
 
-handler.help = ["getfile"];
-handler.tags = ["owner"];
-handler.command = /^(getfile|gf)$/i;
-handler.owner = true;
+handler.help = ["getfile"]
+handler.tags = ["owner"]
+handler.command = /^(getfile|gf)$/i
+handler.owner = true
 
-export default handler;
+export default handler

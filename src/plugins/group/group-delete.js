@@ -1,21 +1,22 @@
 let handler = async (m, { conn }) => {
-  if (!m.quoted) return m.reply("No quoted message found to delete.");
+  if (!m.quoted) return m.reply("Reply message to delete");
+  
   const { chat, id, participant, sender, fromMe } = m.quoted.vM;
-  if (m.isBaileys || m.fromMe) return true;
-  const quotedSender = participant || sender;
-  if (!quotedSender) return m.reply("Could not identify quoted sender.");
-  if (fromMe) return m.reply("Cannot delete messages sent by the bot.");
+  if (fromMe) return m.reply("Cannot delete bot msg");
+  
+  const qs = participant || sender;
+  if (!qs) return m.reply("No sender found");
+  
   try {
     await conn.sendMessage(chat, {
       delete: {
         remoteJid: m.chat,
         fromMe: false,
         id,
-        participant: quotedSender,
+        participant: qs,
       },
     });
   } catch (e) {
-    global.logger.error(e);
     m.reply(`Error: ${e.message}`);
   }
 };

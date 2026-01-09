@@ -1,41 +1,36 @@
 let handler = async (m, { text, usedPrefix, command, conn }) => {
   try {
-    const settings = global.db.data.settings[conn.user.lid] || {};
+    const s = global.db.data.settings[conn.user.lid] || {}
 
     if (!text) {
-      const status = settings.self ? "ONLINE" : "OFFLINE";
-      return m.reply(
-        `Bot self mode: ${status}\nUse '${usedPrefix + command} on' or '${usedPrefix + command} off' to change mode.`,
-      );
+      const st = s.self ? "ON" : "OFF"
+      return m.reply(`Self mode: ${st}\nUse '${usedPrefix + command} on' or '${usedPrefix + command} off'`)
     }
 
     switch (text.toLowerCase()) {
       case "off":
       case "disable":
-        if (!settings.self) return m.reply("Self mode is already disabled.");
-        settings.self = false;
-        return m.reply("Self mode disabled.");
+        if (!s.self) return m.reply("Already off")
+        s.self = false
+        return m.reply("Self mode off")
 
       case "on":
       case "enable":
-        if (settings.self) return m.reply("Self mode is already enabled.");
-        settings.self = true;
-        return m.reply("Self mode enabled.");
+        if (s.self) return m.reply("Already on")
+        s.self = true
+        return m.reply("Self mode on")
 
       default:
-        return m.reply(
-          `Invalid parameter.\nUsage: ${usedPrefix + command} on | off`,
-        );
+        return m.reply(`Invalid\nUse: ${usedPrefix + command} on | off`)
     }
   } catch (e) {
-    global.logger.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   }
-};
+}
 
-handler.help = ["self"];
-handler.tags = ["owner"];
-handler.command = /^(self(mode)?)$/i;
-handler.owner = true;
+handler.help = ["self"]
+handler.tags = ["owner"]
+handler.command = /^(self(mode)?)$/i
+handler.owner = true
 
-export default handler;
+export default handler

@@ -4,16 +4,13 @@ export async function fileType(buffer) {
   }
 
   return await Promise.resolve().then(() => {
-    // MP4: bytes 4-7 = "ftyp" (66 74 79 70)
     if (buffer.length >= 12) {
       const boxType = buffer.slice(4, 8).toString("ascii");
-      const brand = buffer.slice(8, 12).toString("ascii");
       if (boxType === "ftyp") {
         return { mime: "video/mp4", ext: "mp4" };
       }
     }
 
-    // MOV: bytes 4-7 = "ftyp" dengan brand "qt"
     if (
       buffer.length >= 12 &&
       buffer.slice(4, 8).toString("ascii") === "ftyp"
@@ -24,7 +21,6 @@ export async function fileType(buffer) {
       }
     }
 
-    // AVI: bytes 0-3 = "RIFF", bytes 8-11 = "AVI "
     if (
       buffer.length >= 12 &&
       buffer[0] === 0x52 &&
@@ -39,7 +35,6 @@ export async function fileType(buffer) {
       return { mime: "video/x-msvideo", ext: "avi" };
     }
 
-    // MKV/WebM: bytes 0-3 = webm signature
     if (
       buffer.length >= 4 &&
       buffer[0] === 0x1a &&
@@ -50,9 +45,7 @@ export async function fileType(buffer) {
       return { mime: "video/webm", ext: "mkv" };
     }
 
-    // MP3: bisa dengan ID3 tag atau frame sync
     if (buffer.length >= 3) {
-      // ID3 tag
       if (buffer[0] === 0x49 && buffer[1] === 0x44 && buffer[2] === 0x33) {
         return { mime: "audio/mpeg", ext: "mp3" };
       }
@@ -61,7 +54,6 @@ export async function fileType(buffer) {
       }
     }
 
-    // WAV: bytes 0-3 = "RIFF", bytes 8-11 = "WAVE"
     if (
       buffer.length >= 12 &&
       buffer[0] === 0x52 &&
@@ -76,7 +68,6 @@ export async function fileType(buffer) {
       return { mime: "audio/wav", ext: "wav" };
     }
 
-    // OGG/Opus: bytes 0-3 = "OggS"
     if (
       buffer.length >= 4 &&
       buffer[0] === 0x4f &&
@@ -87,7 +78,6 @@ export async function fileType(buffer) {
       return { mime: "audio/ogg", ext: "ogg" };
     }
 
-    // M4A: bytes 4-7 = "ftyp" dengan brand "M4A"
     if (
       buffer.length >= 12 &&
       buffer.slice(4, 8).toString("ascii") === "ftyp"
@@ -98,7 +88,6 @@ export async function fileType(buffer) {
       }
     }
 
-    // AAC: ADTS frame sync
     if (
       buffer.length >= 2 &&
       buffer[0] === 0xff &&
@@ -107,7 +96,6 @@ export async function fileType(buffer) {
       return { mime: "audio/aac", ext: "aac" };
     }
 
-    // AMR: bytes 0-5 = "#!AMR"
     if (
       buffer.length >= 6 &&
       buffer[0] === 0x23 &&
@@ -119,8 +107,7 @@ export async function fileType(buffer) {
     ) {
       return { mime: "audio/amr", ext: "amr" };
     }
-
-    // JPEG: FF D8 FF
+    
     if (
       buffer.length >= 3 &&
       buffer[0] === 0xff &&
@@ -130,7 +117,6 @@ export async function fileType(buffer) {
       return { mime: "image/jpeg", ext: "jpg" };
     }
 
-    // PNG: 89 50 4E 47 0D 0A 1A 0A
     if (
       buffer.length >= 8 &&
       buffer[0] === 0x89 &&
@@ -145,7 +131,6 @@ export async function fileType(buffer) {
       return { mime: "image/png", ext: "png" };
     }
 
-    // GIF: "GIF87a" atau "GIF89a"
     if (
       buffer.length >= 6 &&
       buffer[0] === 0x47 &&
@@ -158,7 +143,6 @@ export async function fileType(buffer) {
       return { mime: "image/gif", ext: "gif" };
     }
 
-    // WebP: "RIFF" + "WEBP"
     if (
       buffer.length >= 12 &&
       buffer[0] === 0x52 &&
@@ -173,7 +157,6 @@ export async function fileType(buffer) {
       return { mime: "image/webp", ext: "webp" };
     }
 
-    // HEIC: "ftyp" dengan brand "heic" atau "mif1"
     if (
       buffer.length >= 12 &&
       buffer.slice(4, 8).toString("ascii") === "ftyp"
@@ -184,7 +167,6 @@ export async function fileType(buffer) {
       }
     }
 
-    // PDF: "%PDF"
     if (
       buffer.length >= 4 &&
       buffer[0] === 0x25 &&
@@ -195,7 +177,6 @@ export async function fileType(buffer) {
       return { mime: "application/pdf", ext: "pdf" };
     }
 
-    // DOCX: PK zip header + [Content_Types].xml
     if (
       buffer.length >= 4 &&
       buffer[0] === 0x50 &&
@@ -246,7 +227,6 @@ export async function fileType(buffer) {
       }
     }
 
-    // ZIP: PK header
     if (
       buffer.length >= 4 &&
       buffer[0] === 0x50 &&
@@ -257,7 +237,6 @@ export async function fileType(buffer) {
       return { mime: "application/zip", ext: "zip" };
     }
 
-    // RAR: "Rar!" atau "RE~^"
     if (
       buffer.length >= 7 &&
       ((buffer[0] === 0x52 &&

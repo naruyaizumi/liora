@@ -1,8 +1,5 @@
-/* global conn */
-/* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 import { smsg } from "#core/smsg.js";
 import { join, dirname } from "node:path";
-import printMessage from "#lib/console.js";
 
 const CMD_PREFIX_RE = /^[/!.]/;
 
@@ -52,7 +49,7 @@ const isCmdMatch = (cmd, rule) => {
   return false;
 };
 
-const resolveLid = async (sender) => {
+const resolveLid = async (sender, conn) => {
   if (!sender || typeof sender !== "string") {
     return sender || "";
   }
@@ -73,69 +70,153 @@ const resolveLid = async (sender) => {
   return sender.split("@")[0];
 };
 
+const getGroupMetadata = async (conn, chat) => {
+  try {
+    const chatData = await conn.getChat(chat);
+    if (chatData?.metadata) {
+      return chatData.metadata;
+    }
+
+    const metadata = await safe(() => conn.groupMetadata(chat), {});
+
+    if (metadata && Object.keys(metadata).length > 0) {
+      await conn.setChat(chat, {
+        id: chat,
+        metadata,
+        isChats: true,
+        lastSync: Date.now(),
+      });
+    }
+
+    return metadata;
+  } catch {
+    return await safe(() => conn.groupMetadata(chat), {});
+  }
+};
+
+const checkPermissions = (m, settings, isOwner, isAdmin, isBotAdmin, chat) => {
+  if (!m.fromMe && settings?.self && !isOwner) {
+    return { allowed: false, reason: "self" };
+  }
+
+  if (settings?.gconly && !m.isGroup && !isOwner) {
+    return { allowed: false, reason: "gconly" };
+  }
+
+  if (!isAdmin && !isOwner && chat?.adminOnly) {
+    return { allowed: false, reason: "adminOnly" };
+  }
+
+  if (!isOwner && chat?.mute) {
+    return { allowed: false, reason: "mute" };
+  }
+
+  return { allowed: true };
+};
+
+async function printMessage(
+  m,
+  conn = {
+    user: {},
+    decodeJid: (id) => id,
+    getName: async () => "Unknown",
+    logger: console,
+  },
+) {
+  try {
+    if (global.db?.data?.settings?.[conn.user?.lid]?.noprint) return;
+    if (!m || !m.sender || !m.chat || !m.mtype) return;
+
+    const sender = conn.decodeJid(m.sender);
+    const chat = conn.decodeJid(m.chat);
+    const user = (await conn.getName(sender)) || "Unknown";
+
+    const getIdFormat = (id) => {
+      if (id?.endsWith("@lid")) return "LID";
+      if (id?.endsWith("@s.whatsapp.net")) return "PN";
+      if (id?.startsWith("@")) return "Username";
+      return "Unknown";
+    };
+
+    const getChatContext = (id) => {
+      if (id?.endsWith("@g.us")) return "Group";
+      if (id?.endsWith("@broadcast")) return "Broadcast";
+      if (id?.endsWith("@newsletter")) return "Channel";
+      if (id?.endsWith("@lid") || id?.endsWith("@s.whatsapp.net"))
+        return "Private";
+      return "Unknown";
+    };
+
+    const rawText = m.text?.trim() || "";
+    const prefixMatch = rawText.match(/^([/!.])\s*(\S+)/);
+    const prefix = m.prefix || (prefixMatch ? prefixMatch[1] : null);
+    const command = m.command || (prefixMatch ? prefixMatch[2] : null);
+    if (!prefix || !command) return;
+
+    const cmd = `${prefix}${command}`;
+    const idFormat = getIdFormat(sender);
+    const chatContext = getChatContext(chat);
+
+    global.logger.info(
+      {
+        user: user,
+        sender: sender,
+        idFormat: idFormat,
+        chatContext: chatContext,
+      },
+      `${cmd} executed`,
+    );
+  } catch (e) {
+    global.logger.error(e);
+  }
+}
+
 export async function handler(chatUpdate) {
   try {
     if (!chatUpdate) return;
 
-    setImmediate(async () => {
-      try {
-        await this.readMessages(
-          chatUpdate.messages.map((m) => m.key).filter(Boolean),
-        );
-      } catch {
-        //
-      }
-    });
+    this.pushMessage(chatUpdate.messages);
 
-    this.pushMessage(chatUpdate.messages).catch(global.logger.error);
+    const messages = chatUpdate.messages;
+    if (!messages || messages.length === 0) return;
 
-    const m = smsg(this, chatUpdate.messages?.[chatUpdate.messages.length - 1]);
+    const m = smsg(this, messages[messages.length - 1]);
     if (!m || m.isBaileys || m.fromMe) return;
 
     const settings = global.db?.data?.settings?.[this.user.lid] || {};
-    const senderLid = await resolveLid(m.sender);
+    const senderLid = await resolveLid(m.sender, this);
     const regOwners = global.config.owner.map(
       (id) => id.toString().split("@")[0],
     );
     const isOwner = m.fromMe || regOwners.includes(senderLid);
 
     let groupMetadata = {};
+    let participants = [];
+    let participantMap = {};
+    let user = {};
+    let bot = {};
+    let isRAdmin = false;
+    let isAdmin = false;
+    let isBotAdmin = false;
+
     if (m.isGroup) {
-      try {
-        const chatData = await this.getChat(m.chat);
-        if (chatData?.metadata) {
-          groupMetadata = chatData.metadata;
-        } else {
-          groupMetadata = await safe(() => this.groupMetadata(m.chat), {});
+      groupMetadata = await getGroupMetadata(this, m.chat);
+      participants = groupMetadata?.participants || [];
+      participantMap = Object.fromEntries(participants.map((p) => [p.id, p]));
 
-          if (groupMetadata && Object.keys(groupMetadata).length > 0) {
-            const dataToSave = {
-              id: m.chat,
-              metadata: groupMetadata,
-              isChats: true,
-              lastSync: Date.now(),
-            };
-            await this.setChat(m.chat, dataToSave);
-          }
-        }
-      } catch (e) {
-        groupMetadata = await safe(() => this.groupMetadata(m.chat), {});
-      }
+      const botId = this.decodeJid(this.user.lid);
+      user = participantMap[m.sender] || {};
+      bot = participantMap[botId] || {};
+      isRAdmin = user?.admin === "superadmin";
+      isAdmin = isRAdmin || user?.admin === "admin";
+      isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
     }
-
-    const participants = groupMetadata?.participants || [];
-    const participantMap = Object.fromEntries(
-      participants.map((p) => [p.id, p]),
-    );
-    const botId = this.decodeJid(this.user.lid);
-    const user = participantMap[m.sender] || {};
-    const bot = participantMap[botId] || {};
-    const isRAdmin = user?.admin === "superadmin";
-    const isAdmin = isRAdmin || user?.admin === "admin";
-    const isBotAdmin = bot?.admin === "admin" || bot?.admin === "superadmin";
 
     const __dirname = dirname(Bun.fileURLToPath(import.meta.url));
     const pluginDir = join(__dirname, "./plugins");
+
+    let commandMatched = false;
+    let matchedKey = null;
 
     for (const name in global.plugins) {
       const plugin = global.plugins[name];
@@ -169,17 +250,23 @@ export async function handler(chatUpdate) {
 
         if (!isCmdMatch(command, plugin.command)) continue;
 
+        commandMatched = true;
+        matchedKey = m.key;
         m.plugin = name;
+
         const chat = global.db?.data?.chats?.[m.chat] || {};
 
-        if (!m.fromMe && settings?.self && !isOwner) return;
-
-        if (settings?.gconly && !m.isGroup && !isOwner) {
-          return;
+        const permission = checkPermissions(
+          m,
+          settings,
+          isOwner,
+          isAdmin,
+          isBotAdmin,
+          chat,
+        );
+        if (!permission.allowed) {
+          break;
         }
-
-        if (!isAdmin && !isOwner && chat?.adminOnly) return;
-        if (!isOwner && chat?.mute) return;
 
         const fail = plugin.fail || global.dfail;
 
@@ -236,6 +323,16 @@ export async function handler(chatUpdate) {
     }
 
     await safe(() => printMessage(m, this));
+
+    if (commandMatched && matchedKey) {
+      setImmediate(async () => {
+        try {
+          await this.readMessages([matchedKey]);
+        } catch (e) {
+          global.logger?.error({ error: e.message }, "Read message error");
+        }
+      });
+    }
   } catch (e) {
     global.logger.error({ error: e.message, stack: e.stack }, "Handler error");
   }

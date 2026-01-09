@@ -1,56 +1,54 @@
-import { remini } from "#api/remini.js";
+import { remini } from "#api/remini.js"
 
 let handler = async (m, { conn, command, usedPrefix }) => {
-  const q = m.quoted && m.quoted.mimetype ? m.quoted : m;
-  const mime = (q.msg || q).mimetype || "";
+  const q = m.quoted?.mimetype ? m.quoted : m
+  const mime = (q.msg || q).mimetype || ""
 
-  if (
-    !q ||
-    typeof q.download !== "function" ||
-    !/image\/(jpe?g|png|webp)/i.test(mime)
-  ) {
-    return m.reply(
-      `Please send or reply to an image before using this command.\nExample: ${usedPrefix}${command} < reply to image or send image with caption`,
-    );
+  if (!/image\/(jpe?g|png|webp)/i.test(mime)) {
+    return m.reply(`Send/reply image.\nEx: ${usedPrefix + command}`)
   }
 
   try {
-    await global.loading(m, conn);
-    const media = await q.download().catch(() => null);
-    if (!media || !Buffer.isBuffer(media))
-      return m.reply("Invalid image buffer.");
-    const { success, resultUrl, resultBuffer, error } = await remini(media);
-    if (!success) throw new Error(error || "Enhancement failed");
+    await global.loading(m, conn)
+    const img = await q.download()
+    if (!img) return m.reply("Invalid image")
+
+    const { success, resultUrl, resultBuffer, error } = await remini(img)
+    if (!success) throw new Error(error || "Failed")
 
     if (resultBuffer) {
+      const buffer = Buffer.from(
+        resultBuffer.buffer,
+        resultBuffer.byteOffset,
+        resultBuffer.byteLength
+      )
       await conn.sendMessage(
         m.chat,
         {
-          image: resultBuffer,
-          caption: "Image enhancement successful.",
+          image: buffer,
+          caption: "Image enhanced",
         },
-        { quoted: m },
-      );
+        { quoted: m }
+      )
     } else {
       await conn.sendMessage(
         m.chat,
         {
           image: { url: resultUrl },
-          caption: "Image enhancement successful.",
+          caption: "Image enhanced",
         },
-        { quoted: m },
-      );
+        { quoted: m }
+      )
     }
   } catch (e) {
-    global.logger.error(e);
-    m.reply("Failed to enhance image.");
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["hd"];
-handler.tags = ["tools"];
-handler.command = /^(remini|hd)$/i;
+handler.help = ["hd"]
+handler.tags = ["tools"]
+handler.command = /^(remini|hd)$/i
 
-export default handler;
+export default handler

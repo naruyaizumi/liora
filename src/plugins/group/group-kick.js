@@ -1,36 +1,30 @@
 let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
-  let target = m.mentionedJid?.[0] || m.quoted?.sender || null;
+  let t = m.mentionedJid?.[0] || m.quoted?.sender || null;
 
-  if (!target && args[0]) {
-    const pn = args[0].replace(/[^0-9]/g, "") + "@s.whatsapp.net";
-    const lid = await conn.signalRepository.lidMapping.getLIDForPN(pn);
-    if (lid) target = lid;
+  if (!t && args[0]) {
+    const num = args[0].replace(/[^0-9]/g, "") + "@s.whatsapp.net";
+    const lid = await conn.signalRepository.lidMapping.getLIDForPN(num);
+    if (lid) t = lid;
   }
 
-  if (!target && args[0]) {
+  if (!t && args[0]) {
     const raw = args[0].replace(/[^0-9]/g, "") + "@lid";
-    if (participants.some((p) => p.id === raw)) target = raw;
+    if (participants.some(p => p.id === raw)) t = raw;
   }
 
-  if (!target || !participants.some((p) => p.id === target))
-    return m.reply(
-      `Specify one valid member to remove.\n› Example: ${usedPrefix + command} @628xxxx`,
-    );
+  if (!t || !participants.some(p => p.id === t))
+    return m.reply(`Remove member\nEx: ${usedPrefix + command} @628xxx`);
 
-  try {
-    await conn.groupParticipantsUpdate(m.chat, [target], "remove");
-    await conn.sendMessage(
-      m.chat,
-      {
-        text: `Successfully removed @${target.split("@")[0]}.`,
-        mentions: [target],
-      },
-      { quoted: m },
-    );
-  } catch (e) {
-    global.logger.error(e);
-    m.reply(`Error: ${e.message}`);
-  }
+  await conn.groupParticipantsUpdate(m.chat, [t], "remove");
+  
+  await conn.sendMessage(
+    m.chat,
+    {
+      text: `Removed @${t.split("@")[0]}`,
+      mentions: [t],
+    },
+    { quoted: m },
+  );
 };
 
 handler.help = ["kick"];

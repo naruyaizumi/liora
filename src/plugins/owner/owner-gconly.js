@@ -1,42 +1,36 @@
 let handler = async (m, { text, usedPrefix, command, conn }) => {
   try {
-    const settings = global.db.data.settings[conn.user.lid] || {};
+    const s = global.db.data.settings[conn.user.lid] || {}
 
     if (!text) {
-      const status = settings.gconly ? "ON" : "OFF";
-      return m.reply(
-        `GC Only mode: ${status}\nUse '${usedPrefix + command} on' or '${usedPrefix + command} off' to change mode.`,
-      );
+      const st = s.gconly ? "ON" : "OFF"
+      return m.reply(`GC Only: ${st}\nUse '${usedPrefix + command} on' or '${usedPrefix + command} off'`)
     }
 
     switch (text.toLowerCase()) {
       case "off":
       case "disable":
-        if (!settings.gconly)
-          return m.reply("GC Only mode is already disabled.");
-        settings.gconly = false;
-        return m.reply("GC Only mode disabled.");
+        if (!s.gconly) return m.reply("Already off")
+        s.gconly = false
+        return m.reply("GC Only off")
 
       case "on":
       case "enable":
-        if (settings.gconly) return m.reply("GC Only mode is already enabled.");
-        settings.gconly = true;
-        return m.reply("GC Only mode enabled.");
+        if (s.gconly) return m.reply("Already on")
+        s.gconly = true
+        return m.reply("GC Only on")
 
       default:
-        return m.reply(
-          `Invalid parameter.\nUsage: ${usedPrefix + command} on | off`,
-        );
+        return m.reply(`Invalid\nUse: ${usedPrefix + command} on | off`)
     }
   } catch (e) {
-    global.logger.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   }
-};
+}
 
-handler.help = ["gconly"];
-handler.tags = ["owner"];
-handler.command = /^(gconly|grouponly)$/i;
-handler.owner = true;
+handler.help = ["gconly"]
+handler.tags = ["owner"]
+handler.command = /^(gconly|grouponly)$/i
+handler.owner = true
 
-export default handler;
+export default handler

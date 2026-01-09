@@ -8,173 +8,164 @@ import {
   isAudio,
   isJson,
   isHtml,
-} from "#lib/file-type.js";
+} from "#lib/file-type.js"
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  const startTime = Date.now();
+  const start = Date.now()
 
   if (!text || !/^https?:\/\//i.test(text.trim())) {
-    return m.reply(
-      `\`\`\`Usage: ${usedPrefix + command} <url>\n\nExample: ${usedPrefix + command} https://example.com\`\`\``,
-    );
+    return m.reply(`Need URL\nEx: ${usedPrefix + command} https://example.com`)
   }
 
-  const originalUrl = text.trim();
-  await global.loading(m, conn);
+  const url = text.trim()
+  await global.loading(m, conn)
 
-  const fetchOptions = {
+  const opts = {
     method: "GET",
     headers: getBrowserHeaders(),
     redirect: "follow",
     signal: AbortSignal.timeout(30000),
-  };
+  }
 
   try {
-    const response = await fetch(originalUrl, fetchOptions);
-    const fetchTime = Date.now() - startTime;
+    const res = await fetch(url, opts)
+    const time = Date.now() - start
 
-    const finalUrl = response.url;
-    const wasRedirected = response.redirected || finalUrl !== originalUrl;
+    const final = res.url
+    const redirect = res.redirected || final !== url
 
-    if (!response.ok) {
-      const errorText = await Bun.readableStreamToText(response.body).catch(
-        () => "",
-      );
-      const errorMsg = `\`\`\`HTTP Error ${response.status}
+    if (!res.ok) {
+      const err = await Bun.readableStreamToText(res.body).catch(() => "")
+      const msg = `\`\`\`HTTP Error ${res.status}
 
-Request URL: ${originalUrl}
-${
-  wasRedirected
-    ? `Final URL: ${finalUrl}
-`
-    : ""
-}Status: ${response.status} ${response.statusText}
-Time: ${fetchTime}ms
-Content-Type: ${response.headers.get("content-type") || "unknown"}
-Content-Length: ${response.headers.get("content-length") || "unknown"}
+URL: ${url}
+${redirect ? `Final: ${final}\n` : ""}Status: ${res.status} ${res.statusText}
+Time: ${time}ms
+Type: ${res.headers.get("content-type") || "unknown"}
+Length: ${res.headers.get("content-length") || "unknown"}
 
-Response Preview:
-${errorText.substring(0, 200)}${errorText.length > 200 ? "..." : ""}\`\`\``;
-      return m.reply(errorMsg);
+Preview:
+${err.substring(0, 200)}${err.length > 200 ? "..." : ""}\`\`\``
+      return m.reply(msg)
     }
 
-    const contentType =
-      response.headers.get("content-type") || "application/octet-stream";
-    const contentLength = response.headers.get("content-length");
-    const contentEncoding = response.headers.get("content-encoding");
-    const server = response.headers.get("server");
-    const date = response.headers.get("date");
-    const processingStart = Date.now();
-    const uint8Array = await Bun.readableStreamToBytes(response.body);
-    const buffer = Buffer.from(uint8Array);
-    const processingTime = Date.now() - processingStart;
-    const detectedType = await fileType(buffer);
+    const type = res.headers.get("content-type") || "application/octet-stream"
+    const len = res.headers.get("content-length")
+    const enc = res.headers.get("content-encoding")
+    const server = res.headers.get("server")
+    const date = res.headers.get("date")
 
-    let mime = contentType.split(";")[0].trim();
-    let ext = "bin";
-    if (detectedType) {
-      mime = detectedType.mime;
-      ext = detectedType.ext;
+    const processStart = Date.now()
+    const u8 = await Bun.readableStreamToBytes(res.body)
+    const buf = Buffer.from(u8)
+    const processTime = Date.now() - processStart
+    const detect = await fileType(buf)
+
+    let mime = type.split(";")[0].trim()
+    let ext = "bin"
+    if (detect) {
+      mime = detect.mime
+      ext = detect.ext
     } else {
-      ext = (await getExtension(mime)) || "bin";
+      ext = (await getExtension(mime)) || "bin"
     }
 
-    const jsonCheck = isJson(mime);
-    const imageCheck = isImage(mime);
-    const videoCheck = isVideo(mime);
-    const audioCheck = isAudio(mime);
-    const htmlCheck = isHtml(mime);
+    const json = isJson(mime)
+    const img = isImage(mime)
+    const vid = isVideo(mime)
+    const aud = isAudio(mime)
+    const html = isHtml(mime)
 
-    const totalTime = Date.now() - startTime;
-    const transferRate = formatBytes(buffer.length / (totalTime / 1000)) + "/s";
+    const total = Date.now() - start
+    const rate = formatBytes(buf.length / (total / 1000)) + "/s"
 
-    let contentTypeInfo = "";
-    if (jsonCheck) {
+    let info = ""
+    if (json) {
       try {
-        const jsonContent = JSON.parse(buffer.toString("utf-8", 0, 50000));
-        contentTypeInfo = `JSON Type: ${Array.isArray(jsonContent) ? "Array" : typeof jsonContent}
+        const j = JSON.parse(buf.toString("utf-8", 0, 50000))
+        info = `JSON Type: ${Array.isArray(j) ? "Array" : typeof j}
 JSON Keys: ${
-          Object.keys(jsonContent).length > 5
-            ? Object.keys(jsonContent).slice(0, 5).join(", ") + "..."
-            : Object.keys(jsonContent).join(", ")
+          Object.keys(j).length > 5
+            ? Object.keys(j).slice(0, 5).join(", ") + "..."
+            : Object.keys(j).join(", ")
         }
-`;
+`
       } catch {
-        contentTypeInfo = "JSON Type: Invalid/Malformed\n";
+        info = "JSON Type: Invalid\n"
       }
-    } else if (htmlCheck) {
-      const textContent = buffer.toString("utf-8", 0, 50000);
-      const titleMatch = textContent.match(/<title[^>]*>([^<]+)<\/title>/i);
-      contentTypeInfo = `HTML Title: ${titleMatch ? titleMatch[1].substring(0, 50) : "Not found"}
-`;
+    } else if (html) {
+      const t = buf.toString("utf-8", 0, 50000)
+      const title = t.match(/<title[^>]*>([^<]+)<\/title>/i)
+      info = `HTML Title: ${title ? title[1].substring(0, 50) : "Not found"}
+`
     }
 
-    const caption = `FETCH REPORT
+    const cap = `FETCH
 
-URL: ${originalUrl}
-Final URL: ${finalUrl}
-Redirected: ${wasRedirected ? "Yes" : "No"}
+URL: ${url}
+Final: ${final}
+Redirect: ${redirect ? "Y" : "N"}
 
-Status: ${response.status} ${response.statusText}
+Status: ${res.status} ${res.statusText}
 Server: ${server || "Unknown"}
-Date: ${date || "Not specified"}
+Date: ${date || "N/A"}
 
-Content-Type: ${contentType}
-Content-Encoding: ${contentEncoding || "none"}
-Content-Length: ${contentLength ? formatBytes(parseInt(contentLength)) : formatBytes(buffer.length)}
-Detected MIME: ${mime}
-File Extension: .${ext}
-Detection Method: ${detectedType ? "Signature-based" : "Header-based"}
+Type: ${type}
+Encoding: ${enc || "none"}
+Length: ${len ? formatBytes(parseInt(len)) : formatBytes(buf.length)}
+MIME: ${mime}
+Ext: .${ext}
+Detect: ${detect ? "Signature" : "Header"}
 
-Type Detection:
-${imageCheck ? "✓ Image" : "✗ Image"}
-${videoCheck ? "✓ Video" : "✗ Video"} 
-${audioCheck ? "✓ Audio" : "✗ Audio"}
-${jsonCheck ? "✓ JSON" : "✗ JSON"}
-${htmlCheck ? "✓ HTML" : "✗ HTML"}
+Type:
+${img ? "✓ Image" : "✗ Image"}
+${vid ? "✓ Video" : "✗ Video"} 
+${aud ? "✓ Audio" : "✗ Audio"}
+${json ? "✓ JSON" : "✗ JSON"}
+${html ? "✓ HTML" : "✗ HTML"}
 
-Total Time: ${totalTime}ms
-Network Time: ${fetchTime}ms
-Processing Time: ${processingTime}ms
-Transfer Rate: ${transferRate}
+Time: ${total}ms
+Network: ${time}ms
+Process: ${processTime}ms
+Rate: ${rate}
 
-Buffer Size: ${formatBytes(buffer.length)}
-${contentTypeInfo}`;
+Size: ${formatBytes(buf.length)}
+${info}`
 
-    let msg;
-    if (imageCheck && buffer.length > 1000) {
-      msg = { image: buffer, caption: caption };
-    } else if (videoCheck && buffer.length > 10000) {
-      msg = { video: buffer, caption: caption };
-    } else if (audioCheck && buffer.length > 1000) {
-      msg = { audio: buffer, mimetype: mime, caption: caption };
+    let msg
+    if (img && buf.length > 1000) {
+      msg = { image: buf, caption: cap }
+    } else if (vid && buf.length > 10000) {
+      msg = { video: buf, caption: cap }
+    } else if (aud && buf.length > 1000) {
+      msg = { audio: buf, mimetype: mime, caption: cap }
     } else {
-      const fileName = `result.${ext}`;
+      const name = `result.${ext}`
       msg = {
-        document: buffer,
+        document: buf,
         mimetype: mime,
-        fileName: fileName,
-        caption: caption,
-      };
+        fileName: name,
+        caption: cap,
+      }
     }
 
-    await conn.sendMessage(m.chat, msg, { quoted: m });
+    await conn.sendMessage(m.chat, msg, { quoted: m })
   } catch (e) {
-    const errorMsg = `\`\`\`FETCH ERROR
+    const err = `\`\`\`FETCH ERROR
 
-Request URL: ${originalUrl}
-Error Type: ${e.name}
-Error Message: ${e.message}
-Time Elapsed: ${Date.now() - startTime}ms\`\`\``;
+URL: ${url}
+Error: ${e.name}
+Message: ${e.message}
+Time: ${Date.now() - start}ms\`\`\``
 
-    m.reply(errorMsg);
+    m.reply(err)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["fetch"];
-handler.tags = ["internet"];
-handler.command = /^(fetch|get)$/i;
+handler.help = ["fetch"]
+handler.tags = ["internet"]
+handler.command = /^(fetch|get)$/i
 
-export default handler;
+export default handler

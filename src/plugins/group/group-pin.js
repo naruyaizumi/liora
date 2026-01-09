@@ -1,35 +1,32 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  if (!m.quoted) return m.reply("Reply a message to pin.");
+  if (!m.quoted) return m.reply("Reply message to pin");
 
   if (!args[0]) {
     return m.reply(
-      `Specify duration.\n\nExamples:\n` +
-        `› ${usedPrefix + command} 1 = 1 day\n` +
-        `› ${usedPrefix + command} 2 = 7 days\n` +
-        `› ${usedPrefix + command} 3 = 30 days`,
+      `Pin duration\nEx:\n${usedPrefix + command} 1 = 1 day\n${usedPrefix + command} 2 = 7 days\n${usedPrefix + command} 3 = 30 days`
     );
   }
 
-  const durations = {
-    1: { seconds: 86400, label: "1 day" },
-    2: { seconds: 604800, label: "7 days" },
-    3: { seconds: 2592000, label: "30 days" },
+  const dur = {
+    1: { sec: 86400, label: "1 day" },
+    2: { sec: 604800, label: "7 days" },
+    3: { sec: 2592000, label: "30 days" },
   };
 
-  const selected = durations[args[0]];
-  if (!selected) return m.reply("Invalid option. Use 1, 2, or 3 only.");
+  const opt = dur[args[0]];
+  if (!opt) return m.reply("Invalid. Use 1, 2, or 3");
 
-  const quotedKey = m.quoted?.vM?.key;
-  if (!quotedKey) return m.reply("Cannot pin: quoted message key not found");
+  const key = m.quoted?.vM?.key;
+  if (!key) return m.reply("Cannot pin: no key");
+
   try {
     await conn.sendMessage(m.chat, {
-      pin: quotedKey,
+      pin: key,
       type: 1,
-      time: selected.seconds,
+      time: opt.sec,
     });
-    m.reply(`Message pinned for ${selected.label}.`);
+    m.reply(`Pinned for ${opt.label}`);
   } catch (e) {
-    global.logger.error(e);
     m.reply(`Error: ${e.message}`);
   }
 };

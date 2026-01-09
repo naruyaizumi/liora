@@ -1,43 +1,40 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     if (!text) {
-      return m.reply(
-        `Usage: ${usedPrefix + command} <package>\nExample: ${usedPrefix + command} baileys`,
-      );
+      return m.reply(`Need package\nEx: ${usedPrefix + command} baileys`)
     }
 
-    await global.loading(m, conn);
+    await global.loading(m, conn)
 
     const res = await fetch(
       `https://registry.npmjs.com/-/v1/search?text=${encodeURIComponent(text)}`,
-    );
-    const { objects } = await res.json();
+    )
+    const { objects } = await res.json()
 
     if (!objects.length) {
-      return m.reply(`No results found for "${text}".`);
+      return m.reply(`No results for "${text}"`)
     }
 
-    const limited = objects.slice(0, 10);
+    const list = objects.slice(0, 10)
     const result = [
-      `NPM Search Result for "${text}"`,
+      `NPM Search: "${text}"`,
       "",
-      ...limited.map(
-        ({ package: pkg }, i) =>
-          `${i + 1}. ${pkg.name} (v${pkg.version})\n    ↳ ${pkg.links.npm}`,
+      ...list.map(
+        ({ package: p }, i) =>
+          `${i + 1}. ${p.name} (v${p.version})\n    ↳ ${p.links.npm}`,
       ),
-    ].join("\n");
+    ].join("\n")
 
-    await conn.sendMessage(m.chat, { text: result }, { quoted: m });
+    await conn.sendMessage(m.chat, { text: result }, { quoted: m })
   } catch (e) {
-    global.logger.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["npmsearch"];
-handler.tags = ["internet"];
-handler.command = /^(npm(js|search)?)$/i;
+handler.help = ["npmsearch"]
+handler.tags = ["internet"]
+handler.command = /^(npm(js|search)?)$/i
 
-export default handler;
+export default handler
