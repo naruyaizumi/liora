@@ -350,6 +350,7 @@ export function naruyaizumi(connectionOptions) {
           }
           
           if (!isGroup) {
+            // eslint-disable-next-line no-unused-vars
             const s =
               message.key?.fromMe && conn.user?.lid ? conn.user
               .lid : chat;

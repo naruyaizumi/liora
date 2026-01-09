@@ -124,8 +124,8 @@ export class MemoryStore {
     }
   }
 
-  async _executeEvent(type, data) {
-    // eslint-disable-next-line no-unused-vars
+  async _executeEvent(_type, _data) {
+    //
   }
 
   _startAutoCleanup() {
