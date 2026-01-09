@@ -1,171 +1,262 @@
 # Contributing to Liora
 
-First off, thank you for considering contributing to Liora! It's people like you that make Liora such a great tool. 🎉
+Thank you for considering contributing to Liora. This document provides guidelines and instructions for contributing to the project.
+
+---
+
+## Table of Contents
+
+- [Code of Conduct](#code-of-conduct)
+- [Getting Started](#getting-started)
+- [Development Setup](#development-setup)
+- [How to Contribute](#how-to-contribute)
+- [Coding Standards](#coding-standards)
+- [Commit Guidelines](#commit-guidelines)
+- [Pull Request Process](#pull-request-process)
+- [Testing](#testing)
+- [Documentation](#documentation)
+
+---
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to liora.bot.official@gmail.com.
+This project adheres to the [GitHub Community Code of Conduct](https://docs.github.com/en/site-policy/github-terms/github-community-code-of-conduct). By participating, you are expected to uphold this code.
+
+### Expected Behavior
+
+- Be respectful and inclusive
+- Welcome newcomers and help them learn
+- Focus on constructive feedback
+- Acknowledge different viewpoints
+- Prioritize community well-being
+
+### Unacceptable Behavior
+
+- Harassment or discriminatory language
+- Personal attacks or trolling
+- Publishing private information
+- Spamming or off-topic content
+- Any conduct that could reasonably be considered inappropriate
+
+### Reporting
+
+Report violations to: liora.bot.official@gmail.com
+
+All reports will be reviewed promptly and confidentially.
+
+---
 
 ## Getting Started
 
+### Prerequisites
+
+- Git
+- Bun v1.3.0 or higher
+- Text editor or IDE
+- Basic understanding of JavaScript/TypeScript
+- Familiarity with WhatsApp bot concepts
+
+### Fork and Clone
+
 1. **Fork the repository** on GitHub
-2. **Clone your fork** locally:
-    ```bash
-    git clone https://github.com/YOUR-USERNAME/liora.git
-    cd liora
-    ```
+
+2. **Clone your fork**:
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/liora.git
+   cd liora
+   ```
+
 3. **Add upstream remote**:
-    ```bash
-    git remote add upstream https://github.com/naruyaizumi/liora.git
-    ```
-4. **Create a branch** for your changes:
-    ```bash
-    git checkout -b feature/your-feature-name
-    ```
+   ```bash
+   git remote add upstream https://github.com/naruyaizumi/liora.git
+   ```
 
-## How Can I Contribute?
+4. **Verify remotes**:
+   ```bash
+   git remote -v
+   ```
 
-### Reporting Bugs
-
-Before creating bug reports, please check existing issues as you might find that the problem has already been reported. When creating a bug report, include as many details as possible:
-
-- **Use a clear and descriptive title**
-- **Describe the exact steps to reproduce the problem**
-- **Provide specific examples** (code snippets, screenshots)
-- **Describe the behavior you observed** and what you expected
-- **Include your environment details** (OS, Bun version, Node version)
-
-Use our [Bug Report Template](.github/ISSUE_TEMPLATE/bug_report.yml).
-
-### Suggesting Enhancements
-
-Enhancement suggestions are tracked as GitHub issues. When creating an enhancement suggestion:
-
-- **Use a clear and descriptive title**
-- **Provide a detailed description** of the proposed enhancement
-- **Explain why this enhancement would be useful**
-- **List some examples** of how it would be used
-
-Use our [Feature Request Template](.github/ISSUE_TEMPLATE/feature_request.yml).
-
-### Your First Code Contribution
-
-Unsure where to begin? You can start by looking through `good-first-issue` and `help-wanted` labels:
-
-- **good-first-issue** - Issues that should only require a few lines of code
-- **help-wanted** - Issues that are a bit more involved
-
-### Pull Requests
-
-1. Follow the [Coding Standards](#coding-standards)
-2. Update documentation if needed
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Follow the [Commit Guidelines](#commit-guidelines)
-6. Fill in the Pull Request template
+---
 
 ## Development Setup
 
-### Prerequisites
+### Install Dependencies
 
-- **Bun** >= 1.0.0 (required)
-- **Node.js** >= 24.0.0
-- **Git**
-- **PostgreSQL** >= 14
-- **Redis** >= 6
-- **System dependencies**:
+```bash
+# Install all dependencies
+bun install
+```
 
-    ```bash
-    # Ubuntu/Debian
-    sudo apt-get install -y \
-        ffmpeg build-essential python3 git curl wget \
-        ca-certificates postgresql redis-server
-    ```
+### Configuration
 
-### Setup Instructions
+```bash
+# Copy example environment file
+cp .env.example .env
 
-1. **Install Bun** (required):
-    ```bash
-    curl -fsSL https://bun.sh/install | bash
-    ```
+# Edit configuration
+nano .env
+```
 
-2. **Install Node.js via NVM**:
-    ```bash
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-    nvm install 24
-    nvm use 24
-    ```
+Required environment variables:
+- `PAIRING_NUMBER`: WhatsApp number for pairing
+- `PAIRING_CODE`: Code for authentication
+- `OWNERS`: Array of owner numbers
 
-3. **Clone and setup**:
-    ```bash
-    git clone https://github.com/YOUR-USERNAME/liora.git
-    cd liora
-    bun install
-    ```
+### Running Development Server
 
-4. **Setup PostgreSQL**:
-    ```bash
-    sudo -u postgres psql <<EOF
-    CREATE USER liora WITH PASSWORD 'liora';
-    CREATE DATABASE liora OWNER liora;
-    GRANT ALL PRIVILEGES ON DATABASE liora TO liora;
-    EOF
-    ```
+```bash
+# Start in development mode with hot reload
+bun run dev
+```
 
-5. **Setup Redis**:
-    ```bash
-    sudo systemctl start redis-server
-    sudo systemctl enable redis-server
-    ```
+### Project Structure
 
-6. **Configure environment**:
-    ```bash
-    cp .env.example .env
-    nano .env
-    ```
+```
+liora/
+├── src/
+│   ├── main.js          # Application entry point
+│   ├── handlers.js         # Message and event handlers
+│   ├── plugins/          # Bot plugins/commands
+│   ├── lib/              # Shared utilities
+│   └── database/         # Database models and migrations
+└── .env                  # Configuration (git-ignored)
+```
 
-7. **Run the bot**:
-    ```bash
-    bun src/index.js
-    ```
+---
+
+## How to Contribute
+
+### Reporting Bugs
+
+Before creating a bug report:
+1. Check existing issues to avoid duplicates
+2. Verify the issue exists in the latest version
+3. Collect relevant information
+
+**Bug Report Template**:
+```markdown
+**Description**
+Clear description of the bug
+
+**Steps to Reproduce**
+1. Step one
+2. Step two
+3. Expected vs actual behavior
+
+**Environment**
+- OS: [e.g., Ubuntu 24.04]
+- Bun version: [e.g., 1.3.5]
+- Liora version: [e.g., 10.0.0]
+
+**Additional Context**
+Logs, screenshots, or other relevant information
+```
+
+### Suggesting Features
+
+Feature suggestions are welcome! Please provide:
+- Clear description of the feature
+- Use cases and benefits
+- Potential implementation approach
+- Any relevant examples from other projects
+
+**Feature Request Template**:
+```markdown
+**Feature Description**
+What feature would you like to see?
+
+**Problem Statement**
+What problem does this solve?
+
+**Proposed Solution**
+How should this feature work?
+
+**Alternatives Considered**
+Other approaches you've thought about
+```
+
+### First Contribution
+
+Look for issues labeled:
+- `good first issue` - Beginner-friendly tasks
+- `help wanted` - Tasks needing assistance
+- `documentation` - Documentation improvements
+
+---
 
 ## Coding Standards
 
-### JavaScript
+### JavaScript/TypeScript
 
-- Follow the existing code style (enforced by ESLint and Prettier)
-- Use meaningful variable and function names
-- Write comments for complex logic
+**Style Guidelines**:
+- Use ESM (ES Modules) syntax
+- Prefer `const` over `let`, avoid `var`
+- Use meaningful variable names
 - Keep functions small and focused
-- Use modern JavaScript features (ES6+)
+- Add JSDoc comments for complex functions
+- Use async/await over promises
+
+**Example**:
+```javascript
+/**
+ * Downloads media from a WhatsApp message
+ * @param {Object} message - WhatsApp message object
+ * @returns {Promise<Buffer>} Downloaded media buffer
+ */
+async function downloadMedia(message) {
+  if (!message.message) {
+    throw new Error('Invalid message object');
+  }
+  
+  // Implementation
+  const buffer = await downloadMediaMessage(message);
+  return buffer;
+}
+```
 
 ### Code Formatting
 
-Before committing, ensure your code is properly formatted:
+We use Prettier for consistent formatting:
 
 ```bash
 # Install Prettier
 bun add -D prettier
 
-# Format code
+# Format all files
 bunx prettier --write .
+
+# Check formatting
+bunx prettier --check .
+```
+
+**Prettier Configuration** (`.prettierrc`):
+```json
+{
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "printWidth": 80
+}
 ```
 
 ### Linting
 
-Run ESLint to check for code quality issues:
+We use ESLint for code quality:
 
 ```bash
-# Install ESLint
-bun add -D eslint @eslint/js globals
-
 # Run linter
 bunx eslint .
+
+# Fix auto-fixable issues
+bunx eslint . --fix
 ```
+
+---
 
 ## Commit Guidelines
 
-We follow [Conventional Commits](https://www.conventionalcommits.org/) specification:
+We follow [Conventional Commits](https://www.conventionalcommits.org/) specification.
 
 ### Commit Message Format
 
@@ -179,136 +270,227 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/) specifica
 
 ### Types
 
-- **feat**: A new feature
-- **fix**: A bug fix
-- **docs**: Documentation only changes
-- **style**: Code style changes (formatting, missing semi-colons, etc)
-- **refactor**: Code changes that neither fix a bug nor add a feature
-- **perf**: Performance improvements
-- **test**: Adding or updating tests
-- **build**: Changes to build system or dependencies
-- **ci**: Changes to CI configuration
-- **chore**: Other changes that don't modify src or test files
+| Type | Description | Example |
+|------|-------------|---------|
+| `feat` | New feature | `feat(api): add TikTok downloader` |
+| `fix` | Bug fix | `fix(auth): resolve session timeout` |
+| `docs` | Documentation | `docs(readme): update installation` |
+| `style` | Code style | `style: format with prettier` |
+| `refactor` | Code refactoring | `refactor(db): simplify query logic` |
+| `perf` | Performance | `perf(cache): optimize lookup` |
+| `test` | Tests | `test(api): add unit tests` |
+| `build` | Build system | `build: update dependencies` |
+| `ci` | CI/CD | `ci: add GitHub Actions workflow` |
+| `chore` | Maintenance | `chore: update .gitignore` |
 
 ### Scope
 
-The scope should be the name of the affected module:
-
-- **api** - API integrations
-- **auth** - Authentication
-- **core** - Core functionality
-- **cli** - Command line interface
-- **deps** - Dependencies
-- **ci** - CI/CD
-- **database** - PostgreSQL related
-- **redis** - Redis cache related
+Common scopes:
+- `api` - API integrations
+- `auth` - Authentication
+- `db` - Database
+- `cli` - Command-line interface
+- `plugin` - Plugin system
+- `deps` - Dependencies
+- `config` - Configuration
 
 ### Examples
 
 ```bash
-feat(api): add TikTok download support
+# Feature
+feat(plugin): add image generation command
 
-Add new API endpoint for downloading TikTok videos
-Includes support for watermark removal
+Add new plugin for AI image generation using DALL-E API.
+Includes error handling and rate limiting.
 
 Closes #123
-```
 
-```bash
-fix(auth): resolve session timeout issue
+# Bug fix
+fix(db): prevent duplicate message processing
 
-Fix bug where sessions would timeout prematurely
-Update keep-alive logic in PostgreSQL store
+Check message ID before processing to avoid duplicates.
+Add unique constraint to messages table.
 
 Fixes #456
+
+# Breaking change
+feat(auth)!: change authentication flow
+
+BREAKING CHANGE: Sessions now expire after 7 days instead of 30.
+Users will need to re-authenticate after updating.
+
+Closes #789
 ```
+
+---
 
 ## Pull Request Process
 
+### Before Submitting
+
 1. **Update your fork**:
+   ```bash
+   git fetch upstream
+   git checkout main
+   git merge upstream/main
+   ```
 
-    ```bash
-    git fetch upstream
-    git rebase upstream/main
-    ```
+2. **Create feature branch**:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
 
-2. **Push your changes**:
+3. **Make changes and commit**:
+   ```bash
+   git add .
+   git commit -m "feat(scope): description"
+   ```
 
-    ```bash
-    git push origin feature/your-feature-name
-    ```
+4. **Run tests**:
+   ```bash
+   bun test
+   ```
 
-3. **Create Pull Request** on GitHub
+5. **Push to your fork**:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
 
-4. **Fill in the PR template** completely
+### Submitting PR
 
-5. **Wait for review** - A maintainer will review your PR
-
-6. **Make requested changes** if needed
-
-7. **Celebrate!** 🎉 Your PR will be merged
+1. **Create Pull Request** on GitHub
+2. **Fill in the PR template** completely
+3. **Link related issues** using keywords (Closes #123)
+4. **Request review** from maintainers
+5. **Respond to feedback** promptly
 
 ### PR Checklist
 
 - [ ] Code follows project style guidelines
-- [ ] Self-review of code completed
-- [ ] Comments added for complex code
+- [ ] Self-review completed
+- [ ] Comments added for complex logic
 - [ ] Documentation updated
-- [ ] No new warnings generated
 - [ ] Tests added/updated
 - [ ] All tests passing
+- [ ] No new warnings or errors
+- [ ] Commit messages follow conventions
 - [ ] PR description is clear and complete
 
-### Writing Tests
+### Review Process
 
-- Write tests for all new features
-- Ensure tests are deterministic
-- Use descriptive test names
-- Keep tests focused and simple
-
-## Architecture Overview
-
-Liora uses a modern, pure JavaScript architecture:
-
-- **Pure JavaScript**: 100% JavaScript, no native bindings
-- **PostgreSQL**: Session and authentication storage
-- **Redis**: Real-time chat data caching
-- **SQLite**: Local user database
-- **Bun**: Primary runtime for performance
-
-## Community
-
-### Get Help
-
-- **GitHub Discussions**: Ask questions and share ideas
-- **GitHub Issues**: Report bugs and request features
-- **Email**: liora.bot.official@gmail.com
-
-### Stay Updated
-
-- Watch the repository for updates
-- Star the project if you find it useful
-- Follow [@naruyaizumi](https://github.com/naruyaizumi)
-
-## Recognition
-
-Contributors are recognized in several ways:
-
-- Listed in [CONTRIBUTORS.md](CONTRIBUTORS.md)
-- Mentioned in release notes
-- Featured in monthly recap discussions
-- Added to repository contributors list
-
-## License
-
-By contributing to Liora, you agree that your contributions will be licensed under the Apache-2.0 License.
-
-## Questions?
-
-Don't hesitate to ask! Open an issue with the `question` label or reach out via email.
+1. **Automated checks** run on PR submission
+2. **Maintainer review** within 3-5 business days
+3. **Address feedback** through new commits
+4. **Final approval** by maintainer
+5. **Merge** using squash and merge strategy
 
 ---
 
-**Thank you for contributing to Liora! 🚀**
+## Testing
 
-Made with ❤️ by the Liora community
+### Running Tests
+
+```bash
+# Run all tests
+bun test
+
+# Run specific test file
+bun test tests/api.test.js
+
+# Run with coverage
+bun test --coverage
+```
+
+### Writing Tests
+
+Place tests in `tests/` directory with `.test.js` suffix.
+
+**Example Test**:
+```javascript
+import { describe, it, expect } from 'bun:test';
+import { downloadMedia } from '../src/lib/media.js';
+
+describe('Media Download', () => {
+  it('should download image successfully', async () => {
+    const mockMessage = {
+      message: {
+        imageMessage: {
+          url: 'https://example.com/image.jpg'
+        }
+      }
+    };
+    
+    const result = await downloadMedia(mockMessage);
+    expect(result).toBeInstanceOf(Buffer);
+  });
+  
+  it('should throw error for invalid message', async () => {
+    expect(async () => {
+      await downloadMedia({});
+    }).toThrow('Invalid message object');
+  });
+});
+```
+
+### Test Coverage
+
+Aim for:
+- **Unit tests**: 80%+ coverage
+- **Integration tests**: Critical paths covered
+- **E2E tests**: Major features tested
+
+---
+
+## Documentation
+
+### Code Documentation
+
+- Add JSDoc comments to all exported functions
+- Document complex algorithms or business logic
+- Include usage examples for public APIs
+
+### Project Documentation
+
+When updating features, also update:
+- README.md
+- API documentation (if applicable)
+- Configuration examples
+- Migration guides (for breaking changes)
+
+### Documentation Style
+
+- Use clear, concise language
+- Include code examples
+- Provide context and rationale
+- Keep it up-to-date
+
+---
+
+## Recognition
+
+Contributors are recognized through:
+- Listed in CONTRIBUTORS.md
+- Mentioned in release notes
+- GitHub contributor badge
+- Special thanks in major releases
+
+---
+
+## Questions?
+
+- **GitHub Issues**: Report bugs with `question` label
+- **Email**: liora.bot.official@gmail.com
+
+---
+
+## License
+
+By contributing to Liora, you agree that your contributions will be licensed under the Apache License 2.0.
+
+You retain copyright to your contributions but grant Liora and users the rights specified in the Apache License 2.0.
+
+---
+
+**Thank you for contributing to Liora!**
+
+Made with dedication by the Liora community.

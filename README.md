@@ -1,125 +1,68 @@
-<div align="center">
+# Liora Bot
 
-<!-- Wave Header with Typing Animation -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=Liora%20Bot&fontSize=80&fontAlignY=35&animation=twinkling&fontColor=fff&desc=Enterprise-Grade%20WhatsApp%20Bot%20Framework&descAlignY=55&descSize=18" width="100%" />
+**Enterprise-Grade WhatsApp Bot Framework**
 
-![Liora Banner](https://files.catbox.moe/3xv7p0.png)
+Built on Baileys • Powered by Bun Runtime
 
-**Built on Baileys • Powered by Bun**
+---
 
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
+## Overview
 
-</div>
+Liora is a production-ready WhatsApp bot framework designed for developers who demand performance, reliability, and scalability. Built with modern technologies and battle-tested architecture patterns.
 
-## 🎯 Why Liora?
+### Key Features
 
-<div align="center">
+- **Blazing Fast Performance**: Native Bun runtime delivers unmatched speed and efficiency
+- **Modern Architecture**: ESM-first design with clean, maintainable codebase
+- **Lightweight Database**: Native `bun:sqlite` - no external database services required
+- **Zero Dependencies Overhead**: Minimal, optimized dependencies for production use
+- **Server Ready**: Deploy anywhere - Server, Pterodactyl, or containerized environments
+- **Rich Media Support**: Buttons, carousels, albums, and group stories out of the box
 
-**Liora** is not just another WhatsApp bot—it's a **production-ready framework** designed for developers who demand **performance**, **reliability**, and **scalability**. Built with modern technologies and battle-tested architecture patterns.
+---
 
-</div>
+## System Requirements
 
-<table>
-<tr>
-<td width="33%" align="center">
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Gear.png" width="80" />
+### Minimum Requirements
 
-**⚡ Blazing Fast**
+| Component | Requirement |
+|-----------|-------------|
+| OS | Linux (Ubuntu 22.04+, Debian 12+) |
+| Architecture | x86_64 |
+| CPU | 2 cores |
+| RAM | 4GB |
+| Storage | 10GB SSD |
+| Network | Stable internet connection |
+| Bun | v1.3.0+ |
 
-Native Bun runtime with Rust supervisor delivers unmatched performance. Zero-downtime hot-reload keeps your bot running 24/7.
+### Recommended for Production
 
-</td>
-<td width="33%" align="center">
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Locked.png" width="80" />
+| Component | Recommendation |
+|-----------|----------------|
+| CPU | 4+ cores |
+| RAM | 8GB+ |
+| Storage | 20GB+ NVMe SSD |
+| Network | Dedicated IP with 100Mbps+ |
 
-**🔒 Battle-Tested**
+---
 
-Enterprise-grade security with Sqlite persistence, and comprehensive input sanitization.
+## Quick Start
 
-</td>
-<td width="33%" align="center">
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Hammer%20and%20Wrench.png" width="80" />
+### Automated Installation (Recommended)
 
-**🧩 Developer First**
-
-Hot-reload plugins, ESM modules, type-safe patterns, and clean architecture make development a breeze.
-
-</td>
-</tr>
-</table>
-
-<div align="center">
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
-</div>
-
-## ⚠️ Important Notices
-
-<div align="center">
-
-<table>
-<tr>
-<td width="33%" align="center">
-
-**🚨 Warning!**
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Warning.png"
-width="60" />
-
-This project is for educational purposes only. Selling or claiming copyright is strictly prohibited.
-
-</td>
-<td width="33%" align="center">
-
-**🛡 Security**
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Shield.png"
-width="60" />
-
-Found a vulnerability? **Do not** disclose publicly. Report responsibly through our security policy.
-
-[Security Policy →](.github/SECURITY.md)
-
-</td>
-<td width="33%" align="center">
-
-**⚖️ License**
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Scroll.png"
-width="60" />
-
-Apache 2.0 allows free use with attribution. **Do not** remove credits or rebrand for profit.
-
-[Read License →](LICENSE)
-
-</td>
-</tr>
-</table>
-
-</div>
-
-<div align="center">
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
-</div>
-
-## 🚀 Quick Start
-
-<div align="center">
-
-### ⚡ One-Line Installation (Systemd)
-
-**Recommended for production deployment with auto-restart**
+One-line installation with systemd service configuration:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh | bash
 ```
 
-After installation:
+Post-installation commands:
 
 ```bash
 # Configure bot
 bot config
 
-# Start bot
+# Start service
 bot start
 
 # View logs
@@ -129,19 +72,15 @@ bot log
 bot status
 ```
 
----
+### Manual Installation
 
-### 📦 Manual Installation
-
-</div>
-
-#### Install Bun
+#### 1. Install Bun Runtime
 
 ```bash
 # Install Bun
 curl -fsSL https://bun.sh/install | bash
 
-# Load Bun
+# Load Bun environment
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
@@ -149,39 +88,58 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 bun --version
 ```
 
-#### Clone & Configure
+#### 2. Clone Repository
 
 ```bash
-# Clone repository
 git clone https://github.com/naruyaizumi/liora.git
 cd liora
+```
+
+#### 3. Configure Environment
+
+```bash
+# Copy example configuration
+cp .env.example .env
 
 # Edit configuration
-cp .env.example .env
 nano .env
 ```
 
-#### Install Dependencies
+#### 4. Install Dependencies
 
 ```bash
 bun install
 ```
 
-#### Run the Bot
+#### 5. Run the Bot
 
-**Option A: Direct Run**
+**Development Mode:**
+
+```bash
+bun run dev
+```
+
+**Production Mode:**
 
 ```bash
 bun start
 ```
 
-**Option B: Using PM2 (Recommended for Production)**
+---
+
+## Production Deployment
+
+### Using PM2 (Recommended)
+
+#### Install PM2
 
 ```bash
-# Install PM2 globally
 npm install -g pm2
+```
 
-# Create PM2 ecosystem file
+#### Create Ecosystem File
+
+```bash
 cat > ecosystem.config.js <<'EOF'
 module.exports = {
   apps: [{
@@ -202,160 +160,227 @@ module.exports = {
   }]
 };
 EOF
+```
 
-# Start with PM2
+#### PM2 Commands
+
+```bash
+# Start application
 pm2 start ecosystem.config.js
 
-# Save PM2 configuration
+# Save configuration
 pm2 save
 
-# Enable PM2 startup
+# Enable startup script
 pm2 startup
 
 # View logs
 pm2 logs liora
 
-# Monitor
+# Monitor resources
 pm2 monit
 
-# Other PM2 commands
-pm2 status           # Check status
-pm2 restart liora    # Restart bot
-pm2 stop liora       # Stop bot
-pm2 delete liora     # Remove from PM2
-```
-
-<div align="center">
-
----
-
-### 🎮 PM2 Management Commands
-
-<table>
-<tr>
-<td width="50%">
-
-**Basic Commands**
-
-```bash
-pm2 start ecosystem.config.js
-pm2 stop liora
+# Restart application
 pm2 restart liora
+
+# Stop application
+pm2 stop liora
+
+# Remove from PM2
 pm2 delete liora
-pm2 logs liora
 ```
 
-</td>
-<td width="50%">
+### Using Systemd (Automated)
 
-**Monitoring**
+The automated installer creates a systemd service. Manual service file example:
 
-```bash
-pm2 status
-pm2 monit
-pm2 describe liora
-pm2 logs liora --lines 100
-pm2 flush
+```ini
+[Unit]
+Description=Liora WhatsApp Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=liora
+WorkingDirectory=/opt/liora
+ExecStart=/usr/local/bin/bun run --smol src/main.js
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
 ```
-
-</td>
-</tr>
-</table>
 
 ---
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Backhand%20Index%20Pointing%20Down.png" width="40" />
+## License and Usage Rights
 
-**Minimum Requirements**
+This project is licensed under the **Apache License 2.0**.
 
-<table>
-<tr>
-<td width="50%">
+You are free to:
+- Use this software for any purpose, including commercial use
+- Modify the source code
+- Distribute original or modified versions
+- Sublicense your modifications
+- Sell services or products based on this software
 
-**System**
+### Attribution and License Requirements
 
-- **OS**: Linux (Ubuntu, Debian)
-- **Architecture**: x86_64
-- **Bun**: v1.3.x
+> [!IMPORTANT]
+> When redistributing this software or derivative works, you must:
+> - Retain original copyright notices
+> - Include a copy of the Apache License 2.0
+> - Preserve attribution to the original author: **Naruya Izumi**
 
-</td>
-<td width="50%">
+Maintaining a reference to the original repository is strongly recommended to ensure transparency and proper attribution.
 
-**Hardware**
+### License Violations
 
-- **CPU**: 2 cores minimum
-- **RAM**: 4GB minimum
-- **Storage**: 10GB SSD recommended
-- **Network**: Stable internet connection
+> [!CAUTION]
+> The following actions constitute violations of the Apache License 2.0:
+> - Removing or altering copyright or license notices
+> - Claiming original authorship of this project
+> - Distributing derivative works without proper attribution
+> - Initiating patent litigation against the Work or its Contributors
 
-</td>
-</tr>
-</table>
+Violation of the license may result in termination of usage rights and potential legal consequences under applicable intellectual property laws.
 
-</div>
+### Commercial Use
 
-<div align="center">
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
-</div>
+Commercial use is permitted, including:
+- Offering the software as a service (SaaS)
+- Integrating it into commercial products
+- Providing paid support, consulting, or customization
 
-## 📊 Project Statistics
+**Commercial distributors must:**
+- Retain all required notices
+- Include the Apache License 2.0
+- Clearly indicate any modifications made
 
-<div align="center">
+---
 
-**📈 Project Activity Insights**
-Get a visual overview of recent contributions, issues, and PRs.
+## Security
 
-![Alt](https://repobeats.axiom.co/api/embed/80e8d22ce1b99e5cdc62a986f74bbac8f9e2ed5b.svg "Repobeats analytics image")
+### Reporting Vulnerabilities
 
-**🌟 Star Growth**
-Track how Liora's popularity has evolved over time.
+> [!WARNING]
+> **DO NOT** report security vulnerabilities through public GitHub issues.
 
-<a href="https://star-history.com/#naruyaizumi/liora&Date">
-  <img src="https://api.star-history.com/svg?repos=naruyaizumi/liora&type=Date&theme=dark" width="100%" alt="Star History Chart"/>
-</a>
+**Responsible Disclosure:**
+- Email: liora.bot.official@gmail.com
+- Subject: "Security Vulnerability Report - Liora"
+- Include: Detailed description, reproduction steps, impact assessment
 
-</div>
+**Response Timeline:**
+- Initial response: 24-48 hours
+- Status updates: Weekly during investigation
+- Resolution: Based on severity (see [SECURITY.md](.github/SECURITY.md))
 
-<div align="center">
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
-</div>
+### Security Features
 
-<div align="center">
+- **Input Validation**: Comprehensive sanitization for all user inputs
+- **Resource Limits**: Memory and CPU constraints to prevent abuse
+- **Sandboxed Execution**: Isolated plugin environment
+- **Dependency Scanning**: Automated security audits
+- **Type Safety**: Strict typing throughout codebase
 
-**✨ Sponsorship & Support**
+---
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Glowing%20Star.png" width="60" />
+## Contributing
 
-If Liora makes your life easier and you'd like to support its continued development, consider:
+We welcome contributions! Please see our [Contributing Guidelines](.github/CONTRIBUTING.md) for details.
 
-<table>
-<tr>
-<td align="center" width="33%">
+### Quick Contribution Guide
 
-**⭐ Give a Star**<br>
-The simplest way to show support
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'feat: add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open Pull Request
 
-</td>
-<td align="center" width="33%">
+### Development Standards
 
-**💬 Share Feedback**<br>
-Report issues or suggest features
+- Follow existing code style
+- Write meaningful commit messages (Conventional Commits)
+- Add tests for new features
+- Update documentation as needed
+- Ensure all tests pass before submitting
 
-</td>
-<td align="center" width="33%">
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for detailed guidelines.
 
-**🍴 Fork & Contribute**<br>
-Help improve Liora for everyone
+---
 
-</td>
-</tr>
-</table>
+## Support and Community
 
-**🏆 Made with 💖 by [Naruya Izumi](https://github.com/naruyaizumi)**
+### Get Help
 
-**Copyright © 2024 Naruya Izumi**<br>
-Maintained by the Liora community
+- **GitHub Issues**: Report bugs and request features
+- **Email**: liora.bot.official@gmail.com
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,14,18,20,24&height=100&section=footer" width="100%" />
+### Stay Updated
 
-</div>
+- Watch this repository for updates
+- Star the project if you find it useful
+- Follow [@naruyaizumi](https://github.com/naruyaizumi) on GitHub
+
+---
+
+## Project Statistics
+
+### Repository Analytics
+
+![Repobeats Analytics](https://repobeats.axiom.co/api/embed/80e8d22ce1b99e5cdc62a986f74bbac8f9e2ed5b.svg)
+
+### Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=naruyaizumi/liora&type=Date)](https://star-history.com/#naruyaizumi/liora&Date)
+
+---
+
+## Acknowledgments
+
+### Contributors
+
+Thank you to all contributors who have helped improve Liora. See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full list.
+
+### Open Source
+
+This project builds upon excellent open source projects:
+- [Baileys](https://github.com/WhiskeySockets/Baileys) - WhatsApp Web API
+- [Bun](https://bun.sh) - Fast JavaScript runtime
+
+---
+
+## Legal
+
+### Copyright
+
+Copyright © 2024 Naruya Izumi
+
+### License
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+### Trademark Notice
+
+"Liora" and associated logos are trademarks of Naruya Izumi. Use of these trademarks requires prior written permission.
+
+---
+
+**Made with dedication by [Naruya Izumi](https://github.com/naruyaizumi)**
+
+**Repository**: https://github.com/naruyaizumi/liora  
+**License**: Apache 2.0  
+**Maintained by**: Liora Community

@@ -1,94 +1,267 @@
 # Code of Conduct
 
-## Our Pledge
+## Our Commitment
 
-We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, caste, color, religion, or sexual identity and orientation.
+We are committed to providing a welcoming and inclusive environment for all contributors, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
-We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
+This Code of Conduct outlines our expectations for participant behavior and the consequences for unacceptable behavior.
+
+---
 
 ## Our Standards
 
-Examples of behavior that contributes to a positive environment for our community include:
+### Positive Behavior
 
-- Demonstrating empathy and kindness toward other people
-- Being respectful of differing opinions, viewpoints, and experiences
-- Giving and gracefully accepting constructive feedback
-- Accepting responsibility and apologizing to those affected by our mistakes, and learning from the experience
-- Focusing on what is best not just for us as individuals, but for the overall community
-- Using welcoming and inclusive language
-- Being respectful of differing viewpoints and experiences
-- Showing patience and understanding with newcomers
+We encourage behavior that contributes to a positive environment:
 
-Examples of unacceptable behavior include:
+**Respectful Communication**
+- Use welcoming and inclusive language
+- Be respectful of differing viewpoints and experiences
+- Accept constructive criticism gracefully
+- Show empathy toward other community members
 
-- The use of sexualized language or imagery, and sexual attention or advances of any kind
-- Trolling, insulting or derogatory comments, and personal or political attacks
+**Collaborative Spirit**
+- Focus on what is best for the community
+- Support and help newcomers
+- Share knowledge and expertise
+- Acknowledge contributions of others
+
+**Professional Conduct**
+- Maintain professionalism in all interactions
+- Exercise consideration and respect in speech and actions
+- Attempt collaboration before conflict
+- Take responsibility for mistakes
+
+### Unacceptable Behavior
+
+The following behaviors are considered harassment and are unacceptable:
+
+**Harassment and Discrimination**
+- Discriminatory language or actions
+- Personal or political attacks
+- Trolling or insulting comments
 - Public or private harassment
-- Publishing others' private information, such as a physical or email address, without their explicit permission
-- Spamming issues, pull requests, or discussions with irrelevant content
-- Other conduct which could reasonably be considered inappropriate in a professional setting
+- Sexual language or imagery
+
+**Disruptive Behavior**
+- Sustained disruption of discussions
+- Spam or off-topic content
+- Deliberate intimidation or stalking
+- Unwelcome sexual attention or advances
+
+**Privacy Violations**
+- Publishing others' private information without permission
+- Sharing confidential project information
+- Unauthorized use of personal data
+
+**Misuse of Platform**
+- Creating multiple accounts to evade bans
+- Impersonating others
+- Manipulating voting or engagement metrics
+- Violating GitHub Terms of Service
+
+---
 
 ## Enforcement Responsibilities
 
-Community leaders are responsible for clarifying and enforcing our standards of acceptable behavior and will take appropriate and fair corrective action in response to any behavior that they deem inappropriate, threatening, offensive, or harmful.
+Project maintainers are responsible for clarifying and enforcing standards of acceptable behavior. They will take appropriate and fair corrective action in response to any behavior deemed inappropriate, threatening, offensive, or harmful.
 
-Community leaders have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, and will communicate reasons for moderation decisions when appropriate.
+Maintainers have the right and responsibility to remove, edit, or reject:
+- Comments
+- Commits
+- Code
+- Issues
+- Pull requests
+- Other contributions
+
+that do not align with this Code of Conduct.
+
+---
 
 ## Scope
 
-This Code of Conduct applies within all community spaces, and also applies when an individual is officially representing the community in public spaces. Examples of representing our community include using an official e-mail address, posting via an official social media account, or acting as an appointed representative at an online or offline event.
+This Code of Conduct applies in all project spaces, including:
 
-## Enforcement
+**Project Spaces**
+- GitHub repository (issues, PRs)
+- Project documentation
+- Code reviews and commits
+- Official communication channels
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement at liora.bot.official@gmail.com. All complaints will be reviewed and investigated promptly and fairly.
+**Public Representation**
+- Official social media accounts
+- Online or offline events
+- Email communications
+- Any public forum representing the project
 
-All community leaders are obligated to respect the privacy and security of the reporter of any incident.
+---
+
+## Reporting Violations
+
+### How to Report
+
+If you experience or witness unacceptable behavior:
+
+**Primary Contact**  
+Email: liora.bot.official@gmail.com  
+Subject: "Code of Conduct Violation Report"
+
+**What to Include**
+- Your contact information
+- Names of individuals involved (if known)
+- Description of the incident
+- Context and supporting evidence (links, screenshots)
+- Any other relevant information
+
+### Confidentiality
+
+All reports will be handled with discretion and confidentiality. We will protect the identity of reporters unless required by law or with explicit permission.
+
+### Response Timeline
+
+- **Acknowledgment**: Within 24-48 hours
+- **Initial Assessment**: Within 3-5 business days
+- **Resolution**: Timeframe depends on complexity
+- **Follow-up**: After resolution is implemented
+
+---
 
 ## Enforcement Guidelines
 
-Community leaders will follow these Community Impact Guidelines in determining the consequences for any action they deem in violation of this Code of Conduct:
+Project maintainers will follow these guidelines when determining consequences:
 
-### 1. Correction
+### Level 1: Correction
 
-**Community Impact**: Use of inappropriate language or other behavior deemed unprofessional or unwelcome in the community.
+**Community Impact**  
+Minor violation such as inappropriate language or unprofessional behavior.
 
-**Consequence**: A private, written warning from community leaders, providing clarity around the nature of the violation and an explanation of why the behavior was inappropriate. A public apology may be requested.
+**Consequence**  
+- Private written warning from maintainers
+- Explanation of violation
+- Request for public or private apology
+- Guidance on expected behavior
 
-### 2. Warning
+**Example**: Using insensitive language unintentionally
 
-**Community Impact**: A violation through a single incident or series of actions.
+### Level 2: Warning
 
-**Consequence**: A warning with consequences for continued behavior. No interaction with the people involved, including unsolicited interaction with those enforcing the Code of Conduct, for a specified period of time. This includes avoiding interactions in community spaces as well as external channels like social media. Violating these terms may lead to a temporary or permanent ban.
+**Community Impact**  
+Violation through single incident or series of actions.
 
-### 3. Temporary Ban
+**Consequence**  
+- Formal warning with specified consequences
+- Temporary restriction from community interaction
+- No contact with involved parties for specified period
+- Violation of terms may result in temporary ban
 
-**Community Impact**: A serious violation of community standards, including sustained inappropriate behavior.
+**Example**: Repeated unprofessional comments or minor harassment
 
-**Consequence**: A temporary ban from any sort of interaction or public communication with the community for a specified period of time. No public or private interaction with the people involved, including unsolicited interaction with those enforcing the Code of Conduct, is allowed during this period. Violating these terms may lead to a permanent ban.
+### Level 3: Temporary Ban
 
-### 4. Permanent Ban
+**Community Impact**  
+Serious violation of community standards, including sustained inappropriate behavior.
 
-**Community Impact**: Demonstrating a pattern of violation of community standards, including sustained inappropriate behavior, harassment of an individual, or aggression toward or disparagement of classes of individuals.
+**Consequence**  
+- Temporary ban from all project interaction (7-30 days)
+- No public or private communication allowed
+- Violation of ban may result in permanent ban
+- Review process before reinstatement
 
-**Consequence**: A permanent ban from any sort of public interaction within the community.
+**Example**: Pattern of harassment or sustained trolling
 
-## Attribution
+### Level 4: Permanent Ban
 
-This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 2.1, available at [https://www.contributor-covenant.org/version/2/1/code_of_conduct.html][v2.1].
+**Community Impact**  
+Demonstrating pattern of violations, harassment, or aggression toward individuals or groups.
 
-Community Impact Guidelines were inspired by [Mozilla's code of conduct enforcement ladder][Mozilla CoC].
+**Consequence**  
+- Permanent ban from all project spaces
+- Prohibition from representing the project
+- Report to relevant platforms (GitHub, etc.)
+- Legal action if applicable
 
-For answers to common questions about this code of conduct, see the FAQ at [https://www.contributor-covenant.org/faq][FAQ]. Translations are available at [https://www.contributor-covenant.org/translations][translations].
+**Example**: Severe harassment, threats, doxxing, or repeated violations after warnings
 
-[homepage]: https://www.contributor-covenant.org
-[v2.1]: https://www.contributor-covenant.org/version/2/1/code_of_conduct.html
-[Mozilla CoC]: https://github.com/mozilla/diversity
-[FAQ]: https://www.contributor-covenant.org/faq
-[translations]: https://www.contributor-covenant.org/translations
+---
 
-## Contact
+## Appeals Process
 
-If you have questions or concerns, please contact:
+### How to Appeal
 
-- **GitHub**: [@naruyaizumi](https://github.com/naruyaizumi)
-- **Issues**: [GitHub Issues](https://github.com/naruyaizumi/liora/issues)
+If you believe an enforcement action was incorrect:
+
+1. **Email appeal** to liora.bot.official@gmail.com
+2. **Subject**: "Code of Conduct Enforcement Appeal"
+3. **Include**: Original incident details and reason for appeal
+4. **Provide**: Any additional context or evidence
+
+### Appeal Review
+
+- Appeals reviewed by different maintainer than original enforcer
+- Decision made within 7 business days
+- Decision is final unless new evidence emerges
+
+---
+
+## Attribution and Adaptation
+
+This Code of Conduct is adapted from:
+
+- [GitHub Community Code of Conduct](https://docs.github.com/en/site-policy/github-terms/github-community-code-of-conduct)
+- [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct/)
+- [Mozilla Community Participation Guidelines](https://www.mozilla.org/en-US/about/governance/policies/participation/)
+
+---
+
+## Community Guidelines
+
+### Best Practices
+
+**For Contributors**
+- Read documentation before asking questions
+- Search existing issues before creating new ones
+- Provide complete information in bug reports
+- Be patient when waiting for responses
+- Thank maintainers and contributors
+
+**For Maintainers**
+- Respond to issues and PRs promptly
+- Provide clear feedback and guidance
+- Be welcoming to new contributors
+- Recognize and appreciate contributions
+- Lead by example
+
+### Communication Standards
+
+**Issue and PR Discussions**
+- Stay on topic
+- Use clear, descriptive titles
+- Provide context and examples
+- Be constructive in code reviews
+- Avoid bikeshedding
+
+---
+
+## Changes to Code of Conduct
+
+This Code of Conduct may be updated periodically. We will:
+- Announce significant changes via GitHub
+- Update the "Last Modified" date
+- Maintain version history in git
+
+Changes take effect immediately upon posting.
+
+---
+
+## Contact Information
+
+**Project Maintainer**: Naruya Izumi  
+**GitHub**: [@naruyaizumi](https://github.com/naruyaizumi)  
+**Email**: liora.bot.official@gmail.com  
+**Repository**: https://github.com/naruyaizumi/liora
+
+---
+
+## Acknowledgment
+
+By participating in this project, you agree to abide by this Code of Conduct. We appreciate your cooperation in making this a welcoming and productive community.
