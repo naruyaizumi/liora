@@ -46,7 +46,7 @@ async function safeExec(command, fallback = "") {
   try {
     const result = await $`sh -c ${command}`.text();
     return result;
-  } catch (e) {
+  } catch {
     return fallback;
   }
 }

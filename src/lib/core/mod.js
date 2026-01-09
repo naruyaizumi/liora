@@ -3,7 +3,6 @@ import {
   prepareWAMessageMedia,
   generateWAMessageFromContent,
   generateWAMessage,
-  generateWAMessageContent,
 } from "baileys";
 
 export class mods {

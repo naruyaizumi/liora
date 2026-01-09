@@ -89,7 +89,7 @@ const getGroupMetadata = async (conn, chat) => {
     }
 
     return metadata;
-  } catch (e) {
+  } catch {
     return await safe(() => conn.groupMetadata(chat), {});
   }
 };

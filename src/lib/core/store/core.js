@@ -124,7 +124,7 @@ export class MemoryStore {
     }
   }
 
-  async _executeEvent(type, data) {
+  async _executeEvent() {
     //
   }
 
@@ -199,7 +199,9 @@ export class MemoryStore {
       setImmediate(() => {
         try {
           this.stmtTouch.run(key);
-        } catch {}
+        } catch {
+          //
+        }
       });
       
       return decode(row.v);

@@ -1,6 +1,6 @@
 import path from "node:path"
 
-let handler = async (m, { args, usedPrefix, command, conn }) => {
+let handler = async (m, { args, usedPrefix, command }) => {
   if (!args.length) {
     return m.reply(`Need file path\nEx: ${usedPrefix + command} plugins/owner/owner-sf`)
   }

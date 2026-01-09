@@ -1,4 +1,4 @@
-let handler = async (m, { conn }) => {
+let handler = async (m) => {
   await global.reloadAllPlugins();
   await global.reloadHandler();
   m.reply("Reloaded");
