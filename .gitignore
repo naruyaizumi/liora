@@ -3,3 +3,4 @@ node_modules/
 src/database/*.db
 *.db-wal
 *.db-shm
+service

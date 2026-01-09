@@ -1,45 +1,34 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text || typeof text !== "string") {
-    return m.reply(
-      `Please enter a query for Felo AI.\n› Example: ${usedPrefix}${command} what date is it today?`,
-    );
-  }
+  if (!text) return m.reply(`Ask Felo AI\nEx: ${usedPrefix + command} what's today date`);
 
   try {
     await global.loading(m, conn);
 
-    const apiUrl = `https://api.nekolabs.web.id/text-generation/feloai?text=${encodeURIComponent(text)}`;
-    const response = await fetch(apiUrl);
+    const api = `https://api.nekolabs.web.id/text-generation/feloai?text=${encodeURIComponent(text)}`;
+    const res = await fetch(api);
+    if (!res.ok) return m.reply("API error");
 
-    if (!response.ok) {
-      return m.reply("Failed to connect to Felo AI. Please try again later.");
-    }
-
-    const json = await response.json();
+    const json = await res.json();
     const result = json?.result;
-    const replyText = result?.text;
+    const reply = result?.text;
 
-    if (!replyText) {
-      return m.reply("No response received from Felo AI.");
-    }
+    if (!reply) return m.reply("No response");
 
-    let sources = "";
+    let src = "";
     if (Array.isArray(result?.sources) && result.sources.length > 0) {
-      sources =
-        "\n\n*Sources:*\n" +
+      src = "\n\n*Sources:*\n" +
         result.sources
           .slice(0, 10)
-          .map((src) => `${src.index}. ${src.title || "Untitled"}\n${src.url}`)
+          .map(s => `${s.index}. ${s.title || "Untitled"}\n${s.url}`)
           .join("\n\n");
     }
 
     await conn.sendMessage(
       m.chat,
-      { text: `Felo AI:\n${replyText.trim()}${sources}` },
+      { text: `Felo AI:\n${reply.trim()}${src}` },
       { quoted: m },
     );
   } catch (e) {
-    global.logger.error(e);
     m.reply(`Error: ${e.message}`);
   } finally {
     await global.loading(m, conn, true);

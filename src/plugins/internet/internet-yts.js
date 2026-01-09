@@ -1,44 +1,42 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
-    return m.reply(
-      `Usage: ${usedPrefix + command} <query>\n› Example: ${usedPrefix + command} neck deep`,
-    );
+    return m.reply(`Need query\nEx: ${usedPrefix + command} neck deep`)
   }
 
   try {
-    await global.loading(m, conn);
+    await global.loading(m, conn)
 
-    const url = `https://api.nekolabs.web.id/discovery/youtube/search?q=${encodeURIComponent(text)}`;
-    const response = await fetch(url);
+    const url = `https://api.nekolabs.web.id/discovery/youtube/search?q=${encodeURIComponent(text)}`
+    const res = await fetch(url)
 
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`);
+    if (!res.ok) {
+      throw new Error(`API failed: ${res.statusText}`)
     }
 
-    const data = await response.json();
+    const data = await res.json()
 
     if (!data.success || !Array.isArray(data.result)) {
-      throw new Error("Invalid API response");
+      throw new Error("Invalid API response")
     }
 
-    const videos = data.result;
+    const vids = data.result
 
-    if (videos.length === 0) {
-      return m.reply(`No results found for "${text}".`);
+    if (vids.length === 0) {
+      return m.reply(`No results for "${text}"`)
     }
 
-    const rows = videos.map((video, index) => ({
-      header: `Result ${index + 1}`,
-      title: video.title,
-      description: `${video.channel} • ${video.duration || "-"}`,
-      id: `.play ${video.title}`,
-    }));
+    const rows = vids.map((v, i) => ({
+      header: `Result ${i + 1}`,
+      title: v.title,
+      description: `${v.channel} • ${v.duration || "-"}`,
+      id: `.play ${v.title}`,
+    }))
 
     await conn.sendButton(m.chat, {
-      image: videos[0].cover,
-      caption: "*Select a video from the results above*",
-      title: "YouTube Search Results",
-      footer: `Found ${videos.length} results for "${text}"`,
+      image: vids[0].cover,
+      caption: "*Select video above*",
+      title: "YouTube Search",
+      footer: `Found ${vids.length} results`,
       interactiveButtons: [
         {
           name: "single_select",
@@ -46,7 +44,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             title: "Select Video",
             sections: [
               {
-                title: `All Results (${videos.length})`,
+                title: `Results (${vids.length})`,
                 rows: rows,
               },
             ],
@@ -54,17 +52,16 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         },
       ],
       hasMediaAttachment: true,
-    });
+    })
   } catch (e) {
-    global.logger.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["yts"];
-handler.tags = ["internet"];
-handler.command = /^(yts)$/i;
+handler.help = ["yts"]
+handler.tags = ["internet"]
+handler.command = /^(yts)$/i
 
-export default handler;
+export default handler

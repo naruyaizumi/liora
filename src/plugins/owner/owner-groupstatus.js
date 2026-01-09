@@ -1,72 +1,114 @@
 let handler = async (m, { conn, usedPrefix, command }) => {
-  const quoted = m.quoted ? m.quoted : m;
-  const mime = (quoted.msg || quoted).mimetype || "";
+  const q = m.quoted ? m.quoted : m
+  const type = q.mtype || ""
+  const mime = (q.msg || q).mimetype || ""
 
-  const textToParse = m.text || "";
-  const caption = textToParse
+  const txt = m.text || ""
+  const cap = txt
     .replace(new RegExp(`^[.!#/](${command})\\s*`, "i"), "")
-    .trim();
+    .trim()
 
   try {
-    if (!mime && !caption) {
-      return m.reply(
-        `Reply to media or provide text.\nExamples: ${usedPrefix + command} Hello everyone! or ${usedPrefix + command} reply to image/video/audio`,
-      );
+    if (!type && !cap) {
+      return m.reply(`Reply to media or provide text\nEx: ${usedPrefix + command} Hello or ${usedPrefix + command} reply`)
     }
 
-    await global.loading(m, conn);
+    await global.loading(m, conn)
 
-    let payload = {};
+    let c = {}
 
-    if (/image/.test(mime)) {
-      const buffer = await quoted.download();
-      if (!buffer) return m.reply("Failed to download image.");
+    if (type === "imageMessage" || /image/.test(mime)) {
+      const d = await q.download()
+      if (!d) throw new Error("Failed to download image")
 
-      payload = {
-        image: buffer,
-        caption: caption || "",
-      };
-    } else if (/video/.test(mime)) {
-      const buffer = await quoted.download();
-      if (!buffer) return m.reply("Failed to download video.");
+      const buf = Buffer.from(d.buffer, d.byteOffset, d.byteLength)
 
-      payload = {
-        video: buffer,
-        caption: caption || "",
-      };
-    } else if (/audio/.test(mime)) {
-      const buffer = await quoted.download();
-      if (!buffer) return m.reply("Failed to download audio.");
+      c = {
+        image: buf,
+        caption: cap || "",
+      }
+    } else if (type === "videoMessage" || /video/.test(mime)) {
+      const d = await q.download()
+      if (!d) throw new Error("Failed to download video")
 
-      payload = {
-        audio: buffer,
+      const buf = Buffer.from(d.buffer, d.byteOffset, d.byteLength)
+
+      c = {
+        video: buf,
+        caption: cap || "",
+      }
+    } else if (
+      type === "audioMessage" ||
+      type === "ptt" ||
+      /audio/.test(mime)
+    ) {
+      const d = await q.download()
+      if (!d) throw new Error("Failed to download audio")
+
+      const buf = Buffer.from(d.buffer, d.byteOffset, d.byteLength)
+
+      c = {
+        audio: buf,
         mimetype: "audio/mp4",
-      };
-    } else if (caption) {
-      payload = {
-        text: caption,
-      };
+      }
+    } else if (cap) {
+      c = {
+        text: cap,
+      }
     } else {
-      return m.reply(
-        `Reply to media or provide text.\nExamples: ${usedPrefix + command} Hello everyone! or ${usedPrefix + command} reply to image/video/audio`,
-      );
+      throw new Error("Reply to media or provide text")
     }
 
-    await conn.sendGroupStatus(m.chat, payload);
+    const { generateWAMessageContent, generateWAMessageFromContent } =
+      await import("baileys")
 
-    m.reply("Group status sent successfully.");
+    const { backgroundColor, ...cNoBg } = c
+
+    const inside = await generateWAMessageContent(cNoBg, {
+      upload: conn.waUploadToServer,
+      backgroundColor: backgroundColor || undefined,
+    })
+
+    const secret = new Uint8Array(32)
+    crypto.getRandomValues(secret)
+
+    const msg = generateWAMessageFromContent(
+      m.chat,
+      {
+        messageContextInfo: {
+          messageSecret: secret,
+        },
+        groupStatusMessageV2: {
+          message: {
+            ...inside,
+            messageContextInfo: {
+              messageSecret: secret,
+            },
+          },
+        },
+      },
+      {
+        userJid: conn.user.id,
+        quoted: m,
+      },
+    )
+
+    await conn.relayMessage(m.chat, msg.message, {
+      messageId: msg.key.id,
+    })
+
+    m.reply("Group status sent")
   } catch (e) {
-    global.logger?.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading?.(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["groupstatus"];
-handler.tags = ["owner"];
-handler.command = /^(statusgc|swgc)$/i;
-handler.owner = true;
-handler.group = true;
+handler.help = ["groupstatus"]
+handler.tags = ["owner"]
+handler.command = /^(statusgc|swgc)$/i
+handler.owner = true
+handler.group = true
 
-export default handler;
+export default handler

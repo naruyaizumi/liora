@@ -5,7 +5,7 @@
 
 ![Liora Banner](https://files.catbox.moe/3xv7p0.png)
 
-**Built on Baileys • Powered by Node.js & Bun**
+**Built on Baileys • Powered by Bun**
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
@@ -17,9 +17,36 @@
 
 **Liora** is not just another WhatsApp bot—it's a **production-ready framework** designed for developers who demand **performance**, **reliability**, and **scalability**. Built with modern technologies and battle-tested architecture patterns.
 
-**🚀 Pure JavaScript** • **⚡ PostgreSQL Sessions** • **💾 Redis Caching** • **📦 SQLite Local DB**
-
 </div>
+
+<table>
+<tr>
+<td width="33%" align="center">
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Gear.png" width="80" />
+
+**⚡ Blazing Fast**
+
+Native Bun runtime with Rust supervisor delivers unmatched performance. Zero-downtime hot-reload keeps your bot running 24/7.
+
+</td>
+<td width="33%" align="center">
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Locked.png" width="80" />
+
+**🔒 Battle-Tested**
+
+Enterprise-grade security with Sqlite persistence, and comprehensive input sanitization.
+
+</td>
+<td width="33%" align="center">
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Hammer%20and%20Wrench.png" width="80" />
+
+**🧩 Developer First**
+
+Hot-reload plugins, ESM modules, type-safe patterns, and clean architecture make development a breeze.
+
+</td>
+</tr>
+</table>
 
 <div align="center">
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
@@ -74,65 +101,6 @@ Apache 2.0 allows free use with attribution. **Do not** remove credits or rebran
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 </div>
 
-## 🏗️ Architecture
-
-<div align="center">
-
-<table>
-<tr>
-<td width="25%" align="center">
-
-**📝 Pure JavaScript**
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Laptop.png" width="60" />
-
-100% JavaScript codebase
-No native bindings
-Easy to maintain & debug
-
-</td>
-<td width="25%" align="center">
-
-**🔐 PostgreSQL**
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Locked.png" width="60" />
-
-Session & Auth storage
-Multi-device support
-ACID compliance
-
-</td>
-<td width="25%" align="center">
-
-**⚡ Redis**
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Fire.png" width="60" />
-
-Chat data caching
-Real-time messaging
-High-speed performance
-
-</td>
-<td width="25%" align="center">
-
-**💾 SQLite**
-
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/File%20Folder.png" width="60" />
-
-Local user database
-Zero-config setup
-Embedded storage
-
-</td>
-</tr>
-</table>
-
-</div>
-
-<div align="center">
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
-</div>
-
 ## 🚀 Quick Start
 
 <div align="center">
@@ -167,25 +135,7 @@ bot status
 
 </div>
 
-#### Install System Dependencies
-
-```bash
-# Update system
-sudo apt-get update
-
-# Install required packages
-sudo apt-get install -y \
-    ffmpeg \
-    build-essential \
-    python3 \
-    git \
-    curl \
-    wget \
-    postgresql \
-    redis-server
-```
-
-#### Install Bun (Required)
+#### Install Bun
 
 ```bash
 # Install Bun
@@ -199,53 +149,6 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 bun --version
 ```
 
-#### Install Node.js via NVM
-
-```bash
-# Install NVM
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-
-# Load NVM
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-# Install Node.js v24
-nvm install 24
-nvm use 24
-nvm alias default 24
-
-# Verify installation
-node -v
-npm -v
-```
-
-#### Setup PostgreSQL
-
-```bash
-# Start PostgreSQL
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
-
-# Create database and user
-sudo -u postgres psql <<EOF
-CREATE USER liora WITH PASSWORD 'your_password_here';
-CREATE DATABASE liora OWNER liora;
-GRANT ALL PRIVILEGES ON DATABASE liora TO liora;
-EOF
-```
-
-#### Setup Redis
-
-```bash
-# Start Redis
-sudo systemctl start redis-server
-sudo systemctl enable redis-server
-
-# Test Redis
-redis-cli ping
-# Should return: PONG
-```
-
 #### Clone & Configure
 
 ```bash
@@ -253,31 +156,8 @@ redis-cli ping
 git clone https://github.com/naruyaizumi/liora.git
 cd liora
 
-# Create .env file
-cat > .env <<EOF
-# Bot Configuration
-OWNERS=[]
-PAIRING_NUMBER=6281234567890
-PAIRING_CODE=CUMICUMI
-
-# Bot Metadata
-WATERMARK=Liora
-AUTHOR=Naruya Izumi
-THUMBNAIL_URL=https://qu.ax/DdwBH.jpg
-
-# Logger
-LOG_LEVEL=info
-LOG_PRETTY=true
-LOG_COLORIZE=true
-
-# Database (PostgreSQL)
-DATABASE_URL=postgresql://liora:your_password_here@localhost:5432/liora
-
-# Redis
-REDIS_URL=redis://localhost:6379
-EOF
-
 # Edit configuration
+cp .env.example .env
 nano .env
 ```
 
@@ -396,10 +276,7 @@ pm2 flush
 
 - **OS**: Linux (Ubuntu, Debian)
 - **Architecture**: x86_64
-- **Bun**: v1.3.x (required)
-- **Node.js**: v24.x
-- **PostgreSQL**: 16+
-- **Redis**: 7+
+- **Bun**: v1.3.x
 
 </td>
 <td width="50%">

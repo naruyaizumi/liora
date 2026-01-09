@@ -1,28 +1,28 @@
 let handler = async (m, { conn, text }) => {
   try {
-    await global.loading(m, conn);
+    await global.loading(m, conn)
 
-    const input =
+    const inp = 
       m.mentionedJid?.[0] ||
       m.quoted?.sender ||
-      (text && /^\d+$/.test(text) ? text + "@s.whatsapp.net" : null);
+      (text && /^\d+$/.test(text) ? text + "@s.whatsapp.net" : null)
 
-    if (!input) return m.reply("Enter a number, mention, or reply to a user.");
+    if (!inp) throw new Error("Enter number, mention, or reply")
 
-    let lid;
+    let lid
 
-    if (/@lid$/.test(input)) {
-      lid = input.replace(/@lid$/, "");
+    if (/@lid$/.test(inp)) {
+      lid = inp.replace(/@lid$/, "")
     } else {
-      const raw = await conn.signalRepository.lidMapping.getLIDForPN(input);
-      if (!raw) return m.reply("Cannot resolve LID for this user.");
-      lid = raw.replace(/@lid$/, "");
+      const r = await conn.signalRepository.lidMapping.getLIDForPN(inp)
+      if (!r) throw new Error("Cannot resolve LID")
+      lid = r.replace(/@lid$/, "")
     }
 
-    await conn.sendButton(m.chat, {
+    await conn.client(m.chat, {
       text: `Target LID: ${lid}`,
       title: "Result",
-      footer: "Use the button below to copy the LID",
+      footer: "Use button below to copy",
       interactiveButtons: [
         {
           name: "cta_copy",
@@ -33,17 +33,16 @@ let handler = async (m, { conn, text }) => {
         },
       ],
       hasMediaAttachment: false,
-    });
+    })
   } catch (e) {
-    global.logger.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["getlid"];
-handler.tags = ["tools"];
-handler.command = /^getlid$/i;
+handler.help = ["getlid"]
+handler.tags = ["tools"]
+handler.command = /^(getlid)$/i
 
-export default handler;
+export default handler

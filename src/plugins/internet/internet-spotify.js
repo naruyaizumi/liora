@@ -1,44 +1,42 @@
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
-    return m.reply(
-      `Usage: ${usedPrefix + command} <query>\n› Example: ${usedPrefix + command} for revenge`,
-    );
+    return m.reply(`Need query\nEx: ${usedPrefix + command} for revenge`)
   }
 
   try {
-    await global.loading(m, conn);
+    await global.loading(m, conn)
 
-    const url = `https://api.nekolabs.web.id/discovery/spotify/search?q=${encodeURIComponent(text)}`;
-    const response = await fetch(url);
+    const url = `https://api.nekolabs.web.id/discovery/spotify/search?q=${encodeURIComponent(text)}`
+    const res = await fetch(url)
 
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`);
+    if (!res.ok) {
+      throw new Error(`API failed: ${res.statusText}`)
     }
 
-    const data = await response.json();
+    const data = await res.json()
 
     if (!data.success || !Array.isArray(data.result)) {
-      throw new Error("Invalid API response");
+      throw new Error("Invalid API response")
     }
 
-    const tracks = data.result;
+    const tracks = data.result
 
     if (tracks.length === 0) {
-      return m.reply(`No results found for "${text}".`);
+      return m.reply(`No results for "${text}"`)
     }
 
-    const rows = tracks.map((track, index) => ({
-      header: `Track ${index + 1}`,
-      title: track.title,
-      description: `${track.artist} • ${track.duration || "-"}`,
-      id: `.spotify ${track.title}`,
-    }));
+    const rows = tracks.map((t, i) => ({
+      header: `Track ${i + 1}`,
+      title: t.title,
+      description: `${t.artist} • ${t.duration || "-"}`,
+      id: `.spotify ${t.title}`,
+    }))
 
     await conn.sendButton(m.chat, {
       image: tracks[0].cover,
-      caption: "*Select a track from the results above*",
-      title: "Spotify Search Results",
-      footer: `Found ${tracks.length} results for "${text}"`,
+      caption: "*Select track above*",
+      title: "Spotify Search",
+      footer: `Found ${tracks.length} results`,
       interactiveButtons: [
         {
           name: "single_select",
@@ -46,7 +44,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             title: "Select Track",
             sections: [
               {
-                title: `All Results (${tracks.length})`,
+                title: `Results (${tracks.length})`,
                 rows: rows,
               },
             ],
@@ -54,17 +52,16 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         },
       ],
       hasMediaAttachment: true,
-    });
+    })
   } catch (e) {
-    global.logger.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["spsearch"];
-handler.tags = ["internet"];
-handler.command = /^(spsearch)$/i;
+handler.help = ["spsearch"]
+handler.tags = ["internet"]
+handler.command = /^(spsearch)$/i
 
-export default handler;
+export default handler

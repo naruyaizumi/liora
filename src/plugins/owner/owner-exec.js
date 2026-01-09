@@ -1,4 +1,4 @@
-import { $ } from "bun";
+import { $ } from "bun"
 
 const blocked = [
   "rm -rf /",
@@ -16,104 +16,104 @@ const blocked = [
   "halt",
   "kill -9 1",
   ">:(){ :|: & };:",
-];
+]
 
 const handler = async (m, { conn, isOwner }) => {
-  if (!isOwner) return;
-  const fullText = m.text || "";
-  if (!fullText.startsWith("$ ")) return;
+  if (!isOwner) return
+  const txt = m.text || ""
+  if (!txt.startsWith("$ ")) return
 
-  let cmdText = fullText.slice(2).trim();
-  if (!cmdText) return;
+  let cmd = txt.slice(2).trim()
+  if (!cmd) return
 
   const flags = {
     cwd: null,
     env: {},
     quiet: true,
     timeout: null,
-  };
+  }
 
-  // $ --cwd=/tmp --env=KEY=VALUE --timeout=5000 command
-  const flagRegex = /^--(\w+)(?:=(.+?))?(?:\s+|$)/;
-  while (flagRegex.test(cmdText)) {
-    const match = cmdText.match(flagRegex);
-    const [fullMatch, flag, value] = match;
+  const re = /^--(\w+)(?:=(.+?))?(?:\s+|$)/
+  while (re.test(cmd)) {
+    const m = cmd.match(re)
+    const [all, f, v] = m
 
-    if (flag === "cwd") {
-      flags.cwd = value;
-    } else if (flag === "env") {
-      const [key, val] = value.split("=");
-      flags.env[key] = val;
-    } else if (flag === "timeout") {
-      flags.timeout = parseInt(value);
-    } else if (flag === "verbose") {
-      flags.quiet = false;
+    if (f === "cwd") {
+      flags.cwd = v
+    } else if (f === "env") {
+      const [k, val] = v.split("=")
+      flags.env[k] = val
+    } else if (f === "timeout") {
+      flags.timeout = parseInt(v)
+    } else if (f === "verbose") {
+      flags.quiet = false
     }
 
-    cmdText = cmdText.slice(fullMatch.length);
+    cmd = cmd.slice(all.length)
   }
 
-  if (blocked.some((cmd) => cmdText.startsWith(cmd))) {
+  if (blocked.some(b => cmd.startsWith(b))) {
     return conn.sendMessage(m.chat, {
-      text: ["Command blocked for security reasons.", `> ${cmdText}`].join(
-        "\n",
-      ),
-    });
+      text: ["Command blocked", `> ${cmd}`].join("\n"),
+    })
   }
 
-  let resultText;
+  let out
   try {
-    let command = $`bash -c ${cmdText}`;
+    let c = $`bash -c ${cmd}`
     if (flags.cwd) {
-      command = command.cwd(flags.cwd);
+      c = c.cwd(flags.cwd)
     }
     if (Object.keys(flags.env).length > 0) {
-      command = command.env({ ...process.env, ...flags.env });
+      c = c.env({ ...process.env, ...flags.env })
     }
     if (flags.quiet) {
-      command = command.quiet();
+      c = c.quiet()
     }
     if (flags.timeout) {
-      command = command.timeout(flags.timeout);
+      c = c.timeout(flags.timeout)
     }
-    const result = await command.nothrow();
-    const stdout = result.stdout?.toString() || "";
-    const stderr = result.stderr?.toString() || "";
-    const exitCode = result.exitCode;
-    const output = stdout || stderr || "(no output)";
-    const parts = [`${cmdText}`, "────────────────────────────"];
-
+    
+    const r = await c.nothrow()
+    const stdout = r.stdout?.toString() || ""
+    const stderr = r.stderr?.toString() || ""
+    const exit = r.exitCode
+    const output = stdout || stderr || "(no output)"
+    
+    const parts = [`${cmd}`, "─".repeat(30)]
+    
     if (output.trim()) {
-      parts.push(output.trim());
+      parts.push(output.trim())
     }
-    const footer = [];
-    if (exitCode !== 0) {
-      footer.push(`Exit code: ${exitCode}`);
+    
+    const foot = []
+    if (exit !== 0) {
+      foot.push(`Exit: ${exit}`)
     }
     if (flags.cwd) {
-      footer.push(`📁 ${flags.cwd}`);
+      foot.push(`📁 ${flags.cwd}`)
     }
 
-    if (footer.length > 0) {
-      parts.push("", footer.join(" • "));
+    if (foot.length > 0) {
+      parts.push("", foot.join(" • "))
     }
 
-    resultText = parts.join("\n");
-  } catch (err) {
-    resultText = [
-      `${cmdText}`,
-      "────────────────────────────",
-      `Error: ${err.message || String(err)}`,
+    out = parts.join("\n")
+  } catch (e) {
+    out = [
+      `${cmd}`,
+      "─".repeat(30),
+      `Error: ${e.message || String(e)}`,
       "",
-    ].join("\n");
+    ].join("\n")
   }
 
-  await conn.sendMessage(m.chat, { text: resultText });
-};
+  await conn.sendMessage(m.chat, { text: out })
+}
 
-handler.help = ["$"];
-handler.tags = ["owner"];
-handler.customPrefix = /^\$ /;
-handler.command = /(?:)/i;
+handler.help = ["$"]
+handler.tags = ["owner"]
+handler.customPrefix = /^\$ /
+handler.command = /(?:)/i
 
-export default handler;
+export default handler

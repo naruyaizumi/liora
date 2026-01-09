@@ -2,24 +2,23 @@ let handler = async (m, { conn }) => {
   try {
     await global.loading(m, conn);
 
-    let groupMeta;
+    let meta;
     try {
       const chatData = await conn.getChat(m.chat);
-      if (chatData?.metadata && chatData.metadata.participants?.length > 0) {
-        groupMeta = chatData.metadata;
+      if (chatData?.metadata?.participants?.length) {
+        meta = chatData.metadata;
       }
     } catch {
       //
     }
 
-    if (!groupMeta) {
+    if (!meta) {
       try {
-        groupMeta = await conn.groupMetadata(m.chat);
-
+        meta = await conn.groupMetadata(m.chat);
         try {
           const chatData = (await conn.getChat(m.chat)) || { id: m.chat };
-          chatData.metadata = groupMeta;
-          chatData.subject = groupMeta.subject;
+          chatData.metadata = meta;
+          chatData.subject = meta.subject;
           chatData.isChats = true;
           chatData.lastSync = Date.now();
           await conn.setChat(m.chat, chatData);
@@ -27,92 +26,75 @@ let handler = async (m, { conn }) => {
           //
         }
       } catch (e) {
-        return m.reply(
-          `Failed to get group metadata. Error: ${e.message || "Unknown error"}`,
-        );
+        return m.reply(`Failed: ${e.message || "Unknown"}`);
       }
     }
 
-    const participants = groupMeta.participants || [];
-    const groupAdmins = participants.filter((p) => p.admin);
-    const owner =
-      groupMeta.owner ||
-      groupAdmins.find((p) => p.admin === "superadmin")?.id ||
+    const members = meta.participants || [];
+    const admins = members.filter(p => p.admin);
+    const owner = meta.owner ||
+      admins.find(p => p.admin === "superadmin")?.id ||
       m.chat.split`-`[0] + "@s.whatsapp.net";
 
-    const listAdmin =
-      groupAdmins
-        .map((v, i) => `${i + 1}. @${v.id.split("@")[0]}`)
-        .join("\n") || "-";
+    const adminList = admins.map((v, i) => `${i + 1}. @${v.id.split("@")[0]}`).join("\n") || "-";
 
-    const ephemeralTime = (() => {
-      switch (groupMeta.ephemeralDuration) {
-        case 86400:
-          return "24 hours";
-        case 604800:
-          return "7 days";
-        case 2592000:
-          return "30 days";
-        case 7776000:
-          return "90 days";
-        default:
-          return "None";
-      }
-    })();
+    const ephemeralTime = {
+      86400: "24h",
+      604800: "7d",
+      2592000: "30d",
+      7776000: "90d"
+    }[meta.ephemeralDuration] || "None";
 
-    const creationDate = groupMeta.creation
-      ? new Date(groupMeta.creation * 1000).toLocaleString("en-US", {
+    const creationDate = meta.creation
+      ? new Date(meta.creation * 1000).toLocaleString("en-US", {
           timeZone: "UTC",
           dateStyle: "medium",
           timeStyle: "short",
         })
       : "(unknown)";
 
-    const desc = groupMeta.desc || "(none)";
+    const desc = meta.desc || "(none)";
     let pp = null;
     try {
       pp = await conn.profilePictureUrl(m.chat, "image");
-    } catch (e) {
-      global.logger?.warn(
-        `No profile picture for group ${m.chat}: ${e.message}`,
-      );
+    } catch {
+      //
     }
 
-    const mentions = [...new Set([...groupAdmins.map((v) => v.id), owner])];
+    const mentions = [...new Set([...admins.map(v => v.id), owner])];
 
-    const text = `
-『 Group Information 』
+    const txt = `
+Group Info
 
 ID: ${m.chat}
-Name: ${groupMeta.subject || "(unknown)"}
-Members: ${participants.length}
+Name: ${meta.subject || "(unknown)"}
+Members: ${members.length}
 Owner: @${owner.split("@")[0]}
 
-Administrators:
-${listAdmin}
+Admins:
+${adminList}
 
-Description:
+Desc:
 ${desc}
 
-Creation: ${creationDate}
-Ephemeral Timer: ${ephemeralTime}
-Announcement Only: ${groupMeta.announce ? "Yes" : "No"}
+Created: ${creationDate}
+Ephemeral: ${ephemeralTime}
+Announce: ${meta.announce ? "Yes" : "No"}
 `.trim();
 
     if (pp) {
       await conn.sendMessage(m.chat, {
         image: { url: pp },
-        caption: text,
-        mentions: mentions,
+        caption: txt,
+        mentions,
       });
     } else {
       await conn.sendMessage(m.chat, {
-        text: text,
-        mentions: mentions,
+        text: txt,
+        mentions,
       });
     }
   } catch (e) {
-    global.logger?.error(e);
     m.reply(`Error: ${e.message}`);
   } finally {
     await global.loading(m, conn, true);

@@ -1,15 +1,8 @@
 let handler = async (m, { conn, text }) => {
-  const group = text || m.chat;
-
-  try {
-    await conn.sendMessage(group, {
-      text: "This bot is leaving the group.",
-    });
-    await conn.groupLeave(group);
-  } catch (e) {
-    global.logger.error(e);
-    m.reply(`Error: ${e.message}`);
-  }
+  const gc = text || m.chat;
+  
+  await conn.sendMessage(gc, { text: "Leaving group" });
+  await conn.groupLeave(gc);
 };
 
 handler.help = ["leavegc"];

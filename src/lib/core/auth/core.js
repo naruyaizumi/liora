@@ -1,269 +1,480 @@
-import { SQL } from "bun";
-import { BufferJSON } from "baileys";
+/* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
+import { Database } from "bun:sqlite";
+import { Mutex } from "async-mutex";
+import { encode, decode } from "@msgpack/msgpack";
+import {
+    DEFAULT_DB,
+    validateKey,
+    validateValue,
+    initializeSignalHandlers,
+    registerSignalHandler,
+} from "./config.js";
 
-const stringify = (obj) => JSON.stringify(obj, BufferJSON.replacer);
-
-export const parse = (str) => {
-  if (!str) return null;
-  try {
-    return JSON.parse(str, BufferJSON.reviver);
-  } catch (e) {
-    global.logger?.error(e.message);
-    return null;
-  }
-};
-
-export const makeKey = (type, id) => `${type}-${id}`;
-
-export class DatabaseCore {
-  constructor(options = {}) {
-    this.instanceId = `DatabaseCore-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-    const connectionString =
-      Bun.env.DATABASE_URL ||
-      "postgres://postgres:postgres@localhost:5432/liora";
-
-    this.db = new SQL(connectionString, {
-      max: 30,
-      idleTimeout: 30000,
-      connectionTimeout: 3000,
-    });
-
-    this.initialized = false;
-    this.initPromise = this._initDatabase().catch((err) => {
-      global.logger?.error(
-        { error: err.message },
-        "Database initialization failed",
-      );
-      throw err;
-    });
-
-    this.disposed = false;
-    this.writeQueue = new Map();
-  }
-
-  async _initDatabase() {
-    try {
-      await this.db`
-        CREATE TABLE IF NOT EXISTS baileys_state (
-          key TEXT PRIMARY KEY,
-          value TEXT NOT NULL,
-          created_at TIMESTAMPTZ DEFAULT NOW(),
-          updated_at TIMESTAMPTZ DEFAULT NOW()
-        )
-      `;
-
-      await this.db`
-        CREATE INDEX IF NOT EXISTS idx_baileys_key_hash 
-        ON baileys_state USING hash(key)
-      `;
-
-      try {
-        await this.db`
-          CREATE OR REPLACE FUNCTION update_baileys_timestamp()
-          RETURNS TRIGGER AS $$
-          BEGIN
-            NEW.updated_at = NOW();
-            RETURN NEW;
-          END;
-          $$ LANGUAGE plpgsql
-        `;
-
-        await this
-          .db`DROP TRIGGER IF EXISTS baileys_updated_at ON baileys_state`;
-        await this.db`
-          CREATE TRIGGER baileys_updated_at
-          BEFORE UPDATE ON baileys_state
-          FOR EACH ROW
-          EXECUTE FUNCTION update_baileys_timestamp()
-        `;
-      } catch {
-        //
-      }
-
-      this.initialized = true;
-    } catch (e) {
-      global.logger?.fatal(
-        { error: e.message, stack: e.stack },
-        "Database initialization failed",
-      );
-      throw e;
+class WriteBuffer {
+    constructor() {
+        this.upserts = new Map();
+        this.deletes = new Set();
     }
-  }
-
-  async _ensureInitialized() {
-    if (!this.initialized && this.initPromise) {
-      await this.initPromise;
+    
+    addUpsert(k, v) {
+        if (!validateKey(k)) return false;
+        this.upserts.set(k, v);
+        this.deletes.delete(k);
+        return true;
     }
-    return this.initialized;
-  }
-
-  async get(key) {
-    if (this.disposed) return undefined;
-    await this._ensureInitialized();
-
-    try {
-      const result = await this.db`
-        SELECT value FROM baileys_state WHERE key = ${key}
-      `;
-      return result.length > 0 ? result[0] : undefined;
-    } catch (e) {
-      global.logger?.error(`Get error for key ${key}: ${e.message}`);
-      return undefined;
+    
+    addDelete(k) {
+        if (!validateKey(k)) return false;
+        this.deletes.add(k);
+        this.upserts.delete(k);
+        return true;
     }
-  }
-
-  async getMany(keys) {
-    if (this.disposed || keys.length === 0) return {};
-    await this._ensureInitialized();
-
-    try {
-      const promises = keys.map((key) => this.get(key));
-      const results = await Promise.all(promises);
-
-      const out = {};
-      for (let i = 0; i < keys.length; i++) {
-        if (results[i]) {
-          out[keys[i]] = results[i];
-        }
-      }
-      return out;
-    } catch (e) {
-      global.logger?.error(`GetMany error: ${e.message}`);
-      return {};
+    
+    clear() {
+        this.upserts.clear();
+        this.deletes.clear();
     }
-  }
-
-  async set(key, value) {
-    if (this.disposed) return;
-    await this._ensureInitialized();
-
-    if (this.writeQueue.has(key)) {
-      await this.writeQueue.get(key);
+    
+    hasChanges() {
+        return this.upserts.size > 0 || this.deletes.size > 0;
     }
-
-    const writePromise = (async () => {
-      try {
-        await this.db`
-          INSERT INTO baileys_state (key, value) 
-          VALUES (${key}, ${stringify(value)}) 
-          ON CONFLICT (key) 
-          DO UPDATE SET value = EXCLUDED.value
-        `;
-      } catch (e) {
-        global.logger?.error(`Set error for key ${key}: ${e.message}`);
-        throw e;
-      } finally {
-        this.writeQueue.delete(key);
-      }
-    })();
-
-    this.writeQueue.set(key, writePromise);
-
-    return writePromise;
-  }
-
-  async del(key) {
-    if (this.disposed) return;
-    await this._ensureInitialized();
-
-    try {
-      await this.db`DELETE FROM baileys_state WHERE key = ${key}`;
-    } catch (e) {
-      global.logger?.error(`Delete error for key ${key}: ${e.message}`);
-      throw e;
+    
+    toArrays() {
+        return {
+            upserts: Array.from(this.upserts.entries()),
+            deletes: Array.from(this.deletes.values()),
+        };
     }
-  }
-
-  async setMany(data) {
-    if (this.disposed) return;
-    await this._ensureInitialized();
-
-    const entries = Object.entries(data);
-    if (entries.length === 0) return;
-
-    try {
-      const pendingKeys = new Set();
-      const canExecuteNow = [];
-
-      for (const [key, value] of entries) {
-        if (this.writeQueue.has(key)) {
-          pendingKeys.add(key);
-        } else {
-          canExecuteNow.push([key, value]);
-        }
-      }
-
-      if (pendingKeys.size > 0) {
-        const waitPromises = Array.from(pendingKeys).map((k) =>
-          this.writeQueue.get(k),
-        );
-        await Promise.all(waitPromises);
-      }
-
-      const promises = entries.map(([key, value]) => {
-        const writePromise = this.db`
-          INSERT INTO baileys_state (key, value) 
-          VALUES (${key}, ${stringify(value)}) 
-          ON CONFLICT (key) 
-          DO UPDATE SET value = EXCLUDED.value
-        `.finally(() => {
-          this.writeQueue.delete(key);
-        });
-
-        this.writeQueue.set(key, writePromise);
-        return writePromise;
-      });
-
-      await Promise.all(promises);
-    } catch (error) {
-      global.logger?.error(`Batch set error: ${error.message}`);
-      throw error;
-    }
-  }
-
-  async deleteMany(keys) {
-    if (this.disposed || keys.length === 0) return;
-    await this._ensureInitialized();
-
-    try {
-      const promises = keys.map(
-        (key) => this.db`DELETE FROM baileys_state WHERE key = ${key}`,
-      );
-
-      await Promise.all(promises);
-    } catch (error) {
-      global.logger?.error(`Batch delete error: ${error.message}`);
-      throw error;
-    }
-  }
-
-  async flush() {
-    return Promise.resolve();
-  }
-
-  async dispose() {
-    if (this.disposed) return;
-
-    try {
-      await this.db`VACUUM ANALYZE baileys_state`;
-    } catch (e) {
-      global.logger?.error(`Dispose cleanup error: ${e.message}`);
-    } finally {
-      try {
-        await this.db.close();
-      } catch {}
-
-      this.disposed = true;
-      this.db = null;
-      this.initialized = false;
-    }
-  }
-
-  isHealthy() {
-    return !this.disposed && this.db !== null && this.initialized;
-  }
 }
 
-const core = new DatabaseCore();
-export default core;
+class AuthDatabase {
+    constructor(dbPath = DEFAULT_DB, options = {}) {
+        this.dbPath = dbPath;
+        this.instanceId = `auth-${Date.now()}-${Bun.randomUUIDv7("base64url")}`;
+        this.disposed = false;
+        this.isInitialized = false;
+        
+        this.cache = new Map();
+        
+        try {
+            this.db = this._initDatabase();
+            this._prepareStatements();
+            this._initWriteBuffer(options);
+            this._initVacuum(options);
+            this._registerCleanup();
+            this.isInitialized = true;
+        } catch (e) {
+            global.logger.fatal({
+                err: e.message,
+                context: "AuthDatabase constructor"
+            });
+            throw e;
+        }
+    }
+    
+    _initDatabase() {
+        try {
+            const db = new Database(this.dbPath, {
+                create: true,
+                readwrite: true,
+                strict: true,
+            });
+            
+            db.exec("PRAGMA journal_mode = WAL");
+            db.exec("PRAGMA synchronous = NORMAL");
+            db.exec("PRAGMA temp_store = MEMORY");
+            db.exec("PRAGMA cache_size = -131072");
+            db.exec("PRAGMA mmap_size = 134217728");
+            db.exec("PRAGMA page_size = 8192");
+            db.exec("PRAGMA auto_vacuum = INCREMENTAL");
+            db.exec("PRAGMA busy_timeout = 5000");
+            
+            db.exec(`
+                CREATE TABLE IF NOT EXISTS baileys_state (
+                    key   TEXT PRIMARY KEY NOT NULL CHECK(length(key) > 0 AND length(key) < 512),
+                    value BLOB NOT NULL,
+                    last_access INTEGER DEFAULT (unixepoch())
+                ) WITHOUT ROWID;
+            `);
+            
+            db.exec(`
+                CREATE INDEX IF NOT EXISTS idx_key_prefix ON baileys_state(key) 
+                WHERE key LIKE '%-%';
+            `);
+            
+            db.exec(`
+                CREATE INDEX IF NOT EXISTS idx_last_access ON baileys_state(last_access);
+            `);
+            
+            return db;
+        } catch (e) {
+            global.logger.fatal({
+                err: e.message,
+                context: "_initDatabase"
+            });
+            throw e;
+        }
+    }
+    
+    _prepareStatements() {
+        try {
+            this.stmtGet = this.db.query(
+                "SELECT value FROM baileys_state WHERE key = ?"
+            );
+            
+            this.stmtSet = this.db.query(
+                "INSERT OR REPLACE INTO baileys_state (key, value, last_access) VALUES (?, ?, unixepoch())"
+            );
+            
+            this.stmtDel = this.db.query(
+                "DELETE FROM baileys_state WHERE key = ?"
+            );
+            
+            this.stmtUpdateAccess = this.db.query(
+                "UPDATE baileys_state SET last_access = unixepoch() WHERE key = ?"
+            );
+            
+            this.stmtGetOldKeys = this.db.query(
+                "SELECT key FROM baileys_state WHERE last_access < ? AND key LIKE '%-%' LIMIT ?"
+            );
+            
+            this.stmtCountKeys = this.db.query(
+                "SELECT COUNT(*) as count FROM baileys_state WHERE key LIKE '%-%'"
+            );
+            
+            this.txCommit = this.db.transaction((upsertsArr, deletesArr) => {
+                const maxBatch = this.maxBatch;
+                
+                for (let i = 0; i < upsertsArr.length; i += maxBatch) {
+                    const slice = upsertsArr.slice(i, i + maxBatch);
+                    for (const [k, v] of slice) {
+                        try {
+                            const binaryData = encode(v);
+                            this.stmtSet.run(k, binaryData);
+                        } catch (e) {
+                            global.logger.error({
+                                err: e.message,
+                                key: k,
+                                context: "txCommit upsert"
+                            });
+                        }
+                    }
+                }
+                
+                for (let i = 0; i < deletesArr.length; i += maxBatch) {
+                    const slice = deletesArr.slice(i, i + maxBatch);
+                    for (const k of slice) {
+                        try {
+                            this.stmtDel.run(k);
+                        } catch (e) {
+                            global.logger.error({
+                                err: e.message,
+                                key: k,
+                                context: "txCommit delete"
+                            });
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            global.logger.fatal({
+                err: e.message,
+                context: "_prepareStatements"
+            });
+            throw e;
+        }
+    }
+    
+    _initWriteBuffer(options) {
+        this.writeBuffer = new WriteBuffer();
+        this.writeMutex = new Mutex();
+        this.flushIntervalMs = Number(options.flushIntervalMs ?? 200);
+        this.maxBatch = Number(options.maxBatch ?? 1000);
+        this.flushTimer = null;
+    }
+    
+    _initVacuum(options) {
+        this.vacuumEnabled = options.vacuumEnabled !== false;
+        this.vacuumIntervalMs = Number(options.vacuumIntervalMs ?? 3600000);
+        this.vacuumMaxAge = Number(options.vacuumMaxAge ?? 604800);
+        this.vacuumBatchSize = Number(options.vacuumBatchSize ?? 500);
+        this.vacuumTimer = null;
+        this.lastVacuumTime = 0;
+        
+        if (this.vacuumEnabled) {
+            this._scheduleVacuum();
+        }
+    }
+    
+    _scheduleVacuum() {
+        if (!this.vacuumEnabled || this.disposed || !this.isInitialized) return;
+        
+        if (this.vacuumTimer) {
+            clearTimeout(this.vacuumTimer);
+        }
+        
+        this.vacuumTimer = setTimeout(() => {
+            this.vacuumTimer = null;
+            this._performVacuum().catch((e) => {
+                global.logger.error({
+                    err: e.message,
+                    context: "_scheduleVacuum"
+                });
+            });
+        }, this.vacuumIntervalMs);
+        
+        this.vacuumTimer.unref?.();
+    }
+    
+    async _performVacuum() {
+        if (this.disposed || !this.isInitialized) return;
+        
+        const now = Date.now();
+        if (now - this.lastVacuumTime < this.vacuumIntervalMs) {
+            this._scheduleVacuum();
+            return;
+        }
+        
+        await this.writeMutex.runExclusive(async () => {
+            try {
+                const cutoffTime = Math.floor(Date.now() / 1000) - this.vacuumMaxAge;
+                
+                const countResult = this.stmtCountKeys.get();
+                const totalKeys = countResult?.count || 0;
+                
+                if (totalKeys === 0) {
+                    global.logger.debug("No keys to vacuum");
+                    this.lastVacuumTime = now;
+                    this._scheduleVacuum();
+                    return;
+                }
+                
+                const oldKeys = this.stmtGetOldKeys.all(cutoffTime, this.vacuumBatchSize);
+                
+                if (oldKeys.length === 0) {
+                    global.logger.debug("No old keys found for vacuum");
+                    this.lastVacuumTime = now;
+                    this._scheduleVacuum();
+                    return;
+                }
+                
+                let deletedCount = 0;
+                this.db.transaction(() => {
+                    for (const row of oldKeys) {
+                        try {
+                            this.stmtDel.run(row.key);
+                            this.cache.delete(row.key);
+                            deletedCount++;
+                        } catch (e) {
+                            global.logger.error({
+                                err: e.message,
+                                key: row.key,
+                                context: "_performVacuum delete"
+                            });
+                        }
+                    }
+                })();
+                
+                if (deletedCount > 0) {
+                    this.db.exec("PRAGMA incremental_vacuum");
+                    this.db.exec("PRAGMA wal_checkpoint(PASSIVE)");
+                    
+                    global.logger.info({
+                        deletedCount,
+                        totalKeys,
+                        context: "vacuum completed"
+                    });
+                }
+                
+                this.lastVacuumTime = now;
+                this._scheduleVacuum();
+            } catch (e) {
+                global.logger.error({
+                    err: e.message,
+                    context: "_performVacuum"
+                });
+                this._scheduleVacuum();
+            }
+        });
+    }
+    
+    _registerCleanup() {
+        initializeSignalHandlers();
+        registerSignalHandler(this.instanceId, () => this._cleanup());
+    }
+    
+    get(key) {
+        if (!validateKey(key)) return undefined;
+        
+        if (this.cache.has(key)) {
+            return { value: this.cache.get(key) };
+        }
+        
+        try {
+            const row = this.stmtGet.get(key);
+            if (!row || !row.value) return undefined;
+            
+            let value;
+            if (row.value instanceof Uint8Array) {
+                value = decode(row.value);
+            } else {
+                global.logger.warn({
+                    key,
+                    valueType: typeof row.value,
+                    context: "get: unknown data type, deleting"
+                });
+                this.del(key);
+                return undefined;
+            }
+            
+            this.cache.set(key, value);
+            
+            setImmediate(() => {
+                try {
+                    this.stmtUpdateAccess.run(key);
+                } catch (e) {
+                    global.logger.debug({
+                        err: e.message,
+                        key,
+                        context: "get: update access time"
+                    });
+                }
+            });
+            
+            return { value };
+        } catch (e) {
+            global.logger.error({ err: e.message, key, context: "get" });
+            return undefined;
+        }
+    }
+    
+    set(key, value) {
+        if (!validateKey(key) || !validateValue(value)) {
+            global.logger.warn({
+                key,
+                context: "set: invalid key or value"
+            });
+            return false;
+        }
+        
+        this.cache.set(key, value);
+        this.writeBuffer.addUpsert(key, value);
+        this._scheduleFlush();
+        return true;
+    }
+    
+    del(key) {
+        if (!validateKey(key)) {
+            global.logger.warn({ key, context: "del: invalid key" });
+            return false;
+        }
+        
+        this.cache.delete(key);
+        this.writeBuffer.addDelete(key);
+        this._scheduleFlush();
+        return true;
+    }
+    
+    _scheduleFlush() {
+        if (!this.flushTimer && !this.disposed && this.isInitialized) {
+            this.flushTimer = setTimeout(() => {
+                this.flushTimer = null;
+                this.flush().catch((e) => {
+                    global.logger.error({
+                        err: e.message,
+                        context: "_scheduleFlush"
+                    });
+                });
+            }, this.flushIntervalMs);
+            
+            this.flushTimer.unref?.();
+        }
+    }
+    
+    async flush() {
+        if (this.disposed || !this.isInitialized) return;
+        
+        await this.writeMutex.runExclusive(async () => {
+            if (!this.writeBuffer.hasChanges()) return;
+            
+            const { upserts, deletes } = this.writeBuffer.toArrays();
+            this.writeBuffer.clear();
+            
+            try {
+                this.txCommit(upserts, deletes);
+                this.db.exec("PRAGMA wal_checkpoint(PASSIVE)");
+            } catch (e) {
+                global.logger.error({
+                    err: e.message,
+                    context: "flush"
+                });
+                
+                for (const [k, v] of upserts) {
+                    this.writeBuffer.addUpsert(k, v);
+                }
+                for (const k of deletes) {
+                    this.writeBuffer.addDelete(k);
+                }
+                throw e;
+            }
+        });
+    }
+    
+    async forceVacuum() {
+        if (!this.vacuumEnabled) {
+            global.logger.warn("Vacuum is disabled");
+            return;
+        }
+        
+        this.lastVacuumTime = 0;
+        await this._performVacuum();
+    }
+    
+    _cleanup() {
+        if (this.disposed) return;
+        this.disposed = true;
+        
+        try {
+            if (this.flushTimer) {
+                clearTimeout(this.flushTimer);
+                this.flushTimer = null;
+            }
+            
+            if (this.vacuumTimer) {
+                clearTimeout(this.vacuumTimer);
+                this.vacuumTimer = null;
+            }
+            
+            const { upserts, deletes } = this.writeBuffer.toArrays();
+            if (upserts.length || deletes.length) {
+                this.txCommit(upserts, deletes);
+            }
+            
+            this.db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
+            this.db.exec("PRAGMA incremental_vacuum");
+            this.db.exec("PRAGMA optimize");
+            
+            this.stmtGet?.finalize();
+            this.stmtDel?.finalize();
+            this.stmtSet?.finalize();
+            this.stmtUpdateAccess?.finalize();
+            this.stmtGetOldKeys?.finalize();
+            this.stmtCountKeys?.finalize();
+            this.db.close();
+            this.cache.clear();
+        } catch (e) {
+            global.logger.error({ err: e.message, context: "_cleanup" });
+        }
+    }
+}
+
+let dbInstance = null;
+
+export function getAuthDatabase(dbPath = DEFAULT_DB, options = {}) {
+    if (!dbInstance || dbInstance.disposed) {
+        dbInstance = new AuthDatabase(dbPath, options);
+    }
+    return dbInstance;
+}
+
+export default getAuthDatabase();

@@ -1,18 +1,16 @@
-import { readdir, mkdir } from "node:fs/promises";
-import path from "node:path";
+import { readdir, mkdir } from "node:fs/promises"
+import path from "node:path"
 
-const handler = async (m, { args, conn }) => {
+const handler = async (m, { args }) => {
   try {
-    let target = args.length
+    let t = args.length
       ? path.join(process.cwd(), ...args)
-      : process.cwd();
-    target = path.resolve(target);
+      : process.cwd()
+    t = path.resolve(t)
 
     if (!m.quoted) {
-      const items = await readdir(target, { withFileTypes: true }).catch(
-        () => null,
-      );
-      if (!items) return m.reply(`Folder not found: ${target}`);
+      const items = await readdir(t, { withFileTypes: true }).catch(() => null)
+      if (!items) return m.reply(`Folder not found: ${t}`)
 
       const list =
         items
@@ -24,39 +22,39 @@ const handler = async (m, { args, conn }) => {
                 : 1,
           )
           .map(
-            (item) =>
-              `${item.isDirectory() ? "📁" : "📄"} ${item.name}${item.isDirectory() ? "/" : ""}`,
+            (i) =>
+              `${i.isDirectory() ? "📁" : "📄"} ${i.name}${i.isDirectory() ? "/" : ""}`,
           )
-          .join("\n") || "(empty directory)";
-      return m.reply(`Path: ${target}\n\n${list}`);
+          .join("\n") || "(empty)"
+      return m.reply(`Path: ${t}\n\n${list}`)
     }
 
-    const q = m.quoted;
-    const mime = q.mimetype || q.mediaType || "";
-    if (!q?.download || !/^(image|video|audio|application)/.test(mime))
-      return m.reply("Quoted message must be a media or document file.");
+    const q = m.quoted
+    const mime = q.mimetype || q.mediaType || ""
+    if (!q?.download || !/^(image|video|audio|application)/.test(mime)) {
+      return m.reply("Need media or document")
+    }
 
-    const buffer = await q.download().catch(() => null);
-    if (!buffer?.length) return m.reply("Failed to download the quoted media.");
+    const buf = await q.download().catch(() => null)
+    if (!buf?.length) return m.reply("Download failed")
 
     const ext =
-      mime?.split("/")[1] || path.extname(q.fileName || "")?.slice(1) || "bin";
-    const baseName = q.fileName
+      mime?.split("/")[1] || path.extname(q.fileName || "")?.slice(1) || "bin"
+    const name = q.fileName
       ? path.basename(q.fileName)
-      : `file-${Date.now()}.${ext}`;
-    const fullpath = path.resolve(target, baseName);
-    await mkdir(path.dirname(fullpath), { recursive: true });
-    await Bun.write(fullpath, buffer);
-    return m.reply(`Saved as: ${path.relative(process.cwd(), fullpath)}`);
+      : `file-${Date.now()}.${ext}`
+    const fp = path.resolve(t, name)
+    await mkdir(path.dirname(fp), { recursive: true })
+    await Bun.write(fp, buf)
+    return m.reply(`Saved: ${path.relative(process.cwd(), fp)}`)
   } catch (e) {
-    conn.logger.error(e);
-    return m.reply(`Error: ${e.message}`);
+    return m.reply(`Error: ${e.message}`)
   }
-};
+}
 
-handler.help = ["sf"];
-handler.tags = ["owner"];
-handler.command = /^(sf|savefile)$/i;
-handler.owner = true;
+handler.help = ["sf"]
+handler.tags = ["owner"]
+handler.command = /^(sf|savefile)$/i
+handler.owner = true
 
-export default handler;
+export default handler

@@ -1,41 +1,32 @@
 let handler = async (m, { args, usedPrefix, command }) => {
-  if (!args[0]) {
-    return m.reply(
-      `Enter a domain name or URL.\nExample: ${usedPrefix + command} google.com`,
-    );
-  }
+  if (!args[0]) return m.reply(`Enter domain\nEx: ${usedPrefix + command} google.com`);
 
-  const domain = args[0]
+  const dom = args[0]
     .replace(/^https?:\/\//i, "")
     .replace(/^www\./i, "")
     .split("/")[0];
 
   try {
-    const res = await fetch(`http://ip-api.com/json/${domain}`);
+    const res = await fetch(`http://ip-api.com/json/${dom}`);
     const data = await res.json();
 
-    if (data.status !== "success") {
-      return m.reply(`Failed to resolve IP for domain: ${domain}`);
-    }
+    if (data.status !== "success") return m.reply(`Failed: ${dom}`);
 
-    const result = `
-Network Lookup
-Query: ${data.query}
+    const txt = `
+IP Lookup
+IP: ${data.query}
 Country: ${data.country} (${data.countryCode})
 Region: ${data.regionName} (${data.region})
 City: ${data.city}
 ZIP: ${data.zip}
-Latitude: ${data.lat}
-Longitude: ${data.lon}
-Timezone: ${data.timezone}
+Lat/Lon: ${data.lat}, ${data.lon}
 ISP: ${data.isp}
 Org: ${data.org}
 AS: ${data.as}
 `.trim();
 
-    await m.reply(result);
+    await m.reply(txt);
   } catch (e) {
-    global.logger.error(e);
     m.reply(`Error: ${e.message}`);
   }
 };

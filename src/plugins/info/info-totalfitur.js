@@ -1,21 +1,18 @@
 let handler = async (m, { conn }) => {
-  const plugins = Object.values(global.plugins);
-  const totalCommands = plugins.reduce(
-    (sum, p) => sum + (p.help ? p.help.length : 0),
-    0,
-  );
-  const totalTags = [...new Set(plugins.flatMap((v) => v.tags || []))].length;
-  const totalPlugins = plugins.length;
+  const p = Object.values(global.plugins);
+  const tc = p.reduce((s, v) => s + (v.help ? v.help.length : 0), 0);
+  const tt = [...new Set(p.flatMap(v => v.tags || []))].length;
+  const tp = p.length;
 
-  const text = `
+  const t = `
 Liora Plugin Statistics
 
-Total Features: ${totalCommands}
-Total Categories: ${totalTags}
-Total Plugins: ${totalPlugins}
-    `.trim();
+Total Features: ${tc}
+Total Categories: ${tt}
+Total Plugins: ${tp}
+`.trim();
 
-  await conn.sendMessage(m.chat, { text }, { quoted: m });
+  await conn.sendMessage(m.chat, { text: t }, { quoted: m });
 };
 
 handler.help = ["totalfitur"];

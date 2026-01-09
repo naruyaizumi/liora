@@ -1,30 +1,23 @@
 let handler = async (m, { conn, groupMetadata }) => {
-  try {
-    const invite = await conn.groupInviteCode(m.chat);
-    const link = `https://chat.whatsapp.com/${invite}`;
-    const info = `
-Group Name: ${groupMetadata.subject}
-Group ID: ${m.chat}`;
+  const invite = await conn.groupInviteCode(m.chat);
+  const link = `https://chat.whatsapp.com/${invite}`;
+  const txt = `Group: ${groupMetadata.subject}\nID: ${m.chat}`;
 
-    await conn.sendButton(m.chat, {
-      text: info,
-      title: "Group Link",
-      footer: "Use the button below to copy the group link",
-      interactiveButtons: [
-        {
-          name: "cta_copy",
-          buttonParamsJson: JSON.stringify({
-            display_text: "Copy Group Link",
-            copy_code: link,
-          }),
-        },
-      ],
-      hasMediaAttachment: false,
-    });
-  } catch (e) {
-    global.logger.error(e);
-    m.reply(`Error: ${e.message}`);
-  }
+  await conn.sendButton(m.chat, {
+    text: txt,
+    title: "Group Link",
+    footer: "Click button to copy",
+    interactiveButtons: [
+      {
+        name: "cta_copy",
+        buttonParamsJson: JSON.stringify({
+          display_text: "Copy",
+          copy_code: link,
+        }),
+      },
+    ],
+    hasMediaAttachment: false,
+  });
 };
 
 handler.help = ["grouplink"];
