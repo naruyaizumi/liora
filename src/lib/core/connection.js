@@ -1,3 +1,4 @@
+/* global conn */
 import { readdir, stat } from "node:fs/promises";
 import { join, relative, normalize } from "node:path";
 import { naruyaizumi } from "./socket.js";
@@ -21,6 +22,7 @@ export async function getAllPlugins(dir) {
           results.push(filepath);
         }
       } catch {
+          //
       }
     }
   } catch (e) {
@@ -168,7 +170,7 @@ export class EventManager {
                         conn.ev.off(ev, oldHandler);
                         cleanupManager.unregisterEventHandler(ev, oldHandler);
                     } catch (e) {
-                        logger.error(
+                        global.logger.error(
                             { error: e.message, event: ev },
                             "Failed to unregister handler"
                         );
@@ -195,7 +197,7 @@ export class EventManager {
                     eventManager.setHandler(handler);
                 }
             } catch (e) {
-                logger.error({ error: e.message }, "Handler reload error");
+                global.logger.error({ error: e.message }, "Handler reload error");
             }
 
             if (!handler) return false;
@@ -210,7 +212,7 @@ export class EventManager {
                                 global.conn.ev.off(eventName, handler);
                                 cleanupManager.unregisterEventHandler(eventName, handler);
                             } catch (e) {
-                                logger.error(
+                                global.logger.error(
                                     { error: e.message, event: eventName },
                                     "Failed to remove event"
                                 );
@@ -220,7 +222,7 @@ export class EventManager {
                         try {
                             global.conn.ev.removeAllListeners();
                         } catch (e) {
-                            logger.error({ error: e.message }, "Failed to remove all listeners");
+                            global.logger.error({ error: e.message }, "Failed to remove all listeners");
                         }
                     }
 
@@ -228,7 +230,7 @@ export class EventManager {
                         try {
                             global.conn.ws.close();
                         } catch (e) {
-                            logger.error({ error: e.message }, "Failed to close websocket");
+                            global.logger.error({ error: e.message }, "Failed to close websocket");
                         }
                     }
 
@@ -240,7 +242,7 @@ export class EventManager {
                         Bun.gc(false);
                     }
                 } catch (e) {
-                    logger.error({ error: e.message }, "Restart error");
+                    global.logger.error({ error: e.message }, "Restart error");
                 }
 
                 global.conn = naruyaizumi(connectionOptions, { chats: oldChats });
@@ -489,7 +491,7 @@ export async function handleDisconnect({ lastDisconnect, isNewLogin, connection 
             try {
                 global.timestamp.lastTick = Date.now();
             } catch (e) {
-                logger.error(e);
+                global.logger.error(e);
             }
         }, 45_000);
     };
@@ -510,7 +512,7 @@ export async function handleDisconnect({ lastDisconnect, isNewLogin, connection 
 
         if (now < global.__reconnect.cooldownUntil) {
             const wait = global.__reconnect.cooldownUntil - now;
-            logger.warn(`Cooling down after repeated failures (${Math.ceil(wait / 1000)}s)…`);
+            global.logger.warn(`Cooling down after repeated failures (${Math.ceil(wait / 1000)}s)…`);
             if (!global.__reconnect.timer) {
                 global.__reconnect.timer = setTimeout(() => {
                     global.__reconnect.timer = null;
@@ -576,7 +578,7 @@ export async function handleDisconnect({ lastDisconnect, isNewLogin, connection 
             global.__reconnect.attempts = 0;
             global.__reconnect.cooldownUntil = 0;
             stopKeepAlive();
-            logger.error(
+            global.logger.error(
                 `Auto-reconnect disabled for reason: ${dcReason}. Manual action required.`
             );
             return;
@@ -587,7 +589,7 @@ export async function handleDisconnect({ lastDisconnect, isNewLogin, connection 
         if (global.__reconnect.attempts >= 6) {
             global.__reconnect.cooldownUntil = Date.now() + 5 * 60_000;
             global.__reconnect.attempts = 0;
-            logger.warn("Too many consecutive failures; entering 5m cooldown.");
+            global.logger.warn("Too many consecutive failures; entering 5m cooldown.");
             return;
         }
 
@@ -602,29 +604,29 @@ export async function handleDisconnect({ lastDisconnect, isNewLogin, connection 
                 global.__reconnect.attempts += 1;
                 global.__reconnect.lastAt = Date.now();
 
-                logger.info(
+                global.logger.info(
                     `Reloaded session (attempt ${global.__reconnect.attempts}, reason: ${dcReason})`
                 );
             } catch (e) {
-                logger.error(e);
+                global.logger.error(e);
                 global.__reconnect.attempts += 1;
             } finally {
                 global.__reconnect.inflight = false;
             }
         }, delay);
 
-        logger.warn(`Scheduling reconnect in ${Math.ceil(delay / 1000)}s (reason: ${dcReason})`);
+        global.logger.warn(`Scheduling reconnect in ${Math.ceil(delay / 1000)}s (reason: ${dcReason})`);
     };
 
     if (isNewLogin) conn.isInit = true;
 
     switch (connection) {
         case "connecting":
-            logger.info("Connecting…");
+            global.logger.info("Connecting…");
             break;
 
         case "open":
-            logger.info("Connected to WhatsApp.");
+            global.logger.info("Connected to WhatsApp.");
 
             global.__reconnect.attempts = 0;
             global.__reconnect.cooldownUntil = 0;
@@ -633,13 +635,13 @@ export async function handleDisconnect({ lastDisconnect, isNewLogin, connection 
 
         case "close":
             stopKeepAlive();
-            logger.warn(`Connection closed — reason=${dcReason}`);
+            global.logger.warn(`Connection closed — reason=${dcReason}`);
             break;
     }
 
     if (lastDisconnect?.error) {
         if (["logged_out", "device_unpaired", "pairing_required"].includes(dcReason)) {
-            logger.error(`Session requires manual fix (${dcReason}). No auto-reconnect.`);
+            global.logger.error(`Session requires manual fix (${dcReason}). No auto-reconnect.`);
         } else {
             tryRecover();
         }

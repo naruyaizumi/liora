@@ -6,7 +6,6 @@ export async function fileType(buffer) {
   return await Promise.resolve().then(() => {
     if (buffer.length >= 12) {
       const boxType = buffer.slice(4, 8).toString("ascii");
-      const brand = buffer.slice(8, 12).toString("ascii");
       if (boxType === "ftyp") {
         return { mime: "video/mp4", ext: "mp4" };
       }

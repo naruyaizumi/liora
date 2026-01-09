@@ -1,7 +1,7 @@
 import { readdir, mkdir } from "node:fs/promises"
 import path from "node:path"
 
-const handler = async (m, { args, conn }) => {
+const handler = async (m, { args }) => {
   try {
     let t = args.length
       ? path.join(process.cwd(), ...args)

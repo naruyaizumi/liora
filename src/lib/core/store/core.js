@@ -125,7 +125,7 @@ export class MemoryStore {
   }
 
   async _executeEvent(type, data) {
-    //
+    // eslint-disable-next-line no-unused-vars
   }
 
   _startAutoCleanup() {
@@ -199,7 +199,9 @@ export class MemoryStore {
       setImmediate(() => {
         try {
           this.stmtTouch.run(key);
-        } catch {}
+        } catch {
+          //
+        }
       });
       
       return decode(row.v);

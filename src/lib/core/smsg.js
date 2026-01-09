@@ -11,11 +11,7 @@ export function smsg(conn, m) {
     
     const M = proto.WebMessageInfo;
     if (M?.create) {
-        try {
-            m = M.create(m);
-        } catch (e) {
-            throw e;
-        }
+        m = M.create(m);
     }
     
     m.conn = conn;
@@ -26,34 +22,30 @@ export function smsg(conn, m) {
         return m;
     }
 
-    try {
-        if (m.mtype === "protocolMessage" && m.msg?.key) {
-            const key = { ...m.msg.key };
+    if (m.mtype === "protocolMessage" && m.msg?.key) {
+        const key = { ...m.msg.key };
 
-            if (key.remoteJid === "status@broadcast" && m.chat) {
-                key.remoteJid = m.chat;
-            }
-
-            if ((!key.participant || key.participant === "status_me") && m.sender) {
-                key.participant = m.sender;
-            }
-
-            const botId = conn.decodeJid?.(conn.user?.lid || "") || "";
-            
-            if (botId) {
-                const partId = conn.decodeJid?.(key.participant) || "";
-                key.fromMe = partId === botId;
-
-                if (!key.fromMe && key.remoteJid === botId && m.sender) {
-                    key.remoteJid = m.sender;
-                }
-            }
-
-            m.msg.key = key;
-            conn.ev?.emit("messages.delete", { keys: [key] });
+        if (key.remoteJid === "status@broadcast" && m.chat) {
+            key.remoteJid = m.chat;
         }
-    } catch (e) {
-        throw e;
+
+        if ((!key.participant || key.participant === "status_me") && m.sender) {
+            key.participant = m.sender;
+        }
+
+        const botId = conn.decodeJid?.(conn.user?.lid || "") || "";
+        
+        if (botId) {
+            const partId = conn.decodeJid?.(key.participant) || "";
+            key.fromMe = partId === botId;
+
+            if (!key.fromMe && key.remoteJid === botId && m.sender) {
+                key.remoteJid = m.sender;
+            }
+        }
+
+        m.msg.key = key;
+        conn.ev?.emit("messages.delete", { keys: [key] });
     }
 
     m[SYM_PROCESSED] = true;

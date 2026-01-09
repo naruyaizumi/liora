@@ -53,7 +53,7 @@ class MessageQueue {
 
 const messageQueue = new MessageQueue();
 
-export function naruyaizumi(connectionOptions, options = {}) {
+export function naruyaizumi(connectionOptions) {
   const conn = makeWASocket(connectionOptions);
   
   bind(conn);
@@ -293,7 +293,9 @@ export function naruyaizumi(connectionOptions, options = {}) {
               const md = await conn.groupMetadata(chat);
               chatData.subject = md.subject;
               chatData.metadata = md;
-            } catch (e) {}
+            } catch {
+              //
+            }
           }
           
           const ctx = msgObj[mtype]?.contextInfo;
@@ -341,35 +343,39 @@ export function naruyaizumi(connectionOptions, options = {}) {
                   
                   await conn.setChat(qChat, qm);
                 }
-              } catch (e) {}
+              } catch {
+                //
+              }
             }
           }
           
           if (!isGroup) {
-            const sender =
+            const s =
               message.key?.fromMe && conn.user?.lid ? conn.user
               .lid : chat;
             chatData.name = message.pushName || chatData.name || "";
           } else {
-            const sender = conn.decodeJid(
+            const s = conn.decodeJid(
               (message.key?.fromMe && conn.user?.lid) ||
               message.participant ||
               message.key?.participant ||
               chat,
             );
             
-            if (sender && sender !== chat) {
+            if (s && s !== chat) {
               try {
-                const sChat = (await conn.getChat(sender)) ||
-                { id: sender };
+                const sChat = (await conn.getChat(s)) ||
+                { id: s };
                 sChat.name = message.pushName || sChat.name || "";
-                await conn.setChat(sender, sChat);
-              } catch (e) {}
+                await conn.setChat(s, sChat);
+              } catch {
+                //
+              }
             }
           }
           
           if (mtype !== "senderKeyDistributionMessage") {
-            const sender = isGroup ?
+            const s = isGroup ?
               conn.decodeJid(
                 (message.key?.fromMe && conn.user?.lid) ||
                 message.participant ||
@@ -382,8 +388,8 @@ export function naruyaizumi(connectionOptions, options = {}) {
             
             const fromMe =
               message.key?.fromMe ||
-              (conn.user?.lid && sender && areJidsSameUser ?
-                areJidsSameUser(sender, conn.user?.lid) :
+              (conn.user?.lid && s && areJidsSameUser ?
+                areJidsSameUser(s, conn.user?.lid) :
                 false);
             
             if (
