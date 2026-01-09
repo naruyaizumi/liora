@@ -10,35 +10,23 @@ WORK_DIR="/root/liora"
 BUN_PATH="/root/.bun/bin/bun"
 REPO_URL="https://github.com/naruyaizumi/liora.git"
 TIME_ZONE="Asia/Jakarta"
-DB_NAME="liora"
-DB_USER="liora"
-DB_PASSWORD="naruyaizumi"
-DB_HOST="localhost"
-DB_PORT="5432"
-REDIS_HOST="localhost"
-REDIS_PORT="6379"
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
-print_error() { echo -e "${RED}[ERROR]${NC} $1" >&2; }
-print_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
-print_info() { echo -e "[INFO] $1"; }
-print_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+print_error() { echo -e "${RED}✗${NC} $1" >&2; }
+print_success() { echo -e "${GREEN}✓${NC} $1"; }
+print_info() { echo -e "${BLUE}ℹ${NC} $1"; }
+print_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
 
 if ! command -v curl &> /dev/null; then
     echo "[INFO] Installing curl..."
-    if command -v apt-get &> /dev/null; then
-        apt-get update && apt-get install -y curl
-    elif command -v dnf &> /dev/null; then
-        dnf install -y curl
-    elif command -v pacman &> /dev/null; then
-        pacman -Sy --noconfirm curl
-    else
-        print_error "Cannot install curl automatically"
-        exit 1
-    fi
+    apt-get update && apt-get install -y curl
 fi
 
 load_script() {
@@ -66,14 +54,31 @@ cleanup_on_error() {
 
 trap cleanup_on_error ERR
 
-main() {
-    print_info "Starting Liora Bot installation..."
+print_banner() {
+    clear
+    echo -e "${CYAN}"
+    cat << "EOF"
+╔══════════════════════════════════════════╗
+║                                          ║
+║          LIORA BOT INSTALLER             ║
+║                                          ║
+╚══════════════════════════════════════════╝
+EOF
+    echo -e "${NC}"
+    echo -e "${BLUE}Repository:${NC} https://github.com/naruyaizumi/liora"
+    echo -e "${BLUE}License:${NC}    Apache 2.0"
+    echo -e "${BLUE}Author:${NC}     Naruya Izumi"
     echo ""
+}
+
+main() {
+    print_banner
     
     load_script "deps.sh"
     load_script "setup.sh"
     load_script "service.sh"
     load_script "cli.sh"
+    
     install_dependencies
     setup_environment
     create_service
