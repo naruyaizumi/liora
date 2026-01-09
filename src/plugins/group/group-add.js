@@ -2,38 +2,31 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   let target = m.quoted?.sender || null;
 
   if (!target && args[0]) {
-    const raw = args[0].replace(/[^0-9]/g, "");
-    if (raw.length >= 5) {
-      target = raw + "@s.whatsapp.net";
-    }
+    const num = args[0].replace(/[^0-9]/g, "");
+    if (num.length >= 5) target = num + "@s.whatsapp.net";
   }
 
-  if (!target || !target.endsWith("@s.whatsapp.net")) {
-    return m.reply(
-      `Specify one valid member to add.\n› Example: ${usedPrefix + command} 6281234567890`,
-    );
+  if (!target?.endsWith("@s.whatsapp.net")) {
+    return m.reply(`Add member\nEx: ${usedPrefix + command} 6281234567890`);
   }
 
   try {
-    const result = await conn.groupParticipantsUpdate(m.chat, [target], "add");
-    const userResult = result?.[0];
+    const res = await conn.groupParticipantsUpdate(m.chat, [target], "add");
+    const user = res?.[0];
 
-    if (userResult?.status === "200") {
-      return await conn.sendMessage(
+    if (user?.status === "200") {
+      return conn.sendMessage(
         m.chat,
         {
-          text: `Successfully added @${target.split("@")[0]}.`,
+          text: `Added @${target.split("@")[0]}`,
           mentions: [target],
         },
         { quoted: m },
       );
     }
 
-    return m.reply(
-      `Failed to add the member. Status: ${userResult?.status || "unknown"}`,
-    );
+    return m.reply(`Failed to add. Status: ${user?.status || "unknown"}`);
   } catch (e) {
-    global.logger.error(e);
     return m.reply(`Error: ${e.message}`);
   }
 };

@@ -3,10 +3,14 @@ import {
   formatTime,
   makeProgressBar,
   getOSInfo,
+  getSystemInfo,
   getCPUInfo,
+  getCPUFeatures,
   getMemoryInfo,
   getDiskInfo,
   getNetworkInfo,
+  getNetworkFeatures,
+  getIPInfo,
   getProcessInfo,
   getContainerInfo,
   getSystemLoad,
@@ -14,48 +18,46 @@ import {
   getHeapInfo,
   getServiceInfo,
   getUserInfo,
-  getSoftwareVersions,
-  getRedisInfo,
-  getPostgresInfo,
-  getRustInfo,
+  getSoftwareInfo,
 } from "#lib/system.js";
 
 let handler = async (m, { conn }) => {
   const startTime = Date.now();
   const [
     osInfo,
+    systemInfo,
     cpuInfo,
+    cpuFeatures,
     memoryInfo,
     diskInfo,
     networkInfo,
+    networkFeatures,
+    ipInfo,
     processInfo,
     containerInfo,
     systemLoad,
     heapInfo,
     serviceInfo,
     userInfo,
-    softwareVersions,
-    redisInfo,
-    postgresInfo,
-    rustInfo,
+    softwareInfo,
   ] = await Promise.all([
     getOSInfo(),
+    getSystemInfo(),
     getCPUInfo(),
+    getCPUFeatures(),
     getMemoryInfo(),
     getDiskInfo(),
     getNetworkInfo(),
+    getNetworkFeatures(),
+    getIPInfo(),
     getProcessInfo(),
     getContainerInfo(),
     getSystemLoad(),
     getHeapInfo(),
     getServiceInfo(),
     getUserInfo(),
-    getSoftwareVersions(),
-    getRedisInfo(),
-    getPostgresInfo(),
-    getRustInfo(),
+    getSoftwareInfo(),
   ]);
-  const collectionTime = Date.now() - startTime;
   const warnings = await getWarnings(
     cpuInfo,
     memoryInfo,
@@ -81,35 +83,72 @@ let handler = async (m, { conn }) => {
       : "";
   const diskBar = makeProgressBar(diskInfo.total.used, diskInfo.total.size);
   const heapBar = makeProgressBar(heapInfo.rss, memoryInfo.total);
-  console.log("Redis Info:", redisInfo);
-  console.log("Postgres Info:", postgresInfo);
-  console.log("Rust Info:", rustInfo);
+  const collectionTime = Date.now() - startTime;
   const message = `
 \`\`\`
 ━━━ SYSTEM INFORMATION ━━━ 
 OS: ${osInfo.name}
+Distribution: ${osInfo.distribution}${osInfo.codename ? ` (${osInfo.codename})` : ""}
+Base: ${osInfo.base}
+Version: ${osInfo.version}${osInfo.debianVersion && osInfo.debianVersion !== "unknown" ? ` (Debian ${osInfo.debianVersion})` : ""}
 Kernel: ${osInfo.kernel}
-Hostname: ${containerInfo.hostname}
+Platform: ${osInfo.platform}
+Arch: ${osInfo.architecture} (${osInfo.bits})
+Hostname: ${osInfo.hostname}
+Shell: ${systemInfo.shell}
+Host: ${systemInfo.host}
+System Uptime: ${formatTime(osInfo.uptime)}
 Container: ${containerInfo.isContainer ? `${containerInfo.type} (${containerInfo.id || "N/A"})` : "No"}
-System Uptime: ${formatTime(processInfo.uptime)}
-Data Collection: ${collectionTime}ms
 
-━━━ SOFTWARE VERSIONS ━━━ 
+━━━ CPU FEATURES ━━━
+Virtualization: ${cpuFeatures.virtualization}
+AES-NI: ${cpuFeatures.aesni}
+VM-x/AMD-V: ${cpuFeatures.vmxAmdv}
+Virtual Machine: ${cpuFeatures.isVM}
+TCP CC: ${cpuFeatures.tcpCC}
+
+━━━ NETWORK INFORMATION ━━━
+Host: ${ipInfo.host}
+ISP: ${ipInfo.isp}
+Organization: ${ipInfo.organization}
+ASN: ${ipInfo.asn}
+Location: ${ipInfo.location}
+Region: ${ipInfo.region}
+Continent: ${ipInfo.continent}
+Timezone: ${ipInfo.timezone}
+IPv4: ${networkFeatures.ipv4}
+IPv6: ${networkFeatures.ipv6}
+
+━━━ SOFTWARE INFORMATION ━━━ 
 Runtime:
-Bun: v${softwareVersions.bun}
-Node.js: v${softwareVersions.node}
-NPM: ${softwareVersions.npm}
+Bun: v${softwareInfo.bun}
+Node.js: v${softwareInfo.node}
 
-Databases:
-Redis: ${redisInfo}
-PostgreSQL: ${postgresInfo}
+Project:
+Node Modules: ${softwareInfo.nodeModules} packages
+Package.json: ${softwareInfo.hasPackageJson}
 
-Programming Languages:
-Rust: ${rustInfo}
+Process:
+PID: ${softwareInfo.pid}
+PPID: ${softwareInfo.ppid}
+Bot Uptime: ${formatTime(softwareInfo.botUptime)}
+
+━━━ SERVICE INFORMATION ━━━
+Name: ${serviceInfo.name}
+Type: ${serviceInfo.type}
+Description: ${serviceInfo.description}
+Status: ${serviceInfo.status}
+Active: ${serviceInfo.active}
+Main PID: ${serviceInfo.mainPid}
+Tasks: ${serviceInfo.tasks}
+Memory: ${serviceInfo.memory}
+CPU: ${serviceInfo.cpu}
 
 ━━━ CPU INFORMATION ━━━
 Model: ${cpuInfo.model}
-Cores: ${cpuInfo.cores} @ ${cpuInfo.speed}
+Cores: ${cpuInfo.cores}
+Speed: ${cpuInfo.speed}
+Cache: ${cpuInfo.cache}
 Architecture: ${cpuInfo.architecture}
 Current Usage: ${cpuInfo.usage}%
 
@@ -169,11 +208,11 @@ ${diskInfo.disks
   .slice(0, 3)
   .map(
     (disk) =>
-      `${disk.mountpoint}: ${formatSize(disk.used)}/${formatSize(disk.size)} (${((disk.used / disk.size) * 100).toFixed(1)}%)`,
+      `${disk.mountpoint}: ${formatSize(disk.used)}/${formatSize(disk.size)} (${disk.size > 0 ? ((disk.used / disk.size) * 100).toFixed(1) : "0.0"}%)`,
   )
   .join("\n")}
 
-━━━ NETWORK INFORMATION ━━━
+━━━ NETWORK TRAFFIC ━━━
 Total Traffic:
 Received: ${formatSize(networkInfo.total.rxBytes)} (${networkInfo.total.rxPackets} packets)
 Transmitted: ${formatSize(networkInfo.total.txBytes)} (${networkInfo.total.txPackets} packets)
@@ -206,24 +245,6 @@ Load Averages: ${processInfo.load1}, ${processInfo.load5}, ${processInfo.load15}
 VMStat Processes:
 Running: ${systemLoad.procs.r}
 Blocked: ${systemLoad.procs.b}
-
-${
-  serviceInfo.services.length > 0
-    ? `
-━━━ SERVICE INFORMATION ━━━
-Running Services: ${serviceInfo.total}
-${serviceInfo.services
-  .map(
-    (svc) =>
-      `${svc.name}
-Status: ${svc.status}
-Active: ${svc.active}
-${svc.memory ? `Memory: ${svc.memory}` : ""}
-${svc.cpu ? `CPU: ${svc.cpu}` : ""}`,
-  )
-  .join("\n\n")}`
-    : ""
-}
 
 ━━━ USER INFORMATION ━━━
 Logged In Users: ${userInfo.loggedIn}

@@ -1,6 +1,6 @@
-import os from "os";
+import os from "os"
 
-const CATEGORIES = [
+const CATS = [
   "ai",
   "downloader",
   "group",
@@ -9,92 +9,75 @@ const CATEGORIES = [
   "maker",
   "owner",
   "tools",
-];
+]
 
-const MENU_META = {
+const META = {
   ai: "AI",
   downloader: "Downloader",
   group: "Group",
-  info: "Information",
+  info: "Info",
   internet: "Internet",
   maker: "Maker",
   owner: "Owner",
   tools: "Tools",
-};
+}
 
 let handler = async (m, { conn, usedPrefix, command, args }) => {
-  await global.loading(m, conn);
+  await global.loading(m, conn)
 
   try {
-    const pkg = await getPackageInfo();
-    const help = getPluginHelp();
-    const input = (args[0] || "").toLowerCase();
-    const timestamp = new Date().toTimeString().split(" ")[0];
+    const pkg = await getPkg()
+    const help = getHelp()
+    const inp = (args[0] || "").toLowerCase()
+    const time = new Date().toTimeString().split(" ")[0]
 
-    if (input === "all") {
-      return await allCommands(conn, m, help, usedPrefix, timestamp);
+    if (inp === "all") {
+      return await all(conn, m, help, usedPrefix, time)
     }
 
-    if (!input) {
-      return await mainMenu(conn, m, pkg, usedPrefix, command, timestamp);
+    if (!inp) {
+      return await main(conn, m, pkg, usedPrefix, command, time)
     }
 
-    const idx = parseInt(input) - 1;
-    const categoryName =
-      !isNaN(idx) && CATEGORIES[idx] ? CATEGORIES[idx] : input;
+    const idx = parseInt(inp) - 1
+    const cat = !isNaN(idx) && CATS[idx] ? CATS[idx] : inp
 
-    if (!CATEGORIES.includes(categoryName)) {
-      return m.reply(
-        `Invalid category. Use \`${usedPrefix + command}\` to see available categories.`,
-      );
+    if (!CATS.includes(cat)) {
+      return m.reply(`Invalid category. Use \`${usedPrefix + command}\``)
     }
 
-    return await showCategory(
-      conn,
-      m,
-      help,
-      categoryName,
-      usedPrefix,
-      timestamp,
-    );
+    return await show(conn, m, help, cat, usedPrefix, time)
   } catch (e) {
-    conn.logger.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-async function allCommands(conn, m, help, usedPrefix, timestamp) {
-  const allCmds = CATEGORIES.map((cat) => {
-    const cmds = formatCommandList(help, cat, usedPrefix);
-    return cmds.length > 0 ? `\n${MENU_META[cat]}\n${cmds.join("\n")}` : "";
-  })
-    .filter(Boolean)
-    .join("\n");
+async function all(conn, m, help, prefix, time) {
+  const cmds = CATS.map(c => {
+    const list = format(help, c, prefix)
+    return list.length > 0 ? `\n${META[c]}\n${list.join("\n")}` : ""
+  }).filter(Boolean).join("\n")
 
-  const text = [
+  const txt = [
     "```",
-    `[${timestamp}] All Commands`,
-    "────────────────────────────",
-    allCmds,
+    `[${time}] All Commands`,
+    "─".repeat(30),
+    cmds,
     "```",
-  ].join("\n");
+  ].join("\n")
 
   return conn.sendMessage(
     m.chat,
     {
-      text,
+      text: txt,
       contextInfo: {
         forwardingScore: 999,
         isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: "120363144038483540@newsletter",
-          newsletterName: "mkfs.ext4 /dev/naruyaizumi",
-        },
         externalAdReply: {
           title: "All Commands",
-          body: "Complete Command List",
+          body: "Complete List",
           thumbnailUrl: "https://qu.ax/TLqUB.png",
           sourceUrl: "https://linkbio.co/naruyaizumi",
           mediaType: 1,
@@ -103,52 +86,52 @@ async function allCommands(conn, m, help, usedPrefix, timestamp) {
       },
     },
     { quoted: q() },
-  );
+  )
 }
 
-async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
-  const uptimeBot = formatTime(process.uptime());
-  const uptimeSys = formatTime(os.uptime());
+async function main(conn, m, pkg, prefix, cmd, time) {
+  const upBot = fmt(process.uptime())
+  const upSys = fmt(os.uptime())
 
-  const caption = [
+  const cap = [
     "```",
-    `[${timestamp}] Liora Environment`,
-    "────────────────────────────",
-    `Name       : ${pkg.name}`,
-    `Version    : ${pkg.version}`,
-    `License    : ${pkg.license}`,
-    `Type       : ${pkg.type}`,
-    `Runtime    : Bun ${Bun.version}`,
-    `VPS Uptime : ${uptimeSys}`,
-    `Bot Uptime : ${uptimeBot}`,
+    `[${time}] Liora`,
+    "─".repeat(30),
+    `Name    : ${pkg.name}`,
+    `Version : ${pkg.version}`,
+    `License : ${pkg.license}`,
+    `Type    : ${pkg.type}`,
+    `Runtime : Bun ${Bun.version}`,
+    `VPS Up  : ${upSys}`,
+    `Bot Up  : ${upBot}`,
     "",
-    `Owner      : ${pkg.author?.name || "Naruya Izumi"}`,
-    `Social     : https://linkbio.co/naruyaizumi`,
-    "────────────────────────────",
-    "Select a category below to view commands",
+    `Owner   : ${pkg.author?.name || "Naruya Izumi"}`,
+    `Social  : https://linkbio.co/naruyaizumi`,
+    "─".repeat(30),
+    "Select category below",
     "```",
-  ].join("\n");
+  ].join("\n")
 
   const sections = [
     {
-      title: "Command Categories",
-      rows: CATEGORIES.map((cat) => ({
-        title: MENU_META[cat],
-        description: `View ${MENU_META[cat]} commands`,
-        id: `${usedPrefix + command} ${cat}`,
+      title: "Categories",
+      rows: CATS.map(c => ({
+        title: META[c],
+        description: `View ${META[c]} commands`,
+        id: `${prefix + cmd} ${c}`,
       })),
     },
     {
-      title: "Other Options",
+      title: "Options",
       rows: [
         {
           title: "All Commands",
-          description: "View all commands at once",
-          id: `${usedPrefix + command} all`,
+          description: "View all at once",
+          id: `${prefix + cmd} all`,
         },
       ],
     },
-  ];
+  ]
 
   return await conn.client(
     m.chat,
@@ -157,7 +140,7 @@ async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
         productImage: { url: "https://files.catbox.moe/1moinz.jpg" },
         productId: "25015941284694382",
         title: "Liora Menu",
-        description: "WhatsApp Bot Command Menu",
+        description: "WhatsApp Bot",
         currencyCode: "USD",
         priceAmount1000: "0",
         retailerId: global.config.author,
@@ -165,14 +148,14 @@ async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
         productImageCount: 1,
       },
       businessOwnerJid: "113748182302861@lid",
-      caption,
+      caption: cap,
       title: "Liora Menu",
-      footer: global.config.watermark || "Liora WhatsApp Bot",
+      footer: global.config.watermark || "Liora",
       interactiveButtons: [
         {
           name: "single_select",
           buttonParamsJson: JSON.stringify({
-            title: "Select Category",
+            title: "Select",
             sections,
           }),
         },
@@ -187,39 +170,34 @@ async function mainMenu(conn, m, pkg, usedPrefix, command, timestamp) {
       hasMediaAttachment: false,
     },
     { quoted: q() },
-  );
+  )
 }
 
-async function showCategory(conn, m, help, category, usedPrefix, timestamp) {
-  const cmds = formatCommandList(help, category, usedPrefix);
+async function show(conn, m, help, cat, prefix, time) {
+  const cmds = format(help, cat, prefix)
 
-  const text =
-    cmds.length > 0
-      ? [
-          "```",
-          `[${timestamp}] ${MENU_META[category]} Commands`,
-          "────────────────────────────",
-          cmds.join("\n"),
-          "────────────────────────────",
-          `Total: ${cmds.length} commands`,
-          "```",
-        ].join("\n")
-      : `No commands found for ${MENU_META[category]} category.`;
+  const txt = cmds.length > 0
+    ? [
+        "```",
+        `[${time}] ${META[cat]} Commands`,
+        "─".repeat(30),
+        cmds.join("\n"),
+        "─".repeat(30),
+        `Total: ${cmds.length}`,
+        "```",
+      ].join("\n")
+    : `No commands for ${META[cat]}`
 
   return conn.sendMessage(
     m.chat,
     {
-      text,
+      text: txt,
       contextInfo: {
         forwardingScore: 999,
         isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: "120363144038483540@newsletter",
-          newsletterName: "mkfs.ext4 /dev/naruyaizumi",
-        },
         externalAdReply: {
-          title: `${MENU_META[category]} Commands`,
-          body: `${cmds.length} commands available`,
+          title: `${META[cat]} Commands`,
+          body: `${cmds.length} commands`,
           thumbnailUrl: "https://qu.ax/TLqUB.png",
           sourceUrl: "https://linkbio.co/naruyaizumi",
           mediaType: 1,
@@ -228,29 +206,29 @@ async function showCategory(conn, m, help, category, usedPrefix, timestamp) {
       },
     },
     { quoted: q() },
-  );
+  )
 }
 
-handler.help = ["menu"];
-handler.tags = ["info"];
-handler.command = /^(menu|help)$/i;
+handler.help = ["menu"]
+handler.tags = ["info"]
+handler.command = /^(menu|help)$/i
 
-export default handler;
+export default handler
 
-function formatTime(sec) {
-  const m = Math.floor(sec / 60);
-  const h = Math.floor(m / 60);
-  const d = Math.floor(h / 24);
+function fmt(sec) {
+  const m = Math.floor(sec / 60)
+  const h = Math.floor(m / 60)
+  const d = Math.floor(h / 24)
   return (
     [d && `${d}d`, h % 24 && `${h % 24}h`, m % 60 && `${m % 60}m`]
       .filter(Boolean)
       .join(" ") || "0m"
-  );
+  )
 }
 
-function getPackageInfo() {
+function getPkg() {
   try {
-    return Bun.file("./package.json").json();
+    return Bun.file("./package.json").json()
   } catch {
     return {
       name: "Unknown",
@@ -258,47 +236,41 @@ function getPackageInfo() {
       type: "?",
       license: "?",
       author: { name: "Unknown" },
-    };
+    }
   }
 }
 
-function getPluginHelp() {
+function getHelp() {
   return Object.values(global.plugins)
-    .filter((p) => !p.disabled)
-    .map((p) => ({
+    .filter(p => !p.disabled)
+    .map(p => ({
       help: [].concat(p.help || []),
       tags: [].concat(p.tags || []),
       owner: p.owner,
       mods: p.mods,
       admin: p.admin,
-    }));
+    }))
 }
 
-function formatCommandList(help, category, usedPrefix) {
+function format(help, cat, prefix) {
   return help
-    .filter((p) => p.tags.includes(category))
-    .flatMap((p) =>
-      p.help.map((cmd) => {
-        const badge = p.mods
-          ? " (developer)"
-          : p.owner
-            ? " (owner)"
-            : p.admin
-              ? " (admin)"
-              : "";
-        return `- ${usedPrefix + cmd}${badge}`;
+    .filter(p => p.tags.includes(cat))
+    .flatMap(p =>
+      p.help.map(cmd => {
+        const b = p.mods ? " (dev)" : p.owner ? " (owner)" : p.admin ? " (admin)" : ""
+        return `- ${prefix + cmd}${b}`
       }),
-    );
+    )
 }
 
 function q() {
-  const vcard = `BEGIN:VCARD
+  const v = `BEGIN:VCARD
 VERSION:3.0
 N:;ttname;;;
 FN:ttname
 item1.TEL;waid=13135550002:+1 (313) 555-0002
 item1.X-ABLabel:Ponsel
-END:VCARD`;
+END:VCARD`
 
   return {
     key: {
@@ -309,8 +281,8 @@ END:VCARD`;
     message: {
       contactMessage: {
         displayName: "𝗟 𝗜 𝗢 𝗥 𝗔",
-        vcard,
+        vcard: v,
       },
     },
-  };
+  }
 }

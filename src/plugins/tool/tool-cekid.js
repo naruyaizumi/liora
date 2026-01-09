@@ -34,7 +34,7 @@ let handler = async (m, { conn, args, usedPrefix }) => {
       );
     }
 
-    await conn.client(m.chat, {
+    await conn.sendButton(m.chat, {
       text: `Target ID: ${id}`,
       title: "Result",
       footer: "Use the button below to copy the ID",

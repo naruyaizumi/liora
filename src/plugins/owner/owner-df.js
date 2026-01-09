@@ -1,31 +1,29 @@
-import path from "node:path";
+import path from "node:path"
 
 let handler = async (m, { args, usedPrefix, command, conn }) => {
-  if (!args.length)
-    return m.reply(
-      `Enter the file path to delete.\n› Example: ${usedPrefix + command} plugins/owner/owner-sf`,
-    );
+  if (!args.length) {
+    return m.reply(`Need file path\nEx: ${usedPrefix + command} plugins/owner/owner-sf`)
+  }
 
-  let target = path.join(...args);
-  if (!path.extname(target)) target += ".js";
-  const filepath = path.resolve(process.cwd(), target);
+  let t = path.join(...args)
+  if (!path.extname(t)) t += ".js"
+  const fp = path.resolve(process.cwd(), t)
 
   try {
-    const file = Bun.file(filepath);
-    const exists = await file.exists();
-    if (!exists) throw new Error(`File not found: ${filepath}`);
+    const f = Bun.file(fp)
+    const ex = await f.exists()
+    if (!ex) throw new Error(`File not found: ${fp}`)
 
-    await file.delete();
-    m.reply("File deleted successfully.");
+    await f.delete()
+    m.reply("File deleted")
   } catch (e) {
-    conn.logger.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   }
-};
+}
 
-handler.help = ["deletefile"];
-handler.tags = ["owner"];
-handler.command = /^(df|deletefile)$/i;
-handler.owner = true;
+handler.help = ["deletefile"]
+handler.tags = ["owner"]
+handler.command = /^(df|deletefile)$/i
+handler.owner = true
 
-export default handler;
+export default handler

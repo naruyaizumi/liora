@@ -1,5 +1,5 @@
 let handler = async (m, { conn }) => {
-  const vcard = `BEGIN:VCARD
+  const v = `BEGIN:VCARD
 VERSION:3.0
 FN:Naruya Izumi
 ORG:Naruya Izumi
@@ -11,7 +11,7 @@ URL;type=WORK:https://www.instagram.com/naruyaizumi
 X-WA-BIZ-NAME:Naruya Izumi
 X-WA-BIZ-DESCRIPTION:𝙊𝙬𝙣𝙚𝙧 𝙤𝙛 𝙇𝙞𝙤𝙧𝙖 𝙎𝙘𝙧𝙞𝙥𝙩
 X-WA-BIZ-HOURS:Mo-Su 00:00-23:59
-END:VCARD`;
+END:VCARD`
 
   const q = {
     key: {
@@ -22,28 +22,24 @@ END:VCARD`;
     message: {
       contactMessage: {
         displayName: "Naruya Izumi",
-        vcard,
+        vcard: v,
       },
     },
-  };
+  }
 
   await conn.sendMessage(
     m.chat,
     {
       contacts: {
         displayName: "Naruya Izumi",
-        contacts: [{ vcard }],
+        contacts: [{ vcard: v }],
       },
       contextInfo: {
         forwardingScore: 999,
         isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: "120363144038483540@newsletter",
-          newsletterName: "mkfs.ext4 /dev/naruyaizumi",
-        },
         externalAdReply: {
-          title: "© 2024–2025 Liora Project",
-          body: "Contact the Owner via WhatsApp",
+          title: "© 2024–2026 Liora",
+          body: "Contact via WhatsApp",
           thumbnailUrl: "https://files.catbox.moe/8tw69l.jpeg",
           mediaType: 1,
           renderLargerThumbnail: true,
@@ -51,11 +47,11 @@ END:VCARD`;
       },
     },
     { quoted: q },
-  );
-};
+  )
+}
 
-handler.help = ["owner"];
-handler.tags = ["info"];
-handler.command = /^(owner|creator)$/i;
+handler.help = ["owner"]
+handler.tags = ["info"]
+handler.command = /^(owner|creator)$/i
 
-export default handler;
+export default handler

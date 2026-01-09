@@ -1,104 +1,88 @@
 let handler = async (m, { conn, usedPrefix, command }) => {
-  const quoted = m.quoted ? m.quoted : m;
-  const mediaType = quoted.mtype || "";
-  const mime = (quoted.msg || quoted).mimetype || "";
+  const q = m.quoted ? m.quoted : m
+  const type = q.mtype || ""
+  const mime = (q.msg || q).mimetype || ""
 
-  const textToParse = m.text || "";
-  const caption = textToParse
+  const txt = m.text || ""
+  const cap = txt
     .replace(new RegExp(`^[.!#/](${command})\\s*`, "i"), "")
-    .trim();
+    .trim()
 
   try {
-    if (!mediaType && !caption) {
-      return m.reply(
-        `Reply to media or provide text.\nExamples: ${usedPrefix + command} Hello everyone! or ${usedPrefix + command} reply to image/video/audio`,
-      );
+    if (!type && !cap) {
+      return m.reply(`Reply to media or provide text\nEx: ${usedPrefix + command} Hello or ${usedPrefix + command} reply`)
     }
 
-    await global.loading(m, conn);
+    await global.loading(m, conn)
 
-    let content = {};
+    let c = {}
 
-    if (mediaType === "imageMessage" || /image/.test(mime)) {
-      const uint8Array = await quoted.download();
-      if (!uint8Array) return m.reply("Failed to download image.");
+    if (type === "imageMessage" || /image/.test(mime)) {
+      const d = await q.download()
+      if (!d) throw new Error("Failed to download image")
 
-      const buffer = Buffer.from(
-        uint8Array.buffer,
-        uint8Array.byteOffset,
-        uint8Array.byteLength,
-      );
+      const buf = Buffer.from(d.buffer, d.byteOffset, d.byteLength)
 
-      content = {
-        image: buffer,
-        caption: caption || "",
-      };
-    } else if (mediaType === "videoMessage" || /video/.test(mime)) {
-      const uint8Array = await quoted.download();
-      if (!uint8Array) return m.reply("Failed to download video.");
+      c = {
+        image: buf,
+        caption: cap || "",
+      }
+    } else if (type === "videoMessage" || /video/.test(mime)) {
+      const d = await q.download()
+      if (!d) throw new Error("Failed to download video")
 
-      const buffer = Buffer.from(
-        uint8Array.buffer,
-        uint8Array.byteOffset,
-        uint8Array.byteLength,
-      );
+      const buf = Buffer.from(d.buffer, d.byteOffset, d.byteLength)
 
-      content = {
-        video: buffer,
-        caption: caption || "",
-      };
+      c = {
+        video: buf,
+        caption: cap || "",
+      }
     } else if (
-      mediaType === "audioMessage" ||
-      mediaType === "ptt" ||
+      type === "audioMessage" ||
+      type === "ptt" ||
       /audio/.test(mime)
     ) {
-      const uint8Array = await quoted.download();
-      if (!uint8Array) return m.reply("Failed to download audio.");
+      const d = await q.download()
+      if (!d) throw new Error("Failed to download audio")
 
-      const buffer = Buffer.from(
-        uint8Array.buffer,
-        uint8Array.byteOffset,
-        uint8Array.byteLength,
-      );
+      const buf = Buffer.from(d.buffer, d.byteOffset, d.byteLength)
 
-      content = {
-        audio: buffer,
+      c = {
+        audio: buf,
         mimetype: "audio/mp4",
-      };
-    } else if (caption) {
-      content = {
-        text: caption,
-      };
+      }
+    } else if (cap) {
+      c = {
+        text: cap,
+      }
     } else {
-      return m.reply(
-        `Reply to media or provide text.\nExamples: ${usedPrefix + command} Hello everyone! or ${usedPrefix + command} reply to image/video/audio`,
-      );
+      throw new Error("Reply to media or provide text")
     }
 
     const { generateWAMessageContent, generateWAMessageFromContent } =
-      await import("baileys");
+      await import("baileys")
 
-    const { backgroundColor, ...contentWithoutBg } = content;
+    const { backgroundColor, ...cNoBg } = c
 
-    const inside = await generateWAMessageContent(contentWithoutBg, {
+    const inside = await generateWAMessageContent(cNoBg, {
       upload: conn.waUploadToServer,
       backgroundColor: backgroundColor || undefined,
-    });
+    })
 
-    const messageSecret = new Uint8Array(32);
-    crypto.getRandomValues(messageSecret);
+    const secret = new Uint8Array(32)
+    crypto.getRandomValues(secret)
 
     const msg = generateWAMessageFromContent(
       m.chat,
       {
         messageContextInfo: {
-          messageSecret,
+          messageSecret: secret,
         },
         groupStatusMessageV2: {
           message: {
             ...inside,
             messageContextInfo: {
-              messageSecret,
+              messageSecret: secret,
             },
           },
         },
@@ -107,25 +91,24 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         userJid: conn.user.id,
         quoted: m,
       },
-    );
+    )
 
     await conn.relayMessage(m.chat, msg.message, {
       messageId: msg.key.id,
-    });
+    })
 
-    m.reply("Group status sent successfully.");
+    m.reply("Group status sent")
   } catch (e) {
-    global.logger?.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading?.(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["groupstatus"];
-handler.tags = ["owner"];
-handler.command = /^(statusgc|swgc)$/i;
-handler.owner = true;
-handler.group = true;
+handler.help = ["groupstatus"]
+handler.tags = ["owner"]
+handler.command = /^(statusgc|swgc)$/i
+handler.owner = true
+handler.group = true
 
-export default handler;
+export default handler

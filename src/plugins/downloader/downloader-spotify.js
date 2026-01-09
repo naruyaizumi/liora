@@ -1,53 +1,32 @@
-import { convert } from "#lib/convert.js";
-import { spotify } from "#api/spotify.js";
+import { spotify } from "#api/spotify.js"
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  if (!args[0])
-    return m.reply(
-      `Please provide a song title.\n› Example: ${usedPrefix + command} Swim`,
-    );
+  if (!args[0]) {
+    return m.reply(`Need song title\nEx: ${usedPrefix + command} Swim`)
+  }
 
-  await global.loading(m, conn);
+  await global.loading(m, conn)
+
   try {
-    const {
-      success,
-      title,
-      channel,
-      cover,
-      url,
-      downloadUrl,
-      duration,
-      error,
-    } = await spotify(args.join(" "));
-    if (!success) throw new Error(error);
+    const res = await spotify(args.join(" "))
 
-    const audioRes = await fetch(downloadUrl);
-    if (!audioRes.ok)
-      throw new Error(`Failed to fetch audio. Status: ${audioRes.status}`);
+    if (!res?.success) {
+      throw new Error(res?.error || "No audio")
+    }
 
-    const arrayBuffer = await audioRes.arrayBuffer();
-    const audioUint8 = new Uint8Array(arrayBuffer);
+    const { title, channel, cover, url, downloadUrl } = res
 
-    const convertedUint8 = await convert(audioUint8, {
-      format: "opus",
-      sampleRate: 48000,
-      channels: 1,
-      bitrate: "64k",
-      ptt: true,
-    });
-
-    const audioBuffer = Buffer.from(
-      convertedUint8.buffer,
-      convertedUint8.byteOffset,
-      convertedUint8.byteLength,
-    );
+    if (!downloadUrl) {
+      throw new Error("No download URL")
+    }
 
     await conn.sendMessage(
       m.chat,
       {
-        audio: audioBuffer,
-        mimetype: "audio/ogg; codecs=opus",
-        ptt: true,
+        audio: {
+          url: downloadUrl,
+        },
+        mimetype: "audio/mpeg",
         contextInfo: {
           externalAdReply: {
             title,
@@ -60,17 +39,16 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         },
       },
       { quoted: m },
-    );
+    )
   } catch (e) {
-    global.logger.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["spotify"];
-handler.tags = ["downloader"];
-handler.command = /^(spotify|sp)$/i;
+handler.help = ["spotify"]
+handler.tags = ["downloader"]
+handler.command = /^(spotify)$/i
 
-export default handler;
+export default handler

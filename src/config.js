@@ -581,6 +581,8 @@ const db = new DataWrapper();
 global.db = db;
 global.sqlite = sqlite;
 
+global.timestamp = { start: new Date() };
+
 setInterval(() => {
   const stats = {
     chats: db.rowCaches.chats.cache.size,

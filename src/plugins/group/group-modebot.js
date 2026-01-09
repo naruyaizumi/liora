@@ -1,35 +1,26 @@
 let handler = async (m, { text, usedPrefix, command }) => {
-  try {
-    const chat = global.db.data.chats[m.chat];
+  const chat = global.db.data.chats[m.chat];
 
-    if (!text) {
-      const status = chat.mute ? "OFFLINE" : "ONLINE";
-      return m.reply(
-        `Bot status: ${status}\nUse '${usedPrefix + command} on' or '${usedPrefix + command} off' to change mode.`,
-      );
-    }
+  if (!text) {
+    const status = chat.mute ? "OFF" : "ON";
+    return m.reply(`Bot: ${status}\nUse: ${usedPrefix + command} on/off`);
+  }
 
-    switch (text.toLowerCase()) {
-      case "off":
-      case "mute":
-        if (chat.mute) return m.reply("Bot is already OFFLINE.");
-        chat.mute = true;
-        return m.reply("Bot is now OFFLINE.");
+  switch (text.toLowerCase()) {
+    case "off":
+    case "mute":
+      if (chat.mute) return m.reply("Already OFF");
+      chat.mute = true;
+      return m.reply("Bot OFF");
 
-      case "on":
-      case "unmute":
-        if (!chat.mute) return m.reply("Bot is already ONLINE.");
-        chat.mute = false;
-        return m.reply("Bot is now ONLINE.");
+    case "on":
+    case "unmute":
+      if (!chat.mute) return m.reply("Already ON");
+      chat.mute = false;
+      return m.reply("Bot ON");
 
-      default:
-        return m.reply(
-          `Invalid parameter.\nUsage: ${usedPrefix + command} on | off`,
-        );
-    }
-  } catch (e) {
-    global.logger.error(e);
-    m.reply(`Error: ${e.message}`);
+    default:
+      return m.reply(`Invalid\nUse: ${usedPrefix + command} on/off`);
   }
 };
 

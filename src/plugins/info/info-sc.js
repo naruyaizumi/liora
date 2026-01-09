@@ -1,5 +1,5 @@
 let handler = async (m, { conn }) => {
-  const text = `
+  const txt = `
 Liora Repository
 
 Project Script Izumi
@@ -61,7 +61,7 @@ Pull Req: https://github.com/naruyaizumi/liora/pulls
           "https://l.wl.co/l/?u=https%3A%2F%2Flinkbio.co%2Fnaruyaizumi&e=AT065QDZzUpFex4H3JaKX1B3jFxLs90G3NEOHbP-LeDGmNM4QfwzF76CAPV6ODSxeErfWu-ZjaaihkWeRUJcUKOdiAfCTnSh3v8uQMqc2-eqKvM8EYzip2AAR-5GsbNJH16tEQ",
       },
       businessOwnerJid: "113748182302861@lid",
-      footer: text,
+      footer: txt,
       contextInfo: {
         forwardingScore: 999,
         isForwarded: true,

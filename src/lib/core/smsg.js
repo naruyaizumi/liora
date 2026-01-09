@@ -1,47 +1,61 @@
 import { proto } from "baileys";
-import { Message } from "./message.js";
 
-const messageCache = new WeakMap();
+const SYM_PROCESSED = Symbol.for("smsg.processed");
 
 export function smsg(conn, m) {
-  if (!m) return m;
-
-  let cached = messageCache.get(m);
-  if (cached) {
-    if (cached.conn !== conn) {
-      cached.conn = conn;
+    if (!m) return m;
+    if (m[SYM_PROCESSED]) {
+        m.conn = conn;
+        return m;
     }
-    return cached;
-  }
+    
+    const M = proto.WebMessageInfo;
+    if (M?.create) {
+        try {
+            m = M.create(m);
+        } catch (e) {
+            throw e;
+        }
+    }
+    
+    m.conn = conn;
+    
+    const msg = m.message;
+    if (!msg) {
+        m[SYM_PROCESSED] = true;
+        return m;
+    }
 
-  const M = proto.WebMessageInfo;
-  let raw = m;
-
-  if (M?.create) {
     try {
-      raw = M.create(m);
+        if (m.mtype === "protocolMessage" && m.msg?.key) {
+            const key = { ...m.msg.key };
+
+            if (key.remoteJid === "status@broadcast" && m.chat) {
+                key.remoteJid = m.chat;
+            }
+
+            if ((!key.participant || key.participant === "status_me") && m.sender) {
+                key.participant = m.sender;
+            }
+
+            const botId = conn.decodeJid?.(conn.user?.lid || "") || "";
+            
+            if (botId) {
+                const partId = conn.decodeJid?.(key.participant) || "";
+                key.fromMe = partId === botId;
+
+                if (!key.fromMe && key.remoteJid === botId && m.sender) {
+                    key.remoteJid = m.sender;
+                }
+            }
+
+            m.msg.key = key;
+            conn.ev?.emit("messages.delete", { keys: [key] });
+        }
     } catch (e) {
-      if (global.logger?.error) {
-        global.logger.error(e.message);
-      }
-      raw = m;
+        throw e;
     }
-  }
 
-  const wrapped = new Message(raw, conn);
-
-  try {
-    wrapped.process();
-  } catch (e) {
-    if (global.logger?.error) {
-      global.logger.error({ error: e.message }, "Process message error");
-    }
-  }
-
-  messageCache.set(m, wrapped);
-  if (raw !== m) {
-    messageCache.set(raw, wrapped);
-  }
-
-  return wrapped;
+    m[SYM_PROCESSED] = true;
+    return m;
 }

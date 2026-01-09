@@ -1,69 +1,67 @@
 let handler = async (m, { conn }) => {
-  const q = m.quoted;
+  const q = m.quoted
   try {
-    const media = q?.mediaMessage;
+    const mq = q?.mediaMessage
 
-    if (!media) {
-      return m.reply("No media found in quoted message.");
+    if (!mq) {
+      throw new Error("No media")
     }
 
-    const vid = media.videoMessage;
-    const img = media.imageMessage;
-    const aud = media.audioMessage;
+    const v = mq.videoMessage || mq.imageMessage || mq.audioMessage
 
-    const msg = vid || img || aud;
-
-    if (!msg) {
-      return m.reply("Unsupported media type.");
+    if (!v) {
+      throw new Error("Unsupported type")
     }
 
-    if (!msg.viewOnce) {
-      return m.reply("This is not a view-once message.");
+    if (!v.viewOnce) {
+      throw new Error("Not view-once")
     }
 
-    const buffer = await q.download?.();
-    if (!buffer) {
-      return m.reply("Failed to retrieve media.");
+    const buf = await q.download?.()
+    if (!buf) {
+      throw new Error("Download failed")
     }
 
-    const mime = msg.mimetype || "";
-
-    let type;
-    if (mime.startsWith("image/") || img) {
-      type = "image";
-    } else if (mime.startsWith("video/") || vid) {
-      type = "video";
-    } else if (mime.startsWith("audio/") || aud) {
-      type = "audio";
+    const mime = v.mimetype || ""
+    let t
+    if (mime.startsWith("image/") || mq.imageMessage) {
+      t = "image"
+    } else if (mime.startsWith("video/") || mq.videoMessage) {
+      t = "video"
+    } else if (mime.startsWith("audio/") || mq.audioMessage) {
+      t = "audio"
     } else {
-      return m.reply("Unsupported media type.");
+      throw new Error("Unsupported type")
     }
 
-    const caption = msg.caption || q.text || "";
-    const ctx = {};
+    const cap = v.caption || q.text || ""
+    const ctx = {}
 
-    if (msg.contextInfo?.mentionedJid?.length > 0) {
-      ctx.mentionedJid = msg.contextInfo.mentionedJid;
+    if (v.contextInfo?.mentionedJid?.length > 0) {
+      ctx.mentionedJid = v.contextInfo.mentionedJid
     }
+
+    const data = buf instanceof Uint8Array 
+      ? Buffer.from(buf.buffer, buf.byteOffset, buf.byteLength)
+      : Buffer.isBuffer(buf) ? buf : Buffer.from(buf || [])
 
     await conn.sendMessage(
       m.chat,
       {
-        [type]: buffer,
+        [t]: data,
         mimetype: mime,
-        caption,
+        caption: cap,
         contextInfo: ctx,
       },
       { quoted: m },
-    );
+    )
   } catch (e) {
-    global.logger?.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   }
-};
+}
 
-handler.help = ["readviewonce"];
-handler.tags = ["tools"];
-handler.command = /^(read(view(once)?)?|rvo)$/i;
+handler.help = ["readviewonce"]
+handler.tags = ["tools"]
+handler.command = /^(read(view(once)?)?|rvo)$/i
 
-export default handler;
+export default handler

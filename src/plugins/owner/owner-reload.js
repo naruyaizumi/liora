@@ -1,12 +1,7 @@
 let handler = async (m, { conn }) => {
-  try {
-    await global.reloadAllPlugins();
-    await global.reloadHandler();
-    await m.reply("Reloaded successfully!");
-  } catch (e) {
-    m.reply(`Error: ${e.message}`);
-    global.logger.error({ error: e.message }, "Reload command error");
-  }
+  await global.reloadAllPlugins();
+  await global.reloadHandler();
+  m.reply("Reloaded");
 };
 
 handler.help = ["reload"];

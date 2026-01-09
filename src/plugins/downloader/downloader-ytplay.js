@@ -1,68 +1,35 @@
-import { convert } from "#lib/convert.js";
-import { play } from "#api/play.js";
+import { play } from "#api/play.js"
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  if (!args[0])
-    return m.reply(
-      `Please provide a song title.\n› Example: ${usedPrefix + command} Bye`,
-    );
-
-  await global.loading(m, conn);
-
+  if (!args[0]) {
+    return m.reply(`Need song title\nEx: ${usedPrefix + command} Bye`)
+  }
+  
+  await global.loading(m, conn)
+  
   try {
-    const result = await play(args.join(" "));
-
-    if (!result?.success) {
-      throw new Error(result?.error || "Failed to get audio");
+    const res = await play(args.join(" "))
+    
+    if (!res?.success) {
+      throw new Error(res?.error || "No audio")
     }
-
-    const { title, channel, cover, url, downloadUrl } = result;
-
+    
+    const { title, channel, cover, url, downloadUrl } = res
+    
     if (!downloadUrl) {
-      throw new Error("No download URL returned");
+      throw new Error("No download URL")
     }
-
-    const audioRes = await fetch(downloadUrl);
-    if (!audioRes.ok) {
-      throw new Error(
-        `Failed to fetch audio: ${audioRes.status} ${audioRes.statusText}`,
-      );
-    }
-
-    const audioArrayBuffer = await audioRes.arrayBuffer();
-    const audioUint8 = new Uint8Array(audioArrayBuffer);
-
-    if (audioUint8.length === 0) {
-      throw new Error("Audio data is empty");
-    }
-
-    const converted = await convert(audioUint8, {
-      format: "opus",
-      bitrate: "128k",
-      channels: 1,
-      sampleRate: 48000,
-      ptt: true,
-    });
-
-    if (!converted || converted.length === 0) {
-      throw new Error("Audio conversion failed");
-    }
-
-    const audioBuffer = Buffer.from(
-      converted.buffer,
-      converted.byteOffset,
-      converted.byteLength,
-    );
-
+    
     await conn.sendMessage(
       m.chat,
       {
-        audio: audioBuffer,
-        mimetype: "audio/ogg; codecs=opus",
-        ptt: true,
+        audio: {
+          url: downloadUrl,
+        },
+        mimetype: "audio/mpeg",
         contextInfo: {
           externalAdReply: {
-            title: title,
+            title,
             body: channel,
             thumbnailUrl: cover,
             mediaUrl: url,
@@ -70,19 +37,17 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             renderLargerThumbnail: true,
           },
         },
-      },
-      { quoted: m },
-    );
+      }, { quoted: m },
+    )
   } catch (e) {
-    global.logger.error(e);
-    m.reply(`Error: ${e.message}`);
+    m.reply(`Error: ${e.message}`)
   } finally {
-    await global.loading(m, conn, true);
+    await global.loading(m, conn, true)
   }
-};
+}
 
-handler.help = ["play"];
-handler.tags = ["downloader"];
-handler.command = /^(play)$/i;
+handler.help = ["play"]
+handler.tags = ["downloader"]
+handler.command = /^(play)$/i
 
-export default handler;
+export default handler

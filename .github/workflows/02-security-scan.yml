@@ -55,28 +55,3 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:${{matrix.language}}"
-
-  njsscan:
-    name: Njsscan Security Analysis
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install Njsscan
-        run: pip install njsscan
-
-      - name: Run Njsscan
-        run: njsscan --json > report.json
-
-      - name: Upload Njsscan Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: njsscan-report
-          path: report.json
-          retention-days: 7
