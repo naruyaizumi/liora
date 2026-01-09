@@ -61,20 +61,22 @@ All reports will be reviewed promptly and confidentially.
 1. **Fork the repository** on GitHub
 
 2. **Clone your fork**:
-   ```bash
-   git clone https://github.com/YOUR-USERNAME/liora.git
-   cd liora
-   ```
+
+    ```bash
+    git clone https://github.com/YOUR-USERNAME/liora.git
+    cd liora
+    ```
 
 3. **Add upstream remote**:
-   ```bash
-   git remote add upstream https://github.com/naruyaizumi/liora.git
-   ```
+
+    ```bash
+    git remote add upstream https://github.com/naruyaizumi/liora.git
+    ```
 
 4. **Verify remotes**:
-   ```bash
-   git remote -v
-   ```
+    ```bash
+    git remote -v
+    ```
 
 ---
 
@@ -98,6 +100,7 @@ nano .env
 ```
 
 Required environment variables:
+
 - `PAIRING_NUMBER`: WhatsApp number for pairing
 - `PAIRING_CODE`: Code for authentication
 - `OWNERS`: Array of owner numbers
@@ -129,21 +132,25 @@ liora/
 ### Reporting Bugs
 
 Before creating a bug report:
+
 1. Check existing issues to avoid duplicates
 2. Verify the issue exists in the latest version
 3. Collect relevant information
 
 **Bug Report Template**:
+
 ```markdown
 **Description**
 Clear description of the bug
 
 **Steps to Reproduce**
+
 1. Step one
 2. Step two
 3. Expected vs actual behavior
 
 **Environment**
+
 - OS: [e.g., Ubuntu 24.04]
 - Bun version: [e.g., 1.3.5]
 - Liora version: [e.g., 10.0.0]
@@ -155,12 +162,14 @@ Logs, screenshots, or other relevant information
 ### Suggesting Features
 
 Feature suggestions are welcome! Please provide:
+
 - Clear description of the feature
 - Use cases and benefits
 - Potential implementation approach
 - Any relevant examples from other projects
 
 **Feature Request Template**:
+
 ```markdown
 **Feature Description**
 What feature would you like to see?
@@ -178,6 +187,7 @@ Other approaches you've thought about
 ### First Contribution
 
 Look for issues labeled:
+
 - `good first issue` - Beginner-friendly tasks
 - `help wanted` - Tasks needing assistance
 - `documentation` - Documentation improvements
@@ -189,6 +199,7 @@ Look for issues labeled:
 ### JavaScript/TypeScript
 
 **Style Guidelines**:
+
 - Use ESM (ES Modules) syntax
 - Prefer `const` over `let`, avoid `var`
 - Use meaningful variable names
@@ -197,6 +208,7 @@ Look for issues labeled:
 - Use async/await over promises
 
 **Example**:
+
 ```javascript
 /**
  * Downloads media from a WhatsApp message
@@ -204,13 +216,13 @@ Look for issues labeled:
  * @returns {Promise<Buffer>} Downloaded media buffer
  */
 async function downloadMedia(message) {
-  if (!message.message) {
-    throw new Error('Invalid message object');
-  }
-  
-  // Implementation
-  const buffer = await downloadMediaMessage(message);
-  return buffer;
+    if (!message.message) {
+        throw new Error("Invalid message object");
+    }
+
+    // Implementation
+    const buffer = await downloadMediaMessage(message);
+    return buffer;
 }
 ```
 
@@ -230,13 +242,14 @@ bunx prettier --check .
 ```
 
 **Prettier Configuration** (`.prettierrc`):
+
 ```json
 {
-  "semi": true,
-  "singleQuote": true,
-  "tabWidth": 2,
-  "trailingComma": "es5",
-  "printWidth": 80
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "printWidth": 80
 }
 ```
 
@@ -270,22 +283,23 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/) specifica
 
 ### Types
 
-| Type | Description | Example |
-|------|-------------|---------|
-| `feat` | New feature | `feat(api): add TikTok downloader` |
-| `fix` | Bug fix | `fix(auth): resolve session timeout` |
-| `docs` | Documentation | `docs(readme): update installation` |
-| `style` | Code style | `style: format with prettier` |
+| Type       | Description      | Example                              |
+| ---------- | ---------------- | ------------------------------------ |
+| `feat`     | New feature      | `feat(api): add TikTok downloader`   |
+| `fix`      | Bug fix          | `fix(auth): resolve session timeout` |
+| `docs`     | Documentation    | `docs(readme): update installation`  |
+| `style`    | Code style       | `style: format with prettier`        |
 | `refactor` | Code refactoring | `refactor(db): simplify query logic` |
-| `perf` | Performance | `perf(cache): optimize lookup` |
-| `test` | Tests | `test(api): add unit tests` |
-| `build` | Build system | `build: update dependencies` |
-| `ci` | CI/CD | `ci: add GitHub Actions workflow` |
-| `chore` | Maintenance | `chore: update .gitignore` |
+| `perf`     | Performance      | `perf(cache): optimize lookup`       |
+| `test`     | Tests            | `test(api): add unit tests`          |
+| `build`    | Build system     | `build: update dependencies`         |
+| `ci`       | CI/CD            | `ci: add GitHub Actions workflow`    |
+| `chore`    | Maintenance      | `chore: update .gitignore`           |
 
 ### Scope
 
 Common scopes:
+
 - `api` - API integrations
 - `auth` - Authentication
 - `db` - Database
@@ -329,32 +343,36 @@ Closes #789
 ### Before Submitting
 
 1. **Update your fork**:
-   ```bash
-   git fetch upstream
-   git checkout main
-   git merge upstream/main
-   ```
+
+    ```bash
+    git fetch upstream
+    git checkout main
+    git merge upstream/main
+    ```
 
 2. **Create feature branch**:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+
+    ```bash
+    git checkout -b feature/your-feature-name
+    ```
 
 3. **Make changes and commit**:
-   ```bash
-   git add .
-   git commit -m "feat(scope): description"
-   ```
+
+    ```bash
+    git add .
+    git commit -m "feat(scope): description"
+    ```
 
 4. **Run tests**:
-   ```bash
-   bun test
-   ```
+
+    ```bash
+    bun test
+    ```
 
 5. **Push to your fork**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
+    ```bash
+    git push origin feature/your-feature-name
+    ```
 
 ### Submitting PR
 
@@ -406,35 +424,37 @@ bun test --coverage
 Place tests in `tests/` directory with `.test.js` suffix.
 
 **Example Test**:
-```javascript
-import { describe, it, expect } from 'bun:test';
-import { downloadMedia } from '../src/lib/media.js';
 
-describe('Media Download', () => {
-  it('should download image successfully', async () => {
-    const mockMessage = {
-      message: {
-        imageMessage: {
-          url: 'https://example.com/image.jpg'
-        }
-      }
-    };
-    
-    const result = await downloadMedia(mockMessage);
-    expect(result).toBeInstanceOf(Buffer);
-  });
-  
-  it('should throw error for invalid message', async () => {
-    expect(async () => {
-      await downloadMedia({});
-    }).toThrow('Invalid message object');
-  });
+```javascript
+import { describe, it, expect } from "bun:test";
+import { downloadMedia } from "../src/lib/media.js";
+
+describe("Media Download", () => {
+    it("should download image successfully", async () => {
+        const mockMessage = {
+            message: {
+                imageMessage: {
+                    url: "https://example.com/image.jpg",
+                },
+            },
+        };
+
+        const result = await downloadMedia(mockMessage);
+        expect(result).toBeInstanceOf(Buffer);
+    });
+
+    it("should throw error for invalid message", async () => {
+        expect(async () => {
+            await downloadMedia({});
+        }).toThrow("Invalid message object");
+    });
 });
 ```
 
 ### Test Coverage
 
 Aim for:
+
 - **Unit tests**: 80%+ coverage
 - **Integration tests**: Critical paths covered
 - **E2E tests**: Major features tested
@@ -452,6 +472,7 @@ Aim for:
 ### Project Documentation
 
 When updating features, also update:
+
 - README.md
 - API documentation (if applicable)
 - Configuration examples
@@ -469,6 +490,7 @@ When updating features, also update:
 ## Recognition
 
 Contributors are recognized through:
+
 - Listed in CONTRIBUTORS.md
 - Mentioned in release notes
 - GitHub contributor badge

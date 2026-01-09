@@ -33,7 +33,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
     const textNode = typeof rawNode === "string" ? rawNode : rawNode?.text;
     const base = typeof rawNode === "string" ? { text: rawNode } : rawNode || {};
     const out = Object.create(base);
-    
+
     return Object.defineProperties(out, {
         mtype: {
             get: () => type,
@@ -209,9 +209,7 @@ export function serialize() {
             get() {
                 const skdm = this.message?.senderKeyDistributionMessage?.groupId;
                 const raw =
-                    this.key?.remoteJid ||
-                    (skdm && skdm !== "status@broadcast" ? skdm : "") ||
-                    "";
+                    this.key?.remoteJid || (skdm && skdm !== "status@broadcast" ? skdm : "") || "";
 
                 const conn = this.conn;
                 if (conn?.decodeJid) return conn.decodeJid(raw);

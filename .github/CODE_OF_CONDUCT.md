@@ -15,18 +15,21 @@ This Code of Conduct outlines our expectations for participant behavior and the 
 We encourage behavior that contributes to a positive environment:
 
 **Respectful Communication**
+
 - Use welcoming and inclusive language
 - Be respectful of differing viewpoints and experiences
 - Accept constructive criticism gracefully
 - Show empathy toward other community members
 
 **Collaborative Spirit**
+
 - Focus on what is best for the community
 - Support and help newcomers
 - Share knowledge and expertise
 - Acknowledge contributions of others
 
 **Professional Conduct**
+
 - Maintain professionalism in all interactions
 - Exercise consideration and respect in speech and actions
 - Attempt collaboration before conflict
@@ -37,6 +40,7 @@ We encourage behavior that contributes to a positive environment:
 The following behaviors are considered harassment and are unacceptable:
 
 **Harassment and Discrimination**
+
 - Discriminatory language or actions
 - Personal or political attacks
 - Trolling or insulting comments
@@ -44,17 +48,20 @@ The following behaviors are considered harassment and are unacceptable:
 - Sexual language or imagery
 
 **Disruptive Behavior**
+
 - Sustained disruption of discussions
 - Spam or off-topic content
 - Deliberate intimidation or stalking
 - Unwelcome sexual attention or advances
 
 **Privacy Violations**
+
 - Publishing others' private information without permission
 - Sharing confidential project information
 - Unauthorized use of personal data
 
 **Misuse of Platform**
+
 - Creating multiple accounts to evade bans
 - Impersonating others
 - Manipulating voting or engagement metrics
@@ -67,6 +74,7 @@ The following behaviors are considered harassment and are unacceptable:
 Project maintainers are responsible for clarifying and enforcing standards of acceptable behavior. They will take appropriate and fair corrective action in response to any behavior deemed inappropriate, threatening, offensive, or harmful.
 
 Maintainers have the right and responsibility to remove, edit, or reject:
+
 - Comments
 - Commits
 - Code
@@ -83,12 +91,14 @@ that do not align with this Code of Conduct.
 This Code of Conduct applies in all project spaces, including:
 
 **Project Spaces**
+
 - GitHub repository (issues, PRs)
 - Project documentation
 - Code reviews and commits
 - Official communication channels
 
 **Public Representation**
+
 - Official social media accounts
 - Online or offline events
 - Email communications
@@ -107,6 +117,7 @@ Email: liora.bot.official@gmail.com
 Subject: "Code of Conduct Violation Report"
 
 **What to Include**
+
 - Your contact information
 - Names of individuals involved (if known)
 - Description of the incident
@@ -135,7 +146,8 @@ Project maintainers will follow these guidelines when determining consequences:
 **Community Impact**  
 Minor violation such as inappropriate language or unprofessional behavior.
 
-**Consequence**  
+**Consequence**
+
 - Private written warning from maintainers
 - Explanation of violation
 - Request for public or private apology
@@ -148,7 +160,8 @@ Minor violation such as inappropriate language or unprofessional behavior.
 **Community Impact**  
 Violation through single incident or series of actions.
 
-**Consequence**  
+**Consequence**
+
 - Formal warning with specified consequences
 - Temporary restriction from community interaction
 - No contact with involved parties for specified period
@@ -161,7 +174,8 @@ Violation through single incident or series of actions.
 **Community Impact**  
 Serious violation of community standards, including sustained inappropriate behavior.
 
-**Consequence**  
+**Consequence**
+
 - Temporary ban from all project interaction (7-30 days)
 - No public or private communication allowed
 - Violation of ban may result in permanent ban
@@ -174,7 +188,8 @@ Serious violation of community standards, including sustained inappropriate beha
 **Community Impact**  
 Demonstrating pattern of violations, harassment, or aggression toward individuals or groups.
 
-**Consequence**  
+**Consequence**
+
 - Permanent ban from all project spaces
 - Prohibition from representing the project
 - Report to relevant platforms (GitHub, etc.)
@@ -218,6 +233,7 @@ This Code of Conduct is adapted from:
 ### Best Practices
 
 **For Contributors**
+
 - Read documentation before asking questions
 - Search existing issues before creating new ones
 - Provide complete information in bug reports
@@ -225,6 +241,7 @@ This Code of Conduct is adapted from:
 - Thank maintainers and contributors
 
 **For Maintainers**
+
 - Respond to issues and PRs promptly
 - Provide clear feedback and guidance
 - Be welcoming to new contributors
@@ -234,6 +251,7 @@ This Code of Conduct is adapted from:
 ### Communication Standards
 
 **Issue and PR Discussions**
+
 - Stay on topic
 - Use clear, descriptive titles
 - Provide context and examples
@@ -245,6 +263,7 @@ This Code of Conduct is adapted from:
 ## Changes to Code of Conduct
 
 This Code of Conduct may be updated periodically. We will:
+
 - Announce significant changes via GitHub
 - Update the "Last Modified" date
 - Maintain version history in git

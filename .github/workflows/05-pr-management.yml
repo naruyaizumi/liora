@@ -1,49 +1,49 @@
 name: Pull Request Management
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+    pull_request:
+        types: [opened, synchronize, reopened]
 
 permissions:
-  contents: write
-  pull-requests: write
+    contents: write
+    pull-requests: write
 
 jobs:
-  auto-approve-dependabot:
-    name: Auto Approve Dependabot
-    runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]' && github.event.action == 'opened'
-    steps:
-      - name: Dependabot metadata
-        id: metadata
-        uses: dependabot/fetch-metadata@v2
-        with:
-          github-token: ${{ secrets.PAT_TOKEN }}
+    auto-approve-dependabot:
+        name: Auto Approve Dependabot
+        runs-on: ubuntu-latest
+        if: github.actor == 'dependabot[bot]' && github.event.action == 'opened'
+        steps:
+            - name: Dependabot metadata
+              id: metadata
+              uses: dependabot/fetch-metadata@v2
+              with:
+                  github-token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Auto approve
+            - name: Auto approve
+              if: |
+                  steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+                  steps.metadata.outputs.update-type == 'version-update:semver-minor'
+              run: gh pr review --approve "${{ github.event.pull_request.html_url }}"
+              env:
+                  GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+    auto-approve-release:
+        name: Auto Approve Release PR
+        runs-on: ubuntu-latest
         if: |
-          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
-          steps.metadata.outputs.update-type == 'version-update:semver-minor'
-        run: gh pr review --approve "${{ github.event.pull_request.html_url }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-  auto-approve-release:
-    name: Auto Approve Release PR
-    runs-on: ubuntu-latest
-    if: |
-      contains(github.event.pull_request.head.ref, 'release/v') &&
-      github.event.pull_request.head.ref != 'release/v' &&
-      github.event.action == 'opened'
-    steps:
-      - name: Approve Release PR
-        uses: actions/github-script@v8
-        with:
-          script: |
-            await github.rest.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-              event: 'APPROVE',
-              body: '✓ Auto-approved: Release PR'
-            });
+            contains(github.event.pull_request.head.ref, 'release/v') &&
+            github.event.pull_request.head.ref != 'release/v' &&
+            github.event.action == 'opened'
+        steps:
+            - name: Approve Release PR
+              uses: actions/github-script@v8
+              with:
+                  script: |
+                      await github.rest.pulls.createReview({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        pull_number: context.issue.number,
+                        event: 'APPROVE',
+                        body: '✓ Auto-approved: Release PR'
+                      });

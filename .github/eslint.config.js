@@ -5,10 +5,7 @@ export default [
     js.configs.recommended,
     {
         files: ["**/*.js"],
-        ignores: [
-            "node_modules/",
-            ".github/",
-        ],
+        ignores: ["node_modules/", ".github/"],
         languageOptions: {
             globals: {
                 ...globals.node,

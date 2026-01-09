@@ -1,104 +1,104 @@
 name: Release Management
 
 on:
-  push:
-    branches: [main]
+    push:
+        branches: [main]
 
 permissions:
-  contents: write
-  issues: write
-  pull-requests: write
+    contents: write
+    issues: write
+    pull-requests: write
 
 jobs:
-  check-version:
-    name: Check Version Change
-    runs-on: ubuntu-latest
-    outputs:
-      should_release: ${{ steps.check.outputs.release }}
-      new_version: ${{ steps.check.outputs.version }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+    check-version:
+        name: Check Version Change
+        runs-on: ubuntu-latest
+        outputs:
+            should_release: ${{ steps.check.outputs.release }}
+            new_version: ${{ steps.check.outputs.version }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
 
-      - name: Check version vs tag
-        id: check
-        run: |
-          PACKAGE_VERSION=$(jq -r '.version' package.json)
-          echo "version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
-          
-          if git rev-parse "v$PACKAGE_VERSION" >/dev/null 2>&1; then
-            echo "Tag already exists: v$PACKAGE_VERSION"
-            echo "release=false" >> $GITHUB_OUTPUT
-          else
-            echo "New version detected: $PACKAGE_VERSION"
-            echo "release=true" >> $GITHUB_OUTPUT
-          fi
+            - name: Check version vs tag
+              id: check
+              run: |
+                  PACKAGE_VERSION=$(jq -r '.version' package.json)
+                  echo "version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
 
-  create-tag:
-    name: Create Tag if Needed
-    needs: check-version
-    if: needs.check-version.outputs.should_release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.PAT_TOKEN }}
-          fetch-depth: 0
+                  if git rev-parse "v$PACKAGE_VERSION" >/dev/null 2>&1; then
+                    echo "Tag already exists: v$PACKAGE_VERSION"
+                    echo "release=false" >> $GITHUB_OUTPUT
+                  else
+                    echo "New version detected: $PACKAGE_VERSION"
+                    echo "release=true" >> $GITHUB_OUTPUT
+                  fi
 
-      - name: Create tag
-        run: |
-          VERSION="${{ needs.check-version.outputs.new_version }}"
-          git config user.name "liora-bot"
-          git config user.email "liora.bot.official@gmail.com"
-          git tag -a "v$VERSION" -m "Release v$VERSION"
-          git push origin "v$VERSION"
+    create-tag:
+        name: Create Tag if Needed
+        needs: check-version
+        if: needs.check-version.outputs.should_release == 'true'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+              with:
+                  token: ${{ secrets.PAT_TOKEN }}
+                  fetch-depth: 0
 
-  create-release:
-    name: Create GitHub Release
-    needs: [check-version, create-tag]
-    if: needs.check-version.outputs.should_release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+            - name: Create tag
+              run: |
+                  VERSION="${{ needs.check-version.outputs.new_version }}"
+                  git config user.name "liora-bot"
+                  git config user.email "liora.bot.official@gmail.com"
+                  git tag -a "v$VERSION" -m "Release v$VERSION"
+                  git push origin "v$VERSION"
 
-      - name: Generate changelog
-        id: changelog
-        run: |
-          VERSION="${{ needs.check-version.outputs.new_version }}"
-          PREV_TAG=$(git describe --tags --abbrev=0 "v$VERSION^" 2>/dev/null || echo "")
-          
-          if [ -z "$PREV_TAG" ]; then
-            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
-          else
-            CHANGELOG=$(git log "$PREV_TAG..v$VERSION" --pretty=format:"- %s (%h)" --no-merges)
-          fi
-          
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+    create-release:
+        name: Create GitHub Release
+        needs: [check-version, create-tag]
+        if: needs.check-version.outputs.should_release == 'true'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ needs.check-version.outputs.new_version }}
-          name: Release v${{ needs.check-version.outputs.new_version }}
-          body: |
-            # 🎉 Release v${{ needs.check-version.outputs.new_version }}
-            
-            ## What's Changed
-            
-            ${{ steps.changelog.outputs.changelog }}
-            
-            ## Full Changelog
-            
-            **Full Changelog**: https://github.com/naruyaizumi/liora/compare/v${{ needs.check-version.outputs.new_version }}
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+            - name: Generate changelog
+              id: changelog
+              run: |
+                  VERSION="${{ needs.check-version.outputs.new_version }}"
+                  PREV_TAG=$(git describe --tags --abbrev=0 "v$VERSION^" 2>/dev/null || echo "")
+
+                  if [ -z "$PREV_TAG" ]; then
+                    CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
+                  else
+                    CHANGELOG=$(git log "$PREV_TAG..v$VERSION" --pretty=format:"- %s (%h)" --no-merges)
+                  fi
+
+                  echo "changelog<<EOF" >> $GITHUB_OUTPUT
+                  echo "$CHANGELOG" >> $GITHUB_OUTPUT
+                  echo "EOF" >> $GITHUB_OUTPUT
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: v${{ needs.check-version.outputs.new_version }}
+                  name: Release v${{ needs.check-version.outputs.new_version }}
+                  body: |
+                      # 🎉 Release v${{ needs.check-version.outputs.new_version }}
+
+                      ## What's Changed
+
+                      ${{ steps.changelog.outputs.changelog }}
+
+                      ## Full Changelog
+
+                      **Full Changelog**: https://github.com/naruyaizumi/liora/compare/v${{ needs.check-version.outputs.new_version }}
+                  draft: false
+                  prerelease: false
+              env:
+                  GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}

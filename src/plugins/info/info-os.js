@@ -1,90 +1,81 @@
 import {
-  formatSize,
-  formatTime,
-  makeProgressBar,
-  getOSInfo,
-  getSystemInfo,
-  getCPUInfo,
-  getCPUFeatures,
-  getMemoryInfo,
-  getDiskInfo,
-  getNetworkInfo,
-  getNetworkFeatures,
-  getIPInfo,
-  getProcessInfo,
-  getContainerInfo,
-  getSystemLoad,
-  getWarnings,
-  getHeapInfo,
-  getServiceInfo,
-  getUserInfo,
-  getSoftwareInfo,
+    formatSize,
+    formatTime,
+    makeProgressBar,
+    getOSInfo,
+    getSystemInfo,
+    getCPUInfo,
+    getCPUFeatures,
+    getMemoryInfo,
+    getDiskInfo,
+    getNetworkInfo,
+    getNetworkFeatures,
+    getIPInfo,
+    getProcessInfo,
+    getContainerInfo,
+    getSystemLoad,
+    getWarnings,
+    getHeapInfo,
+    getServiceInfo,
+    getUserInfo,
+    getSoftwareInfo,
 } from "#lib/system.js";
 
 let handler = async (m, { conn }) => {
-  const startTime = Date.now();
-  const [
-    osInfo,
-    systemInfo,
-    cpuInfo,
-    cpuFeatures,
-    memoryInfo,
-    diskInfo,
-    networkInfo,
-    networkFeatures,
-    ipInfo,
-    processInfo,
-    containerInfo,
-    systemLoad,
-    heapInfo,
-    serviceInfo,
-    userInfo,
-    softwareInfo,
-  ] = await Promise.all([
-    getOSInfo(),
-    getSystemInfo(),
-    getCPUInfo(),
-    getCPUFeatures(),
-    getMemoryInfo(),
-    getDiskInfo(),
-    getNetworkInfo(),
-    getNetworkFeatures(),
-    getIPInfo(),
-    getProcessInfo(),
-    getContainerInfo(),
-    getSystemLoad(),
-    getHeapInfo(),
-    getServiceInfo(),
-    getUserInfo(),
-    getSoftwareInfo(),
-  ]);
-  const warnings = await getWarnings(
-    cpuInfo,
-    memoryInfo,
-    diskInfo,
-    processInfo,
-  );
-  const memUsage =
-    memoryInfo.total > 0
-      ? ((memoryInfo.used / memoryInfo.total) * 100).toFixed(1)
-      : "0.0";
-  const swapUsage =
-    memoryInfo.swapTotal > 0
-      ? ((memoryInfo.swapUsed / memoryInfo.swapTotal) * 100).toFixed(1)
-      : "0.0";
-  const diskUsage =
-    diskInfo.total.size > 0
-      ? ((diskInfo.total.used / diskInfo.total.size) * 100).toFixed(1)
-      : "0.0";
-  const memBar = makeProgressBar(memoryInfo.used, memoryInfo.total);
-  const swapBar =
-    memoryInfo.swapTotal > 0
-      ? makeProgressBar(memoryInfo.swapUsed, memoryInfo.swapTotal)
-      : "";
-  const diskBar = makeProgressBar(diskInfo.total.used, diskInfo.total.size);
-  const heapBar = makeProgressBar(heapInfo.rss, memoryInfo.total);
-  const collectionTime = Date.now() - startTime;
-  const message = `
+    const startTime = Date.now();
+    const [
+        osInfo,
+        systemInfo,
+        cpuInfo,
+        cpuFeatures,
+        memoryInfo,
+        diskInfo,
+        networkInfo,
+        networkFeatures,
+        ipInfo,
+        processInfo,
+        containerInfo,
+        systemLoad,
+        heapInfo,
+        serviceInfo,
+        userInfo,
+        softwareInfo,
+    ] = await Promise.all([
+        getOSInfo(),
+        getSystemInfo(),
+        getCPUInfo(),
+        getCPUFeatures(),
+        getMemoryInfo(),
+        getDiskInfo(),
+        getNetworkInfo(),
+        getNetworkFeatures(),
+        getIPInfo(),
+        getProcessInfo(),
+        getContainerInfo(),
+        getSystemLoad(),
+        getHeapInfo(),
+        getServiceInfo(),
+        getUserInfo(),
+        getSoftwareInfo(),
+    ]);
+    const warnings = await getWarnings(cpuInfo, memoryInfo, diskInfo, processInfo);
+    const memUsage =
+        memoryInfo.total > 0 ? ((memoryInfo.used / memoryInfo.total) * 100).toFixed(1) : "0.0";
+    const swapUsage =
+        memoryInfo.swapTotal > 0
+            ? ((memoryInfo.swapUsed / memoryInfo.swapTotal) * 100).toFixed(1)
+            : "0.0";
+    const diskUsage =
+        diskInfo.total.size > 0
+            ? ((diskInfo.total.used / diskInfo.total.size) * 100).toFixed(1)
+            : "0.0";
+    const memBar = makeProgressBar(memoryInfo.used, memoryInfo.total);
+    const swapBar =
+        memoryInfo.swapTotal > 0 ? makeProgressBar(memoryInfo.swapUsed, memoryInfo.swapTotal) : "";
+    const diskBar = makeProgressBar(diskInfo.total.used, diskInfo.total.size);
+    const heapBar = makeProgressBar(heapInfo.rss, memoryInfo.total);
+    const collectionTime = Date.now() - startTime;
+    const message = `
 \`\`\`
 ━━━ SYSTEM INFORMATION ━━━ 
 OS: ${osInfo.name}
@@ -205,12 +196,12 @@ Write: ${formatSize(diskInfo.io.writeBytes)} (${diskInfo.io.writeOps} ops)
 
 Top 3 Mounts:
 ${diskInfo.disks
-  .slice(0, 3)
-  .map(
-    (disk) =>
-      `${disk.mountpoint}: ${formatSize(disk.used)}/${formatSize(disk.size)} (${disk.size > 0 ? ((disk.used / disk.size) * 100).toFixed(1) : "0.0"}%)`,
-  )
-  .join("\n")}
+    .slice(0, 3)
+    .map(
+        (disk) =>
+            `${disk.mountpoint}: ${formatSize(disk.used)}/${formatSize(disk.size)} (${disk.size > 0 ? ((disk.used / disk.size) * 100).toFixed(1) : "0.0"}%)`
+    )
+    .join("\n")}
 
 ━━━ NETWORK TRAFFIC ━━━
 Total Traffic:
@@ -225,12 +216,9 @@ Context Switches: ${processInfo.contextSwitches.toLocaleString()}
 
 Top 3 Interfaces:
 ${networkInfo.interfaces
-  .slice(0, 3)
-  .map(
-    (iface) =>
-      `${iface.name}: ▼${formatSize(iface.rxBytes)} ▲${formatSize(iface.txBytes)}`,
-  )
-  .join("\n")}
+    .slice(0, 3)
+    .map((iface) => `${iface.name}: ▼${formatSize(iface.rxBytes)} ▲${formatSize(iface.txBytes)}`)
+    .join("\n")}
 
 ━━━ PROCESS INFORMATION ━━━
 Process Summary:
@@ -249,49 +237,49 @@ Blocked: ${systemLoad.procs.b}
 ━━━ USER INFORMATION ━━━
 Logged In Users: ${userInfo.loggedIn}
 ${
-  userInfo.recentLogins.length > 0
-    ? `Recent Logins:\n${userInfo.recentLogins.map((login) => `${login}`).join("\n")}`
-    : "No recent logins"
+    userInfo.recentLogins.length > 0
+        ? `Recent Logins:\n${userInfo.recentLogins.map((login) => `${login}`).join("\n")}`
+        : "No recent logins"
 }
 ${
-  warnings.length > 0
-    ? `
+    warnings.length > 0
+        ? `
 ━━━ WARNINGS (${warnings.length}) ━━━
 ${warnings.map((w, i) => `${i + 1}. ${w}`).join("\n")}
 `
-    : ""
+        : ""
 }
 Collection Time: ${collectionTime}ms
 Report Generated: ${new Date().toLocaleString("en-US", {
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    timeZoneName: "short",
-  })}
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        timeZoneName: "short",
+    })}
 System Status: ${warnings.length === 0 ? "✓ HEALTHY" : "✘ ATTENTION REQUIRED"}
 \`\`\`
 `.trim();
 
-  await conn.sendMessage(
-    m.chat,
-    {
-      text: message,
-      contextInfo: {
-        externalAdReply: {
-          title: "System Monitoring Report",
-          body: `Status: ${warnings.length === 0 ? "Healthy" : `${warnings.length} Warnings`}`,
-          thumbnailUrl: "https://files.catbox.moe/2tswt7.jpg",
-          mediaType: 1,
-          renderLargerThumbnail: true,
+    await conn.sendMessage(
+        m.chat,
+        {
+            text: message,
+            contextInfo: {
+                externalAdReply: {
+                    title: "System Monitoring Report",
+                    body: `Status: ${warnings.length === 0 ? "Healthy" : `${warnings.length} Warnings`}`,
+                    thumbnailUrl: "https://files.catbox.moe/2tswt7.jpg",
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                },
+            },
         },
-      },
-    },
-    { quoted: m },
-  );
+        { quoted: m }
+    );
 };
 
 handler.help = ["os"];

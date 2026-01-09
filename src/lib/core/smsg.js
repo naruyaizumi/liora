@@ -8,14 +8,14 @@ export function smsg(conn, m) {
         m.conn = conn;
         return m;
     }
-    
+
     const M = proto.WebMessageInfo;
     if (M?.create) {
         m = M.create(m);
     }
-    
+
     m.conn = conn;
-    
+
     const msg = m.message;
     if (!msg) {
         m[SYM_PROCESSED] = true;
@@ -34,7 +34,7 @@ export function smsg(conn, m) {
         }
 
         const botId = conn.decodeJid?.(conn.user?.lid || "") || "";
-        
+
         if (botId) {
             const partId = conn.decodeJid?.(key.participant) || "";
             key.fromMe = partId === botId;

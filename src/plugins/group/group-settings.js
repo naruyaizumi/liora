@@ -1,11 +1,11 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  const arg = (args[0] || "").toLowerCase();
-  const mode = { open: "not_announcement", close: "announcement" }[arg];
+    const arg = (args[0] || "").toLowerCase();
+    const mode = { open: "not_announcement", close: "announcement" }[arg];
 
-  if (!mode) return m.reply(`Use: ${usedPrefix + command} open/close`);
+    if (!mode) return m.reply(`Use: ${usedPrefix + command} open/close`);
 
-  await conn.groupSettingUpdate(m.chat, mode);
-  return m.reply(`Group ${arg === "open" ? "opened" : "closed"}`);
+    await conn.groupSettingUpdate(m.chat, mode);
+    return m.reply(`Group ${arg === "open" ? "opened" : "closed"}`);
 };
 
 handler.help = ["group"];

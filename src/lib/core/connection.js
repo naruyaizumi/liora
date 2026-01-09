@@ -4,92 +4,83 @@ import { join, relative, normalize } from "node:path";
 import { naruyaizumi } from "./socket.js";
 
 export async function getAllPlugins(dir) {
-  const results = [];
+    const results = [];
 
-  try {
-    const files = await readdir(dir);
+    try {
+        const files = await readdir(dir);
 
-    for (const file of files) {
-      const filepath = join(dir, file);
+        for (const file of files) {
+            const filepath = join(dir, file);
 
-      try {
-        const stats = await stat(filepath);
+            try {
+                const stats = await stat(filepath);
 
-        if (stats.isDirectory()) {
-          const nested = await getAllPlugins(filepath);
-          results.push(...nested);
-        } else if (file.endsWith(".js")) {
-          results.push(filepath);
+                if (stats.isDirectory()) {
+                    const nested = await getAllPlugins(filepath);
+                    results.push(...nested);
+                } else if (file.endsWith(".js")) {
+                    results.push(filepath);
+                }
+            } catch {
+                //
+            }
         }
-      } catch {
-          //
-      }
+    } catch (e) {
+        global.logger?.error?.({ error: e.message }, "Error reading plugin directory");
     }
-  } catch (e) {
-    global.logger?.error?.(
-      { error: e.message },
-      "Error reading plugin directory",
-    );
-  }
 
-  return results;
+    return results;
 }
 
 export async function loadPlugins(pluginFolder, getAllPluginsFn) {
-  let success = 0,
-    failed = 0;
+    let success = 0,
+        failed = 0;
 
-  const oldPlugins = global.plugins || {};
-  for (const [filename, plugin] of Object.entries(oldPlugins)) {
-    if (typeof plugin.cleanup === "function") {
-      try {
-        await plugin.cleanup();
-      } catch (e) {
-        global.logger?.warn?.(
-          { file: filename, error: e.message },
-          "Plugin cleanup error",
-        );
-      }
+    const oldPlugins = global.plugins || {};
+    for (const [filename, plugin] of Object.entries(oldPlugins)) {
+        if (typeof plugin.cleanup === "function") {
+            try {
+                await plugin.cleanup();
+            } catch (e) {
+                global.logger?.warn?.({ file: filename, error: e.message }, "Plugin cleanup error");
+            }
+        }
     }
-  }
 
-  global.plugins = {};
+    global.plugins = {};
 
-  try {
-    const files = await getAllPluginsFn(pluginFolder);
+    try {
+        const files = await getAllPluginsFn(pluginFolder);
 
-    for (const filepath of files) {
-      const filename = normalize(relative(pluginFolder, filepath)).replace(
-        /\\/g,
-        "/",
-      );
+        for (const filepath of files) {
+            const filename = normalize(relative(pluginFolder, filepath)).replace(/\\/g, "/");
 
-      try {
-        const module = await import(`${filepath}?init=${Date.now()}`);
+            try {
+                const module = await import(`${filepath}?init=${Date.now()}`);
 
-        if (typeof module.default?.init === "function") {
-          await module.default.init();
-        } else if (typeof module.init === "function") {
-          await module.init();
+                if (typeof module.default?.init === "function") {
+                    await module.default.init();
+                } else if (typeof module.init === "function") {
+                    await module.init();
+                }
+
+                global.plugins[filename] = module.default || module;
+                success++;
+            } catch (e) {
+                delete global.plugins[filename];
+                failed++;
+                global.logger?.warn?.(
+                    { file: filename, error: e.message },
+                    "Failed to load plugin"
+                );
+            }
         }
 
-        global.plugins[filename] = module.default || module;
-        success++;
-      } catch (e) {
-        delete global.plugins[filename];
-        failed++;
-        global.logger?.warn?.(
-          { file: filename, error: e.message },
-          "Failed to load plugin",
-        );
-      }
+        global.logger?.info?.(`Plugins loaded: ${success} OK, ${failed} failed`);
+    } catch (e) {
+        global.logger?.error?.({ error: e.message }, "Error loading plugins");
+        throw e;
     }
-
-    global.logger?.info?.(`Plugins loaded: ${success} OK, ${failed} failed`);
-  } catch (e) {
-    global.logger?.error?.({ error: e.message }, "Error loading plugins");
-    throw e;
-  }
 }
 
 export class CleanupManager {
@@ -203,7 +194,6 @@ export class EventManager {
             if (!handler) return false;
 
             if (restartConn) {
-
                 try {
                     if (global.conn?.ev) {
                         for (const [eventName, handler] of eventManager.eventHandlers) {
@@ -221,7 +211,10 @@ export class EventManager {
                         try {
                             global.conn.ev.removeAllListeners();
                         } catch (e) {
-                            global.logger.error({ error: e.message }, "Failed to remove all listeners");
+                            global.logger.error(
+                                { error: e.message },
+                                "Failed to remove all listeners"
+                            );
                         }
                     }
 
@@ -511,7 +504,9 @@ export async function handleDisconnect({ lastDisconnect, isNewLogin, connection 
 
         if (now < global.__reconnect.cooldownUntil) {
             const wait = global.__reconnect.cooldownUntil - now;
-            global.logger.warn(`Cooling down after repeated failures (${Math.ceil(wait / 1000)}s)…`);
+            global.logger.warn(
+                `Cooling down after repeated failures (${Math.ceil(wait / 1000)}s)…`
+            );
             if (!global.__reconnect.timer) {
                 global.__reconnect.timer = setTimeout(() => {
                     global.__reconnect.timer = null;
@@ -614,7 +609,9 @@ export async function handleDisconnect({ lastDisconnect, isNewLogin, connection 
             }
         }, delay);
 
-        global.logger.warn(`Scheduling reconnect in ${Math.ceil(delay / 1000)}s (reason: ${dcReason})`);
+        global.logger.warn(
+            `Scheduling reconnect in ${Math.ceil(delay / 1000)}s (reason: ${dcReason})`
+        );
     };
 
     if (isNewLogin) conn.isInit = true;
@@ -650,73 +647,64 @@ export async function handleDisconnect({ lastDisconnect, isNewLogin, connection 
 }
 
 export function cleanupReconnect() {
-  if (!global.__reconnect) {
-    global.__reconnect = {
-      attempts: 0,
-      lastAt: 0,
-      cooldownUntil: 0,
-      inflight: false,
-      timer: null,
-      keepAliveTimer: null,
-    };
-    return;
-  }
-  
-  if (global.__reconnect.timer) {
-    clearTimeout(global.__reconnect.timer);
-    global.__reconnect.timer = null;
-  }
-  
-  if (global.__reconnect.keepAliveTimer) {
-    clearInterval(global.__reconnect.keepAliveTimer);
-    global.__reconnect.keepAliveTimer = null;
-  }
-  
-  global.__reconnect.attempts = 0;
-  global.__reconnect.cooldownUntil = 0;
-  global.__reconnect.inflight = false;
-  global.__reconnect.lastAt = 0;
+    if (!global.__reconnect) {
+        global.__reconnect = {
+            attempts: 0,
+            lastAt: 0,
+            cooldownUntil: 0,
+            inflight: false,
+            timer: null,
+            keepAliveTimer: null,
+        };
+        return;
+    }
+
+    if (global.__reconnect.timer) {
+        clearTimeout(global.__reconnect.timer);
+        global.__reconnect.timer = null;
+    }
+
+    if (global.__reconnect.keepAliveTimer) {
+        clearInterval(global.__reconnect.keepAliveTimer);
+        global.__reconnect.keepAliveTimer = null;
+    }
+
+    global.__reconnect.attempts = 0;
+    global.__reconnect.cooldownUntil = 0;
+    global.__reconnect.inflight = false;
+    global.__reconnect.lastAt = 0;
 }
 
 export async function reloadSinglePlugin(filepath, pluginFolder) {
-  try {
-    const filename = normalize(relative(pluginFolder, filepath)).replace(
-      /\\/g,
-      "/",
-    );
-    const oldPlugin = global.plugins[filename];
+    try {
+        const filename = normalize(relative(pluginFolder, filepath)).replace(/\\/g, "/");
+        const oldPlugin = global.plugins[filename];
 
-    if (oldPlugin && typeof oldPlugin.cleanup === "function") {
-      try {
-        await oldPlugin.cleanup();
-      } catch (e) {
-        global.logger?.warn?.(
-          { file: filename, error: e.message },
-          "Plugin cleanup error",
-        );
-      }
+        if (oldPlugin && typeof oldPlugin.cleanup === "function") {
+            try {
+                await oldPlugin.cleanup();
+            } catch (e) {
+                global.logger?.warn?.({ file: filename, error: e.message }, "Plugin cleanup error");
+            }
+        }
+
+        const module = await import(`${filepath}?reload=${Date.now()}`);
+
+        if (typeof module.default?.init === "function") {
+            await module.default.init();
+        } else if (typeof module.init === "function") {
+            await module.init();
+        }
+
+        global.plugins[filename] = module.default || module;
+        global.logger?.info?.({ file: filename }, "Plugin reloaded");
+        return true;
+    } catch (e) {
+        global.logger?.error?.({ file: filepath, error: e.message }, "Failed to reload plugin");
+        return false;
     }
-
-    const module = await import(`${filepath}?reload=${Date.now()}`);
-
-    if (typeof module.default?.init === "function") {
-      await module.default.init();
-    } else if (typeof module.init === "function") {
-      await module.init();
-    }
-
-    global.plugins[filename] = module.default || module;
-    global.logger?.info?.({ file: filename }, "Plugin reloaded");
-    return true;
-  } catch (e) {
-    global.logger?.error?.(
-      { file: filepath, error: e.message },
-      "Failed to reload plugin",
-    );
-    return false;
-  }
 }
 
 export async function reloadAllPlugins(pluginFolder) {
-  return loadPlugins(pluginFolder, (dir) => getAllPlugins(dir));
+    return loadPlugins(pluginFolder, (dir) => getAllPlugins(dir));
 }

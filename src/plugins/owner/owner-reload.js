@@ -1,7 +1,7 @@
 let handler = async (m) => {
-  await global.reloadAllPlugins();
-  await global.reloadHandler();
-  m.reply("Reloaded");
+    await global.reloadAllPlugins();
+    await global.reloadHandler();
+    m.reply("Reloaded");
 };
 
 handler.help = ["reload"];

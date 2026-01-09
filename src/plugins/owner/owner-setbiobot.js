@@ -1,8 +1,8 @@
 let handler = async (m, { conn, text, command, usedPrefix }) => {
-  if (!text) return m.reply(`Set bot bio\nEx: ${usedPrefix + command} I am a bot`);
+    if (!text) return m.reply(`Set bot bio\nEx: ${usedPrefix + command} I am a bot`);
 
-  await conn.setStatus(text);
-  m.reply(`Bio updated: ${text}`);
+    await conn.setStatus(text);
+    m.reply(`Bio updated: ${text}`);
 };
 
 handler.help = ["setbiobot"];

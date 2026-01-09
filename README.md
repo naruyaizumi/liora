@@ -25,24 +25,24 @@ Liora is a production-ready WhatsApp bot framework designed for developers who d
 
 ### Minimum Requirements
 
-| Component | Requirement |
-|-----------|-------------|
-| OS | Linux (Ubuntu 22.04+, Debian 12+) |
-| Architecture | x86_64 |
-| CPU | 2 cores |
-| RAM | 4GB |
-| Storage | 10GB SSD |
-| Network | Stable internet connection |
-| Bun | v1.3.0+ |
+| Component    | Requirement                       |
+| ------------ | --------------------------------- |
+| OS           | Linux (Ubuntu 22.04+, Debian 12+) |
+| Architecture | x86_64                            |
+| CPU          | 2 cores                           |
+| RAM          | 4GB                               |
+| Storage      | 10GB SSD                          |
+| Network      | Stable internet connection        |
+| Bun          | v1.3.0+                           |
 
 ### Recommended for Production
 
-| Component | Recommendation |
-|-----------|----------------|
-| CPU | 4+ cores |
-| RAM | 8GB+ |
-| Storage | 20GB+ NVMe SSD |
-| Network | Dedicated IP with 100Mbps+ |
+| Component | Recommendation             |
+| --------- | -------------------------- |
+| CPU       | 4+ cores                   |
+| RAM       | 8GB+                       |
+| Storage   | 20GB+ NVMe SSD             |
+| Network   | Dedicated IP with 100Mbps+ |
 
 ---
 
@@ -220,6 +220,7 @@ WantedBy=multi-user.target
 This project is licensed under the **Apache License 2.0**.
 
 You are free to:
+
 - Use this software for any purpose, including commercial use
 - Modify the source code
 - Distribute original or modified versions
@@ -230,6 +231,7 @@ You are free to:
 
 > [!IMPORTANT]
 > When redistributing this software or derivative works, you must:
+>
 > - Retain original copyright notices
 > - Include a copy of the Apache License 2.0
 > - Preserve attribution to the original author: **Naruya Izumi**
@@ -240,6 +242,7 @@ Maintaining a reference to the original repository is strongly recommended to en
 
 > [!CAUTION]
 > The following actions constitute violations of the Apache License 2.0:
+>
 > - Removing or altering copyright or license notices
 > - Claiming original authorship of this project
 > - Distributing derivative works without proper attribution
@@ -250,11 +253,13 @@ Violation of the license may result in termination of usage rights and potential
 ### Commercial Use
 
 Commercial use is permitted, including:
+
 - Offering the software as a service (SaaS)
 - Integrating it into commercial products
 - Providing paid support, consulting, or customization
 
 **Commercial distributors must:**
+
 - Retain all required notices
 - Include the Apache License 2.0
 - Clearly indicate any modifications made
@@ -269,11 +274,13 @@ Commercial use is permitted, including:
 > **DO NOT** report security vulnerabilities through public GitHub issues.
 
 **Responsible Disclosure:**
+
 - Email: liora.bot.official@gmail.com
 - Subject: "Security Vulnerability Report - Liora"
 - Include: Detailed description, reproduction steps, impact assessment
 
 **Response Timeline:**
+
 - Initial response: 24-48 hours
 - Status updates: Weekly during investigation
 - Resolution: Based on severity (see [SECURITY.md](.github/SECURITY.md))
@@ -348,6 +355,7 @@ Thank you to all contributors who have helped improve Liora. See [CONTRIBUTORS.m
 ### Open Source
 
 This project builds upon excellent open source projects:
+
 - [Baileys](https://github.com/WhiskeySockets/Baileys) - WhatsApp Web API
 - [Bun](https://bun.sh) - Fast JavaScript runtime
 

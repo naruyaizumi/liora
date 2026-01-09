@@ -21,9 +21,9 @@
 
 <!-- Detailed list of changes -->
 
-- 
-- 
-- 
+-
+-
+-
 
 ## Related Issues
 
@@ -38,9 +38,9 @@
 
 <!-- Describe how to test these changes -->
 
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ### Test Results
 
@@ -55,16 +55,19 @@
 <!-- If applicable, provide performance benchmarks -->
 
 **Before:**
+
 ```
 <!-- Benchmark results before changes -->
 ```
 
 **After:**
+
 ```
 <!-- Benchmark results after changes -->
 ```
 
-**Impact:** 
+**Impact:**
+
 <!-- e.g., "20% faster", "Reduces memory by 15%", "No performance impact" -->
 
 ## Code Quality Checklist
@@ -92,9 +95,9 @@
 <!-- If this PR introduces breaking changes, describe them and migration steps -->
 
 **Breaking:**
-- 
 
-**Migration Guide:**
+- **Migration Guide:**
+
 ```javascript
 // Before
 ...
@@ -126,6 +129,7 @@
 ---
 
 **Note:** This PR will trigger automated checks:
+
 - ✅ Prettier/ESLint for JavaScript
 - ✅ Security scans (CodeQL, Njsscan)
 - ✅ Dependency audit

@@ -1,6 +1,6 @@
 let handler = async (m, { conn }) => {
-  await conn.groupRevokeInvite(m.chat);
-  m.reply("Link reset");
+    await conn.groupRevokeInvite(m.chat);
+    m.reply("Link reset");
 };
 
 handler.help = ["revoke"];

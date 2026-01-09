@@ -1,76 +1,76 @@
 bug:
-  - '\b(bug|error|crash|exception|fail|broken|not working)\b'
+    - '\b(bug|error|crash|exception|fail|broken|not working)\b'
 
 priority-high:
-  - '\b(critical|urgent|blocker|severe)\b'
-  - '\b(security|vulnerability|exploit)\b'
-  - '\b(data loss|corruption)\b'
+    - '\b(critical|urgent|blocker|severe)\b'
+    - '\b(security|vulnerability|exploit)\b'
+    - '\b(data loss|corruption)\b'
 
 priority-medium:
-  - '\b(important|significant|should have)\b'
+    - '\b(important|significant|should have)\b'
 
 priority-low:
-  - '\b(nice to have|enhancement|minor)\b'
+    - '\b(nice to have|enhancement|minor)\b'
 
 enhancement:
-  - '\b(feature|enhance|improvement|suggest)\b'
-  - '\b(add support for|new feature|feature request)\b'
+    - '\b(feature|enhance|improvement|suggest)\b'
+    - '\b(add support for|new feature|feature request)\b'
 
 documentation:
-  - '\b(docs|documentation|readme|wiki|guide|tutorial)\b'
-  - '\b(typo|grammar|spelling)\b'
+    - '\b(docs|documentation|readme|wiki|guide|tutorial)\b'
+    - '\b(typo|grammar|spelling)\b'
 
 question:
-  - '\b(how to|how do I|question|help|support)\b'
-  - '\b(what is|why|when|where)\b'
+    - '\b(how to|how do I|question|help|support)\b'
+    - '\b(what is|why|when|where)\b'
 
 whatsapp:
-  - '\b(baileys|whatsapp|connection|qr|pairing)\b'
-  - '\b(message|chat|group|contact)\b'
+    - '\b(baileys|whatsapp|connection|qr|pairing)\b'
+    - '\b(message|chat|group|contact)\b'
 
 sticker:
-  - '\b(sticker|webp|image conversion)\b'
+    - '\b(sticker|webp|image conversion)\b'
 
 media-processing:
-  - '\b(video|audio|image|ffmpeg|conversion)\b'
-  - '\b(webp|mp4|mp3|converter)\b'
+    - '\b(video|audio|image|ffmpeg|conversion)\b'
+    - '\b(webp|mp4|mp3|converter)\b'
 
 api:
-  - '\b(api|endpoint|integration)\b'
-  - '\b(tiktok|instagram|twitter|spotify|youtube)\b'
+    - '\b(api|endpoint|integration)\b'
+    - '\b(tiktok|instagram|twitter|spotify|youtube)\b'
 
 performance:
-  - '\b(slow|performance|speed|optimize|latency)\b'
-  - '\b(memory usage|cpu usage|resource)\b'
+    - '\b(slow|performance|speed|optimize|latency)\b'
+    - '\b(memory usage|cpu usage|resource)\b'
 
 installation:
-  - '\b(install|setup|configure|deployment)\b'
-  - '\b(dependencies|bun)\b'
+    - '\b(install|setup|configure|deployment)\b'
+    - '\b(dependencies|bun)\b'
 
 database:
-  - '\b(postgresql|postgres|database|session|auth)\b'
-  - '\b(sql|query|connection)\b'
+    - '\b(postgresql|postgres|database|session|auth)\b'
+    - '\b(sql|query|connection)\b'
 
 redis:
-  - '\b(redis|cache|caching)\b'
-  - '\b(memory store|data store)\b'
+    - '\b(redis|cache|caching)\b'
+    - '\b(memory store|data store)\b'
 
 ubuntu:
-  - '\bubuntu\b'
+    - '\bubuntu\b'
 
 debian:
-  - '\bdebian\b'
+    - '\bdebian\b'
 
 testing:
-  - '\b(test|testing|unit test|integration test)\b'
+    - '\b(test|testing|unit test|integration test)\b'
 
 ci-cd:
-  - '\b(github actions|workflow|ci|cd|pipeline)\b'
-  - '\b(build failed|test failed)\b'
+    - '\b(github actions|workflow|ci|cd|pipeline)\b'
+    - '\b(build failed|test failed)\b'
 
 security:
-  - '\b(security|vulnerability|cve|exploit|injection)\b'
-  - '\b(xss|sql injection|auth)\b'
+    - '\b(security|vulnerability|cve|exploit|injection)\b'
+    - '\b(xss|sql injection|auth)\b'
 
 good-first-issue:
-  - '\b(beginner|easy|good first issue|starter)\b'
+    - '\b(beginner|easy|good first issue|starter)\b'

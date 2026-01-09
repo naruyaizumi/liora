@@ -135,7 +135,10 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
 
         if (missing.length > 0) {
             ctx.dbQueries++;
-            global.logger.trace({ type, count: missing.length }, "fetching missing keys in transaction");
+            global.logger.trace(
+                { type, count: missing.length },
+                "fetching missing keys in transaction"
+            );
 
             const fetched = await getTxMutex(type).runExclusive(async () => {
                 const result = {};
@@ -202,7 +205,12 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
                                     db.set(k, v);
                                 }
                             } catch (e) {
-                                global.logger.error({ err: e.message, type, id, context: "keys.set" });
+                                global.logger.error({
+                                    err: e.message,
+                                    type,
+                                    id,
+                                    context: "keys.set",
+                                });
                             }
                         }
                     })

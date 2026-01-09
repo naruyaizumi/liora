@@ -5,7 +5,7 @@
 We provide security updates for the following versions. Always use the latest stable release for optimal security.
 
 | Version | Supported | Security Updates Until |
-|---------|-----------|------------------------|
+| ------- | --------- | ---------------------- |
 | 1.x.x   | Yes       | Active development     |
 | 0.x.x   | No        | Ended                  |
 
@@ -25,42 +25,42 @@ We provide security updates for the following versions. Always use the latest st
 When reporting a vulnerability, please include:
 
 1. **Vulnerability Description**
-   - Clear, detailed explanation of the issue
-   - Type of vulnerability (e.g., XSS, SQL injection, authentication bypass)
+    - Clear, detailed explanation of the issue
+    - Type of vulnerability (e.g., XSS, SQL injection, authentication bypass)
 
 2. **Impact Assessment**
-   - Potential risks and consequences
-   - Affected components or modules
-   - Attack scenarios
+    - Potential risks and consequences
+    - Affected components or modules
+    - Attack scenarios
 
 3. **Reproduction Steps**
-   - Step-by-step instructions to reproduce
-   - Required preconditions
-   - Expected vs actual behavior
+    - Step-by-step instructions to reproduce
+    - Required preconditions
+    - Expected vs actual behavior
 
 4. **Environment Details**
-   - Operating system and version
-   - Bun version
-   - Liora version
-   - Relevant configuration details
+    - Operating system and version
+    - Bun version
+    - Liora version
+    - Relevant configuration details
 
 5. **Proof of Concept**
-   - Code snippets demonstrating the issue
-   - Screenshots or videos if applicable
-   - Command sequences used
+    - Code snippets demonstrating the issue
+    - Screenshots or videos if applicable
+    - Command sequences used
 
 6. **Suggested Remediation** (Optional)
-   - Proposed fixes or mitigations
-   - Security best practices applicable
+    - Proposed fixes or mitigations
+    - Security best practices applicable
 
 ### Response Timeline
 
-| Stage | Timeframe |
-|-------|-----------|
-| Initial acknowledgment | 24-48 hours |
-| Preliminary assessment | 3-5 days |
-| Regular status updates | Weekly |
-| Resolution timeline | Based on severity (see below) |
+| Stage                  | Timeframe                     |
+| ---------------------- | ----------------------------- |
+| Initial acknowledgment | 24-48 hours                   |
+| Preliminary assessment | 3-5 days                      |
+| Regular status updates | Weekly                        |
+| Resolution timeline    | Based on severity (see below) |
 
 ---
 
@@ -69,12 +69,14 @@ When reporting a vulnerability, please include:
 ### Critical Severity
 
 **Criteria:**
+
 - Remote code execution
 - Authentication bypass
 - Privilege escalation
 - Data exfiltration at scale
 
 **Response:**
+
 - Initial response: 24 hours
 - Patch development: 24-48 hours
 - Release: Immediate emergency patch
@@ -83,12 +85,14 @@ When reporting a vulnerability, please include:
 ### High Severity
 
 **Criteria:**
+
 - SQL injection
 - Cross-site scripting (XSS)
 - Insecure deserialization
 - Sensitive data exposure
 
 **Response:**
+
 - Initial response: 48 hours
 - Patch development: 3-5 days
 - Release: Next patch release (expedited)
@@ -97,12 +101,14 @@ When reporting a vulnerability, please include:
 ### Medium Severity
 
 **Criteria:**
+
 - Denial of service
 - Information disclosure (limited)
 - Security misconfiguration
 - Insecure defaults
 
 **Response:**
+
 - Initial response: 3-5 days
 - Patch development: 7-14 days
 - Release: Scheduled patch release
@@ -111,12 +117,14 @@ When reporting a vulnerability, please include:
 ### Low Severity
 
 **Criteria:**
+
 - Minor information leaks
 - Security warnings
 - Best practice violations
 - Non-exploitable bugs
 
 **Response:**
+
 - Initial response: 5-7 days
 - Patch development: 14-30 days
 - Release: Next minor version
@@ -146,22 +154,26 @@ When reporting a vulnerability, please include:
 ### Application Security
 
 **Input Validation**
+
 - Comprehensive sanitization of all user inputs
 - Whitelist-based validation where possible
 - Type checking and schema validation
 - Length and format constraints
 
 **Output Encoding**
+
 - Context-aware output escaping
 - Prevention of injection attacks
 - Safe rendering of user content
 
 **Authentication & Authorization**
+
 - Secure session management
 - Role-based access control (RBAC)
 - Principle of least privilege
 
 **Data Protection**
+
 - Encryption at rest for sensitive data
 - Secure credential storage
 - No hardcoded secrets
@@ -169,17 +181,20 @@ When reporting a vulnerability, please include:
 ### Infrastructure Security
 
 **Dependency Management**
+
 - Automated dependency scanning
 - Regular security audits
 - Timely updates for vulnerable packages
 - Minimal dependency footprint
 
 **Code Analysis**
+
 - Static Application Security Testing (SAST)
 - Automated code review
 - Security-focused linting rules
 
 **Runtime Security**
+
 - Resource limits (CPU, memory)
 - Sandboxed plugin execution
 - File system access controls
@@ -188,12 +203,14 @@ When reporting a vulnerability, please include:
 ### Deployment Security
 
 **Production Best Practices**
+
 - Run as non-root user
 - Restricted file permissions
 - Environment variable management
 - Secure defaults configuration
 
 **Monitoring & Logging**
+
 - Security event logging
 - Anomaly detection
 - Rate limiting
@@ -237,6 +254,7 @@ When reporting a vulnerability, please include:
 ### File Upload Security
 
 If enabling file uploads:
+
 - Validate file types strictly
 - Scan for malware
 - Limit file sizes
@@ -246,6 +264,7 @@ If enabling file uploads:
 ### Database Security
 
 For `bun:sqlite`:
+
 - Set restrictive file permissions (600)
 - Regular backups
 - Avoid storing sensitive data unencrypted
@@ -286,6 +305,7 @@ We practice coordinated disclosure:
 ### Public Disclosure
 
 Public disclosure occurs after:
+
 - Patch is available and released
 - Sufficient time for users to update (7-30 days based on severity)
 - Coordination with reporter
@@ -298,7 +318,7 @@ We recognize security researchers who responsibly disclose vulnerabilities:
 
 ### 2026
 
-*No vulnerabilities reported yet*
+_No vulnerabilities reported yet_
 
 ### How to be Listed
 
@@ -320,6 +340,7 @@ We recognize security researchers who responsibly disclose vulnerabilities:
 ## Legal
 
 Security research conducted in good faith will not result in legal action, provided:
+
 - Research does not violate laws or regulations
 - Research does not compromise user data or privacy
 - Findings are reported responsibly
