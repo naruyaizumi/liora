@@ -105,7 +105,7 @@ async function uploader4(buffer) {
     if (!buffer || buffer.length === 0)
       throw new Error("Buffer cannot be empty");
 
-    const type = fileType(buffer);
+    const type = await fileType(buffer);
     if (!type) throw new Error("Unrecognized file format");
 
     const response = await fetch("https://put.icu/upload/", {
@@ -139,7 +139,7 @@ async function uploader5(buffer) {
     if (!buffer || buffer.length === 0)
       throw new Error("Buffer cannot be empty");
 
-    const type = fileType(buffer);
+    const type = await fileType(buffer);
     if (!type) throw new Error("Unrecognized file format");
 
     const formData = new FormData();
