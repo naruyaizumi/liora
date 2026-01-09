@@ -203,7 +203,6 @@ export class EventManager {
             if (!handler) return false;
 
             if (restartConn) {
-                const oldChats = global.conn?.chats || {};
 
                 try {
                     if (global.conn?.ev) {
