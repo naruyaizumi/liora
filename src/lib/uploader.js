@@ -40,7 +40,7 @@ async function uploader2(buffer) {
     if (!buffer || buffer.length === 0)
       throw new Error("Buffer cannot be empty");
 
-    const type = fileType(buffer);
+    const type = await fileType(buffer);
     if (!type) throw new Error("Unrecognized file format");
 
     const formData = new FormData();
@@ -72,7 +72,7 @@ async function uploader3(buffer) {
     if (!buffer || buffer.length === 0)
       throw new Error("Buffer cannot be empty");
 
-    const type = fileType(buffer);
+    const type = await fileType(buffer);
     if (!type) throw new Error("Unrecognized file format");
 
     const formData = new FormData();
