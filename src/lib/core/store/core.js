@@ -124,7 +124,7 @@ export class MemoryStore {
     }
   }
 
-  async _executeEvent(_type, _data) {
+  async _executeEvent() {
     //
   }
 
