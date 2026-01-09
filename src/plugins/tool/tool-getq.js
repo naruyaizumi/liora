@@ -27,7 +27,7 @@ const findMedia = (obj) => {
         else t = "document"
       }
 
-      if (t) return { node: o, type: t }
+      return { node: o, type: t }
     }
 
     const keys = [
