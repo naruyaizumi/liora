@@ -11,18 +11,10 @@ BUN_PATH="/root/.bun/bin/bun"
 REPO_URL="https://github.com/naruyaizumi/liora.git"
 TIME_ZONE="Asia/Jakarta"
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
-NC='\033[0m'
-
-print_error() { echo -e "${RED}✗${NC} $1" >&2; }
-print_success() { echo -e "${GREEN}✓${NC} $1"; }
-print_info() { echo -e "${BLUE}ℹ${NC} $1"; }
-print_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
+print_error() { echo "[ERROR] $1" >&2; }
+print_success() { echo "[SUCCESS] $1"; }
+print_info() { echo "[INFO] $1"; }
+print_warning() { echo "[WARNING] $1"; }
 
 if ! command -v curl &> /dev/null; then
     echo "[INFO] Installing curl..."
@@ -56,19 +48,18 @@ trap cleanup_on_error ERR
 
 print_banner() {
     clear
-    echo -e "${CYAN}"
     cat << "EOF"
-╔══════════════════════════════════════════╗
-║                                          ║
-║          LIORA BOT INSTALLER             ║
-║                                          ║
-╚══════════════════════════════════════════╝
++------------------------------------------+
+|                                          |
+|          LIORA BOT INSTALLER             |
+|                                          |
++------------------------------------------+
+
+Repository: https://github.com/naruyaizumi/liora
+License:    Apache 2.0
+Author:     Naruya Izumi
+
 EOF
-    echo -e "${NC}"
-    echo -e "${BLUE}Repository:${NC} https://github.com/naruyaizumi/liora"
-    echo -e "${BLUE}License:${NC}    Apache 2.0"
-    echo -e "${BLUE}Author:${NC}     Naruya Izumi"
-    echo ""
 }
 
 main() {

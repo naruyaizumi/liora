@@ -85,45 +85,52 @@ print_completion() {
     CURRENT_VERSION=$(cat "$WORK_DIR/.current_version" 2>/dev/null || echo "unknown")
     BUN_VERSION=$("$BUN_PATH" --version 2>/dev/null || echo "unknown")
     
-    echo ""
-    echo -e "${GREEN}═══════════════════════════════════════════════════${NC}"
-    echo -e "${GREEN}           Installation Complete! 🎉               ${NC}"
-    echo -e "${GREEN}═══════════════════════════════════════════════════${NC}"
-    echo ""
-    echo -e "${CYAN}System Information:${NC}"
-    echo -e "  ${BLUE}├─${NC} OS: ${GREEN}$OS_ID${NC}"
-    echo -e "  ${BLUE}├─${NC} Liora: ${GREEN}$CURRENT_VERSION${NC}"
-    echo -e "  ${BLUE}└─${NC} Bun: ${GREEN}v$BUN_VERSION${NC}"
-    echo ""
-    echo -e "${CYAN}Installation Details:${NC}"
-    echo -e "  ${BLUE}├─${NC} Directory: ${GREEN}$WORK_DIR${NC}"
-    echo -e "  ${BLUE}├─${NC} Service: ${GREEN}$SERVICE_NAME${NC}"
-    echo -e "  ${BLUE}└─${NC} Config: ${GREEN}$WORK_DIR/.env${NC}"
-    echo ""
-    echo -e "${YELLOW}═══════════════════════════════════════════════════${NC}"
-    echo -e "${YELLOW}              Quick Start Guide                    ${NC}"
-    echo -e "${YELLOW}═══════════════════════════════════════════════════${NC}"
-    echo ""
-    echo -e "${MAGENTA}1. Start the bot:${NC}"
-    echo -e "   ${GREEN}bot start${NC}"
-    echo ""
-    echo -e "${MAGENTA}2. View logs:${NC}"
-    echo -e "   ${GREEN}bot log${NC}"
-    echo ""
-    echo -e "${MAGENTA}3. Check status:${NC}"
-    echo -e "   ${GREEN}bot status${NC}"
-    echo ""
-    echo -e "${CYAN}Available Commands:${NC}"
-    echo -e "  ${GREEN}bot${NC}              - Show all commands"
-    echo -e "  ${GREEN}bot start${NC}        - Start bot"
-    echo -e "  ${GREEN}bot stop${NC}         - Stop bot"
-    echo -e "  ${GREEN}bot restart${NC}      - Restart bot"
-    echo -e "  ${GREEN}bot log${NC}          - View live logs"
-    echo -e "  ${GREEN}bot status${NC}       - Check status"
-    echo -e "  ${GREEN}bot update${NC}       - Update bot"
-    echo -e "  ${GREEN}bot config${NC}       - Edit config"
-    echo -e "  ${GREEN}bot version${NC}      - Show versions"
-    echo ""
-    echo -e "${GREEN}═══════════════════════════════════════════════════${NC}"
-    echo ""
+    cat << EOF
+
++---------------------------------------------------+
+|                                                   |
+|           Installation Complete!                  |
+|                                                   |
++---------------------------------------------------+
+
+System Information:
+--------------------
+  OS:        $OS_ID
+  Liora:     $CURRENT_VERSION
+  Bun:       v$BUN_VERSION
+
+Installation Details:
+--------------------
+  Directory: $WORK_DIR
+  Service:   $SERVICE_NAME
+  Config:    $WORK_DIR/.env
+
++---------------------------------------------------+
+|              Quick Start Guide                    |
++---------------------------------------------------+
+
+1. Start the bot:
+   $ bot start
+
+2. View logs:
+   $ bot log
+
+3. Check status:
+   $ bot status
+
+Available Commands:
+--------------------
+  bot              - Show all commands
+  bot start        - Start bot
+  bot stop         - Stop bot
+  bot restart      - Restart bot
+  bot log          - View live logs
+  bot status       - Check status
+  bot update       - Update bot
+  bot config       - Edit config
+  bot version      - Show versions
+
++---------------------------------------------------+
+
+EOF
 }

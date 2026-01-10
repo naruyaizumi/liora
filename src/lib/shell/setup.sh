@@ -8,11 +8,13 @@ get_available_versions() {
 }
 
 prompt_version() {
-    echo ""
-    echo -e "${CYAN}═══════════════════════════════════════${NC}"
-    echo -e "${MAGENTA}  Select Installation Version${NC}"
-    echo -e "${CYAN}═══════════════════════════════════════${NC}"
-    echo ""
+    cat << "EOF"
+
++---------------------------------------+
+| Select Installation Version           |
++---------------------------------------+
+
+EOF
     
     VERSIONS=($(get_available_versions))
     
@@ -22,13 +24,13 @@ prompt_version() {
         return
     fi
     
-    echo -e "${GREEN}  [1]${NC} Latest Stable (${VERSIONS[0]})"
-    echo -e "${YELLOW}  [2]${NC} Development (main branch)"
-    echo -e "${BLUE}  [3]${NC} Specific Version"
+    echo "  [1] Latest Stable (${VERSIONS[0]})"
+    echo "  [2] Development (main branch)"
+    echo "  [3] Specific Version"
     echo ""
     
     while true; do
-        read -p "$(echo -e ${CYAN}Choose option [1-3]:${NC} )" choice
+        read -p "liora> " choice
         case $choice in
             1)
                 SELECTED_VERSION="${VERSIONS[0]}"
@@ -42,12 +44,12 @@ prompt_version() {
                 ;;
             3)
                 echo ""
-                echo -e "${BLUE}Available versions:${NC}"
+                echo "Available versions:"
                 for i in "${!VERSIONS[@]}"; do
-                    echo -e "  ${GREEN}$((i+1)).${NC} ${VERSIONS[$i]}"
+                    echo "  $((i+1)). ${VERSIONS[$i]}"
                 done
                 echo ""
-                read -p "$(echo -e ${CYAN}Enter version number:${NC} )" ver_choice
+                read -p "liora> " ver_choice
                 if [[ $ver_choice =~ ^[0-9]+$ ]] && [ $ver_choice -ge 1 ] && [ $ver_choice -le ${#VERSIONS[@]} ]; then
                     SELECTED_VERSION="${VERSIONS[$((ver_choice-1))]}"
                     print_success "Selected: $SELECTED_VERSION"
@@ -57,7 +59,7 @@ prompt_version() {
                 fi
                 ;;
             *)
-                print_error "Invalid option"
+                print_error "Invalid option. Choose 1-3"
                 ;;
         esac
     done
@@ -65,13 +67,15 @@ prompt_version() {
 }
 
 prompt_pairing() {
-    echo -e "${CYAN}═══════════════════════════════════════${NC}"
-    echo -e "${MAGENTA}  WhatsApp Configuration${NC}"
-    echo -e "${CYAN}═══════════════════════════════════════${NC}"
-    echo ""
+    cat << "EOF"
++---------------------------------------+
+| WhatsApp Configuration                |
++---------------------------------------+
+
+EOF
     
     while true; do
-        read -p "$(echo -e ${CYAN}Enter WhatsApp number ${YELLOW}[without +]:${NC} )" PAIRING_NUM
+        read -p "liora> Enter WhatsApp number (without +): " PAIRING_NUM
         
         if [[ $PAIRING_NUM =~ ^[0-9]{10,15}$ ]]; then
             print_success "Number: +$PAIRING_NUM"
@@ -81,26 +85,28 @@ prompt_pairing() {
         fi
     done
     
-    read -p "$(echo -e ${CYAN}Enter pairing code ${YELLOW}[default: CUMICUMI]:${NC} )" PAIRING_CODE
+    read -p "liora> Enter pairing code [default: CUMICUMI]: " PAIRING_CODE
     PAIRING_CODE=${PAIRING_CODE:-CUMICUMI}
     print_success "Code: $PAIRING_CODE"
     echo ""
 }
 
 prompt_owner() {
-    echo -e "${CYAN}═══════════════════════════════════════${NC}"
-    echo -e "${MAGENTA}  Bot Owner Configuration${NC}"
-    echo -e "${CYAN}═══════════════════════════════════════${NC}"
-    echo ""
+    cat << "EOF"
++---------------------------------------+
+| Bot Owner Configuration               |
++---------------------------------------+
+
+EOF
     
     OWNERS_ARRAY="[]"
     
-    read -p "$(echo -e ${CYAN}Add owner numbers? ${YELLOW}[y/N]:${NC} )" add_owners
+    read -p "liora> Add owner numbers? [y/N]: " add_owners
     
     if [[ $add_owners =~ ^[Yy]$ ]]; then
         OWNER_LIST=()
         while true; do
-            read -p "$(echo -e ${CYAN}Owner number ${YELLOW}[without + or blank to finish]:${NC} )" owner_num
+            read -p "liora> Owner number (without + or blank to finish): " owner_num
             
             if [ -z "$owner_num" ]; then
                 break

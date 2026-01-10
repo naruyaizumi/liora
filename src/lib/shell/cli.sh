@@ -11,18 +11,10 @@ WORK_DIR="/root/liora"
 BUN_PATH="/root/.bun/bin/bun"
 REPO_URL="https://github.com/naruyaizumi/liora.git"
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
-NC='\033[0m'
-
-print_error() { echo -e "${RED}✗${NC} $1" >&2; }
-print_success() { echo -e "${GREEN}✓${NC} $1"; }
-print_info() { echo -e "${BLUE}ℹ${NC} $1"; }
-print_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
+print_error() { echo "[ERROR] $1" >&2; }
+print_success() { echo "[SUCCESS] $1"; }
+print_info() { echo "[INFO] $1"; }
+print_warning() { echo "[WARNING] $1"; }
 
 get_available_versions() {
     git ls-remote --tags --refs "$REPO_URL" 2>/dev/null | 
@@ -43,11 +35,13 @@ check_config() {
 }
 
 interactive_update() {
-    echo ""
-    echo -e "${CYAN}═══════════════════════════════════════${NC}"
-    echo -e "${MAGENTA}  Update Bot Version${NC}"
-    echo -e "${CYAN}═══════════════════════════════════════${NC}"
-    echo ""
+    cat << "EOF"
+
++---------------------------------------+
+| Update Bot Version                    |
++---------------------------------------+
+
+EOF
     
     cd "$WORK_DIR" || exit 1
     
@@ -55,24 +49,24 @@ interactive_update() {
     LATEST=$(get_latest_tag)
     VERSIONS=($(get_available_versions))
     
-    echo -e "${BLUE}Current version:${NC} ${GREEN}$CURRENT${NC}"
-    [ -n "$LATEST" ] && echo -e "${BLUE}Latest version:${NC} ${GREEN}$LATEST${NC}"
+    echo "Current version: $CURRENT"
+    [ -n "$LATEST" ] && echo "Latest version:  $LATEST"
     echo ""
     
     if [ "$CURRENT" = "$LATEST" ]; then
-        echo -e "${GREEN}You are already on the latest version!${NC}"
+        echo "You are already on the latest version!"
         echo ""
-        read -p "$(echo -e ${CYAN}Show all versions? ${YELLOW}[y/N]:${NC} )" show_all
+        read -p "liora> Show all versions? [y/N]: " show_all
         [[ ! $show_all =~ ^[Yy]$ ]] && exit 0
     fi
     
-    echo -e "${GREEN}  [1]${NC} Update to Latest ($LATEST)"
-    echo -e "${YELLOW}  [2]${NC} Switch to Development (main)"
-    echo -e "${BLUE}  [3]${NC} Rollback to Specific Version"
-    echo -e "${RED}  [4]${NC} Cancel"
+    echo "  [1] Update to Latest ($LATEST)"
+    echo "  [2] Switch to Development (main)"
+    echo "  [3] Rollback to Specific Version"
+    echo "  [4] Cancel"
     echo ""
     
-    read -p "$(echo -e ${CYAN}Choose option [1-4]:${NC} )" choice
+    read -p "liora> " choice
     
     case $choice in
         1)
@@ -83,14 +77,14 @@ interactive_update() {
             ;;
         3)
             echo ""
-            echo -e "${BLUE}Available versions:${NC}"
+            echo "Available versions:"
             for i in "${!VERSIONS[@]}"; do
                 current_mark=""
-                [ "${VERSIONS[$i]}" = "$CURRENT" ] && current_mark=" ${GREEN}(current)${NC}"
-                echo -e "  ${GREEN}$((i+1)).${NC} ${VERSIONS[$i]}$current_mark"
+                [ "${VERSIONS[$i]}" = "$CURRENT" ] && current_mark=" (current)"
+                echo "  $((i+1)). ${VERSIONS[$i]}$current_mark"
             done
             echo ""
-            read -p "$(echo -e ${CYAN}Enter version number:${NC} )" ver_choice
+            read -p "liora> " ver_choice
             if [[ $ver_choice =~ ^[0-9]+$ ]] && [ $ver_choice -ge 1 ] && [ $ver_choice -le ${#VERSIONS[@]} ]; then
                 TARGET_VERSION="${VERSIONS[$((ver_choice-1))]}"
             else
@@ -170,56 +164,63 @@ case "$1" in
         ;;
     version)
         echo ""
-        [ -f "$WORK_DIR/.current_version" ] && echo -e "${BLUE}Current:${NC} ${GREEN}$(cat $WORK_DIR/.current_version)${NC}"
+        [ -f "$WORK_DIR/.current_version" ] && echo "Current: $(cat $WORK_DIR/.current_version)"
         LATEST=$(get_latest_tag)
-        [ -n "$LATEST" ] && echo -e "${BLUE}Latest:${NC} ${GREEN}$LATEST${NC}"
+        [ -n "$LATEST" ] && echo "Latest:  $LATEST"
         echo ""
         ;;
     health)
-        echo ""
-        echo -e "${CYAN}═══════════════════════════════════════${NC}"
-        echo -e "${MAGENTA}  Health Check${NC}"
-        echo -e "${CYAN}═══════════════════════════════════════${NC}"
-        echo ""
-        echo -e "${BLUE}Service Status:${NC}"
+        cat << "EOF"
+
++---------------------------------------+
+| Health Check                          |
++---------------------------------------+
+
+Service Status:
+---------------
+EOF
         if systemctl is-active --quiet $SERVICE; then
-            echo -e "  ${GREEN}✓${NC} Bot is running"
+            echo "  [OK] Bot is running"
         else
-            echo -e "  ${RED}✗${NC} Bot is not running"
+            echo "  [FAIL] Bot is not running"
         fi
         echo ""
         ;;
     *)
         cat <<EOF
 
-${CYAN}╔══════════════════════════════════════════╗
-║                                          ║
-║             LIORA BOT CLI                ║
-║                                          ║
-╚══════════════════════════════════════════╝${NC}
++------------------------------------------+
+|                                          |
+|           LIORA BOT CLI                  |
+|                                          |
++------------------------------------------+
 
-${MAGENTA}Service Management:${NC}
-  ${GREEN}bot start${NC}          Start the bot
-  ${GREEN}bot stop${NC}           Stop the bot
-  ${GREEN}bot restart${NC}        Restart the bot
-  ${GREEN}bot reload${NC}         Reload configuration
-  ${GREEN}bot status${NC}         Show service status
+Service Management:
+--------------------
+  bot start          Start the bot
+  bot stop           Stop the bot
+  bot restart        Restart the bot
+  bot reload         Reload configuration
+  bot status         Show service status
 
-${MAGENTA}Logs & Monitoring:${NC}
-  ${GREEN}bot log${NC}            View live logs
-  ${GREEN}bot logs${NC}           View live logs (alias)
-  ${GREEN}bot tail [n]${NC}       Show last N lines (default: 50)
+Logs & Monitoring:
+--------------------
+  bot log            View live logs
+  bot logs           View live logs (alias)
+  bot tail [n]       Show last N lines (default: 50)
 
-${MAGENTA}Configuration:${NC}
-  ${GREEN}bot config${NC}         Edit configuration file
-  ${GREEN}bot check-config${NC}   Validate configuration
+Configuration:
+--------------------
+  bot config         Edit configuration file
+  bot check-config   Validate configuration
 
-${MAGENTA}Maintenance:${NC}
-  ${GREEN}bot update${NC}         Interactive version update
-  ${GREEN}bot version${NC}        Show current & latest version
-  ${GREEN}bot health${NC}         Health check
+Maintenance:
+--------------------
+  bot update         Interactive version update
+  bot version        Show current & latest version
+  bot health         Health check
 
-${CYAN}═══════════════════════════════════════════${NC}
++------------------------------------------+
 
 EOF
         ;;
