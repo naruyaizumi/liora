@@ -1,6 +1,113 @@
+# ============================================
+# BUN RUNTIME & DEPENDENCIES
+# ============================================
 node_modules/
+.bun/
+.oven/
+bun.lock
+bun-debug.log*
+bun-error.log*
+
+# ============================================
+# ENVIRONMENT & SECURITY
+# ============================================
 .env
-src/database/*.db
+.env.local
+.env.*.local
+.env.backup
+.secrets/
+keys/
+certificates/
+ssl/
+
+# ============================================
+# DATABASE & DATA STORAGE
+# ============================================
+*.db
 *.db-wal
 *.db-shm
+src/database/*.db
+data/
+storage/
+temp.db
+test.db
+
+# ============================================
+# LOGS & TEMPORARY FILES
+# ============================================
+logs/
+*.log
+bun-debug.log*
+bun-error.log*
+*.pid
+*.pid.lock
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+~*
+
+# ============================================
+# BUN BUILD & CACHE
+# ============================================
+dist/
+build/
+out/
+.bun-cache/
+
+# ============================================
+# MEDIA & CACHE
+# ============================================
+temp/
+tmp/
+cache/
+downloads/
+media/
+uploads/
+.prekey/
+
+# ============================================
+# SERVICE & PROCESS MANAGEMENT
+# ============================================
 service
+*.service
+bun.pid
+.pm2/
+
+# ============================================
+# BACKUP & ARCHIVE
+# ============================================
+*.bak
+*.backup
+*.old
+*.orig
+dump.rdb
+
+# ============================================
+# TEST & COVERAGE
+# ============================================
+coverage/
+test-results/
+
+# ============================================
+# DOCKER & VIRTUALIZATION
+# ============================================
+docker-compose.override.yml
+.dockerignore
+.vagrant/
+*.box
+
+# ============================================
+# EXCLUSIVELY FOR BUN PROJECTS
+# ============================================
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*

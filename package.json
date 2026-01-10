@@ -1,8 +1,25 @@
 {
     "name": "liora",
     "version": "9.1.3",
+    "description": "Liora - Advanced WhatsApp Bot",
     "type": "module",
     "license": "Apache-2.0",
+    "author": {
+        "name": "Naruya Izumi",
+        "email": "sexystyle088@gmail.com",
+        "url": "https://github.com/naruyaizumi"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/naruyaizumi/liora.git"
+    },
+    "homepage": "https://github.com/naruyaizumi/liora#readme",
+    "bugs": {
+        "url": "https://github.com/naruyaizumi/liora/issues"
+    },
+    "engines": {
+        "bun": ">=1.3.0"
+    },
     "scripts": {
         "start": "bun run --smol src/main.js"
     },
