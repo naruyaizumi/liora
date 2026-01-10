@@ -1,6 +1,19 @@
+/**
+ * @file Message serialization and prototype extension
+ * @module core/message
+ * @description Extends WhatsApp WebMessageInfo prototype with utility methods
+ * and properties for enhanced message handling in Liora bot.
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
 import { smsg } from "./smsg.js";
 import { proto, areJidsSameUser, extractMessageContent } from "baileys";
 
+/**
+ * Set of recognized media message types
+ * @constant {Set<string>}
+ */
 const MEDIA_TYPES = new Set([
     "imageMessage",
     "videoMessage",
@@ -9,9 +22,29 @@ const MEDIA_TYPES = new Set([
     "documentMessage",
 ]);
 
+/**
+ * Fast object keys extraction with null safety
+ * @function fastKeys
+ * @param {Object} o - Object to extract keys from
+ * @returns {Array<string>} Array of keys or empty array
+ */
 const fastKeys = (o) => (o && typeof o === "object" ? Object.keys(o) : []);
+
+/**
+ * Safe property access with hasOwnProperty check
+ * @function safeGet
+ * @param {Object} o - Source object
+ * @param {string} k - Property key
+ * @returns {*} Property value or undefined
+ */
 const safeGet = (o, k) => (o && Object.prototype.hasOwnProperty.call(o, k) ? o[k] : undefined);
 
+/**
+ * Extracts primary message type, skipping protocol headers
+ * @function firstMeaningfulType
+ * @param {Object} msg - Message object
+ * @returns {string} Primary message type
+ */
 const firstMeaningfulType = (msg) => {
     const keys = fastKeys(msg);
     if (!keys.length) return "";
@@ -22,6 +55,13 @@ const firstMeaningfulType = (msg) => {
     return keys[keys.length - 1];
 };
 
+/**
+ * Extracts media envelope from message structure
+ * @function getMediaEnvelope
+ * @param {Object} root - Root message object
+ * @param {Object} node - Media node
+ * @returns {Object|null} Media envelope or null
+ */
 const getMediaEnvelope = (root, node) => {
     if (!node) return null;
     if (node?.url || node?.directPath) return root;
@@ -29,6 +69,16 @@ const getMediaEnvelope = (root, node) => {
     return extracted || null;
 };
 
+/**
+ * Creates enhanced quoted message object with utility methods
+ * @function createQuotedMessage
+ * @param {Object} self - Parent message context
+ * @param {Object} ctx - Context information
+ * @param {Object} quoted - Quoted message object
+ * @param {Object|string} rawNode - Raw message node
+ * @param {string} type - Message type
+ * @returns {Object} Enhanced quoted message
+ */
 const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
     const textNode = typeof rawNode === "string" ? rawNode : rawNode?.text;
     const base = typeof rawNode === "string" ? { text: rawNode } : rawNode || {};
@@ -182,19 +232,53 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
     });
 };
 
+/**
+ * Extends WebMessageInfo prototype with Liora-specific utilities
+ * @export
+ * @function serialize
+ * @returns {Object} Modified prototype
+ * 
+ * @extendedProperties
+ * - Connection management (.conn)
+ * - Message metadata (.id, .chat, .sender, .mtype)
+ * - Media handling (.mediaMessage, .mediaType, .download)
+ * - Quoted message utilities (.quoted, .getQuotedObj)
+ * - Action methods (.reply, .copy, .forward, .delete)
+ * - Context detection (.isGroup, .isChannel, .isBaileys)
+ * 
+ * @performance
+ * - Uses getters for lazy evaluation
+ * - Minimal property creation overhead
+ * - Efficient media detection
+ * - Connection-aware utilities
+ */
 export function serialize() {
     return Object.defineProperties(proto.WebMessageInfo.prototype, {
+        /**
+         * Connection reference for message operations
+         * @property {Object} conn
+         */
         conn: {
             value: undefined,
             enumerable: false,
             writable: true,
         },
+
+        /**
+         * Message identifier
+         * @property {string} id
+         */
         id: {
             get() {
                 return this.key?.id || null;
             },
             enumerable: true,
         },
+
+        /**
+         * Checks if message is from Baileys
+         * @property {boolean} isBaileys
+         */
         isBaileys: {
             get() {
                 const id = this.id;
@@ -205,6 +289,11 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Chat identifier with normalization
+         * @property {string} chat
+         */
         chat: {
             get() {
                 const skdm = this.message?.senderKeyDistributionMessage?.groupId;
@@ -218,6 +307,11 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Checks if chat is a newsletter channel
+         * @property {boolean} isChannel
+         */
         isChannel: {
             get() {
                 const chat = this.chat;
@@ -225,6 +319,11 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Checks if chat is a group
+         * @property {boolean} isGroup
+         */
         isGroup: {
             get() {
                 const chat = this.chat;
@@ -232,6 +331,11 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Sender identifier with JID normalization
+         * @property {string} sender
+         */
         sender: {
             get() {
                 const conn = this.conn;
@@ -249,6 +353,11 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Checks if message is from current user
+         * @property {boolean} fromMe
+         */
         fromMe: {
             get() {
                 const me = this.conn?.user?.id;
@@ -257,12 +366,22 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Primary message type
+         * @property {string} mtype
+         */
         mtype: {
             get() {
                 return this.message ? firstMeaningfulType(this.message) : "";
             },
             enumerable: true,
         },
+
+        /**
+         * Message content object
+         * @property {Object} msg
+         */
         msg: {
             get() {
                 if (!this.message) return null;
@@ -271,6 +390,11 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Media message envelope
+         * @property {Object} mediaMessage
+         */
         mediaMessage: {
             get() {
                 if (!this.message) return null;
@@ -281,6 +405,11 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Media type identifier
+         * @property {string} mediaType
+         */
         mediaType: {
             get() {
                 const m = this.mediaMessage;
@@ -288,6 +417,11 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Quoted message with utilities
+         * @property {Object} quoted
+         */
         quoted: {
             get() {
                 const baseMsg = this.msg;
@@ -304,6 +438,11 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Extracted text content
+         * @property {string} text
+         */
         text: {
             get() {
                 const msg = this.msg;
@@ -330,6 +469,11 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Mentioned user JIDs
+         * @property {Array<string>} mentionedJid
+         */
         mentionedJid: {
             get() {
                 const arr = safeGet(this.msg?.contextInfo || {}, "mentionedJid");
@@ -337,6 +481,11 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Sender display name
+         * @property {string} name
+         */
         name: {
             get() {
                 const pn = this.pushName;
@@ -347,6 +496,12 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Downloads media content
+         * @method download
+         * @returns {Promise<Uint8Array>} Media buffer
+         */
         download: {
             async value() {
                 const t = this.mediaType;
@@ -365,6 +520,15 @@ export function serialize() {
             enumerable: true,
             configurable: true,
         },
+
+        /**
+         * Replies to this message
+         * @method reply
+         * @param {string} text - Reply text
+         * @param {string} chatId - Target chat (optional)
+         * @param {Object} options - Send options
+         * @returns {Promise<Object>} Send result
+         */
         reply: {
             value(text, chatId, options = {}) {
                 if (!this.conn?.reply) {
@@ -374,6 +538,12 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Creates a copy of this message
+         * @method copy
+         * @returns {Object} Copied message
+         */
         copy: {
             value() {
                 if (!this.conn) throw new Error("Connection not available");
@@ -382,6 +552,15 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Forwards this message
+         * @method forward
+         * @param {string} jid - Target JID
+         * @param {boolean} force - Force forward
+         * @param {Object} options - Forward options
+         * @returns {Promise<Object>} Forward result
+         */
         forward: {
             value(jid, force = false, options = {}) {
                 if (!this.conn?.sendMessage) {
@@ -391,6 +570,12 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Retrieves full quoted message object
+         * @method getQuotedObj
+         * @returns {Object|null} Quoted message or null
+         */
         getQuotedObj: {
             value() {
                 const q = this.quoted;
@@ -407,12 +592,23 @@ export function serialize() {
             },
             enumerable: true,
         },
+
+        /**
+         * Alias for getQuotedObj
+         * @property {Function} getQuotedMessage
+         */
         getQuotedMessage: {
             get() {
                 return this.getQuotedObj;
             },
             enumerable: true,
         },
+
+        /**
+         * Deletes this message
+         * @method delete
+         * @returns {Promise<Object>} Delete result
+         */
         delete: {
             value() {
                 if (!this.conn?.sendMessage) {

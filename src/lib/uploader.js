@@ -1,6 +1,29 @@
+/**
+ * @file Multi-provider file upload utilities for Liora bot
+ * @module lib/uploader
+ * @description Robust file uploading to various free file hosting services
+ * with fallback mechanisms and comprehensive error handling.
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
 /* global conn */
 import { fileType, getBrowserHeaders } from "./file-type.js";
 
+/**
+ * Uploads file to Catbox.moe hosting service
+ * @async
+ * @function uploader1
+ * @param {Uint8Array|Buffer} buffer - File buffer to upload
+ * @returns {Promise<string>} Direct download URL
+ * @throws {Error} On upload failure or invalid response
+ * 
+ * @serviceDetails
+ * - Max file size: 200MB
+ * - Retention: Indefinite (user-managed)
+ * - Features: Direct links, API access
+ * - URL format: https://files.catbox.moe/xxxxxx.ext
+ */
 async function uploader1(buffer) {
     try {
         if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
@@ -33,6 +56,20 @@ async function uploader1(buffer) {
     }
 }
 
+/**
+ * Uploads file to Uguu.se hosting service
+ * @async
+ * @function uploader2
+ * @param {Uint8Array|Buffer} buffer - File buffer to upload
+ * @returns {Promise<string>} Direct download URL
+ * @throws {Error} On upload failure or invalid response
+ * 
+ * @serviceDetails
+ * - Max file size: 100MB
+ * - Retention: 1 month (automatic cleanup)
+ * - Features: Direct links, no registration
+ * - URL format: https://uguu.se/xxxxxx.ext
+ */
 async function uploader2(buffer) {
     try {
         if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
@@ -63,6 +100,20 @@ async function uploader2(buffer) {
     }
 }
 
+/**
+ * Uploads file to Qu.ax hosting service
+ * @async
+ * @function uploader3
+ * @param {Uint8Array|Buffer} buffer - File buffer to upload
+ * @returns {Promise<string>} Direct download URL
+ * @throws {Error} On upload failure or invalid response
+ * 
+ * @serviceDetails
+ * - Max file size: 50MB
+ * - Retention: 30 days
+ * - Features: Direct links, simple API
+ * - URL format: https://qu.ax/xxxxxx.ext
+ */
 async function uploader3(buffer) {
     try {
         if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
@@ -93,6 +144,20 @@ async function uploader3(buffer) {
     }
 }
 
+/**
+ * Uploads file to Put.icu hosting service using PUT method
+ * @async
+ * @function uploader4
+ * @param {Uint8Array|Buffer} buffer - File buffer to upload
+ * @returns {Promise<string>} Direct download URL
+ * @throws {Error} On upload failure or invalid response
+ * 
+ * @serviceDetails
+ * - Max file size: 250MB
+ * - Retention: Permanent
+ * - Features: REST API, direct PUT method
+ * - URL format: https://put.icu/xxxxxx
+ */
 async function uploader4(buffer) {
     try {
         if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
@@ -124,6 +189,20 @@ async function uploader4(buffer) {
     }
 }
 
+/**
+ * Uploads file to Tmpfiles.org hosting service
+ * @async
+ * @function uploader5
+ * @param {Uint8Array|Buffer} buffer - File buffer to upload
+ * @returns {Promise<string>} Direct download URL
+ * @throws {Error} On upload failure or invalid response
+ * 
+ * @serviceDetails
+ * - Max file size: 100MB
+ * - Retention: 5 days (temporary)
+ * - Features: Direct links, simple interface
+ * - URL format: https://tmpfiles.org/dl/xxxxxx
+ */
 async function uploader5(buffer) {
     try {
         if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
@@ -155,6 +234,20 @@ async function uploader5(buffer) {
     }
 }
 
+/**
+ * Uploads video files to Videy hosting service (video-only)
+ * @async
+ * @function uploader6
+ * @param {Uint8Array|Buffer} buffer - Video buffer to upload
+ * @returns {Promise<string>} Direct download URL
+ * @throws {Error} On upload failure or invalid response
+ * 
+ * @serviceDetails
+ * - Supported formats: MP4, MOV, AVI, MKV, WebM
+ * - Max file size: 500MB
+ * - Features: Video streaming, thumbnails
+ * - API: Third-party wrapper
+ */
 async function uploader6(buffer) {
     try {
         if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
@@ -194,6 +287,20 @@ async function uploader6(buffer) {
     }
 }
 
+/**
+ * Uploads image files to GoFile hosting service (image-only)
+ * @async
+ * @function uploader7
+ * @param {Uint8Array|Buffer} buffer - Image buffer to upload
+ * @returns {Promise<string>} Direct download URL
+ * @throws {Error} On upload failure or invalid response
+ * 
+ * @serviceDetails
+ * - Supported formats: JPG, PNG, GIF, WebP, HEIC, BMP
+ * - Max file size: 50MB
+ * - Features: Image optimization, galleries
+ * - API: Third-party wrapper
+ */
 async function uploader7(buffer) {
     try {
         if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
@@ -233,6 +340,33 @@ async function uploader7(buffer) {
     }
 }
 
+/**
+ * Multi-provider uploader with automatic fallback
+ * @async
+ * @function uploader
+ * @param {Uint8Array|Buffer} buffer - File buffer to upload
+ * @returns {Promise<Object>} Upload result with metadata
+ * 
+ * @resultFormat
+ * {
+ *   success: boolean,
+ *   url: string|null,
+ *   provider: string|null,
+ *   attempts: Array<{
+ *     provider: string,
+ *     status: 'success'|'error'|'invalid_response',
+ *     url?: string,
+ *     error?: string
+ *   }>
+ * }
+ * 
+ * @fallbackStrategy
+ * 1. Catbox.moe (most reliable)
+ * 2. Uguu.se (good alternative)
+ * 3. Qu.ax (lightweight)
+ * 4. Put.icu (REST API)
+ * 5. Tmpfiles.org (temporary)
+ */
 async function uploader(buffer) {
     const providers = [
         { name: "Catbox", fn: uploader1 },

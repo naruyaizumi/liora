@@ -1,3 +1,34 @@
+/**
+ * @file HTTP fetch command handler
+ * @module plugins/internet/fetch
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Fetches and analyzes HTTP resources from URLs
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {string} text - URL to fetch
+ * @param {string} usedPrefix - Command prefix used
+ * @param {string} command - Command name
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to fetch HTTP resources from URLs and analyze their content.
+ * Supports various content types including images, videos, audio, JSON, and HTML.
+ * 
+ * @features
+ * - Fetches HTTP resources with browser-like headers
+ * - Detects file types using magic bytes
+ * - Handles redirects and HTTP errors
+ * - Displays detailed metadata and statistics
+ * - Sends appropriate media types back to chat
+ * - Shows download speed and processing time
+ */
+
 import {
     fileType,
     getExtension,
@@ -93,11 +124,6 @@ JSON Keys: ${
             } catch {
                 info = "JSON Type: Invalid\n";
             }
-        } else if (html) {
-            const t = buf.toString("utf-8", 0, 50000);
-            const title = t.match(/<title[^>]*>([^<]+)<\/title>/i);
-            info = `HTML Title: ${title ? title[1].substring(0, 50) : "Not found"}
-`;
         }
 
         const cap = `FETCH
@@ -164,6 +190,12 @@ Time: ${Date.now() - start}ms\`\`\``;
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["fetch"];
 handler.tags = ["internet"];
 handler.command = /^(fetch|get)$/i;

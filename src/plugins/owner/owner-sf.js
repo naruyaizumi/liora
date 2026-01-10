@@ -1,3 +1,33 @@
+/**
+ * @file Save file and directory listing command handler
+ * @module plugins/owner/savefile
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Lists directory contents or saves files to the file system
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} param1 - Destructured parameters
+ * @param {Array} param1.args - Directory path arguments
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Dual-purpose command that either lists directory contents or saves files.
+ * Without a quoted message: lists files and directories at specified path.
+ * With a quoted media/document: saves the file to specified path.
+ * 
+ * @features
+ * - Lists directory contents with file/folder icons
+ * - Saves media and documents to file system
+ * - Handles various file types (image, video, audio, documents)
+ * - Creates directories recursively if needed
+ * - Shows relative paths for saved files
+ * - Only accessible by bot owner
+ */
+
 import { readdir, mkdir } from "node:fs/promises";
 import path from "node:path";
 
@@ -47,6 +77,13 @@ const handler = async (m, { args }) => {
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ * @property {boolean} owner - Whether only bot owner can use this command
+ */
 handler.help = ["sf"];
 handler.tags = ["owner"];
 handler.command = /^(sf|savefile)$/i;

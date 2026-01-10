@@ -1,3 +1,33 @@
+/**
+ * @file System information command handler
+ * @module plugins/info/os
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Displays comprehensive system information and performance metrics
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to display detailed system information including OS details, CPU, memory, 
+ * disk usage, network statistics, process information, and system health warnings.
+ * 
+ * @features
+ * - Comprehensive system monitoring dashboard
+ * - Real-time performance metrics
+ * - System health warnings
+ * - Progress bars for resource usage
+ * - Network and traffic statistics
+ * - Process and user information
+ * - Container and virtualization detection
+ * - External advertisement integration
+ */
+
 import {
     formatSize,
     formatTime,
@@ -282,6 +312,12 @@ System Status: ${warnings.length === 0 ? "✓ HEALTHY" : "✘ ATTENTION REQUIRED
     );
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["os"];
 handler.tags = ["info"];
 handler.command = /^(os)$/i;

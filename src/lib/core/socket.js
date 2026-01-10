@@ -1,3 +1,12 @@
+/**
+ * @file Socket wrapper and connection management for Liora bot
+ * @module core/socket
+ * @description Enhanced WhatsApp WebSocket wrapper with message queueing,
+ * connection utilities, and message processing pipeline.
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
 import bind from "./store/store.js";
 import { smsg } from "./smsg.js";
 import { mods } from "./mod.js";
@@ -8,9 +17,32 @@ import {
     downloadContentFromMessage,
 } from "baileys";
 
+/**
+ * Checks if JID belongs to a group chat
+ * @function isGroupJid
+ * @param {string} id - JID to check
+ * @returns {boolean} True if group JID
+ */
 const isGroupJid = (id) => id && id.endsWith("@g.us");
+
+/**
+ * Checks if JID is a status broadcast
+ * @function isStatusJid
+ * @param {string} id - JID to check
+ * @returns {boolean} True if status JID
+ */
 const isStatusJid = (id) => !id || id === "status@broadcast";
 
+/**
+ * Decodes and normalizes JID formats
+ * @function decodeJid
+ * @param {string} raw - Raw JID string
+ * @returns {string|null} Normalized JID or null
+ * @example
+ * decodeJid("1234567890@s.whatsapp.net") // "1234567890@s.whatsapp.net"
+ * decodeJid("1234567890:0@s.whatsapp.net") // "1234567890@s.whatsapp.net"
+ * decodeJid("1234567890") // "1234567890@s.whatsapp.net"
+ */
 const decodeJid = (raw) => {
     if (!raw || typeof raw !== "string") return raw || null;
     const cleaned = raw.replace(/:\d+@/, "@");
@@ -21,13 +53,27 @@ const decodeJid = (raw) => {
           : cleaned;
 };
 
+/**
+ * Asynchronous message queue for processing incoming messages
+ * @class MessageQueue
+ * @description Batches message processing to prevent overload
+ */
 class MessageQueue {
+    /**
+     * Creates new message queue
+     * @constructor
+     */
     constructor() {
         this.tasks = [];
         this.running = false;
         this.batchSize = 10;
     }
 
+    /**
+     * Adds task to queue
+     * @method add
+     * @param {Function} task - Async function to execute
+     */
     add(task) {
         this.tasks.push(task);
         if (!this.running) {
@@ -36,6 +82,11 @@ class MessageQueue {
         }
     }
 
+    /**
+     * Processes queued tasks in batches
+     * @async
+     * @method process
+     */
     async process() {
         while (this.tasks.length > 0) {
             const batch = this.tasks.splice(0, this.batchSize);
@@ -49,18 +100,56 @@ class MessageQueue {
     }
 }
 
+/**
+ * Global message queue instance
+ * @constant {MessageQueue}
+ */
 const messageQueue = new MessageQueue();
 
+/**
+ * Creates enhanced WhatsApp socket connection
+ * @export
+ * @function naruyaizumi
+ * @param {Object} connectionOptions - Baileys socket options
+ * @returns {Object} Enhanced connection object
+ * 
+ * @features
+ * - Message queue for batched processing
+ * - Automatic JID normalization
+ * - Media download utilities
+ * - Group metadata management
+ * - Message persistence and caching
+ * - Enhanced reply system with ephemeral support
+ * 
+ * @performance
+ * - Batched message processing (10 messages/batch)
+ * - Async group metadata fetching
+ * - Efficient media streaming with chunk aggregation
+ * - Automatic connection state management
+ */
 export function naruyaizumi(connectionOptions) {
     const conn = makeWASocket(connectionOptions);
 
+    // Bind store management
     bind(conn);
 
+    // JID utilities
     conn.decodeJid = decodeJid;
 
+    // Message sending utilities
     const sender = new mods(conn);
     conn.client = sender.client.bind(sender);
 
+    /**
+     * Enhanced reply method with ephemeral support
+     * @async
+     * @method reply
+     * @param {string} jid - Target JID
+     * @param {string} text - Message text
+     * @param {Object} quoted - Quoted message
+     * @param {Object} options - Additional options
+     * @returns {Promise<Object>} Message send result
+     */
     conn.reply = async (jid, text = "", quoted, options = {}) => {
         let ephemeral = false;
         try {
@@ -85,6 +174,14 @@ export function naruyaizumi(connectionOptions) {
         );
     };
 
+    /**
+     * Downloads media from message with chunk aggregation
+     * @async
+     * @method downloadM
+     * @param {Object} m - Media message object
+     * @param {string} type - Media type
+     * @returns {Promise<Uint8Array>} Media buffer
+     */
     conn.downloadM = async (m, type) => {
         if (!m || !(m.url || m.directPath)) return new Uint8Array(0);
 
@@ -117,6 +214,14 @@ export function naruyaizumi(connectionOptions) {
         }
     };
 
+    /**
+     * Gets display name for JID with caching
+     * @async
+     * @method getName
+     * @param {string} jid - Target JID
+     * @param {boolean} withoutContact - Skip contact resolution
+     * @returns {Promise<string>} Display name
+     */
     conn.getName = async (jid = "", withoutContact = false) => {
         jid = conn.decodeJid(jid);
         if (!jid || withoutContact) return jid || "";
@@ -153,6 +258,13 @@ export function naruyaizumi(connectionOptions) {
         }
     };
 
+    /**
+     * Loads message from chat cache by ID
+     * @async
+     * @method loadMessage
+     * @param {string} messageID - Message identifier
+     * @returns {Promise<Object|null>} Message object or null
+     */
     conn.loadMessage = async (messageID) => {
         if (!messageID) return null;
 
@@ -169,6 +281,12 @@ export function naruyaizumi(connectionOptions) {
         return null;
     };
 
+    /**
+     * Processes WhatsApp protocol message stubs
+     * @async
+     * @method processMessageStubType
+     * @param {Object} m - Message object
+     */
     conn.processMessageStubType = async (m) => {
         if (!m?.messageStubType) return;
 
@@ -195,6 +313,12 @@ export function naruyaizumi(connectionOptions) {
         });
     };
 
+    /**
+     * Bulk inserts all participating groups into cache
+     * @async
+     * @method insertAllGroup
+     * @returns {Promise<Object>} Groups metadata
+     */
     conn.insertAllGroup = async () => {
         try {
             const allGroups = await conn.groupFetchAllParticipating().catch(() => ({}));
@@ -233,6 +357,24 @@ export function naruyaizumi(connectionOptions) {
         }
     };
 
+    /**
+     * Processes and stores incoming messages
+     * @method pushMessage
+     * @param {Object|Array} m - Message(s) to process
+     * 
+     * @processingPipeline
+     * 1. Protocol stub processing
+     * 2. Message type detection
+     * 3. Chat metadata resolution
+     * 4. Quoted message caching
+     * 5. Sender information updating
+     * 6. Message persistence
+     * 
+     * @storage
+     * - Messages: 15 per chat (sliding window)
+     * - Quoted messages: 20 per chat
+     * - Automatic cleanup of old entries
+     */
     conn.pushMessage = (m) => {
         if (!m) return;
 
@@ -241,6 +383,7 @@ export function naruyaizumi(connectionOptions) {
         messages.forEach((message) => {
             messageQueue.add(async () => {
                 try {
+                    // Process protocol messages
                     if (
                         message.messageStubType &&
                         message.messageStubType !== WAMessageStubType.CIPHERTEXT
@@ -252,6 +395,7 @@ export function naruyaizumi(connectionOptions) {
                     const mtypeKeys = Object.keys(msgObj);
                     if (!mtypeKeys.length) return;
 
+                    // Determine message type
                     let mtype = mtypeKeys.find(
                         (k) => k !== "senderKeyDistributionMessage" && k !== "messageContextInfo"
                     );
@@ -265,6 +409,7 @@ export function naruyaizumi(connectionOptions) {
 
                     if (!chat || isStatusJid(chat)) return;
 
+                    // Get or create chat data
                     let chatData = await conn.getChat(chat);
                     if (!chatData) {
                         chatData = { id: chat, isChats: true };
@@ -272,16 +417,18 @@ export function naruyaizumi(connectionOptions) {
 
                     const isGroup = isGroupJid(chat);
 
+                    // Fetch group metadata if missing
                     if (isGroup && !chatData.metadata) {
                         try {
                             const md = await conn.groupMetadata(chat);
                             chatData.subject = md.subject;
                             chatData.metadata = md;
                         } catch {
-                            //
+                            // Silent fail
                         }
                     }
 
+                    // Cache quoted messages
                     const ctx = msgObj[mtype]?.contextInfo;
                     if (ctx?.quotedMessage && ctx.stanzaId) {
                         const qChat = conn.decodeJid(ctx.remoteJid || ctx.participant || chat);
@@ -316,6 +463,7 @@ export function naruyaizumi(connectionOptions) {
 
                                     qm.messages[ctx.stanzaId] = quotedMsg;
 
+                                    // Maintain sliding window of 20 messages
                                     const msgKeys = Object.keys(qm.messages);
                                     if (msgKeys.length > 30) {
                                         for (let i = 0; i < msgKeys.length - 20; i++) {
@@ -326,11 +474,12 @@ export function naruyaizumi(connectionOptions) {
                                     await conn.setChat(qChat, qm);
                                 }
                             } catch {
-                                //
+                                // Silent fail
                             }
                         }
                     }
 
+                    // Update sender information
                     if (!isGroup) {
                         chatData.name = message.pushName || chatData.name || "";
                     } else {
@@ -347,11 +496,12 @@ export function naruyaizumi(connectionOptions) {
                                 sChat.name = message.pushName || sChat.name || "";
                                 await conn.setChat(s, sChat);
                             } catch {
-                                //
+                                // Silent fail
                             }
                         }
                     }
 
+                    // Store non-bot messages (15 message sliding window)
                     if (mtype !== "senderKeyDistributionMessage") {
                         const s = isGroup
                             ? conn.decodeJid(
@@ -402,8 +552,15 @@ export function naruyaizumi(connectionOptions) {
         });
     };
 
+    /**
+     * Serializes message using smsg utility
+     * @method serializeM
+     * @param {Object} m - Message object
+     * @returns {Object} Serialized message
+     */
     conn.serializeM = (m) => smsg(conn, m);
 
+    // Normalize bot's own LID
     if (conn.user?.lid) {
         conn.user.lid = conn.decodeJid(conn.user.lid);
     }

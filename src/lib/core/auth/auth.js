@@ -1,3 +1,12 @@
+/**
+ * @file SQLite-based authentication state management for Baileys
+ * @module auth/sqlite-auth
+ * @description Production-grade authentication state persistence with transaction support,
+ * connection pooling, and robust error handling for WhatsApp Web sessions.
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 import { initAuthCreds } from "baileys";
 import { AsyncLocalStorage } from "async_hooks";
@@ -6,15 +15,46 @@ import PQueue from "p-queue";
 import db from "./core.js";
 import { makeKey, validateKey, validateValue } from "./config.js";
 
+/**
+ * Default transaction options for atomic operations
+ * @constant {Object}
+ */
 const DEFAULT_TRANSACTION_OPTIONS = {
     maxCommitRetries: 5,
     delayBetweenTriesMs: 200,
 };
 
+/**
+ * Promise-based delay utility
+ * @function delay
+ * @param {number} ms - Milliseconds to delay
+ * @returns {Promise<void>}
+ */
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/**
+ * Creates SQLite-based authentication state manager for Baileys
+ * @export
+ * @function useSQLiteAuthState
+ * @param {string} _dbPath - Database file path (unused, uses global db)
+ * @param {Object} options - Transaction options
+ * @returns {Object} Authentication state manager
+ * 
+ * @features
+ * - Transaction support with automatic retries
+ * - Connection pooling and mutex locking
+ * - Async context preservation
+ * - Automatic credential persistence
+ * - Cache coherency with write-through
+ * 
+ * @transactionMechanism
+ * - Uses AsyncLocalStorage for transaction context
+ * - Mutex locks per key type for consistency
+ * - Retry logic for commit failures
+ * - Automatic rollback on errors
+ */
 export function useSQLiteAuthState(_dbPath, options = {}) {
     const txOptions = { ...DEFAULT_TRANSACTION_OPTIONS, ...options };
 
@@ -40,6 +80,12 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
     const keyQueues = new Map();
     const txMutexes = new Map();
 
+    /**
+     * Gets or creates queue for specific key type
+     * @function getQueue
+     * @param {string} key - Key type identifier
+     * @returns {PQueue} Priority queue instance
+     */
     function getQueue(key) {
         if (!keyQueues.has(key)) {
             keyQueues.set(key, new PQueue({ concurrency: 1 }));
@@ -47,6 +93,12 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
         return keyQueues.get(key);
     }
 
+    /**
+     * Gets or creates mutex for transaction isolation
+     * @function getTxMutex
+     * @param {string} key - Key type identifier
+     * @returns {Mutex} Mutex instance
+     */
     function getTxMutex(key) {
         if (!txMutexes.has(key)) {
             txMutexes.set(key, new Mutex());
@@ -54,10 +106,22 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
         return txMutexes.get(key);
     }
 
+    /**
+     * Checks if currently executing within a transaction
+     * @function isInTransaction
+     * @returns {boolean} True if in transaction context
+     */
     function isInTransaction() {
         return !!txStorage.getStore();
     }
 
+    /**
+     * Commits transaction mutations with automatic retry
+     * @async
+     * @function commitWithRetry
+     * @param {Object} mutations - Key-value mutations to commit
+     * @throws {Error} On persistent commit failure
+     */
     async function commitWithRetry(mutations) {
         if (Object.keys(mutations).length === 0) {
             global.logger.trace("no mutations in transaction");
@@ -102,6 +166,14 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
         }
     }
 
+    /**
+     * Retrieves multiple keys with transaction awareness
+     * @async
+     * @function keysGet
+     * @param {string} type - Key type/category
+     * @param {Array<string>} ids - Key identifiers
+     * @returns {Promise<Object>} Key-value mapping
+     */
     async function keysGet(type, ids) {
         if (!type || !Array.isArray(ids)) {
             global.logger.warn({ type, ids, context: "keys.get: invalid params" });
@@ -175,6 +247,12 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
         return result;
     }
 
+    /**
+     * Sets multiple keys with transaction awareness
+     * @async
+     * @function keysSet
+     * @param {Object} data - Key-value data organized by type
+     */
     async function keysSet(data) {
         if (!data || typeof data !== "object") {
             global.logger.warn({ context: "keys.set: invalid data" });
@@ -233,6 +311,11 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
         }
     }
 
+    /**
+     * Clears all authentication keys
+     * @async
+     * @function keysClear
+     */
     async function keysClear() {
         try {
             global.logger.info({ context: "keys.clear: clearing all keys" });
@@ -244,6 +327,21 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
         }
     }
 
+    /**
+     * Executes work within a transactional context
+     * @async
+     * @function transaction
+     * @param {Function} work - Async function to execute
+     * @param {string} key - Transaction isolation key
+     * @returns {Promise<*>} Work result
+     * 
+     * @transactionBehavior
+     * - Automatic commit on success
+     * - Automatic rollback on error
+     * - Nested transactions reuse parent context
+     * - Mutex isolation per key type
+     * - Performance monitoring
+     */
     async function transaction(work, key = "default") {
         if (typeof work !== "function") {
             global.logger.error({ context: "transaction: work must be a function" });
@@ -281,6 +379,11 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
         });
     }
 
+    /**
+     * Persists credentials to database
+     * @function saveCreds
+     * @returns {boolean} Success status
+     */
     function saveCreds() {
         try {
             if (!creds || typeof creds !== "object") {

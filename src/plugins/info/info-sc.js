@@ -1,3 +1,31 @@
+/**
+ * @file Script information command handler
+ * @module plugins/info/script
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Displays bot script information and repository details
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to display information about the bot's source code repository,
+ * including GitHub links, issue reporting, and pull request information.
+ * 
+ * @features
+ * - Shows GitHub repository link
+ * - Provides issue and pull request links
+ * - Displays copyright information
+ * - Interactive product display with image
+ * - Request payment message simulation
+ * - Newsletter forwarding context
+ */
+
 let handler = async (m, { conn }) => {
     const txt = `
 Liora Repository
@@ -75,6 +103,12 @@ Pull Req: https://github.com/naruyaizumi/liora/pulls
     );
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["script"];
 handler.tags = ["info"];
 handler.command = /^(script|sc)$/i;

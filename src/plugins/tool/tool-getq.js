@@ -1,5 +1,39 @@
+/**
+ * @file Message debug and media extraction command handler
+ * @module plugins/tools/debug
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Debugs quoted messages and extracts media information
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to debug and analyze quoted messages, extracting media information
+ * and attempting to redownload and send media with detailed metadata.
+ * 
+ * @features
+ * - Extracts and analyzes quoted message structure
+ * - Recursively searches for media nodes in complex objects
+ * - Attempts to redownload and resend media
+ * - Shows detailed debug information including message metadata
+ * - Displays raw object structure using Bun.inspect
+ * - Only accessible by bot owner
+ */
+
 import { formatBytes } from "#lib/file-type.js";
 
+/**
+ * Recursively searches for media nodes in an object
+ * @function findMedia
+ * @param {Object} obj - Object to search
+ * @returns {Object|null} Media node information or null
+ */
 const findMedia = (obj) => {
     const seen = new WeakSet();
 
@@ -62,6 +96,15 @@ const findMedia = (obj) => {
     return search(obj);
 };
 
+/**
+ * Downloads media from WhatsApp servers
+ * @async
+ * @function download
+ * @param {Object} conn - Connection object
+ * @param {Object} node - Media node object
+ * @param {string} type - Media type
+ * @returns {Promise<Uint8Array>} Downloaded media data
+ */
 const download = async (conn, node, type) => {
     try {
         const d = await conn.downloadM(node, type);
@@ -71,6 +114,17 @@ const download = async (conn, node, type) => {
     }
 };
 
+/**
+ * Sends media to chat with proper formatting
+ * @async
+ * @function send
+ * @param {Object} conn - Connection object
+ * @param {string} chatId - Target chat ID
+ * @param {Object} media - Media object with type, data, and node
+ * @param {string} caption - Caption text
+ * @param {Object} opts - Additional options
+ * @returns {Promise<boolean>} Success status
+ */
 const send = async (conn, chatId, media, caption = "", opts = {}) => {
     const { type, data, node } = media;
     if (data.byteLength === 0) return false;
@@ -186,6 +240,13 @@ ${raw}
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ * @property {boolean} owner - Whether only bot owner can use this command
+ */
 handler.help = ["debug"];
 handler.tags = ["tools"];
 handler.command = /^(debug|q)$/i;

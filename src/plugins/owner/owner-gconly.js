@@ -1,3 +1,35 @@
+/**
+ * @file Group-only mode command handler
+ * @module plugins/owner/gconly
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Controls whether bot only responds in groups
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} param1 - Destructured parameters
+ * @param {string} param1.text - Command argument (on/off)
+ * @param {string} param1.usedPrefix - Command prefix used
+ * @param {string} param1.command - Command name
+ * @param {Object} param1.conn - Connection object
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to toggle group-only mode for the bot.
+ * When enabled, bot only responds to commands in group chats.
+ * When disabled, bot responds in both private and group chats.
+ * 
+ * @features
+ * - Toggle group-only mode on/off
+ * - Show current mode status
+ * - Support for 'on/off' and 'enable/disable' aliases
+ * - Only accessible by bot owner
+ * - Prevents redundant state changes
+ */
+
 let handler = async (m, { text, usedPrefix, command, conn }) => {
     try {
         const s = global.db.data.settings[conn.user.lid] || {};
@@ -30,6 +62,13 @@ let handler = async (m, { text, usedPrefix, command, conn }) => {
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ * @property {boolean} owner - Whether only bot owner can use this command
+ */
 handler.help = ["gconly"];
 handler.tags = ["owner"];
 handler.command = /^(gconly|grouponly)$/i;

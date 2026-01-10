@@ -1,3 +1,33 @@
+/**
+ * @file Spotify search command handler
+ * @module plugins/internet/spsearch
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Searches for tracks on Spotify
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {string} text - Search query
+ * @param {string} usedPrefix - Command prefix used
+ * @param {string} command - Command name
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to search for music tracks on Spotify using the nekolabs API.
+ * Returns search results with interactive track selection interface.
+ * 
+ * @features
+ * - Searches Spotify tracks using external API
+ * - Displays track title, artist, and duration
+ * - Shows track cover images
+ * - Interactive selection interface
+ * - Handles empty results gracefully
+ */
+
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text) {
         return m.reply(`Need query\nEx: ${usedPrefix + command} for revenge`);
@@ -60,6 +90,12 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["spsearch"];
 handler.tags = ["internet"];
 handler.command = /^(spsearch)$/i;

@@ -1,3 +1,32 @@
+/**
+ * @file Instagram downloader command handler
+ * @module plugins/downloader/instagram
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Downloads Instagram posts, reels, and image carousels
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {Array} args - Command arguments
+ * @param {string} usedPrefix - Command prefix used
+ * @param {string} command - Command name
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Downloads Instagram content including videos, single images, and image carousels.
+ * Uses multiple API endpoints for reliability and supports various post types.
+ * 
+ * @features
+ * - Supports videos, single images, and image carousels
+ * - Uses multiple backup API endpoints
+ * - Shows loading indicators during processing
+ * - Handles errors with user-friendly messages
+ */
+
 import { instagram } from "#api/instagram.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -46,6 +75,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["instagram"];
 handler.tags = ["downloader"];
 handler.command = /^(instagram|ig)$/i;

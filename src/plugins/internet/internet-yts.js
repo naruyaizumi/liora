@@ -1,3 +1,33 @@
+/**
+ * @file YouTube search command handler
+ * @module plugins/internet/yts
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Searches for videos on YouTube
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {string} text - Search query
+ * @param {string} usedPrefix - Command prefix used
+ * @param {string} command - Command name
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to search for videos on YouTube using the nekolabs API.
+ * Returns search results with interactive video selection interface.
+ * 
+ * @features
+ * - Searches YouTube videos using external API
+ * - Displays video title, channel, and duration
+ * - Shows video cover images
+ * - Interactive selection interface
+ * - Handles empty results gracefully
+ */
+
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text) {
         return m.reply(`Need query\nEx: ${usedPrefix + command} neck deep`);
@@ -60,6 +90,12 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["yts"];
 handler.tags = ["internet"];
 handler.command = /^(yts)$/i;

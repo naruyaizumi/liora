@@ -1,3 +1,33 @@
+/**
+ * @file Group information command handler
+ * @module plugins/group/infogroup
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Displays detailed information about a WhatsApp group
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to display comprehensive information about the current group.
+ * Shows group metadata including members, admins, settings, and creation details.
+ * 
+ * @features
+ * - Displays group name, ID, and description
+ * - Shows member count and admin list with mentions
+ * - Displays group owner
+ * - Shows group creation date and time
+ * - Indicates ephemeral message settings
+ * - Shows group announcement status
+ * - Includes group profile picture if available
+ * - Caches group metadata for performance
+ */
+
 let handler = async (m, { conn }) => {
     try {
         await global.loading(m, conn);
@@ -104,6 +134,14 @@ Announce: ${meta.announce ? "Yes" : "No"}
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ * @property {boolean} group - Whether command works only in groups
+ * @property {boolean} admin - Whether user needs admin privileges
+ */
 handler.help = ["groupinfo"];
 handler.tags = ["group"];
 handler.command = /^(info(gro?up|gc))$/i;

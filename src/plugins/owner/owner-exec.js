@@ -1,3 +1,34 @@
+/**
+ * @file Terminal command handler
+ * @module plugins/owner/terminal
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Executes shell commands with owner-only access and safety restrictions
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} param1 - Destructured parameters
+ * @param {Object} param1.conn - Connection object
+ * @param {boolean} param1.isOwner - Whether user is bot owner
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to execute shell commands in the bot's environment with safety features.
+ * Includes command blocking for dangerous operations and flexible flag options.
+ * 
+ * @features
+ * - Executes shell commands via bash
+ * - Blocks dangerous commands (rm, mkfs, etc.)
+ * - Supports command flags (--cwd, --env, --timeout, --verbose)
+ * - Shows command output and exit codes
+ * - Handles errors gracefully
+ * - Only accessible by bot owner
+ * - Custom prefix pattern for terminal commands
+ */
+
 import { $ } from "bun";
 
 const blocked = [
@@ -106,9 +137,16 @@ const handler = async (m, { conn, isOwner }) => {
     await conn.sendMessage(m.chat, { text: out });
 };
 
-handler.help = ["$"];
-handler.tags = ["owner"];
+/**
+ * Custom prefix pattern for terminal commands
+ * @property {RegExp} customPrefix - Pattern matching terminal commands
+ */
 handler.customPrefix = /^\$ /;
+
+/**
+ * Command metadata for help system
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.command = /(?:)/i;
 
 export default handler;

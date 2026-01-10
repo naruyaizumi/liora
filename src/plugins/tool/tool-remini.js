@@ -1,3 +1,32 @@
+/**
+ * @file Image enhancement (HD/Remini) command handler
+ * @module plugins/tools/remini
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Enhances image quality using Remini-like AI enhancement
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {string} command - Command name
+ * @param {string} usedPrefix - Command prefix used
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to enhance image quality using AI-powered enhancement similar to Remini.
+ * Supports JPEG, PNG, and WebP image formats for enhancement.
+ * 
+ * @features
+ * - Enhances image quality using external API
+ * - Supports JPEG, PNG, and WebP formats
+ * - Works with sent or replied images
+ * - Returns enhanced image with caption
+ * - Handles both buffer and URL responses
+ */
+
 import { remini } from "#api/remini.js";
 
 let handler = async (m, { conn, command, usedPrefix }) => {
@@ -47,6 +76,12 @@ let handler = async (m, { conn, command, usedPrefix }) => {
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["hd"];
 handler.tags = ["tools"];
 handler.command = /^(remini|hd)$/i;

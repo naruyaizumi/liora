@@ -1,3 +1,35 @@
+/**
+ * @file Menu/Help command handler
+ * @module plugins/info/menu
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Displays interactive bot menu and command help
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {string} usedPrefix - Command prefix used
+ * @param {string} command - Command name
+ * @param {Array} args - Command arguments
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Interactive menu system for the bot that displays commands categorized by functionality.
+ * Shows bot information, uptime, system status, and organized command lists.
+ * 
+ * @features
+ * - Interactive menu with category selection
+ * - Shows bot information and uptime
+ * - Categorized command lists (AI, Downloader, Group, etc.)
+ * - View all commands at once option
+ * - Interactive buttons for navigation
+ * - Contact card with bot details
+ * - External advertisement integration
+ */
+
 import os from "os";
 
 const CATS = ["ai", "downloader", "group", "info", "internet", "maker", "owner", "tools"];
@@ -45,6 +77,17 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
     }
 };
 
+/**
+ * Displays all commands in one message
+ * @async
+ * @function all
+ * @param {Object} conn - Connection object
+ * @param {Object} m - Message object
+ * @param {Array} help - Help data array
+ * @param {string} prefix - Command prefix
+ * @param {string} time - Current time
+ * @returns {Promise<void>}
+ */
 async function all(conn, m, help, prefix, time) {
     const cmds = CATS.map((c) => {
         const list = format(help, c, prefix);
@@ -76,6 +119,18 @@ async function all(conn, m, help, prefix, time) {
     );
 }
 
+/**
+ * Displays main interactive menu
+ * @async
+ * @function main
+ * @param {Object} conn - Connection object
+ * @param {Object} m - Message object
+ * @param {Object} pkg - Package.json data
+ * @param {string} prefix - Command prefix
+ * @param {string} cmd - Command name
+ * @param {string} time - Current time
+ * @returns {Promise<void>}
+ */
 async function main(conn, m, pkg, prefix, cmd, time) {
     const upBot = fmt(process.uptime());
     const upSys = fmt(os.uptime());
@@ -160,6 +215,18 @@ async function main(conn, m, pkg, prefix, cmd, time) {
     );
 }
 
+/**
+ * Displays commands for a specific category
+ * @async
+ * @function show
+ * @param {Object} conn - Connection object
+ * @param {Object} m - Message object
+ * @param {Array} help - Help data array
+ * @param {string} cat - Category name
+ * @param {string} prefix - Command prefix
+ * @param {string} time - Current time
+ * @returns {Promise<void>}
+ */
 async function show(conn, m, help, cat, prefix, time) {
     const cmds = format(help, cat, prefix);
 
@@ -197,12 +264,24 @@ async function show(conn, m, help, cat, prefix, time) {
     );
 }
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["menu"];
 handler.tags = ["info"];
 handler.command = /^(menu|help)$/i;
 
 export default handler;
 
+/**
+ * Formats seconds into human readable time (d, h, m)
+ * @function fmt
+ * @param {number} sec - Seconds to format
+ * @returns {string} Formatted time string
+ */
 function fmt(sec) {
     const m = Math.floor(sec / 60);
     const h = Math.floor(m / 60);
@@ -213,6 +292,11 @@ function fmt(sec) {
     );
 }
 
+/**
+ * Reads and returns package.json data
+ * @function getPkg
+ * @returns {Promise<Object>} Package.json data
+ */
 function getPkg() {
     try {
         return Bun.file("./package.json").json();
@@ -227,6 +311,11 @@ function getPkg() {
     }
 }
 
+/**
+ * Collects help data from all plugins
+ * @function getHelp
+ * @returns {Array} Array of help objects from all plugins
+ */
 function getHelp() {
     return Object.values(global.plugins)
         .filter((p) => !p.disabled)
@@ -239,6 +328,14 @@ function getHelp() {
         }));
 }
 
+/**
+ * Formats commands for a specific category
+ * @function format
+ * @param {Array} help - Help data array
+ * @param {string} cat - Category name
+ * @param {string} prefix - Command prefix
+ * @returns {Array<string>} Formatted command list
+ */
 function format(help, cat, prefix) {
     return help
         .filter((p) => p.tags.includes(cat))
@@ -250,6 +347,11 @@ function format(help, cat, prefix) {
         );
 }
 
+/**
+ * Creates a quoted message with contact card
+ * @function q
+ * @returns {Object} Quoted message object
+ */
 function q() {
     const v = `BEGIN:VCARD
 VERSION:3.0

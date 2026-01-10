@@ -1,3 +1,29 @@
+/**
+ * @file WhatsApp ID extractor command handler
+ * @module plugins/tools/cekid
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Extracts WhatsApp group or channel ID from invite links
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {Array} args - Command arguments
+ * @param {string} usedPrefix - Command prefix used
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Extracts the internal WhatsApp ID from group or channel invite links.
+ * Returns the ID with a copy button for convenience.
+ * 
+ * @supportedLinks
+ * - WhatsApp group invites: https://chat.whatsapp.com/INVITE_CODE
+ * - WhatsApp channels: https://whatsapp.com/channel/CHANNEL_ID
+ */
+
 let handler = async (m, { conn, args, usedPrefix }) => {
     try {
         const text = args[0];
@@ -48,7 +74,13 @@ let handler = async (m, { conn, args, usedPrefix }) => {
     }
 };
 
-handler.help = ["cekid"];
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
+handler.help = ["cekid <link>"];
 handler.tags = ["tools"];
 handler.command = /^(cekid|id)$/i;
 

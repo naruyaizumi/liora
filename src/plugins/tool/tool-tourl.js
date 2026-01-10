@@ -1,3 +1,34 @@
+/**
+ * @file File upload to various servers command handler
+ * @module plugins/tools/upload
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Uploads files to various hosting servers and returns URLs
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {Array} args - Command arguments
+ * @param {string} usedPrefix - Command prefix used
+ * @param {string} command - Command name
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to upload media files to various hosting servers and return shareable URLs.
+ * Supports multiple servers with automatic fallback and interactive copy buttons.
+ * 
+ * @features
+ * - Uploads to 7 different hosting servers
+ * - Shows server list when no server specified
+ * - Automatic fallback if primary server fails
+ * - Displays file size information
+ * - Interactive copy buttons for URLs
+ * - Supports all media types (images, videos, documents)
+ */
+
 import {
     uploader1,
     uploader2,
@@ -117,6 +148,12 @@ Ex: ${usedPrefix + command} 1`;
     );
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["upload"];
 handler.tags = ["tools"];
 handler.command = /^(tourl|url|upload)$/i;

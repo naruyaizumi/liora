@@ -1,3 +1,30 @@
+/**
+ * @file Read view-once media command handler
+ * @module plugins/tools/readviewonce
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Extracts and displays view-once (disappearing) media
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to extract and display view-once (disappearing) media from WhatsApp messages.
+ * Supports images, videos, and audio sent with view-once feature enabled.
+ * 
+ * @features
+ * - Extracts view-once images, videos, and audio
+ * - Preserves media captions and mentions
+ * - Handles various media types and mimetypes
+ * - Converts between buffer types for compatibility
+ * - Provides error handling for unsupported media
+ */
+
 let handler = async (m, { conn }) => {
     const q = m.quoted;
     try {
@@ -63,6 +90,12 @@ let handler = async (m, { conn }) => {
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["readviewonce"];
 handler.tags = ["tools"];
 handler.command = /^(read(view(once)?)?|rvo)$/i;

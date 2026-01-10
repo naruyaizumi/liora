@@ -1,3 +1,32 @@
+/**
+ * @file TikTok downloader command handler
+ * @module plugins/downloader/tiktok
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Downloads content from TikTok posts
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {Array} args - Command arguments
+ * @param {string} usedPrefix - Command prefix used
+ * @param {string} command - Command name
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Downloads media from TikTok posts including videos and image slideshows.
+ * Supports both video posts and multi-image slideshows.
+ * 
+ * @features
+ * - Downloads TikTok videos and image slideshows
+ * - Validates TikTok URL formats (vm., vt., m., www.)
+ * - Supports single and multiple image posts
+ * - Shows loading indicators during processing
+ */
+
 import { tiktok } from "#api/tiktok.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -40,6 +69,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["tiktok"];
 handler.tags = ["downloader"];
 handler.command = /^(tiktok|tt)$/i;

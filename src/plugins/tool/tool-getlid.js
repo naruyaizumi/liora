@@ -1,3 +1,31 @@
+/**
+ * @file Get LID (Local ID) command handler
+ * @module plugins/tools/getlid
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Retrieves WhatsApp LID (Local ID) from phone number or mention
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {string} text - Phone number or user identifier
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to retrieve WhatsApp LID (Local ID) from phone numbers, mentions, or replies.
+ * LID is WhatsApp's internal user identifier used in the Signal protocol.
+ * 
+ * @features
+ * - Resolves LID from phone numbers
+ * - Works with mentioned users
+ * - Works with replied messages
+ * - Handles both regular JIDs and LIDs
+ * - Interactive copy button for easy sharing
+ */
+
 let handler = async (m, { conn, text }) => {
     try {
         await global.loading(m, conn);
@@ -41,6 +69,12 @@ let handler = async (m, { conn, text }) => {
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["getlid"];
 handler.tags = ["tools"];
 handler.command = /^(getlid)$/i;

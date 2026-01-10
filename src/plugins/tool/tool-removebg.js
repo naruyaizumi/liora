@@ -1,3 +1,32 @@
+/**
+ * @file Remove background from image command handler
+ * @module plugins/tools/removebg
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Removes background from images using AI-powered background removal
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {string} command - Command name
+ * @param {string} usedPrefix - Command prefix used
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to remove background from images using AI-powered background removal service.
+ * Supports JPEG, PNG, and WebP image formats.
+ * 
+ * @features
+ * - Removes image backgrounds using external API
+ * - Supports JPEG, PNG, and WebP formats
+ * - Works with sent or replied images
+ * - Returns transparent background image
+ * - Handles both buffer and URL responses
+ */
+
 import { removebg } from "#api/removebg.js";
 
 let handler = async (m, { conn, command, usedPrefix }) => {
@@ -32,6 +61,12 @@ let handler = async (m, { conn, command, usedPrefix }) => {
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["removebg"];
 handler.tags = ["tools"];
 handler.command = /^(removebg)$/i;

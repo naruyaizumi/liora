@@ -1,3 +1,12 @@
+/**
+ * @file Advanced message sending utilities for Liora bot
+ * @module core/mods
+ * @description Enhanced message sending capabilities including albums, cards,
+ * interactive buttons, and rich media support beyond standard WhatsApp messages.
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
 import {
     proto,
     prepareWAMessageMedia,
@@ -5,11 +14,37 @@ import {
     generateWAMessage,
 } from "baileys";
 
+/**
+ * Advanced message sender with rich media support
+ * @class mods
+ * @description Provides enhanced messaging capabilities including albums,
+ * interactive cards, buttons, and various media types with proper formatting.
+ */
 export class mods {
+    /**
+     * Creates mods instance with connection
+     * @constructor
+     * @param {Object} conn - Connection object
+     */
     constructor(conn) {
         this.conn = conn;
     }
 
+    /**
+     * Unified message sending interface with content detection
+     * @async
+     * @method client
+     * @param {string} jid - Target JID
+     * @param {Object} content - Message content
+     * @param {Object} options - Send options
+     * @returns {Promise<Object>} Message send result
+     * 
+     * @contentDetection
+     * - album: Multi-image/video albums
+     * - cards: Carousel card interfaces
+     * - button/interactiveButtons: Interactive buttons
+     * - default: Standard message sending
+     */
     async client(jid, content, options = {}) {
         if (content.album) {
             return this.sendAlbum(jid, content, options);
@@ -26,6 +61,21 @@ export class mods {
         return this.conn.sendMessage(jid, content, options);
     }
 
+    /**
+     * Sends media album (multiple images/videos as single message)
+     * @async
+     * @method sendAlbum
+     * @param {string} jid - Target JID
+     * @param {Object} content - Album content
+     * @param {Object} options - Send options
+     * @returns {Promise<{album: Object, mediaMessages: Array}>} Album and media messages
+     * 
+     * @albumSpecification
+     * - content.album: Array of {image|video, caption?, mimetype?}
+     * - Supports up to 30 items (WhatsApp limit)
+     * - Automatic media type detection
+     * - Sequential sending with delays
+     */
     async sendAlbum(jid, content, options = {}) {
         if (!this.conn.user?.id) {
             throw new Error("User not authenticated");
@@ -145,6 +195,21 @@ export class mods {
         };
     }
 
+    /**
+     * Sends interactive carousel cards
+     * @async
+     * @method sendCard
+     * @param {string} jid - Target JID
+     * @param {Object} content - Card content
+     * @param {Object} options - Send options
+     * @returns {Promise<Object>} Message send result
+     * 
+     * @cardSpecification
+     * - content.cards: Array of card objects
+     * - Each card: {image|video, title?, body?, footer?, buttons?}
+     * - Maximum 10 cards (WhatsApp limit)
+     * - View-once message wrapper
+     */
     async sendCard(jid, content = {}, options = {}) {
         if (!this.conn.user?.id) {
             throw new Error("User not authenticated");
@@ -253,6 +318,30 @@ export class mods {
         return msg;
     }
 
+    /**
+     * Sends interactive button messages with rich media support
+     * @async
+     * @method sendButton
+     * @param {string} jid - Target JID
+     * @param {Object} content - Button content
+     * @param {Object} options - Send options
+     * @returns {Promise<Object>} Message send result
+     * 
+     * @mediaSupport
+     * - Image: Header images with captions
+     * - Video: Header videos with captions
+     * - Document: Files with thumbnails
+     * - Location: Map locations
+     * - Product: Product catalogs
+     * - Text-only: Simple headers
+     * 
+     * @buttonTypes
+     * - Quick reply buttons
+     * - URL buttons
+     * - Call buttons
+     * - Copy code buttons
+     * - Native flow buttons
+     */
     async sendButton(jid, content = {}, options = {}) {
         if (!this.conn.user?.id) {
             throw new Error("User not authenticated");
@@ -404,7 +493,7 @@ export class mods {
                             mediaInput.document.jpegThumbnail = new Uint8Array(arrayBuffer);
                         }
                     } catch {
-                        //
+                        // Silently fail on thumbnail fetch
                     }
                 }
             }

@@ -1,3 +1,34 @@
+/**
+ * @file Eval (evaluation) command handler
+ * @module plugins/owner/eval
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Evaluates JavaScript code with owner-only access
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} param1 - Destructured parameters
+ * @param {Object} param1.conn - Connection object
+ * @param {string} param1.noPrefix - Message text without prefix
+ * @param {boolean} param1.isOwner - Whether user is bot owner
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to evaluate JavaScript code in the bot's runtime environment.
+ * Supports both expression evaluation (=>) and statement execution.
+ * 
+ * @features
+ * - Evaluates JavaScript code in bot context
+ * - Supports expression evaluation with "=>" prefix
+ * - Handles both statements and expressions
+ * - Uses Bun.inspect for object visualization
+ * - Only accessible by bot owner
+ * - Custom prefix pattern for evaluation
+ */
+
 let handler = async (m, { conn, noPrefix, isOwner }) => {
     if (!isOwner) return;
     let t = noPrefix;
@@ -25,9 +56,16 @@ let handler = async (m, { conn, noPrefix, isOwner }) => {
     await conn.sendMessage(m.chat, { text: out });
 };
 
-handler.help = [">", "=>"];
-handler.tags = ["owner"];
+/**
+ * Custom prefix pattern for evaluation commands
+ * @property {RegExp} customPrefix - Pattern matching evaluation commands
+ */
 handler.customPrefix = /^=?> /;
+
+/**
+ * Command metadata for help system
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.command = /(?:)/i;
 
 export default handler;

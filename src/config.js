@@ -1,6 +1,29 @@
+/**
+ * @file Configuration and database initialization module
+ * @module config
+ * @description Core configuration manager, database setup, and utility functions
+ * for Liora bot with SQLite persistence and environment-based configuration.
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
 import { join } from "node:path";
 import { Database } from "bun:sqlite";
 
+/**
+ * Encodes metadata values to binary format for SQLite storage
+ * @private
+ * @function encodeMeta
+ * @param {*} value - Value to encode
+ * @returns {Uint8Array|null} Encoded bytes or null
+ * 
+ * @encoding
+ * - Strings: UTF-8 encoding
+ * - Numbers: 64-bit float (little-endian)
+ * - Booleans: Single byte (1=true, 0=false)
+ * - Objects: Bun.inspect() string representation
+ * - Null/Undefined: Returns null
+ */
 const encodeMeta = (value) => {
     if (value === null || value === undefined) return null;
 
@@ -26,6 +49,18 @@ const encodeMeta = (value) => {
     return null;
 };
 
+/**
+ * Decodes binary data from SQLite back to JavaScript values
+ * @private
+ * @function decodeMeta
+ * @param {Uint8Array|ArrayBuffer} bytes - Binary data to decode
+ * @returns {*|null} Decoded value or null
+ * 
+ * @decoding
+ * - Attempts UTF-8 text decoding first
+ * - Auto-detects numbers, booleans from text
+ * - Falls back to null on failure
+ */
 const decodeMeta = (bytes) => {
     if (!bytes || bytes.length === 0) return null;
 
@@ -36,11 +71,13 @@ const decodeMeta = (bytes) => {
     try {
         const text = new TextDecoder().decode(bytes);
 
+        // Detect and convert numbers
         if (/^-?\d+\.?\d*$/.test(text)) {
             const num = parseFloat(text);
             if (!isNaN(num)) return num;
         }
 
+        // Detect and convert booleans
         if (text === "true") return true;
         if (text === "false") return false;
 
@@ -50,6 +87,19 @@ const decodeMeta = (bytes) => {
     }
 };
 
+/**
+ * Validates and sanitizes URLs for security
+ * @private
+ * @function sanitizeUrl
+ * @param {string} url - URL to sanitize
+ * @param {string} fallback - Fallback URL if validation fails
+ * @returns {string} Sanitized URL or fallback
+ * 
+ * @security
+ * - Requires HTTPS protocol
+ * - Validates URL format
+ * - Returns fallback on invalid URLs
+ */
 const sanitizeUrl = (url, fallback) => {
     try {
         if (!url) return fallback;
@@ -61,6 +111,12 @@ const sanitizeUrl = (url, fallback) => {
     }
 };
 
+/**
+ * Generates a secure pairing code for WhatsApp authentication
+ * @private
+ * @function generatePairingCode
+ * @returns {string} 8-character alphanumeric code
+ */
 const generatePairingCode = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let code = "";
@@ -70,6 +126,14 @@ const generatePairingCode = () => {
     return code;
 };
 
+/**
+ * Parses boolean values from various formats
+ * @private
+ * @function parseBoolean
+ * @param {*} value - Value to parse
+ * @param {boolean} defaultValue - Default value if parsing fails
+ * @returns {boolean} Parsed boolean value
+ */
 const parseBoolean = (value, defaultValue) => {
     if (value === undefined || value === null) return defaultValue;
     if (typeof value === "boolean") return value;
@@ -81,12 +145,30 @@ const parseBoolean = (value, defaultValue) => {
     return defaultValue;
 };
 
+/**
+ * Initializes the logging system with configurable levels and formats
+ * @private
+ * @function initializeLogger
+ * @returns {Object} Logger instance with methods for all log levels
+ * 
+ * @features
+ * - Environment-controlled log levels (LOG_LEVEL)
+ * - Pretty printing vs JSON output (LOG_PRETTY)
+ * - Structured logging with object support
+ * - Colored terminal output (when pretty=true)
+ * - Child logger creation with context bindings
+ */
 const initializeLogger = () => {
     if (globalThis.logger) return globalThis.logger;
 
     const logLevel = (Bun.env.LOG_LEVEL || "info").toLowerCase();
     const usePretty = parseBoolean(Bun.env.LOG_PRETTY, true);
 
+    /**
+     * Log level numeric values (Syslog compatible)
+     * @private
+     * @constant {Object}
+     */
     const LEVEL_NUMBERS = {
         fatal: 60,
         error: 50,
@@ -96,6 +178,11 @@ const initializeLogger = () => {
         trace: 10,
     };
 
+    /**
+     * ANSI color codes for terminal output
+     * @private
+     * @constant {Object}
+     */
     const COLORS = {
         reset: "\x1b[0m",
         bright: "\x1b[1m",
@@ -108,6 +195,11 @@ const initializeLogger = () => {
         magenta: "\x1b[35m",
     };
 
+    /**
+     * Color mapping for log levels
+     * @private
+     * @constant {Object}
+     */
     const LEVEL_COLORS = {
         fatal: `${COLORS.bright}${COLORS.red}`,
         error: COLORS.red,
@@ -117,6 +209,11 @@ const initializeLogger = () => {
         trace: COLORS.gray,
     };
 
+    /**
+     * Display names for log levels
+     * @private
+     * @constant {Object}
+     */
     const LEVEL_NAMES = {
         fatal: "FATAL",
         error: "ERROR",
@@ -126,14 +223,29 @@ const initializeLogger = () => {
         trace: "TRACE",
     };
 
+    // Determine current log level threshold
     const currentLevelNumber =
         logLevel === "silent" ? 100 : LEVEL_NUMBERS[logLevel] || LEVEL_NUMBERS.info;
 
+    /**
+     * Formats current time for log prefix
+     * @private
+     * @function formatTime
+     * @returns {string} Formatted time string
+     */
     const formatTime = () => {
         const now = new Date();
         return now.toTimeString().slice(0, 5);
     };
 
+    /**
+     * Formats object for pretty printing
+     * @private
+     * @function formatObject
+     * @param {Object} obj - Object to format
+     * @param {string} indent - Indentation string
+     * @returns {string} Formatted object string
+     */
     const formatObject = (obj, indent = "    ") => {
         const lines = [];
         for (const [key, value] of Object.entries(obj)) {
@@ -154,6 +266,14 @@ const initializeLogger = () => {
         return lines.join("\n");
     };
 
+    /**
+     * Formats log message in pretty (human-readable) style
+     * @private
+     * @function formatPretty
+     * @param {string} level - Log level
+     * @param {Array} args - Log arguments
+     * @returns {string} Formatted log string
+     */
     const formatPretty = (level, args) => {
         const timeStr = `${COLORS.gray}[${formatTime()}]${COLORS.reset}`;
         const levelColor = LEVEL_COLORS[level] || COLORS.reset;
@@ -165,6 +285,7 @@ const initializeLogger = () => {
         const strings = [];
         let object = null;
 
+        // Separate string arguments from object arguments
         for (const arg of args) {
             if (typeof arg === "object" && arg !== null && !(arg instanceof Error)) {
                 object = arg;
@@ -175,6 +296,7 @@ const initializeLogger = () => {
 
         message = strings.join(" ");
 
+        // Add object details if present
         if (object) {
             objectLines = "\n" + formatObject(object);
         }
@@ -182,10 +304,19 @@ const initializeLogger = () => {
         return `${timeStr} ${levelColor}${levelName}${COLORS.reset}: ${message}${objectLines}`;
     };
 
+    /**
+     * Formats log message in JSON style
+     * @private
+     * @function formatJson
+     * @param {string} level - Log level
+     * @param {Array} args - Log arguments
+     * @returns {string} JSON-formatted log string
+     */
     const formatJson = (level, args) => {
         let message = "";
         const extraFields = [];
 
+        // Process arguments
         for (const arg of args) {
             if (typeof arg === "object" && arg !== null && !(arg instanceof Error)) {
                 for (const [key, value] of Object.entries(arg)) {
@@ -209,6 +340,13 @@ const initializeLogger = () => {
         return `{${fields.join(",")}}`;
     };
 
+    /**
+     * Core logging function with level filtering
+     * @private
+     * @function log
+     * @param {string} level - Log level
+     * @param {...*} args - Arguments to log
+     */
     const log = (level, ...args) => {
         const levelNumber = LEVEL_NUMBERS[level];
         if (levelNumber === undefined || levelNumber < currentLevelNumber) return;
@@ -218,6 +356,10 @@ const initializeLogger = () => {
         console.log(logMessage);
     };
 
+    /**
+     * Logger instance with all log level methods
+     * @type {Object}
+     */
     const logger = {
         fatal: (...args) => log("fatal", ...args),
         error: (...args) => log("error", ...args),
@@ -226,6 +368,12 @@ const initializeLogger = () => {
         debug: (...args) => log("debug", ...args),
         trace: (...args) => log("trace", ...args),
 
+        /**
+         * Creates a child logger with context bindings
+         * @method child
+         * @param {Object} bindings - Context bindings for all log messages
+         * @returns {Object} Child logger instance
+         */
         child: (bindings) => {
             const childLogger = {
                 fatal: (...args) => log("fatal", bindings, ...args),
@@ -246,6 +394,12 @@ const initializeLogger = () => {
             return childLogger;
         },
 
+        /**
+         * Checks if a log level is enabled
+         * @method isLevelEnabled
+         * @param {string} level - Log level to check
+         * @returns {boolean} True if level is enabled
+         */
         isLevelEnabled: (level) => {
             const levelKey = level.toLowerCase();
             const levelNum = LEVEL_NUMBERS[levelKey];
@@ -259,19 +413,34 @@ const initializeLogger = () => {
     return logger;
 };
 
+// Initialize global logger
 const logger = initializeLogger();
 
+/**
+ * Initializes bot configuration from environment variables
+ * @private
+ * @function initializeConfig
+ * @returns {Object} Configuration object
+ * 
+ * @configurationSources
+ * 1. Environment variables (primary)
+ * 2. Default values (fallback)
+ * 3. Auto-generation (pairing codes)
+ */
 const initializeConfig = () => {
     const ownersEnv = (Bun.env.OWNERS || "").trim();
     let owners = [];
 
+    // Parse owners from environment
     if (ownersEnv) {
         if (ownersEnv.includes(",")) {
+            // Comma-separated format
             owners = ownersEnv
                 .split(",")
                 .map((o) => o.trim())
                 .filter(Boolean);
         } else if (ownersEnv.startsWith("[")) {
+            // JSON array format
             try {
                 const parsed = JSON.parse(ownersEnv);
                 if (Array.isArray(parsed)) {
@@ -281,10 +450,15 @@ const initializeConfig = () => {
                 logger.warn("Invalid OWNERS format, use comma-separated values");
             }
         } else {
+            // Single owner format
             owners = [ownersEnv];
         }
     }
 
+    /**
+     * Bot configuration object
+     * @type {Object}
+     */
     const config = {
         owner: owners,
         pairingNumber: (Bun.env.PAIRING_NUMBER || "").trim(),
@@ -294,6 +468,7 @@ const initializeConfig = () => {
         thumbnailUrl: sanitizeUrl(Bun.env.THUMBNAIL_URL),
     };
 
+    // Validate pairing code format
     if (config.pairingCode.length !== 8 || !/^[A-Z0-9]{8}$/.test(config.pairingCode)) {
         logger.warn("Invalid PAIRING_CODE format, generating new one");
         config.pairingCode = generatePairingCode();
@@ -302,15 +477,27 @@ const initializeConfig = () => {
     return config;
 };
 
+// Set global configuration
 global.config = initializeConfig();
 
+/**
+ * Database file path
+ * @private
+ * @constant {string}
+ */
 const DB_PATH = join(process.cwd(), "src", "database", "database.db");
 
+/**
+ * SQLite database instance with performance optimizations
+ * @private
+ * @type {Database}
+ */
 const sqlite = new Database(DB_PATH, {
     create: true,
     readwrite: true,
 });
 
+// Performance optimizations
 sqlite.exec("PRAGMA journal_mode = WAL");
 sqlite.exec("PRAGMA synchronous = NORMAL");
 sqlite.exec("PRAGMA cache_size = -8000");
@@ -319,6 +506,11 @@ sqlite.exec("PRAGMA mmap_size = 268435456");
 sqlite.exec("PRAGMA page_size = 4096");
 sqlite.exec("PRAGMA locking_mode = NORMAL");
 
+/**
+ * Database table schemas
+ * @private
+ * @constant {Object}
+ */
 const SCHEMAS = {
     chats: {
         columns: {
@@ -344,6 +536,14 @@ const SCHEMAS = {
     },
 };
 
+/**
+ * Ensures a table exists with proper schema
+ * @private
+ * @function ensureTable
+ * @param {string} tableName - Table name
+ * @param {Object} schema - Table schema definition
+ * @returns {void}
+ */
 function ensureTable(tableName, schema) {
     const exists = sqlite
         .query("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
@@ -356,12 +556,14 @@ function ensureTable(tableName, schema) {
     if (!exists) {
         sqlite.exec(`CREATE TABLE ${tableName} (${columnDefs})`);
 
+        // Create indices
         if (schema.indices) {
             for (const idx of schema.indices) {
                 sqlite.exec(idx);
             }
         }
     } else {
+        // Check for missing columns and add them
         const existingCols = sqlite
             .query(`PRAGMA table_info(${tableName})`)
             .all()
@@ -375,12 +577,19 @@ function ensureTable(tableName, schema) {
     }
 }
 
+// Initialize all tables
 for (const [tableName, schema] of Object.entries(SCHEMAS)) {
     ensureTable(tableName, schema);
 }
 
+// Optimize database after schema changes
 sqlite.exec("PRAGMA optimize");
 
+/**
+ * Prepared SQL statements cache
+ * @private
+ * @constant {Object}
+ */
 const STMTS = {
     getRow: {},
     insertRow: {},
@@ -388,13 +597,20 @@ const STMTS = {
     deleteRow: {},
 };
 
+/**
+ * Tables that use JID as primary key
+ * @private
+ * @constant {Array<string>}
+ */
 const TABLES_WITH_JID = ["chats", "settings"];
 
+// Prepare statements for JID-based tables
 for (const table of TABLES_WITH_JID) {
     STMTS.getRow[table] = sqlite.query(`SELECT * FROM ${table} WHERE jid = ?`);
     STMTS.insertRow[table] = sqlite.query(`INSERT OR IGNORE INTO ${table} (jid) VALUES (?)`);
     STMTS.deleteRow[table] = sqlite.query(`DELETE FROM ${table} WHERE jid = ?`);
 
+    // Prepare update statements for each column
     STMTS.updateCol[table] = {};
     for (const col of Object.keys(SCHEMAS[table].columns)) {
         if (col !== "jid") {
@@ -405,6 +621,7 @@ for (const table of TABLES_WITH_JID) {
     }
 }
 
+// Meta table statements
 STMTS.meta = {
     get: sqlite.query(`SELECT value FROM meta WHERE key = ?`),
     set: sqlite.query(`INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)`),
@@ -412,16 +629,39 @@ STMTS.meta = {
     getAll: sqlite.query(`SELECT * FROM meta`),
 };
 
+/**
+ * LRU cache for database rows
+ * @class RowCache
+ * @private
+ */
 class RowCache {
+    /**
+     * Creates a new RowCache instance
+     * @constructor
+     * @param {number} maxSize - Maximum cache size
+     */
     constructor(maxSize = 100) {
         this.cache = new Map();
         this.maxSize = maxSize;
     }
 
+    /**
+     * Gets a value from cache
+     * @method get
+     * @param {string} key - Cache key
+     * @returns {*|undefined} Cached value or undefined
+     */
     get(key) {
         return this.cache.get(key);
     }
 
+    /**
+     * Sets a value in cache with LRU eviction
+     * @method set
+     * @param {string} key - Cache key
+     * @param {*} value - Value to cache
+     * @returns {void}
+     */
     set(key, value) {
         if (this.cache.size >= this.maxSize) {
             const firstKey = this.cache.keys().next().value;
@@ -430,27 +670,46 @@ class RowCache {
         this.cache.set(key, value);
     }
 
+    /**
+     * Deletes a value from cache
+     * @method delete
+     * @param {string} key - Cache key to delete
+     * @returns {void}
+     */
     delete(key) {
         this.cache.delete(key);
     }
 
+    /**
+     * Clears all cached values
+     * @method clear
+     * @returns {void}
+     */
     clear() {
         this.cache.clear();
     }
 }
 
+/**
+ * Database wrapper with proxy-based access and caching
+ * @class DataWrapper
+ * @private
+ */
 class DataWrapper {
     constructor() {
+        // Initialize row caches
         this.rowCaches = {
             chats: new RowCache(100),
             settings: new RowCache(50),
         };
 
+        // Create proxy-based data accessors
         this.data = {
             chats: this._createProxy("chats"),
             settings: this._createProxy("settings"),
         };
 
+        // Meta data interface
         this.meta = {
             get: (key) => {
                 const result = STMTS.meta.get.get(key);
@@ -477,6 +736,13 @@ class DataWrapper {
         };
     }
 
+    /**
+     * Creates a Proxy for table access
+     * @private
+     * @method _createProxy
+     * @param {string} table - Table name
+     * @returns {Proxy} Table access proxy
+     */
     _createProxy(table) {
         const cache = this.rowCaches[table];
 
@@ -490,13 +756,16 @@ class DataWrapper {
                     let cached = cache.get(cacheKey);
                     if (cached) return cached;
 
+                    // Query database
                     let row = STMTS.getRow[table].get(jid);
 
+                    // Create row if doesn't exist
                     if (!row) {
                         STMTS.insertRow[table].run(jid);
                         row = STMTS.getRow[table].get(jid);
                     }
 
+                    // Create proxy for row access
                     const proxy = this._createRowProxy(table, jid, row);
                     cache.set(cacheKey, proxy);
                     return proxy;
@@ -518,16 +787,28 @@ class DataWrapper {
         );
     }
 
+    /**
+     * Creates a Proxy for individual row access
+     * @private
+     * @method _createRowProxy
+     * @param {string} table - Table name
+     * @param {string} jid - JID identifier
+     * @param {Object} rowData - Row data object
+     * @returns {Proxy} Row access proxy
+     */
     _createRowProxy(table, jid, rowData) {
         return new Proxy(rowData, {
             set: (obj, prop, value) => {
+                // Validate column exists
                 if (!Object.prototype.hasOwnProperty.call(SCHEMAS[table].columns, prop)) {
                     logger.warn({ table, prop }, "Unknown column");
                     return false;
                 }
 
+                // Normalize boolean values
                 const normalizedValue = typeof value === "boolean" ? (value ? 1 : 0) : value;
 
+                // Update database
                 const stmt = STMTS.updateCol[table][prop];
                 if (stmt) {
                     stmt.run(normalizedValue, jid);
@@ -547,6 +828,12 @@ class DataWrapper {
         });
     }
 
+    /**
+     * Clears specified cache or all caches
+     * @method clearCache
+     * @param {string} [table] - Specific table cache to clear
+     * @returns {void}
+     */
     clearCache(table) {
         if (table) {
             this.rowCaches[table]?.clear();
@@ -557,17 +844,39 @@ class DataWrapper {
         }
     }
 
+    /**
+     * Closes the data wrapper and clears caches
+     * @method close
+     * @returns {void}
+     */
     close() {
         this.clearCache();
     }
 }
 
+/**
+ * Global database instance
+ * @type {DataWrapper}
+ */
 const db = new DataWrapper();
+
+/**
+ * Global database references
+ * @global
+ * @property {DataWrapper} db - Database wrapper instance
+ * @property {Database} sqlite - Raw SQLite database instance
+ */
 global.db = db;
 global.sqlite = sqlite;
 
+/**
+ * Global timestamp tracking
+ * @global
+ * @property {Object} timestamp - Startup timestamp
+ */
 global.timestamp = { start: new Date() };
 
+// Periodic cache monitoring
 setInterval(() => {
     const stats = {
         chats: db.rowCaches.chats.cache.size,
@@ -579,18 +888,35 @@ setInterval(() => {
     }
 }, 60000);
 
+/**
+ * Sends typing indicators to simulate user activity
+ * @global
+ * @async
+ * @function loading
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {boolean} back - Whether to show "back" typing (paused)
+ * @returns {Promise<void>}
+ */
 global.loading = async (m, conn, back = false) => {
     if (!conn || !m || !m.chat) return;
 
     if (back) {
+        // Simulate user finishing typing
         await conn.sendPresenceUpdate("paused", m.chat);
         await new Promise((resolve) => setTimeout(resolve, 800));
         await conn.sendPresenceUpdate("available", m.chat);
     } else {
+        // Simulate user typing
         await conn.sendPresenceUpdate("composing", m.chat);
     }
 };
 
+/**
+ * Failure message configurations for different error types
+ * @private
+ * @constant {Object}
+ */
 const FAILURE_MESSAGES = {
     owner: {
         title: "[ACCESS DENIED]",
@@ -614,6 +940,16 @@ const FAILURE_MESSAGES = {
     },
 };
 
+/**
+ * Global failure handler for permission errors
+ * @global
+ * @async
+ * @function dfail
+ * @param {string} type - Failure type (owner, group, admin, botAdmin, restrict)
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @returns {Promise<void>}
+ */
 global.dfail = async (type, m, conn) => {
     if (!type || !m || !conn || !m.chat) return;
 
@@ -623,6 +959,7 @@ global.dfail = async (type, m, conn) => {
     const messageText = `\`\`\`\n${failureConfig.title}\n${failureConfig.body}\n\`\`\``;
 
     try {
+        // Send with rich preview if thumbnail available
         await conn.sendMessage(
             m.chat,
             {
@@ -640,6 +977,7 @@ global.dfail = async (type, m, conn) => {
             { quoted: m }
         );
     } catch {
+        // Fallback to simple message
         await conn.sendMessage(m.chat, { text: messageText }, { quoted: m });
     }
 };

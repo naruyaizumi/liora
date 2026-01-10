@@ -1,3 +1,32 @@
+/**
+ * @file YouTube to MP4 downloader command handler
+ * @module plugins/downloader/ytmp4
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Downloads YouTube videos in MP4 format
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {Array} args - Command arguments
+ * @param {string} usedPrefix - Command prefix used
+ * @param {string} command - Command name
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Downloads YouTube videos as MP4 files. Supports various YouTube URL formats
+ * including regular videos, shorts, and live streams.
+ * 
+ * @features
+ * - Downloads YouTube videos in MP4 format
+ * - Supports multiple YouTube URL formats (youtube.com, youtu.be)
+ * - Requests 720p quality where available
+ * - Shows loading indicators during download
+ */
+
 import { ytmp4 } from "#api/ytmp4.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -33,6 +62,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["ytmp4"];
 handler.tags = ["downloader"];
 handler.command = /^(ytmp4)$/i;

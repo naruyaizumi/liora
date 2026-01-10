@@ -1,3 +1,32 @@
+/**
+ * @file Add member to group command handler
+ * @module plugins/group/add
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Adds a member to a WhatsApp group
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {Array} args - Command arguments
+ * @param {string} usedPrefix - Command prefix used
+ * @param {string} command - Command name
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Command to add members to a WhatsApp group. Can add members by replying to their message
+ * or by providing their phone number as an argument.
+ * 
+ * @features
+ * - Add members by replying to their message
+ * - Add members by providing phone number
+ * - Mention the added user in confirmation message
+ * - Proper error handling and status reporting
+ */
+
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     let target = m.quoted?.sender || null;
 
@@ -31,6 +60,15 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ * @property {boolean} group - Whether command works only in groups
+ * @property {boolean} botAdmin - Whether bot needs admin privileges
+ * @property {boolean} admin - Whether user needs admin privileges
+ */
 handler.help = ["add"];
 handler.tags = ["group"];
 handler.command = /^(add)$/i;

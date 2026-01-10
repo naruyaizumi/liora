@@ -1,3 +1,32 @@
+/**
+ * @file Spotify direct URL downloader command handler
+ * @module plugins/downloader/spotifydl
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Downloads audio directly from Spotify track URLs
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {Array} args - Command arguments
+ * @param {string} usedPrefix - Command prefix used
+ * @param {string} command - Command name
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * Downloads audio directly from Spotify track URLs without search.
+ * Converts Spotify links to downloadable audio files.
+ * 
+ * @features
+ * - Direct Spotify URL processing
+ * - Validates URL format before processing
+ * - Downloads audio without metadata
+ * - Shows loading indicators during processing
+ */
+
 import { spotifydl } from "#api/spotifydl.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -34,6 +63,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
 };
 
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
 handler.help = ["spotifydl"];
 handler.tags = ["downloader"];
 handler.command = /^(spotifydl)$/i;

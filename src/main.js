@@ -1,3 +1,12 @@
+/**
+ * @file Liora bot core entry point and lifecycle manager
+ * @module main
+ * @description Main initialization file for Liora WhatsApp bot - handles
+ * authentication, connection management, plugin loading, and graceful shutdown.
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
 import "./config.js";
 import { serialize } from "#core/message.js";
 import { useSQLiteAuthState } from "#auth";
@@ -15,12 +24,38 @@ import {
 } from "#core/connection.js";
 import { naruyaizumi } from "#core/socket.js";
 
+/**
+ * Pairing configuration from global config
+ * @private
+ * @type {Object}
+ */
 const pairNum = global.config.pairingNumber;
 const pairCode = global.config.pairingCode;
 
+/**
+ * Authentication state instance
+ * @private
+ * @type {Object|null}
+ */
 let auth = null;
+
+/**
+ * Shutdown prevention flag
+ * @private
+ * @type {boolean}
+ */
 let isDown = false;
 
+/**
+ * Creates necessary directories for database storage
+ * @async
+ * @function makeDirs
+ * @returns {Promise<void>}
+ * @throws {Error} If directory creation fails
+ * 
+ * @directories
+ * - src/database/: SQLite database files
+ */
 async function makeDirs() {
     const dbDir = join(process.cwd(), "src", "database");
     try {
@@ -37,8 +72,29 @@ async function makeDirs() {
     }
 }
 
+// Initialize directories
 await makeDirs();
 
+/**
+ * Creates a configurable logger instance for Baileys
+ * @function logger
+ * @returns {Object} Logger object with level-based methods
+ * 
+ * @levels
+ * - fatal: Critical errors (60)
+ * - error: Runtime errors (50)
+ * - warn: Warnings (40)
+ * - info: Informational messages (30)
+ * - debug: Debug information (20)
+ * - trace: Detailed tracing (10)
+ * - silent: No logging (controlled by env var)
+ * 
+ * @format
+ * - Timestamp: [HH:MM]
+ * - Level: UPPERCASE
+ * - Structured objects: Pretty-printed with indentation
+ * - Errors: Message and stack trace
+ */
 const logger = () => {
     const LVL = {
         fatal: 60,
@@ -49,9 +105,17 @@ const logger = () => {
         trace: 10,
     };
 
+    // Determine current log level from environment
     const curLvl = LVL[Bun.env.BAILEYS_LOG_LEVEL?.toLowerCase() || "silent"];
     const should = (lvl) => LVL[lvl] >= curLvl;
 
+    /**
+     * Formats values for logging
+     * @private
+     * @function fmt
+     * @param {*} val - Value to format
+     * @returns {string} Formatted string
+     */
     const fmt = (val) => {
         if (val === null) return "null";
         if (val === undefined) return "undefined";
@@ -62,6 +126,14 @@ const logger = () => {
         return String(val);
     };
 
+    /**
+     * Formats log entry with structured output
+     * @private
+     * @function fmtLog
+     * @param {string} lvl - Log level
+     * @param {...*} args - Arguments to log
+     * @returns {string} Formatted log string
+     */
     const fmtLog = (lvl, ...args) => {
         const time = new Date().toTimeString().slice(0, 5);
         const lvlName = lvl.toUpperCase();
@@ -70,6 +142,7 @@ const logger = () => {
         let msg = "";
         let obj = null;
 
+        // Handle structured logging (first arg is object)
         if (args.length > 0 && typeof args[0] === "object" && args[0] !== null) {
             obj = args[0];
             msg = fmtArgs.slice(1).join(" ");
@@ -77,6 +150,7 @@ const logger = () => {
             msg = fmtArgs.join(" ");
         }
 
+        // Pretty print objects
         if (obj && Object.keys(obj).length > 0) {
             const lines = Object.entries(obj)
                 .map(([k, v]) => `    ${k}: ${fmt(v)}`)
@@ -110,6 +184,19 @@ const logger = () => {
     };
 };
 
+/**
+ * Handles pairing code generation for first-time authentication
+ * @async
+ * @function pair
+ * @param {Object} conn - Baileys connection instance
+ * @returns {Promise<void>}
+ * 
+ * @flow
+ * 1. Wait for connection readiness (3 second timeout)
+ * 2. Request pairing code from WhatsApp
+ * 3. Format code with dashes (XXXX-XXXX-XXXX)
+ * 4. Log pairing code for user
+ */
 async function pair(conn) {
     return new Promise((res) => {
         const t = setTimeout(res, 3000);
@@ -132,10 +219,34 @@ async function pair(conn) {
     });
 }
 
+/**
+ * Main bot initialization function
+ * @async
+ * @function LIORA
+ * @returns {Promise<void>}
+ * 
+ * @initializationSteps
+ * 1. Initialize SQLite authentication state
+ * 2. Fetch latest Baileys version
+ * 3. Configure connection options
+ * 4. Create connection instance
+ * 5. Handle pairing if needed
+ * 6. Initialize event and cleanup managers
+ * 7. Load and register plugins
+ * 8. Start message handler
+ */
 async function LIORA() {
+    // Initialize authentication
     auth = useSQLiteAuthState();
     const { state, saveCreds } = auth;
+    
+    // Fetch latest Baileys version for compatibility
     const { version: v } = await fetchLatestBaileysVersion();
+    
+    /**
+     * Baileys connection configuration
+     * @type {Object}
+     */
     const opt = {
         version: v,
         logger: logger(),
@@ -164,42 +275,77 @@ async function LIORA() {
         enableRecentMessageCache: true,
     };
 
+    // Create global connection instance
     global.conn = naruyaizumi(opt);
     global.conn.isInit = false;
 
+    // Handle pairing for new sessions
     if (!state.creds.registered && pairNum) {
         await pair(global.conn);
     }
 
+    // Initialize managers
     const evt = new EventManager();
     const cln = new CleanupManager();
     global.cleanupManager = cln;
 
+    // Load message handler
     const hdl = await import("./handler.js");
     evt.setHandler(hdl);
 
+    // Create reload handler for hot-reloading
     global.reloadHandler = await evt.createReloadHandler(opt, saveCreds, cln);
 
+    // Determine plugin directory
     const file = Bun.fileURLToPath(import.meta.url);
     const src = dirname(file);
     const plugDir = join(src, "./plugins");
 
+    // Load all plugins
     await loadPlugins(plugDir, (dir) => getAllPlugins(dir));
 
+    // Store plugin directory globally for reloading
     global.pluginFolder = plugDir;
 
+    /**
+     * Reloads all plugins dynamically
+     * @function global.reloadAllPlugins
+     * @returns {Promise<void>}
+     */
     global.reloadAllPlugins = async () => {
         return reloadAllPlugins(plugDir);
     };
 
+    /**
+     * Reloads a single plugin file
+     * @function global.reloadSinglePlugin
+     * @param {string} fp - Plugin file path
+     * @returns {Promise<void>}
+     */
     global.reloadSinglePlugin = async (fp) => {
         return reloadSinglePlugin(fp, plugDir);
     };
 
+    // Start the bot
     await global.reloadHandler();
     serialize();
 }
 
+/**
+ * Graceful shutdown procedure
+ * @async
+ * @function shutdown
+ * @param {string} sig - Signal that triggered shutdown
+ * @returns {Promise<void>}
+ * 
+ * @cleanupSequence
+ * 1. Prevent re-entrance with isDown flag
+ * 2. Cleanup reconnection timers
+ * 3. Execute cleanup manager tasks
+ * 4. Dispose authentication state
+ * 5. Close database connections
+ * 6. Log shutdown completion
+ */
 async function shutdown(sig) {
     if (isDown) return;
     isDown = true;
@@ -207,6 +353,7 @@ async function shutdown(sig) {
     global.logger.info(`Shutdown (${sig})...`);
 
     try {
+        // Initialize reconnect tracking if not exists
         if (!global.__reconnect) {
             global.__reconnect = {
                 attempts: 0,
@@ -218,8 +365,10 @@ async function shutdown(sig) {
             };
         }
 
+        // Cleanup reconnection logic
         cleanupReconnect();
 
+        // Execute cleanup manager tasks
         if (global.cleanupManager) {
             try {
                 global.cleanupManager.cleanup();
@@ -229,6 +378,7 @@ async function shutdown(sig) {
             }
         }
 
+        // Dispose authentication state
         if (auth && typeof auth._dispose === "function") {
             try {
                 await Promise.race([
@@ -244,6 +394,7 @@ async function shutdown(sig) {
             }
         }
 
+        // Close database connections
         if (global.sqlite) {
             try {
                 global.sqlite.close();
@@ -259,28 +410,54 @@ async function shutdown(sig) {
     }
 }
 
+/**
+ * SIGTERM signal handler (graceful termination)
+ * @listens SIGTERM
+ */
 process.on("SIGTERM", async () => {
     await shutdown("SIGTERM");
     process.exit(0);
 });
 
+/**
+ * SIGINT signal handler (Ctrl+C interruption)
+ * @listens SIGINT
+ */
 process.on("SIGINT", async () => {
     await shutdown("SIGINT");
     process.exit(0);
 });
 
+/**
+ * Uncaught exception handler
+ * @listens uncaughtException
+ * @param {Error} e - Uncaught exception
+ */
 process.on("uncaughtException", async (e) => {
     global.logger.error({ error: e.message, stack: e.stack }, "Uncaught");
     await shutdown("uncaughtException");
     process.exit(1);
 });
 
+/**
+ * Unhandled promise rejection handler
+ * @listens unhandledRejection
+ * @param {Error} e - Unhandled rejection
+ */
 process.on("unhandledRejection", async (e) => {
     global.logger.error({ error: e?.message, stack: e?.stack }, "Unhandled");
     await shutdown("unhandledRejection");
     process.exit(1);
 });
 
+/**
+ * Main execution entry point
+ * @async
+ * @execution
+ * - Calls LIORA() to initialize bot
+ * - Handles fatal errors with shutdown
+ * - Exits with appropriate code
+ */
 LIORA().catch(async (e) => {
     global.logger.fatal({ error: e.message, stack: e.stack }, "Fatal");
     await shutdown("fatal");

@@ -1,5 +1,28 @@
+/**
+ * @file System monitoring and diagnostics utilities
+ * @module monitor/utils
+ * @description Comprehensive system information gathering and monitoring tools
+ * for server diagnostics, performance tracking, and health reporting.
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
 import { $ } from "bun";
 
+/**
+ * Formats byte size into human-readable string
+ * @function formatSize
+ * @param {number} bytes - Size in bytes
+ * @returns {string} Formatted size (e.g., "1.23 MB")
+ * 
+ * @units
+ * - B: Bytes
+ * - KB: Kilobytes (1024 bytes)
+ * - MB: Megabytes (1024 KB)
+ * - GB: Gigabytes (1024 MB)
+ * - TB: Terabytes (1024 GB)
+ * - PB: Petabytes (1024 TB)
+ */
 export function formatSize(bytes) {
     if (!bytes || isNaN(bytes)) return "0 B";
     const units = ["B", "KB", "MB", "GB", "TB", "PB"];
@@ -11,6 +34,12 @@ export function formatSize(bytes) {
     return `${bytes.toFixed(2)} ${units[i]}`;
 }
 
+/**
+ * Formats seconds into human-readable time string
+ * @function formatTime
+ * @param {number} seconds - Time in seconds
+ * @returns {string} Formatted time (e.g., "1d 2h 3m 4s")
+ */
 export function formatTime(seconds) {
     if (!seconds || isNaN(seconds)) return "0s";
     const days = Math.floor(seconds / 86400);
@@ -27,6 +56,19 @@ export function formatTime(seconds) {
     return parts.length > 0 ? parts.join(" ") : "0s";
 }
 
+/**
+ * Creates a visual progress bar
+ * @function makeProgressBar
+ * @param {number} used - Used amount
+ * @param {number} total - Total amount
+ * @param {number} [length=10] - Bar length in characters
+ * @returns {string} Progress bar string
+ * 
+ * @indicators
+ * - ✓: Normal (<80%)
+ * - ⚠: Warning (80-90%)
+ * - ✗: Critical (>90%)
+ */
 export function makeProgressBar(used, total, length = 10) {
     if (!total || total <= 0) return "[░░░░░░░░░░] 0%";
 
@@ -42,6 +84,15 @@ export function makeProgressBar(used, total, length = 10) {
     return `[${bar}] ${percentage.toFixed(1)}% ${indicator}`;
 }
 
+/**
+ * Safely executes a shell command with fallback
+ * @private
+ * @async
+ * @function safeExec
+ * @param {string} command - Shell command to execute
+ * @param {string} fallback - Default return value on error
+ * @returns {Promise<string>} Command output or fallback
+ */
 async function safeExec(command, fallback = "") {
     try {
         const result = await $`sh -c ${command}`.text();
@@ -51,6 +102,25 @@ async function safeExec(command, fallback = "") {
     }
 }
 
+/**
+ * Retrieves operating system information
+ * @async
+ * @function getOSInfo
+ * @returns {Promise<Object>} Operating system details
+ * 
+ * @properties
+ * - name: Full OS name (e.g., "Ubuntu 22.04.3 LTS")
+ * - distribution: Distribution name (e.g., "ubuntu")
+ * - codename: Release codename (e.g., "jammy")
+ * - base: Base distribution (e.g., "debian")
+ * - version: Version number (e.g., "22.04")
+ * - kernel: Kernel version
+ * - hostname: System hostname
+ * - platform: Platform (Linux, Darwin, etc.)
+ * - architecture: CPU architecture
+ * - bits: 32-bit or 64-bit
+ * - uptime: System uptime in seconds
+ */
 export async function getOSInfo() {
     const osRelease = await safeExec("cat /etc/os-release 2>/dev/null", "");
     const kernel = await safeExec("uname -r 2>/dev/null", "unknown");
@@ -61,6 +131,7 @@ export async function getOSInfo() {
     const debianVersion = await safeExec("cat /etc/debian_version 2>/dev/null", "");
     const lsbRelease = await safeExec("lsb_release -cs 2>/dev/null", "");
 
+    // Parse OS release file
     const info = Object.fromEntries(
         osRelease
             .split("\n")
@@ -71,12 +142,14 @@ export async function getOSInfo() {
             })
     );
 
+    // Determine codename
     let codename = lsbRelease.trim() || info.VERSION_CODENAME || info.UBUNTU_CODENAME || "";
     if (!codename && info.VERSION) {
         const match = info.VERSION.match(/\(([^)]+)\)/);
         if (match) codename = match[1];
     }
 
+    // Determine architecture bits
     const bits = machine.trim().includes("64")
         ? "64 Bit"
         : machine.trim().includes("32")
@@ -99,6 +172,16 @@ export async function getOSInfo() {
     };
 }
 
+/**
+ * Retrieves system hardware and shell information
+ * @async
+ * @function getSystemInfo
+ * @returns {Promise<Object>} System hardware and shell details
+ * 
+ * @properties
+ * - shell: Shell name and version (e.g., "bash 5.1.16")
+ * - host: System hardware information
+ */
 export async function getSystemInfo() {
     const shell = await safeExec("echo $SHELL 2>/dev/null", "unknown");
     const shellVersion = await safeExec("$SHELL --version 2>/dev/null | head -1", "");
@@ -106,6 +189,7 @@ export async function getSystemInfo() {
     const manufacturer = await safeExec("dmidecode -s system-manufacturer 2>/dev/null", "");
     const biosVersion = await safeExec("dmidecode -s bios-version 2>/dev/null", "");
 
+    // Build host information
     let hostInfo = dmidecode.trim();
     if (manufacturer.trim() && manufacturer.trim() !== "System manufacturer") {
         hostInfo = `${manufacturer.trim()} ${hostInfo}`.trim();
@@ -114,12 +198,14 @@ export async function getSystemInfo() {
         hostInfo = `${hostInfo} ${biosVersion.trim()}`.trim();
     }
 
+    // Fallback to sysfs if dmidecode fails
     if (!hostInfo) {
         const productName = await safeExec("cat /sys/class/dmi/id/product_name 2>/dev/null", "");
         const boardName = await safeExec("cat /sys/class/dmi/id/board_name 2>/dev/null", "");
         hostInfo = productName.trim() || boardName.trim() || "Unknown";
     }
 
+    // Parse shell version
     let shellName = shell.trim().split("/").pop();
     const shellVersionClean = shellVersion.trim().split("\n")[0];
 
@@ -141,15 +227,30 @@ export async function getSystemInfo() {
     };
 }
 
+/**
+ * Retrieves CPU features and virtualization information
+ * @async
+ * @function getCPUFeatures
+ * @returns {Promise<Object>} CPU features and virtualization status
+ * 
+ * @properties
+ * - aesni: AES-NI instruction support
+ * - virtualization: Hypervisor type (if virtualized)
+ * - vmxAmdv: Intel VT-x / AMD-V status
+ * - tcpCC: TCP congestion control algorithm
+ * - isVM: Whether running in virtual machine
+ */
 export async function getCPUFeatures() {
     const cpuinfo = await safeExec("cat /proc/cpuinfo 2>/dev/null", "");
     const flags = cpuinfo.match(/flags\s*:\s*(.+)/)?.[1] || "";
 
+    // Check CPU features
     const aesni = flags.includes("aes");
     const vmx = flags.includes("vmx");
     const svm = flags.includes("svm");
     const hypervisor = flags.includes("hypervisor");
 
+    // Determine virtualization status
     let virtualization = "None";
     let isVM = "No";
 
@@ -165,6 +266,7 @@ export async function getCPUFeatures() {
     const allInfo =
         `${dmidecodeSystem} ${dmidecodeManufacturer} ${systemVendor} ${productName} ${boardName}`.toLowerCase();
 
+    // Detect virtualization platform
     if (allInfo.includes("vmware")) {
         virtualization = "VMware";
         isVM = "Yes (VMware)";
@@ -195,11 +297,13 @@ export async function getCPUFeatures() {
         isVM = "Yes";
     }
 
+    // VT-x/AMD-V status
     let vmxStatus = "✗ Disabled";
     if (vmx || svm) {
         vmxStatus = "✓ Enabled";
     }
 
+    // TCP congestion control
     const tcpCongestion = await safeExec(
         "sysctl net.ipv4.tcp_congestion_control 2>/dev/null",
         "net.ipv4.tcp_congestion_control = unknown"
@@ -215,6 +319,12 @@ export async function getCPUFeatures() {
     };
 }
 
+/**
+ * Checks network connectivity status
+ * @async
+ * @function getNetworkFeatures
+ * @returns {Promise<Object>} Network connectivity status
+ */
 export async function getNetworkFeatures() {
     const ipv4Check = await safeExec("timeout 3 curl -4 -s https://api.ipify.org 2>/dev/null", "");
     const ipv6Check = await safeExec(
@@ -228,6 +338,16 @@ export async function getNetworkFeatures() {
     };
 }
 
+/**
+ * Retrieves IP address and geolocation information
+ * @async
+ * @function getIPInfo
+ * @returns {Promise<Object>} IP and location information
+ * 
+ * @source
+ * - Uses ipapi.co for geolocation
+ * - Falls back gracefully on timeout/error
+ */
 export async function getIPInfo() {
     try {
         const response = await fetch("https://ipapi.co/json/", {
@@ -248,6 +368,7 @@ export async function getIPInfo() {
             continent: data.continent_code || "Unknown",
         };
     } catch {
+        // Fallback on API failure
         const host = await safeExec("hostname -f 2>/dev/null || hostname 2>/dev/null", "unknown");
         return {
             host: host.trim(),
@@ -262,15 +383,23 @@ export async function getIPInfo() {
     }
 }
 
+/**
+ * Retrieves software runtime information
+ * @async
+ * @function getSoftwareInfo
+ * @returns {Promise<Object>} Software environment details
+ */
 export async function getSoftwareInfo() {
     const nodeVersion = process.version.replace("v", "");
     const bunVersion = await safeExec("bun --version 2>/dev/null", "unknown");
     const processId = process.pid;
     const parentProcessId = process.ppid;
 
+    // Bot uptime calculation
     const botStartTime = global.timestamp?.connect || new Date();
     const botUptime = (Date.now() - new Date(botStartTime).getTime()) / 1000;
 
+    // Project structure checks
     const nodeModules = await safeExec(
         "find node_modules -maxdepth 1 -type d 2>/dev/null | wc -l",
         "0"
@@ -283,11 +412,23 @@ export async function getSoftwareInfo() {
         pid: processId,
         ppid: parentProcessId,
         botUptime: botUptime,
-        nodeModules: parseInt(nodeModules.trim()) - 1,
+        nodeModules: parseInt(nodeModules.trim()) - 1, // Subtract 1 for the node_modules directory itself
         hasPackageJson: packageJson.trim(),
     };
 }
 
+/**
+ * Retrieves detailed CPU information and usage metrics
+ * @async
+ * @function getCPUInfo
+ * @returns {Promise<Object>} CPU details and performance metrics
+ * 
+ * @metrics
+ * - Load averages (1, 5, 15 minutes)
+ * - CPU usage percentage
+ * - Clock speed and cache information
+ * - Architecture details
+ */
 export async function getCPUInfo() {
     const cpuInfo = await safeExec("cat /proc/cpuinfo 2>/dev/null", "");
     const loadAvg = await safeExec("cat /proc/loadavg 2>/dev/null", "0 0 0");
@@ -297,6 +438,7 @@ export async function getCPUInfo() {
     let mhz = 0;
     let cacheSize = "";
 
+    // Parse /proc/cpuinfo
     const lines = cpuInfo.split("\n");
     for (const line of lines) {
         if (line.startsWith("model name")) {
@@ -313,14 +455,17 @@ export async function getCPUInfo() {
         }
     }
 
+    // Fallback core count detection
     if (cores === 0) {
         const nproc = await safeExec("nproc 2>/dev/null", "1");
         cores = parseInt(nproc.trim());
     }
 
+    // Calculate load percentages
     const loads = loadAvg.split(/\s+/).slice(0, 3).map(Number);
     const loadPercent = (load) => ((load / cores) * 100).toFixed(2);
 
+    // Calculate CPU usage from /proc/stat
     let usage = "0.00";
     const stat = await safeExec("cat /proc/stat 2>/dev/null", "cpu 0 0 0 0");
     const cpuLine = stat.split("\n")[0];
@@ -328,6 +473,7 @@ export async function getCPUInfo() {
     const idle = values[3] || 0;
     const total = values.reduce((a, b) => a + b, 0);
 
+    // Compare with previous measurement
     if (global._prevCPU && total > 0) {
         const idleDelta = idle - global._prevCPU.idle;
         const totalDelta = total - global._prevCPU.total;
@@ -335,8 +481,10 @@ export async function getCPUInfo() {
             totalDelta > 0 ? (((totalDelta - idleDelta) * 100) / totalDelta).toFixed(2) : "0.00";
     }
 
+    // Store for next comparison
     global._prevCPU = { idle, total };
 
+    // Get frequency information
     const arch = await safeExec("uname -m 2>/dev/null", "unknown");
     const cpuFreq = await safeExec(
         "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq 2>/dev/null",
@@ -347,6 +495,7 @@ export async function getCPUInfo() {
         ""
     );
 
+    // Format speed information
     let speedInfo = mhz > 0 ? `${mhz.toFixed(2)} MHz` : "Unknown";
     if (cpuFreq) {
         const currentMhz = (parseInt(cpuFreq) / 1000).toFixed(2);
@@ -370,6 +519,16 @@ export async function getCPUInfo() {
     };
 }
 
+/**
+ * Retrieves detailed memory and swap information
+ * @async
+ * @function getMemoryInfo
+ * @returns {Promise<Object>} Memory statistics
+ * 
+ * @source
+ * - Parses /proc/meminfo for detailed memory breakdown
+ * - Includes swap, buffers, cache, and kernel memory
+ */
 export async function getMemoryInfo() {
     const memInfo = await safeExec("cat /proc/meminfo 2>/dev/null", "");
     const memLines = memInfo.split("\n");
@@ -383,10 +542,11 @@ export async function getMemoryInfo() {
         swapFree = 0,
         swapCached = 0;
 
+    // Parse /proc/meminfo
     for (const line of memLines) {
         if (!line.includes(":")) continue;
         const [key, value] = line.split(":").map((s) => s.trim());
-        const numValue = parseInt(value) * 1024;
+        const numValue = parseInt(value) * 1024; // Convert from KB to bytes
 
         if (key === "MemTotal") memTotal = numValue;
         else if (key === "MemFree") memFree = numValue;
@@ -398,9 +558,11 @@ export async function getMemoryInfo() {
         else if (key === "SwapCached") swapCached = numValue;
     }
 
+    // Calculate derived values
     const memUsed = memTotal - memAvailable;
     const swapUsed = swapTotal - swapFree;
 
+    // Additional memory stats from /proc/vmstat
     let active = 0,
         inactive = 0,
         dirty = 0,
@@ -435,6 +597,17 @@ export async function getMemoryInfo() {
     };
 }
 
+/**
+ * Retrieves disk usage and I/O statistics
+ * @async
+ * @function getDiskInfo
+ * @returns {Promise<Object>} Disk information
+ * 
+ * @data
+ * - Filesystem-level usage from df
+ * - I/O statistics from /proc/diskstats
+ * - Total aggregated values
+ */
 export async function getDiskInfo() {
     const dfOutput = await safeExec("df -B1 2>/dev/null | tail -n +2", "");
     const lines = dfOutput.trim().split("\n");
@@ -444,6 +617,7 @@ export async function getDiskInfo() {
         totalUsed = 0,
         totalAvailable = 0;
 
+    // Parse df output
     for (const line of lines) {
         const parts = line.trim().split(/\s+/);
         if (parts.length < 6) continue;
@@ -469,6 +643,7 @@ export async function getDiskInfo() {
         totalAvailable += avail;
     }
 
+    // Get I/O statistics
     let ioStats = { readBytes: 0, writeBytes: 0, readOps: 0, writeOps: 0 };
     const diskstats = await safeExec("cat /proc/diskstats 2>/dev/null", "");
     const diskLines = diskstats.split("\n");
@@ -493,6 +668,12 @@ export async function getDiskInfo() {
     };
 }
 
+/**
+ * Retrieves network interface statistics and connection information
+ * @async
+ * @function getNetworkInfo
+ * @returns {Promise<Object>} Network information
+ */
 export async function getNetworkInfo() {
     const netDev = await safeExec("cat /proc/net/dev 2>/dev/null", "");
     const lines = netDev.split("\n").slice(2);
@@ -503,6 +684,7 @@ export async function getNetworkInfo() {
         totalTxPackets = 0;
     const interfaces = [];
 
+    // Parse network device statistics
     for (const line of lines) {
         if (!line.trim() || line.includes("lo:")) continue;
 
@@ -531,9 +713,11 @@ export async function getNetworkInfo() {
         });
     }
 
+    // Get active connections
     const connOutput = await safeExec("ss -tun state connected 2>/dev/null | wc -l", "1");
     const connections = Math.max(0, parseInt(connOutput.trim()) - 1);
 
+    // Get DNS servers
     const resolv = await safeExec("cat /etc/resolv.conf 2>/dev/null | grep nameserver", "");
     const dnsServers = resolv
         .split("\n")
@@ -554,6 +738,12 @@ export async function getNetworkInfo() {
     };
 }
 
+/**
+ * Retrieves process statistics and system load
+ * @async
+ * @function getProcessInfo
+ * @returns {Promise<Object>} Process information
+ */
 export async function getProcessInfo() {
     const uptimeStr = await safeExec("cat /proc/uptime 2>/dev/null", "0 0");
     const uptimeSeconds = parseFloat(uptimeStr.split(" ")[0]);
@@ -562,6 +752,7 @@ export async function getProcessInfo() {
     const loadAvg = await safeExec("cat /proc/loadavg 2>/dev/null", "0 0 0");
     const loads = loadAvg.split(" ").slice(0, 3).map(Number);
 
+    // Get process state breakdown
     const zombies = await safeExec(
         "ps aux 2>/dev/null | grep 'defunct' | grep -v grep | wc -l",
         "0"
@@ -587,6 +778,17 @@ export async function getProcessInfo() {
     };
 }
 
+/**
+ * Detects containerization environment
+ * @async
+ * @function getContainerInfo
+ * @returns {Promise<Object>} Container information
+ * 
+ * @detection
+ * - Docker: /proc/1/cgroup contains "docker"
+ * - LXC: /proc/1/environ contains "container=lxc"
+ * - Kubernetes: KUBERNETES_SERVICE environment variable
+ */
 export async function getContainerInfo() {
     const cgroup = await safeExec("cat /proc/1/cgroup 2>/dev/null", "");
     const isDocker = cgroup.includes("docker");
@@ -620,6 +822,12 @@ export async function getContainerInfo() {
     };
 }
 
+/**
+ * Retrieves real-time system load from vmstat
+ * @async
+ * @function getSystemLoad
+ * @returns {Promise<Object>} System load metrics
+ */
 export async function getSystemLoad() {
     const data = await safeExec("vmstat 1 2 2>/dev/null | tail -1", "");
 
@@ -685,6 +893,23 @@ export async function getSystemLoad() {
     };
 }
 
+/**
+ * Generates system warnings based on resource thresholds
+ * @async
+ * @function getWarnings
+ * @param {Object} cpu - CPU information object
+ * @param {Object} memory - Memory information object
+ * @param {Object} disk - Disk information object
+ * @param {Object} processes - Process information object
+ * @returns {Array<string>} Array of warning messages
+ * 
+ * @thresholds
+ * - CPU: >70% warning, >90% critical
+ * - Memory: >85% warning, >95% critical
+ * - Swap: >50% warning
+ * - Disk: >85% warning, >95% critical
+ * - Zombie processes: >10 warning
+ */
 export async function getWarnings(cpu, memory, disk, processes) {
     const warnings = [];
 
@@ -710,6 +935,11 @@ export async function getWarnings(cpu, memory, disk, processes) {
     return warnings;
 }
 
+/**
+ * Retrieves Node.js heap memory information
+ * @function getHeapInfo
+ * @returns {Object} Node.js memory usage statistics
+ */
 export function getHeapInfo() {
     const mem = process.memoryUsage();
     return {
@@ -721,6 +951,17 @@ export function getHeapInfo() {
     };
 }
 
+/**
+ * Retrieves service information for Liora bot
+ * @async
+ * @function getServiceInfo
+ * @returns {Promise<Object>} Service status information
+ * 
+ * @detection
+ * - systemd: systemctl status
+ * - pm2: PM2 process list
+ * - none: No service manager detected
+ */
 export async function getServiceInfo() {
     const serviceName = "liora";
 
@@ -765,6 +1006,7 @@ export async function getServiceInfo() {
         };
     }
 
+    // Check for PM2
     const pm2List = await safeExec("pm2 list 2>/dev/null | grep liora", "");
     if (pm2List.trim()) {
         const pm2Info = await safeExec("pm2 jlist 2>/dev/null", "[]");
@@ -793,10 +1035,11 @@ export async function getServiceInfo() {
                 };
             }
         } catch {
-            //
+            // JSON parse failed
         }
     }
 
+    // No service manager detected
     return {
         name: serviceName,
         type: "none",
@@ -810,6 +1053,12 @@ export async function getServiceInfo() {
     };
 }
 
+/**
+ * Retrieves user login information
+ * @async
+ * @function getUserInfo
+ * @returns {Promise<Object>} User login statistics
+ */
 export async function getUserInfo() {
     const users = await safeExec("who 2>/dev/null | wc -l", "0");
     const lastLogin = await safeExec("last -n 5 2>/dev/null", "");

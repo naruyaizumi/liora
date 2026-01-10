@@ -1,3 +1,37 @@
+/**
+ * @file Group status message command handler
+ * @module plugins/owner/groupstatus
+ * @license Apache-2.0
+ * @author Naruya Izumi
+ */
+
+/**
+ * Sends a group status update message (similar to WhatsApp group announcements)
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} conn - Connection object
+ * @param {string} usedPrefix - Command prefix used
+ * @param {string} command - Command name
+ * @returns {Promise<void>}
+ * 
+ * @description
+ * This command allows bot owners to send group status updates that appear
+ * as group announcements. Supports text, images, videos, and audio.
+ * 
+ * @features
+ * - Supports text, image, video, and audio status updates
+ * - Can reply to media or provide text directly
+ * - Uses WhatsApp's group status message protocol
+ * - Includes encryption for message security
+ * 
+ * @supportedMedia
+ * - Images (JPEG, PNG, WebP)
+ * - Videos (MP4, MOV, etc.)
+ * - Audio (MP3, MP4 audio, voice notes)
+ * - Plain text messages
+ */
+
 let handler = async (m, { conn, usedPrefix, command }) => {
     const q = m.quoted ? m.quoted : m;
     const type = q.mtype || "";
@@ -100,7 +134,15 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     }
 };
 
-handler.help = ["groupstatus"];
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ * @property {boolean} owner - Owner-only command flag
+ * @property {boolean} group - Group-only command flag
+ */
+handler.help = ["groupstatus <text/media>"];
 handler.tags = ["owner"];
 handler.command = /^(statusgc|swgc)$/i;
 handler.owner = true;
