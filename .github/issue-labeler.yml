@@ -1,105 +1,72 @@
 bug:
-  - '\b(bug|error|crash|exception|fail|broken|not working)\b'
+    - '\b(bug|error|crash|exception|fail|broken|not working)\b'
 
 priority-high:
-  - '\b(critical|urgent|blocker|severe)\b'
-  - '\b(security|vulnerability|exploit)\b'
-  - '\b(data loss|corruption)\b'
+    - '\b(critical|urgent|blocker|severe)\b'
+    - '\b(security|vulnerability|exploit)\b'
+    - '\b(data loss|corruption)\b'
 
 priority-medium:
-  - '\b(important|significant|should have)\b'
+    - '\b(important|significant|should have)\b'
 
 priority-low:
-  - '\b(nice to have|enhancement|minor)\b'
+    - '\b(nice to have|enhancement|minor)\b'
 
 enhancement:
-  - '\b(feature|enhance|improvement|suggest)\b'
-  - '\b(add support for|new feature|feature request)\b'
+    - '\b(feature|enhance|improvement|suggest)\b'
+    - '\b(add support for|new feature|feature request)\b'
 
 documentation:
-  - '\b(docs|documentation|readme|wiki|guide|tutorial)\b'
-  - '\b(typo|grammar|spelling)\b'
+    - '\b(docs|documentation|readme|wiki|guide|tutorial)\b'
+    - '\b(typo|grammar|spelling)\b'
 
 question:
-  - '\b(how to|how do I|question|help|support)\b'
-  - '\b(what is|why|when|where)\b'
+    - '\b(how to|how do I|question|help|support)\b'
+    - '\b(what is|why|when|where)\b'
 
 whatsapp:
-  - '\b(baileys|whatsapp|connection|pairing)\b'
-  - '\b(message|chat|group|contact)\b'
+    - '\b(baileys|whatsapp|connection|qr|pairing)\b'
+    - '\b(message|chat|group|contact)\b'
+
+sticker:
+    - '\b(sticker|webp|image conversion)\b'
+
+media-processing:
+    - '\b(video|audio|image|ffmpeg|conversion)\b'
+    - '\b(webp|mp4|mp3|converter)\b'
 
 api:
-  - '\b(api|endpoint|integration)\b'
-  - '\b(tiktok|instagram|twitter|spotify|youtube)\b'
+    - '\b(api|endpoint|integration)\b'
+    - '\b(tiktok|instagram|twitter|spotify|youtube)\b'
 
 performance:
-  - '\b(slow|performance|speed|optimize|latency)\b'
-  - '\b(memory usage|cpu usage|resource)\b'
+    - '\b(slow|performance|speed|optimize|latency)\b'
+    - '\b(memory usage|cpu usage|resource)\b'
 
 installation:
-  - '\b(install|setup|configure|deployment)\b'
-  - '\b(dependencies|bun)\b'
+    - '\b(install|setup|configure|deployment)\b'
+    - '\b(dependencies|bun)\b'
 
 database:
-  - '\b(sqlite|sqlite3|database|session|auth)\b'
-  - '\b(sql|query|connection)\b'
+    - '\b(sqlite|sqlite3|database|session|auth)\b'
+    - '\b(sql|query|connection)\b'
 
 ubuntu:
-  - '\bubuntu\b'
+    - '\bubuntu\b'
 
 debian:
-  - '\bdebian\b'
+    - '\bdebian\b'
 
 testing:
-  - '\b(test|testing|unit test|integration test)\b'
+    - '\b(test|testing|unit test|integration test)\b'
 
 ci-cd:
-  - '\b(github actions|workflow|ci|cd|pipeline)\b'
-  - '\b(build failed|test failed)\b'
+    - '\b(github actions|workflow|ci|cd|pipeline)\b'
+    - '\b(build failed|test failed)\b'
 
 security:
-  - '\b(security|vulnerability|cve|exploit|injection)\b'
-  - '\b(xss|sql injection|auth)\b'
+    - '\b(security|vulnerability|cve|exploit|injection)\b'
+    - '\b(xss|sql injection|auth)\b'
 
 good-first-issue:
-  - '\b(beginner|easy|good first issue|starter)\b'
-
-production-bug:
-  - '\b(production|live|deployed)\b.*\b(bug|error|crash)\b'
-  - '\b(downtime|outage|unavailable)\b'
-
-regression:
-  - '\b(regression|used to work|broken after)\b'
-
-duplicate:
-  - '\b(same|duplicate|already reported)\b'
-
-wontfix:
-  - '\b(won\'t fix|not fixing|by design|working as intended)\b'
-
-invalid:
-  - '\b(not a bug|not an issue|misunderstanding)\b'
-
-needs-repro:
-  - '\b(can\'t reproduce|need steps|need example)\b'
-
-needs-info:
-  - '\b(need more info|additional information|clarification)\b'
-
-dependencies:
-  - '\b(upgrade|update|downgrade|dependency|package)\b.*\b(bun|baileys|msgpack)\b'
-
-monitoring:
-  - '\b(logging|monitoring|metrics|alert|notification)\b'
-
-backup:
-  - '\b(backup|restore|recovery|data loss)\b'
-
-scalability:
-  - '\b(scale|scalability|high load|concurrent users)\b'
-
-i18n:
-  - '\b(language|translation|localization|i18n|l10n)\b'
-
-accessibility:
-  - '\b(accessibility|a11y|screen reader|disability)\b'
+    - '\b(beginner|easy|good first issue|starter)\b'
