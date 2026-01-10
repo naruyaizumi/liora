@@ -96,7 +96,7 @@ async function all(conn, m, help, prefix, time) {
         .filter(Boolean)
         .join("\n");
 
-    const txt = ["```", `[${time}] All Commands`, "─".repeat(30), cmds, "```"].join("\n");
+    const txt = ["```", `[${time}] All Commands`, "─".repeat(25), cmds, "```"].join("\n");
 
     return conn.sendMessage(
         m.chat,
@@ -115,7 +115,7 @@ async function all(conn, m, help, prefix, time) {
                 },
             },
         },
-        { quoted: q() }
+        { quoted: await q() }
     );
 }
 
@@ -138,7 +138,7 @@ async function main(conn, m, pkg, prefix, cmd, time) {
     const cap = [
         "```",
         `[${time}] Liora`,
-        "─".repeat(30),
+        "─".repeat(25),
         `Name    : ${pkg.name}`,
         `Version : ${pkg.version}`,
         `License : ${pkg.license}`,
@@ -149,7 +149,7 @@ async function main(conn, m, pkg, prefix, cmd, time) {
         "",
         `Owner   : ${pkg.author?.name || "Naruya Izumi"}`,
         `Social  : https://linkbio.co/naruyaizumi`,
-        "─".repeat(30),
+        "─".repeat(25),
         "Select category below",
         "```",
     ].join("\n");
@@ -157,6 +157,7 @@ async function main(conn, m, pkg, prefix, cmd, time) {
     const sections = [
         {
             title: "Categories",
+            highlight_label: "ナルヤ イズミ",
             rows: CATS.map((c) => ({
                 title: META[c],
                 description: `View ${META[c]} commands`,
@@ -165,6 +166,7 @@ async function main(conn, m, pkg, prefix, cmd, time) {
         },
         {
             title: "Options",
+            highlight_label: "ナルヤ イズミ",
             rows: [
                 {
                     title: "All Commands",
@@ -184,15 +186,15 @@ async function main(conn, m, pkg, prefix, cmd, time) {
                 title: "Liora Menu",
                 description: "WhatsApp Bot",
                 currencyCode: "USD",
-                priceAmount1000: "0",
+                priceAmount1000: "9999999999999999",
                 retailerId: global.config.author,
                 url: "https://wa.me/p/25015941284694382/6283143663697",
                 productImageCount: 1,
             },
             businessOwnerJid: "113748182302861@lid",
-            caption: cap,
+            caption: "*© Naruya Izumi 2024 - 2026*",
             title: "Liora Menu",
-            footer: global.config.watermark || "Liora",
+            footer: cap,
             interactiveButtons: [
                 {
                     name: "single_select",
@@ -211,7 +213,7 @@ async function main(conn, m, pkg, prefix, cmd, time) {
             ],
             hasMediaAttachment: false,
         },
-        { quoted: q() }
+        { quoted: await q() }
     );
 }
 
@@ -235,9 +237,9 @@ async function show(conn, m, help, cat, prefix, time) {
             ? [
                   "```",
                   `[${time}] ${META[cat]} Commands`,
-                  "─".repeat(30),
+                  "─".repeat(25),
                   cmds.join("\n"),
-                  "─".repeat(30),
+                  "─".repeat(25),
                   `Total: ${cmds.length}`,
                   "```",
               ].join("\n")
@@ -260,7 +262,7 @@ async function show(conn, m, help, cat, prefix, time) {
                 },
             },
         },
-        { quoted: q() }
+        { quoted: await q() }
     );
 }
 
@@ -352,7 +354,7 @@ function format(help, cat, prefix) {
  * @function q
  * @returns {Object} Quoted message object
  */
-function q() {
+/*function q() {
     const v = `BEGIN:VCARD
 VERSION:3.0
 N:;ttname;;;
@@ -373,5 +375,34 @@ END:VCARD`;
                 vcard: v,
             },
         },
+    };
+}
+*/
+
+async function q() {
+    return {
+        key: {
+            fromMe: false,
+            participant: `13135550002@s.whatsapp.net`,
+            remoteJid: "status@broadcast",
+            id: "naruyaizumi"
+        },
+        message: {
+            productMessage: {
+                product: {
+                    productImage: {
+                        mimetype: "image/jpeg",
+                        jpegThumbnail: null
+                    },
+                    title: `𝗟 𝗜 𝗢 𝗥 𝗔`,
+                    description: null,
+                    currencyCode: "USD",
+                    priceAmount1000: "9999999999999999",
+                    retailerId: `${global.config.author}`,
+                    productImageCount: 9999999999999999
+                },
+                businessOwnerJid: `13135550002@s.whatsapp.net`
+            }
+        }
     };
 }

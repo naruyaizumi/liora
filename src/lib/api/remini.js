@@ -58,15 +58,19 @@ export async function remini(buffer) {
      * @constant {Array<string>}
      */
     const attempts = [
-        // Nekolabs services (primary)
-        `https://api.nekolabs.web.id/tools/pxpic/upscale?imageUrl=${encoded}`,
-        `https://api.nekolabs.web.id/tools/pxpic/enhance?imageUrl=${encoded}`,
-        `https://api.nekolabs.web.id/tools/ihancer?imageUrl=${encoded}`,
-
+        // Elrayy services (quinary - multiple resolution options)
+        `https://api.elrayyxml.web.id/api/tools/remini?url=${encoded}`,
+        `https://api.elrayyxml.web.id/api/tools/upscale?url=${encoded}&resolusi=5`, // 5x resolution
+        
         // Zenzxz services (secondary - various upscale factors)
         `https://api.zenzxz.my.id/api/tools/upscale?url=${encoded}`,
         `https://api.zenzxz.my.id/api/tools/upscalev2?url=${encoded}&scale=2`, // 2x upscale
         `https://api.zenzxz.my.id/api/tools/upscalev2?url=${encoded}&scale=4`, // 4x upscale
+
+        // Nekolabs services (primary)
+        `https://api.nekolabs.web.id/tools/pxpic/upscale?imageUrl=${encoded}`,
+        `https://api.nekolabs.web.id/tools/pxpic/enhance?imageUrl=${encoded}`,
+        `https://api.nekolabs.web.id/tools/ihancer?imageUrl=${encoded}`,
 
         // Siputzx service (tertiary)
         `https://api.siputzx.my.id/api/iloveimg/upscale?image=${encoded}&scale=2`,
@@ -74,9 +78,6 @@ export async function remini(buffer) {
         // Ootaizumi service (quaternary)
         `https://api.ootaizumi.web.id/tools/upscale?imageUrl=${encoded}`,
 
-        // Elrayy services (quinary - multiple resolution options)
-        `https://api.elrayyxml.web.id/api/tools/remini?url=${encoded}`,
-        `https://api.elrayyxml.web.id/api/tools/upscale?url=${encoded}&resolusi=5`, // 5x resolution
     ];
 
     /**
