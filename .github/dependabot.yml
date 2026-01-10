@@ -15,20 +15,12 @@ updates:
       labels:
           - "dependencies"
           - "automated"
-          - "security"
       commit-message:
           prefix: "chore(deps)"
           include: "scope"
-      groups:
-          baileys:
-              patterns: ["baileys"]
-          core-deps:
-              patterns: ["@msgpack/msgpack", "async-mutex", "eventemitter3", "p-queue"]
       ignore:
           - dependency-name: "*"
             update-types: ["version-update:semver-major"]
-          - dependency-name: "baileys"
-            versions: ["> 0.0.0"]
 
     - package-ecosystem: "github-actions"
       directory: "/"
@@ -44,10 +36,6 @@ updates:
           - "dependencies"
           - "ci-cd"
           - "automated"
-          - "security"
       commit-message:
           prefix: "chore(ci)"
           include: "scope"
-
-security-updates:
-    enable: true
