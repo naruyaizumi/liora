@@ -1,21 +1,15 @@
 # Code Owners for Liora WhatsApp Bot
-# These owners will be the default owners for everything in the repo.
-# Unless a later match takes precedence, they will be requested for
-# review when someone opens a pull request.
 
-# Default owners
+# Default owner for everything
 * @naruyaizumi
 
+# Specific directories
 /.github/ @naruyaizumi
-
 /src/ @naruyaizumi
 
-package.json @naruyaizumi
-
+# Specific files
+/package.json @naruyaizumi
 *.md @naruyaizumi
-
-README.md @naruyaizumi
-
 *.sh @naruyaizumi
-
-install.sh @naruyaizumi
+LICENSE @naruyaizumi
+.env.example @naruyaizumi
