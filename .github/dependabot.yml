@@ -1,41 +1,90 @@
+# ============================================
+# Dependabot Configuration
+# ============================================
+# Automated dependency updates for Liora WhatsApp Bot
+# ============================================
+
 version: 2
 updates:
-    - package-ecosystem: "npm"
-      directory: "/"
-      schedule:
-          interval: "weekly"
-          day: "monday"
-          time: "08:00"
-          timezone: "Asia/Jakarta"
-      open-pull-requests-limit: 10
-      reviewers:
-          - "naruyaizumi"
-      assignees:
-          - "naruyaizumi"
-      labels:
-          - "dependencies"
-          - "automated"
-      commit-message:
-          prefix: "chore(deps)"
-          include: "scope"
-      ignore:
-          - dependency-name: "*"
-            update-types: ["version-update:semver-major"]
+  # ============================================
+  # NPM DEPENDENCIES (Bun)
+  # ============================================
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Asia/Jakarta"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "naruyaizumi"
+    assignees:
+      - "naruyaizumi"
+    labels:
+      - "dependencies"
+      - "automated"
+      - "security"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      baileys:
+        patterns: ["baileys"]
+      core-deps:
+        patterns: ["@msgpack/msgpack", "async-mutex", "eventemitter3", "p-queue"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "baileys"
+        versions: ["> 0.0.0"]
 
-    - package-ecosystem: "github-actions"
-      directory: "/"
-      schedule:
-          interval: "weekly"
-          day: "monday"
-          time: "11:00"
-          timezone: "Asia/Jakarta"
-      open-pull-requests-limit: 5
-      reviewers:
-          - "naruyaizumi"
-      labels:
-          - "dependencies"
-          - "ci-cd"
-          - "automated"
-      commit-message:
-          prefix: "chore(ci)"
-          include: "scope"
+  # ============================================
+  # GITHUB ACTIONS
+  # ============================================
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "11:00"
+      timezone: "Asia/Jakarta"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "naruyaizumi"
+    labels:
+      - "dependencies"
+      - "ci-cd"
+      - "automated"
+      - "security"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"
+
+  # ============================================
+  # BUN SPECIFIC CONFIGURATION
+  # ============================================
+  # Note: Bun uses npm ecosystem but has specific behavior
+  # - bun.lock is automatically updated
+  # - Bun-specific packages are handled through npm
+  # ============================================
+
+# ============================================
+# SECURITY UPDATES (Automatic)
+# ============================================
+# Security updates are processed immediately
+# regardless of schedule
+# ============================================
+
+security-updates:
+  enable: true
+
+# ============================================
+# VERSION UPDATES CONFIGURATION
+# ============================================
+# Update strategy:
+# - Weekly updates for patch/minor versions
+# - Major versions require manual review
+# - Grouped updates for related packages
+# - Custom fork (baileys) is ignored
+# ============================================
