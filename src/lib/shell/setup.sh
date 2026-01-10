@@ -31,9 +31,9 @@ EOF
     
     while true; do
         printf "liora> "
-        read choice
+        read -r choice
         
-        case $choice in
+        case "$choice" in
             1)
                 SELECTED_VERSION="${VERSIONS[0]}"
                 print_success "Selected: $SELECTED_VERSION"
@@ -54,9 +54,9 @@ EOF
                 
                 while true; do
                     printf "liora> "
-                    read ver_choice
+                    read -r ver_choice
                     
-                    if [[ $ver_choice =~ ^[0-9]+$ ]] && [ $ver_choice -ge 1 ] && [ $ver_choice -le ${#VERSIONS[@]} ]; then
+                    if [[ "$ver_choice" =~ ^[0-9]+$ ]] && [ "$ver_choice" -ge 1 ] && [ "$ver_choice" -le ${#VERSIONS[@]} ]; then
                         SELECTED_VERSION="${VERSIONS[$((ver_choice-1))]}"
                         print_success "Selected: $SELECTED_VERSION"
                         break 2
@@ -83,9 +83,9 @@ EOF
     
     while true; do
         printf "liora> Enter WhatsApp number (without +): "
-        read PAIRING_NUM
+        read -r PAIRING_NUM
         
-        if [[ $PAIRING_NUM =~ ^[0-9]{10,15}$ ]]; then
+        if [[ "$PAIRING_NUM" =~ ^[0-9]{10,15}$ ]]; then
             print_success "Number: +$PAIRING_NUM"
             break
         else
@@ -94,7 +94,7 @@ EOF
     done
     
     printf "liora> Enter pairing code [default: CUMICUMI]: "
-    read PAIRING_CODE
+    read -r PAIRING_CODE
     PAIRING_CODE=${PAIRING_CODE:-CUMICUMI}
     print_success "Code: $PAIRING_CODE"
     echo ""
@@ -111,19 +111,19 @@ EOF
     OWNERS_ARRAY="[]"
     
     printf "liora> Add owner numbers? [y/N]: "
-    read add_owners
+    read -r add_owners
     
-    if [[ $add_owners =~ ^[Yy]$ ]]; then
+    if [[ "$add_owners" =~ ^[Yy]$ ]]; then
         OWNER_LIST=()
         while true; do
             printf "liora> Owner number (without + or blank to finish): "
-            read owner_num
+            read -r owner_num
             
             if [ -z "$owner_num" ]; then
                 break
             fi
             
-            if [[ $owner_num =~ ^[0-9]{10,15}$ ]]; then
+            if [[ "$owner_num" =~ ^[0-9]{10,15}$ ]]; then
                 OWNER_LIST+=("\"$owner_num@s.whatsapp.net\"")
                 print_success "Added: +$owner_num"
             else
