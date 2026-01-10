@@ -56,7 +56,8 @@ EOF
     if [ "$CURRENT" = "$LATEST" ]; then
         echo "You are already on the latest version!"
         echo ""
-        read -p "liora> Show all versions? [y/N]: " show_all
+        printf "liora> Show all versions? [y/N]: "
+        read show_all
         [[ ! $show_all =~ ^[Yy]$ ]] && exit 0
     fi
     
@@ -66,41 +67,50 @@ EOF
     echo "  [4] Cancel"
     echo ""
     
-    read -p "liora> " choice
-    
-    case $choice in
-        1)
-            TARGET_VERSION="$LATEST"
-            ;;
-        2)
-            TARGET_VERSION="main"
-            ;;
-        3)
-            echo ""
-            echo "Available versions:"
-            for i in "${!VERSIONS[@]}"; do
-                current_mark=""
-                [ "${VERSIONS[$i]}" = "$CURRENT" ] && current_mark=" (current)"
-                echo "  $((i+1)). ${VERSIONS[$i]}$current_mark"
-            done
-            echo ""
-            read -p "liora> " ver_choice
-            if [[ $ver_choice =~ ^[0-9]+$ ]] && [ $ver_choice -ge 1 ] && [ $ver_choice -le ${#VERSIONS[@]} ]; then
-                TARGET_VERSION="${VERSIONS[$((ver_choice-1))]}"
-            else
-                print_error "Invalid selection"
-                exit 1
-            fi
-            ;;
-        4)
-            print_info "Update cancelled"
-            exit 0
-            ;;
-        *)
-            print_error "Invalid option"
-            exit 1
-            ;;
-    esac
+    while true; do
+        printf "liora> "
+        read choice
+        
+        case $choice in
+            1)
+                TARGET_VERSION="$LATEST"
+                break
+                ;;
+            2)
+                TARGET_VERSION="main"
+                break
+                ;;
+            3)
+                echo ""
+                echo "Available versions:"
+                for i in "${!VERSIONS[@]}"; do
+                    current_mark=""
+                    [ "${VERSIONS[$i]}" = "$CURRENT" ] && current_mark=" (current)"
+                    echo "  $((i+1)). ${VERSIONS[$i]}$current_mark"
+                done
+                echo ""
+                
+                while true; do
+                    printf "liora> "
+                    read ver_choice
+                    
+                    if [[ $ver_choice =~ ^[0-9]+$ ]] && [ $ver_choice -ge 1 ] && [ $ver_choice -le ${#VERSIONS[@]} ]; then
+                        TARGET_VERSION="${VERSIONS[$((ver_choice-1))]}"
+                        break 2
+                    else
+                        print_error "Invalid selection. Enter 1-${#VERSIONS[@]}"
+                    fi
+                done
+                ;;
+            4)
+                print_info "Update cancelled"
+                exit 0
+                ;;
+            *)
+                print_error "Invalid option. Choose 1-4"
+                ;;
+        esac
+    done
     
     echo ""
     print_info "Updating to $TARGET_VERSION..."

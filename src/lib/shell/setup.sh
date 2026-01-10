@@ -8,14 +8,6 @@ get_available_versions() {
 }
 
 prompt_version() {
-    cat << "EOF"
-
-+---------------------------------------+
-| Select Installation Version           |
-+---------------------------------------+
-
-EOF
-    
     VERSIONS=($(get_available_versions))
     
     if [ ${#VERSIONS[@]} -eq 0 ]; then
@@ -24,13 +16,23 @@ EOF
         return
     fi
     
+    cat << "EOF"
+
++---------------------------------------+
+| Select Installation Version           |
++---------------------------------------+
+
+EOF
+    
     echo "  [1] Latest Stable (${VERSIONS[0]})"
     echo "  [2] Development (main branch)"
     echo "  [3] Specific Version"
     echo ""
     
     while true; do
-        read -p "liora> " choice
+        printf "liora> "
+        read choice
+        
         case $choice in
             1)
                 SELECTED_VERSION="${VERSIONS[0]}"
@@ -49,14 +51,19 @@ EOF
                     echo "  $((i+1)). ${VERSIONS[$i]}"
                 done
                 echo ""
-                read -p "liora> " ver_choice
-                if [[ $ver_choice =~ ^[0-9]+$ ]] && [ $ver_choice -ge 1 ] && [ $ver_choice -le ${#VERSIONS[@]} ]; then
-                    SELECTED_VERSION="${VERSIONS[$((ver_choice-1))]}"
-                    print_success "Selected: $SELECTED_VERSION"
-                    break
-                else
-                    print_error "Invalid selection"
-                fi
+                
+                while true; do
+                    printf "liora> "
+                    read ver_choice
+                    
+                    if [[ $ver_choice =~ ^[0-9]+$ ]] && [ $ver_choice -ge 1 ] && [ $ver_choice -le ${#VERSIONS[@]} ]; then
+                        SELECTED_VERSION="${VERSIONS[$((ver_choice-1))]}"
+                        print_success "Selected: $SELECTED_VERSION"
+                        break 2
+                    else
+                        print_error "Invalid selection. Enter 1-${#VERSIONS[@]}"
+                    fi
+                done
                 ;;
             *)
                 print_error "Invalid option. Choose 1-3"
@@ -75,7 +82,8 @@ prompt_pairing() {
 EOF
     
     while true; do
-        read -p "liora> Enter WhatsApp number (without +): " PAIRING_NUM
+        printf "liora> Enter WhatsApp number (without +): "
+        read PAIRING_NUM
         
         if [[ $PAIRING_NUM =~ ^[0-9]{10,15}$ ]]; then
             print_success "Number: +$PAIRING_NUM"
@@ -85,7 +93,8 @@ EOF
         fi
     done
     
-    read -p "liora> Enter pairing code [default: CUMICUMI]: " PAIRING_CODE
+    printf "liora> Enter pairing code [default: CUMICUMI]: "
+    read PAIRING_CODE
     PAIRING_CODE=${PAIRING_CODE:-CUMICUMI}
     print_success "Code: $PAIRING_CODE"
     echo ""
@@ -101,12 +110,14 @@ EOF
     
     OWNERS_ARRAY="[]"
     
-    read -p "liora> Add owner numbers? [y/N]: " add_owners
+    printf "liora> Add owner numbers? [y/N]: "
+    read add_owners
     
     if [[ $add_owners =~ ^[Yy]$ ]]; then
         OWNER_LIST=()
         while true; do
-            read -p "liora> Owner number (without + or blank to finish): " owner_num
+            printf "liora> Owner number (without + or blank to finish): "
+            read owner_num
             
             if [ -z "$owner_num" ]; then
                 break
