@@ -12,7 +12,6 @@ import { serialize } from "#core/message.js";
 import { useSQLiteAuthState } from "#auth";
 import { Browsers, fetchLatestBaileysVersion } from "baileys";
 import { dirname, join } from "node:path";
-import { mkdir, access } from "node:fs/promises";
 import {
     getAllPlugins,
     loadPlugins,
@@ -45,35 +44,6 @@ let auth = null;
  * @type {boolean}
  */
 let isDown = false;
-
-/**
- * Creates necessary directories for database storage
- * @async
- * @function makeDirs
- * @returns {Promise<void>}
- * @throws {Error} If directory creation fails
- *
- * @directories
- * - src/database/: SQLite database files
- */
-async function makeDirs() {
-    const dbDir = join(process.cwd(), "src", "database");
-    try {
-        try {
-            await access(dbDir);
-            global.logger.info("DB dir exists");
-        } catch {
-            await mkdir(dbDir, { recursive: true });
-            global.logger.info(`DB dir made: ${dbDir}`);
-        }
-    } catch (e) {
-        global.logger.error(e.message);
-        throw e;
-    }
-}
-
-// Initialize directories
-await makeDirs();
 
 /**
  * Creates a configurable logger instance for Baileys
