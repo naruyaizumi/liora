@@ -1,9 +1,3 @@
-# ============================================
-# GitHub Issue Labeler Configuration
-# ============================================
-# Automatically labels issues based on title/body content
-# ============================================
-
 bug:
   - '\b(bug|error|crash|exception|fail|broken|not working)\b'
 

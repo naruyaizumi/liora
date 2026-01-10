@@ -1,9 +1,3 @@
-# ============================================
-# GitHub Labeler Configuration
-# ============================================
-# Automatically labels PRs based on changed files
-# ============================================
-
 whatsapp:
     changed-files:
         - any-glob-to-any-file:
@@ -47,21 +41,3 @@ security:
         - any-glob-to-any-file:
               - ".github/workflows/security/**/*"
               - ".github/workflows/scan/**/*"
-
-# ============================================
-# USAGE NOTES:
-# ============================================
-# This file should be placed in: .github/labeler.yml
-#
-# Labels are automatically applied to PRs based on file changes:
-# - whatsapp: Core bot functionality changes
-# - api: External API integrations
-# - documentation: Readme and documentation updates
-# - config: Configuration file changes
-# - database: Authentication and session changes
-# - ci-cd: GitHub Actions workflow changes
-# - dependencies: Package dependency updates
-# - security: Security-related workflow changes
-#
-# PRs can receive multiple labels if multiple file types are changed
-# ============================================
