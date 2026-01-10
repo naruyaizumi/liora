@@ -31,7 +31,7 @@ EOF
     
     while true; do
         printf "liora> "
-        read -r choice
+        read -r choice < /dev/tty
         
         case "$choice" in
             1)
@@ -54,7 +54,7 @@ EOF
                 
                 while true; do
                     printf "liora> "
-                    read -r ver_choice
+                    read -r ver_choice < /dev/tty
                     
                     if [[ "$ver_choice" =~ ^[0-9]+$ ]] && [ "$ver_choice" -ge 1 ] && [ "$ver_choice" -le ${#VERSIONS[@]} ]; then
                         SELECTED_VERSION="${VERSIONS[$((ver_choice-1))]}"
@@ -83,7 +83,7 @@ EOF
     
     while true; do
         printf "liora> Enter WhatsApp number (without +): "
-        read -r PAIRING_NUM
+        read -r PAIRING_NUM < /dev/tty
         
         if [[ "$PAIRING_NUM" =~ ^[0-9]{10,15}$ ]]; then
             print_success "Number: +$PAIRING_NUM"
@@ -94,7 +94,7 @@ EOF
     done
     
     printf "liora> Enter pairing code [default: CUMICUMI]: "
-    read -r PAIRING_CODE
+    read -r PAIRING_CODE < /dev/tty
     PAIRING_CODE=${PAIRING_CODE:-CUMICUMI}
     print_success "Code: $PAIRING_CODE"
     echo ""
@@ -111,13 +111,13 @@ EOF
     OWNERS_ARRAY="[]"
     
     printf "liora> Add owner numbers? [y/N]: "
-    read -r add_owners
+    read -r add_owners < /dev/tty
     
     if [[ "$add_owners" =~ ^[Yy]$ ]]; then
         OWNER_LIST=()
         while true; do
             printf "liora> Owner number (without + or blank to finish): "
-            read -r owner_num
+            read -r owner_num < /dev/tty
             
             if [ -z "$owner_num" ]; then
                 break

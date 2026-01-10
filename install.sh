@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-exec < /dev/tty
-
 GITHUB_RAW="https://raw.githubusercontent.com/naruyaizumi/liora/main/src/lib/shell"
 SERVICE_NAME="liora"
 SERVICE_FILE="/etc/systemd/system/liora.service"
