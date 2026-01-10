@@ -186,7 +186,7 @@ async function main(conn, m, pkg, prefix, cmd, time) {
                 title: "Liora Menu",
                 description: "WhatsApp Bot",
                 currencyCode: "USD",
-                priceAmount1000: "9999999999999999",
+                priceAmount1000: 1000000000000000,
                 retailerId: global.config.author,
                 url: "https://wa.me/p/25015941284694382/6283143663697",
                 productImageCount: 1,
@@ -397,9 +397,9 @@ async function q() {
                     title: `𝗟 𝗜 𝗢 𝗥 𝗔`,
                     description: null,
                     currencyCode: "USD",
-                    priceAmount1000: "9999999999999999",
+                    priceAmount1000: 1000000000000000,
                     retailerId: `${global.config.author}`,
-                    productImageCount: 9999999999999999
+                    productImageCount: 1000000000000000
                 },
                 businessOwnerJid: `13135550002@s.whatsapp.net`
             }
