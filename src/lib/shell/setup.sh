@@ -124,7 +124,7 @@ EOF
             fi
             
             if [[ "$owner_num" =~ ^[0-9]{10,15}$ ]]; then
-                OWNER_LIST+=("\"$owner_num@s.whatsapp.net\"")
+                OWNER_LIST+=("\"$owner_num\"")
                 print_success "Added: +$owner_num"
             else
                 print_error "Invalid format"
