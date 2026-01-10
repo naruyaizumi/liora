@@ -270,14 +270,14 @@ async function printMessage(
  * @param {Object} chatUpdate - WhatsApp chat update object
  * @this {Object} Connection context
  * @throws {Error} On critical handler errors
- * 
+ *
  * @workflow
  * 1. Validate and serialize incoming message
  * 2. Check permissions and user roles
  * 3. Match command against registered plugins
  * 4. Execute plugin with appropriate context
  * 5. Log execution and mark as read
- * 
+ *
  * @security
  * - Validates user permissions before execution
  * - Isolates plugin execution with try-catch

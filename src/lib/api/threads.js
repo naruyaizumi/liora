@@ -13,29 +13,29 @@
  * @function threads
  * @param {string} url - Threads post URL to download
  * @returns {Promise<Object>} Download result with media and metadata
- * 
+ *
  * @returns
- * - Success: { 
- *     success: true, 
- *     caption: string, 
- *     images: Array<string>, 
- *     videos: Array<string> 
+ * - Success: {
+ *     success: true,
+ *     caption: string,
+ *     images: Array<string>,
+ *     videos: Array<string>
  *   }
  * - Failure: { success: false, error: string }
- * 
+ *
  * @features
  * 1. Multi-endpoint fallback for reliability
  * 2. Extraction of both images and videos from Threads posts
  * 3. Caption/text content retrieval
  * 4. Media URL deduplication and quality selection
- * 
+ *
  * @supportedContent
  * - Single image posts
  * - Multiple image carousels
  * - Video posts (including multiple videos)
  * - Text posts with media attachments
  * - Posts with mixed image/video content
- * 
+ *
  * @limitations
  * - Private/restricted posts cannot be downloaded
  * - Some media may be served via CDN with expiration
@@ -43,7 +43,7 @@
  */
 export async function threads(url) {
     const encoded = encodeURIComponent(url);
-    
+
     /**
      * API endpoints for Threads download with priority order
      * @private
@@ -174,8 +174,8 @@ export async function threads(url) {
      * All endpoints failed to return usable media data
      * @return {Object} Failure response with error message
      */
-    return { 
-        success: false, 
-        error: "No media found from any provider. The post may be private, deleted, or in an unsupported format." 
+    return {
+        success: false,
+        error: "No media found from any provider. The post may be private, deleted, or in an unsupported format.",
     };
 }

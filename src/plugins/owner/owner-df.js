@@ -15,11 +15,11 @@
  * @param {string} param1.usedPrefix - Command prefix used
  * @param {string} param1.command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to delete files from the bot's file system.
  * Only accessible by bot owner for security reasons.
- * 
+ *
  * @features
  * - Deletes files from specified paths
  * - Automatically adds .js extension if not provided

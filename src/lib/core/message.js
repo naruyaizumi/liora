@@ -237,7 +237,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
  * @export
  * @function serialize
  * @returns {Object} Modified prototype
- * 
+ *
  * @extendedProperties
  * - Connection management (.conn)
  * - Message metadata (.id, .chat, .sender, .mtype)
@@ -245,7 +245,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
  * - Quoted message utilities (.quoted, .getQuotedObj)
  * - Action methods (.reply, .copy, .forward, .delete)
  * - Context detection (.isGroup, .isChannel, .isBaileys)
- * 
+ *
  * @performance
  * - Uses getters for lazy evaluation
  * - Minimal property creation overhead

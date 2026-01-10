@@ -12,11 +12,11 @@
  * @param {Object} m - Message object
  * @param {Object} conn - Connection object
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to display comprehensive information about the current group.
  * Shows group metadata including members, admins, settings, and creation details.
- * 
+ *
  * @features
  * - Displays group name, ID, and description
  * - Shows member count and admin list with mentions

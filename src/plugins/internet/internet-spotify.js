@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to search for music tracks on Spotify using the nekolabs API.
  * Returns search results with interactive track selection interface.
- * 
+ *
  * @features
  * - Searches Spotify tracks using external API
  * - Displays track title, artist, and duration

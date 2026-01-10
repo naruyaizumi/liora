@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to add members to a WhatsApp group. Can add members by replying to their message
  * or by providing their phone number as an argument.
- * 
+ *
  * @features
  * - Add members by replying to their message
  * - Add members by providing phone number

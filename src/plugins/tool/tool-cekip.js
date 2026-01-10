@@ -14,11 +14,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Performs IP geolocation lookup for a given domain using ip-api.com.
  * Returns detailed information about the server location.
- * 
+ *
  * @features
  * - Extracts domain from URLs (removes http://, www.)
  * - Uses ip-api.com free API

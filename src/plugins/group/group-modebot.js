@@ -15,11 +15,11 @@
  * @param {string} param1.usedPrefix - Command prefix used
  * @param {string} param1.command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to toggle the bot's response mode in a chat.
  * When muted, the bot will not respond to commands except for specific ones.
- * 
+ *
  * @features
  * - Toggle bot responses ON/OFF
  * - Show current bot status

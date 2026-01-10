@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Downloads Instagram content including videos, single images, and image carousels.
  * Uses multiple API endpoints for reliability and supports various post types.
- * 
+ *
  * @features
  * - Supports videos, single images, and image carousels
  * - Uses multiple backup API endpoints

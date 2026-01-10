@@ -14,11 +14,11 @@
  * @param {Array} args - Command arguments
  * @param {string} usedPrefix - Command prefix used
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Extracts the internal WhatsApp ID from group or channel invite links.
  * Returns the ID with a copy button for convenience.
- * 
+ *
  * @supportedLinks
  * - WhatsApp group invites: https://chat.whatsapp.com/INVITE_CODE
  * - WhatsApp channels: https://whatsapp.com/channel/CHANNEL_ID

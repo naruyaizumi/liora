@@ -13,24 +13,24 @@
  * @function tiktok
  * @param {string} url - TikTok video or slideshow URL to download
  * @returns {Promise<Object>} Download result with media URLs
- * 
+ *
  * @returns
  * - Success (Video): { success: true, type: "video", videoUrl: string }
  * - Success (Images): { success: true, type: "images", images: Array<string> }
  * - Failure: { success: false, error: string }
- * 
+ *
  * @features
  * 1. Multi-endpoint fallback with 5 different APIs
  * 2. Support for both video posts and image slideshows
  * 3. Quality selection (HD when available)
  * 4. Private link detection and error handling
- * 
+ *
  * @supportedContent
  * - Single video posts (with or without watermark)
  * - Multi-image slideshows
  * - TikTok stories
  * - User profile videos
- * 
+ *
  * @limitations
  * - Videos may have TikTok watermark
  * - HD videos may require login/session
@@ -39,14 +39,14 @@
  */
 export async function tiktok(url) {
     const encoded = encodeURIComponent(url);
-    
+
     /**
      * API endpoints for TikTok download with priority order
      * @private
      * @constant {Array<string>}
      */
     const endpoints = [
-        `https://tikwm.com/api/?url=${encoded}`,                    // Primary: tikwm.com (reliable)
+        `https://tikwm.com/api/?url=${encoded}`, // Primary: tikwm.com (reliable)
         `https://api.nekolabs.web.id/downloader/tiktok?url=${encoded}`, // Secondary: Nekolabs
         `https://api.elrayyxml.web.id/api/downloader/tiktok?url=${encoded}`, // Tertiary: Elrayy
         `https://api.ootaizumi.web.id/downloader/tiktok?url=${encoded}`, // Quaternary: Ootaizumi
@@ -86,12 +86,12 @@ export async function tiktok(url) {
               : Array.isArray(data.data)
                 ? data.data
                 : null;
-                
+
         if (images?.length) {
             return {
                 success: true,
                 type: "images",
-                images: images.filter(url => typeof url === "string" && url.startsWith("http")),
+                images: images.filter((url) => typeof url === "string" && url.startsWith("http")),
             };
         }
 
@@ -101,10 +101,10 @@ export async function tiktok(url) {
          * @private
          */
         const videoUrl =
-            data.play ||        // tikwm format
-            data.video ||       // Standard video property
-            data.videoUrl ||    // Some APIs use videoUrl
-            data.hdplay ||      // HD video variant
+            data.play || // tikwm format
+            data.video || // Standard video property
+            data.videoUrl || // Some APIs use videoUrl
+            data.hdplay || // HD video variant
             (typeof data.data === "string" ? data.data : null); // Direct string data
 
         if (videoUrl) {
@@ -120,8 +120,8 @@ export async function tiktok(url) {
      * All endpoints failed to return usable media data
      * @return {Object} Failure response with error message
      */
-    return { 
-        success: false, 
-        error: "No downloadable media found. The TikTok may be private, removed, region-restricted, or the link may be invalid." 
+    return {
+        success: false,
+        error: "No downloadable media found. The TikTok may be private, removed, region-restricted, or the link may be invalid.",
     };
 }

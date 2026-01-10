@@ -13,11 +13,11 @@
  * @param {Object} conn - Connection object
  * @param {string} text - Group chat ID (optional)
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to make the bot leave a WhatsApp group.
  * Can leave the current group or a specified group by chat ID.
- * 
+ *
  * @features
  * - Leaves current group or specified group
  * - Sends farewell message before leaving

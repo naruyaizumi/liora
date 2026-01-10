@@ -13,11 +13,11 @@
  * @param {Object} conn - Connection object
  * @param {Object} groupMetadata - Group metadata object
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to get the invitation link for the current WhatsApp group.
  * Displays the link in an interactive button format that allows copying.
- * 
+ *
  * @features
  * - Retrieves current group invitation link
  * - Displays group name and ID

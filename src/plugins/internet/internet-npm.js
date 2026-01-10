@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to search for packages on the NPM registry.
  * Returns top 10 search results with package names, versions, and NPM links.
- * 
+ *
  * @features
  * - Searches NPM registry using official API
  * - Returns top 10 search results

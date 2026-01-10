@@ -1,7 +1,7 @@
 /**
  * @file Image enhancement and upscaling utility
  * @module enhancer/remini
- * @description Multi-endpoint image enhancement service for AI-based 
+ * @description Multi-endpoint image enhancement service for AI-based
  * upscaling, quality improvement, and restoration of low-quality images.
  * @license Apache-2.0
  * @author Naruya Izumi
@@ -15,25 +15,25 @@ import { uploader } from "#lib/uploader.js";
  * @function remini
  * @param {Buffer|Uint8Array} buffer - Input image buffer to enhance
  * @returns {Promise<Object>} Enhancement result with processed image
- * 
+ *
  * @returns
  * - Success (URL): { success: true, resultUrl: string }
  * - Success (Buffer): { success: true, resultBuffer: Buffer }
  * - Failure: { success: false, error: string }
- * 
+ *
  * @features
  * 1. Multi-service fallback with 10 different enhancement endpoints
  * 2. Support for both URL-based and direct buffer returns
  * 3. Multiple enhancement types (upscale, enhance, AI restoration)
  * 4. Variable upscale factors (2x, 4x, 5x)
- * 
+ *
  * @capabilities
  * - Increase image resolution without quality loss
  * - Reduce noise and compression artifacts
  * - Restore details in blurry images
  * - Color correction and enhancement
  * - Face enhancement and restoration
- * 
+ *
  * @limitations
  * - Processing time varies by service (5-30 seconds)
  * - Large images may be downscaled by some services
@@ -47,10 +47,11 @@ export async function remini(buffer) {
      * @variable {Object|null}
      */
     const up = await uploader(buffer).catch(() => null);
-    if (!up || !up.url) return { success: false, error: "Image upload failed for enhancement processing" };
+    if (!up || !up.url)
+        return { success: false, error: "Image upload failed for enhancement processing" };
 
     const encoded = encodeURIComponent(up.url);
-    
+
     /**
      * Enhancement service endpoints with priority order and varied capabilities
      * @private
@@ -61,18 +62,18 @@ export async function remini(buffer) {
         `https://api.nekolabs.web.id/tools/pxpic/upscale?imageUrl=${encoded}`,
         `https://api.nekolabs.web.id/tools/pxpic/enhance?imageUrl=${encoded}`,
         `https://api.nekolabs.web.id/tools/ihancer?imageUrl=${encoded}`,
-        
+
         // Zenzxz services (secondary - various upscale factors)
         `https://api.zenzxz.my.id/api/tools/upscale?url=${encoded}`,
-        `https://api.zenzxz.my.id/api/tools/upscalev2?url=${encoded}&scale=2`,  // 2x upscale
-        `https://api.zenzxz.my.id/api/tools/upscalev2?url=${encoded}&scale=4`,  // 4x upscale
-        
+        `https://api.zenzxz.my.id/api/tools/upscalev2?url=${encoded}&scale=2`, // 2x upscale
+        `https://api.zenzxz.my.id/api/tools/upscalev2?url=${encoded}&scale=4`, // 4x upscale
+
         // Siputzx service (tertiary)
         `https://api.siputzx.my.id/api/iloveimg/upscale?image=${encoded}&scale=2`,
-        
+
         // Ootaizumi service (quaternary)
         `https://api.ootaizumi.web.id/tools/upscale?imageUrl=${encoded}`,
-        
+
         // Elrayy services (quinary - multiple resolution options)
         `https://api.elrayyxml.web.id/api/tools/remini?url=${encoded}`,
         `https://api.elrayyxml.web.id/api/tools/upscale?url=${encoded}&resolusi=5`, // 5x resolution
@@ -86,7 +87,7 @@ export async function remini(buffer) {
     for (const url of attempts) {
         const res = await fetch(url).catch(() => null);
         if (!res) continue;
-        
+
         /**
          * Determine response content type to handle different return formats
          * @private
@@ -104,25 +105,25 @@ export async function remini(buffer) {
 
             // Nekolabs/Zenzxz format
             if (json?.result) {
-                return { 
-                    success: true, 
-                    resultUrl: json.result 
+                return {
+                    success: true,
+                    resultUrl: json.result,
                 };
             }
-            
+
             // Siputzx format
             if (json?.data?.url) {
-                return { 
-                    success: true, 
-                    resultUrl: json.data.url 
+                return {
+                    success: true,
+                    resultUrl: json.data.url,
                 };
             }
-            
+
             // Ootaizumi format
             if (json?.result?.imageUrl) {
-                return { 
-                    success: true, 
-                    resultUrl: json.result.imageUrl 
+                return {
+                    success: true,
+                    resultUrl: json.result.imageUrl,
                 };
             }
         }
@@ -165,9 +166,9 @@ export async function remini(buffer) {
             if (arrayBuffer) {
                 const buf = Buffer.from(arrayBuffer);
                 if (buf.length) {
-                    return { 
-                        success: true, 
-                        resultBuffer: buf 
+                    return {
+                        success: true,
+                        resultBuffer: buf,
                     };
                 }
             }
@@ -178,8 +179,8 @@ export async function remini(buffer) {
      * All enhancement services failed
      * @return {Object} Failure response with error message
      */
-    return { 
-        success: false, 
-        error: "All enhancement methods failed. This may be due to rate limits, service downtime, or incompatible image format." 
+    return {
+        success: false,
+        error: "All enhancement methods failed. This may be due to rate limits, service downtime, or incompatible image format.",
     };
 }

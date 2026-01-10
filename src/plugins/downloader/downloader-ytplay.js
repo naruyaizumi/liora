@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Searches for and downloads audio from YouTube Music by song title.
  * Returns audio with metadata including title, artist, and album art.
- * 
+ *
  * @features
  * - Searches YouTube Music by song title
  * - Downloads audio with metadata preservation

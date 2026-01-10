@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to upload media files to various hosting servers and return shareable URLs.
  * Supports multiple servers with automatic fallback and interactive copy buttons.
- * 
+ *
  * @features
  * - Uploads to 7 different hosting servers
  * - Shows server list when no server specified

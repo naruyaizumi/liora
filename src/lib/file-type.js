@@ -19,12 +19,12 @@
  * const result = await fileType(fileBuffer);
  * // Result: { mime: 'image/jpeg', ext: 'jpg' }
  * // Returns null for unknown formats
- * 
+ *
  * @performance
  * - O(1) time complexity for most formats
  * - Minimal buffer slicing for efficiency
  * - Early returns on successful detection
- * 
+ *
  * @supportedFormats
  * Videos: MP4, MOV, AVI, MKV, WebM, FLV, WMV, 3GP, M4V
  * Images: JPEG, PNG, GIF, WebP, HEIC, BMP, ICO, TIFF, SVG (basic)
@@ -110,7 +110,7 @@ export async function fileType(buffer) {
             buffer[6] === 0xcf && // 'Ï'
             buffer[7] === 0x11 && // ''
             buffer[8] === 0xa6 && // '¦'
-            buffer[9] === 0xd9    // 'Ù'
+            buffer[9] === 0xd9 // 'Ù'
         ) {
             return { mime: "video/x-ms-wmv", ext: "wmv" };
         }
@@ -282,8 +282,14 @@ export async function fileType(buffer) {
         // TIFF detection (both little and big endian)
         if (
             buffer.length >= 4 &&
-            ((buffer[0] === 0x49 && buffer[1] === 0x49 && buffer[2] === 0x2a && buffer[3] === 0x00) || // II*
-                (buffer[0] === 0x4d && buffer[1] === 0x4d && buffer[2] === 0x00 && buffer[3] === 0x2a)) // MM*
+            ((buffer[0] === 0x49 &&
+                buffer[1] === 0x49 &&
+                buffer[2] === 0x2a &&
+                buffer[3] === 0x00) || // II*
+                (buffer[0] === 0x4d &&
+                    buffer[1] === 0x4d &&
+                    buffer[2] === 0x00 &&
+                    buffer[3] === 0x2a)) // MM*
         ) {
             return { mime: "image/tiff", ext: "tiff" };
         }
@@ -309,7 +315,7 @@ export async function fileType(buffer) {
             buffer[3] === 0x04
         ) {
             const bufferStr = buffer.toString("latin1", 0, Math.min(1000, buffer.length));
-            
+
             if (bufferStr.includes("[Content_Types].xml")) {
                 // Word Document
                 if (bufferStr.includes("word/")) {
@@ -333,7 +339,7 @@ export async function fileType(buffer) {
                     };
                 }
             }
-            
+
             return { mime: "application/zip", ext: "zip" };
         }
 
@@ -350,7 +356,7 @@ export async function fileType(buffer) {
             buffer[7] === 0xe1
         ) {
             const bufferStr = buffer.toString("latin1", 0, Math.min(512, buffer.length));
-            
+
             if (bufferStr.includes("Word.Document")) {
                 return { mime: "application/msword", ext: "doc" };
             }
@@ -371,8 +377,11 @@ export async function fileType(buffer) {
             buffer[3] === 0x04
         ) {
             const bufferStr = buffer.toString("latin1", 0, Math.min(512, buffer.length));
-            
-            if (bufferStr.includes("mimetype") && bufferStr.includes("application/vnd.oasis.opendocument")) {
+
+            if (
+                bufferStr.includes("mimetype") &&
+                bufferStr.includes("application/vnd.oasis.opendocument")
+            ) {
                 if (bufferStr.includes("text")) {
                     return { mime: "application/vnd.oasis.opendocument.text", ext: "odt" };
                 }
@@ -400,8 +409,14 @@ export async function fileType(buffer) {
         // RAR detection (v4 and v5)
         if (
             buffer.length >= 7 &&
-            ((buffer[0] === 0x52 && buffer[1] === 0x61 && buffer[2] === 0x72 && buffer[3] === 0x21) || // Rar!
-                (buffer[0] === 0x52 && buffer[1] === 0x45 && buffer[2] === 0x7e && buffer[3] === 0x5e)) // RE~^
+            ((buffer[0] === 0x52 &&
+                buffer[1] === 0x61 &&
+                buffer[2] === 0x72 &&
+                buffer[3] === 0x21) || // Rar!
+                (buffer[0] === 0x52 &&
+                    buffer[1] === 0x45 &&
+                    buffer[2] === 0x7e &&
+                    buffer[3] === 0x5e)) // RE~^
         ) {
             return { mime: "application/vnd.rar", ext: "rar" };
         }
@@ -422,19 +437,23 @@ export async function fileType(buffer) {
         // TAR detection
         if (
             buffer.length >= 262 &&
-            ((buffer[257] === 0x75 && buffer[258] === 0x73 && buffer[259] === 0x74 && buffer[260] === 0x61 && buffer[261] === 0x72) || // ustar
-                (buffer[257] === 0x75 && buffer[258] === 0x73 && buffer[259] === 0x74 && buffer[260] === 0x61 && buffer[261] === 0x72 && buffer[262] === 0x00)) // ustar\0
+            ((buffer[257] === 0x75 &&
+                buffer[258] === 0x73 &&
+                buffer[259] === 0x74 &&
+                buffer[260] === 0x61 &&
+                buffer[261] === 0x72) || // ustar
+                (buffer[257] === 0x75 &&
+                    buffer[258] === 0x73 &&
+                    buffer[259] === 0x74 &&
+                    buffer[260] === 0x61 &&
+                    buffer[261] === 0x72 &&
+                    buffer[262] === 0x00)) // ustar\0
         ) {
             return { mime: "application/x-tar", ext: "tar" };
         }
 
         // GZIP detection
-        if (
-            buffer.length >= 3 &&
-            buffer[0] === 0x1f &&
-            buffer[1] === 0x8b &&
-            buffer[2] === 0x08
-        ) {
+        if (buffer.length >= 3 && buffer[0] === 0x1f && buffer[1] === 0x8b && buffer[2] === 0x08) {
             return { mime: "application/gzip", ext: "gz" };
         }
 
@@ -454,7 +473,7 @@ export async function fileType(buffer) {
             let asciiCount = 0;
             let controlCount = 0;
             const checkLength = Math.min(256, buffer.length);
-            
+
             for (let i = 0; i < checkLength; i++) {
                 const byte = buffer[i];
                 // Printable ASCII + common control chars
@@ -468,11 +487,18 @@ export async function fileType(buffer) {
                 ) {
                     asciiCount++;
                 }
-                if (byte < 0x20 && byte !== 0x09 && byte !== 0x0a && byte !== 0x0d && byte !== 0x0c && byte !== 0x1b) {
+                if (
+                    byte < 0x20 &&
+                    byte !== 0x09 &&
+                    byte !== 0x0a &&
+                    byte !== 0x0d &&
+                    byte !== 0x0c &&
+                    byte !== 0x1b
+                ) {
                     controlCount++;
                 }
             }
-            
+
             // High ASCII ratio and low control chars
             if (asciiCount / checkLength > 0.95 && controlCount / checkLength < 0.05) {
                 return { mime: "text/plain", ext: "txt" };
@@ -482,11 +508,15 @@ export async function fileType(buffer) {
         // HTML detection
         if (
             buffer.length >= 5 &&
-            (
-                // <!DOCTYPE or <html
-                (buffer[0] === 0x3c && buffer[1] === 0x21 && buffer[2] === 0x44 && buffer[3] === 0x4f) ||
-                (buffer[0] === 0x3c && buffer[1] === 0x68 && buffer[2] === 0x74 && buffer[3] === 0x6d)
-            )
+            // <!DOCTYPE or <html
+            ((buffer[0] === 0x3c &&
+                buffer[1] === 0x21 &&
+                buffer[2] === 0x44 &&
+                buffer[3] === 0x4f) ||
+                (buffer[0] === 0x3c &&
+                    buffer[1] === 0x68 &&
+                    buffer[2] === 0x74 &&
+                    buffer[3] === 0x6d))
         ) {
             return { mime: "text/html", ext: "html" };
         }
@@ -510,7 +540,7 @@ export async function fileType(buffer) {
         ) {
             try {
                 // Try to parse to verify it's valid JSON
-                const jsonStr = buffer.toString('utf8', 0, Math.min(1024, buffer.length));
+                const jsonStr = buffer.toString("utf8", 0, Math.min(1024, buffer.length));
                 JSON.parse(jsonStr);
                 return { mime: "application/json", ext: "json" };
             } catch {
@@ -524,8 +554,13 @@ export async function fileType(buffer) {
             buffer[0] === 0x2f && // '/'
             buffer[1] === 0x2a // '*'
         ) {
-            const bufferStr = buffer.toString('utf8', 0, Math.min(100, buffer.length));
-            if (bufferStr.includes('function') || bufferStr.includes('var ') || bufferStr.includes('const ') || bufferStr.includes('let ')) {
+            const bufferStr = buffer.toString("utf8", 0, Math.min(100, buffer.length));
+            if (
+                bufferStr.includes("function") ||
+                bufferStr.includes("var ") ||
+                bufferStr.includes("const ") ||
+                bufferStr.includes("let ")
+            ) {
                 return { mime: "text/javascript", ext: "js" };
             }
         }
@@ -533,11 +568,17 @@ export async function fileType(buffer) {
         // CSS detection
         if (
             buffer.length >= 5 &&
-            buffer.toString('utf8', 0, Math.min(50, buffer.length)).includes('{')
+            buffer.toString("utf8", 0, Math.min(50, buffer.length)).includes("{")
         ) {
-            const bufferStr = buffer.toString('utf8', 0, Math.min(200, buffer.length));
-            if (bufferStr.includes(':') && bufferStr.includes(';') && 
-                (bufferStr.includes('color') || bufferStr.includes('font') || bufferStr.includes('margin') || bufferStr.includes('padding'))) {
+            const bufferStr = buffer.toString("utf8", 0, Math.min(200, buffer.length));
+            if (
+                bufferStr.includes(":") &&
+                bufferStr.includes(";") &&
+                (bufferStr.includes("color") ||
+                    bufferStr.includes("font") ||
+                    bufferStr.includes("margin") ||
+                    bufferStr.includes("padding"))
+            ) {
                 return { mime: "text/css", ext: "css" };
             }
         }
@@ -546,7 +587,7 @@ export async function fileType(buffer) {
         // SVG detection (basic - looks for SVG tags)
         if (
             buffer.length >= 100 &&
-            buffer.toString('utf8', 0, Math.min(200, buffer.length)).toLowerCase().includes('<svg')
+            buffer.toString("utf8", 0, Math.min(200, buffer.length)).toLowerCase().includes("<svg")
         ) {
             return { mime: "image/svg+xml", ext: "svg" };
         }
@@ -564,7 +605,7 @@ export async function fileType(buffer) {
         if (
             buffer.length >= 4 &&
             buffer[0] === 0x78 && // 'x'
-            buffer[1] === 0x01 && 
+            buffer[1] === 0x01 &&
             buffer[2] === 0x73 &&
             buffer[3] === 0x0d
         ) {
@@ -596,7 +637,7 @@ export async function fileType(buffer) {
  * @example
  * const type = await fileType(buffer);
  * const category = await getCategory(type); // 'image'
- * 
+ *
  * @categoryMapping
  * - video/: video, animation
  * - audio/: audio
@@ -611,7 +652,7 @@ export async function getCategory(type) {
 
     return await Promise.resolve().then(() => {
         const mime = type.mime.toLowerCase();
-        
+
         if (mime.startsWith("video/")) return "video";
         if (mime.startsWith("audio/")) return "audio";
         if (mime.startsWith("image/")) return "image";
@@ -644,7 +685,7 @@ export async function getCategory(type) {
         if (mime.includes("json") || mime.includes("xml")) {
             return "text";
         }
-        
+
         return "other";
     });
 }
@@ -658,7 +699,7 @@ export async function getCategory(type) {
  * @example
  * const mime = await getMime('jpg'); // 'image/jpeg'
  * const unknown = await getMime('xyz'); // 'application/octet-stream'
- * 
+ *
  * @mimeDatabase
  * - Covers 80+ common extensions
  * - Follows IANA media type registry
@@ -679,7 +720,7 @@ export async function getMime(ext) {
         mpg: "video/mpeg",
         mpeg: "video/mpeg",
         ogv: "video/ogg",
-        
+
         // Audio
         mp3: "audio/mpeg",
         wav: "audio/wav",
@@ -692,7 +733,7 @@ export async function getMime(ext) {
         mid: "audio/midi",
         midi: "audio/midi",
         wma: "audio/x-ms-wma",
-        
+
         // Images
         jpg: "image/jpeg",
         jpeg: "image/jpeg",
@@ -708,7 +749,7 @@ export async function getMime(ext) {
         svg: "image/svg+xml",
         psd: "image/vnd.adobe.photoshop",
         ai: "application/postscript",
-        
+
         // Documents
         pdf: "application/pdf",
         doc: "application/msword",
@@ -723,7 +764,7 @@ export async function getMime(ext) {
         rtf: "application/rtf",
         txt: "text/plain",
         csv: "text/csv",
-        
+
         // Text/Code
         html: "text/html",
         htm: "text/html",
@@ -737,7 +778,7 @@ export async function getMime(ext) {
         ini: "text/plain",
         cfg: "text/plain",
         conf: "text/plain",
-        
+
         // Archives
         zip: "application/zip",
         rar: "application/vnd.rar",
@@ -746,7 +787,7 @@ export async function getMime(ext) {
         gz: "application/gzip",
         bz2: "application/x-bzip2",
         xz: "application/x-xz",
-        
+
         // Executables
         exe: "application/x-msdownload",
         msi: "application/x-msdownload",
@@ -754,13 +795,13 @@ export async function getMime(ext) {
         pkg: "application/x-newton-compatible-pkg",
         deb: "application/vnd.debian.binary-package",
         rpm: "application/x-rpm",
-        
+
         // Fonts
         ttf: "font/ttf",
         otf: "font/otf",
         woff: "font/woff",
         woff2: "font/woff2",
-        
+
         // Other
         torrent: "application/x-bittorrent",
         ics: "text/calendar",
@@ -781,7 +822,7 @@ export async function getMime(ext) {
  * @example
  * const ext = await getExtension('image/jpeg'); // 'jpg'
  * const unknown = await getExtension('unknown/type'); // 'bin'
- * 
+ *
  * @extensionMapping
  * - Reverse mapping of getMime()
  * - Handles common aliases (jpeg -> jpg)
@@ -803,7 +844,7 @@ export async function getExtension(mime) {
         "video/3gpp": "3gp",
         "video/mpeg": "mpg",
         "video/ogg": "ogv",
-        
+
         // Audio
         "audio/mpeg": "mp3",
         "audio/wav": "wav",
@@ -814,7 +855,7 @@ export async function getExtension(mime) {
         "audio/flac": "flac",
         "audio/midi": "mid",
         "audio/x-ms-wma": "wma",
-        
+
         // Images
         "image/jpeg": "jpg",
         "image/png": "png",
@@ -828,7 +869,7 @@ export async function getExtension(mime) {
         "image/svg+xml": "svg",
         "image/vnd.adobe.photoshop": "psd",
         "application/postscript": "ai",
-        
+
         // Documents
         "application/pdf": "pdf",
         "application/msword": "doc",
@@ -843,7 +884,7 @@ export async function getExtension(mime) {
         "application/rtf": "rtf",
         "text/plain": "txt",
         "text/csv": "csv",
-        
+
         // Text/Code
         "text/html": "html",
         "text/css": "css",
@@ -854,7 +895,7 @@ export async function getExtension(mime) {
         "text/xml": "xml",
         "text/yaml": "yaml",
         "text/markdown": "md",
-        
+
         // Archives
         "application/zip": "zip",
         "application/vnd.rar": "rar",
@@ -863,19 +904,19 @@ export async function getExtension(mime) {
         "application/gzip": "gz",
         "application/x-bzip2": "bz2",
         "application/x-xz": "xz",
-        
+
         // Executables
         "application/x-msdownload": "exe",
         "application/x-apple-diskimage": "dmg",
         "application/vnd.debian.binary-package": "deb",
         "application/x-rpm": "rpm",
-        
+
         // Fonts
         "font/ttf": "ttf",
         "font/otf": "otf",
         "font/woff": "woff",
         "font/woff2": "woff2",
-        
+
         // Other
         "application/x-bittorrent": "torrent",
         "text/calendar": "ics",
@@ -894,7 +935,7 @@ export async function getExtension(mime) {
  * formatBytes(1024); // "1 KB"
  * formatBytes(1048576); // "1 MB"
  * formatBytes(0); // "0 B"
- * 
+ *
  * @formatRules
  * - Uses binary prefixes (1024 base)
  * - Shows 2 decimal places for fractional values
@@ -915,7 +956,7 @@ export function formatBytes(bytes) {
  * @example
  * const headers = getBrowserHeaders();
  * // Use with fetch: fetch(url, { headers })
- * 
+ *
  * @headerComposition
  * - User-Agent: Latest Chrome on macOS
  * - Accept: Modern media types
@@ -924,12 +965,13 @@ export function formatBytes(bytes) {
  */
 export function getBrowserHeaders() {
     return {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
         "Accept-Language": "en-US,en;q=0.9",
         "Accept-Encoding": "gzip, deflate, br",
         "Cache-Control": "no-cache",
-        "Pragma": "no-cache",
+        Pragma: "no-cache",
         "Sec-Ch-Ua": '"Not_A Brand";v="8", "Chromium";v="120"',
         "Sec-Ch-Ua-Mobile": "?0",
         "Sec-Ch-Ua-Platform": '"macOS"',
@@ -1008,17 +1050,18 @@ export function isText(mime) {
  * @returns {boolean} True if document MIME type
  */
 export function isDocument(mime) {
-    return mime && (
-        mime.includes("pdf") ||
-        mime.includes("document") ||
-        mime.includes("sheet") ||
-        mime.includes("presentation") ||
-        mime.includes("msword") ||
-        mime.includes("excel") ||
-        mime.includes("powerpoint") ||
-        mime.includes("opendocument") ||
-        mime.includes("oasis") ||
-        mime === "application/rtf"
+    return (
+        mime &&
+        (mime.includes("pdf") ||
+            mime.includes("document") ||
+            mime.includes("sheet") ||
+            mime.includes("presentation") ||
+            mime.includes("msword") ||
+            mime.includes("excel") ||
+            mime.includes("powerpoint") ||
+            mime.includes("opendocument") ||
+            mime.includes("oasis") ||
+            mime === "application/rtf")
     );
 }
 
@@ -1029,13 +1072,14 @@ export function isDocument(mime) {
  * @returns {boolean} True if archive MIME type
  */
 export function isArchive(mime) {
-    return mime && (
-        mime.includes("zip") ||
-        mime.includes("rar") ||
-        mime.includes("tar") ||
-        mime.includes("gzip") ||
-        mime.includes("7z") ||
-        mime.includes("bzip2") ||
-        mime.includes("compressed")
+    return (
+        mime &&
+        (mime.includes("zip") ||
+            mime.includes("rar") ||
+            mime.includes("tar") ||
+            mime.includes("gzip") ||
+            mime.includes("7z") ||
+            mime.includes("bzip2") ||
+            mime.includes("compressed"))
     );
 }

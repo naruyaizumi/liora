@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to pin messages in WhatsApp groups with customizable durations.
  * Supports three pin durations: 1 day, 7 days, and 30 days.
- * 
+ *
  * @features
  * - Pin messages by replying to them
  * - Three duration options (1, 7, 30 days)

@@ -16,11 +16,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to promote regular group members to administrators.
  * Supports promoting by mention, reply, phone number, or LID.
- * 
+ *
  * @features
  * - Promote by mentioning user
  * - Promote by replying to user's message

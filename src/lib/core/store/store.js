@@ -1,7 +1,7 @@
 /**
  * @file WhatsApp event binding with in-memory store
  * @module store/bind
- * @description Binds WhatsApp connection events to in-memory store operations 
+ * @description Binds WhatsApp connection events to in-memory store operations
  * for real-time data synchronization and caching.
  * @license Apache-2.0
  * @author Naruya Izumi
@@ -34,13 +34,13 @@ const memoryStore = new MemoryStore();
  * @function bind
  * @param {Object} conn - WhatsApp connection object
  * @returns {void}
- * 
+ *
  * @overview
- * This function attaches event listeners to the WhatsApp connection and 
+ * This function attaches event listeners to the WhatsApp connection and
  * synchronizes all data changes to an in-memory store. It provides methods
  * for retrieving and updating chat data, contacts, messages, and other
  * WhatsApp entities with atomic operations.
- * 
+ *
  * @architecture
  * 1. Attaches store methods to connection object
  * 2. Listens to WhatsApp events (messages, chats, contacts, groups, etc.)

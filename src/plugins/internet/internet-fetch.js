@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to fetch HTTP resources from URLs and analyze their content.
  * Supports various content types including images, videos, audio, JSON, and HTML.
- * 
+ *
  * @features
  * - Fetches HTTP resources with browser-like headers
  * - Detects file types using magic bytes

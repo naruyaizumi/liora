@@ -11,11 +11,11 @@
  * @function handler
  * @param {Object} m - Message object
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to reload all bot plugins and handlers without restarting.
  * Useful for applying changes to plugins during development.
- * 
+ *
  * @features
  * - Reloads all plugin modules
  * - Reloads command handlers

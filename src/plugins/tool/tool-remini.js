@@ -14,11 +14,11 @@
  * @param {string} command - Command name
  * @param {string} usedPrefix - Command prefix used
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to enhance image quality using AI-powered enhancement similar to Remini.
  * Supports JPEG, PNG, and WebP image formats for enhancement.
- * 
+ *
  * @features
  * - Enhances image quality using external API
  * - Supports JPEG, PNG, and WebP formats

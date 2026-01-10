@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Downloads media from TikTok posts including videos and image slideshows.
  * Supports both video posts and multi-image slideshows.
- * 
+ *
  * @features
  * - Downloads TikTok videos and image slideshows
  * - Validates TikTok URL formats (vm., vt., m., www.)

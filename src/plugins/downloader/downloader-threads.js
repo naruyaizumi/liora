@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Downloads media from Threads posts including videos and images.
  * Supports single images, multiple images, and videos.
- * 
+ *
  * @features
  * - Downloads Threads videos and images
  * - Supports image carousels (multiple images)

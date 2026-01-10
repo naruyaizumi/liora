@@ -12,11 +12,11 @@
  * @param {Object} m - Message object
  * @param {Object} conn - Connection object
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to display information about the bot's source code repository,
  * including GitHub links, issue reporting, and pull request information.
- * 
+ *
  * @features
  * - Shows GitHub repository link
  * - Provides issue and pull request links

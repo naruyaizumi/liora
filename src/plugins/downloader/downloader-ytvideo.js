@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Downloads YouTube videos as MP4 files. Supports various YouTube URL formats
  * including regular videos, shorts, and live streams.
- * 
+ *
  * @features
  * - Downloads YouTube videos in MP4 format
  * - Supports multiple YouTube URL formats (youtube.com, youtu.be)

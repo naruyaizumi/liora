@@ -1,7 +1,7 @@
 /**
  * @file Signal handler and database utilities for Liora bot
  * @module core/utils
- * @description Provides signal/process management, database configuration, 
+ * @description Provides signal/process management, database configuration,
  * and validation utilities for graceful shutdown and resource management.
  * @license Apache-2.0
  * @author Naruya Izumi
@@ -23,7 +23,7 @@ export const DEFAULT_DB = path.join(process.cwd(), "src", "database", "auth.db")
  * @param {string} type - Key type/category
  * @param {string|number} id - Unique identifier
  * @returns {string} Formatted key string "type-id"
- * 
+ *
  * @example
  * const sessionKey = makeKey("session", "user123"); // "session-user123"
  * const cacheKey = makeKey("cache", 456); // "cache-456"
@@ -35,7 +35,7 @@ export const makeKey = (type, id) => `${type}-${id}`;
  * @function validateKey
  * @param {string} key - Key to validate
  * @returns {boolean} True if key is valid string with appropriate length
- * 
+ *
  * @constraints
  * - Must be non-empty string
  * - Length must be between 1 and 511 characters
@@ -50,7 +50,7 @@ export function validateKey(key) {
  * @function validateValue
  * @param {*} value - Value to check
  * @returns {boolean} True if value is defined (not undefined)
- * 
+ *
  * @note
  * - Allows null values for explicit "empty" state
  * - Only rejects undefined values which indicate missing data
@@ -85,7 +85,7 @@ let isExiting = false;
  * @private
  * @function exitHandler
  * @param {string} _signal - Signal name (unused parameter)
- * 
+ *
  * @safety
  * - Prevents re-entrance with isExiting flag
  * - Wraps each handler in try-catch to prevent cascade failures
@@ -99,10 +99,10 @@ function exitHandler(_signal) {
         try {
             handler();
         } catch (e) {
-            global.logger.error({ 
-                err: e.message, 
-                handler: id, 
-                context: "exitHandler" 
+            global.logger.error({
+                err: e.message,
+                handler: id,
+                context: "exitHandler",
             });
         }
     }
@@ -113,11 +113,11 @@ function exitHandler(_signal) {
  * @private
  * @function fullExitHandler
  * @param {string} signal - System signal (SIGINT, SIGTERM)
- * 
+ *
  * @exitCodes
  * - 130: SIGINT (Ctrl+C) - User interrupted
  * - 143: SIGTERM - Graceful termination
- * 
+ *
  * @cleanup
  * - Ensures all handlers execute before exit
  * - Adds timeout safety to prevent hanging
@@ -134,14 +134,14 @@ function fullExitHandler(signal) {
  * Initializes system signal handlers for graceful shutdown
  * @function initializeSignalHandlers
  * @returns {void}
- * 
+ *
  * @handlers
  * 1. exit - Clean shutdown
  * 2. SIGINT - Ctrl+C interruption
  * 3. SIGTERM - Termination request
  * 4. uncaughtException - Unhandled errors
  * 5. unhandledRejection - Unhandled promise rejections
- * 
+ *
  * @idempotency
  * - Safe to call multiple times (only initializes once)
  * - Prevents duplicate handler registration
@@ -169,9 +169,9 @@ export function initializeSignalHandlers() {
             });
         });
     } catch (e) {
-        global.logger.error({ 
-            err: e.message, 
-            context: "initializeSignalHandlers" 
+        global.logger.error({
+            err: e.message,
+            context: "initializeSignalHandlers",
         });
     }
 }
@@ -182,21 +182,21 @@ export function initializeSignalHandlers() {
  * @param {string} id - Unique identifier for the handler
  * @param {Function} handler - Cleanup function to execute
  * @returns {boolean} True if handler was registered successfully
- * 
+ *
  * @validation
  * - Requires non-empty string ID
  * - Requires function handler
  * - Logs warning for invalid parameters
- * 
+ *
  * @usage
  * // Register database cleanup
  * registerSignalHandler("db-close", () => db.close());
  */
 export function registerSignalHandler(id, handler) {
     if (typeof handler !== "function") {
-        global.logger.warn({ 
-            id, 
-            context: "registerSignalHandler: invalid handler" 
+        global.logger.warn({
+            id,
+            context: "registerSignalHandler: invalid handler",
         });
         return false;
     }
@@ -209,7 +209,7 @@ export function registerSignalHandler(id, handler) {
  * @function unregisterSignalHandler
  * @param {string} id - Handler identifier to remove
  * @returns {boolean} True if handler was found and removed
- * 
+ *
  * @note
  * - Safe to call for non-existent IDs (returns false)
  * - Useful for dynamic cleanup during runtime

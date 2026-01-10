@@ -112,7 +112,7 @@ const messageQueue = new MessageQueue();
  * @function naruyaizumi
  * @param {Object} connectionOptions - Baileys socket options
  * @returns {Object} Enhanced connection object
- * 
+ *
  * @features
  * - Message queue for batched processing
  * - Automatic JID normalization
@@ -120,7 +120,7 @@ const messageQueue = new MessageQueue();
  * - Group metadata management
  * - Message persistence and caching
  * - Enhanced reply system with ephemeral support
- * 
+ *
  * @performance
  * - Batched message processing (10 messages/batch)
  * - Async group metadata fetching
@@ -361,7 +361,7 @@ export function naruyaizumi(connectionOptions) {
      * Processes and stores incoming messages
      * @method pushMessage
      * @param {Object|Array} m - Message(s) to process
-     * 
+     *
      * @processingPipeline
      * 1. Protocol stub processing
      * 2. Message type detection
@@ -369,7 +369,7 @@ export function naruyaizumi(connectionOptions) {
      * 4. Quoted message caching
      * 5. Sender information updating
      * 6. Message persistence
-     * 
+     *
      * @storage
      * - Messages: 15 per chat (sliding window)
      * - Quoted messages: 20 per chat

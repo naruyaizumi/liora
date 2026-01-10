@@ -13,11 +13,11 @@
  * @param {Object} conn - Connection object
  * @param {string} text - User query/prompt
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to interact with Microsoft Copilot AI for text generation and conversation.
  * Uses the nekolabs API to access Copilot's capabilities.
- * 
+ *
  * @features
  * - Interacts with Microsoft Copilot AI
  * - Supports natural language conversations

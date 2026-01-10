@@ -13,12 +13,12 @@
  * @param {Object} param1 - Destructured parameters
  * @param {Array} param1.args - Directory path arguments
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Dual-purpose command that either lists directory contents or saves files.
  * Without a quoted message: lists files and directories at specified path.
  * With a quoted media/document: saves the file to specified path.
- * 
+ *
  * @features
  * - Lists directory contents with file/folder icons
  * - Saves media and documents to file system

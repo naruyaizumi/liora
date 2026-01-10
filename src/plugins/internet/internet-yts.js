@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to search for videos on YouTube using the nekolabs API.
  * Returns search results with interactive video selection interface.
- * 
+ *
  * @features
  * - Searches YouTube videos using external API
  * - Displays video title, channel, and duration

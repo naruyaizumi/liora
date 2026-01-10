@@ -1,7 +1,7 @@
 /**
  * @file Baileys authentication database with caching and write buffering
  * @module database/auth
- * @description SQLite-based storage system for Baileys session management 
+ * @description SQLite-based storage system for Baileys session management
  * with memory caching, write buffering, and automatic vacuuming.
  * @license Apache-2.0
  * @author Naruya Izumi
@@ -23,7 +23,7 @@ import {
  * Write buffer for batching database operations
  * @class WriteBuffer
  * @private
- * 
+ *
  * @design
  * - Accumulates upserts and deletes in memory
  * - Prevents duplicate operations on same key
@@ -37,7 +37,7 @@ class WriteBuffer {
          * @type {Map<string, *>}
          */
         this.upserts = new Map();
-        
+
         /**
          * Set of keys for delete operations
          * @private
@@ -52,7 +52,7 @@ class WriteBuffer {
      * @param {string} k - Key to upsert
      * @param {*} v - Value to store
      * @returns {boolean} True if operation was successful
-     * 
+     *
      * @sideEffects
      * - Removes key from deletes set if present
      * - Updates upserts map with new value
@@ -69,7 +69,7 @@ class WriteBuffer {
      * @method addDelete
      * @param {string} k - Key to delete
      * @returns {boolean} True if operation was successful
-     * 
+     *
      * @sideEffects
      * - Removes key from upserts if present
      * - Adds key to deletes set
@@ -104,7 +104,7 @@ class WriteBuffer {
      * Converts buffer contents to arrays for transaction processing
      * @method toArrays
      * @returns {Object} Object containing upserts and deletes arrays
-     * 
+     *
      * @property {Array<[string, *]>} upserts - Key-value pairs for insertion/update
      * @property {Array<string>} deletes - Keys for deletion
      */
@@ -120,14 +120,14 @@ class WriteBuffer {
  * Main authentication database class with caching and buffering
  * @class AuthDatabase
  * @exports AuthDatabase
- * 
+ *
  * @features
  * 1. Memory caching with LRU-like access tracking
  * 2. Write buffering with periodic flushing
  * 3. Automatic vacuuming of old records
  * 4. SQLite WAL mode for concurrent access
  * 5. Graceful shutdown handling
- * 
+ *
  * @performance
  * - Cache-first read strategy
  * - Batch write operations
@@ -146,7 +146,7 @@ class AuthDatabase {
      * @param {number} [options.vacuumIntervalMs=3600000] - Vacuum check interval (1 hour)
      * @param {number} [options.vacuumMaxAge=604800] - Max age of records to keep (7 days)
      * @param {number} [options.vacuumBatchSize=500] - Records to vacuum per batch
-     * 
+     *
      * @throws {Error} If database initialization fails
      */
     constructor(dbPath = DEFAULT_DB, options = {}) {
@@ -156,21 +156,21 @@ class AuthDatabase {
          * @type {string}
          */
         this.dbPath = dbPath;
-        
+
         /**
          * Unique instance identifier
          * @private
          * @type {string}
          */
         this.instanceId = `auth-${Date.now()}-${Bun.randomUUIDv7("base64url")}`;
-        
+
         /**
          * Whether instance has been disposed
          * @private
          * @type {boolean}
          */
         this.disposed = false;
-        
+
         /**
          * Whether instance is fully initialized
          * @private
@@ -207,7 +207,7 @@ class AuthDatabase {
      * @method _initDatabase
      * @returns {Database} Bun SQLite database instance
      * @throws {Error} If database creation or configuration fails
-     * 
+     *
      * @optimizations
      * - WAL journal mode for better concurrency
      * - 128MB cache size
@@ -267,7 +267,7 @@ class AuthDatabase {
      * @private
      * @method _prepareStatements
      * @throws {Error} If statement preparation fails
-     * 
+     *
      * @statements
      * - stmtGet: Retrieve single record
      * - stmtSet: Insert/update record
@@ -347,7 +347,7 @@ class AuthDatabase {
      * @private
      * @method _initWriteBuffer
      * @param {Object} options - Configuration options
-     * 
+     *
      * @components
      * - writeBuffer: Accumulates operations
      * - writeMutex: Ensures thread-safe flushing
@@ -366,7 +366,7 @@ class AuthDatabase {
      * @private
      * @method _initVacuum
      * @param {Object} options - Configuration options
-     * 
+     *
      * @purpose
      * - Removes old, unused records
      * - Maintains database performance
@@ -390,7 +390,7 @@ class AuthDatabase {
      * @private
      * @method _scheduleVacuum
      * @returns {void}
-     * 
+     *
      * @safety
      * - Checks disposed state before scheduling
      * - Clears existing timer to prevent duplicates
@@ -422,7 +422,7 @@ class AuthDatabase {
      * @async
      * @method _performVacuum
      * @returns {Promise<void>}
-     * 
+     *
      * @process
      * 1. Calculate cutoff time based on vacuumMaxAge
      * 2. Count total records for logging
@@ -518,7 +518,7 @@ class AuthDatabase {
      * @method get
      * @param {string} key - Key to retrieve
      * @returns {Object|undefined} Object with value property or undefined
-     * 
+     *
      * @strategy
      * 1. Check memory cache
      * 2. Query database if not in cache
@@ -577,7 +577,7 @@ class AuthDatabase {
      * @param {string} key - Key to store
      * @param {*} value - Value to store
      * @returns {boolean} True if operation was successful
-     * 
+     *
      * @flow
      * 1. Validate key and value
      * 2. Update memory cache
@@ -644,7 +644,7 @@ class AuthDatabase {
      * @async
      * @method flush
      * @returns {Promise<void>}
-     * 
+     *
      * @process
      * 1. Acquire write mutex
      * 2. Extract buffered operations
@@ -702,7 +702,7 @@ class AuthDatabase {
      * @private
      * @method _cleanup
      * @returns {void}
-     * 
+     *
      * @cleanupSteps
      * 1. Mark as disposed
      * 2. Clear timers
@@ -762,7 +762,7 @@ let dbInstance = null;
  * @param {string} [dbPath=DEFAULT_DB] - Database file path
  * @param {Object} [options={}] - Configuration options
  * @returns {AuthDatabase} Singleton database instance
- * 
+ *
  * @singletonPattern
  * - Creates instance if none exists
  * - Recreates if existing instance is disposed

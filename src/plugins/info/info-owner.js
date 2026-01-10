@@ -12,11 +12,11 @@
  * @param {Object} m - Message object
  * @param {Object} conn - Connection object
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to display the bot owner's contact information in vCard format.
  * Includes personal details, contact information, and social media links.
- * 
+ *
  * @features
  * - Displays owner contact information as vCard
  * - Includes WhatsApp business profile details

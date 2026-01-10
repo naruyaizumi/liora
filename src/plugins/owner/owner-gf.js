@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to retrieve and send files from the bot's file system as documents.
  * Only accessible by bot owner for security reasons.
- * 
+ *
  * @features
  * - Retrieves files from specified paths
  * - Automatically adds .js extension if not provided

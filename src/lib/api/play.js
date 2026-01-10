@@ -13,24 +13,24 @@
  * @function play
  * @param {string} query - Search query (song title, artist, YouTube URL)
  * @returns {Promise<Object>} Track information and download data
- * 
+ *
  * @returns
- * - Success: { 
- *     success: true, 
- *     title: string, 
- *     channel: string, 
- *     cover: string, 
- *     url: string, 
- *     downloadUrl: string 
+ * - Success: {
+ *     success: true,
+ *     title: string,
+ *     channel: string,
+ *     cover: string,
+ *     url: string,
+ *     downloadUrl: string
  *   }
  * - Failure: { success: false, error: string }
- * 
+ *
  * @features
  * 1. Multi-endpoint fallback for redundancy
  * 2. Metadata extraction (title, artist, thumbnail)
  * 3. YouTube URL resolution for direct links
  * 4. Audio download URL retrieval
- * 
+ *
  * @supportedInputs
  * - Song titles: "Shape of You Ed Sheeran"
  * - Artist + song: "Taylor Swift Blank Space"
@@ -39,7 +39,7 @@
  */
 export async function play(query) {
     const encoded = encodeURIComponent(query);
-    
+
     /**
      * API endpoints for YouTube Music search with priority order
      * @private

@@ -14,11 +14,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to set or update the bot's WhatsApp profile picture.
  * Requires sending or replying to an image message.
- * 
+ *
  * @features
  * - Sets bot's WhatsApp profile picture
  * - Requires image attachment or reply

@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Downloads media from Twitter/X posts including videos and images.
  * Supports single images, image galleries, and video tweets.
- * 
+ *
  * @features
  * - Downloads Twitter/X videos and images
  * - Supports image galleries (multiple images)

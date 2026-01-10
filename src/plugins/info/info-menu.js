@@ -15,11 +15,11 @@
  * @param {string} command - Command name
  * @param {Array} args - Command arguments
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Interactive menu system for the bot that displays commands categorized by functionality.
  * Shows bot information, uptime, system status, and organized command lists.
- * 
+ *
  * @features
  * - Interactive menu with category selection
  * - Shows bot information and uptime

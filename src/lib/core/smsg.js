@@ -22,7 +22,7 @@ const SYM_PROCESSED = Symbol.for("smsg.processed");
  * @param {Object} conn - Connection object with utilities
  * @param {Object} m - Raw message object to serialize
  * @returns {Object} Enhanced message object
- * 
+ *
  * @processingSteps
  * 1. Skip already processed messages
  * 2. Convert to WebMessageInfo if needed
@@ -30,13 +30,13 @@ const SYM_PROCESSED = Symbol.for("smsg.processed");
  * 4. Handle protocol messages (deletions)
  * 5. Normalize message keys
  * 6. Mark as processed
- * 
+ *
  * @protocolMessageHandling
  * - Fixes status broadcast JIDs
  * - Resolves ambiguous participant fields
  * - Determines fromMe status accurately
  * - Emits delete events for protocol messages
- * 
+ *
  * @example
  * const rawMsg = { key: { remoteJid: '123@s.whatsapp.net', ... } };
  * const serialized = smsg(connection, rawMsg);

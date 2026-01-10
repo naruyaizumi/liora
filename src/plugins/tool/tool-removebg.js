@@ -14,11 +14,11 @@
  * @param {string} command - Command name
  * @param {string} usedPrefix - Command prefix used
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to remove background from images using AI-powered background removal service.
  * Supports JPEG, PNG, and WebP image formats.
- * 
+ *
  * @features
  * - Removes image backgrounds using external API
  * - Supports JPEG, PNG, and WebP formats

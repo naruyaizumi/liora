@@ -12,11 +12,11 @@
  * @param {Object} m - Message object
  * @param {Object} conn - Connection object
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to delete messages in a WhatsApp group. Can only delete messages sent by other users.
  * The bot must be an admin and have the necessary permissions to delete messages.
- * 
+ *
  * @features
  * - Delete messages by replying to them
  * - Cannot delete bot's own messages

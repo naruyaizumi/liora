@@ -14,11 +14,11 @@
  * @param {Object} param1.conn - Connection object
  * @param {boolean} param1.isOwner - Whether user is bot owner
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to execute shell commands in the bot's environment with safety features.
  * Includes command blocking for dangerous operations and flexible flag options.
- * 
+ *
  * @features
  * - Executes shell commands via bash
  * - Blocks dangerous commands (rm, mkfs, etc.)

@@ -14,7 +14,7 @@ import { $ } from "bun";
  * @function formatSize
  * @param {number} bytes - Size in bytes
  * @returns {string} Formatted size (e.g., "1.23 MB")
- * 
+ *
  * @units
  * - B: Bytes
  * - KB: Kilobytes (1024 bytes)
@@ -63,7 +63,7 @@ export function formatTime(seconds) {
  * @param {number} total - Total amount
  * @param {number} [length=10] - Bar length in characters
  * @returns {string} Progress bar string
- * 
+ *
  * @indicators
  * - ✓: Normal (<80%)
  * - ⚠: Warning (80-90%)
@@ -107,7 +107,7 @@ async function safeExec(command, fallback = "") {
  * @async
  * @function getOSInfo
  * @returns {Promise<Object>} Operating system details
- * 
+ *
  * @properties
  * - name: Full OS name (e.g., "Ubuntu 22.04.3 LTS")
  * - distribution: Distribution name (e.g., "ubuntu")
@@ -177,7 +177,7 @@ export async function getOSInfo() {
  * @async
  * @function getSystemInfo
  * @returns {Promise<Object>} System hardware and shell details
- * 
+ *
  * @properties
  * - shell: Shell name and version (e.g., "bash 5.1.16")
  * - host: System hardware information
@@ -232,7 +232,7 @@ export async function getSystemInfo() {
  * @async
  * @function getCPUFeatures
  * @returns {Promise<Object>} CPU features and virtualization status
- * 
+ *
  * @properties
  * - aesni: AES-NI instruction support
  * - virtualization: Hypervisor type (if virtualized)
@@ -343,7 +343,7 @@ export async function getNetworkFeatures() {
  * @async
  * @function getIPInfo
  * @returns {Promise<Object>} IP and location information
- * 
+ *
  * @source
  * - Uses ipapi.co for geolocation
  * - Falls back gracefully on timeout/error
@@ -422,7 +422,7 @@ export async function getSoftwareInfo() {
  * @async
  * @function getCPUInfo
  * @returns {Promise<Object>} CPU details and performance metrics
- * 
+ *
  * @metrics
  * - Load averages (1, 5, 15 minutes)
  * - CPU usage percentage
@@ -524,7 +524,7 @@ export async function getCPUInfo() {
  * @async
  * @function getMemoryInfo
  * @returns {Promise<Object>} Memory statistics
- * 
+ *
  * @source
  * - Parses /proc/meminfo for detailed memory breakdown
  * - Includes swap, buffers, cache, and kernel memory
@@ -602,7 +602,7 @@ export async function getMemoryInfo() {
  * @async
  * @function getDiskInfo
  * @returns {Promise<Object>} Disk information
- * 
+ *
  * @data
  * - Filesystem-level usage from df
  * - I/O statistics from /proc/diskstats
@@ -783,7 +783,7 @@ export async function getProcessInfo() {
  * @async
  * @function getContainerInfo
  * @returns {Promise<Object>} Container information
- * 
+ *
  * @detection
  * - Docker: /proc/1/cgroup contains "docker"
  * - LXC: /proc/1/environ contains "container=lxc"
@@ -902,7 +902,7 @@ export async function getSystemLoad() {
  * @param {Object} disk - Disk information object
  * @param {Object} processes - Process information object
  * @returns {Array<string>} Array of warning messages
- * 
+ *
  * @thresholds
  * - CPU: >70% warning, >90% critical
  * - Memory: >85% warning, >95% critical
@@ -956,7 +956,7 @@ export function getHeapInfo() {
  * @async
  * @function getServiceInfo
  * @returns {Promise<Object>} Service status information
- * 
+ *
  * @detection
  * - systemd: systemctl status
  * - pm2: PM2 process list

@@ -16,12 +16,12 @@
  * @param {string} param1.command - Command name
  * @param {Object} param1.conn - Connection object
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to toggle group-only mode for the bot.
  * When enabled, bot only responds to commands in group chats.
  * When disabled, bot responds in both private and group chats.
- * 
+ *
  * @features
  * - Toggle group-only mode on/off
  * - Show current mode status

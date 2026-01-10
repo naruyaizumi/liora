@@ -16,12 +16,12 @@
  * @param {string} param1.command - Command name
  * @param {Object} param1.conn - Connection object
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to toggle self mode for the bot.
  * When enabled, bot only responds to commands from the owner.
  * When disabled, bot responds to commands from all users.
- * 
+ *
  * @features
  * - Toggle self mode on/off
  * - Show current mode status

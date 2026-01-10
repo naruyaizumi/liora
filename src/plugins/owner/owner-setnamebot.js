@@ -15,11 +15,11 @@
  * @param {string} command - Command name
  * @param {string} usedPrefix - Command prefix used
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to set or update the bot's WhatsApp display name.
  * Changes the name that appears in contacts and chats.
- * 
+ *
  * @features
  * - Sets bot's WhatsApp display name
  * - Requires text argument for new name

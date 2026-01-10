@@ -12,11 +12,11 @@
  * @param {Object} m - Message object
  * @param {Object} conn - Connection object
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to measure and display the bot's response latency in milliseconds.
  * Calculates the time taken to send and edit a message, showing network and processing speed.
- * 
+ *
  * @features
  * - Measures response latency in nanoseconds and milliseconds
  * - Uses Bun.nanoseconds() for high-precision timing

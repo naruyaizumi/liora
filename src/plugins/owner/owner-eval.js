@@ -15,11 +15,11 @@
  * @param {string} param1.noPrefix - Message text without prefix
  * @param {boolean} param1.isOwner - Whether user is bot owner
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to evaluate JavaScript code in the bot's runtime environment.
  * Supports both expression evaluation (=>) and statement execution.
- * 
+ *
  * @features
  * - Evaluates JavaScript code in bot context
  * - Supports expression evaluation with "=>" prefix

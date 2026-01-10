@@ -12,11 +12,11 @@
  * @param {Object} m - Message object
  * @param {Object} conn - Connection object
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to debug and analyze quoted messages, extracting media information
  * and attempting to redownload and send media with detailed metadata.
- * 
+ *
  * @features
  * - Extracts and analyzes quoted message structure
  * - Recursively searches for media nodes in complex objects

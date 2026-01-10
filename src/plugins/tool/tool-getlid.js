@@ -13,11 +13,11 @@
  * @param {Object} conn - Connection object
  * @param {string} text - Phone number or user identifier
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to retrieve WhatsApp LID (Local ID) from phone numbers, mentions, or replies.
  * LID is WhatsApp's internal user identifier used in the Signal protocol.
- * 
+ *
  * @features
  * - Resolves LID from phone numbers
  * - Works with mentioned users

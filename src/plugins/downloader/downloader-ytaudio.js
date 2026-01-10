@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Converts YouTube videos to MP3 audio files. Supports various YouTube URL formats
  * including regular videos, shorts, and live streams.
- * 
+ *
  * @features
  * - Converts YouTube videos to MP3 audio
  * - Supports multiple YouTube URL formats (youtube.com, youtu.be, music.youtube.com)

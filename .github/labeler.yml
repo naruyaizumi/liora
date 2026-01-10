@@ -5,54 +5,54 @@
 # ============================================
 
 whatsapp:
-  changed-files:
-    - any-glob-to-any-file:
-        - "src/*"
-        - "src/lib/core/*"
+    changed-files:
+        - any-glob-to-any-file:
+              - "src/*"
+              - "src/lib/core/*"
 
 api:
-  changed-files:
-    - any-glob-to-any-file: "src/lib/api/**/*"
+    changed-files:
+        - any-glob-to-any-file: "src/lib/api/**/*"
 
 documentation:
-  changed-files:
-    - any-glob-to-any-file:
-        - "**/*.md"
-        - "README.md"
+    changed-files:
+        - any-glob-to-any-file:
+              - "**/*.md"
+              - "README.md"
 
 config:
-  changed-files:
-    - any-glob-to-any-file:
-        - "*.json"
-        - "*.yml"
-        - "*.yaml"
-        - ".github/**/*"
+    changed-files:
+        - any-glob-to-any-file:
+              - "*.json"
+              - "*.yml"
+              - "*.yaml"
+              - ".github/**/*"
 
 database:
-  changed-files:
-    - any-glob-to-any-file: "src/lib/core/auth/*"
+    changed-files:
+        - any-glob-to-any-file: "src/lib/core/auth/*"
 
 ci-cd:
-  changed-files:
-    - any-glob-to-any-file: ".github/workflows/**/*"
+    changed-files:
+        - any-glob-to-any-file: ".github/workflows/**/*"
 
 dependencies:
-  changed-files:
-    - any-glob-to-any-file:
-        - "package.json"
-        - "bun.lockb"
+    changed-files:
+        - any-glob-to-any-file:
+              - "package.json"
+              - "bun.lockb"
 
 security:
-  changed-files:
-    - any-glob-to-any-file:
-        - ".github/workflows/security/**/*"
-        - ".github/workflows/scan/**/*"
+    changed-files:
+        - any-glob-to-any-file:
+              - ".github/workflows/security/**/*"
+              - ".github/workflows/scan/**/*"
 
 # ============================================
 # USAGE NOTES:
 # ============================================
 # This file should be placed in: .github/labeler.yml
-# 
+#
 # Labels are automatically applied to PRs based on file changes:
 # - whatsapp: Core bot functionality changes
 # - api: External API integrations

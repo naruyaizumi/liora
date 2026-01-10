@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Searches for and downloads Spotify tracks by song title or artist.
  * Returns audio with rich metadata including title, artist, and album art.
- * 
+ *
  * @features
  * - Searches Spotify by song title or artist
  * - Downloads audio with metadata preservation

@@ -16,7 +16,7 @@ import { Database } from "bun:sqlite";
  * @function encodeMeta
  * @param {*} value - Value to encode
  * @returns {Uint8Array|null} Encoded bytes or null
- * 
+ *
  * @encoding
  * - Strings: UTF-8 encoding
  * - Numbers: 64-bit float (little-endian)
@@ -55,7 +55,7 @@ const encodeMeta = (value) => {
  * @function decodeMeta
  * @param {Uint8Array|ArrayBuffer} bytes - Binary data to decode
  * @returns {*|null} Decoded value or null
- * 
+ *
  * @decoding
  * - Attempts UTF-8 text decoding first
  * - Auto-detects numbers, booleans from text
@@ -94,7 +94,7 @@ const decodeMeta = (bytes) => {
  * @param {string} url - URL to sanitize
  * @param {string} fallback - Fallback URL if validation fails
  * @returns {string} Sanitized URL or fallback
- * 
+ *
  * @security
  * - Requires HTTPS protocol
  * - Validates URL format
@@ -150,7 +150,7 @@ const parseBoolean = (value, defaultValue) => {
  * @private
  * @function initializeLogger
  * @returns {Object} Logger instance with methods for all log levels
- * 
+ *
  * @features
  * - Environment-controlled log levels (LOG_LEVEL)
  * - Pretty printing vs JSON output (LOG_PRETTY)
@@ -421,7 +421,7 @@ const logger = initializeLogger();
  * @private
  * @function initializeConfig
  * @returns {Object} Configuration object
- * 
+ *
  * @configurationSources
  * 1. Environment variables (primary)
  * 2. Default values (fallback)

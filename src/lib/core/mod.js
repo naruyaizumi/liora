@@ -38,7 +38,7 @@ export class mods {
      * @param {Object} content - Message content
      * @param {Object} options - Send options
      * @returns {Promise<Object>} Message send result
-     * 
+     *
      * @contentDetection
      * - album: Multi-image/video albums
      * - cards: Carousel card interfaces
@@ -69,7 +69,7 @@ export class mods {
      * @param {Object} content - Album content
      * @param {Object} options - Send options
      * @returns {Promise<{album: Object, mediaMessages: Array}>} Album and media messages
-     * 
+     *
      * @albumSpecification
      * - content.album: Array of {image|video, caption?, mimetype?}
      * - Supports up to 30 items (WhatsApp limit)
@@ -203,7 +203,7 @@ export class mods {
      * @param {Object} content - Card content
      * @param {Object} options - Send options
      * @returns {Promise<Object>} Message send result
-     * 
+     *
      * @cardSpecification
      * - content.cards: Array of card objects
      * - Each card: {image|video, title?, body?, footer?, buttons?}
@@ -326,7 +326,7 @@ export class mods {
      * @param {Object} content - Button content
      * @param {Object} options - Send options
      * @returns {Promise<Object>} Message send result
-     * 
+     *
      * @mediaSupport
      * - Image: Header images with captions
      * - Video: Header videos with captions
@@ -334,7 +334,7 @@ export class mods {
      * - Location: Map locations
      * - Product: Product catalogs
      * - Text-only: Simple headers
-     * 
+     *
      * @buttonTypes
      * - Quick reply buttons
      * - URL buttons

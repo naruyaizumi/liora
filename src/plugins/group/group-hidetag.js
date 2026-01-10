@@ -15,11 +15,11 @@
  * @param {Array} param1.participants - Group participants list
  * @param {Object} param1.conn - Connection object
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to send messages or media to all group members without triggering notifications.
  * Can send text messages, images, videos, audio, or documents.
- * 
+ *
  * @features
  * - Send text messages without notifications
  * - Send media files without notifications

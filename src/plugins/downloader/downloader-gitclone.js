@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to download GitHub repositories as ZIP files using GitHub's API.
  * Supports standard GitHub repository URLs and sends the ZIP archive to chat.
- * 
+ *
  * @features
  * - Downloads GitHub repositories as ZIP archives
  * - Validates GitHub URL format

@@ -12,11 +12,11 @@
  * @param {Object} m - Message object
  * @param {Object} conn - Connection object
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to display statistical information about the bot's plugins and features.
  * Shows counts of total features, categories, and plugins loaded in the system.
- * 
+ *
  * @features
  * - Shows total number of features/commands
  * - Displays total number of categories/tags

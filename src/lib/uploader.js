@@ -17,7 +17,7 @@ import { fileType, getBrowserHeaders } from "./file-type.js";
  * @param {Uint8Array|Buffer} buffer - File buffer to upload
  * @returns {Promise<string>} Direct download URL
  * @throws {Error} On upload failure or invalid response
- * 
+ *
  * @serviceDetails
  * - Max file size: 200MB
  * - Retention: Indefinite (user-managed)
@@ -63,7 +63,7 @@ async function uploader1(buffer) {
  * @param {Uint8Array|Buffer} buffer - File buffer to upload
  * @returns {Promise<string>} Direct download URL
  * @throws {Error} On upload failure or invalid response
- * 
+ *
  * @serviceDetails
  * - Max file size: 100MB
  * - Retention: 1 month (automatic cleanup)
@@ -107,7 +107,7 @@ async function uploader2(buffer) {
  * @param {Uint8Array|Buffer} buffer - File buffer to upload
  * @returns {Promise<string>} Direct download URL
  * @throws {Error} On upload failure or invalid response
- * 
+ *
  * @serviceDetails
  * - Max file size: 50MB
  * - Retention: 30 days
@@ -151,7 +151,7 @@ async function uploader3(buffer) {
  * @param {Uint8Array|Buffer} buffer - File buffer to upload
  * @returns {Promise<string>} Direct download URL
  * @throws {Error} On upload failure or invalid response
- * 
+ *
  * @serviceDetails
  * - Max file size: 250MB
  * - Retention: Permanent
@@ -196,7 +196,7 @@ async function uploader4(buffer) {
  * @param {Uint8Array|Buffer} buffer - File buffer to upload
  * @returns {Promise<string>} Direct download URL
  * @throws {Error} On upload failure or invalid response
- * 
+ *
  * @serviceDetails
  * - Max file size: 100MB
  * - Retention: 5 days (temporary)
@@ -241,7 +241,7 @@ async function uploader5(buffer) {
  * @param {Uint8Array|Buffer} buffer - Video buffer to upload
  * @returns {Promise<string>} Direct download URL
  * @throws {Error} On upload failure or invalid response
- * 
+ *
  * @serviceDetails
  * - Supported formats: MP4, MOV, AVI, MKV, WebM
  * - Max file size: 500MB
@@ -294,7 +294,7 @@ async function uploader6(buffer) {
  * @param {Uint8Array|Buffer} buffer - Image buffer to upload
  * @returns {Promise<string>} Direct download URL
  * @throws {Error} On upload failure or invalid response
- * 
+ *
  * @serviceDetails
  * - Supported formats: JPG, PNG, GIF, WebP, HEIC, BMP
  * - Max file size: 50MB
@@ -346,7 +346,7 @@ async function uploader7(buffer) {
  * @function uploader
  * @param {Uint8Array|Buffer} buffer - File buffer to upload
  * @returns {Promise<Object>} Upload result with metadata
- * 
+ *
  * @resultFormat
  * {
  *   success: boolean,
@@ -359,7 +359,7 @@ async function uploader7(buffer) {
  *     error?: string
  *   }>
  * }
- * 
+ *
  * @fallbackStrategy
  * 1. Catbox.moe (most reliable)
  * 2. Uguu.se (good alternative)

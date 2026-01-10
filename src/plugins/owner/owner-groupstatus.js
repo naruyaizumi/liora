@@ -14,17 +14,17 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * This command allows bot owners to send group status updates that appear
  * as group announcements. Supports text, images, videos, and audio.
- * 
+ *
  * @features
  * - Supports text, image, video, and audio status updates
  * - Can reply to media or provide text directly
  * - Uses WhatsApp's group status message protocol
  * - Includes encryption for message security
- * 
+ *
  * @supportedMedia
  * - Images (JPEG, PNG, WebP)
  * - Videos (MP4, MOV, etc.)

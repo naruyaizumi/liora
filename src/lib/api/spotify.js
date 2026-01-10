@@ -13,31 +13,31 @@
  * @function spotify
  * @param {string} query - Search query (track title, artist, Spotify URL)
  * @returns {Promise<Object>} Track information and download data
- * 
+ *
  * @returns
- * - Success: { 
- *     success: true, 
- *     title: string, 
- *     channel: string, 
- *     cover: string, 
- *     url: string, 
- *     duration: number, 
- *     downloadUrl: string 
+ * - Success: {
+ *     success: true,
+ *     title: string,
+ *     channel: string,
+ *     cover: string,
+ *     url: string,
+ *     duration: number,
+ *     downloadUrl: string
  *   }
  * - Failure: { success: false, error: string }
- * 
+ *
  * @features
  * 1. Multi-endpoint fallback for redundancy
  * 2. Metadata extraction (title, artist, album art, duration)
  * 3. Spotify URL resolution for direct links
  * 4. Audio download URL retrieval (typically YouTube-sourced)
- * 
+ *
  * @supportedInputs
  * - Track titles: "Blinding Lights The Weeknd"
  * - Artist + track: "Drake Hotline Bling"
  * - Spotify URLs: "https://open.spotify.com/track/..."
  * - Spotify URIs: "spotify:track:4cOdK2wGLETKBW3PvgPWqT"
- * 
+ *
  * @limitations
  * - Spotify tracks are typically downloaded from YouTube equivalents
  * - Audio quality depends on YouTube source availability
@@ -45,7 +45,7 @@
  */
 export async function spotify(query) {
     const encoded = encodeURIComponent(query);
-    
+
     /**
      * API endpoints for Spotify track search with priority order
      * @private

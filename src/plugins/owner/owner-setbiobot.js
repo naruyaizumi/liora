@@ -15,11 +15,11 @@
  * @param {string} command - Command name
  * @param {string} usedPrefix - Command prefix used
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to set or update the bot's WhatsApp status/bio.
  * Changes the text that appears in the bot's profile status.
- * 
+ *
  * @features
  * - Sets bot's WhatsApp status/bio
  * - Requires text argument for new bio

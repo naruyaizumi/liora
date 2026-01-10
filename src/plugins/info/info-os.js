@@ -12,11 +12,11 @@
  * @param {Object} m - Message object
  * @param {Object} conn - Connection object
  * @returns {Promise<void>}
- * 
+ *
  * @description
- * Command to display detailed system information including OS details, CPU, memory, 
+ * Command to display detailed system information including OS details, CPU, memory,
  * disk usage, network statistics, process information, and system health warnings.
- * 
+ *
  * @features
  * - Comprehensive system monitoring dashboard
  * - Real-time performance metrics

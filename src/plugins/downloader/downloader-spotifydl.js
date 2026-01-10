@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Downloads audio directly from Spotify track URLs without search.
  * Converts Spotify links to downloadable audio files.
- * 
+ *
  * @features
  * - Direct Spotify URL processing
  * - Validates URL format before processing

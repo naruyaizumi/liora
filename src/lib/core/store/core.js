@@ -28,7 +28,7 @@ const EVENT_PRIORITY = {
  * Time-to-live (TTL) strategies for different data types (in seconds)
  * @constant {Object}
  * @private
- * 
+ *
  * @strategy
  * - Short TTL: Presence, typing indicators
  * - Medium TTL: Messages, chats, calls
@@ -36,16 +36,16 @@ const EVENT_PRIORITY = {
  * - No TTL: Configuration data (0 = never expire)
  */
 const TTL_STRATEGY = {
-    message: 604800,     // 7 days
-    chat: 604800,        // 7 days
-    contact: 2592000,    // 30 days
-    group: 604800,       // 7 days
-    presence: 300,       // 5 minutes
-    typing: 60,          // 1 minute
-    receipt: 86400,      // 1 day
-    call: 259200,        // 3 days
-    blocklist: 2592000,  // 30 days
-    processed: 900,      // 15 minutes
+    message: 604800, // 7 days
+    chat: 604800, // 7 days
+    contact: 2592000, // 30 days
+    group: 604800, // 7 days
+    presence: 300, // 5 minutes
+    typing: 60, // 1 minute
+    receipt: 86400, // 1 day
+    call: 259200, // 3 days
+    blocklist: 2592000, // 30 days
+    processed: 900, // 15 minutes
 };
 
 /**
@@ -61,7 +61,7 @@ const CLEANUP_INTERVAL = 3600000; // 1 hour
  * In-memory key-value store with event processing capabilities
  * @class MemoryStore
  * @exports MemoryStore
- * 
+ *
  * @features
  * 1. SQLite in-memory backend for persistence
  * 2. Priority-based event queue with flow control
@@ -69,7 +69,7 @@ const CLEANUP_INTERVAL = 3600000; // 1 hour
  * 4. LRU/LFU eviction for memory management
  * 5. Batch operations for performance
  * 6. Health monitoring and metrics
- * 
+ *
  * @architecture
  * - Uses SQLite WITHOUT ROWID tables for optimal key-value storage
  * - Implements priority queue with configurable size limits
@@ -81,7 +81,7 @@ export class MemoryStore {
      * Creates a new MemoryStore instance
      * @constructor
      * @returns {MemoryStore}
-     * 
+     *
      * @initialization
      * 1. Creates in-memory SQLite database
      * 2. Sets up table schema and indexes
@@ -136,7 +136,7 @@ export class MemoryStore {
      * @private
      * @method _initDatabase
      * @returns {void}
-     * 
+     *
      * @optimizations
      * - MEMORY journal mode for speed
      * - EXCLUSIVE locking for single-writer
@@ -174,7 +174,7 @@ export class MemoryStore {
      * @private
      * @method _prepareStatements
      * @returns {void}
-     * 
+     *
      * @statements
      * - stmtGet: Retrieve single value
      * - stmtSet: Insert/update value
@@ -224,7 +224,7 @@ export class MemoryStore {
      * @private
      * @method _startEventProcessor
      * @returns {void}
-     * 
+     *
      * @algorithm
      * 1. Check if processor is idle and queue has items
      * 2. Process up to MAX_INFLIGHT_OPS events concurrently
@@ -292,7 +292,7 @@ export class MemoryStore {
      * @private
      * @method _startAutoCleanup
      * @returns {void}
-     * 
+     *
      * @tasks
      * 1. Remove expired entries (TTL-based)
      * 2. Evict least frequently used items (LFU)
@@ -336,7 +336,7 @@ export class MemoryStore {
      * @param {*} data - Event payload
      * @param {number} [priority=EVENT_PRIORITY.CORE] - Event priority
      * @returns {void}
-     * 
+     *
      * @queueBehavior
      * - If queue full and priority is NOISE: drop event
      * - If queue full and priority higher: drop oldest event
@@ -372,7 +372,7 @@ export class MemoryStore {
      * @param {*} value - Value to store (any MessagePack-serializable type)
      * @param {string} [type="chat"] - Data type for TTL selection
      * @returns {void}
-     * 
+     *
      * @serialization
      * - Uses MessagePack for efficient binary serialization
      * - Includes metadata: type, expiration timestamp, access frequency
@@ -415,7 +415,7 @@ export class MemoryStore {
      * @method get
      * @param {string} key - Storage key
      * @returns {*|null} Deserialized value or null if not found/expired
-     * 
+     *
      * @optimization
      * - Increments access frequency asynchronously (LFU tracking)
      * - Uses prepared statement for performance
@@ -475,7 +475,7 @@ export class MemoryStore {
      * @method keys
      * @param {string} pattern - Pattern with * wildcards
      * @returns {Array<string>} Array of matching keys
-     * 
+     *
      * @pattern
      * - Converts * to SQL LIKE % wildcard
      * - Example: "prefix:*" matches all keys starting with "prefix:"
@@ -495,7 +495,7 @@ export class MemoryStore {
      * @method mget
      * @param {Array<string>} keys - Array of keys to retrieve
      * @returns {Array<*>} Array of values in same order as input keys
-     * 
+     *
      * @performance
      * - Single SQL query for all keys
      * - Preserves null for missing/expired keys
@@ -525,7 +525,7 @@ export class MemoryStore {
      * @param {Array<[string, *]>} items - Array of [key, value] pairs
      * @param {string} [type="chat"] - Data type for TTL
      * @returns {void}
-     * 
+     *
      * @transaction
      * - Uses SQLite transaction for atomicity
      * - Applies same TTL to all items
@@ -555,7 +555,7 @@ export class MemoryStore {
      * @method bulkGet
      * @param {Array<string>} keys - Array of keys to retrieve
      * @returns {Map<string, *>} Map of key-value pairs
-     * 
+     *
      * @optimization
      * - Uses JSON array for IN clause (better for large key sets)
      * - Returns only existing key-value pairs
@@ -635,7 +635,7 @@ export class MemoryStore {
      * Retrieves detailed store statistics
      * @method getStats
      * @returns {Object} Store statistics object
-     * 
+     *
      * @metrics
      * - Health status
      * - Entry counts by type
@@ -682,7 +682,7 @@ export class MemoryStore {
      * Gracefully disconnects and cleans up resources
      * @method disconnect
      * @returns {void}
-     * 
+     *
      * @cleanup
      * - Finalizes all prepared statements
      * - Closes database connection

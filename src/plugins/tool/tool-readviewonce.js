@@ -12,11 +12,11 @@
  * @param {Object} m - Message object
  * @param {Object} conn - Connection object
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to extract and display view-once (disappearing) media from WhatsApp messages.
  * Supports images, videos, and audio sent with view-once feature enabled.
- * 
+ *
  * @features
  * - Extracts view-once images, videos, and audio
  * - Preserves media captions and mentions

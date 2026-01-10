@@ -13,17 +13,17 @@
  * @function instagram
  * @param {string} url - Instagram post URL to download
  * @returns {Promise<Object>} Download result object
- * 
+ *
  * @returns
  * - Success: { success: true, type: 'video'|'images', urls: Array<string> }
  * - Failure: { success: false, error: string }
- * 
+ *
  * @strategy
  * 1. Try multiple API endpoints sequentially
  * 2. Parse various response formats from different services
  * 3. Detect content type (video/images) and extract URLs
  * 4. Return deduplicated URLs for multi-image posts
- * 
+ *
  * @supportedFormats
  * - Single videos
  * - Image carousels (multiple images)
@@ -32,7 +32,7 @@
  */
 export async function instagram(url) {
     const encoded = encodeURIComponent(url);
-    
+
     /**
      * List of backup API endpoints with priority order
      * @private
@@ -173,8 +173,8 @@ export async function instagram(url) {
      * All endpoints failed to return usable data
      * @return {Object} Failure response
      */
-    return { 
-        success: false, 
-        error: "No downloadable media found. The post may be private, removed, or in an unsupported format." 
+    return {
+        success: false,
+        error: "No downloadable media found. The post may be private, removed, or in an unsupported format.",
     };
 }

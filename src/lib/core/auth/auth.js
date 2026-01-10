@@ -41,14 +41,14 @@ function delay(ms) {
  * @param {string} _dbPath - Database file path (unused, uses global db)
  * @param {Object} options - Transaction options
  * @returns {Object} Authentication state manager
- * 
+ *
  * @features
  * - Transaction support with automatic retries
  * - Connection pooling and mutex locking
  * - Async context preservation
  * - Automatic credential persistence
  * - Cache coherency with write-through
- * 
+ *
  * @transactionMechanism
  * - Uses AsyncLocalStorage for transaction context
  * - Mutex locks per key type for consistency
@@ -334,7 +334,7 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
      * @param {Function} work - Async function to execute
      * @param {string} key - Transaction isolation key
      * @returns {Promise<*>} Work result
-     * 
+     *
      * @transactionBehavior
      * - Automatic commit on success
      * - Automatic rollback on error

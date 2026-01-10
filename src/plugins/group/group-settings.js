@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to toggle group announcement settings between open and closed modes.
  * Open mode allows all members to send messages, closed mode restricts to admins only.
- * 
+ *
  * @features
  * - Toggle group between open and closed modes
  * - Simple one-word commands (open/close)

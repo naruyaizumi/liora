@@ -12,11 +12,11 @@
  * @param {Object} m - Message object
  * @param {Object} conn - Connection object
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to revoke the current group invitation link and generate a new one.
  * This invalidates all previously shared links and creates a fresh invitation link.
- * 
+ *
  * @features
  * - Revokes current group invitation link
  * - Generates new invitation link automatically

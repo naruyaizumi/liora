@@ -16,11 +16,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to remove (kick) members from a WhatsApp group.
  * Supports removing by mention, reply, phone number, or LID.
- * 
+ *
  * @features
  * - Remove by mentioning user
  * - Remove by replying to user's message

@@ -16,11 +16,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to demote group administrators back to regular members.
  * Supports demoting by mention, reply, phone number, or LID.
- * 
+ *
  * @features
  * - Demote by mentioning user
  * - Demote by replying to user's message

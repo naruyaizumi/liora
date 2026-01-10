@@ -15,11 +15,11 @@
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
- * 
+ *
  * @description
  * Command to interact with Felo AI for text generation with source citations.
  * Returns AI responses along with sources used for information verification.
- * 
+ *
  * @features
  * - Interacts with Felo AI
  * - Includes source citations for information

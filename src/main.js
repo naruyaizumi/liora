@@ -52,7 +52,7 @@ let isDown = false;
  * @function makeDirs
  * @returns {Promise<void>}
  * @throws {Error} If directory creation fails
- * 
+ *
  * @directories
  * - src/database/: SQLite database files
  */
@@ -79,7 +79,7 @@ await makeDirs();
  * Creates a configurable logger instance for Baileys
  * @function logger
  * @returns {Object} Logger object with level-based methods
- * 
+ *
  * @levels
  * - fatal: Critical errors (60)
  * - error: Runtime errors (50)
@@ -88,7 +88,7 @@ await makeDirs();
  * - debug: Debug information (20)
  * - trace: Detailed tracing (10)
  * - silent: No logging (controlled by env var)
- * 
+ *
  * @format
  * - Timestamp: [HH:MM]
  * - Level: UPPERCASE
@@ -190,7 +190,7 @@ const logger = () => {
  * @function pair
  * @param {Object} conn - Baileys connection instance
  * @returns {Promise<void>}
- * 
+ *
  * @flow
  * 1. Wait for connection readiness (3 second timeout)
  * 2. Request pairing code from WhatsApp
@@ -224,7 +224,7 @@ async function pair(conn) {
  * @async
  * @function LIORA
  * @returns {Promise<void>}
- * 
+ *
  * @initializationSteps
  * 1. Initialize SQLite authentication state
  * 2. Fetch latest Baileys version
@@ -239,10 +239,10 @@ async function LIORA() {
     // Initialize authentication
     auth = useSQLiteAuthState();
     const { state, saveCreds } = auth;
-    
+
     // Fetch latest Baileys version for compatibility
     const { version: v } = await fetchLatestBaileysVersion();
-    
+
     /**
      * Baileys connection configuration
      * @type {Object}
@@ -337,7 +337,7 @@ async function LIORA() {
  * @function shutdown
  * @param {string} sig - Signal that triggered shutdown
  * @returns {Promise<void>}
- * 
+ *
  * @cleanupSequence
  * 1. Prevent re-entrance with isDown flag
  * 2. Cleanup reconnection timers
