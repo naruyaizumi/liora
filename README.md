@@ -56,20 +56,37 @@ Liora is an enterprise-ready WhatsApp bot framework designed for developers who 
 
 ---
 
+## 📸 Screenshots
+
 ### Interactive Menus
 
-<img src="https://files.catbox.moe/dqx3qt.jpg" width="400" alt="Main Menu">
+<p align="center">
+  <img src="https://files.catbox.moe/dqx3qt.jpg" width="400" alt="Main Menu"><br>
+  <em>Main menu interface with options</em>
+</p>
 
-<img src="https://files.catbox.moe/t3aeaj.jpg" width="400" alt="Category Menu">
+<p align="center">
+  <img src="https://files.catbox.moe/t3aeaj.jpg" width="400" alt="Category Menu"><br>
+  <em>Category menu for easier navigation</em>
+</p>
 
 
 ### Rich Media Support
 
-<img src="https://files.catbox.moe/bqgvwe.jpg" width="270" alt="Buttons">
+<p align="center">
+  <img src="https://files.catbox.moe/bqgvwe.jpg" width="270" alt="Buttons"><br>
+  <em>Interactive buttons for commands</em>
+</p>
 
-<img src="https://files.catbox.moe/ulm6qc.jpg" width="270" alt="Carousels">
+<p align="center">
+  <img src="https://files.catbox.moe/ulm6qc.jpg" width="270" alt="Carousels"><br>
+  <em>Carousel view for multiple items</em>
+</p>
 
-<img src="https://files.catbox.moe/jjmlvd.jpg" width="270" alt="Ping Command">
+<p align="center">
+  <img src="https://files.catbox.moe/jjmlvd.jpg" width="270" alt="Ping Command"><br>
+  <em>Ping command response example</em>
+</p>
 
 ---
 
