@@ -74,13 +74,8 @@ Liora is an enterprise-ready WhatsApp bot framework designed for developers who 
 ### Rich Media Support
 
 <p align="center">
-  <img src="https://files.catbox.moe/bqgvwe.jpg" width="270" alt="Buttons"><br>
-  <em>Interactive buttons for commands</em>
-</p>
-
-<p align="center">
   <img src="https://files.catbox.moe/ulm6qc.jpg" width="270" alt="Carousels"><br>
-  <em>Carousel view for multiple items</em>
+  <em>Carousel view for multiple items with interactive buttons</em>
 </p>
 
 <p align="center">
