@@ -8,7 +8,7 @@
  */
 
 import { Database } from "bun:sqlite";
-import { encode, decode } from "@msgpack/msgpack";
+import { BufferJSON } from "baileys";
 
 /**
  * Event priority levels for queue processing
@@ -69,6 +69,7 @@ const CLEANUP_INTERVAL = 3600000; // 1 hour
  * 4. LRU/LFU eviction for memory management
  * 5. Batch operations for performance
  * 6. Health monitoring and metrics
+ * 7. Native Buffer serialization via Baileys BufferJSON
  *
  * @architecture
  * - Uses SQLite WITHOUT ROWID tables for optimal key-value storage
@@ -152,11 +153,11 @@ export class MemoryStore {
         this.db.exec("PRAGMA page_size = 8192");
         this.db.exec("PRAGMA cache_size = -16384");
 
-        // Main key-value table
+        // Main key-value table - changed BLOB to TEXT for JSON storage
         this.db.exec(`
       CREATE TABLE kv (
         k TEXT PRIMARY KEY NOT NULL,
-        v BLOB NOT NULL,
+        v TEXT NOT NULL,
         t TEXT NOT NULL,
         e INTEGER NOT NULL,
         p INTEGER NOT NULL DEFAULT 0,
@@ -369,12 +370,12 @@ export class MemoryStore {
      * Atomically sets a key-value pair with type-specific TTL
      * @method atomicSet
      * @param {string} key - Storage key
-     * @param {*} value - Value to store (any MessagePack-serializable type)
+     * @param {*} value - Value to store (any JSON-serializable type)
      * @param {string} [type="chat"] - Data type for TTL selection
      * @returns {void}
      *
      * @serialization
-     * - Uses MessagePack for efficient binary serialization
+     * - Uses Baileys BufferJSON for proper Buffer handling
      * - Includes metadata: type, expiration timestamp, access frequency
      * - Handles serialization errors with detailed logging
      */
@@ -383,7 +384,7 @@ export class MemoryStore {
         const expireAt = ttl > 0 ? Math.floor(Date.now() / 1000) + ttl : 0;
 
         try {
-            const serialized = encode(value);
+            const serialized = JSON.stringify(value, BufferJSON.replacer);
             this.stmtSet.run(key, serialized, type, expireAt, 0);
         } catch (e) {
             global.logger?.error(
@@ -420,6 +421,7 @@ export class MemoryStore {
      * - Increments access frequency asynchronously (LFU tracking)
      * - Uses prepared statement for performance
      * - Handles deserialization errors gracefully
+     * - Uses BufferJSON.reviver for proper Buffer reconstruction
      */
     get(key) {
         try {
@@ -435,7 +437,7 @@ export class MemoryStore {
                 }
             });
 
-            return decode(row.v);
+            return JSON.parse(row.v, BufferJSON.reviver);
         } catch (e) {
             global.logger?.error({ error: e.message, key }, "Get error");
             return null;
@@ -511,7 +513,7 @@ export class MemoryStore {
       `);
 
             const rows = stmt.all(...keys);
-            const map = new Map(rows.map((r) => [r.k, decode(r.v)]));
+            const map = new Map(rows.map((r) => [r.k, JSON.parse(r.v, BufferJSON.reviver)]));
 
             return keys.map((k) => map.get(k) || null);
         } catch {
@@ -539,7 +541,7 @@ export class MemoryStore {
         try {
             const transaction = this.db.transaction((items) => {
                 for (const [key, value] of items) {
-                    const serialized = encode(value);
+                    const serialized = JSON.stringify(value, BufferJSON.replacer);
                     this.stmtBatchSet.run(key, serialized, type, expireAt, 0);
                 }
             });
@@ -570,7 +572,7 @@ export class MemoryStore {
             const result = new Map();
             for (const row of rows) {
                 try {
-                    result.set(row.k, decode(row.v));
+                    result.set(row.k, JSON.parse(row.v, BufferJSON.reviver));
                 } catch (e) {
                     global.logger?.debug(
                         { key: row.k, error: e.message },
@@ -608,7 +610,7 @@ export class MemoryStore {
 
             return rows.map((row) => ({
                 key: row.k,
-                value: decode(row.v),
+                value: JSON.parse(row.v, BufferJSON.reviver),
             }));
         } catch (e) {
             global.logger?.error({ error: e.message, pattern }, "Scan error");
