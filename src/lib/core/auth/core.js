@@ -10,7 +10,7 @@
 /* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 import { Database } from "bun:sqlite";
 import { Mutex } from "async-mutex";
-import { encode, decode } from "@msgpack/msgpack";
+import { BufferJSON } from "baileys";
 import {
     DEFAULT_DB,
     validateKey,
@@ -127,6 +127,7 @@ class WriteBuffer {
  * 3. Automatic vacuuming of old records
  * 4. SQLite WAL mode for concurrent access
  * 5. Graceful shutdown handling
+ * 6. Native Buffer serialization via Baileys BufferJSON
  *
  * @performance
  * - Cache-first read strategy
@@ -237,7 +238,7 @@ class AuthDatabase {
             db.exec(`
                 CREATE TABLE IF NOT EXISTS baileys_state (
                     key   TEXT PRIMARY KEY NOT NULL CHECK(length(key) > 0 AND length(key) < 512),
-                    value BLOB NOT NULL,
+                    value TEXT NOT NULL,
                     last_access INTEGER DEFAULT (unixepoch())
                 ) WITHOUT ROWID;
             `);
@@ -306,8 +307,9 @@ class AuthDatabase {
                     const slice = upsertsArr.slice(i, i + maxBatch);
                     for (const [k, v] of slice) {
                         try {
-                            const binaryData = encode(v);
-                            this.stmtSet.run(k, binaryData);
+                            // Use Baileys BufferJSON for proper Buffer serialization
+                            const jsonString = JSON.stringify(v, BufferJSON.replacer);
+                            this.stmtSet.run(k, jsonString);
                         } catch (e) {
                             global.logger.error({
                                 err: e.message,
@@ -522,7 +524,7 @@ class AuthDatabase {
      * @strategy
      * 1. Check memory cache
      * 2. Query database if not in cache
-     * 3. Decode MessagePack data
+     * 3. Parse JSON with BufferJSON.reviver for proper Buffer deserialization
      * 4. Update access time asynchronously
      * 5. Update cache for future requests
      */
@@ -538,8 +540,9 @@ class AuthDatabase {
             if (!row || !row.value) return undefined;
 
             let value;
-            if (row.value instanceof Uint8Array) {
-                value = decode(row.value);
+            if (typeof row.value === 'string') {
+                // Use Baileys BufferJSON.reviver to properly reconstruct Buffers
+                value = JSON.parse(row.value, BufferJSON.reviver);
             } else {
                 global.logger.warn({
                     key,
