@@ -213,13 +213,12 @@ async function LIORA() {
     // Fetch latest Baileys version for compatibility
     const { version: v } = await fetchLatestBaileysVersion();
 
-    global.logger.info({ version: v.join(".") }, "Baileys version loaded");
-
     /**
      * Baileys connection configuration
      * @type {Object}
      */
     global.logger.info({ version: v.join(".") }, "Baileys version loaded");
+    
     const opt = {
         version: v,
         logger: logger(),
