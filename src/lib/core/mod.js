@@ -29,7 +29,7 @@ export class mods {
     constructor(conn) {
         this.conn = conn;
     }
-
+    
     /**
      * Unified message sending interface with content detection
      * @async
@@ -49,18 +49,18 @@ export class mods {
         if (content.album) {
             return this.sendAlbum(jid, content, options);
         }
-
+        
         if (content.cards) {
             return this.sendCard(jid, content, options);
         }
-
+        
         if (content.button || content.interactiveButtons) {
             return this.sendButton(jid, content, options);
         }
-
+        
         return this.conn.sendMessage(jid, content, options);
     }
-
+    
     /**
      * Sends media album (multiple images/videos as single message)
      * @async
@@ -80,96 +80,103 @@ export class mods {
         if (!this.conn.user?.id) {
             throw new Error("User not authenticated");
         }
-
-        if (!content?.album || !Array.isArray(content.album) || content.album.length === 0) {
+        
+        if (!content?.album || !Array.isArray(content.album) || content
+            .album.length === 0) {
             throw new Error("Album content with items array is required");
         }
-
+        
         const items = content.album;
-
-        const expectedImageCount = items.filter((item) => item?.image).length;
-        const expectedVideoCount = items.filter((item) => item?.video).length;
-
-        const messageSecret = new Uint8Array(32);
-        crypto.getRandomValues(messageSecret);
-
-        const messageContent = {
+        
+        const imgCount = items.filter((item) => item?.image).length;
+        const vidCount = items.filter((item) => item?.video).length;
+        
+        const msgSecret = new Uint8Array(32);
+        crypto.getRandomValues(msgSecret);
+        
+        const msgContent = {
             albumMessage: {
-                expectedImageCount,
-                expectedVideoCount,
+                expectedImageCount: imgCount,
+                expectedVideoCount: vidCount,
             },
             messageContextInfo: {
-                messageSecret: messageSecret,
+                messageSecret: msgSecret,
             },
         };
-
-        const generationOptions = {
+        
+        const genOpt = {
             userJid: this.conn.user.id,
             upload: this.conn.waUploadToServer,
             quoted: options?.quoted || null,
             ephemeralExpiration: options?.quoted?.expiration ?? 0,
         };
-
-        const album = generateWAMessageFromContent(jid, messageContent, generationOptions);
-
+        
+        const album = generateWAMessageFromContent(jid, msgContent, genOpt);
+        
         await this.conn.relayMessage(album.key.remoteJid, album.message, {
             messageId: album.key.id,
         });
-
-        const mediaMessages = [];
-
+        
+        const mediaMsgs = [];
+        
         for (let i = 0; i < items.length; i++) {
-            const contentItem = items[i];
-
+            const item = items[i];
+            
             const mediaSecret = new Uint8Array(32);
             crypto.getRandomValues(mediaSecret);
-
+            
             let mediaMsg;
-
-            if (contentItem.image) {
+            
+            if (item.image) {
                 const mediaInput = {};
-                if (contentItem.image instanceof Uint8Array) {
-                    mediaInput.image = contentItem.image;
-                } else if (typeof contentItem.image === "object" && contentItem.image.url) {
-                    mediaInput.image = { url: contentItem.image.url };
-                } else if (typeof contentItem.image === "string") {
-                    mediaInput.image = { url: contentItem.image };
+                if (Buffer.isBuffer(item.image)) {
+                    mediaInput.image = item.image;
+                } else if (typeof item.image === "object" && item.image
+                    .url) {
+                    mediaInput.image = { url: item.image.url };
+                } else if (typeof item.image === "string") {
+                    mediaInput.image = { url: item.image };
                 }
-
-                if (contentItem.caption) {
-                    mediaInput.caption = contentItem.caption;
+                
+                if (item.caption) {
+                    mediaInput.caption = item.caption;
                 }
-
-                mediaMsg = await generateWAMessage(album.key.remoteJid, mediaInput, {
-                    upload: this.conn.waUploadToServer,
-                    ephemeralExpiration: options?.quoted?.expiration ?? 0,
-                });
-            } else if (contentItem.video) {
+                
+                mediaMsg = await generateWAMessage(album.key.remoteJid,
+                    mediaInput, {
+                        upload: this.conn.waUploadToServer,
+                        ephemeralExpiration: options?.quoted
+                            ?.expiration ?? 0,
+                    });
+            } else if (item.video) {
                 const mediaInput = {};
-                if (contentItem.video instanceof Uint8Array) {
-                    mediaInput.video = contentItem.video;
-                } else if (typeof contentItem.video === "object" && contentItem.video.url) {
-                    mediaInput.video = { url: contentItem.video.url };
-                } else if (typeof contentItem.video === "string") {
-                    mediaInput.video = { url: contentItem.video };
+                if (Buffer.isBuffer(item.video)) {
+                    mediaInput.video = item.video;
+                } else if (typeof item.video === "object" && item.video
+                    .url) {
+                    mediaInput.video = { url: item.video.url };
+                } else if (typeof item.video === "string") {
+                    mediaInput.video = { url: item.video };
                 }
-
-                if (contentItem.caption) {
-                    mediaInput.caption = contentItem.caption;
+                
+                if (item.caption) {
+                    mediaInput.caption = item.caption;
                 }
-
-                if (contentItem.mimetype) {
-                    mediaInput.mimetype = contentItem.mimetype;
+                
+                if (item.mimetype) {
+                    mediaInput.mimetype = item.mimetype;
                 }
-
-                mediaMsg = await generateWAMessage(album.key.remoteJid, mediaInput, {
-                    upload: this.conn.waUploadToServer,
-                    ephemeralExpiration: options?.quoted?.expiration ?? 0,
-                });
+                
+                mediaMsg = await generateWAMessage(album.key.remoteJid,
+                    mediaInput, {
+                        upload: this.conn.waUploadToServer,
+                        ephemeralExpiration: options?.quoted
+                            ?.expiration ?? 0,
+                    });
             } else {
-                throw new Error(`Item at index ${i} must contain either image or video`);
+                throw new Error(`Item ${i} must have image or video`);
             }
-
+            
             mediaMsg.message.messageContextInfo = {
                 messageSecret: mediaSecret,
                 messageAssociation: {
@@ -177,24 +184,25 @@ export class mods {
                     parentMessageKey: album.key,
                 },
             };
-
-            mediaMessages.push(mediaMsg);
-
-            await this.conn.relayMessage(mediaMsg.key.remoteJid, mediaMsg.message, {
-                messageId: mediaMsg.key.id,
-            });
-
+            
+            mediaMsgs.push(mediaMsg);
+            
+            await this.conn.relayMessage(mediaMsg.key.remoteJid, mediaMsg
+                .message, {
+                    messageId: mediaMsg.key.id,
+                });
+            
             if (i < items.length - 1) {
                 await new Promise((resolve) => setTimeout(resolve, 100));
             }
         }
-
+        
         return {
             album,
-            mediaMessages,
+            mediaMessages: mediaMsgs,
         };
     }
-
+    
     /**
      * Sends interactive carousel cards
      * @async
@@ -214,46 +222,51 @@ export class mods {
         if (!this.conn.user?.id) {
             throw new Error("User not authenticated");
         }
-
+        
         const { text = "", title = "", footer = "", cards = [] } = content;
         if (!Array.isArray(cards) || cards.length === 0) {
             throw new Error("Cards must be a non-empty array");
         }
-
+        
         if (cards.length > 10) {
             throw new Error("Maximum 10 cards allowed");
         }
-
+        
         const carouselCards = await Promise.all(
             cards.map(async (card) => {
-                let mediaType = null;
-                let mediaContent = null;
-
+                let type = null;
+                let media = null;
+                
                 if (card.image) {
-                    mediaType = "image";
-                    mediaContent = card.image;
+                    type = "image";
+                    media = card.image;
                 } else if (card.video) {
-                    mediaType = "video";
-                    mediaContent = card.video;
+                    type = "video";
+                    media = card.video;
                 } else {
-                    throw new Error("Card must have 'image' or 'video' property");
+                    throw new Error(
+                        "Card must have image or video");
                 }
-
+                
                 const mediaInput = {};
-                if (mediaContent instanceof Uint8Array) {
-                    mediaInput[mediaType] = mediaContent;
-                } else if (typeof mediaContent === "object" && mediaContent.url) {
-                    mediaInput[mediaType] = { url: mediaContent.url };
-                } else if (typeof mediaContent === "string") {
-                    mediaInput[mediaType] = { url: mediaContent };
+                if (Buffer.isBuffer(media)) {
+                    mediaInput[type] = media;
+                } else if (typeof media === "object" && media
+                    .url) {
+                    mediaInput[type] = { url: media.url };
+                } else if (typeof media === "string") {
+                    mediaInput[type] = { url: media };
                 } else {
-                    throw new Error("Media must be Uint8Array, URL string, or { url: string }");
+                    throw new Error(
+                        "Media must be Buffer, URL string, or {url: string}"
+                        );
                 }
-
-                const preparedMedia = await prepareWAMessageMedia(mediaInput, {
-                    upload: this.conn.waUploadToServer,
-                });
-
+                
+                const prepped = await prepareWAMessageMedia(
+                    mediaInput, {
+                        upload: this.conn.waUploadToServer,
+                    });
+                
                 const cardObj = {
                     header: {
                         title: card.title || "",
@@ -266,26 +279,34 @@ export class mods {
                         text: card.footer || "",
                     },
                 };
-
-                if (mediaType === "image") {
-                    cardObj.header.imageMessage = preparedMedia.imageMessage;
-                } else if (mediaType === "video") {
-                    cardObj.header.videoMessage = preparedMedia.videoMessage;
+                
+                if (type === "image") {
+                    cardObj.header.imageMessage = prepped
+                        .imageMessage;
+                } else if (type === "video") {
+                    cardObj.header.videoMessage = prepped
+                        .videoMessage;
                 }
-
-                if (Array.isArray(card.buttons) && card.buttons.length > 0) {
+                
+                if (Array.isArray(card.buttons) && card.buttons
+                    .length > 0) {
                     cardObj.nativeFlowMessage = {
-                        buttons: card.buttons.map((btn) => ({
-                            name: btn.name || "quick_reply",
-                            buttonParamsJson: btn.buttonParamsJson || JSON.stringify(btn),
+                        buttons: card.buttons.map((btn) =>
+                    ({
+                            name: btn.name ||
+                                "quick_reply",
+                            buttonParamsJson: btn
+                                .buttonParamsJson ||
+                                JSON.stringify(
+                                    btn),
                         })),
                     };
                 }
-
+                
                 return cardObj;
             })
         );
-
+        
         const payload = proto.Message.InteractiveMessage.create({
             body: { text: text },
             footer: { text: footer },
@@ -295,7 +316,7 @@ export class mods {
                 messageVersion: 1,
             },
         });
-
+        
         const msg = generateWAMessageFromContent(
             jid,
             {
@@ -310,14 +331,14 @@ export class mods {
                 quoted: options?.quoted || null,
             }
         );
-
+        
         await this.conn.relayMessage(jid, msg.message, {
             messageId: msg.key.id,
         });
-
+        
         return msg;
     }
-
+    
     /**
      * Sends interactive button messages with rich media support
      * @async
@@ -346,83 +367,82 @@ export class mods {
         if (!this.conn.user?.id) {
             throw new Error("User not authenticated");
         }
-
+        
         const {
             text = "",
-            caption = "",
-            title = "",
-            footer = "",
-            buttons = [], // Support format lama
-            interactiveButtons = [], // Support format baru
-            hasMediaAttachment = false,
-            image = null,
-            video = null,
-            document = null,
-            mimetype = null,
-            fileName = null,
-            fileLength = null,
-            pageCount = null,
-            jpegThumbnail = null,
-            location = null,
-            product = null,
-            businessOwnerJid = null,
-            contextInfo = null,
-            externalAdReply = null,
+                caption = "",
+                title = "",
+                footer = "",
+                buttons = [],
+                interactiveButtons = [],
+                hasMediaAttachment = false,
+                image = null,
+                video = null,
+                document = null,
+                mimetype = null,
+                fileName = null,
+                fileLength = null,
+                pageCount = null,
+                jpegThumbnail = null,
+                location = null,
+                product = null,
+                businessOwnerJid = null,
+                contextInfo = null,
+                externalAdReply = null,
         } = content;
-
-        // Gabungkan buttons dari kedua format
+        
         const allButtons = [...buttons, ...interactiveButtons];
-
+        
         if (!Array.isArray(allButtons) || allButtons.length === 0) {
-            throw new Error("buttons or interactiveButtons must be a non-empty array");
+            throw new Error(
+                "buttons or interactiveButtons must be a non-empty array"
+            );
         }
-
+        
         const processedButtons = [];
         for (let i = 0; i < allButtons.length; i++) {
             const btn = allButtons[i];
-
+            
             if (!btn || typeof btn !== "object") {
                 throw new Error(`button[${i}] must be an object`);
             }
-
-            // Format baru: sudah ada name dan buttonParamsJson
+            
             if (btn.name && btn.buttonParamsJson) {
                 processedButtons.push(btn);
                 continue;
             }
-
-            // Format dengan nativeFlowInfo (single_select, dll)
+            
             if (btn.nativeFlowInfo && btn.nativeFlowInfo.name) {
                 processedButtons.push({
                     name: btn.nativeFlowInfo.name,
-                    buttonParamsJson: btn.nativeFlowInfo.paramsJson || JSON.stringify({}),
+                    buttonParamsJson: btn.nativeFlowInfo
+                        .paramsJson || JSON.stringify({}),
                 });
                 continue;
             }
-
-            // Format quick_reply sederhana
+            
             if (btn.id || btn.text || btn.displayText) {
                 processedButtons.push({
                     name: "quick_reply",
                     buttonParamsJson: JSON.stringify({
-                        display_text: btn.text || btn.displayText || `Button ${i + 1}`,
+                        display_text: btn.text || btn
+                            .displayText ||
+                            `Button ${i + 1}`,
                         id: btn.id || `quick_${i + 1}`,
                     }),
                 });
                 continue;
             }
-
-            // Format lama dengan buttonId dan buttonText
+            
             if (btn.buttonId && btn.buttonText?.displayText) {
-                // Cek apakah ada nativeFlowInfo di level buttonText
                 if (btn.type === 4 || btn.nativeFlowInfo) {
                     const flowInfo = btn.nativeFlowInfo || {};
                     processedButtons.push({
                         name: flowInfo.name || "quick_reply",
-                        buttonParamsJson:
-                            flowInfo.paramsJson ||
+                        buttonParamsJson: flowInfo.paramsJson ||
                             JSON.stringify({
-                                display_text: btn.buttonText.displayText,
+                                display_text: btn.buttonText
+                                    .displayText,
                                 id: btn.buttonId,
                             }),
                     });
@@ -430,33 +450,34 @@ export class mods {
                     processedButtons.push({
                         name: "quick_reply",
                         buttonParamsJson: JSON.stringify({
-                            display_text: btn.buttonText.displayText,
+                            display_text: btn.buttonText
+                                .displayText,
                             id: btn.buttonId,
                         }),
                     });
                 }
                 continue;
             }
-
+            
             throw new Error(`button[${i}] has invalid shape`);
         }
-
+        
         let messageContent = {};
-
+        
         if (image) {
             const mediaInput = {};
-            if (image instanceof Uint8Array) {
+            if (Buffer.isBuffer(image)) {
                 mediaInput.image = image;
             } else if (typeof image === "object" && image.url) {
                 mediaInput.image = { url: image.url };
             } else if (typeof image === "string") {
                 mediaInput.image = { url: image };
             }
-
+            
             const preparedMedia = await prepareWAMessageMedia(mediaInput, {
                 upload: this.conn.waUploadToServer,
             });
-
+            
             messageContent.header = {
                 title: title || "",
                 hasMediaAttachment: hasMediaAttachment || true,
@@ -464,18 +485,18 @@ export class mods {
             };
         } else if (video) {
             const mediaInput = {};
-            if (video instanceof Uint8Array) {
+            if (Buffer.isBuffer(video)) {
                 mediaInput.video = video;
             } else if (typeof video === "object" && video.url) {
                 mediaInput.video = { url: video.url };
             } else if (typeof video === "string") {
                 mediaInput.video = { url: video };
             }
-
+            
             const preparedMedia = await prepareWAMessageMedia(mediaInput, {
                 upload: this.conn.waUploadToServer,
             });
-
+            
             messageContent.header = {
                 title: title || "",
                 hasMediaAttachment: hasMediaAttachment || true,
@@ -483,8 +504,8 @@ export class mods {
             };
         } else if (document) {
             const mediaInput = { document: {} };
-
-            if (document instanceof Uint8Array) {
+            
+            if (Buffer.isBuffer(document)) {
                 mediaInput.document = {
                     buffer: document,
                     ...(mimetype && { mimetype }),
@@ -509,37 +530,42 @@ export class mods {
                     ...(pageCount !== null && { pageCount }),
                 };
             }
-
+            
             if (jpegThumbnail) {
-                if (jpegThumbnail instanceof Uint8Array) {
+                if (Buffer.isBuffer(jpegThumbnail)) {
                     if (typeof mediaInput.document === "object") {
                         mediaInput.document.jpegThumbnail = jpegThumbnail;
                     }
                 } else if (typeof jpegThumbnail === "string") {
                     try {
-                        const response = await fetch(jpegThumbnail);
-                        const arrayBuffer = await response.arrayBuffer();
+                        const res = await fetch(jpegThumbnail);
+                        const arr = await res.arrayBuffer();
                         if (typeof mediaInput.document === "object") {
-                            mediaInput.document.jpegThumbnail = new Uint8Array(arrayBuffer);
+                            mediaInput.document.jpegThumbnail = Buffer.from(
+                                arr);
                         }
                     } catch {
-                        // Silently fail on thumbnail fetch
+                        //
                     }
                 }
             }
-
+            
             const preparedMedia = await prepareWAMessageMedia(mediaInput, {
                 upload: this.conn.waUploadToServer,
             });
-
+            
             if (preparedMedia.documentMessage) {
-                if (fileName) preparedMedia.documentMessage.fileName = fileName;
+                if (fileName) preparedMedia.documentMessage.fileName =
+                    fileName;
                 if (fileLength !== null)
-                    preparedMedia.documentMessage.fileLength = fileLength.toString();
-                if (pageCount !== null) preparedMedia.documentMessage.pageCount = pageCount;
-                if (mimetype) preparedMedia.documentMessage.mimetype = mimetype;
+                    preparedMedia.documentMessage.fileLength = fileLength
+                    .toString();
+                if (pageCount !== null) preparedMedia.documentMessage
+                    .pageCount = pageCount;
+                if (mimetype) preparedMedia.documentMessage.mimetype =
+                    mimetype;
             }
-
+            
             messageContent.header = {
                 title: title || "",
                 hasMediaAttachment: hasMediaAttachment || true,
@@ -550,8 +576,10 @@ export class mods {
                 title: title || location.name || "Location",
                 hasMediaAttachment: hasMediaAttachment || false,
                 locationMessage: {
-                    degreesLatitude: location.degressLatitude || location.degreesLatitude || 0,
-                    degreesLongitude: location.degressLongitude || location.degreesLongitude || 0,
+                    degreesLatitude: location.degressLatitude ||
+                        location.degreesLatitude || 0,
+                    degreesLongitude: location.degressLongitude ||
+                        location.degreesLongitude || 0,
                     name: location.name || "",
                     address: location.address || "",
                 },
@@ -560,20 +588,22 @@ export class mods {
             let productImageMessage = null;
             if (product.productImage) {
                 const mediaInput = {};
-                if (product.productImage instanceof Uint8Array) {
+                if (Buffer.isBuffer(product.productImage)) {
                     mediaInput.image = product.productImage;
-                } else if (typeof product.productImage === "object" && product.productImage.url) {
+                } else if (typeof product.productImage === "object" &&
+                    product.productImage.url) {
                     mediaInput.image = { url: product.productImage.url };
                 } else if (typeof product.productImage === "string") {
                     mediaInput.image = { url: product.productImage };
                 }
-
-                const preparedMedia = await prepareWAMessageMedia(mediaInput, {
-                    upload: this.conn.waUploadToServer,
-                });
+                
+                const preparedMedia = await prepareWAMessageMedia(
+                    mediaInput, {
+                        upload: this.conn.waUploadToServer,
+                    });
                 productImageMessage = preparedMedia.imageMessage;
             }
-
+            
             messageContent.header = {
                 title: title || product.title || "Product",
                 hasMediaAttachment: hasMediaAttachment || false,
@@ -584,13 +614,15 @@ export class mods {
                         title: product.title || "",
                         description: product.description || "",
                         currencyCode: product.currencyCode || "USD",
-                        priceAmount1000: parseInt(product.priceAmount1000) || 0,
+                        priceAmount1000: parseInt(product
+                            .priceAmount1000) || 0,
                         retailerId: product.retailerId || "",
                         url: product.url || "",
-                        productImageCount: product.productImageCount || 1,
+                        productImageCount: product.productImageCount ||
+                            1,
                     },
-                    businessOwnerJid:
-                        businessOwnerJid || product.businessOwnerJid || this.conn.user.id,
+                    businessOwnerJid: businessOwnerJid || product
+                        .businessOwnerJid || this.conn.user.id,
                 },
             };
         } else if (title) {
@@ -599,22 +631,23 @@ export class mods {
                 hasMediaAttachment: false,
             };
         }
-
-        const hasMedia = !!(image || video || document || location || product);
+        
+        const hasMedia = !!(image || video || document || location ||
+            product);
         const bodyText = hasMedia ? caption : text || caption;
-
+        
         if (bodyText) {
             messageContent.body = { text: bodyText };
         }
-
+        
         if (footer) {
             messageContent.footer = { text: footer };
         }
-
+        
         messageContent.nativeFlowMessage = {
             buttons: processedButtons,
         };
-
+        
         if (contextInfo && typeof contextInfo === "object") {
             messageContent.contextInfo = { ...contextInfo };
         } else if (externalAdReply && typeof externalAdReply === "object") {
@@ -623,38 +656,47 @@ export class mods {
                     title: externalAdReply.title || "",
                     body: externalAdReply.body || "",
                     mediaType: externalAdReply.mediaType || 1,
-                    sourceUrl: externalAdReply.sourceUrl || externalAdReply.url || "",
-                    thumbnailUrl: externalAdReply.thumbnailUrl || externalAdReply.thumbnail || "",
-                    renderLargerThumbnail: externalAdReply.renderLargerThumbnail || false,
-                    showAdAttribution: externalAdReply.showAdAttribution !== false,
-                    containsAutoReply: externalAdReply.containsAutoReply || false,
+                    sourceUrl: externalAdReply.sourceUrl ||
+                        externalAdReply.url || "",
+                    thumbnailUrl: externalAdReply.thumbnailUrl ||
+                        externalAdReply.thumbnail || "",
+                    renderLargerThumbnail: externalAdReply
+                        .renderLargerThumbnail || false,
+                    showAdAttribution: externalAdReply
+                        .showAdAttribution !== false,
+                    containsAutoReply: externalAdReply
+                        .containsAutoReply || false,
                     ...(externalAdReply.mediaUrl && {
                         mediaUrl: externalAdReply.mediaUrl,
                     }),
                     ...(externalAdReply.thumbnail &&
-                        externalAdReply.thumbnail instanceof Uint8Array && {
+                        Buffer.isBuffer(externalAdReply.thumbnail) && {
                             thumbnail: externalAdReply.thumbnail,
                         }),
                     ...(externalAdReply.jpegThumbnail &&
-                        externalAdReply.jpegThumbnail instanceof Uint8Array && {
-                            jpegThumbnail: externalAdReply.jpegThumbnail,
+                        Buffer.isBuffer(externalAdReply
+                            .jpegThumbnail) && {
+                            jpegThumbnail: externalAdReply
+                                .jpegThumbnail,
                         }),
                 },
             };
         }
-
+        
         if (options.mentionedJid) {
             if (messageContent.contextInfo) {
-                messageContent.contextInfo.mentionedJid = options.mentionedJid;
+                messageContent.contextInfo.mentionedJid = options
+                    .mentionedJid;
             } else {
                 messageContent.contextInfo = {
                     mentionedJid: options.mentionedJid,
                 };
             }
         }
-
-        const payload = proto.Message.InteractiveMessage.create(messageContent);
-
+        
+        const payload = proto.Message.InteractiveMessage.create(
+            messageContent);
+        
         const msg = generateWAMessageFromContent(
             jid,
             {
@@ -669,37 +711,34 @@ export class mods {
                 quoted: options?.quoted || null,
             }
         );
-
+        
         const additionalNodes = [
+        {
+            tag: "biz",
+            attrs: {},
+            content: [
             {
-                tag: "biz",
-                attrs: {},
+                tag: "interactive",
+                attrs: {
+                    type: "native_flow",
+                    v: "1",
+                },
                 content: [
-                    {
-                        tag: "interactive",
-                        attrs: {
-                            type: "native_flow",
-                            v: "1",
-                        },
-                        content: [
-                            {
-                                tag: "native_flow",
-                                attrs: {
-                                    v: "9",
-                                    name: "mixed",
-                                },
-                            },
-                        ],
+                {
+                    tag: "native_flow",
+                    attrs: {
+                        v: "9",
+                        name: "mixed",
                     },
-                ],
-            },
-        ];
-
+                }, ],
+            }, ],
+        }, ];
+        
         await this.conn.relayMessage(jid, msg.message, {
             messageId: msg.key.id,
             additionalNodes,
         });
-
+        
         return msg;
     }
 }
