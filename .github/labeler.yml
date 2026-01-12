@@ -1,43 +1,75 @@
 whatsapp:
-    changed-files:
-        - any-glob-to-any-file:
-              - "src/*"
-              - "src/lib/core/*"
+    - changed-files:
+          - any-glob-to-any-file:
+                - "src/**/*.js"
+                - "src/lib/core/**/*"
 
 api:
-    changed-files:
-        - any-glob-to-any-file: "src/lib/api/**/*"
+    - changed-files:
+          - any-glob-to-any-file:
+                - "src/lib/api/**/*"
 
 documentation:
-    changed-files:
-        - any-glob-to-any-file:
-              - "**/*.md"
-              - "README.md"
+    - changed-files:
+          - any-glob-to-any-file:
+                - "**/*.md"
+                - "README.md"
+                - "CONTRIBUTING.md"
+                - "CODE_OF_CONDUCT.md"
 
 config:
-    changed-files:
-        - any-glob-to-any-file:
-              - "*.json"
-              - "*.yml"
-              - "*.yaml"
-              - ".github/**/*"
+    - changed-files:
+          - any-glob-to-any-file:
+                - "*.json"
+                - "*.yml"
+                - "*.yaml"
+                - ".github/**/*.yml"
+                - ".github/**/*.yaml"
+                - "*.config.js"
 
 database:
-    changed-files:
-        - any-glob-to-any-file: "src/lib/core/auth/*"
+    - changed-files:
+          - any-glob-to-any-file:
+                - "src/lib/core/auth/*"
+                - "src/database/*"
+                - "**/*sqlite*"
+                - "**/*db*"
 
 ci-cd:
-    changed-files:
-        - any-glob-to-any-file: ".github/workflows/**/*"
+    - changed-files:
+          - any-glob-to-any-file:
+                - ".github/workflows/**/*"
 
 dependencies:
-    changed-files:
-        - any-glob-to-any-file:
-              - "package.json"
-              - "bun.lockb"
+    - changed-files:
+          - any-glob-to-any-file:
+                - "package.json"
+                - "bun.lockb"
 
 security:
-    changed-files:
-        - any-glob-to-any-file:
-              - ".github/workflows/security/**/*"
-              - ".github/workflows/scan/**/*"
+    - changed-files:
+          - any-glob-to-any-file:
+                - ".github/workflows/*security*"
+                - ".github/workflows/*scan*"
+                - "**/security/**/*"
+
+media-processing:
+    - changed-files:
+          - any-glob-to-any-file:
+                - "src/lib/media/**/*"
+                - "src/utils/media/**/*"
+                - "**/converter/**/*"
+
+testing:
+    - changed-files:
+          - any-glob-to-any-file:
+                - "**/*.test.js"
+                - "**/*.spec.js"
+                - "tests/**/*"
+                - "test/**/*"
+
+utils:
+    - changed-files:
+          - any-glob-to-any-file:
+                - "src/lib/**/*"
+                - "src/lib/*"
