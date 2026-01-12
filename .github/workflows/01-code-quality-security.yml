@@ -44,7 +44,7 @@ jobs:
                       ${{ runner.os }}-bun-
 
             - name: Install dependencies
-              run: bun install --frozen-lockfile
+              run: bun add -D @eslint/js globals
 
             - name: Run ESLint
               run: bunx eslint . --config ./.github/eslint.config.js --format json --output-file eslint-report.json
@@ -78,7 +78,7 @@ jobs:
                   bun-version: latest
 
             - name: Install dependencies
-              run: bun install --frozen-lockfile
+              run: bun install
 
             - name: Run security audit
               run: |
