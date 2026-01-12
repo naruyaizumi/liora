@@ -5,6 +5,8 @@
  * @author Naruya Izumi
  */
 
+import { removebg } from "#api/removebg.js";
+
 /**
  * Removes background from images using AI-powered background removal
  * @async
@@ -24,17 +26,14 @@
  * - Supports JPEG, PNG, and WebP formats
  * - Works with sent or replied images
  * - Returns transparent background image
- * - Handles both buffer and URL responses
  */
-
-import { removebg } from "#api/removebg.js";
 
 let handler = async (m, { conn, command, usedPrefix }) => {
     const q = m.quoted?.mimetype ? m.quoted : m;
     const mime = (q.msg || q).mimetype || "";
 
     if (!/image\/(jpe?g|png|webp)/i.test(mime)) {
-        return m.reply(`Send/reply image.\nEx: ${usedPrefix + command}`);
+        return m.reply(`Send/reply image\nEx: ${usedPrefix + command}`);
     }
 
     try {

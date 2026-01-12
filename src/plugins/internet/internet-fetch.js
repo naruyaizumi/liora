@@ -1,12 +1,85 @@
 /**
- * @file HTTP fetch command handler
+ * @file URL fetcher and content analyzer command handler
  * @module plugins/internet/fetch
  * @license Apache-2.0
  * @author Naruya Izumi
  */
 
+import { fileTypeFromBuffer } from "file-type";
+
 /**
- * Fetches and analyzes HTTP resources from URLs
+ * Converts bytes to human readable format
+ * @function formatBytes
+ * @param {number} bytes - Bytes to format
+ * @returns {string} Formatted string
+ */
+function formatBytes(bytes) {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+}
+
+/**
+ * Returns browser-like HTTP headers
+ * @function getHeaders
+ * @returns {Object} HTTP headers
+ */
+function getHeaders() {
+    return {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+        "Sec-Ch-Ua": '"Not_A Brand";v="8", "Chromium";v="120"',
+        "Sec-Ch-Ua-Mobile": "?0",
+        "Sec-Ch-Ua-Platform": '"macOS"',
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Upgrade-Insecure-Requests": "1",
+    };
+}
+
+/**
+ * Converts ReadableStream to Uint8Array
+ * @async
+ * @function streamToBytes
+ * @param {ReadableStream} stream - Readable stream
+ * @returns {Promise<Uint8Array>} Byte array
+ */
+async function streamToBytes(stream) {
+    const chunks = [];
+    const reader = stream.getReader();
+
+    try {
+        while (true) {
+            const { done, val } = await reader.read();
+            if (done) break;
+            chunks.push(val);
+        }
+
+        const total = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+        const comb = new Uint8Array(total);
+        let off = 0;
+
+        for (const chunk of chunks) {
+            comb.set(chunk, off);
+            off += chunk.length;
+        }
+
+        return comb;
+    } finally {
+        reader.releaseLock();
+    }
+}
+
+/**
+ * Fetches URL content and analyzes it
  * @async
  * @function handler
  * @param {Object} m - Message object
@@ -17,153 +90,153 @@
  * @returns {Promise<void>}
  *
  * @description
- * Command to fetch HTTP resources from URLs and analyze their content.
- * Supports various content types including images, videos, audio, JSON, and HTML.
+ * Downloads and analyzes content from URLs with detailed metadata.
+ * Supports various content types with automatic detection.
  *
  * @features
- * - Fetches HTTP resources with browser-like headers
- * - Detects file types using magic bytes
- * - Handles redirects and HTTP errors
- * - Displays detailed metadata and statistics
- * - Sends appropriate media types back to chat
- * - Shows download speed and processing time
+ * - Downloads URL content with metadata analysis
+ * - Automatic file type detection
+ * - Supports images, videos, audio, JSON, HTML
+ * - Returns formatted report with timing info
+ * - Handles redirects and errors
  */
-
-import {
-    fileType,
-    getExtension,
-    formatBytes,
-    getBrowserHeaders,
-    isImage,
-    isVideo,
-    isAudio,
-    isJson,
-    isHtml,
-} from "#lib/file-type.js";
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     const start = Date.now();
 
     if (!text || !/^https?:\/\//i.test(text.trim())) {
-        return m.reply(`Need URL\nEx: ${usedPrefix + command} https://example.com`);
+        return m.reply(
+            `Need URL\nEx: ${usedPrefix + command} https://example.com`
+        );
     }
 
     const url = text.trim();
     await global.loading(m, conn);
 
-    const opts = {
+    const opt = {
         method: "GET",
-        headers: getBrowserHeaders(),
+        headers: getHeaders(),
         redirect: "follow",
         signal: AbortSignal.timeout(30000),
     };
 
     try {
-        const res = await fetch(url, opts);
-        const time = Date.now() - start;
+        const res = await fetch(url, opt);
+        const fetchTime = Date.now() - start;
 
         const final = res.url;
         const redirect = res.redirected || final !== url;
 
         if (!res.ok) {
-            const err = await Bun.readableStreamToText(res.body).catch(() => "");
-            const msg = `\`\`\`HTTP Error ${res.status}
-
-URL: ${url}
-${redirect ? `Final: ${final}\n` : ""}Status: ${res.status} ${res.statusText}
-Time: ${time}ms
-Type: ${res.headers.get("content-type") || "unknown"}
-Length: ${res.headers.get("content-length") || "unknown"}
-
-Preview:
-${err.substring(0, 200)}${err.length > 200 ? "..." : ""}\`\`\``;
-            return m.reply(msg);
+            const txt = await res.text().catch(() => "");
+            const err = `HTTP ${res.status}\n\nURL: ${url}\n${redirect ? `Final: ${final}\n` : ""}Status: ${res.status} ${res.statusText}\nTime: ${fetchTime}ms\nType: ${res.headers.get("content-type") || "unknown"}\nSize: ${res.headers.get("content-length") || "unknown"}\n\nPreview:\n${txt.substring(0, 200)}${txt.length > 200 ? "..." : ""}`;
+            return m.reply(err);
         }
 
         const type = res.headers.get("content-type") || "application/octet-stream";
-        const len = res.headers.get("content-length");
+        const size = res.headers.get("content-length");
         const enc = res.headers.get("content-encoding");
-        const server = res.headers.get("server");
-        const date = res.headers.get("date");
+        const svr = res.headers.get("server");
+        const dt = res.headers.get("date");
 
-        const processStart = Date.now();
-        const u8 = await Bun.readableStreamToBytes(res.body);
-        const buf = Buffer.from(u8);
-        const processTime = Date.now() - processStart;
-        const detect = await fileType(buf);
+        const procStart = Date.now();
+        const uint8 = await streamToBytes(res.body);
+        const buf = Buffer.from(uint8);
+        const procTime = Date.now() - procStart;
 
         let mime = type.split(";")[0].trim();
-        let ext;
+        let ext = mime.split("/")[1] || "bin";
+
+        let detect;
+        try {
+            detect = await fileTypeFromBuffer(buf);
+        } catch {
+            /* ignore */
+        }
+
         if (detect) {
             mime = detect.mime;
             ext = detect.ext;
-        } else {
-            ext = (await getExtension(mime)) || "bin";
+        } else if (mime === "application/octet-stream" && buf.length > 100) {
+            if (buf[0] === 0x89 && buf[1] === 0x50) {
+                mime = "image/png";
+                ext = "png";
+            } else if (buf[0] === 0xff && buf[1] === 0xd8) {
+                mime = "image/jpeg";
+                ext = "jpg";
+            } else if (buf[0] === 0x47 && buf[1] === 0x49) {
+                mime = "image/gif";
+                ext = "gif";
+            } else if (
+                buf.slice(0, 4).toString() === "<!DO" ||
+                buf.slice(0, 5).toString() === "<html"
+            ) {
+                mime = "text/html";
+                ext = "html";
+            } else if (buf[0] === 0x7b || buf[0] === 0x5b) {
+                mime = "application/json";
+                ext = "json";
+            }
         }
 
-        const json = isJson(mime);
-        const img = isImage(mime);
-        const vid = isVideo(mime);
-        const aud = isAudio(mime);
-        const html = isHtml(mime);
+        const isJson = mime === "application/json" || mime.includes("json");
+        const isImg = mime.startsWith("image/");
+        const isVid = mime.startsWith("video/");
+        const isAud = mime.startsWith("audio/");
+        const isHtml = mime === "text/html";
 
         const total = Date.now() - start;
         const rate = formatBytes(buf.length / (total / 1000)) + "/s";
 
         let info = "";
-        if (json) {
+        if (isJson) {
+            const txt = buf.toString("utf-8", 0, 50000);
             try {
-                const j = JSON.parse(buf.toString("utf-8", 0, 50000));
-                info = `JSON Type: ${Array.isArray(j) ? "Array" : typeof j}
-JSON Keys: ${
-                    Object.keys(j).length > 5
-                        ? Object.keys(j).slice(0, 5).join(", ") + "..."
-                        : Object.keys(j).join(", ")
+                const json = JSON.parse(txt);
+                info = `JSON: ${Array.isArray(json) ? "Array" : typeof json}\n`;
+                if (typeof json === "object" && json !== null) {
+                    const keys = Object.keys(json);
+                    info += `Keys: ${keys.length > 5 ? keys.slice(0, 5).join(", ") + "..." : keys.join(", ")}\n`;
                 }
-`;
             } catch {
-                info = "JSON Type: Invalid\n";
+                /* ignore */
             }
+        } else if (isHtml) {
+            const txt = buf.toString("utf-8", 0, 50000);
+            const title = txt.match(/<title[^>]*>([^<]+)<\/title>/i);
+            info = `Title: ${title ? title[1].substring(0, 50) : "Not found"}\n`;
         }
 
-        const cap = `FETCH
+        const cap = `FETCH REPORT
 
 URL: ${url}
 Final: ${final}
-Redirect: ${redirect ? "Y" : "N"}
+Redirect: ${redirect ? "Yes" : "No"}
 
 Status: ${res.status} ${res.statusText}
-Server: ${server || "Unknown"}
-Date: ${date || "N/A"}
+Server: ${svr || "Unknown"}
+Date: ${dt || "Not set"}
 
 Type: ${type}
 Encoding: ${enc || "none"}
-Length: ${len ? formatBytes(parseInt(len)) : formatBytes(buf.length)}
-MIME: ${mime}
+Size: ${size ? formatBytes(parseInt(size)) : formatBytes(buf.length)}
+Detect: ${mime}
 Ext: .${ext}
-Detect: ${detect ? "Signature" : "Header"}
 
-Type:
-${img ? "✓ Image" : "✗ Image"}
-${vid ? "✓ Video" : "✗ Video"} 
-${aud ? "✓ Audio" : "✗ Audio"}
-${json ? "✓ JSON" : "✗ JSON"}
-${html ? "✓ HTML" : "✗ HTML"}
-
-Time: ${total}ms
-Network: ${time}ms
-Process: ${processTime}ms
+Total: ${total}ms
+Network: ${fetchTime}ms
+Process: ${procTime}ms
 Rate: ${rate}
 
-Size: ${formatBytes(buf.length)}
+Buffer: ${formatBytes(buf.length)}
 ${info}`;
 
         let msg;
-        if (img && buf.length > 1000) {
+        if (isImg && buf.length > 1000) {
             msg = { image: buf, caption: cap };
-        } else if (vid && buf.length > 10000) {
+        } else if (isVid && buf.length > 10000) {
             msg = { video: buf, caption: cap };
-        } else if (aud && buf.length > 1000) {
+        } else if (isAud && buf.length > 1000) {
             msg = { audio: buf, mimetype: mime, caption: cap };
         } else {
             const name = `result.${ext}`;
@@ -177,12 +250,12 @@ ${info}`;
 
         await conn.sendMessage(m.chat, msg, { quoted: m });
     } catch (e) {
-        const err = `\`\`\`FETCH ERROR
+        const err = `FETCH ERROR
 
 URL: ${url}
 Error: ${e.name}
 Message: ${e.message}
-Time: ${Date.now() - start}ms\`\`\``;
+Time: ${Date.now() - start}ms`;
 
         m.reply(err);
     } finally {

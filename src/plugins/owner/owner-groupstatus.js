@@ -24,16 +24,10 @@
  * - Can reply to media or provide text directly
  * - Uses WhatsApp's group status message protocol
  * - Includes encryption for message security
- *
- * @supportedMedia
- * - Images (JPEG, PNG, WebP)
- * - Videos (MP4, MOV, etc.)
- * - Audio (MP3, MP4 audio, voice notes)
- * - Plain text messages
  */
 
 let handler = async (m, { conn, usedPrefix, command }) => {
-    const q = m.quoted ? m.quoted : m;
+    const q = m.quoted ?? m;
     const type = q.mtype || "";
     const mime = (q.msg || q).mimetype || "";
     
@@ -45,7 +39,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     try {
         if (!type && !cap) {
             return m.reply(
-                `Reply to media or provide text\nEx: ${usedPrefix + command} Hello or ${usedPrefix + command} reply`
+                `Reply media or text\nEx: ${usedPrefix + command} Hello or ${usedPrefix + command} reply`
             );
         }
         
@@ -54,27 +48,30 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         let c = {};
         
         if (type === "imageMessage" || /image/.test(mime)) {
-            const d = await q.download();
-            if (!d) throw new Error("Failed to download image");
-            
-            const buf = Buffer.from(d.buffer, d.byteOffset, d
-                .byteLength);
+            const buf = await q.download();
+            if (!buf) throw new Error("Download failed");
             
             c = {
                 image: buf,
                 caption: cap || "",
             };
         } else if (type === "videoMessage" || /video/.test(mime)) {
+<<<<<<< HEAD
             const d = await q.download();
             if (!d) throw new Error("Failed to download video");
             
             const buf = Buffer.from(d.buffer, d.byteOffset, d
                 .byteLength);
+=======
+            const buf = await q.download();
+            if (!buf) throw new Error("Download failed");
+>>>>>>> 0798b3e (refactor(media): standardize buffer handling across core, api, and plugins)
             
             c = {
                 video: buf,
                 caption: cap || "",
             };
+<<<<<<< HEAD
         } else if (type === "audioMessage" || type === "ptt" || /audio/
             .test(mime)) {
             const d = await q.download();
@@ -82,6 +79,11 @@ let handler = async (m, { conn, usedPrefix, command }) => {
             
             const buf = Buffer.from(d.buffer, d.byteOffset, d
                 .byteLength);
+=======
+        } else if (type === "audioMessage" || type === "ptt" || /audio/.test(mime)) {
+            const buf = await q.download();
+            if (!buf) throw new Error("Download failed");
+>>>>>>> 0798b3e (refactor(media): standardize buffer handling across core, api, and plugins)
             
             c = {
                 audio: buf,
@@ -92,11 +94,15 @@ let handler = async (m, { conn, usedPrefix, command }) => {
                 text: cap,
             };
         } else {
-            throw new Error("Reply to media or provide text");
+            throw new Error("Reply media or text");
         }
         
+<<<<<<< HEAD
         const { generateWAMessageContent,
             generateWAMessageFromContent } = await import("baileys");
+=======
+        const { generateWAMessageContent, generateWAMessageFromContent } = await import("baileys");
+>>>>>>> 0798b3e (refactor(media): standardize buffer handling across core, api, and plugins)
         
         const { backgroundColor, ...cNoBg } = c;
         
@@ -129,12 +135,20 @@ let handler = async (m, { conn, usedPrefix, command }) => {
             }
         );
         
+<<<<<<< HEAD
         await conn.relayMessage(m.chat, msg
         .message, {
             messageId: msg.key.id,
         });
         
         m.reply("Group status sent");
+=======
+        await conn.relayMessage(m.chat, msg.message, {
+            messageId: msg.key.id,
+        });
+        
+        m.reply("Status sent");
+>>>>>>> 0798b3e (refactor(media): standardize buffer handling across core, api, and plugins)
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
@@ -150,7 +164,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
  * @property {boolean} owner - Owner-only command flag
  * @property {boolean} group - Group-only command flag
  */
-handler.help = ["groupstatus <text/media>"];
+handler.help = ["groupstatus"];
 handler.tags = ["owner"];
 handler.command = /^(statusgc|swgc)$/i;
 handler.owner = true;

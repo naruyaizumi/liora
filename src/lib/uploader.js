@@ -1,55 +1,66 @@
 /**
- * @file Multi-provider file upload utilities for Liora bot
+ * @file Multi-provider file uploader module
  * @module lib/uploader
- * @description Robust file uploading to various free file hosting services
- * with fallback mechanisms and comprehensive error handling.
  * @license Apache-2.0
  * @author Naruya Izumi
  */
 
 /* global conn */
-import { fileType, getBrowserHeaders } from "./file-type.js";
+import { fileTypeFromBuffer } from "file-type";
 
 /**
- * Uploads file to Catbox.moe hosting service
+ * Common HTTP headers for upload requests
+ * @constant {Object} HEADERS
+ */
+const HEADERS = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+        "Sec-Ch-Ua": '"Not_A Brand";v="8", "Chromium";v="120"',
+        "Sec-Ch-Ua-Mobile": "?0",
+        "Sec-Ch-Ua-Platform": '"macOS"',
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Upgrade-Insecure-Requests": "1",
+    };
+
+/**
+ * Catbox.moe file uploader
  * @async
  * @function uploader1
- * @param {Uint8Array|Buffer} buffer - File buffer to upload
- * @returns {Promise<string>} Direct download URL
- * @throws {Error} On upload failure or invalid response
- *
- * @serviceDetails
- * - Max file size: 200MB
- * - Retention: Indefinite (user-managed)
- * - Features: Direct links, API access
- * - URL format: https://files.catbox.moe/xxxxxx.ext
+ * @param {Buffer} buf - File buffer
+ * @returns {Promise<string>} Direct file URL
  */
-async function uploader1(buffer) {
+async function uploader1(buf) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+        if (!buf || buf.length === 0) throw new Error("Empty buffer");
 
-        const type = await fileType(buffer);
-        if (!type) throw new Error("Unrecognized file format");
+        const type = await fileTypeFromBuffer(buf);
+        if (!type) throw new Error("Unknown file type");
 
-        const formData = new FormData();
-        formData.append("reqtype", "fileupload");
-        const blob = new Blob([buffer], { type: type.mime });
-        formData.append("fileToUpload", blob, `upload.${type.ext}`);
+        const form = new FormData();
+        form.append("reqtype", "fileupload");
+        const blob = new Blob([buf], { type: type.mime });
+        form.append("fileToUpload", blob, `file.${type.ext}`);
 
-        const response = await fetch("https://catbox.moe/user/api.php", {
+        const res = await fetch("https://catbox.moe/user/api.php", {
             method: "POST",
-            headers: getBrowserHeaders(),
-            body: formData,
+            headers: HEADERS,
+            body: form,
             signal: AbortSignal.timeout(60000),
         });
 
-        if (!response.ok) throw new Error(`Catbox HTTP ${response.status}: ${response.statusText}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const text = await response.text();
-        if (!text.startsWith("http"))
-            throw new Error(`Catbox invalid response: ${text.substring(0, 100)}`);
+        const txt = await res.text();
+        if (!txt.startsWith("http")) throw new Error("Invalid response");
 
-        return text.trim();
+        return txt.trim();
     } catch (e) {
         conn?.logger?.error(e.message);
         throw e;
@@ -57,41 +68,34 @@ async function uploader1(buffer) {
 }
 
 /**
- * Uploads file to Uguu.se hosting service
+ * Uguu.se file uploader
  * @async
  * @function uploader2
- * @param {Uint8Array|Buffer} buffer - File buffer to upload
- * @returns {Promise<string>} Direct download URL
- * @throws {Error} On upload failure or invalid response
- *
- * @serviceDetails
- * - Max file size: 100MB
- * - Retention: 1 month (automatic cleanup)
- * - Features: Direct links, no registration
- * - URL format: https://uguu.se/xxxxxx.ext
+ * @param {Buffer} buf - File buffer
+ * @returns {Promise<string>} Direct file URL
  */
-async function uploader2(buffer) {
+async function uploader2(buf) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+        if (!buf || buf.length === 0) throw new Error("Empty buffer");
 
-        const type = await fileType(buffer);
-        if (!type) throw new Error("Unrecognized file format");
+        const type = await fileTypeFromBuffer(buf);
+        if (!type) throw new Error("Unknown file type");
 
-        const formData = new FormData();
-        const blob = new Blob([buffer], { type: type.mime });
-        formData.append("files[]", blob, `upload.${type.ext}`);
+        const form = new FormData();
+        const blob = new Blob([buf], { type: type.mime });
+        form.append("files[]", blob, `file.${type.ext}`);
 
-        const response = await fetch("https://uguu.se/upload.php", {
+        const res = await fetch("https://uguu.se/upload.php", {
             method: "POST",
-            headers: getBrowserHeaders(),
-            body: formData,
+            headers: HEADERS,
+            body: form,
             signal: AbortSignal.timeout(60000),
         });
 
-        if (!response.ok) throw new Error(`Uguu HTTP ${response.status}: ${response.statusText}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const json = await response.json();
-        if (!json?.files?.[0]?.url) throw new Error("Uguu invalid response format");
+        const json = await res.json();
+        if (!json?.files?.[0]?.url) throw new Error("Invalid response");
 
         return json.files[0].url.trim();
     } catch (e) {
@@ -101,41 +105,34 @@ async function uploader2(buffer) {
 }
 
 /**
- * Uploads file to Qu.ax hosting service
+ * Qu.ax file uploader
  * @async
  * @function uploader3
- * @param {Uint8Array|Buffer} buffer - File buffer to upload
- * @returns {Promise<string>} Direct download URL
- * @throws {Error} On upload failure or invalid response
- *
- * @serviceDetails
- * - Max file size: 50MB
- * - Retention: 30 days
- * - Features: Direct links, simple API
- * - URL format: https://qu.ax/xxxxxx.ext
+ * @param {Buffer} buf - File buffer
+ * @returns {Promise<string>} Direct file URL
  */
-async function uploader3(buffer) {
+async function uploader3(buf) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+        if (!buf || buf.length === 0) throw new Error("Empty buffer");
 
-        const type = await fileType(buffer);
-        if (!type) throw new Error("Unrecognized file format");
+        const type = await fileTypeFromBuffer(buf);
+        if (!type) throw new Error("Unknown file type");
 
-        const formData = new FormData();
-        const blob = new Blob([buffer], { type: type.mime });
-        formData.append("files[]", blob, `upload.${type.ext}`);
+        const form = new FormData();
+        const blob = new Blob([buf], { type: type.mime });
+        form.append("files[]", blob, `file.${type.ext}`);
 
-        const response = await fetch("https://qu.ax/upload.php", {
+        const res = await fetch("https://qu.ax/upload.php", {
             method: "POST",
-            headers: getBrowserHeaders(),
-            body: formData,
+            headers: HEADERS,
+            body: form,
             signal: AbortSignal.timeout(60000),
         });
 
-        if (!response.ok) throw new Error(`Qu.ax HTTP ${response.status}: ${response.statusText}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const json = await response.json();
-        if (!json?.files?.[0]?.url) throw new Error("Qu.ax invalid response format");
+        const json = await res.json();
+        if (!json?.files?.[0]?.url) throw new Error("Invalid response");
 
         return json.files[0].url.trim();
     } catch (e) {
@@ -145,42 +142,34 @@ async function uploader3(buffer) {
 }
 
 /**
- * Uploads file to Put.icu hosting service using PUT method
+ * Put.icu direct PUT uploader
  * @async
  * @function uploader4
- * @param {Uint8Array|Buffer} buffer - File buffer to upload
- * @returns {Promise<string>} Direct download URL
- * @throws {Error} On upload failure or invalid response
- *
- * @serviceDetails
- * - Max file size: 250MB
- * - Retention: Permanent
- * - Features: REST API, direct PUT method
- * - URL format: https://put.icu/xxxxxx
+ * @param {Buffer} buf - File buffer
+ * @returns {Promise<string>} Direct file URL
  */
-async function uploader4(buffer) {
+async function uploader4(buf) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+        if (!buf || buf.length === 0) throw new Error("Empty buffer");
 
-        const type = await fileType(buffer);
-        if (!type) throw new Error("Unrecognized file format");
+        const type = await fileTypeFromBuffer(buf);
+        if (!type) throw new Error("Unknown file type");
 
-        const response = await fetch("https://put.icu/upload/", {
+        const res = await fetch("https://put.icu/upload/", {
             method: "PUT",
             headers: {
-                ...getBrowserHeaders(),
+                ...HEADERS,
                 "Content-Type": type.mime,
                 Accept: "application/json",
             },
-            body: buffer,
+            body: buf,
             signal: AbortSignal.timeout(60000),
         });
 
-        if (!response.ok)
-            throw new Error(`Put.icu HTTP ${response.status}: ${response.statusText}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const json = await response.json();
-        if (!json?.direct_url) throw new Error("Put.icu invalid response format");
+        const json = await res.json();
+        if (!json?.direct_url) throw new Error("Invalid response");
 
         return json.direct_url.trim();
     } catch (e) {
@@ -190,42 +179,34 @@ async function uploader4(buffer) {
 }
 
 /**
- * Uploads file to Tmpfiles.org hosting service
+ * Tmpfiles.org file uploader
  * @async
  * @function uploader5
- * @param {Uint8Array|Buffer} buffer - File buffer to upload
- * @returns {Promise<string>} Direct download URL
- * @throws {Error} On upload failure or invalid response
- *
- * @serviceDetails
- * - Max file size: 100MB
- * - Retention: 5 days (temporary)
- * - Features: Direct links, simple interface
- * - URL format: https://tmpfiles.org/dl/xxxxxx
+ * @param {Buffer} buf - File buffer
+ * @returns {Promise<string>} Direct file URL
  */
-async function uploader5(buffer) {
+async function uploader5(buf) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+        if (!buf || buf.length === 0) throw new Error("Empty buffer");
 
-        const type = await fileType(buffer);
-        if (!type) throw new Error("Unrecognized file format");
+        const type = await fileTypeFromBuffer(buf);
+        if (!type) throw new Error("Unknown file type");
 
-        const formData = new FormData();
-        const blob = new Blob([buffer], { type: type.mime });
-        formData.append("file", blob, `upload.${type.ext}`);
+        const form = new FormData();
+        const blob = new Blob([buf], { type: type.mime });
+        form.append("file", blob, `file.${type.ext}`);
 
-        const response = await fetch("https://tmpfiles.org/api/v1/upload", {
+        const res = await fetch("https://tmpfiles.org/api/v1/upload", {
             method: "POST",
-            headers: getBrowserHeaders(),
-            body: formData,
+            headers: HEADERS,
+            body: form,
             signal: AbortSignal.timeout(60000),
         });
 
-        if (!response.ok)
-            throw new Error(`Tmpfiles HTTP ${response.status}: ${response.statusText}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const json = await response.json();
-        if (!json?.data?.url) throw new Error("Tmpfiles invalid response format");
+        const json = await res.json();
+        if (!json?.data?.url) throw new Error("Invalid response");
 
         return json.data.url.replace("/file/", "/dl/").trim();
     } catch (e) {
@@ -235,49 +216,40 @@ async function uploader5(buffer) {
 }
 
 /**
- * Uploads video files to Videy hosting service (video-only)
+ * Video-specific uploader (Videy)
  * @async
  * @function uploader6
- * @param {Uint8Array|Buffer} buffer - Video buffer to upload
- * @returns {Promise<string>} Direct download URL
- * @throws {Error} On upload failure or invalid response
- *
- * @serviceDetails
- * - Supported formats: MP4, MOV, AVI, MKV, WebM
- * - Max file size: 500MB
- * - Features: Video streaming, thumbnails
- * - API: Third-party wrapper
+ * @param {Buffer} buf - Video buffer
+ * @returns {Promise<string>} Direct video URL
  */
-async function uploader6(buffer) {
+async function uploader6(buf) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+        if (!buf || buf.length === 0) throw new Error("Empty buffer");
 
-        const type = await fileType(buffer);
-        if (!type) throw new Error("Unrecognized file format");
+        const type = await fileTypeFromBuffer(buf);
+        if (!type) throw new Error("Unknown file type");
+        
         if (!type.mime.startsWith("video/")) {
-            throw new Error("Videy uploader only supports videos (MP4, MOV, AVI, MKV)");
+            throw new Error("Need video");
         }
 
-        const formData = new FormData();
-        const blob = new Blob([buffer], { type: type.mime });
-        formData.append("file", blob, `upload.${type.ext}`);
-        formData.append("apikey", "freeApikey");
+        const form = new FormData();
+        const blob = new Blob([buf], { type: type.mime });
+        form.append("file", blob, `file.${type.ext}`);
+        form.append("apikey", "freeApikey");
 
-        const response = await fetch("https://anabot.my.id/api/tools/videy", {
+        const res = await fetch("https://anabot.my.id/api/tools/videy", {
             method: "POST",
-            headers: {
-                Accept: "*/*",
-            },
-            body: formData,
+            headers: { Accept: "*/*" },
+            body: form,
             signal: AbortSignal.timeout(60000),
         });
 
-        if (!response.ok) throw new Error(`Videy HTTP ${response.status}: ${response.statusText}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const json = await response.json();
-
+        const json = await res.json();
         if (!json?.success || !json?.data?.result?.link) {
-            throw new Error("Videy invalid response format");
+            throw new Error("Invalid response");
         }
 
         return json.data.result.link.trim();
@@ -288,49 +260,40 @@ async function uploader6(buffer) {
 }
 
 /**
- * Uploads image files to GoFile hosting service (image-only)
+ * Image-specific uploader (GoFile)
  * @async
  * @function uploader7
- * @param {Uint8Array|Buffer} buffer - Image buffer to upload
- * @returns {Promise<string>} Direct download URL
- * @throws {Error} On upload failure or invalid response
- *
- * @serviceDetails
- * - Supported formats: JPG, PNG, GIF, WebP, HEIC, BMP
- * - Max file size: 50MB
- * - Features: Image optimization, galleries
- * - API: Third-party wrapper
+ * @param {Buffer} buf - Image buffer
+ * @returns {Promise<string>} Direct image URL
  */
-async function uploader7(buffer) {
+async function uploader7(buf) {
     try {
-        if (!buffer || buffer.length === 0) throw new Error("Buffer cannot be empty");
+        if (!buf || buf.length === 0) throw new Error("Empty buffer");
 
-        const type = await fileType(buffer);
-        if (!type) throw new Error("Unrecognized file format");
+        const type = await fileTypeFromBuffer(buf);
+        if (!type) throw new Error("Unknown file type");
+        
         if (!type.mime.startsWith("image/")) {
-            throw new Error("GoFile uploader only supports images (JPG, PNG, GIF, WEBP, HEIC)");
+            throw new Error("Need image");
         }
 
-        const formData = new FormData();
-        const blob = new Blob([buffer], { type: type.mime });
-        formData.append("file", blob, `upload.${type.ext}`);
-        formData.append("apikey", "freeApikey");
+        const form = new FormData();
+        const blob = new Blob([buf], { type: type.mime });
+        form.append("file", blob, `file.${type.ext}`);
+        form.append("apikey", "freeApikey");
 
-        const response = await fetch("https://anabot.my.id/api/tools/goFile", {
+        const res = await fetch("https://anabot.my.id/api/tools/goFile", {
             method: "POST",
-            headers: {
-                Accept: "*/*",
-            },
-            body: formData,
+            headers: { Accept: "*/*" },
+            body: form,
             signal: AbortSignal.timeout(60000),
         });
 
-        if (!response.ok) throw new Error(`GoFile HTTP ${response.status}: ${response.statusText}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const json = await response.json();
-
+        const json = await res.json();
         if (!json?.success || !json?.data?.result?.imageUrl) {
-            throw new Error("GoFile invalid response format");
+            throw new Error("Invalid response");
         }
 
         return json.data.result.imageUrl.trim();
@@ -341,33 +304,13 @@ async function uploader7(buffer) {
 }
 
 /**
- * Multi-provider uploader with automatic fallback
+ * Main uploader function with fallback providers
  * @async
  * @function uploader
- * @param {Uint8Array|Buffer} buffer - File buffer to upload
- * @returns {Promise<Object>} Upload result with metadata
- *
- * @resultFormat
- * {
- *   success: boolean,
- *   url: string|null,
- *   provider: string|null,
- *   attempts: Array<{
- *     provider: string,
- *     status: 'success'|'error'|'invalid_response',
- *     url?: string,
- *     error?: string
- *   }>
- * }
- *
- * @fallbackStrategy
- * 1. Catbox.moe (most reliable)
- * 2. Uguu.se (good alternative)
- * 3. Qu.ax (lightweight)
- * 4. Put.icu (REST API)
- * 5. Tmpfiles.org (temporary)
+ * @param {Buffer} buf - File buffer to upload
+ * @returns {Promise<Object>} Upload result with URL and provider info
  */
-async function uploader(buffer) {
+async function uploader(buf) {
     const providers = [
         { name: "Catbox", fn: uploader1 },
         { name: "Uguu", fn: uploader2 },
@@ -378,13 +321,13 @@ async function uploader(buffer) {
 
     const attempts = [];
 
-    for (const provider of providers) {
+    for (const prov of providers) {
         try {
-            const url = await provider.fn(buffer);
+            const url = await prov.fn(buf);
 
             if (url && typeof url === "string" && url.startsWith("http")) {
                 attempts.push({
-                    provider: provider.name,
+                    provider: prov.name,
                     status: "success",
                     url,
                 });
@@ -392,27 +335,27 @@ async function uploader(buffer) {
                 return {
                     success: true,
                     url,
-                    provider: provider.name,
+                    provider: prov.name,
                     attempts,
                 };
             }
 
             attempts.push({
-                provider: provider.name,
-                status: "invalid_response",
+                provider: prov.name,
+                status: "invalid",
             });
         } catch (e) {
             attempts.push({
-                provider: provider.name,
+                provider: prov.name,
                 status: "error",
                 error: e.message,
             });
-            conn?.logger?.error(`${provider.name}: ${e.message}`);
+            conn?.logger?.error(`${prov.name}: ${e.message}`);
             continue;
         }
     }
 
-    conn?.logger?.error("All upload providers failed");
+    conn?.logger?.error("All uploaders failed");
     attempts.forEach((a) => conn?.logger?.error(`  - ${a.provider}: ${a.status}`));
 
     return {
@@ -423,4 +366,16 @@ async function uploader(buffer) {
     };
 }
 
-export { uploader1, uploader2, uploader3, uploader4, uploader5, uploader6, uploader7, uploader };
+/**
+ * Module exports
+ */
+export {
+    uploader1,
+    uploader2,
+    uploader3,
+    uploader4,
+    uploader5,
+    uploader6,
+    uploader7,
+    uploader,
+};

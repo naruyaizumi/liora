@@ -219,32 +219,12 @@ async function LIORA() {
      * Baileys connection configuration
      * @type {Object}
      */
+     global.logger.info({ version: v.join(".") }, "Baileys version loaded");
     const opt = {
         version: v,
         logger: logger(),
         browser: Browsers.macOS("Safari"),
         auth: state,
-        defaultQueryTimeoutMs: 60000,
-        connectTimeoutMs: 60000,
-        keepAliveIntervalMs: 10000,
-        emitOwnEvents: true,
-        fireInitQueries: true,
-        generateHighQualityLinkPreview: true,
-        syncFullHistory: true,
-        markOnlineOnConnect: true,
-        retryRequestDelayMs: 250,
-        maxMsgRetryCount: 5,
-        appStateMacVerification: {
-            patch: true,
-            snapshot: true,
-        },
-        linkPreviewImageThumbnailWidth: 192,
-        transactionOpts: {
-            maxCommitRetries: 5,
-            delayBetweenTriesMs: 2500,
-        },
-        enableAutoSessionRecreation: true,
-        enableRecentMessageCache: true,
     };
 
     // Create global connection instance

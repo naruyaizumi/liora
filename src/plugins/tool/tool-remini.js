@@ -5,6 +5,8 @@
  * @author Naruya Izumi
  */
 
+import { remini } from "#api/remini.js";
+
 /**
  * Enhances image quality using Remini-like AI enhancement
  * @async
@@ -24,17 +26,14 @@
  * - Supports JPEG, PNG, and WebP formats
  * - Works with sent or replied images
  * - Returns enhanced image with caption
- * - Handles both buffer and URL responses
  */
-
-import { remini } from "#api/remini.js";
 
 let handler = async (m, { conn, command, usedPrefix }) => {
     const q = m.quoted?.mimetype ? m.quoted : m;
     const mime = (q.msg || q).mimetype || "";
 
     if (!/image\/(jpe?g|png|webp)/i.test(mime)) {
-        return m.reply(`Send/reply image.\nEx: ${usedPrefix + command}`);
+        return m.reply(`Send/reply image\nEx: ${usedPrefix + command}`);
     }
 
     try {
@@ -46,15 +45,10 @@ let handler = async (m, { conn, command, usedPrefix }) => {
         if (!success) throw new Error(error || "Failed");
 
         if (resultBuffer) {
-            const buffer = Buffer.from(
-                resultBuffer.buffer,
-                resultBuffer.byteOffset,
-                resultBuffer.byteLength
-            );
             await conn.sendMessage(
                 m.chat,
                 {
-                    image: buffer,
+                    image: resultBuffer,
                     caption: "Image enhanced",
                 },
                 { quoted: m }

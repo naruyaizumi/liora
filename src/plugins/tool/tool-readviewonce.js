@@ -21,7 +21,6 @@
  * - Extracts view-once images, videos, and audio
  * - Preserves media captions and mentions
  * - Handles various media types and mimetypes
- * - Converts between buffer types for compatibility
  * - Provides error handling for unsupported media
  */
 
@@ -68,17 +67,10 @@ let handler = async (m, { conn }) => {
             ctx.mentionedJid = v.contextInfo.mentionedJid;
         }
 
-        const data =
-            buf instanceof Uint8Array
-                ? Buffer.from(buf.buffer, buf.byteOffset, buf.byteLength)
-                : Buffer.isBuffer(buf)
-                  ? buf
-                  : Buffer.from(buf || []);
-
         await conn.sendMessage(
             m.chat,
             {
-                [t]: data,
+                [t]: buf,
                 mimetype: mime,
                 caption: cap,
                 contextInfo: ctx,
