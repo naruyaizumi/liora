@@ -465,6 +465,8 @@ const initializeConfig = () => {
         pairingCode: (Bun.env.PAIRING_CODE || "").trim().toUpperCase() || generatePairingCode(),
         watermark: (Bun.env.WATERMARK || "Liora").trim(),
         author: (Bun.env.AUTHOR || "Naruya Izumi").trim(),
+        stickpack: (Bun.env.STICKPACK || "Liora").trim(),
+        stickauth: (Bun.env.STICKAUTH || "© Naruya Izumi").trim(),
         thumbnailUrl: sanitizeUrl(Bun.env.THUMBNAIL_URL),
     };
 

@@ -2,7 +2,7 @@
  * @file WebP sticker conversion utility using Bun native APIs
  * @module lib/sticker
  * @description Converts images and videos to WhatsApp sticker format (WebP) with EXIF metadata.
- * Uses Bun's native APIs and FFmpeg CLI for efficient, memory-safe processing without filesystem operations.
+ * Uses Bun's native APIs and external conversion services for efficient processing.
  * @license Apache-2.0
  * @author Naruya Izumi
  */
@@ -33,12 +33,12 @@ import webp from "node-webpmux";
  */
 export async function imageToWebp(buffer, options = {}) {
     const { quality = 90 } = options;
-
+    
     const proc = Bun.spawn(
         [
             "ffmpeg",
             "-i",
-            "pipe:0", // Read from stdin
+            "pipe:0",
             "-vcodec",
             "libwebp",
             "-vf",
@@ -47,7 +47,7 @@ export async function imageToWebp(buffer, options = {}) {
             quality.toString(),
             "-f",
             "webp",
-            "pipe:1", // Write to stdout
+            "pipe:1",
         ],
         {
             stdin: "pipe",
@@ -55,117 +55,131 @@ export async function imageToWebp(buffer, options = {}) {
             stderr: "pipe",
         }
     );
-
-    // Write input buffer to stdin
+    
     proc.stdin.write(buffer);
     proc.stdin.end();
-
+    
     const exitCode = await proc.exited;
-
+    
     if (exitCode !== 0) {
         const stderr = await new Response(proc.stderr).text();
         throw new Error(`FFmpeg image conversion failed: ${stderr}`);
     }
-
-    // Read output from stdout
+    
     const output = await new Response(proc.stdout).arrayBuffer();
     return Buffer.from(output);
 }
 
 /**
- * Converts video to animated WebP sticker using FFmpeg (pure in-memory)
+ * Converts video/GIF to animated WebP sticker using external API
  * @async
  * @function videoToWebp
- * @param {Buffer} buffer - Video buffer
+ * @param {Buffer} buffer - Video/GIF buffer
  * @param {Object} [options={}] - Conversion options
- * @param {number} [options.quality=90] - WebP quality (1-100)
- * @param {number} [options.fps=15] - Output frames per second
- * @param {number} [options.maxDuration=10] - Maximum duration in seconds
+ * @param {boolean} [options.crop=false] - Crop video to square
+ * @param {number} [options.fps=15] - Frames per second (not used in API)
+ * @param {number} [options.maxDuration=30] - Maximum duration in seconds
  * @returns {Promise<Buffer>} Animated WebP buffer
  *
- * @throws {Error} If FFmpeg conversion fails
+ * @throws {Error} If conversion fails
  *
  * @conversionProcess
- * 1. Spawn FFmpeg with stdin/stdout pipes
- * 2. Write video buffer to stdin
- * 3. Apply animated WebP settings with palette generation
- * 4. Trim duration and adjust fps
- * 5. Read output from stdout
- * 6. Automatic memory cleanup
+ * 1. Convert buffer to base64
+ * 2. Send to conversion API
+ * 3. Receive WebP data URL
+ * 4. Parse and return buffer
  *
- * @ffmpegOptions
- * - Loop: Infinite loop (0)
- * - Duration: First N seconds only
- * - No audio stream
- * - Vsync: 0 for proper frame timing
- * - Palette generation for better quality
+ * @apiDetails
+ * Uses sticker-api.openwa.dev for reliable conversion
+ * Handles MP4, GIF, and other video formats
+ * Includes WhatsApp session metadata for compatibility
  *
  * @example
  * const videoBuffer = Buffer.from(await fetch('video.mp4').then(r => r.arrayBuffer()));
  * const stickerBuffer = await videoToWebp(videoBuffer, {
- *   quality: 80,
- *   fps: 15,
- *   maxDuration: 5
+ *   crop: false,
+ *   maxDuration: 10
  * });
  */
 export async function videoToWebp(buffer, options = {}) {
-    const { quality = 90, fps = 15, maxDuration = 10 } = options;
-
-    const proc = Bun.spawn(
-        [
-            "ffmpeg",
-            "-i",
-            "pipe:0", // Read from stdin
-            "-vcodec",
-            "libwebp",
-            "-vf",
-            `scale='min(320,iw)':min'(320,ih)':force_original_aspect_ratio=decrease,fps=${fps},pad=320:320:-1:-1:color=white@0.0,split[a][b];[a]palettegen=reserve_transparent=on:transparency_color=000000[p];[b][p]paletteuse`,
-            "-loop",
-            "0",
-            "-ss",
-            "00:00:00",
-            "-t",
-            `00:00:${String(maxDuration).padStart(2, "0")}`,
-            "-preset",
-            "default",
-            "-an",
-            "-vsync",
-            "0",
-            "-q:v",
-            quality.toString(),
-            "-f",
-            "webp",
-            "pipe:1", // Write to stdout
-        ],
-        {
-            stdin: "pipe",
-            stdout: "pipe",
-            stderr: "pipe",
-        }
-    );
-
-    // Write input buffer to stdin
-    proc.stdin.write(buffer);
-    proc.stdin.end();
-
-    const exitCode = await proc.exited;
-
-    if (exitCode !== 0) {
-        const stderr = await new Response(proc.stderr).text();
-        throw new Error(`FFmpeg video conversion failed: ${stderr}`);
+    const { crop = false, maxDuration = 30 } = options;
+    
+    const base64 = buffer.toString("base64");
+    const endTime = maxDuration > 30 ? "00:00:30.0" :
+        `00:00:${String(maxDuration).padStart(2, "0")}.0`;
+    
+    const payload = {
+        file: `data:video/mp4;base64,${base64}`,
+        processOptions: {
+            crop,
+            startTime: "00:00:00.0",
+            endTime,
+            loop: 0,
+        },
+        stickerMetadata: {},
+        sessionInfo: {
+            WA_VERSION: "2.2106.5",
+            PAGE_UA: "WhatsApp/2.2037.6 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36",
+            WA_AUTOMATE_VERSION: "3.6.10",
+            BROWSER_VERSION: "HeadlessChrome/88.0.4324.190",
+            OS: "Linux",
+            START_TS: Date.now(),
+            NUM: "6247",
+            LAUNCH_TIME_MS: 7934,
+            PHONE_VERSION: "2.20.205.16",
+        },
+        config: {
+            sessionId: "session",
+            headless: true,
+            qrTimeout: 20,
+            authTimeout: 0,
+            cacheEnabled: false,
+            useChrome: true,
+            killProcessOnBrowserClose: true,
+            throwErrorOnTosBlock: false,
+            chromiumArgs: [
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--aggressive-cache-discard",
+                "--disable-cache",
+                "--disable-application-cache",
+                "--disable-offline-load-stale-cache",
+                "--disk-cache-size=0",
+            ],
+            skipBrokenMethodsCheck: true,
+            stickerServerEndpoint: true,
+        },
+    };
+    
+    const res = await fetch(
+        "https://sticker-api.openwa.dev/convertMp4BufferToWebpDataUrl", {
+            method: "POST",
+            headers: {
+                Accept: "application/json, text/plain, */*",
+                "Content-Type": "application/json;charset=utf-8",
+            },
+            body: JSON.stringify(payload),
+        });
+    
+    if (!res.ok) {
+        throw new Error(`Video conversion API failed: ${res.statusText}`);
     }
-
-    // Read output from stdout
-    const output = await new Response(proc.stdout).arrayBuffer();
-    return Buffer.from(output);
+    
+    const text = await res.text();
+    const base64Data = text.split(";base64,")[1];
+    
+    if (!base64Data) {
+        throw new Error("Invalid response from conversion API");
+    }
+    
+    return Buffer.from(base64Data, "base64");
 }
 
 /**
  * Adds EXIF metadata to WebP sticker
  * @async
  * @function addExif
- * @param {Buffer} buffer - WebP image buffer
- * @param {string} mimetype - MIME type of original media
+ * @param {Buffer} webpBuffer - WebP image buffer (must be WebP format)
  * @param {Object} [metadata={}] - EXIF metadata options
  * @param {string} [metadata.packId] - Sticker pack ID
  * @param {string} [metadata.packName] - Sticker pack name
@@ -175,6 +189,8 @@ export async function videoToWebp(buffer, options = {}) {
  * @param {string[]} [metadata.emojis] - Associated emojis
  * @param {number} [metadata.isAvatar] - Avatar sticker flag (0 or 1)
  * @returns {Promise<Buffer>} WebP buffer with EXIF metadata
+ *
+ * @throws {Error} If buffer is not WebP format
  *
  * @exifStructure
  * - Pack identification and branding
@@ -189,58 +205,66 @@ export async function videoToWebp(buffer, options = {}) {
  *
  * @example
  * const webpBuffer = await imageToWebp(imageBuffer);
- * const stickerWithExif = await addExif(webpBuffer, 'image/png', {
+ * const stickerWithExif = await addExif(webpBuffer, {
  *   packName: 'My Stickers',
  *   packPublish: 'John Doe',
  *   emojis: ['😊', '🎉']
  * });
  */
-export async function addExif(buffer, mimetype, metadata = {}) {
-    // Convert to WebP if not already
-    let webpBuffer;
-    if (/webp/i.test(mimetype)) {
-        webpBuffer = buffer;
-    } else if (/image/i.test(mimetype)) {
-        webpBuffer = await imageToWebp(buffer);
-    } else if (/video/i.test(mimetype)) {
-        webpBuffer = await videoToWebp(buffer);
-    } else {
-        throw new Error(`Unsupported media type: ${mimetype}`);
+export async function addExif(webpBuffer, metadata = {}) {
+    if (!Buffer.isBuffer(webpBuffer)) {
+        throw new Error("Input must be a WebP Buffer");
     }
-
+    
+    // Verify it's a WebP file
+    const isWebp =
+        webpBuffer[0] === 0x52 &&
+        webpBuffer[1] === 0x49 &&
+        webpBuffer[2] === 0x46 &&
+        webpBuffer[3] === 0x46 &&
+        webpBuffer[8] === 0x57 &&
+        webpBuffer[9] === 0x45 &&
+        webpBuffer[10] === 0x42 &&
+        webpBuffer[11] === 0x50;
+    
+    if (!isWebp) {
+        throw new Error("Buffer is not a valid WebP file");
+    }
+    
     // Skip EXIF if no metadata provided
     if (!metadata || Object.keys(metadata).length === 0) {
         return webpBuffer;
     }
-
+    
     // Prepare EXIF data
     const img = new webp.Image();
     const exifData = {
         "sticker-pack-id": metadata.packId || `liora-${Date.now()}`,
         "sticker-pack-name": metadata.packName || "Liora Stickers",
         "sticker-pack-publisher": metadata.packPublish || "Liora Bot",
-        "android-app-store-link":
-            metadata.androidApp || "https://play.google.com/store/apps/details?id=com.whatsapp",
-        "ios-app-store-link":
-            metadata.iOSApp || "https://apps.apple.com/app/whatsapp-messenger/id310633997",
+        "android-app-store-link": metadata.androidApp ||
+            "https://play.google.com/store/apps/details?id=com.whatsapp",
+        "ios-app-store-link": metadata.iOSApp ||
+            "https://apps.apple.com/app/whatsapp-messenger/id310633997",
         emojis: metadata.emojis || ["😋", "😎", "🤣"],
         "is-avatar-sticker": metadata.isAvatar || 0,
     };
-
+    
     // Create EXIF buffer
     const exifAttr = Buffer.from([
-        0x49, 0x49, 0x2a, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00, 0x41, 0x57, 0x07, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00,
+        0x49, 0x49, 0x2a, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00,
+        0x41, 0x57, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16,
+        0x00, 0x00, 0x00,
     ]);
-
+    
     const jsonBuffer = Buffer.from(JSON.stringify(exifData), "utf-8");
     const exif = Buffer.concat([exifAttr, jsonBuffer]);
     exif.writeUIntLE(jsonBuffer.length, 14, 4);
-
+    
     // Attach EXIF and save
     await img.load(webpBuffer);
     img.exif = exif;
-
+    
     return await img.save(null);
 }
 
@@ -250,8 +274,8 @@ export async function addExif(buffer, mimetype, metadata = {}) {
  * @function sticker
  * @param {Buffer} buffer - Input media buffer
  * @param {Object} [options={}] - Conversion and metadata options
- * @param {boolean} [options.crop=false] - Crop to square (not implemented)
- * @param {number} [options.quality=90] - Output quality (1-100)
+ * @param {boolean} [options.crop=false] - Crop to square (for videos)
+ * @param {number} [options.quality=90] - Output quality (1-100, for images)
  * @param {number} [options.fps=15] - FPS for animated stickers
  * @param {number} [options.maxDuration=10] - Max duration for videos (seconds)
  * @param {string} [options.packName=''] - Sticker pack name
@@ -267,8 +291,8 @@ export async function addExif(buffer, mimetype, metadata = {}) {
  * - Applies EXIF metadata automatically
  *
  * @supportedFormats
- * - Images: JPEG, PNG, GIF, BMP, TIFF
- * - Videos: MP4, WebM, MKV, MOV, AVI
+ * - Images: JPEG, PNG, GIF (static), BMP, TIFF
+ * - Videos: MP4, WebM, MKV, MOV, AVI, GIF (animated)
  * - Output: WebP (static or animated)
  *
  * @example
@@ -291,59 +315,74 @@ export async function sticker(buffer, options = {}) {
     if (!Buffer.isBuffer(buffer)) {
         throw new Error("Input must be a Buffer");
     }
-
+    
     if (buffer.length === 0) {
         throw new Error("Empty buffer provided");
     }
-
+    
     // Detect media type from magic bytes
-    let mimetype = "image/png"; // Default fallback
-
+    let isVideo = false;
+    let isImage = false;
+    
+    // Check for image formats
     if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
-        mimetype = "image/jpeg";
-    } else if (
-        buffer[0] === 0x89 &&
-        buffer[1] === 0x50 &&
-        buffer[2] === 0x4e &&
-        buffer[3] === 0x47
-    ) {
-        mimetype = "image/png";
-    } else if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) {
-        mimetype = "image/gif";
-    } else if (
-        buffer[0] === 0x52 &&
-        buffer[1] === 0x49 &&
-        buffer[2] === 0x46 &&
-        buffer[3] === 0x46
-    ) {
-        // Check for WEBP
-        if (
-            buffer[8] === 0x57 &&
-            buffer[9] === 0x45 &&
-            buffer[10] === 0x42 &&
-            buffer[11] === 0x50
-        ) {
-            mimetype = "image/webp";
+        isImage = true; // JPEG
+    } else if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] ===
+        0x4e && buffer[3] === 0x47) {
+        isImage = true; // PNG
+    } else if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] ===
+        0x46) {
+        isVideo = true; // GIF (animated, treat as video)
+    } else if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] ===
+        0x46 && buffer[3] === 0x46) {
+        // RIFF container
+        if (buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] ===
+            0x42 && buffer[11] === 0x50) {
+            // Already WebP
+            return addExif(buffer, {
+                packName: options.packName || "",
+                packPublish: options.authorName || "",
+                emojis: options.emojis || [],
+            });
         }
     } else if (
-        (buffer[4] === 0x66 && buffer[5] === 0x74 && buffer[6] === 0x79 && buffer[7] === 0x70) ||
-        (buffer[0] === 0x00 && buffer[1] === 0x00 && buffer[2] === 0x00)
+        (buffer[4] === 0x66 && buffer[5] === 0x74 && buffer[6] === 0x79 &&
+            buffer[7] === 0x70) || // MP4
+        (buffer[0] === 0x00 && buffer[1] === 0x00 && buffer[2] === 0x00) ||
+        // MP4 variant
+        (buffer[0] === 0x1a && buffer[1] === 0x45 && buffer[2] === 0xdf &&
+            buffer[3] === 0xa3) // WebM/MKV
     ) {
-        mimetype = "video/mp4";
+        isVideo = true;
+    } else {
+        // Default to image if unknown
+        isImage = true;
     }
-
-    // Extract metadata options
-    const metadata = {
+    
+    // Convert to WebP
+    let webpBuffer;
+    if (isVideo) {
+        webpBuffer = await videoToWebp(buffer, {
+            crop: options.crop || false,
+            fps: options.fps || 15,
+            maxDuration: options.maxDuration || 10,
+        });
+    } else {
+        webpBuffer = await imageToWebp(buffer, {
+            quality: options.quality || 90,
+        });
+    }
+    
+    // Add EXIF metadata
+    const result = await addExif(webpBuffer, {
         packName: options.packName || "",
         packPublish: options.authorName || "",
         emojis: options.emojis || [],
-    };
-
-    // Convert and add EXIF
-    const result = await addExif(buffer, mimetype, metadata);
-
-    // Clear buffer from memory (hint to GC)
+    });
+    
+    // Clear buffers from memory
     buffer = null;
-
+    webpBuffer = null;
+    
     return result;
 }

@@ -30,21 +30,21 @@ import { addExif, sticker } from "#lib/sticker.js";
 
 let handler = async (m, { conn, text }) => {
     const q = m.quoted ?? m;
-
+    
     if (!q || !/sticker|image|video/.test(q.mtype)) {
-        return m.reply("Reply sticker/image/video");
+        return m.reply("Reply to sticker/image/video");
     }
-
+    
     let [pack, author] = (text || "").split("|");
     pack = (pack || global.config.stickpack || "").trim();
     author = (author || global.config.stickauth || "").trim();
-
+    
     await global.loading(m, conn);
-
+    
     try {
         const media = await q.download?.();
         if (!media) throw new Error("Download failed");
-
+        
         let buf;
         if (typeof media === "string" && /^https?:\/\//.test(media)) {
             const res = await fetch(media);
@@ -55,20 +55,37 @@ let handler = async (m, { conn, text }) => {
         } else if (media?.data) {
             buf = Buffer.from(media.data);
         }
-
+        
         if (!buf) throw new Error("Empty buffer");
-
-        let stc;
+        
+        // Check if already a WebP sticker
         const isWebp =
-            buf.slice(0, 4).toString() === "RIFF" && buf.slice(8, 12).toString() === "WEBP";
-
+            buf[0] === 0x52 &&
+            buf[1] === 0x49 &&
+            buf[2] === 0x46 &&
+            buf[3] === 0x46 &&
+            buf[8] === 0x57 &&
+            buf[9] === 0x45 &&
+            buf[10] === 0x42 &&
+            buf[11] === 0x50;
+        
+        let stc;
         if (isWebp) {
-            stc = await addExif(buf, { packName: pack, authorName: author, emojis: [] });
+            // Just add EXIF to existing WebP
+            stc = await addExif(buf, {
+                packName: pack,
+                packPublish: author,
+                emojis: [],
+            });
         } else {
-            const tmp = await sticker(buf, { packName: pack, authorName: author });
-            stc = await addExif(tmp, { packName: pack, authorName: author, emojis: [] });
+            // Convert to sticker first, then add EXIF
+            stc = await sticker(buf, {
+                packName: pack,
+                authorName: author,
+                emojis: [],
+            });
         }
-
+        
         await conn.sendMessage(m.chat, { sticker: stc }, { quoted: m });
     } catch (e) {
         conn.logger.error(e);
@@ -84,7 +101,7 @@ let handler = async (m, { conn, text }) => {
  * @property {Array<string>} tags - Command categories
  * @property {RegExp} command - Command pattern matching
  */
-handler.help = ["watermark"];
+handler.help = ["watermark <pack|author>"];
 handler.tags = ["maker"];
 handler.command = /^(wm|watermark)$/i;
 
