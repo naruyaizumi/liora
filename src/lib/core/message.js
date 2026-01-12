@@ -37,8 +37,7 @@ const fastKeys = (o) => (o && typeof o === "object" ? Object.keys(o) : []);
  * @param {string} k - Property key
  * @returns {*} Property value or undefined
  */
-const safeGet = (o, k) => (o && Object.prototype.hasOwnProperty.call(o, k) ? o[
-    k] : undefined);
+const safeGet = (o, k) => (o && Object.prototype.hasOwnProperty.call(o, k) ? o[k] : undefined);
 
 /**
  * Extracts primary message type, skipping protocol headers
@@ -49,9 +48,7 @@ const safeGet = (o, k) => (o && Object.prototype.hasOwnProperty.call(o, k) ? o[
 const firstMeaningfulType = (msg) => {
     const keys = fastKeys(msg);
     if (!keys.length) return "";
-    const skipTypes = new Set(["senderKeyDistributionMessage",
-        "messageContextInfo"
-    ]);
+    const skipTypes = new Set(["senderKeyDistributionMessage", "messageContextInfo"]);
     for (const key of keys) {
         if (!skipTypes.has(key)) return key;
     }
@@ -84,10 +81,9 @@ const getMediaEnvelope = (root, node) => {
  */
 const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
     const textNode = typeof rawNode === "string" ? rawNode : rawNode?.text;
-    const base = typeof rawNode === "string" ? { text: rawNode } :
-        rawNode || {};
+    const base = typeof rawNode === "string" ? { text: rawNode } : rawNode || {};
     const out = Object.create(base);
-    
+
     return Object.defineProperties(out, {
         mtype: {
             get: () => type,
@@ -122,8 +118,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
                 const id = this.id;
                 return !!(
                     id &&
-                    (id.length === 16 || (id.startsWith?.(
-                        "3EB0") && id.length === 12))
+                    (id.length === 16 || (id.startsWith?.("3EB0") && id.length === 12))
                 );
             },
             enumerable: true,
@@ -133,8 +128,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
                 const raw = ctx.participant || this.chat || "";
                 const conn = self.conn;
                 if (conn?.decodeJid) return conn.decodeJid(raw);
-                if (typeof raw.decodeJid === "function")
-                return raw.decodeJid();
+                if (typeof raw.decodeJid === "function") return raw.decodeJid();
                 return raw;
             },
             enumerable: true,
@@ -142,17 +136,14 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
         fromMe: {
             get() {
                 const connId = self.conn?.user?.id;
-                return connId ? areJidsSameUser?.(this.sender,
-                    connId) || false : false;
+                return connId ? areJidsSameUser?.(this.sender, connId) || false : false;
             },
             enumerable: true,
         },
         text: {
             get() {
                 return (
-                    textNode || this.caption || this
-                    .contentText || this
-                    .selectedDisplayText || ""
+                    textNode || this.caption || this.contentText || this.selectedDisplayText || ""
                 );
             },
             enumerable: true,
@@ -167,8 +158,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
             get() {
                 const s = this.sender;
                 if (!s) return "";
-                return self.conn?.getName ? self.conn.getName(
-                    s) : "";
+                return self.conn?.getName ? self.conn.getName(s) : "";
             },
             enumerable: true,
         },
@@ -181,9 +171,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
                         id: this.id,
                     },
                     message: quoted,
-                    ...(self.isGroup ?
-                        { participant: this.sender } :
-                        {}),
+                    ...(self.isGroup ? { participant: this.sender } : {}),
                 });
             },
             enumerable: true,
@@ -191,16 +179,14 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
         download: {
             async value() {
                 const t = this.mediaType;
-                if (!t || !self.conn?.downloadM) return Buffer
-                    .alloc(0);
-                
+                if (!t || !self.conn?.downloadM) return Buffer.alloc(0);
+
                 try {
                     const data = await self.conn.downloadM(
                         this.mediaMessage[t],
                         t.replace(/message/i, "")
                     );
-                    return Buffer.isBuffer(data) ? data : Buffer
-                        .alloc(0);
+                    return Buffer.isBuffer(data) ? data : Buffer.alloc(0);
                 } catch {
                     return Buffer.alloc(0);
                 }
@@ -213,18 +199,15 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
                 if (!self.conn?.reply) {
                     throw new Error("Connection not available");
                 }
-                return self.conn.reply(chatId || this.chat, text,
-                    this.vM, options);
+                return self.conn.reply(chatId || this.chat, text, this.vM, options);
             },
             enumerable: true,
         },
         copy: {
             value() {
-                if (!self.conn) throw new Error(
-                    "Connection not available");
+                if (!self.conn) throw new Error("Connection not available");
                 const M = proto.WebMessageInfo;
-                return smsg(self.conn, M.fromObject(M.toObject(this
-                    .vM)));
+                return smsg(self.conn, M.fromObject(M.toObject(this.vM)));
             },
             enumerable: true,
         },
@@ -233,8 +216,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
                 if (!self.conn?.sendMessage) {
                     throw new Error("Connection not available");
                 }
-                return self.conn.sendMessage(jid, { forward: this
-                        .vM, force, ...options }, options);
+                return self.conn.sendMessage(jid, { forward: this.vM, force, ...options }, options);
             },
             enumerable: true,
         },
@@ -243,8 +225,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
                 if (!self.conn?.sendMessage) {
                     throw new Error("Connection not available");
                 }
-                return self.conn.sendMessage(this
-                .chat, { delete: this.vM.key });
+                return self.conn.sendMessage(this.chat, { delete: this.vM.key });
             },
             enumerable: true,
         },
@@ -282,7 +263,7 @@ export function serialize() {
             enumerable: false,
             writable: true,
         },
-        
+
         /**
          * Message identifier
          * @property {string} id
@@ -293,7 +274,7 @@ export function serialize() {
             },
             enumerable: true,
         },
-        
+
         /**
          * Checks if message is from Baileys
          * @property {boolean} isBaileys
@@ -303,34 +284,30 @@ export function serialize() {
                 const id = this.id;
                 return !!(
                     id &&
-                    (id.length === 16 || (id.startsWith?.(
-                        "3EB0") && id.length === 12))
+                    (id.length === 16 || (id.startsWith?.("3EB0") && id.length === 12))
                 );
             },
             enumerable: true,
         },
-        
+
         /**
          * Chat identifier with normalization
          * @property {string} chat
          */
         chat: {
             get() {
-                const skdm = this.message
-                    ?.senderKeyDistributionMessage?.groupId;
+                const skdm = this.message?.senderKeyDistributionMessage?.groupId;
                 const raw =
-                    this.key?.remoteJid || (skdm && skdm !==
-                        "status@broadcast" ? skdm : "") || "";
-                
+                    this.key?.remoteJid || (skdm && skdm !== "status@broadcast" ? skdm : "") || "";
+
                 const conn = this.conn;
                 if (conn?.decodeJid) return conn.decodeJid(raw);
-                if (typeof raw.decodeJid === "function") return raw
-                    .decodeJid();
+                if (typeof raw.decodeJid === "function") return raw.decodeJid();
                 return raw;
             },
             enumerable: true,
         },
-        
+
         /**
          * Checks if chat is a newsletter channel
          * @property {boolean} isChannel
@@ -338,12 +315,11 @@ export function serialize() {
         isChannel: {
             get() {
                 const chat = this.chat;
-                return typeof chat === "string" && chat.endsWith(
-                    "@newsletter");
+                return typeof chat === "string" && chat.endsWith("@newsletter");
             },
             enumerable: true,
         },
-        
+
         /**
          * Checks if chat is a group
          * @property {boolean} isGroup
@@ -351,12 +327,11 @@ export function serialize() {
         isGroup: {
             get() {
                 const chat = this.chat;
-                return typeof chat === "string" && chat.endsWith(
-                    "@g.us");
+                return typeof chat === "string" && chat.endsWith("@g.us");
             },
             enumerable: true,
         },
-        
+
         /**
          * Sender identifier with JID normalization
          * @property {string} sender
@@ -371,15 +346,14 @@ export function serialize() {
                     this.key?.participant ||
                     this.chat ||
                     "";
-                
+
                 if (conn?.decodeJid) return conn.decodeJid(cand);
-                if (typeof cand.decodeJid === "function")
-                return cand.decodeJid();
+                if (typeof cand.decodeJid === "function") return cand.decodeJid();
                 return cand;
             },
             enumerable: true,
         },
-        
+
         /**
          * Checks if message is from current user
          * @property {boolean} fromMe
@@ -388,24 +362,22 @@ export function serialize() {
             get() {
                 const me = this.conn?.user?.id;
                 if (!me) return !!this.key?.fromMe;
-                return !!(this.key?.fromMe || areJidsSameUser?.(me,
-                    this.sender));
+                return !!(this.key?.fromMe || areJidsSameUser?.(me, this.sender));
             },
             enumerable: true,
         },
-        
+
         /**
          * Primary message type
          * @property {string} mtype
          */
         mtype: {
             get() {
-                return this.message ? firstMeaningfulType(this
-                    .message) : "";
+                return this.message ? firstMeaningfulType(this.message) : "";
             },
             enumerable: true,
         },
-        
+
         /**
          * Message content object
          * @property {Object} msg
@@ -418,7 +390,7 @@ export function serialize() {
             },
             enumerable: true,
         },
-        
+
         /**
          * Media message envelope
          * @property {Object} mediaMessage
@@ -426,15 +398,14 @@ export function serialize() {
         mediaMessage: {
             get() {
                 if (!this.message) return null;
-                const env = getMediaEnvelope(this.message, this
-                .msg);
+                const env = getMediaEnvelope(this.message, this.msg);
                 if (!env) return null;
                 const t = fastKeys(env)[0];
                 return MEDIA_TYPES.has(t) ? env : null;
             },
             enumerable: true,
         },
-        
+
         /**
          * Media type identifier
          * @property {string} mediaType
@@ -446,7 +417,7 @@ export function serialize() {
             },
             enumerable: true,
         },
-        
+
         /**
          * Quoted message with utilities
          * @property {Object} quoted
@@ -456,19 +427,18 @@ export function serialize() {
                 const baseMsg = this.msg;
                 const ctx = baseMsg?.contextInfo;
                 const quoted = ctx?.quotedMessage;
-                
+
                 if (!baseMsg || !ctx || !quoted) return null;
-                
+
                 const type = fastKeys(quoted)[0];
                 if (!type) return null;
-                
+
                 const rawNode = quoted[type];
-                return createQuotedMessage(this, ctx, quoted,
-                    rawNode, type);
+                return createQuotedMessage(this, ctx, quoted, rawNode, type);
             },
             enumerable: true,
         },
-        
+
         /**
          * Extracted text content
          * @property {string} text
@@ -488,34 +458,30 @@ export function serialize() {
                 if (primary) return primary;
                 if (msg.nativeFlowResponseMessage?.paramsJson) {
                     try {
-                        const parsed = JSON.parse(msg
-                            .nativeFlowResponseMessage
-                            .paramsJson);
+                        const parsed = JSON.parse(msg.nativeFlowResponseMessage.paramsJson);
                         if (parsed?.id) return String(parsed.id);
                     } catch {
                         //
                     }
                 }
-                
-                return msg.hydratedTemplate?.hydratedContentText ||
-                    "";
+
+                return msg.hydratedTemplate?.hydratedContentText || "";
             },
             enumerable: true,
         },
-        
+
         /**
          * Mentioned user JIDs
          * @property {Array<string>} mentionedJid
          */
         mentionedJid: {
             get() {
-                const arr = safeGet(this.msg?.contextInfo || {},
-                    "mentionedJid");
+                const arr = safeGet(this.msg?.contextInfo || {}, "mentionedJid");
                 return Array.isArray(arr) && arr.length ? arr : [];
             },
             enumerable: true,
         },
-        
+
         /**
          * Sender display name
          * @property {string} name
@@ -526,12 +492,11 @@ export function serialize() {
                 if (pn != null && pn !== "") return pn;
                 const sender = this.sender;
                 if (!sender) return "";
-                return this.conn?.getName ? this.conn.getName(
-                    sender) : "";
+                return this.conn?.getName ? this.conn.getName(sender) : "";
             },
             enumerable: true,
         },
-        
+
         /**
          * Downloads media content
          * @method download
@@ -540,16 +505,14 @@ export function serialize() {
         download: {
             async value() {
                 const t = this.mediaType;
-                if (!t || !this.conn?.downloadM) return Buffer
-                    .alloc(0);
-                
+                if (!t || !this.conn?.downloadM) return Buffer.alloc(0);
+
                 try {
                     const data = await this.conn.downloadM(
                         this.mediaMessage[t],
                         t.replace(/message/i, "")
                     );
-                    return Buffer.isBuffer(data) ? data : Buffer
-                        .alloc(0);
+                    return Buffer.isBuffer(data) ? data : Buffer.alloc(0);
                 } catch {
                     return Buffer.alloc(0);
                 }
@@ -557,7 +520,7 @@ export function serialize() {
             enumerable: true,
             configurable: true,
         },
-        
+
         /**
          * Replies to this message
          * @method reply
@@ -571,12 +534,11 @@ export function serialize() {
                 if (!this.conn?.reply) {
                     throw new Error("Connection not available");
                 }
-                return this.conn.reply(chatId || this.chat, text, this,
-                    options);
+                return this.conn.reply(chatId || this.chat, text, this, options);
             },
             enumerable: true,
         },
-        
+
         /**
          * Creates a copy of this message
          * @method copy
@@ -584,14 +546,13 @@ export function serialize() {
          */
         copy: {
             value() {
-                if (!this.conn) throw new Error(
-                    "Connection not available");
+                if (!this.conn) throw new Error("Connection not available");
                 const M = proto.WebMessageInfo;
                 return smsg(this.conn, M.fromObject(M.toObject(this)));
             },
             enumerable: true,
         },
-        
+
         /**
          * Forwards this message
          * @method forward
@@ -605,12 +566,11 @@ export function serialize() {
                 if (!this.conn?.sendMessage) {
                     throw new Error("Connection not available");
                 }
-                return this.conn.sendMessage(jid, { forward: this,
-                    force, ...options }, options);
+                return this.conn.sendMessage(jid, { forward: this, force, ...options }, options);
             },
             enumerable: true,
         },
-        
+
         /**
          * Retrieves full quoted message object
          * @method getQuotedObj
@@ -620,20 +580,19 @@ export function serialize() {
             value() {
                 const q = this.quoted;
                 if (!q?.id || !this.conn) return null;
-                
+
                 try {
                     const M = this.conn.loadMessage?.(q.id) || q.vM;
                     if (!M) return null;
-                    
-                    return smsg(this.conn, proto.WebMessageInfo
-                        .fromObject(M));
+
+                    return smsg(this.conn, proto.WebMessageInfo.fromObject(M));
                 } catch {
                     return null;
                 }
             },
             enumerable: true,
         },
-        
+
         /**
          * Alias for getQuotedObj
          * @property {Function} getQuotedMessage
@@ -644,7 +603,7 @@ export function serialize() {
             },
             enumerable: true,
         },
-        
+
         /**
          * Deletes this message
          * @method delete
@@ -655,8 +614,7 @@ export function serialize() {
                 if (!this.conn?.sendMessage) {
                     throw new Error("Connection not available");
                 }
-                return this.conn.sendMessage(this.chat, { delete: this
-                        .key });
+                return this.conn.sendMessage(this.chat, { delete: this.key });
             },
             enumerable: true,
         },

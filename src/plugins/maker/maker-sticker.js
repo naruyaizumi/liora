@@ -36,9 +36,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const mime = (q.msg || q).mimetype || q.mediaType || "";
 
         if (!mime && !args[0]) {
-            return m.reply(
-                `Send/Reply media or URL\nEx: ${usedPrefix + command}`
-            );
+            return m.reply(`Send/Reply media or URL\nEx: ${usedPrefix + command}`);
         }
 
         await global.loading(m, conn);

@@ -30,18 +30,16 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     try {
         const code = args.join(" ");
-        
+
         if (!code) {
-            return m.reply(
-                `Need code\nEx: ${usedPrefix + command} console.log("Hello")`
-            );
+            return m.reply(`Need code\nEx: ${usedPrefix + command} console.log("Hello")`);
         }
 
         await global.loading(m, conn);
 
         const url = `https://api.nekolabs.web.id/canvas/carbonify?code=${encodeURIComponent(code)}`;
         const res = await fetch(url);
-        
+
         if (!res.ok) throw new Error("API request failed");
 
         const buf = Buffer.from(await res.arrayBuffer());

@@ -540,7 +540,7 @@ class AuthDatabase {
             if (!row || !row.value) return undefined;
 
             let value;
-            if (typeof row.value === 'string') {
+            if (typeof row.value === "string") {
                 // Use Baileys BufferJSON.reviver to properly reconstruct Buffers
                 value = JSON.parse(row.value, BufferJSON.reviver);
             } else {

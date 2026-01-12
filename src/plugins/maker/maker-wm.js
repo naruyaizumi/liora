@@ -30,7 +30,7 @@ import { addExif, sticker } from "#lib/sticker.js";
 
 let handler = async (m, { conn, text }) => {
     const q = m.quoted ?? m;
-    
+
     if (!q || !/sticker|image|video/.test(q.mtype)) {
         return m.reply("Reply sticker/image/video");
     }
@@ -59,7 +59,8 @@ let handler = async (m, { conn, text }) => {
         if (!buf) throw new Error("Empty buffer");
 
         let stc;
-        const isWebp = buf.slice(0, 4).toString() === "RIFF" && buf.slice(8, 12).toString() === "WEBP";
+        const isWebp =
+            buf.slice(0, 4).toString() === "RIFF" && buf.slice(8, 12).toString() === "WEBP";
 
         if (isWebp) {
             stc = await addExif(buf, { packName: pack, authorName: author, emojis: [] });

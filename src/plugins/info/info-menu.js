@@ -385,24 +385,24 @@ async function q() {
             fromMe: false,
             participant: `13135550002@s.whatsapp.net`,
             remoteJid: "status@broadcast",
-            id: "naruyaizumi"
+            id: "naruyaizumi",
         },
         message: {
             productMessage: {
                 product: {
                     productImage: {
                         mimetype: "image/jpeg",
-                        jpegThumbnail: null
+                        jpegThumbnail: null,
                     },
                     title: `𝗟 𝗜 𝗢 𝗥 𝗔`,
                     description: null,
                     currencyCode: "USD",
                     priceAmount1000: 1000000000000000,
                     retailerId: `${global.config.author}`,
-                    productImageCount: 1000000000000000
+                    productImageCount: 1000000000000000,
                 },
-                businessOwnerJid: `13135550002@s.whatsapp.net`
-            }
-        }
+                businessOwnerJid: `13135550002@s.whatsapp.net`,
+            },
+        },
     };
 }

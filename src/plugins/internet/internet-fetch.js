@@ -105,9 +105,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const start = Date.now();
 
     if (!text || !/^https?:\/\//i.test(text.trim())) {
-        return m.reply(
-            `Need URL\nEx: ${usedPrefix + command} https://example.com`
-        );
+        return m.reply(`Need URL\nEx: ${usedPrefix + command} https://example.com`);
     }
 
     const url = text.trim();

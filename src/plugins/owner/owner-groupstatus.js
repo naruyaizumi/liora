@@ -30,27 +30,27 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     const q = m.quoted ?? m;
     const type = q.mtype || "";
     const mime = (q.msg || q).mimetype || "";
-    
+
     const txt = m.text || "";
     let cap = txt.trim();
     const ptr = new RegExp(`^[.\\/#!]?${command}\\s*`, "i");
     cap = cap.replace(ptr, "").trim();
-    
+
     try {
         if (!type && !cap) {
             return m.reply(
                 `Reply media or text\nEx: ${usedPrefix + command} Hello or ${usedPrefix + command} reply`
             );
         }
-        
+
         await global.loading(m, conn);
-        
+
         let c = {};
-        
+
         if (type === "imageMessage" || /image/.test(mime)) {
             const buf = await q.download();
             if (!buf) throw new Error("Download failed");
-            
+
             c = {
                 image: buf,
                 caption: cap || "",
@@ -58,7 +58,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         } else if (type === "videoMessage" || /video/.test(mime)) {
             const buf = await q.download();
             if (!buf) throw new Error("Download failed");
-            
+
             c = {
                 video: buf,
                 caption: cap || "",
@@ -66,7 +66,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         } else if (type === "audioMessage" || type === "ptt" || /audio/.test(mime)) {
             const buf = await q.download();
             if (!buf) throw new Error("Download failed");
-            
+
             c = {
                 audio: buf,
                 mimetype: "audio/mp4",
@@ -78,19 +78,19 @@ let handler = async (m, { conn, usedPrefix, command }) => {
         } else {
             throw new Error("Reply media or text");
         }
-        
+
         const { generateWAMessageContent, generateWAMessageFromContent } = await import("baileys");
-        
+
         const { backgroundColor, ...cNoBg } = c;
-        
+
         const inside = await generateWAMessageContent(cNoBg, {
             upload: conn.waUploadToServer,
             backgroundColor: backgroundColor || undefined,
         });
-        
+
         const secret = new Uint8Array(32);
         crypto.getRandomValues(secret);
-        
+
         const msg = generateWAMessageFromContent(
             m.chat,
             {
@@ -111,11 +111,11 @@ let handler = async (m, { conn, usedPrefix, command }) => {
                 quoted: m,
             }
         );
-        
+
         await conn.relayMessage(m.chat, msg.message, {
             messageId: msg.key.id,
         });
-        
+
         m.reply("Status sent");
     } catch (e) {
         m.reply(`Error: ${e.message}`);

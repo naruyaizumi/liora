@@ -48,11 +48,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             authorName: global.config.stickauth || "",
         });
 
-        await conn.sendMessage(
-            m.chat,
-            { sticker: stc },
-            { quoted: m }
-        );
+        await conn.sendMessage(m.chat, { sticker: stc }, { quoted: m });
     } catch (e) {
         conn.logger.error(e);
         m.reply(`Error: ${e.message}`);

@@ -35,29 +35,27 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     try {
         const q = m.quoted ?? m;
         const mime = (q.msg || q).mimetype || "";
-        
+
         if (!mime || !/image\/(jpeg|png|webp)/.test(mime)) {
             return m.reply("Need JPEG/PNG/WEBP");
         }
 
         const [top = "", bottom = ""] = args.join(" ").split("|");
-        
+
         if (!top && !bottom) {
-            return m.reply(
-                `Need text\nEx: ${usedPrefix + command} top|bottom`
-            );
+            return m.reply(`Need text\nEx: ${usedPrefix + command} top|bottom`);
         }
 
         await global.loading(m, conn);
-        
+
         const img = await q.download();
         const up = await uploader(img);
-        
+
         if (!up) throw new Error("Upload failed");
 
         const url = `https://api.nekolabs.web.id/canvas/meme?imageUrl=${encodeURIComponent(up)}&textT=${encodeURIComponent(top)}&textB=${encodeURIComponent(bottom)}`;
         const res = await fetch(url);
-        
+
         if (!res.ok) throw new Error("API request failed");
 
         const buf = Buffer.from(await res.arrayBuffer());

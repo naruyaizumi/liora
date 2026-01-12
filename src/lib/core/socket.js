@@ -46,11 +46,11 @@ const isStatusJid = (id) => !id || id === "status@broadcast";
 const decodeJid = (raw) => {
     if (!raw || typeof raw !== "string") return raw || null;
     const cleaned = raw.replace(/:\d+@/, "@");
-    return cleaned.includes("@") ?
-        cleaned :
-        /^[0-9]+$/.test(cleaned) ?
-        cleaned + "@s.whatsapp.net" :
-        cleaned;
+    return cleaned.includes("@")
+        ? cleaned
+        : /^[0-9]+$/.test(cleaned)
+          ? cleaned + "@s.whatsapp.net"
+          : cleaned;
 };
 
 /**
@@ -68,7 +68,7 @@ class MessageQueue {
         this.running = false;
         this.batchSize = 10;
     }
-    
+
     /**
      * Adds task to queue
      * @method add
@@ -81,7 +81,7 @@ class MessageQueue {
             setImmediate(() => this.process());
         }
     }
-    
+
     /**
      * Processes queued tasks in batches
      * @async
@@ -92,8 +92,7 @@ class MessageQueue {
             const batch = this.tasks.splice(0, this.batchSize);
             await Promise.all(
                 batch.map((task) =>
-                    task().catch((e) => global.logger?.error({ error: e
-                            .message }, "Queue error"))
+                    task().catch((e) => global.logger?.error({ error: e.message }, "Queue error"))
                 )
             );
         }
@@ -130,17 +129,17 @@ const messageQueue = new MessageQueue();
  */
 export function naruyaizumi(connectionOptions) {
     const conn = makeWASocket(connectionOptions);
-    
+
     // Bind store management
     bind(conn);
-    
+
     // JID utilities
     conn.decodeJid = decodeJid;
-    
+
     // Message sending utilities
     const sender = new mods(conn);
     conn.client = sender.client.bind(sender);
-    
+
     /**
      * Enhanced reply method with ephemeral support
      * @async
@@ -155,16 +154,13 @@ export function naruyaizumi(connectionOptions) {
         let ephemeral = false;
         try {
             const chat = await conn.getChat(jid);
-            ephemeral = chat?.metadata?.ephemeralDuration || chat
-                ?.ephemeralDuration || false;
+            ephemeral = chat?.metadata?.ephemeralDuration || chat?.ephemeralDuration || false;
         } catch (e) {
-            global.logger?.error({ error: e.message, jid },
-                "getChat error");
+            global.logger?.error({ error: e.message, jid }, "getChat error");
         }
-        
-        text = typeof text === "string" ? text.trim() : String(text ||
-            "");
-        
+
+        text = typeof text === "string" ? text.trim() : String(text || "");
+
         return conn.sendMessage(
             jid,
             {
@@ -177,7 +173,7 @@ export function naruyaizumi(connectionOptions) {
             }
         );
     };
-    
+
     /**
      * Downloads media from message with chunk aggregation
      * @async
@@ -188,21 +184,21 @@ export function naruyaizumi(connectionOptions) {
      */
     conn.downloadM = async (m, type) => {
         if (!m || !(m.url || m.directPath)) return Buffer.alloc(0);
-        
+
         try {
             const stream = await downloadContentFromMessage(m, type);
             const chunks = [];
-            
+
             for await (const chunk of stream) {
                 chunks.push(chunk);
             }
-            
+
             return Buffer.concat(chunks);
         } catch {
             return Buffer.alloc(0);
         }
     };
-    
+
     /**
      * Gets display name for JID with caching
      * @async
@@ -214,12 +210,12 @@ export function naruyaizumi(connectionOptions) {
     conn.getName = async (jid = "", withoutContact = false) => {
         jid = conn.decodeJid(jid);
         if (!jid || withoutContact) return jid || "";
-        
+
         if (isGroupJid(jid)) {
             try {
                 const chat = await conn.getChat(jid);
                 if (chat?.subject) return chat.subject;
-                
+
                 const md = await conn.groupMetadata(jid);
                 if (md?.subject) {
                     conn.setChat(jid, {
@@ -233,13 +229,12 @@ export function naruyaizumi(connectionOptions) {
                 return jid;
             }
         }
-        
+
         const self =
-            conn.user?.lid && areJidsSameUser ? areJidsSameUser(jid,
-                conn.user.lid) : false;
-        
+            conn.user?.lid && areJidsSameUser ? areJidsSameUser(jid, conn.user.lid) : false;
+
         if (self) return conn.user?.name || jid;
-        
+
         try {
             const chat = await conn.getChat(jid);
             return chat?.name || chat?.notify || jid;
@@ -247,7 +242,7 @@ export function naruyaizumi(connectionOptions) {
             return jid;
         }
     };
-    
+
     /**
      * Loads message from chat cache by ID
      * @async
@@ -257,7 +252,7 @@ export function naruyaizumi(connectionOptions) {
      */
     conn.loadMessage = async (messageID) => {
         if (!messageID) return null;
-        
+
         try {
             const allChats = await conn.getAllChats();
             for (const chatData of allChats) {
@@ -265,13 +260,12 @@ export function naruyaizumi(connectionOptions) {
                 if (msg) return msg;
             }
         } catch (e) {
-            global.logger?.error({ error: e.message },
-                "loadMessage error");
+            global.logger?.error({ error: e.message }, "loadMessage error");
         }
-        
+
         return null;
     };
-    
+
     /**
      * Processes WhatsApp protocol message stubs
      * @async
@@ -280,24 +274,21 @@ export function naruyaizumi(connectionOptions) {
      */
     conn.processMessageStubType = async (m) => {
         if (!m?.messageStubType) return;
-        
+
         const chat = conn.decodeJid(
-            m.key?.remoteJid || m.message
-            ?.senderKeyDistributionMessage?.groupId || ""
+            m.key?.remoteJid || m.message?.senderKeyDistributionMessage?.groupId || ""
         );
-        
+
         if (!chat || isStatusJid(chat)) return;
-        
+
         const name =
-            Object.entries(WAMessageStubType).find(([, v]) => v === m
-                .messageStubType)?.[0] ||
+            Object.entries(WAMessageStubType).find(([, v]) => v === m.messageStubType)?.[0] ||
             "UNKNOWN";
-        
+
         const author = conn.decodeJid(
-            m.key?.participant || m.participant || m.key
-            ?.remoteJid || ""
+            m.key?.participant || m.participant || m.key?.remoteJid || ""
         );
-        
+
         global.logger?.warn({
             module: "PROTOCOL",
             event: name,
@@ -306,7 +297,7 @@ export function naruyaizumi(connectionOptions) {
             params: m.messageStubParameters || [],
         });
     };
-    
+
     /**
      * Bulk inserts all participating groups into cache
      * @async
@@ -315,23 +306,22 @@ export function naruyaizumi(connectionOptions) {
      */
     conn.insertAllGroup = async () => {
         try {
-            const allGroups = await conn.groupFetchAllParticipating()
-                .catch(() => ({}));
-            
+            const allGroups = await conn.groupFetchAllParticipating().catch(() => ({}));
+
             if (!allGroups || typeof allGroups !== "object") {
                 return {};
             }
-            
+
             const groupEntries = Object.entries(allGroups);
             const batchSize = 10;
-            
+
             for (let i = 0; i < groupEntries.length; i += batchSize) {
                 const batch = groupEntries.slice(i, i + batchSize);
-                
+
                 await Promise.all(
                     batch.map(async ([gid, meta]) => {
                         if (!isGroupJid(gid)) return;
-                        
+
                         const chat = {
                             id: gid,
                             subject: meta.subject || "",
@@ -339,19 +329,19 @@ export function naruyaizumi(connectionOptions) {
                             isChats: true,
                             lastSync: Date.now(),
                         };
-                        
+
                         await conn.setChat(gid, chat);
                     })
                 );
             }
-            
+
             return allGroups;
         } catch (e) {
             global.logger?.error(e);
             return {};
         }
     };
-    
+
     /**
      * Processes and stores incoming messages
      * @method pushMessage
@@ -372,272 +362,181 @@ export function naruyaizumi(connectionOptions) {
      */
     conn.pushMessage = (m) => {
         if (!m) return;
-        
+
         const messages = Array.isArray(m) ? m : [m];
-        
+
         messages.forEach((message) => {
             messageQueue.add(async () => {
                 try {
                     // Process protocol messages
                     if (
                         message.messageStubType &&
-                        message.messageStubType !==
-                        WAMessageStubType.CIPHERTEXT
+                        message.messageStubType !== WAMessageStubType.CIPHERTEXT
                     ) {
-                        await conn
-                            .processMessageStubType(
-                                message);
+                        await conn.processMessageStubType(message);
                     }
-                    
-                    const msgObj = message.message ||
-                    {};
-                    const mtypeKeys = Object.keys(
-                        msgObj);
+
+                    const msgObj = message.message || {};
+                    const mtypeKeys = Object.keys(msgObj);
                     if (!mtypeKeys.length) return;
-                    
+
                     // Determine message type
                     let mtype = mtypeKeys.find(
-                        (k) => k !==
-                        "senderKeyDistributionMessage" &&
-                        k !== "messageContextInfo"
+                        (k) => k !== "senderKeyDistributionMessage" && k !== "messageContextInfo"
                     );
-                    if (!mtype) mtype = mtypeKeys[
-                        mtypeKeys.length - 1];
-                    
+                    if (!mtype) mtype = mtypeKeys[mtypeKeys.length - 1];
+
                     const chat = conn.decodeJid(
                         message.key?.remoteJid ||
-                        msgObj
-                        ?.senderKeyDistributionMessage
-                        ?.groupId ||
-                        ""
+                            msgObj?.senderKeyDistributionMessage?.groupId ||
+                            ""
                     );
-                    
-                    if (!chat || isStatusJid(chat))
-                        return;
-                    
+
+                    if (!chat || isStatusJid(chat)) return;
+
                     // Get or create chat data
-                    let chatData = await conn.getChat(
-                        chat);
+                    let chatData = await conn.getChat(chat);
                     if (!chatData) {
-                        chatData = { id: chat,
-                            isChats: true };
+                        chatData = { id: chat, isChats: true };
                     }
-                    
+
                     const isGroup = isGroupJid(chat);
-                    
+
                     // Fetch group metadata if missing
                     if (isGroup && !chatData.metadata) {
                         try {
-                            const md = await conn
-                                .groupMetadata(chat);
-                            chatData.subject = md
-                                .subject;
+                            const md = await conn.groupMetadata(chat);
+                            chatData.subject = md.subject;
                             chatData.metadata = md;
                         } catch {
                             // Silent fail
                         }
                     }
-                    
+
                     // Cache quoted messages
-                    const ctx = msgObj[mtype]
-                        ?.contextInfo;
-                    if (ctx?.quotedMessage && ctx
-                        .stanzaId) {
-                        const qChat = conn.decodeJid(ctx
-                            .remoteJid || ctx
-                            .participant || chat);
-                        
-                        if (qChat && !isStatusJid(
-                            qChat)) {
+                    const ctx = msgObj[mtype]?.contextInfo;
+                    if (ctx?.quotedMessage && ctx.stanzaId) {
+                        const qChat = conn.decodeJid(ctx.remoteJid || ctx.participant || chat);
+
+                        if (qChat && !isStatusJid(qChat)) {
                             try {
-                                let qm = await conn
-                                    .getChat(qChat);
+                                let qm = await conn.getChat(qChat);
                                 if (!qm) {
-                                    qm = { id: qChat,
-                                        isChats: !
-                                            isGroupJid(
-                                                qChat
-                                                ) };
+                                    qm = { id: qChat, isChats: !isGroupJid(qChat) };
                                 }
-                                
+
                                 qm.messages ||= {};
-                                
-                                if (!qm.messages[ctx
-                                        .stanzaId]) {
+
+                                if (!qm.messages[ctx.stanzaId]) {
                                     const quotedMsg = {
                                         key: {
                                             remoteJid: qChat,
-                                            fromMe: conn
-                                                .user
-                                                ?.lid &&
-                                                areJidsSameUser ?
-                                                areJidsSameUser(
-                                                    conn
-                                                    .user
-                                                    .lid,
-                                                    qChat
-                                                    ) :
-                                                false,
-                                            id: ctx
-                                                .stanzaId,
-                                            participant: conn
-                                                .decodeJid(
-                                                    ctx
-                                                    .participant
-                                                    ),
+                                            fromMe:
+                                                conn.user?.lid && areJidsSameUser
+                                                    ? areJidsSameUser(conn.user.lid, qChat)
+                                                    : false,
+                                            id: ctx.stanzaId,
+                                            participant: conn.decodeJid(ctx.participant),
                                         },
-                                        message: ctx
-                                            .quotedMessage,
-                                        ...(qChat
-                                            .endsWith(
-                                                "@g.us"
-                                                ) ?
-                                            {
-                                                participant: conn
-                                                    .decodeJid(
-                                                        ctx
-                                                        .participant
-                                                        ),
-                                            } :
-                                            {}),
+                                        message: ctx.quotedMessage,
+                                        ...(qChat.endsWith("@g.us")
+                                            ? {
+                                                  participant: conn.decodeJid(ctx.participant),
+                                              }
+                                            : {}),
                                     };
-                                    
-                                    qm.messages[ctx
-                                            .stanzaId] =
-                                        quotedMsg;
-                                    
+
+                                    qm.messages[ctx.stanzaId] = quotedMsg;
+
                                     // Maintain sliding window of 20 messages
-                                    const msgKeys =
-                                        Object.keys(qm
-                                            .messages);
-                                    if (msgKeys.length >
-                                        30) {
-                                        for (let i =
-                                            0; i <
-                                            msgKeys
-                                            .length -
-                                            20; i++) {
-                                            delete qm
-                                                .messages[
-                                                    msgKeys[
-                                                        i
-                                                        ]
-                                                    ];
+                                    const msgKeys = Object.keys(qm.messages);
+                                    if (msgKeys.length > 30) {
+                                        for (let i = 0; i < msgKeys.length - 20; i++) {
+                                            delete qm.messages[msgKeys[i]];
                                         }
                                     }
-                                    
-                                    await conn.setChat(
-                                        qChat, qm);
+
+                                    await conn.setChat(qChat, qm);
                                 }
                             } catch {
                                 // Silent fail
                             }
                         }
                     }
-                    
+
                     // Update sender information
                     if (!isGroup) {
-                        chatData.name = message
-                            .pushName || chatData
-                            .name || "";
+                        chatData.name = message.pushName || chatData.name || "";
                     } else {
                         const s = conn.decodeJid(
-                            (message.key?.fromMe &&
-                                conn.user?.lid) ||
-                            message.participant ||
-                            message.key
-                            ?.participant ||
-                            chat
+                            (message.key?.fromMe && conn.user?.lid) ||
+                                message.participant ||
+                                message.key?.participant ||
+                                chat
                         );
-                        
+
                         if (s && s !== chat) {
                             try {
-                                const sChat = (
-                                    await conn
-                                    .getChat(s)) ||
-                                { id: s };
-                                sChat.name = message
-                                    .pushName || sChat
-                                    .name || "";
-                                await conn.setChat(s,
-                                    sChat);
+                                const sChat = (await conn.getChat(s)) || { id: s };
+                                sChat.name = message.pushName || sChat.name || "";
+                                await conn.setChat(s, sChat);
                             } catch {
                                 // Silent fail
                             }
                         }
                     }
-                    
+
                     // Store non-bot messages (15 message sliding window)
-                    if (mtype !==
-                        "senderKeyDistributionMessage"
-                        ) {
-                        const s = isGroup ?
-                            conn.decodeJid(
-                                (message.key?.fromMe &&
-                                    conn.user?.lid) ||
-                                message.participant ||
-                                message.key
-                                ?.participant ||
-                                chat
-                            ) :
-                            message.key?.fromMe && conn
-                            .user?.lid ?
-                            conn.user.lid :
-                            chat;
-                        
+                    if (mtype !== "senderKeyDistributionMessage") {
+                        const s = isGroup
+                            ? conn.decodeJid(
+                                  (message.key?.fromMe && conn.user?.lid) ||
+                                      message.participant ||
+                                      message.key?.participant ||
+                                      chat
+                              )
+                            : message.key?.fromMe && conn.user?.lid
+                              ? conn.user.lid
+                              : chat;
+
                         const fromMe =
                             message.key?.fromMe ||
-                            (conn.user?.lid && s &&
-                                areJidsSameUser ?
-                                areJidsSameUser(s, conn
-                                    .user?.lid) :
-                                false);
-                        
+                            (conn.user?.lid && s && areJidsSameUser
+                                ? areJidsSameUser(s, conn.user?.lid)
+                                : false);
+
                         if (
                             !fromMe &&
                             message.message &&
-                            message.messageStubType !==
-                            WAMessageStubType
-                            .CIPHERTEXT &&
+                            message.messageStubType !== WAMessageStubType.CIPHERTEXT &&
                             message.key?.id
                         ) {
-                            const cleanMsg = { ...
-                                message };
+                            const cleanMsg = { ...message };
                             if (cleanMsg.message) {
-                                delete cleanMsg.message
-                                    .messageContextInfo;
-                                delete cleanMsg.message
-                                    .senderKeyDistributionMessage;
+                                delete cleanMsg.message.messageContextInfo;
+                                delete cleanMsg.message.senderKeyDistributionMessage;
                             }
-                            
+
                             chatData.messages ||= {};
-                            chatData.messages[message
-                                .key.id] = cleanMsg;
-                            
-                            const msgKeys = Object.keys(
-                                chatData.messages);
+                            chatData.messages[message.key.id] = cleanMsg;
+
+                            const msgKeys = Object.keys(chatData.messages);
                             if (msgKeys.length > 20) {
-                                for (let i = 0; i <
-                                    msgKeys.length -
-                                    15; i++) {
-                                    delete chatData
-                                        .messages[
-                                            msgKeys[i]];
+                                for (let i = 0; i < msgKeys.length - 15; i++) {
+                                    delete chatData.messages[msgKeys[i]];
                                 }
                             }
                         }
                     }
-                    
+
                     await conn.setChat(chat, chatData);
                 } catch (e) {
-                    global.logger?.error({ error: e
-                                .message },
-                        "pushMessage error");
+                    global.logger?.error({ error: e.message }, "pushMessage error");
                 }
             });
         });
     };
-    
+
     /**
      * Serializes message using smsg utility
      * @method serializeM
@@ -645,11 +544,11 @@ export function naruyaizumi(connectionOptions) {
      * @returns {Object} Serialized message
      */
     conn.serializeM = (m) => smsg(conn, m);
-    
+
     // Normalize bot's own LID
     if (conn.user?.lid) {
         conn.user.lid = conn.decodeJid(conn.user.lid);
     }
-    
+
     return conn;
 }

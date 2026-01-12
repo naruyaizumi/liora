@@ -33,14 +33,10 @@ import { sticker } from "#lib/sticker.js";
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
         const raw = m.quoted?.text || text || "";
-        const txt = raw
-            .replace(new RegExp(`^\\${usedPrefix}${command}\\s*`, "i"), "")
-            .trim();
+        const txt = raw.replace(new RegExp(`^\\${usedPrefix}${command}\\s*`, "i"), "").trim();
 
         if (!txt) {
-            return m.reply(
-                `Need text\nEx: ${usedPrefix + command} Hello World`
-            );
+            return m.reply(`Need text\nEx: ${usedPrefix + command} Hello World`);
         }
 
         const name = (await m.quoted?.name) || m.pushName || (await m.name) || "Anon";

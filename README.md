@@ -40,19 +40,19 @@ Liora is an enterprise-ready WhatsApp bot framework designed for developers who 
 
 ### ✨ Key Features
 
-| Feature                     | Description                                                     |
-|------------------------------|-----------------------------------------------------------------|
-| ⚡ **Bun Runtime**           | Ultra-fast JavaScript execution, up to 3x faster than Node.js   |
-| 🎯 **Modern Architecture**   | ESM-first design with clean codebase                             |
-| 💾 **Lightweight Database**   | Native `bun:sqlite`, no external services                       |
-| 📦 **Zero Bloat**            | Minimal dependencies for production                             |
-| 🌐 **Deploy Anywhere**       | Server, Pterodactyl, or containerized                           |
-| 🎨 **Rich Media**            | Buttons, carousels, albums, and stories support                 |
-| 🔌 **Plugin System**         | Easy-to-extend modular architecture                              |
-| 🔐 **Pairing Code**          | No QR scanning needed                                            |
-| 🧩 **Modular Architecture**  | Plugin-based design pattern for easy extensibility              |
-| 💎 **Zero Config**           | Works out of the box with sensible defaults                     |
-| 🎨 **Clean Code**            | Modern ESM, type-safe patterns, and best practices              |
+| Feature                     | Description                                                   |
+| --------------------------- | ------------------------------------------------------------- |
+| ⚡ **Bun Runtime**          | Ultra-fast JavaScript execution, up to 3x faster than Node.js |
+| 🎯 **Modern Architecture**  | ESM-first design with clean codebase                          |
+| 💾 **Lightweight Database** | Native `bun:sqlite`, no external services                     |
+| 📦 **Zero Bloat**           | Minimal dependencies for production                           |
+| 🌐 **Deploy Anywhere**      | Server, Pterodactyl, or containerized                         |
+| 🎨 **Rich Media**           | Buttons, carousels, albums, and stories support               |
+| 🔌 **Plugin System**        | Easy-to-extend modular architecture                           |
+| 🔐 **Pairing Code**         | No QR scanning needed                                         |
+| 🧩 **Modular Architecture** | Plugin-based design pattern for easy extensibility            |
+| 💎 **Zero Config**          | Works out of the box with sensible defaults                   |
+| 🎨 **Clean Code**           | Modern ESM, type-safe patterns, and best practices            |
 
 ---
 
@@ -69,7 +69,6 @@ Liora is an enterprise-ready WhatsApp bot framework designed for developers who 
   <img src="https://files.catbox.moe/t3aeaj.jpg" width="400" alt="Category Menu"><br>
   <em>Category menu for easier navigation</em>
 </p>
-
 
 ### Rich Media Support
 
@@ -158,6 +157,7 @@ BAILEYS_LOG_LEVEL=silent
 ```
 
 **Important Notes:**
+
 - Use WhatsApp **LIDs** (Local IDs), not phone numbers for OWNERS
 - `PAIRING_NUMBER` must be in international format without `+` or spaces
 - `PAIRING_CODE` should be 8 alphanumeric characters (auto-generated if empty)
@@ -186,10 +186,10 @@ Liora supports multiple prefixes:
 
 ### Built-in Commands
 
-| Command | Description | Example |
-|---------|-------------|---------|
+| Command           | Description          | Example |
+| ----------------- | -------------------- | ------- |
 | `.menu` / `.help` | Display command menu | `.menu` |
-| `.ping` | Check bot latency | `.ping` |
+| `.ping`           | Check bot latency    | `.ping` |
 
 ### Interacting with the Bot
 
@@ -220,7 +220,7 @@ let handler = async (m, { conn }) => {
     const msg = await conn.sendMessage(m.chat, { text: "⏱️ Checking..." });
     const ns = Bun.nanoseconds() - start;
     const ms = (ns / 1_000_000).toFixed(0);
-    
+
     await conn.sendMessage(m.chat, {
         text: `🏓 Pong! ${ms} ms`,
         edit: msg.key,
@@ -414,12 +414,14 @@ See [SECURITY.md](.github/SECURITY.md) for our security policy.
 Licensed under the **Apache License 2.0**
 
 **You are free to:**
+
 - ✅ Use commercially
 - ✅ Modify the source
 - ✅ Distribute
 - ✅ Sublicense
 
 **You must:**
+
 - 📝 Include original copyright
 - 📝 Include Apache License 2.0
 - 📝 State changes made
