@@ -53,7 +53,7 @@ let handler = async (m, { conn, args, usedPrefix }) => {
             return m.reply("Unsupported link. Provide a valid group or channel link.");
         }
 
-        await conn.sendButton(m.chat, {
+        await conn.client(m.chat, {
             text: `Target ID: ${id}`,
             title: "Result",
             footer: "Use the button below to copy the ID",
