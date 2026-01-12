@@ -36,7 +36,7 @@ jobs:
                   bun-version: latest
 
             - name: Cache dependencies
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: ~/.bun/install/cache
                   key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
@@ -51,7 +51,7 @@ jobs:
               continue-on-error: true
 
             - name: Upload ESLint report
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v6
               if: always()
               with:
                   name: eslint-report
@@ -86,7 +86,7 @@ jobs:
                   cat audit-report.json
 
             - name: Upload audit report
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v6
               if: always()
               with:
                   name: dependency-audit-report
@@ -127,7 +127,7 @@ jobs:
                   exit-code: "0"
 
             - name: Upload Trivy config report
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v6
               if: always()
               with:
                   name: trivy-config-report
@@ -165,7 +165,7 @@ jobs:
                   output: codeql-results
 
             - name: Upload CodeQL results
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v6
               if: always()
               with:
                   name: codeql-results
@@ -179,7 +179,7 @@ jobs:
         if: always()
         steps:
             - name: Download all artifacts
-              uses: actions/download-artifact@v4
+              uses: actions/download-artifact@v7
 
             - name: Create security summary
               run: |
