@@ -56,34 +56,16 @@ let handler = async (m, { conn, usedPrefix, command }) => {
                 caption: cap || "",
             };
         } else if (type === "videoMessage" || /video/.test(mime)) {
-<<<<<<< HEAD
-            const d = await q.download();
-            if (!d) throw new Error("Failed to download video");
-            
-            const buf = Buffer.from(d.buffer, d.byteOffset, d
-                .byteLength);
-=======
             const buf = await q.download();
             if (!buf) throw new Error("Download failed");
->>>>>>> 0798b3e (refactor(media): standardize buffer handling across core, api, and plugins)
             
             c = {
                 video: buf,
                 caption: cap || "",
             };
-<<<<<<< HEAD
-        } else if (type === "audioMessage" || type === "ptt" || /audio/
-            .test(mime)) {
-            const d = await q.download();
-            if (!d) throw new Error("Failed to download audio");
-            
-            const buf = Buffer.from(d.buffer, d.byteOffset, d
-                .byteLength);
-=======
         } else if (type === "audioMessage" || type === "ptt" || /audio/.test(mime)) {
             const buf = await q.download();
             if (!buf) throw new Error("Download failed");
->>>>>>> 0798b3e (refactor(media): standardize buffer handling across core, api, and plugins)
             
             c = {
                 audio: buf,
@@ -97,12 +79,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
             throw new Error("Reply media or text");
         }
         
-<<<<<<< HEAD
-        const { generateWAMessageContent,
-            generateWAMessageFromContent } = await import("baileys");
-=======
         const { generateWAMessageContent, generateWAMessageFromContent } = await import("baileys");
->>>>>>> 0798b3e (refactor(media): standardize buffer handling across core, api, and plugins)
         
         const { backgroundColor, ...cNoBg } = c;
         
@@ -135,20 +112,11 @@ let handler = async (m, { conn, usedPrefix, command }) => {
             }
         );
         
-<<<<<<< HEAD
-        await conn.relayMessage(m.chat, msg
-        .message, {
-            messageId: msg.key.id,
-        });
-        
-        m.reply("Group status sent");
-=======
         await conn.relayMessage(m.chat, msg.message, {
             messageId: msg.key.id,
         });
         
         m.reply("Status sent");
->>>>>>> 0798b3e (refactor(media): standardize buffer handling across core, api, and plugins)
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
