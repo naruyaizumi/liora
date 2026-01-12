@@ -62,7 +62,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             id: `.spotify ${t.title}`,
         }));
 
-        await conn.sendButton(m.chat, {
+        await conn.client(m.chat, {
             image: tracks[0].cover,
             caption: "*Select track above*",
             title: "Spotify Search",

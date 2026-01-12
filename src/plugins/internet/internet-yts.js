@@ -62,7 +62,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             id: `.play ${v.title}`,
         }));
 
-        await conn.sendButton(m.chat, {
+        await conn.client(m.chat, {
             image: vids[0].cover,
             caption: "*Select video above*",
             title: "YouTube Search",

@@ -31,7 +31,7 @@ let handler = async (m, { conn, groupMetadata }) => {
     const link = `https://chat.whatsapp.com/${invite}`;
     const txt = `Group: ${groupMetadata.subject}\nID: ${m.chat}`;
 
-    await conn.sendButton(m.chat, {
+    await conn.client(m.chat, {
         text: txt,
         title: "Group Link",
         footer: "Click button to copy",
