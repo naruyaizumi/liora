@@ -5,9 +5,9 @@
 
 ![Liora Banner](https://files.catbox.moe/3xv7p0.png)
 
-# 🌸 Liora
+*🌸 Liora*
 
-### Modern WhatsApp Bot Framework built on Baileys
+**Modern WhatsApp Bot Framework built on Baileys**
 
 <p align="center">
   <a href="https://bun.sh">
@@ -24,61 +24,70 @@
   </a>
 </p>
 
----
+<!-- Wave Footer Divider -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
 </div>
 
 Built on Baileys • Powered by Bun Runtime • Written in JavaScript
 
----
+<!-- Wave Footer Divider -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-## 🚀 Overview
+*🚀 Overview*
 
 Liora is an enterprise-ready WhatsApp bot framework designed for developers who demand **performance**, **reliability**, and **scalability**. Built with modern technologies and battle-tested architecture patterns.
 
-### 🏗️ Architecture Overview
+**🏗️ Architecture Overview**
 
 ```mermaid
 graph TD
-    A[WhatsApp Messages<br/><sub>Input Stream</sub>] -->|WebSocket<br/>TLS 1.3| B[Baileys Client<br/><sub>Core Engine</sub>]
+    A[WhatsApp Messages<br/><sub>User Input Stream</sub>] -->|WebSocket Connection<br/>TLS 1.3| B[Baileys Client<br/><sub>Multi-Device Protocol</sub>]
+    B --> C[Message Handler<br/><sub>Middleware Processor</sub>]
+    C --> D{Command Parser<br/><sub>Pattern Matching</sub>}
+    D -->|Valid Command| E[Plugin Manager<br/><sub>Registry & Loader</sub>]
+    D -->|System Message| F[System Handler<br/><sub>Internal Processing</sub>]
+    D -->|Media Content| G[Media Processor<br/><sub>Encoding/Decoding</sub>]
     
-    B --> C[Message Handler<br/><sub>Middleware Layer</sub>]
-    
-    subgraph "Processing Pipeline"
-        C --> D{Command Parser<br/><sub>Decision Node</sub>}
-        D -->|Valid Command| E[Plugin Manager<br/><sub>Registry & Loader</sub>]
-        D -->|System Message| F[System Handler<br/><sub>Internal Services</sub>]
-    end
-    
-    E --> G((Plugin Executor<br/><sub>Runtime Environment</sub>))
-    
-    subgraph "Data Layer"
-        H[(SQLite Database<br/><sub>Persistence Store</sub>)]
-    end
-    
-    G --> I[Response Handler<br/><sub>Output Formatter</sub>]
+    E --> H((Plugin Executor<br/><sub>Runtime Sandbox</sub>))
+    H --> I[Response Handler<br/><sub>Output Formatter</sub>]
     F --> I
-    C --> H
-    E --> H
+    G --> I
     
-    I -->|API Response| B
+    C --> J[Database Layer<br/><sub>Persistence Store</sub>]
+    J --> K[(SQLite Auth<br/>Session Storage)]
+    J --> L[(SQLite Data<br/>User Data)]
+    J --> M[(SQLite Cache<br/>Temporary Store)]
     
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#0d47a1
-    style B fill:#f1f8e9,stroke:#558b2f,stroke-width:3px,color:#1b5e20
-    style C fill:#fff3e0,stroke:#ef6c00,stroke-width:3px,color:#e65100
-    style D fill:#fce4ec,stroke:#ad1457,stroke-width:3px,color:#880e4f,stroke-dasharray: 5 5
-    style E fill:#e8f5e9,stroke:#2e7d32,stroke-width:3px,color:#1b5e20
-    style F fill:#e8eaf6,stroke:#283593,stroke-width:3px,color:#1a237e
-    style G fill:#fff8e1,stroke:#ff8f00,stroke-width:3px,color:#ff6f00
-    style H cylinder,fill:#fafafa,stroke:#424242,stroke-width:3px,color:#212121
-    style I fill:#e0f7fa,stroke:#006064,stroke-width:3px,color:#004d40
+    E --> N[Dynamic Plugin Loader<br/><sub>Hot Reload System</sub>]
+    N --> O[Plugin Registry<br/><sub>Version Control</sub>]
+    N --> P[Permission Manager<br/><sub>Access Control</sub>]
     
-    linkStyle default stroke:#616161,stroke-width:2px
-    linkStyle 0 stroke:#1976d2,stroke-width:3px
-    linkStyle 6 stroke:#558b2f,stroke-width:3px
+    I -->|Send Response| B
+    
+    style A fill:#e3f2fd,stroke:#2196f3,stroke-width:3px,color:#0d47a1
+    style B fill:#e8f5e9,stroke:#4caf50,stroke-width:3px,color:#1b5e20
+    style C fill:#fff3e0,stroke:#ff9800,stroke-width:3px,color:#e65100
+    style D fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
+    style E fill:#f3e5f5,stroke:#9c27b0,stroke-width:3px,color:#4a148c
+    style F fill:#e8eaf6,stroke:#3f51b5,stroke-width:3px,color:#1a237e
+    style G fill:#e0f2f1,stroke:#00695c,stroke-width:3px,color:#004d40
+    style H fill:#fff8e1,stroke:#ff8f00,stroke-width:3px,color:#ff6f00
+    style I fill:#fce4ec,stroke:#e91e63,stroke-width:3px,color:#880e4f
+    style J fill:#efebe9,stroke:#795548,stroke-width:3px,color:#3e2723
+    style K fill:#d7ccc8,stroke:#5d4037,stroke-width:2px,color:#3e2723
+    style L fill:#d7ccc8,stroke:#5d4037,stroke-width:2px,color:#3e2723
+    style M fill:#d7ccc8,stroke:#5d4037,stroke-width:2px,color:#3e2723
+    style N fill:#ffecb3,stroke:#ffa000,stroke-width:3px,color:#ff6f00
+    style O fill:#ffecb3,stroke:#ffa000,stroke-width:2px,color:#ff6f00
+    style P fill:#ffecb3,stroke:#ffa000,stroke-width:2px,color:#ff6f00
+    
+    linkStyle default stroke:#666,stroke-width:2px
+    linkStyle 0 stroke:#2196f3,stroke-width:3px
+    linkStyle 13 stroke:#e91e63,stroke-width:3px
 ```
 
-### ✨ Key Features
+**✨ Key Features**
 
 <table>
 <tr>
@@ -132,7 +141,7 @@ Server ready
 
 **🎨 Rich Media**
 
-<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Artist%20Palette.png" width="50" />
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Video%20Camera.png" width="50" />
 
 Interactive buttons
 <br>Carousels & albums
@@ -153,7 +162,7 @@ Pairing code auth
 </tr>
 </table>
 
-### 🔄 Message Flow
+**Message Flow**
 
 ```mermaid
 sequenceDiagram
@@ -164,54 +173,33 @@ sequenceDiagram
     participant P as Plugin System
     participant DB as Database
     participant C as Cache
-    participant L as Logger
 
-    Note over U,WA: User Interaction Phase
-    U->>WA: Send Message (Text/Media)
-    WA->>B: WebSocket Event (Encrypted)
-    
-    Note over B,H: Processing Phase
-    B->>L: Log Incoming Message
-    B->>H: Decode & Parse Message
+    U->>WA: Send Message
+    WA->>B: WebSocket Event
+    B->>H: Parse Message
     H->>C: Check Rate Limit
-    C-->>H: Allow/Block
-    H->>DB: Validate User Session
+    C-->>H: Allow/Deny
+    H->>DB: Validate Session
     DB-->>H: Session Data
-    H->>H: Extract Command & Args
-    
-    alt Valid Command
-        H->>DB: Check User Permissions
-        DB-->>H: Permission Level
-        H->>P: Load Plugin
-        P->>DB: Query/Update Data
-        P->>P: Process Logic
-        P->>H: Response Data
-        
-        Note over H,B: Response Phase
-        H->>H: Format Response
-        H->>L: Log Action
-        H->>B: Prepared Message
-        B->>WA: Send via WebSocket
-        WA->>U: Deliver Response
-        
-    else Invalid/No Command
-        H->>H: System Handler
-        H->>B: Default Response
-        B->>WA: Send via WebSocket
-        WA->>U: Deliver Response
-    end
-    
-    Note right of DB: Data Persistence
-    DB->>DB: Commit Transaction
-    L->>L: Archive Logs
-    C->>C: Cleanup Expired
+    H->>DB: Check Permissions
+    DB-->>H: Permission Level
+    H->>H: Match Command
+    H->>P: Execute Plugin
+    P->>DB: Query Data
+    DB-->>P: Result Set
+    P->>P: Process Logic
+    P->>H: Response Data
+    H->>B: Format Message
+    B->>WA: Send Response
+    WA->>U: Deliver Message
 ```
 
----
+<!-- Wave Footer Divider -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-## 📸 Screenshots
+*📸 Screenshots*
 
-### Interactive Menus
+**Interactive Menus**
 
 <p align="center">
   <img src="https://files.catbox.moe/dqx3qt.jpg" width="400" alt="Main Menu"><br>
@@ -223,20 +211,21 @@ sequenceDiagram
   <em>Category menu for easier navigation</em>
 </p>
 
-### Rich Media Support
+**Rich Media Support**
 
 <p align="center">
   <img src="https://files.catbox.moe/ulm6qc.jpg" width="270" alt="Carousels"><br>
   <em>Carousel view for multiple items with interactive buttons</em>
 </p>
 
----
+<!-- Wave Footer Divider -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-## ⚡ Quick Start
+*⚡ Quick Start*
 
-For detailed installation instructions, see **[INSTALLATION.md](.github/INSTALLATION.md)**
+For detailed installation instructions, see **[INSTALLATION.md](INSTALLATION.md)**
 
-### Automated Installation for Linux (Ubuntu/Debian)
+**Automated Installation for Linux (Ubuntu/Debian)**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh | bash
@@ -251,15 +240,16 @@ bot log     # View logs
 bot status  # Check status
 ```
 
-### Manual Installation
+**Manual Installation**
 
-See **[INSTALLATION.md](.github/INSTALLATION.md)** for comprehensive manual installation guide.
+See **[INSTALLATION.md](INSTALLATION.md)** for comprehensive manual installation guide.
 
----
+<!-- Wave Footer Divider -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-## ⚙️ Configuration
+*⚙️ Configuration*
 
-### Environment Setup
+**Environment Setup**
 
 Edit `.env` with your configuration:
 
@@ -288,7 +278,7 @@ BAILEYS_LOG_LEVEL=silent
 - `PAIRING_NUMBER` must be in international format without `+` or spaces
 - `PAIRING_CODE` should be 8 alphanumeric characters (auto-generated if empty)
 
-### Pairing Your Device
+**Pairing Your Device**
 
 1. Run the bot: `bun start`
 2. Open WhatsApp on your phone
@@ -296,11 +286,12 @@ BAILEYS_LOG_LEVEL=silent
 4. Enter the pairing code displayed in console
 5. Done! Your bot is now connected
 
----
+<!-- Wave Footer Divider -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-## 🎮 Usage
+*🎮 Usage*
 
-### Command Prefixes
+**Command Prefixes**
 
 Liora supports multiple prefixes:
 
@@ -310,24 +301,25 @@ Liora supports multiple prefixes:
 /menu    # Slash
 ```
 
-### Built-in Commands
+**Built-in Commands**
 
 | Command           | Description          | Example |
 | ----------------- | -------------------- | ------- |
 | `.menu` / `.help` | Display command menu | `.menu` |
 | `.ping`           | Check bot latency    | `.ping` |
 
-### Interacting with the Bot
+**Interacting with the Bot**
 
 - **Main Menu**: Send `.menu` or `.help`
 - **Category Menu**: Select category from button menu
 - **Direct Command**: Use prefix + command name
 
----
+<!-- Wave Footer Divider -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-## 🔌 Plugin System
+*🔌 Plugin System*
 
-### Plugin Structure
+**Plugin Structure**
 
 ```
 src/plugins/
@@ -344,7 +336,7 @@ src/plugins/
 └── tool/              # Utility tools
 ```
 
-### Creating a Basic Plugin
+**Creating a Basic Plugin**
 
 Create a file in `/src/plugins/[category]/[name].js`:
 
@@ -375,7 +367,7 @@ handler.command = /^(ping)$/i;
 export default handler;
 ```
 
-### Plugin Properties
+**Plugin Properties**
 
 - `handler.help` - Command names for help menu
 - `handler.tags` - Category tags
@@ -385,17 +377,18 @@ export default handler;
 - `handler.group` - Group-only command (optional)
 - `handler.admin` - Admin-only command (optional)
 
-### Learn More
+**Learn More**
 
-- **[PLUGINS.md](.github/PLUGINS.md)** - Complete plugin development guide
-- **[BUTTONS.md](.github/BUTTONS.md)** - Interactive buttons & rich media
-- **[API.md](.github/API.md)** - API integration & utilities
+- **[PLUGINS.md](PLUGINS.md)** - Complete plugin development guide
+- **[BUTTONS.md](BUTTONS.md)** - Interactive buttons & rich media
+- **[API.md](API.md)** - API integration & utilities
 
----
+<!-- Wave Footer Divider -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-## 🚀 Production Deployment
+*🚀 Production Deployment*
 
-### Using PM2
+**Using PM2**
 
 ```bash
 # Install PM2
@@ -414,7 +407,7 @@ pm2 startup
 pm2 monit
 ```
 
-### Using Systemd
+**Using Systemd**
 
 Service file auto-created by installer at `/etc/systemd/system/liora.service`
 
@@ -424,21 +417,23 @@ sudo systemctl enable liora
 sudo systemctl status liora
 ```
 
----
+<!-- Wave Footer Divider -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-## 📚 Documentation
+*📚 Documentation*
 
-- **[INSTALLATION.md](.github/INSTALLATION.md)** - Detailed installation guide
-- **[PLUGINS.md](.github/PLUGINS.md)** - Plugin development guide
-- **[BUTTONS.md](.github/BUTTONS.md)** - Interactive buttons & carousels
-- **[API.md](.github/API.md)** - API utilities & helpers
+- **[INSTALLATION.md](INSTALLATION.md)** - Detailed installation guide
+- **[PLUGINS.md](PLUGINS.md)** - Plugin development guide
+- **[BUTTONS.md](BUTTONS.md)** - Interactive buttons & carousels
+- **[API.md](API.md)** - API utilities & helpers
 - **[Contributing Guidelines](.github/CONTRIBUTING.md)** - How to contribute
 - **[Security Policy](.github/SECURITY.md)** - Report vulnerabilities
 - **[Code of Conduct](.github/CODE_OF_CONDUCT.md)** - Community standards
 
----
+<!-- Wave Footer Divider -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-## 🤝 Contributing
+*🤝 Contributing*
 
 <div align="center">
 
@@ -448,9 +443,10 @@ See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for details.
 
 </div>
 
----
+<!-- Wave Footer Divider -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-## 💬 Community
+*💬 Community*
 
 <div align="center">
 
@@ -491,7 +487,7 @@ on Discord
 
 </div>
 
-## 🔒 Security
+*🔒 Security*
 
 **Report vulnerabilities to:** liora.bot.official@gmail.com
 
@@ -500,22 +496,24 @@ on Discord
 
 See [SECURITY.md](.github/SECURITY.md) for our security policy.
 
----
+<!-- Wave Footer Divider -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-## 📄 License
+*📄 License*
 
 Licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for full details.
 
 > [!CAUTION]
 > Removing copyright notices or claiming original authorship violates the license and may result in legal action.
 
----
+<!-- Wave Footer Divider -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-## 💖 Acknowledgments
+*💖 Acknowledgments*
 
 **Built with passion by developers, for developers**
 
-### 🚀 Core Technologies
+**Core Technologies**
 
 <p align="left">
   <a href="https://bun.sh">
@@ -532,7 +530,7 @@ Licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for full detai
   </a>
 </p>
 
-### 🛠️ Development Tools
+**Development Tools**
 
 <p align="left">
   <a href="https://eslint.org/">
@@ -549,14 +547,15 @@ Licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for full detai
   </a>
 </p>
 
-### 🙏 Community & Contributors
+**Community & Contributors**
 
 - 💚 All [contributors](https://github.com/naruyaizumi/liora/graphs/contributors) who made this possible
 - 🌍 The amazing open-source community
 - ⭐ Everyone who starred this repository
 - 🐛 Bug reporters and feature requesters
 
----
+<!-- Wave Footer Divider -->
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
 <div align="center">
 
