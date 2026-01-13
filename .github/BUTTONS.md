@@ -17,29 +17,6 @@ Complete guide for creating interactive buttons, carousels, and albums in Liora.
 
 Liora supports 15+ types of interactive buttons for rich user experiences.
 
-### Button Types Overview
-
-```mermaid
-graph TD
-    A[Interactive Buttons] --> B[Action Buttons]
-    A --> C[Input Buttons]
-    A --> D[Navigation Buttons]
-    
-    B --> B1[Quick Reply]
-    B --> B2[CTA URL]
-    B --> B3[CTA Copy]
-    B --> B4[CTA Call]
-    
-    C --> C1[Address Message]
-    C --> C2[Send Location]
-    C --> C3[Reminder]
-    
-    D --> D1[Open Webview]
-    D --> D2[Catalog]
-    D --> D3[Marketplace]
-    D --> D4[Single Select]
-```
-
 ### 1. Quick Reply Button
 
 Creates a simple clickable button that sends a predefined response.

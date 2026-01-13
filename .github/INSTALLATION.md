@@ -60,19 +60,79 @@ curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh |
 **What it does:**
 
 ```mermaid
-graph LR
-    A[Start] --> B[Check System]
-    B --> C[Install Bun]
-    C --> D[Clone Repository]
-    D --> E[Install Dependencies]
-    E --> F[Setup Environment]
-    F --> G[Create Service]
-    G --> H[Done]
+graph TD
+    A[Start Installation<br/><sub>Initial Setup</sub>]
     
-    style A fill:#90EE90
-    style H fill:#90EE90
-    style D fill:#F7DF1E
-    style G fill:#4169E1
+    A --> B[System Check<br/><sub>OS & Requirements</sub>]
+    B --> C{System Supported?<br/><sub>OS Validation</sub>}
+    
+    C -->|Yes ✓| D[Install Bun Runtime<br/><sub>JavaScript Runtime</sub>]
+    C -->|No ✗| E[Error: Unsupported OS<br/><sub>Terminate Process</sub>]
+    
+    D --> F[Clone Repository<br/><sub>Git Clone</sub>]
+    F --> G[Install Dependencies<br/><sub>Package Installation</sub>]
+    G --> H[Configure Environment<br/><sub>Environment Variables</sub>]
+    
+    H --> I{Configuration Valid?<br/><sub>Validation Check</sub>}
+    I -->|Yes ✓| J[Setup System Service<br/><sub>Service Creation</sub>]
+    I -->|No ✗| K[Fix Configuration<br/><sub>Manual Correction</sub>]
+    
+    J --> L[Verify Installation<br/><sub>Health Check</sub>]
+    L --> M{Dependencies OK?<br/><sub>Integrity Check</sub>}
+    
+    M -->|Yes ✓| N[Start Application<br/><sub>Launch Service</sub>]
+    M -->|No ✗| O[Reinstall Dependencies<br/><sub>Clean Install</sub>]
+    
+    N --> P[Health Check<br/><sub>Service Monitoring</sub>]
+    P --> Q{Service Running?<br/><sub>Status Verification</sub>}
+    
+    Q -->|Yes ✓| R[Installation Complete ✓<br/><sub>Success State</sub>]
+    Q -->|No ✗| S[Troubleshoot Service<br/><sub>Debug Process</sub>]
+    
+    O --> G
+    K --> H
+    S --> J
+    E --> R
+    
+    style A fill:#e3f2fd,stroke:#2196f3,stroke-width:3px,color:#0d47a1
+    style B fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
+    style D fill:#fff3e0,stroke:#ff9800,stroke-width:3px,color:#e65100
+    style F fill:#e8f5e9,stroke:#4caf50,stroke-width:3px,color:#1b5e20
+    style G fill:#e8eaf6,stroke:#3f51b5,stroke-width:3px,color:#1a237e
+    style H fill:#f3e5f5,stroke:#9c27b0,stroke-width:3px,color:#4a148c
+    style J fill:#e0f2f1,stroke:#00695c,stroke-width:3px,color:#004d40
+    style L fill:#fff8e1,stroke:#ff8f00,stroke-width:3px,color:#ff6f00
+    style N fill:#e8f5e9,stroke:#2e7d32,stroke-width:3px,color:#1b5e20
+    style R fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#1b5e20
+    
+    style E fill:#ffcdd2,stroke:#d32f2f,stroke-width:3px,color:#b71c1c
+    style O fill:#ffecb3,stroke:#ffa000,stroke-width:3px,color:#ff6f00
+    style S fill:#ffecb3,stroke:#ffa000,stroke-width:3px,color:#ff6f00
+    
+    style C fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
+    style I fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
+    style M fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
+    style Q fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
+    
+    linkStyle 0 stroke:#2196f3,stroke-width:2px
+    linkStyle 1 stroke:#616161,stroke-width:2px
+    linkStyle 2 stroke:#ff9800,stroke-width:2px
+    linkStyle 3 stroke:#ff9800,stroke-width:2px
+    linkStyle 4 stroke:#4caf50,stroke-width:2px
+    linkStyle 5 stroke:#4caf50,stroke-width:2px
+    linkStyle 6 stroke:#3f51b5,stroke-width:2px
+    linkStyle 7 stroke:#3f51b5,stroke-width:2px
+    linkStyle 8 stroke:#9c27b0,stroke-width:2px
+    linkStyle 9 stroke:#9c27b0,stroke-width:2px
+    linkStyle 10 stroke:#00695c,stroke-width:2px
+    linkStyle 11 stroke:#00695c,stroke-width:2px
+    linkStyle 12 stroke:#ff8f00,stroke-width:2px
+    linkStyle 13 stroke:#ff8f00,stroke-width:2px
+    linkStyle 14 stroke:#2e7d32,stroke-width:2px
+    linkStyle 15 stroke:#2e7d32,stroke-width:2px
+    linkStyle 16 stroke:#ffa000,stroke-width:2px
+    linkStyle 17 stroke:#ffa000,stroke-width:2px
+    linkStyle 18 stroke:#d32f2f,stroke-width:2px
 ```
 
 **Installation steps:**
@@ -409,18 +469,36 @@ docker-compose down
 ```mermaid
 sequenceDiagram
     participant U as User
+    participant C as Console
     participant B as Bot
     participant WA as WhatsApp
 
-    U->>B: Start bot
-    B->>B: Generate pairing code
-    B-->>U: Display code (XXXX-XXXX)
-    U->>WA: Open WhatsApp
-    U->>WA: Linked Devices
-    U->>WA: Link a Device
-    U->>WA: Enter pairing code
-    WA->>B: Authenticate
-    B-->>U: Connection successful
+    U->>C: Start bot
+    C->>B: Initialize
+    
+    alt Session Exists
+        B->>WA: Restore connection
+        WA-->>B: Connected
+        B-->>C: Ready
+    else New Session
+        B-->>C: Show QR/Code
+        C-->>U: Pairing needed
+        
+        U->>WA: Open WhatsApp
+        U->>WA: Link device
+        U->>WA: Scan/Enter code
+        
+        WA->>B: Authenticate
+        WA-->>B: Session created
+        B-->>C: Connected
+    end
+    
+    C-->>U: Bot online
+    
+    U->>WA: Send message
+    WA->>B: Receive
+    B->>WA: Respond
+    WA->>U: Deliver
 ```
 
 **Steps:**

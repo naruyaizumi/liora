@@ -40,24 +40,42 @@ Liora is an enterprise-ready WhatsApp bot framework designed for developers who 
 
 ```mermaid
 graph TD
-    A[WhatsApp Messages] -->|WebSocket| B[Baileys Client]
-    B --> C[Message Handler]
-    C --> D{Command Parser}
-    D --> E[Plugin Manager]
-    E --> F[Plugin Execution]
-    F --> G[Response Handler]
-    G -->|Send Message| B
+    A[WhatsApp Messages<br/><sub>Input Stream</sub>] -->|WebSocket<br/>TLS 1.3| B[Baileys Client<br/><sub>Core Engine</sub>]
     
-    C --> H[Database Layer]
-    H --> I[(SQLite Auth)]
-    H --> J[(SQLite Data)]
+    B --> C[Message Handler<br/><sub>Middleware Layer</sub>]
     
-    E --> K[Dynamic Plugin Loader]
-    K --> L[Hot Reload System]
+    subgraph "Processing Pipeline"
+        C --> D{Command Parser<br/><sub>Decision Node</sub>}
+        D -->|Valid Command| E[Plugin Manager<br/><sub>Registry & Loader</sub>]
+        D -->|System Message| F[System Handler<br/><sub>Internal Services</sub>]
+    end
     
-    style B fill:#25D366
-    style E fill:#F7DF1E
-    style H fill:#003B57
+    E --> G((Plugin Executor<br/><sub>Runtime Environment</sub>))
+    
+    subgraph "Data Layer"
+        H[(SQLite Database<br/><sub>Persistence Store</sub>)]
+    end
+    
+    G --> I[Response Handler<br/><sub>Output Formatter</sub>]
+    F --> I
+    C --> H
+    E --> H
+    
+    I -->|API Response| B
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#0d47a1
+    style B fill:#f1f8e9,stroke:#558b2f,stroke-width:3px,color:#1b5e20
+    style C fill:#fff3e0,stroke:#ef6c00,stroke-width:3px,color:#e65100
+    style D fill:#fce4ec,stroke:#ad1457,stroke-width:3px,color:#880e4f,stroke-dasharray: 5 5
+    style E fill:#e8f5e9,stroke:#2e7d32,stroke-width:3px,color:#1b5e20
+    style F fill:#e8eaf6,stroke:#283593,stroke-width:3px,color:#1a237e
+    style G fill:#fff8e1,stroke:#ff8f00,stroke-width:3px,color:#ff6f00
+    style H cylinder,fill:#fafafa,stroke:#424242,stroke-width:3px,color:#212121
+    style I fill:#e0f7fa,stroke:#006064,stroke-width:3px,color:#004d40
+    
+    linkStyle default stroke:#616161,stroke-width:2px
+    linkStyle 0 stroke:#1976d2,stroke-width:3px
+    linkStyle 6 stroke:#558b2f,stroke-width:3px
 ```
 
 ### ✨ Key Features
@@ -140,24 +158,53 @@ Pairing code auth
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant WA as WhatsApp
-    participant B as Baileys
-    participant H as Handler
-    participant P as Plugin
+    participant WA as WhatsApp Server
+    participant B as Baileys Client
+    participant H as Message Handler
+    participant P as Plugin System
     participant DB as Database
+    participant C as Cache
+    participant L as Logger
 
-    U->>WA: Send Message
-    WA->>B: WebSocket Event
-    B->>H: Parse Message
-    H->>DB: Check Permissions
-    DB-->>H: User Data
-    H->>H: Match Command
-    H->>P: Execute Plugin
-    P->>DB: Store/Retrieve Data
-    P->>H: Generate Response
-    H->>B: Format Message
-    B->>WA: Send Response
-    WA->>U: Deliver Message
+    Note over U,WA: User Interaction Phase
+    U->>WA: Send Message (Text/Media)
+    WA->>B: WebSocket Event (Encrypted)
+    
+    Note over B,H: Processing Phase
+    B->>L: Log Incoming Message
+    B->>H: Decode & Parse Message
+    H->>C: Check Rate Limit
+    C-->>H: Allow/Block
+    H->>DB: Validate User Session
+    DB-->>H: Session Data
+    H->>H: Extract Command & Args
+    
+    alt Valid Command
+        H->>DB: Check User Permissions
+        DB-->>H: Permission Level
+        H->>P: Load Plugin
+        P->>DB: Query/Update Data
+        P->>P: Process Logic
+        P->>H: Response Data
+        
+        Note over H,B: Response Phase
+        H->>H: Format Response
+        H->>L: Log Action
+        H->>B: Prepared Message
+        B->>WA: Send via WebSocket
+        WA->>U: Deliver Response
+        
+    else Invalid/No Command
+        H->>H: System Handler
+        H->>B: Default Response
+        B->>WA: Send via WebSocket
+        WA->>U: Deliver Response
+    end
+    
+    Note right of DB: Data Persistence
+    DB->>DB: Commit Transaction
+    L->>L: Archive Logs
+    C->>C: Cleanup Expired
 ```
 
 ---
@@ -327,11 +374,6 @@ handler.command = /^(ping)$/i;
 
 export default handler;
 ```
-
-<p align="center">
-  <img src="https://files.catbox.moe/jjmlvd.jpg" width="270" alt="Ping Command"><br>
-  <em>Ping command response example</em>
-</p>
 
 ### Plugin Properties
 

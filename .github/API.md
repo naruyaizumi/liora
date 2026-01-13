@@ -21,20 +21,46 @@ Liora uses a robust fallback system that tries multiple API endpoints until one 
 
 ```mermaid
 graph TD
-    A[API Request] --> B[Try Endpoint 1]
-    B --> C{Success?}
-    C -->|Yes| D[Return Result]
-    C -->|No| E[Try Endpoint 2]
-    E --> F{Success?}
-    F -->|Yes| D
-    F -->|No| G[Try Endpoint 3]
-    G --> H{Success?}
-    H -->|Yes| D
-    H -->|No| I[All Failed]
-    I --> J[Return Error]
+    A[API Request<br/><sub>Client Input</sub>] --> B["Endpoint 1<br/><sub>Primary Source</sub>"]
+    B --> C{Status Check<br/><sub>200 OK?</sub>}
+    C -->|Success ✓| D["Process Data<br/><sub>Parse & Validate</sub>"]
+    D --> E["Return Result<br/><sub>Formatted Output</sub>"]
     
-    style D fill:#90EE90
-    style J fill:#FFB6C1
+    C -->|Failed ✗| F["Endpoint 2<br/><sub>Fallback 1</sub>"]
+    F --> G{Status Check<br/><sub>200 OK?</sub>}
+    G -->|Success ✓| D
+    
+    G -->|Failed ✗| H["Endpoint 3<br/><sub>Fallback 2</sub>"]
+    H --> I{Status Check<br/><sub>200 OK?</sub>}
+    I -->|Success ✓| D
+    
+    I -->|Failed ✗| J["Circuit Breaker<br/><sub>Failure Threshold</sub>"]
+    J --> K["Error Handler<br/><sub>Graceful Degradation</sub>"]
+    K --> L["Return Error<br/><sub>User-Friendly Message</sub>"]
+    
+    style A fill:#e3f2fd,stroke:#2196f3,stroke-width:3px,color:#0d47a1
+    style B fill:#e8f5e9,stroke:#4caf50,stroke-width:3px,color:#1b5e20
+    style F fill:#fff3e0,stroke:#ff9800,stroke-width:3px,color:#e65100
+    style H fill:#fce4ec,stroke:#e91e63,stroke-width:3px,color:#880e4f
+    style D fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#1b5e20
+    style E fill:#a5d6a7,stroke:#1b5e20,stroke-width:3px,color:#003300
+    style J fill:#ffecb3,stroke:#ffa000,stroke-width:3px,color:#ff6f00
+    style K fill:#ffcdd2,stroke:#d32f2f,stroke-width:3px,color:#b71c1c
+    style L fill:#ffcdd2,stroke:#c62828,stroke-width:3px,color:#8e0000
+    
+    style C fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
+    style G fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
+    style I fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
+    
+    linkStyle 0 stroke:#2196f3,stroke-width:2px
+    linkStyle 1 stroke:#4caf50,stroke-width:2px
+    linkStyle 2 stroke:#4caf50,stroke-width:2px
+    linkStyle 3 stroke:#ff9800,stroke-width:2px
+    linkStyle 4 stroke:#ff9800,stroke-width:2px
+    linkStyle 5 stroke:#e91e63,stroke-width:2px
+    linkStyle 6 stroke:#e91e63,stroke-width:2px
+    linkStyle 7 stroke:#ffa000,stroke-width:2px
+    linkStyle 8 stroke:#d32f2f,stroke-width:2px
 ```
 
 ### Example: Image Enhancement
