@@ -28,8 +28,6 @@
 
 </div>
 
-**Production-Grade WhatsApp Bot Framework**
-
 Built on Baileys • Powered by Bun Runtime • Written in JavaScript
 
 ---
@@ -38,21 +36,129 @@ Built on Baileys • Powered by Bun Runtime • Written in JavaScript
 
 Liora is an enterprise-ready WhatsApp bot framework designed for developers who demand **performance**, **reliability**, and **scalability**. Built with modern technologies and battle-tested architecture patterns.
 
+### 🏗️ Architecture Overview
+
+```mermaid
+graph TD
+    A[WhatsApp Messages] -->|WebSocket| B[Baileys Client]
+    B --> C[Message Handler]
+    C --> D{Command Parser}
+    D --> E[Plugin Manager]
+    E --> F[Plugin Execution]
+    F --> G[Response Handler]
+    G -->|Send Message| B
+    
+    C --> H[Database Layer]
+    H --> I[(SQLite Auth)]
+    H --> J[(SQLite Data)]
+    
+    E --> K[Dynamic Plugin Loader]
+    K --> L[Hot Reload System]
+    
+    style B fill:#25D366
+    style E fill:#F7DF1E
+    style H fill:#003B57
+```
+
 ### ✨ Key Features
 
-| Feature                     | Description                                                   |
-| --------------------------- | ------------------------------------------------------------- |
-| ⚡ **Bun Runtime**          | Ultra-fast JavaScript execution, up to 3x faster than Node.js |
-| 🎯 **Modern Architecture**  | ESM-first design with clean codebase                          |
-| 💾 **Lightweight Database** | Native `bun:sqlite`, no external services                     |
-| 📦 **Zero Bloat**           | Minimal dependencies for production                           |
-| 🌐 **Deploy Anywhere**      | Server, Pterodactyl, or containerized                         |
-| 🎨 **Rich Media**           | Buttons, carousels, albums, and stories support               |
-| 🔌 **Plugin System**        | Easy-to-extend modular architecture                           |
-| 🔐 **Pairing Code**         | No QR scanning needed                                         |
-| 🧩 **Modular Architecture** | Plugin-based design pattern for easy extensibility            |
-| 💎 **Zero Config**          | Works out of the box with sensible defaults                   |
-| 🎨 **Clean Code**           | Modern ESM, type-safe patterns, and best practices            |
+<table>
+<tr>
+<td align="center" width="33%">
+
+**⚡ Performance**
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/High%20Voltage.png" width="50" />
+
+Ultra-fast Bun runtime
+<br>3x faster than Node.js
+<br>Minimal dependencies
+
+</td>
+<td align="center" width="33%">
+
+**🎯 Architecture**
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Gear.png" width="50" />
+
+ESM-first design
+<br>Plugin-based system
+<br>Clean codebase
+
+</td>
+<td align="center" width="33%">
+
+**💾 Database**
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/File%20Folder.png" width="50" />
+
+Native bun:sqlite
+<br>No external services
+<br>Lightweight storage
+
+</td>
+</tr>
+<tr>
+<td align="center" width="33%">
+
+**🌐 Deployment**
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Globe%20Showing%20Europe-Africa.png" width="50" />
+
+Server ready
+<br>Container support
+<br>Pterodactyl compatible
+
+</td>
+<td align="center" width="33%">
+
+**🎨 Rich Media**
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Artist%20Palette.png" width="50" />
+
+Interactive buttons
+<br>Carousels & albums
+<br>Stories support
+
+</td>
+<td align="center" width="33%">
+
+**🔐 Security**
+
+<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Locked.png" width="50" />
+
+Pairing code auth
+<br>Owner-only commands
+<br>Command blocking
+
+</td>
+</tr>
+</table>
+
+### 🔄 Message Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant WA as WhatsApp
+    participant B as Baileys
+    participant H as Handler
+    participant P as Plugin
+    participant DB as Database
+
+    U->>WA: Send Message
+    WA->>B: WebSocket Event
+    B->>H: Parse Message
+    H->>DB: Check Permissions
+    DB-->>H: User Data
+    H->>H: Match Command
+    H->>P: Execute Plugin
+    P->>DB: Store/Retrieve Data
+    P->>H: Generate Response
+    H->>B: Format Message
+    B->>WA: Send Response
+    WA->>U: Deliver Message
+```
 
 ---
 
@@ -77,14 +183,11 @@ Liora is an enterprise-ready WhatsApp bot framework designed for developers who 
   <em>Carousel view for multiple items with interactive buttons</em>
 </p>
 
-<p align="center">
-  <img src="https://files.catbox.moe/jjmlvd.jpg" width="270" alt="Ping Command"><br>
-  <em>Ping command response example</em>
-</p>
-
 ---
 
 ## ⚡ Quick Start
+
+For detailed installation instructions, see **[INSTALLATION.md](.github/INSTALLATION.md)**
 
 ### Automated Installation for Linux (Ubuntu/Debian)
 
@@ -103,31 +206,7 @@ bot status  # Check status
 
 ### Manual Installation
 
-#### 1. Install Bun
-
-```bash
-curl -fsSL https://bun.sh/install | bash
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-bun --version
-```
-
-#### 2. Setup Project
-
-```bash
-git clone https://github.com/naruyaizumi/liora.git
-cd liora
-bun install
-cp .env.example .env
-nano .env  # Configure your settings
-```
-
-#### 3. Run the Bot
-
-```bash
-# Production
-bun start
-```
+See **[INSTALLATION.md](.github/INSTALLATION.md)** for comprehensive manual installation guide.
 
 ---
 
@@ -201,11 +280,26 @@ Liora supports multiple prefixes:
 
 ## 🔌 Plugin System
 
-### Creating a Plugin
+### Plugin Structure
 
-Plugins are located in `/src/plugins/` with category-based folders.
+```
+src/plugins/
+├── info/              # Information commands
+│   └── info-ping.js
+├── owner/             # Owner-only commands
+│   ├── owner-sf.js    # Save file
+│   ├── owner-df.js    # Delete file
+│   ├── owner-gf.js    # Get file
+│   └── owner-reload.js
+├── group/             # Group management
+├── downloader/        # Media downloaders
+├── ai/                # AI features
+└── tool/              # Utility tools
+```
 
-**Example Plugin:** `/src/plugins/info/info-ping.js`
+### Creating a Basic Plugin
+
+Create a file in `/src/plugins/[category]/[name].js`:
 
 ```javascript
 /**
@@ -234,16 +328,10 @@ handler.command = /^(ping)$/i;
 export default handler;
 ```
 
-### Plugin Structure
-
-```
-src/plugins/
-├── info/              # Information commands
-│   └── info-ping.js
-├── owner/             # Owner-only commands
-├── group/             # General commands
-└── tool/             # Utility tools
-```
+<p align="center">
+  <img src="https://files.catbox.moe/jjmlvd.jpg" width="270" alt="Ping Command"><br>
+  <em>Ping command response example</em>
+</p>
 
 ### Plugin Properties
 
@@ -252,6 +340,14 @@ src/plugins/
 - `handler.command` - RegExp pattern for command matching
 - `handler.owner` - Owner-only command (optional)
 - `handler.premium` - Premium-only command (optional)
+- `handler.group` - Group-only command (optional)
+- `handler.admin` - Admin-only command (optional)
+
+### Learn More
+
+- **[PLUGINS.md](.github/PLUGINS.md)** - Complete plugin development guide
+- **[BUTTONS.md](.github/BUTTONS.md)** - Interactive buttons & rich media
+- **[API.md](.github/API.md)** - API integration & utilities
 
 ---
 
@@ -290,6 +386,10 @@ sudo systemctl status liora
 
 ## 📚 Documentation
 
+- **[INSTALLATION.md](.github/INSTALLATION.md)** - Detailed installation guide
+- **[PLUGINS.md](.github/PLUGINS.md)** - Plugin development guide
+- **[BUTTONS.md](.github/BUTTONS.md)** - Interactive buttons & carousels
+- **[API.md](.github/API.md)** - API utilities & helpers
 - **[Contributing Guidelines](.github/CONTRIBUTING.md)** - How to contribute
 - **[Security Policy](.github/SECURITY.md)** - Report vulnerabilities
 - **[Code of Conduct](.github/CODE_OF_CONDUCT.md)** - Community standards
@@ -302,56 +402,7 @@ sudo systemctl status liora
 
 **Contributions are welcome!** 💖
 
-All types of contributions are valuable - bug fixes, features, docs, or feedback.
-
-We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for details.
-
-</div>
-
-### 📝 How to Contribute
-
-```bash
-# 1. Fork & Clone
-git clone https://github.com/YOUR_USERNAME/liora.git
-cd liora
-
-# 2. Create Branch
-git checkout -b feature/YourFeature
-
-# 3. Make Changes
-# - Follow code style
-# - Test changes
-# - Update docs
-```
-
-### 🚀 Submit Changes
-
-```bash
-# 4. Commit & Push
-git commit -m "✨ Add YourFeature"
-git push origin feature/YourFeature
-
-# 5. Open Pull Request
-# - Describe changes
-# - Link issues
-# - Wait for review
-```
-
-### 📋 Pull Request Checklist
-
-- [ ] Code follows the project's style guidelines
-- [ ] Tests added/updated and passing
-- [ ] Documentation updated (if applicable)
-- [ ] Commit messages are clear and descriptive
-- [ ] Branch is up to date with main/master
-
-<div align="center">
-
-### 🌟 Top Contributors
-
-<a href="https://github.com/naruyaizumi/liora/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=naruyaizumi/liora" alt="Contributors" />
-</a>
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for details.
 
 </div>
 
@@ -411,23 +462,7 @@ See [SECURITY.md](.github/SECURITY.md) for our security policy.
 
 ## 📄 License
 
-Licensed under the **Apache License 2.0**
-
-**You are free to:**
-
-- ✅ Use commercially
-- ✅ Modify the source
-- ✅ Distribute
-- ✅ Sublicense
-
-**You must:**
-
-- 📝 Include original copyright
-- 📝 Include Apache License 2.0
-- 📝 State changes made
-- 📝 Include NOTICE file
-
-See [LICENSE](LICENSE) for full details.
+Licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for full details.
 
 > [!CAUTION]
 > Removing copyright notices or claiming original authorship violates the license and may result in legal action.
@@ -469,25 +504,6 @@ See [LICENSE](LICENSE) for full details.
   </a>
   <a href="https://github.com/features/actions">
     <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white" alt="GitHub Actions" />
-  </a>
-</p>
-
-### 🤖 AI Assistants
-
-Special thanks to AI assistants that helped in development:
-
-<p align="left">
-  <a href="https://openai.com/chatgpt">
-    <img src="https://img.shields.io/badge/ChatGPT-74aa9c?style=for-the-badge&logo=openai&logoColor=white" alt="ChatGPT" />
-  </a>
-  <a href="https://github.com/features/copilot">
-    <img src="https://img.shields.io/badge/GitHub_Copilot-000000?style=for-the-badge&logo=github&logoColor=white" alt="Copilot" />
-  </a>
-  <a href="https://gemini.google.com/">
-    <img src="https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white" alt="Gemini" />
-  </a>
-  <a href="https://claude.ai/">
-    <img src="https://img.shields.io/badge/Claude-181818?style=for-the-badge&logo=anthropic&logoColor=white" alt="Claude" />
   </a>
 </p>
 
