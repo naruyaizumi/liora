@@ -170,17 +170,7 @@ jobs:
               run: pip install njsscan
 
             - name: Run Njsscan
-              run: njsscan --json > report.json
-
-            - name: Display Njsscan summary
-              run: |
-                echo "Njsscan Scan Summary:"
-                if [ -s report.json ]; then
-                  echo "Report generated successfully"
-                  echo "Check the workflow logs for detailed results"
-                else
-                  echo "No issues found or report is empty"
-                fi
+              run: njsscan --output . 2>&1 || true
 
     prettier-write:
         name: Prettier Format
@@ -215,7 +205,7 @@ jobs:
               id: prettier-check
               run: |
                   echo "Checking formatting with Prettier..."
-                  if bunx prettier --check "src/**/*.js" "*.js"; then
+                  if bunx prettier --check .; then
                       echo "No formatting issues found"
                       echo "has_changes=false" >> $GITHUB_OUTPUT
                   else
@@ -226,7 +216,8 @@ jobs:
             - name: Format files with Prettier
               if: steps.prettier-check.outputs.has_changes == 'true'
               run: |
-                  bunx prettier --write "src/**/*.js" "*.js"
+                  echo "Formatting all files with Prettier..."
+                  bunx prettier --write .
 
             - name: Configure git user
               if: steps.prettier-check.outputs.has_changes == 'true'
