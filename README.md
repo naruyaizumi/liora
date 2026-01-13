@@ -223,7 +223,7 @@ sequenceDiagram
 
 *⚡ Quick Start*
 
-For detailed installation instructions, see **[INSTALLATION.md](INSTALLATION.md)**
+For detailed installation instructions, see **[INSTALLATION.md](.github/INSTALLATION.md)**
 
 **Automated Installation for Linux (Ubuntu/Debian)**
 
@@ -242,7 +242,7 @@ bot status  # Check status
 
 **Manual Installation**
 
-See **[INSTALLATION.md](INSTALLATION.md)** for comprehensive manual installation guide.
+See **[INSTALLATION.md](.github/INSTALLATION.md)** for comprehensive manual installation guide.
 
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
@@ -379,9 +379,9 @@ export default handler;
 
 **Learn More**
 
-- **[PLUGINS.md](PLUGINS.md)** - Complete plugin development guide
-- **[BUTTONS.md](BUTTONS.md)** - Interactive buttons & rich media
-- **[API.md](API.md)** - API integration & utilities
+- **[PLUGINS.md](.github/PLUGINS.md)** - Complete plugin development guide
+- **[BUTTONS.md](.github/BUTTONS.md)** - Interactive buttons & rich media
+- **[API.md](.github/API.md)** - API integration & utilities
 
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
@@ -422,10 +422,10 @@ sudo systemctl status liora
 
 *📚 Documentation*
 
-- **[INSTALLATION.md](INSTALLATION.md)** - Detailed installation guide
-- **[PLUGINS.md](PLUGINS.md)** - Plugin development guide
-- **[BUTTONS.md](BUTTONS.md)** - Interactive buttons & carousels
-- **[API.md](API.md)** - API utilities & helpers
+- **[INSTALLATION.md](.github/INSTALLATION.md)** - Detailed installation guide
+- **[PLUGINS.md](.github/PLUGINS.md)** - Plugin development guide
+- **[BUTTONS.md](.github/BUTTONS.md)** - Interactive buttons & carousels
+- **[API.md](.github/API.md)** - API utilities & helpers
 - **[Contributing Guidelines](.github/CONTRIBUTING.md)** - How to contribute
 - **[Security Policy](.github/SECURITY.md)** - Report vulnerabilities
 - **[Code of Conduct](.github/CODE_OF_CONDUCT.md)** - Community standards
