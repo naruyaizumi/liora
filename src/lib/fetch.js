@@ -260,7 +260,9 @@ export async function s2b(s, o = {}) {
         if (e.name === 'AbortError') throw new Error('Timeout');
         throw e;
     } finally {
-        try { r.releaseLock(); } catch {}
+        try { r.releaseLock(); } catch {
+            //
+        }
     }
 }
 
@@ -341,7 +343,7 @@ export async function gpl(o = {}) {
 
         pc.set(ck, { d: pxs, t: Date.now() });
         return pxs;
-    } catch (e) {
+    } catch {
         if (ch) return ch.d;
         return [];
     }
@@ -363,7 +365,9 @@ export async function dft(bf, ct = '', u = '') {
     try {
         const dt = await fileTypeFromBuffer(bf);
         if (dt) return { m: dt.mime, e: dt.ext, c: dt.mime.split('/')[0], mt: 'sig' };
-    } catch {}
+    } catch {
+        //
+    }
 
     if (ct) {
         const pm = ct.split(';')[0].trim().toLowerCase();
@@ -444,14 +448,18 @@ export async function dft(bf, ct = '', u = '') {
             try {
                 JSON.parse(tr.length > 100000 ? tr.substring(0, 100000) : tr);
                 return { m: 'application/json', e: 'json', c: 'application', mt: 'cnt' };
-            } catch {}
+            } catch {
+                //
+            }
         }
 
         if (/^(import|export|const|let|var|function|class)\s/m.test(sp)) return { m: 'application/javascript', e: 'js', c: 'application', mt: 'cnt' };
         if (/[\w-]+\s*\{[^}]*\}/.test(sp)) return { m: 'text/css', e: 'css', c: 'text', mt: 'cnt' };
         if (/^#+\s|^\*\*|^\[.*\]\(.*\)/m.test(sp)) return { m: 'text/markdown', e: 'md', c: 'text', mt: 'cnt' };
         if (/^[\x20-\x7E\s]*$/.test(sp.substring(0, 1000))) return { m: 'text/plain', e: 'txt', c: 'text', mt: 'cnt' };
-    } catch {}
+    } catch {
+        //
+    }
 
     return { m, e, c, mt: 'def' };
 }
