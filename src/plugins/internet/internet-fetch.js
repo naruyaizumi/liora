@@ -53,7 +53,7 @@ function ft(tm) {
     const b = (ms, mx = 5000) => {
         const p = Math.min((ms / mx) * 100, 100);
         const f = Math.floor(p / 10);
-        return '▓'.repeat(f) + '░'.repeat(10 - f);
+        return "▓".repeat(f) + "░".repeat(10 - f);
     };
 
     return `Performance:
@@ -63,7 +63,7 @@ Fetch: ${tm.ft}ms ${b(tm.ft)}
 Download: ${tm.dl}ms ${b(tm.dl)}
 Process: ${tm.pr}ms ${b(tm.pr)}
 Total: ${tm.tt}ms ${b(tm.tt)}
-Speed: ${tm.dr || 'N/A'}`;
+Speed: ${tm.dr || "N/A"}`;
 }
 
 /**
@@ -75,7 +75,7 @@ Speed: ${tm.dr || 'N/A'}`;
  */
 function fm(md) {
     const l = [];
-    
+
     l.push(`Content Analysis:`);
     l.push(`Size: ${fb(md.sz)}`);
     l.push(`Type: ${md.dt.m}`);
@@ -86,7 +86,7 @@ function fm(md) {
     if (md.json) {
         l.push(``);
         l.push(`JSON:`);
-        l.push(`Valid: ${md.json.v ? 'Yes' : 'No'}`);
+        l.push(`Valid: ${md.json.v ? "Yes" : "No"}`);
         if (md.json.v) {
             l.push(`Type: ${md.json.t}`);
             if (md.json.kc) l.push(`Keys: ${md.json.kc}`);
@@ -134,7 +134,7 @@ function fm(md) {
         l.push(`Estimated Pages: ${md.pdf.pgs}`);
     }
 
-    return l.join('\n');
+    return l.join("\n");
 }
 
 /**
@@ -146,7 +146,7 @@ function fm(md) {
  */
 function fh(h) {
     const l = [`Response Headers:`];
-    
+
     if (h.ct) l.push(`Content-Type: ${h.ct}`);
     if (h.cl) l.push(`Content-Length: ${fb(parseInt(h.cl))}`);
     if (h.ce) l.push(`Content-Encoding: ${h.ce}`);
@@ -155,7 +155,7 @@ function fh(h) {
     if (h.lm) l.push(`Last-Modified: ${h.lm}`);
     if (h.et) l.push(`ETag: ${h.et}`);
 
-    return l.join('\n');
+    return l.join("\n");
 }
 
 /**
@@ -166,31 +166,31 @@ function fh(h) {
  * @returns {string} Formatted redirect chain
  */
 function fr(ch) {
-    if (!ch || ch.length === 0) return '';
-    
+    if (!ch || ch.length === 0) return "";
+
     const l = [`Redirect Chain (${ch.length}):`];
     ch.forEach((r, i) => {
         l.push(`${i + 1}. ${r.f}`);
         l.push(`-> ${r.t} (${r.s})`);
     });
-    
-    return l.join('\n') + '\n';
+
+    return l.join("\n") + "\n";
 }
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     const a = text?.trim().split(/\s+/) || [];
 
-    if (a[0] === 'cache') {
+    if (a[0] === "cache") {
         const s = gcs();
         return m.reply(`Cache: ${s.r} responses, ${s.ph} proxies, ${s.ck} cookies`);
     }
 
-    if (a[0] === 'clear') {
+    if (a[0] === "clear") {
         cc();
         return m.reply("Caches cleared");
     }
 
-    if (!a[0] || a[0] === 'help') {
+    if (!a[0] || a[0] === "help") {
         const hp = [
             "```",
             "URL FETCHER",
@@ -221,16 +221,16 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             "Commands:",
             `${usedPrefix + command} cache`,
             `${usedPrefix + command} clear`,
-            "```"
+            "```",
         ].join("\n");
         return m.reply(hp);
     }
 
     const u = a[0];
     const o = {
-        up: !a.includes('--no-proxy'),
-        cr: !a.includes('--no-cache'),
-        uc: !a.includes('--no-cookies'),
+        up: !a.includes("--no-proxy"),
+        cr: !a.includes("--no-cache"),
+        uc: !a.includes("--no-cookies"),
     };
 
     const go = (fg) => {
@@ -238,19 +238,19 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         return i !== -1 && a[i + 1] ? a[i + 1] : null;
     };
 
-    const to = go('--timeout');
+    const to = go("--timeout");
     if (to) o.to = parseInt(to) || 30000;
 
-    const ms = go('--max-size');
+    const ms = go("--max-size");
     if (ms) o.ms = parseInt(ms) || 100 * 1024 * 1024;
 
-    const rt = go('--retry');
+    const rt = go("--retry");
     if (rt) o.mr = parseInt(rt) || 3;
 
-    const mt = go('--method');
+    const mt = go("--method");
     if (mt) o.m = mt.toUpperCase();
 
-    const rf = go('--referer');
+    const rf = go("--referer");
     if (rf) o.r = rf;
 
     await global.loading(m, conn);
@@ -266,7 +266,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 `URL: ${u}`,
                 ...(r.fu && r.fu !== u ? [`Final URL: ${r.fu}`] : []),
                 ...(fr(r.rch) ? [fr(r.rch)] : []),
-                `Status: ${r.s || 'Failed'}`,
+                `Status: ${r.s || "Failed"}`,
                 `Error: ${r.er}`,
                 `Time: ${r.tm?.tt || 0}ms`,
                 ...(r.pu ? [`Proxy Used: ${r.pu}`] : []),
@@ -277,7 +277,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 ...(!o.up ? ["Enable proxy (remove --no-proxy)"] : []),
                 ...(o.to < 60000 ? ["Increase timeout (--timeout 60000)"] : []),
                 "Check URL accessibility",
-                "```"
+                "```",
             ].join("\n");
             return m.reply(e);
         }
@@ -298,7 +298,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             ...(pu ? [`Proxy: ${pu}`] : []),
             ...(at > 1 ? [`Attempt: ${at}`] : []),
             ...(fc ? [`Source: Cache`] : []),
-            ...(cmp !== 'none' ? [`Compression: ${cmp}`] : []),
+            ...(cmp !== "none" ? [`Compression: ${cmp}`] : []),
             ...(pt ? [`Protocol: ${pt}`] : []),
             ...(crs ? [`Cookies: ${crs.length} received`] : []),
             "",
@@ -309,8 +309,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             ft(tm),
             "",
             `Buffer: ${fb(bf.length)}`,
-            `Original Size: ${h.cl || 'unknown'}`,
-            "```"
+            `Original Size: ${h.cl || "unknown"}`,
+            "```",
         ].join("\n");
 
         const mime = md.dt.m;
@@ -320,52 +320,75 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         const opts = { quoted: m };
         const fn = `fetch_${Date.now()}.${ext}`;
 
-        if (ext === 'txt' || ext === 'json' || ext === 'md' || ext === 'xml' || ext === 'html' || ext === 'js' || ext === 'css') {
-            const tx = bf.toString('utf-8');
+        if (
+            ext === "txt" ||
+            ext === "json" ||
+            ext === "md" ||
+            ext === "xml" ||
+            ext === "html" ||
+            ext === "js" ||
+            ext === "css"
+        ) {
+            const tx = bf.toString("utf-8");
             const mx = 50000;
-            
+
             if (tx.length <= mx) {
-                await m.reply(cp + '\n\n```' + ext + '\n' + tx + '\n```');
+                await m.reply(cp + "\n\n```" + ext + "\n" + tx + "\n```");
             } else {
-                await m.reply(cp + '\n\nContent too large, sending as file...');
-                await conn.sendMessage(m.chat, {
+                await m.reply(cp + "\n\nContent too large, sending as file...");
+                await conn.sendMessage(
+                    m.chat,
+                    {
+                        document: bf,
+                        mimetype: mime,
+                        fileName: fn,
+                    },
+                    opts
+                );
+            }
+        } else if (cat === "image" && bf.length > 100) {
+            await conn.sendMessage(
+                m.chat,
+                {
+                    image: bf,
+                    caption: cp,
+                    jpegThumbnail: bf.length < 50000 ? bf : undefined,
+                },
+                opts
+            );
+        } else if (cat === "video" && bf.length > 1000) {
+            await conn.sendMessage(
+                m.chat,
+                {
+                    video: bf,
+                    caption: cp,
+                    mimetype: mime,
+                },
+                opts
+            );
+        } else if (cat === "audio" && bf.length > 100) {
+            await conn.sendMessage(
+                m.chat,
+                {
+                    audio: bf,
+                    mimetype: mime,
+                    fileName: fn,
+                },
+                opts
+            );
+            await m.reply(cp);
+        } else {
+            await conn.sendMessage(
+                m.chat,
+                {
                     document: bf,
                     mimetype: mime,
                     fileName: fn,
-                }, opts);
-            }
+                    caption: cp,
+                },
+                opts
+            );
         }
-        else if (cat === 'image' && bf.length > 100) {
-            await conn.sendMessage(m.chat, {
-                image: bf,
-                caption: cp,
-                jpegThumbnail: bf.length < 50000 ? bf : undefined
-            }, opts);
-        } 
-        else if (cat === 'video' && bf.length > 1000) {
-            await conn.sendMessage(m.chat, {
-                video: bf,
-                caption: cp,
-                mimetype: mime,
-            }, opts);
-        } 
-        else if (cat === 'audio' && bf.length > 100) {
-            await conn.sendMessage(m.chat, {
-                audio: bf,
-                mimetype: mime,
-                fileName: fn,
-            }, opts);
-            await m.reply(cp);
-        } 
-        else {
-            await conn.sendMessage(m.chat, {
-                document: bf,
-                mimetype: mime,
-                fileName: fn,
-                caption: cp,
-            }, opts);
-        }
-
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
@@ -379,8 +402,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
  * @property {Array<string>} tags - Command categories
  * @property {RegExp} command - Command pattern matching
  */
-handler.help = ['fetch'];
-handler.tags = ['internet'];
+handler.help = ["fetch"];
+handler.tags = ["internet"];
 handler.command = /^(fetch|get|curl|wget)$/i;
 
 export default handler;

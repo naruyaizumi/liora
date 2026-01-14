@@ -23,19 +23,19 @@ Creates a simple clickable button that sends a predefined response.
 
 ```javascript
 await conn.client(m.chat, {
-    text: 'Example message body',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example message body",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'quick_reply',
+            name: "quick_reply",
             buttonParamsJson: JSON.stringify({
-                display_text: 'Example Button',
-                id: 'example_button_id'
-            })
-        }
-    ]
+                display_text: "Example Button",
+                id: "example_button_id",
+            }),
+        },
+    ],
 });
 ```
 
@@ -45,20 +45,20 @@ Opens a URL when clicked, useful for external links.
 
 ```javascript
 await conn.client(m.chat, {
-    text: 'Example message body',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example message body",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'cta_url',
+            name: "cta_url",
             buttonParamsJson: JSON.stringify({
-                display_text: 'Example Button',
-                url: 'https://example.com',
-                merchant_url: 'https://example.com'
-            })
-        }
-    ]
+                display_text: "Example Button",
+                url: "https://example.com",
+                merchant_url: "https://example.com",
+            }),
+        },
+    ],
 });
 ```
 
@@ -68,19 +68,19 @@ Copies text to clipboard when clicked.
 
 ```javascript
 await conn.client(m.chat, {
-    text: 'Example message body',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example message body",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'cta_copy',
+            name: "cta_copy",
             buttonParamsJson: JSON.stringify({
-                display_text: 'Example Button',
-                copy_code: 'EXAMPLE123'
-            })
-        }
-    ]
+                display_text: "Example Button",
+                copy_code: "EXAMPLE123",
+            }),
+        },
+    ],
 });
 ```
 
@@ -90,19 +90,19 @@ Initiates a phone call when clicked.
 
 ```javascript
 await conn.client(m.chat, {
-    text: 'Example message body',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example message body",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'cta_call',
+            name: "cta_call",
             buttonParamsJson: JSON.stringify({
-                display_text: 'Example Button',
-                phone_number: '628123456789'
-            })
-        }
-    ]
+                display_text: "Example Button",
+                phone_number: "628123456789",
+            }),
+        },
+    ],
 });
 ```
 
@@ -112,18 +112,18 @@ Opens WhatsApp Business catalog.
 
 ```javascript
 await conn.client(m.chat, {
-    text: 'Example message body',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example message body",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'cta_catalog',
+            name: "cta_catalog",
             buttonParamsJson: JSON.stringify({
-                business_phone_number: '628123456789'
-            })
-        }
-    ]
+                business_phone_number: "628123456789",
+            }),
+        },
+    ],
 });
 ```
 
@@ -133,18 +133,18 @@ Sets a reminder for the user.
 
 ```javascript
 await conn.client(m.chat, {
-    text: 'Example message body',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example message body",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'cta_reminder',
+            name: "cta_reminder",
             buttonParamsJson: JSON.stringify({
-                display_text: 'Example Button'
-            })
-        }
-    ]
+                display_text: "Example Button",
+            }),
+        },
+    ],
 });
 ```
 
@@ -154,18 +154,18 @@ Cancels an existing reminder.
 
 ```javascript
 await conn.client(m.chat, {
-    text: 'Example message body',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example message body",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'cta_cancel_reminder',
+            name: "cta_cancel_reminder",
             buttonParamsJson: JSON.stringify({
-                display_text: 'Example Button'
-            })
-        }
-    ]
+                display_text: "Example Button",
+            }),
+        },
+    ],
 });
 ```
 
@@ -175,18 +175,18 @@ Requests address from the user.
 
 ```javascript
 await conn.client(m.chat, {
-    text: 'Example message body',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example message body",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'address_message',
+            name: "address_message",
             buttonParamsJson: JSON.stringify({
-                display_text: 'Example Button'
-            })
-        }
-    ]
+                display_text: "Example Button",
+            }),
+        },
+    ],
 });
 ```
 
@@ -196,18 +196,18 @@ Requests location from the user.
 
 ```javascript
 await conn.client(m.chat, {
-    text: 'Example message body',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example message body",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'send_location',
+            name: "send_location",
             buttonParamsJson: JSON.stringify({
-                display_text: 'Example Button'
-            })
-        }
-    ]
+                display_text: "Example Button",
+            }),
+        },
+    ],
 });
 ```
 
@@ -217,22 +217,22 @@ Opens a webview inside WhatsApp.
 
 ```javascript
 await conn.client(m.chat, {
-    text: 'Example message body',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example message body",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'open_webview',
+            name: "open_webview",
             buttonParamsJson: JSON.stringify({
-                title: 'Example Webview',
+                title: "Example Webview",
                 link: {
                     in_app_webview: true,
-                    url: 'https://example.com'
-                }
-            })
-        }
-    ]
+                    url: "https://example.com",
+                },
+            }),
+        },
+    ],
 });
 ```
 
@@ -242,18 +242,18 @@ Links to a product in WhatsApp marketplace.
 
 ```javascript
 await conn.client(m.chat, {
-    text: 'Example message body',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example message body",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'mpm',
+            name: "mpm",
             buttonParamsJson: JSON.stringify({
-                product_id: 'example_product_123'
-            })
-        }
-    ]
+                product_id: "example_product_123",
+            }),
+        },
+    ],
 });
 ```
 
@@ -263,49 +263,49 @@ Creates a dropdown selection menu.
 
 ```javascript
 await conn.client(m.chat, {
-    text: 'Example message body',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example message body",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'single_select',
+            name: "single_select",
             buttonParamsJson: JSON.stringify({
-                title: 'Example Menu',
+                title: "Example Menu",
                 sections: [
                     {
-                        title: 'Example Section 1',
-                        highlight_label: 'Popular',
+                        title: "Example Section 1",
+                        highlight_label: "Popular",
                         rows: [
                             {
-                                header: 'Example Header 1',
-                                title: 'Example Title 1',
-                                description: 'Example Description 1',
-                                id: 'example_option_1'
+                                header: "Example Header 1",
+                                title: "Example Title 1",
+                                description: "Example Description 1",
+                                id: "example_option_1",
                             },
                             {
-                                header: 'Example Header 2',
-                                title: 'Example Title 2',
-                                description: 'Example Description 2',
-                                id: 'example_option_2'
-                            }
-                        ]
+                                header: "Example Header 2",
+                                title: "Example Title 2",
+                                description: "Example Description 2",
+                                id: "example_option_2",
+                            },
+                        ],
                     },
                     {
-                        title: 'Example Section 2',
+                        title: "Example Section 2",
                         rows: [
                             {
-                                header: 'Example Header 3',
-                                title: 'Example Title 3',
-                                description: 'Example Description 3',
-                                id: 'example_option_3'
-                            }
-                        ]
-                    }
-                ]
-            })
-        }
-    ]
+                                header: "Example Header 3",
+                                title: "Example Title 3",
+                                description: "Example Description 3",
+                                id: "example_option_3",
+                            },
+                        ],
+                    },
+                ],
+            }),
+        },
+    ],
 });
 ```
 
@@ -319,23 +319,23 @@ Buttons can be combined with various media types.
 
 ```javascript
 await conn.client(m.chat, {
-    image: { 
-        url: 'https://via.placeholder.com/800x600?text=Example+Image'
+    image: {
+        url: "https://via.placeholder.com/800x600?text=Example+Image",
     },
-    caption: 'Example Caption',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    caption: "Example Caption",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'quick_reply',
+            name: "quick_reply",
             buttonParamsJson: JSON.stringify({
-                display_text: 'Example Button',
-                id: 'example_id'
-            })
-        }
+                display_text: "Example Button",
+                id: "example_id",
+            }),
+        },
     ],
-    hasMediaAttachment: true
+    hasMediaAttachment: true,
 });
 ```
 
@@ -343,23 +343,23 @@ await conn.client(m.chat, {
 
 ```javascript
 await conn.client(m.chat, {
-    video: { 
-        url: 'https://example.com/video.mp4'
+    video: {
+        url: "https://example.com/video.mp4",
     },
-    caption: 'Example Caption',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    caption: "Example Caption",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'quick_reply',
+            name: "quick_reply",
             buttonParamsJson: JSON.stringify({
-                display_text: 'Example Button',
-                id: 'example_id'
-            })
-        }
+                display_text: "Example Button",
+                id: "example_id",
+            }),
+        },
     ],
-    hasMediaAttachment: true
+    hasMediaAttachment: true,
 });
 ```
 
@@ -367,25 +367,25 @@ await conn.client(m.chat, {
 
 ```javascript
 await conn.client(m.chat, {
-    document: { 
-        url: 'https://example.com/document.pdf'
+    document: {
+        url: "https://example.com/document.pdf",
     },
-    mimetype: 'application/pdf',
-    jpegThumbnail: await conn.resize('https://via.placeholder.com/320x320', 320, 320),
-    caption: 'Example Caption',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    mimetype: "application/pdf",
+    jpegThumbnail: await conn.resize("https://via.placeholder.com/320x320", 320, 320),
+    caption: "Example Caption",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'quick_reply',
+            name: "quick_reply",
             buttonParamsJson: JSON.stringify({
-                display_text: 'Example Button',
-                id: 'example_id'
-            })
-        }
+                display_text: "Example Button",
+                id: "example_id",
+            }),
+        },
     ],
-    hasMediaAttachment: true
+    hasMediaAttachment: true,
 });
 ```
 
@@ -393,25 +393,25 @@ await conn.client(m.chat, {
 
 ```javascript
 await conn.client(m.chat, {
-    location: { 
-        degreesLatitude: -6.200000,
+    location: {
+        degreesLatitude: -6.2,
         degreesLongitude: 106.816666,
-        name: 'Example Location'
+        name: "Example Location",
     },
-    caption: 'Example Caption',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    caption: "Example Caption",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'quick_reply',
+            name: "quick_reply",
             buttonParamsJson: JSON.stringify({
-                display_text: 'Example Button',
-                id: 'example_id'
-            })
-        }
+                display_text: "Example Button",
+                id: "example_id",
+            }),
+        },
     ],
-    hasMediaAttachment: true
+    hasMediaAttachment: true,
 });
 ```
 
@@ -420,33 +420,33 @@ await conn.client(m.chat, {
 ```javascript
 await conn.client(m.chat, {
     product: {
-        productImage: { 
-            url: 'https://via.placeholder.com/800x600?text=Product'
+        productImage: {
+            url: "https://via.placeholder.com/800x600?text=Product",
         },
-        productId: 'example_product_123',
-        title: 'Example Product',
-        description: 'Example Description',
-        currencyCode: 'USD',
-        priceAmount1000: '50000',
-        retailerId: 'example_retailer',
-        url: 'https://example.com',
-        productImageCount: 1
+        productId: "example_product_123",
+        title: "Example Product",
+        description: "Example Description",
+        currencyCode: "USD",
+        priceAmount1000: "50000",
+        retailerId: "example_retailer",
+        url: "https://example.com",
+        productImageCount: 1,
     },
-    businessOwnerJid: '628123456789@s.whatsapp.net',
-    caption: 'Example Caption',
-    title: 'Example Title',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    businessOwnerJid: "628123456789@s.whatsapp.net",
+    caption: "Example Caption",
+    title: "Example Title",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     interactiveButtons: [
         {
-            name: 'quick_reply',
+            name: "quick_reply",
             buttonParamsJson: JSON.stringify({
-                display_text: 'Example Button',
-                id: 'example_id'
-            })
-        }
+                display_text: "Example Button",
+                id: "example_id",
+            }),
+        },
     ],
-    hasMediaAttachment: true
+    hasMediaAttachment: true,
 });
 ```
 
@@ -460,53 +460,53 @@ Carousel messages display multiple cards that users can swipe through horizontal
 
 ```javascript
 await conn.client(m.chat, {
-    text: 'Example carousel message',
-    title: 'Example Carousel',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example carousel message",
+    title: "Example Carousel",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     cards: [
         {
-            image: { 
-                url: 'https://via.placeholder.com/800x600?text=Card+1'
+            image: {
+                url: "https://via.placeholder.com/800x600?text=Card+1",
             },
-            title: 'Example Card 1',
-            body: 'Example card 1 description',
-            footer: 'Example Footer 1',
+            title: "Example Card 1",
+            body: "Example card 1 description",
+            footer: "Example Footer 1",
             buttons: [
                 {
-                    name: 'quick_reply',
+                    name: "quick_reply",
                     buttonParamsJson: JSON.stringify({
-                        display_text: 'Example Button 1',
-                        id: 'example_card_1'
-                    })
+                        display_text: "Example Button 1",
+                        id: "example_card_1",
+                    }),
                 },
                 {
-                    name: 'cta_url',
+                    name: "cta_url",
                     buttonParamsJson: JSON.stringify({
-                        display_text: 'Example URL',
-                        url: 'https://example.com/1'
-                    })
-                }
-            ]
+                        display_text: "Example URL",
+                        url: "https://example.com/1",
+                    }),
+                },
+            ],
         },
         {
-            image: { 
-                url: 'https://via.placeholder.com/800x600?text=Card+2'
+            image: {
+                url: "https://via.placeholder.com/800x600?text=Card+2",
             },
-            title: 'Example Card 2',
-            body: 'Example card 2 description',
-            footer: 'Example Footer 2',
+            title: "Example Card 2",
+            body: "Example card 2 description",
+            footer: "Example Footer 2",
             buttons: [
                 {
-                    name: 'quick_reply',
+                    name: "quick_reply",
                     buttonParamsJson: JSON.stringify({
-                        display_text: 'Example Button 2',
-                        id: 'example_card_2'
-                    })
-                }
-            ]
-        }
-    ]
+                        display_text: "Example Button 2",
+                        id: "example_card_2",
+                    }),
+                },
+            ],
+        },
+    ],
 });
 ```
 
@@ -514,46 +514,46 @@ await conn.client(m.chat, {
 
 ```javascript
 await conn.client(m.chat, {
-    text: 'Example video carousel',
-    title: 'Example Videos',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example video carousel",
+    title: "Example Videos",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     cards: [
         {
-            video: { 
-                url: 'https://example.com/video1.mp4'
+            video: {
+                url: "https://example.com/video1.mp4",
             },
-            title: 'Example Video 1',
-            body: 'Example video description',
-            footer: 'Example Footer',
+            title: "Example Video 1",
+            body: "Example video description",
+            footer: "Example Footer",
             buttons: [
                 {
-                    name: 'quick_reply',
+                    name: "quick_reply",
                     buttonParamsJson: JSON.stringify({
-                        display_text: 'Example Play',
-                        id: 'example_play_1'
-                    })
-                }
-            ]
+                        display_text: "Example Play",
+                        id: "example_play_1",
+                    }),
+                },
+            ],
         },
         {
-            video: { 
-                url: 'https://example.com/video2.mp4'
+            video: {
+                url: "https://example.com/video2.mp4",
             },
-            title: 'Example Video 2',
-            body: 'Example video description',
-            footer: 'Example Footer',
+            title: "Example Video 2",
+            body: "Example video description",
+            footer: "Example Footer",
             buttons: [
                 {
-                    name: 'quick_reply',
+                    name: "quick_reply",
                     buttonParamsJson: JSON.stringify({
-                        display_text: 'Example Play',
-                        id: 'example_play_2'
-                    })
-                }
-            ]
-        }
-    ]
+                        display_text: "Example Play",
+                        id: "example_play_2",
+                    }),
+                },
+            ],
+        },
+    ],
 });
 ```
 
@@ -562,63 +562,63 @@ await conn.client(m.chat, {
 ```javascript
 import { readFile } from "node:fs/promises";
 
-const imageBuffer = await readFile('./images/example.jpg');
-const videoBuffer = await readFile('./videos/example.mp4');
+const imageBuffer = await readFile("./images/example.jpg");
+const videoBuffer = await readFile("./videos/example.mp4");
 
 await conn.client(m.chat, {
-    text: 'Example mixed carousel',
-    title: 'Example Gallery',
-    subtitle: 'Example Subtitle',
-    footer: 'Example Footer',
+    text: "Example mixed carousel",
+    title: "Example Gallery",
+    subtitle: "Example Subtitle",
+    footer: "Example Footer",
     cards: [
         {
             image: imageBuffer,
-            title: 'Example Image Card',
-            body: 'Example description',
-            footer: 'Example Footer',
+            title: "Example Image Card",
+            body: "Example description",
+            footer: "Example Footer",
             buttons: [
                 {
-                    name: 'quick_reply',
+                    name: "quick_reply",
                     buttonParamsJson: JSON.stringify({
-                        display_text: 'Example Select',
-                        id: 'example_image'
-                    })
-                }
-            ]
+                        display_text: "Example Select",
+                        id: "example_image",
+                    }),
+                },
+            ],
         },
         {
             video: videoBuffer,
-            title: 'Example Video Card',
-            body: 'Example description',
-            footer: 'Example Footer',
+            title: "Example Video Card",
+            body: "Example description",
+            footer: "Example Footer",
             buttons: [
                 {
-                    name: 'quick_reply',
+                    name: "quick_reply",
                     buttonParamsJson: JSON.stringify({
-                        display_text: 'Example Watch',
-                        id: 'example_video'
-                    })
-                }
-            ]
+                        display_text: "Example Watch",
+                        id: "example_video",
+                    }),
+                },
+            ],
         },
         {
-            image: { 
-                url: 'https://via.placeholder.com/800x600?text=Card+3'
+            image: {
+                url: "https://via.placeholder.com/800x600?text=Card+3",
             },
-            title: 'Example URL Card',
-            body: 'Example description',
-            footer: 'Example Footer',
+            title: "Example URL Card",
+            body: "Example description",
+            footer: "Example Footer",
             buttons: [
                 {
-                    name: 'cta_url',
+                    name: "cta_url",
                     buttonParamsJson: JSON.stringify({
-                        display_text: 'Example Visit',
-                        url: 'https://example.com'
-                    })
-                }
-            ]
-        }
-    ]
+                        display_text: "Example Visit",
+                        url: "https://example.com",
+                    }),
+                },
+            ],
+        },
+    ],
 });
 ```
 
@@ -631,75 +631,75 @@ Album messages send multiple media files in a single message that can be swiped 
 ### Image Album
 
 ```javascript
-await conn.client(m.chat, { 
+await conn.client(m.chat, {
     album: [
         {
-            image: { 
-                url: 'https://via.placeholder.com/800x600?text=Image+1'
+            image: {
+                url: "https://via.placeholder.com/800x600?text=Image+1",
             },
-            caption: 'Example Caption 1'
+            caption: "Example Caption 1",
         },
         {
-            image: { 
-                url: 'https://via.placeholder.com/800x600?text=Image+2'
+            image: {
+                url: "https://via.placeholder.com/800x600?text=Image+2",
             },
-            caption: 'Example Caption 2'
+            caption: "Example Caption 2",
         },
         {
-            image: { 
-                url: 'https://via.placeholder.com/800x600?text=Image+3'
+            image: {
+                url: "https://via.placeholder.com/800x600?text=Image+3",
             },
-            caption: 'Example Caption 3'
-        }
-    ]
+            caption: "Example Caption 3",
+        },
+    ],
 });
 ```
 
 ### Video Album
 
 ```javascript
-await conn.client(m.chat, { 
+await conn.client(m.chat, {
     album: [
         {
-            video: { 
-                url: 'https://example.com/video1.mp4'
+            video: {
+                url: "https://example.com/video1.mp4",
             },
-            caption: 'Example Video 1'
+            caption: "Example Video 1",
         },
         {
-            video: { 
-                url: 'https://example.com/video2.mp4'
+            video: {
+                url: "https://example.com/video2.mp4",
             },
-            caption: 'Example Video 2'
-        }
-    ]
+            caption: "Example Video 2",
+        },
+    ],
 });
 ```
 
 ### Mixed Media Album
 
 ```javascript
-await conn.client(m.chat, { 
+await conn.client(m.chat, {
     album: [
         {
-            image: { 
-                url: 'https://via.placeholder.com/800x600?text=Image'
+            image: {
+                url: "https://via.placeholder.com/800x600?text=Image",
             },
-            caption: 'Example Image'
+            caption: "Example Image",
         },
         {
-            video: { 
-                url: 'https://example.com/video.mp4'
+            video: {
+                url: "https://example.com/video.mp4",
             },
-            caption: 'Example Video'
+            caption: "Example Video",
         },
         {
-            image: { 
-                url: 'https://via.placeholder.com/800x600?text=Image+2'
+            image: {
+                url: "https://via.placeholder.com/800x600?text=Image+2",
             },
-            caption: 'Example Image 2'
-        }
-    ]
+            caption: "Example Image 2",
+        },
+    ],
 });
 ```
 
@@ -708,25 +708,25 @@ await conn.client(m.chat, {
 ```javascript
 import { readFile } from "node:fs/promises";
 
-const image1 = await readFile('./images/photo1.jpg');
-const image2 = await readFile('./images/photo2.jpg');
-const video1 = await readFile('./videos/clip1.mp4');
+const image1 = await readFile("./images/photo1.jpg");
+const image2 = await readFile("./images/photo2.jpg");
+const video1 = await readFile("./videos/clip1.mp4");
 
-await conn.client(m.chat, { 
+await conn.client(m.chat, {
     album: [
         {
             image: image1,
-            caption: 'Example Local Image 1'
+            caption: "Example Local Image 1",
         },
         {
             image: image2,
-            caption: 'Example Local Image 2'
+            caption: "Example Local Image 2",
         },
         {
             video: video1,
-            caption: 'Example Local Video'
-        }
-    ]
+            caption: "Example Local Video",
+        },
+    ],
 });
 ```
 

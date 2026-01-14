@@ -34,8 +34,8 @@ FN:Naruya
 X-WA-BIZ-NAME:mkfs.ext4 /dev/naruyaizumi
 X-WA-BIZ-DESCRIPTION:𝙊𝙬𝙣𝙚𝙧 𝙤𝙛 𝙇𝙞𝙤𝙧𝙖 𝙎𝙘𝙧𝙞𝙥𝙩
 TEL;waid=6283143663697:+62 831-4366-3697
-END:VCARD`
-    
+END:VCARD`;
+
     /*
     const q = {
         key: {
@@ -51,7 +51,7 @@ END:VCARD`
         },
     };
     */
-    
+
     const q = {
         key: {
             fromMe: false,
@@ -68,7 +68,7 @@ END:VCARD`
                                 currency: "IDR",
                                 total_amount: {
                                     value: 999999999999999,
-                                    offset: 0
+                                    offset: 0,
                                 },
                                 reference_id: "NARUYAIZUMI",
                                 type: "physical-goods",
@@ -76,43 +76,45 @@ END:VCARD`
                                     status: "pending",
                                     subtotal: {
                                         value: 999999999999999,
-                                        offset: 0
+                                        offset: 0,
                                     },
                                     order_type: "ORDER",
                                     items: [
-                                    {
-                                        name: "naruyaizumi",
-                                        amount: {
-                                            value: 999999999999999,
-                                            offset: 0
+                                        {
+                                            name: "naruyaizumi",
+                                            amount: {
+                                                value: 999999999999999,
+                                                offset: 0,
+                                            },
+                                            quantity: 1,
+                                            sale_amount: {
+                                                value: 999999999999999,
+                                                offset: 0,
+                                            },
                                         },
-                                        quantity: 1,
-                                        sale_amount: {
-                                            value: 999999999999999,
-                                            offset: 0
-                                        }
-                                    }]
+                                    ],
                                 },
                                 payment_settings: [
-                                {
-                                    type: "pix_static_code",
-                                    pix_static_code: {
-                                        merchant_name: "naruyaizumi",
-                                        key: "mkfs.ext4 /dev/naruyaizumi",
-                                        key_type: "EVP"
-                                    }
-                                }],
-                                share_payment_status: false
-                            })
+                                    {
+                                        type: "pix_static_code",
+                                        pix_static_code: {
+                                            merchant_name: "naruyaizumi",
+                                            key: "mkfs.ext4 /dev/naruyaizumi",
+                                            key_type: "EVP",
+                                        },
+                                    },
+                                ],
+                                share_payment_status: false,
+                            }),
                         },
-                        length: 1
-                    }
-                }
-            }
+                        length: 1,
+                    },
+                },
+            },
         },
-        participant: "13135550002@s.whatsapp.net"
-    }
-    
+        participant: "13135550002@s.whatsapp.net",
+    };
+
     await conn.sendMessage(
         m.chat,
         {
@@ -127,13 +129,14 @@ END:VCARD`
                     mediaType: 1,
                     thumbnailUrl: "https://files.catbox.moe/8tw69l.jpeg",
                     renderLargerThumbnail: true,
-                    
+
                     showAdAttribution: true,
-                    sourceUrl: "https://wa.me/6283143663697"
-                }
+                    sourceUrl: "https://wa.me/6283143663697",
+                },
             },
-        }, { quoted: q }
-    )
+        },
+        { quoted: q }
+    );
 };
 
 /**

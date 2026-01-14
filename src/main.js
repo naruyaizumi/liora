@@ -218,7 +218,7 @@ async function LIORA() {
      * @type {Object}
      */
     global.logger.info({ version: v.join(".") }, "Baileys version loaded");
-    
+
     const opt = {
         version: v,
         logger: logger(),

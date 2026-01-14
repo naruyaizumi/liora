@@ -1,5 +1,5 @@
 /**
- * @file Advanced HTTP fetching utility with cookie management, proxy support, 
+ * @file Advanced HTTP fetching utility with cookie management, proxy support,
  * content analysis, and performance metrics.
  * @module fetch
  * @license Apache-2.0
@@ -46,25 +46,25 @@ class CJ {
         const hs = Array.isArray(h) ? h : [h];
 
         for (const ck of hs) {
-            const pts = ck.split(';').map(s => s.trim());
+            const pts = ck.split(";").map((s) => s.trim());
             const [nv] = pts;
-            const [n, v] = nv.split('=');
+            const [n, v] = nv.split("=");
             if (!n) continue;
 
-            const cd = { v: v || '', d: d, p: '/', s: false, h: false, ss: 'Lax', e: null };
+            const cd = { v: v || "", d: d, p: "/", s: false, h: false, ss: "Lax", e: null };
 
             for (let i = 1; i < pts.length; i++) {
                 const a = pts[i];
-                const [k, val] = a.split('=').map(s => s?.trim());
+                const [k, val] = a.split("=").map((s) => s?.trim());
                 const lk = k?.toLowerCase();
 
-                if (lk === 'domain' && val) cd.d = val.startsWith('.') ? val.slice(1) : val;
-                else if (lk === 'path' && val) cd.p = val;
-                else if (lk === 'secure') cd.s = true;
-                else if (lk === 'httponly') cd.h = true;
-                else if (lk === 'samesite' && val) cd.ss = val;
-                else if (lk === 'expires' && val) cd.e = new Date(val);
-                else if (lk === 'max-age' && val) {
+                if (lk === "domain" && val) cd.d = val.startsWith(".") ? val.slice(1) : val;
+                else if (lk === "path" && val) cd.p = val;
+                else if (lk === "secure") cd.s = true;
+                else if (lk === "httponly") cd.h = true;
+                else if (lk === "samesite" && val) cd.ss = val;
+                else if (lk === "expires" && val) cd.e = new Date(val);
+                else if (lk === "max-age" && val) {
                     const ma = parseInt(val);
                     if (!isNaN(ma)) cd.e = new Date(Date.now() + ma * 1000);
                 }
@@ -92,15 +92,15 @@ class CJ {
                 continue;
             }
 
-            const dm = hn === ck.d || hn.endsWith('.' + ck.d) || ck.d.endsWith('.' + hn);
+            const dm = hn === ck.d || hn.endsWith("." + ck.d) || ck.d.endsWith("." + hn);
             if (!dm) continue;
             if (!pn.startsWith(ck.p)) continue;
-            if (ck.s && uo.protocol !== 'https:') continue;
+            if (ck.s && uo.protocol !== "https:") continue;
 
             vcs.push(`${ck.n}=${ck.v}`);
         }
 
-        return vcs.join('; ');
+        return vcs.join("; ");
     }
 
     /**
@@ -139,27 +139,27 @@ export function fb(b, d = 2) {
  */
 function gfp() {
     const pfs = [
-        { o: 'Windows NT 10.0; Win64; x64', p: 'Windows' },
-        { o: 'Macintosh; Intel Mac OS X 10_15_7', p: 'macOS' },
-        { o: 'X11; Linux x86_64', p: 'Linux' }
+        { o: "Windows NT 10.0; Win64; x64", p: "Windows" },
+        { o: "Macintosh; Intel Mac OS X 10_15_7", p: "macOS" },
+        { o: "X11; Linux x86_64", p: "Linux" },
     ];
-    
+
     const brs = [
-        { n: 'Chrome', mv: 120, xv: 124 },
-        { n: 'Firefox', mv: 120, xv: 124 },
-        { n: 'Safari', mv: 17, xv: 18 }
+        { n: "Chrome", mv: 120, xv: 124 },
+        { n: "Firefox", mv: 120, xv: 124 },
+        { n: "Safari", mv: 17, xv: 18 },
     ];
-    
+
     const pf = pfs[Math.floor(Math.random() * pfs.length)];
     const br = brs[Math.floor(Math.random() * brs.length)];
     const vr = Math.floor(Math.random() * (br.xv - br.mv + 1)) + br.mv;
-    
+
     return {
         p: pf.p,
         b: br.n,
         v: vr,
         o: pf.o,
-        ua: `Mozilla/5.0 (${pf.o}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${vr}.0.0.0 Safari/537.36`
+        ua: `Mozilla/5.0 (${pf.o}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${vr}.0.0.0 Safari/537.36`,
     };
 }
 
@@ -177,20 +177,20 @@ function gfp() {
 export function gbh(u, o = {}) {
     const fp = gfp();
     const uo = new URL(u);
-    
+
     const h = {
         "User-Agent": fp.ua,
-        "Accept": "*/*",
+        Accept: "*/*",
         "Accept-Language": "en-US,en;q=0.9,id;q=0.8,ja;q=0.7",
         "Accept-Encoding": "gzip, deflate, br, zstd",
         "Cache-Control": "no-cache",
-        "Pragma": "no-cache",
-        "DNT": "1",
-        "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1"
+        Pragma: "no-cache",
+        DNT: "1",
+        Connection: "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
     };
 
-    if (uo.protocol === 'https:') {
+    if (uo.protocol === "https:") {
         h["Sec-Ch-Ua"] = `"Not_A Brand";v="8", "Chromium";v="${fp.v}"`;
         h["Sec-Ch-Ua-Mobile"] = "?0";
         h["Sec-Ch-Ua-Platform"] = `"${fp.p}"`;
@@ -200,9 +200,9 @@ export function gbh(u, o = {}) {
         h["Sec-Fetch-User"] = "?1";
     }
 
-    if (o.m && ['POST', 'PUT', 'PATCH'].includes(o.m.toUpperCase())) {
+    if (o.m && ["POST", "PUT", "PATCH"].includes(o.m.toUpperCase())) {
         h["Origin"] = uo.origin;
-        h["Referer"] = o.r || uo.origin + '/';
+        h["Referer"] = o.r || uo.origin + "/";
         h["Content-Type"] = o.ct || "application/x-www-form-urlencoded";
     }
 
@@ -228,7 +228,7 @@ export function gbh(u, o = {}) {
 export async function s2b(s, o = {}) {
     const ms = o.ms || 100 * 1024 * 1024;
     const op = o.op;
-    
+
     const chs = [];
     const r = s.getReader();
     let rsz = 0;
@@ -257,10 +257,12 @@ export async function s2b(s, o = {}) {
 
         return Buffer.from(cb);
     } catch (e) {
-        if (e.name === 'AbortError') throw new Error('Timeout');
+        if (e.name === "AbortError") throw new Error("Timeout");
         throw e;
     } finally {
-        try { r.releaseLock(); } catch {
+        try {
+            r.releaseLock();
+        } catch {
             //
         }
     }
@@ -275,17 +277,17 @@ export async function s2b(s, o = {}) {
 async function chp(px) {
     const ck = `${px.ip}:${px.port}`;
     const ch = hc.get(ck);
-    
+
     if (ch && Date.now() - ch.t < 5 * 60 * 1000) return ch.h;
 
     try {
         const ac = new AbortController();
         const to = setTimeout(() => ac.abort(), 5000);
 
-        const res = await fetch('https://httpbin.org/ip', {
-            method: 'GET',
+        const res = await fetch("https://httpbin.org/ip", {
+            method: "GET",
             signal: ac.signal,
-            headers: { 'User-Agent': 'Mozilla/5.0' }
+            headers: { "User-Agent": "Mozilla/5.0" },
         });
 
         clearTimeout(to);
@@ -306,39 +308,40 @@ async function chp(px) {
  * @returns {Promise<Array>} Array of proxy objects
  */
 export async function gpl(o = {}) {
-    const ck = 'pxl';
+    const ck = "pxl";
     const ch = pc.get(ck);
-    
+
     if (ch && Date.now() - ch.t < 10 * 60 * 1000) return ch.d;
 
     try {
         const ac = new AbortController();
         const to = setTimeout(() => ac.abort(), 15000);
 
-        const res = await fetch('https://api.nekolabs.web.id/tools/free-proxy', {
-            signal: ac.signal
+        const res = await fetch("https://api.nekolabs.web.id/tools/free-proxy", {
+            signal: ac.signal,
         });
 
         clearTimeout(to);
         if (!res.ok) throw new Error(`API ${res.status}`);
 
         const dt = await res.json();
-        if (!dt.success || !Array.isArray(dt.result)) throw new Error('Invalid API');
+        if (!dt.success || !Array.isArray(dt.result)) throw new Error("Invalid API");
 
-        let pxs = dt.result.filter(p => p.https === "yes" && p.anonymity !== "transparent");
+        let pxs = dt.result.filter((p) => p.https === "yes" && p.anonymity !== "transparent");
 
-        pxs = pxs.map(p => ({
-            ...p,
-            sc: (
-                (p.anonymity === "elite proxy" ? 10 : 5) +
-                (p.google === "yes" ? 5 : 0) +
-                (p.https === "yes" ? 5 : 0) +
-                (p.last && p.last.includes('sec') ? 10 : 0)
-            )
-        })).sort((a, b) => b.sc - a.sc);
+        pxs = pxs
+            .map((p) => ({
+                ...p,
+                sc:
+                    (p.anonymity === "elite proxy" ? 10 : 5) +
+                    (p.google === "yes" ? 5 : 0) +
+                    (p.https === "yes" ? 5 : 0) +
+                    (p.last && p.last.includes("sec") ? 10 : 0),
+            }))
+            .sort((a, b) => b.sc - a.sc);
 
         if (o.hc !== false && pxs.length > 0) {
-            await Promise.allSettled(pxs.slice(0, 5).map(px => chp(px)));
+            await Promise.allSettled(pxs.slice(0, 5).map((px) => chp(px)));
         }
 
         pc.set(ck, { d: pxs, t: Date.now() });
@@ -357,59 +360,65 @@ export async function gpl(o = {}) {
  * @returns {Promise<Object>} File type info: {m, e, c, mt}
  * @description Uses multiple detection methods: signature, magic numbers, content analysis
  */
-export async function dft(bf, ct = '', u = '') {
+export async function dft(bf, ct = "", u = "") {
     let m = "application/octet-stream";
     let e = "bin";
     let c = "unknown";
 
     try {
         const dt = await fileTypeFromBuffer(bf);
-        if (dt) return { m: dt.mime, e: dt.ext, c: dt.mime.split('/')[0], mt: 'sig' };
+        if (dt) return { m: dt.mime, e: dt.ext, c: dt.mime.split("/")[0], mt: "sig" };
     } catch {
         //
     }
 
     if (ct) {
-        const pm = ct.split(';')[0].trim().toLowerCase();
-        if (pm && pm !== 'application/octet-stream') {
-            const pts = pm.split('/');
+        const pm = ct.split(";")[0].trim().toLowerCase();
+        if (pm && pm !== "application/octet-stream") {
+            const pts = pm.split("/");
             if (pts.length === 2) {
                 m = pm;
-                e = pts[1].split('+')[0];
+                e = pts[1].split("+")[0];
                 c = pts[0];
             }
         }
     }
 
     if (u) {
-        const ue = u.split('?')[0].split('#')[0].split('.').pop().toLowerCase();
+        const ue = u.split("?")[0].split("#")[0].split(".").pop().toLowerCase();
         if (ue && ue.length <= 5 && /^[a-z0-9]+$/.test(ue)) e = ue;
     }
 
-    if (bf.length < 4) return { m, e, c, mt: 'hdr' };
+    if (bf.length < 4) return { m, e, c, mt: "hdr" };
 
     const mns = [
-        { b: [0x89, 0x50, 0x4E, 0x47], m: 'image/png', e: 'png' },
-        { b: [0xFF, 0xD8, 0xFF], m: 'image/jpeg', e: 'jpg' },
-        { b: [0x47, 0x49, 0x46, 0x38], m: 'image/gif', e: 'gif' },
-        { b: [0x52, 0x49, 0x46, 0x46], m: 'image/webp', e: 'webp', o: 8, xb: [0x57, 0x45, 0x42, 0x50] },
-        { b: [0x42, 0x4D], m: 'image/bmp', e: 'bmp' },
-        { b: [0x00, 0x00, 0x01, 0x00], m: 'image/x-icon', e: 'ico' },
-        { b: [0x1A, 0x45, 0xDF, 0xA3], m: 'video/webm', e: 'webm' },
-        { b: [0x46, 0x4C, 0x56], m: 'video/x-flv', e: 'flv' },
-        { b: [0x49, 0x44, 0x33], m: 'audio/mpeg', e: 'mp3' },
-        { b: [0xFF, 0xFB], m: 'audio/mpeg', e: 'mp3' },
-        { b: [0x4F, 0x67, 0x67, 0x53], m: 'audio/ogg', e: 'ogg' },
-        { b: [0x66, 0x4C, 0x61, 0x43], m: 'audio/flac', e: 'flac' },
-        { b: [0x50, 0x4B, 0x03, 0x04], m: 'application/zip', e: 'zip' },
-        { b: [0x52, 0x61, 0x72, 0x21], m: 'application/x-rar', e: 'rar' },
-        { b: [0x1F, 0x8B], m: 'application/gzip', e: 'gz' },
-        { b: [0x42, 0x5A, 0x68], m: 'application/x-bzip2', e: 'bz2' },
-        { b: [0x37, 0x7A, 0xBC, 0xAF], m: 'application/x-7z-compressed', e: '7z' },
-        { b: [0x25, 0x50, 0x44, 0x46], m: 'application/pdf', e: 'pdf' },
-        { b: [0xD0, 0xCF, 0x11, 0xE0], m: 'application/msword', e: 'doc' },
-        { b: [0x4D, 0x5A], m: 'application/x-msdownload', e: 'exe' },
-        { b: [0x7F, 0x45, 0x4C, 0x46], m: 'application/x-elf', e: 'elf' },
+        { b: [0x89, 0x50, 0x4e, 0x47], m: "image/png", e: "png" },
+        { b: [0xff, 0xd8, 0xff], m: "image/jpeg", e: "jpg" },
+        { b: [0x47, 0x49, 0x46, 0x38], m: "image/gif", e: "gif" },
+        {
+            b: [0x52, 0x49, 0x46, 0x46],
+            m: "image/webp",
+            e: "webp",
+            o: 8,
+            xb: [0x57, 0x45, 0x42, 0x50],
+        },
+        { b: [0x42, 0x4d], m: "image/bmp", e: "bmp" },
+        { b: [0x00, 0x00, 0x01, 0x00], m: "image/x-icon", e: "ico" },
+        { b: [0x1a, 0x45, 0xdf, 0xa3], m: "video/webm", e: "webm" },
+        { b: [0x46, 0x4c, 0x56], m: "video/x-flv", e: "flv" },
+        { b: [0x49, 0x44, 0x33], m: "audio/mpeg", e: "mp3" },
+        { b: [0xff, 0xfb], m: "audio/mpeg", e: "mp3" },
+        { b: [0x4f, 0x67, 0x67, 0x53], m: "audio/ogg", e: "ogg" },
+        { b: [0x66, 0x4c, 0x61, 0x43], m: "audio/flac", e: "flac" },
+        { b: [0x50, 0x4b, 0x03, 0x04], m: "application/zip", e: "zip" },
+        { b: [0x52, 0x61, 0x72, 0x21], m: "application/x-rar", e: "rar" },
+        { b: [0x1f, 0x8b], m: "application/gzip", e: "gz" },
+        { b: [0x42, 0x5a, 0x68], m: "application/x-bzip2", e: "bz2" },
+        { b: [0x37, 0x7a, 0xbc, 0xaf], m: "application/x-7z-compressed", e: "7z" },
+        { b: [0x25, 0x50, 0x44, 0x46], m: "application/pdf", e: "pdf" },
+        { b: [0xd0, 0xcf, 0x11, 0xe0], m: "application/msword", e: "doc" },
+        { b: [0x4d, 0x5a], m: "application/x-msdownload", e: "exe" },
+        { b: [0x7f, 0x45, 0x4c, 0x46], m: "application/x-elf", e: "elf" },
     ];
 
     for (const mn of mns) {
@@ -433,35 +442,40 @@ export async function dft(bf, ct = '', u = '') {
             }
         }
 
-        if (mt) return { m: mn.m, e: mn.e, c: mn.m.split('/')[0], mt: 'mag' };
+        if (mt) return { m: mn.m, e: mn.e, c: mn.m.split("/")[0], mt: "mag" };
     }
 
     try {
-        const sp = bf.toString('utf-8', 0, Math.min(4096, bf.length));
+        const sp = bf.toString("utf-8", 0, Math.min(4096, bf.length));
         const tr = sp.trim();
 
-        if (/<(!doctype html|html|head|body)/i.test(tr)) return { m: 'text/html', e: 'html', c: 'text', mt: 'cnt' };
-        if (tr.startsWith('<?xml') || /<\?xml/i.test(tr)) return { m: 'application/xml', e: 'xml', c: 'application', mt: 'cnt' };
-        if (/<svg/i.test(tr)) return { m: 'image/svg+xml', e: 'svg', c: 'image', mt: 'cnt' };
+        if (/<(!doctype html|html|head|body)/i.test(tr))
+            return { m: "text/html", e: "html", c: "text", mt: "cnt" };
+        if (tr.startsWith("<?xml") || /<\?xml/i.test(tr))
+            return { m: "application/xml", e: "xml", c: "application", mt: "cnt" };
+        if (/<svg/i.test(tr)) return { m: "image/svg+xml", e: "svg", c: "image", mt: "cnt" };
 
-        if ((tr.startsWith('{') || tr.startsWith('['))) {
+        if (tr.startsWith("{") || tr.startsWith("[")) {
             try {
                 JSON.parse(tr.length > 100000 ? tr.substring(0, 100000) : tr);
-                return { m: 'application/json', e: 'json', c: 'application', mt: 'cnt' };
+                return { m: "application/json", e: "json", c: "application", mt: "cnt" };
             } catch {
                 //
             }
         }
 
-        if (/^(import|export|const|let|var|function|class)\s/m.test(sp)) return { m: 'application/javascript', e: 'js', c: 'application', mt: 'cnt' };
-        if (/[\w-]+\s*\{[^}]*\}/.test(sp)) return { m: 'text/css', e: 'css', c: 'text', mt: 'cnt' };
-        if (/^#+\s|^\*\*|^\[.*\]\(.*\)/m.test(sp)) return { m: 'text/markdown', e: 'md', c: 'text', mt: 'cnt' };
-        if (/^[\x20-\x7E\s]*$/.test(sp.substring(0, 1000))) return { m: 'text/plain', e: 'txt', c: 'text', mt: 'cnt' };
+        if (/^(import|export|const|let|var|function|class)\s/m.test(sp))
+            return { m: "application/javascript", e: "js", c: "application", mt: "cnt" };
+        if (/[\w-]+\s*\{[^}]*\}/.test(sp)) return { m: "text/css", e: "css", c: "text", mt: "cnt" };
+        if (/^#+\s|^\*\*|^\[.*\]\(.*\)/m.test(sp))
+            return { m: "text/markdown", e: "md", c: "text", mt: "cnt" };
+        if (/^[\x20-\x7E\s]*$/.test(sp.substring(0, 1000)))
+            return { m: "text/plain", e: "txt", c: "text", mt: "cnt" };
     } catch {
         //
     }
 
-    return { m, e, c, mt: 'def' };
+    return { m, e, c, mt: "def" };
 }
 
 /**
@@ -471,17 +485,17 @@ export async function dft(bf, ct = '', u = '') {
  * @param {string} [u=''] - URL for context
  * @returns {Object} Detailed metadata object
  */
-export function em(bf, dt, u = '') {
+export function em(bf, dt, u = "") {
     const md = { sz: bf.length, m: dt.m, e: dt.e, c: dt.c, dm: dt.mt, u: u };
 
     try {
-        if (dt.m === 'application/json' || dt.m.includes('json')) {
-            const tx = bf.toString('utf-8');
+        if (dt.m === "application/json" || dt.m.includes("json")) {
+            const tx = bf.toString("utf-8");
             try {
                 const js = JSON.parse(tx);
-                md.json = { t: Array.isArray(js) ? 'array' : typeof js, v: true };
+                md.json = { t: Array.isArray(js) ? "array" : typeof js, v: true };
 
-                if (typeof js === 'object' && js !== null) {
+                if (typeof js === "object" && js !== null) {
                     const ks = Object.keys(js);
                     md.json.kc = ks.length;
                     md.json.tks = ks.slice(0, 20);
@@ -491,63 +505,52 @@ export function em(bf, dt, u = '') {
             } catch (er) {
                 md.json = { v: false, er: er.message };
             }
-        }
-
-        else if (dt.m === 'text/html') {
-            const tx = bf.toString('utf-8', 0, Math.min(100000, bf.length));
+        } else if (dt.m === "text/html") {
+            const tx = bf.toString("utf-8", 0, Math.min(100000, bf.length));
             md.html = {};
 
             const ttl = tx.match(/<title[^>]*>([^<]+)<\/title>/i);
             if (ttl) md.html.ttl = ttl[1].trim();
 
-            const dsc = tx.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i);
+            const dsc = tx.match(
+                /<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i
+            );
             if (dsc) md.html.dsc = dsc[1].trim();
 
             md.html.lc = (tx.match(/<link[^>]*>/gi) || []).length;
             md.html.sc = (tx.match(/<script[^>]*>/gi) || []).length;
             md.html.ic = (tx.match(/<img[^>]*>/gi) || []).length;
-        }
+        } else if (dt.c === "text") {
+            const tx = bf.toString("utf-8");
+            const lns = tx.split("\n");
 
-        else if (dt.c === 'text') {
-            const tx = bf.toString('utf-8');
-            const lns = tx.split('\n');
-            
             md.txt = {
                 lns: lns.length,
                 chs: tx.length,
                 wds: tx.trim().split(/\s+/).length,
-                nlns: lns.filter(l => l.trim().length > 0).length
+                nlns: lns.filter((l) => l.trim().length > 0).length,
             };
 
-            if (dt.e === 'js') md.txt.lng = 'JavaScript';
-            else if (dt.e === 'py') md.txt.lng = 'Python';
-            else if (dt.e === 'md') md.txt.lng = 'Markdown';
-        }
-
-        else if (dt.c === 'image') {
+            if (dt.e === "js") md.txt.lng = "JavaScript";
+            else if (dt.e === "py") md.txt.lng = "Python";
+            else if (dt.e === "md") md.txt.lng = "Markdown";
+        } else if (dt.c === "image") {
             md.img = { fmt: dt.e.toUpperCase() };
 
-            if (dt.e === 'png' && bf.length >= 24) {
+            if (dt.e === "png" && bf.length >= 24) {
                 md.img.w = bf.readUInt32BE(16);
                 md.img.h = bf.readUInt32BE(20);
-            }
-
-            else if (dt.e === 'gif' && bf.length >= 10) {
+            } else if (dt.e === "gif" && bf.length >= 10) {
                 md.img.w = bf.readUInt16LE(6);
                 md.img.h = bf.readUInt16LE(8);
             }
-        }
-
-        else if (['zip', 'rar', 'gz', '7z'].includes(dt.e)) {
+        } else if (["zip", "rar", "gz", "7z"].includes(dt.e)) {
             md.arc = { fmt: dt.e.toUpperCase(), cmp: true };
-        }
-
-        else if (dt.e === 'pdf') {
-            const tx = bf.toString('binary', 0, Math.min(10000, bf.length));
+        } else if (dt.e === "pdf") {
+            const tx = bf.toString("binary", 0, Math.min(10000, bf.length));
             const pgs = tx.match(/\/Type\s*\/Page[^s]/g);
             if (pgs) md.pdf = { pgs: pgs.length };
         }
-
     } catch (er) {
         md.eer = er.message;
     }
@@ -577,13 +580,12 @@ async function fwr(u, o, px = null) {
 
             le = new Error(`HTTP ${rs.status}`);
             if (rs.status >= 400 && rs.status < 500 && rs.status !== 429) throw le;
-
         } catch (er) {
             le = er;
             if (at === ma) throw er;
         }
 
-        if (at < ma) await new Promise(r => setTimeout(r, 1000 * Math.pow(2, at - 1)));
+        if (at < ma) await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, at - 1)));
     }
 
     throw le;
@@ -598,7 +600,7 @@ async function fwr(u, o, px = null) {
 function isu(u) {
     try {
         const uo = new URL(u);
-        const vps = ['http:', 'https:', 'ftp:', 'ftps:', 'ws:', 'wss:', 's3:', 'ipfs:'];
+        const vps = ["http:", "https:", "ftp:", "ftps:", "ws:", "wss:", "s3:", "ipfs:"];
         return vps.includes(uo.protocol);
     } catch {
         if (/^(\d{1,3}\.){3}\d{1,3}(:\d+)?$/.test(u)) return true;
@@ -614,10 +616,10 @@ function isu(u) {
  * @private
  */
 function nu(u) {
-    if (u.startsWith('http://') || u.startsWith('https://')) return u;
+    if (u.startsWith("http://") || u.startsWith("https://")) return u;
     if (/^(\d{1,3}\.){3}\d{1,3}(:\d+)?$/.test(u)) return `http://${u}`;
     if (/^\[[\da-f:]+\](:\d+)?$/i.test(u)) return `http://${u}`;
-    if (u.startsWith('s3://') || u.startsWith('ipfs://')) return u;
+    if (u.startsWith("s3://") || u.startsWith("ipfs://")) return u;
     return `https://${u}`;
 }
 
@@ -642,7 +644,7 @@ function nu(u) {
  * @param {*} [o.b] - Request body
  * @param {Function} [o.op] - Progress callback
  * @returns {Promise<Object>} Fetch result object with comprehensive metadata
- * 
+ *
  * @example
  * const result = await fwa('https://example.com');
  * if (result.ok) {
@@ -683,9 +685,9 @@ export async function fwa(u, o = {}) {
             const hds = gbh(u, { m: o.m, r: o.r, ims: o.ims, ine: o.ine, ct: o.ct });
 
             const fo = {
-                method: o.m || 'GET',
+                method: o.m || "GET",
                 headers: { ...hds, ...(o.h || {}) },
-                redirect: cfg.fr ? 'follow' : 'manual',
+                redirect: cfg.fr ? "follow" : "manual",
                 signal: AbortSignal.timeout(cfg.to),
             };
 
@@ -696,10 +698,9 @@ export async function fwa(u, o = {}) {
 
             if (at === 1) {
                 rs = await fwr(u, fo);
-            } 
-            else if (cfg.up) {
+            } else if (cfg.up) {
                 const pxs = await gpl({ hc: true });
-                if (pxs.length === 0) throw new Error('No proxies');
+                if (pxs.length === 0) throw new Error("No proxies");
 
                 let pxs2 = false;
                 for (let i = 0; i < Math.min(3, pxs.length); i++) {
@@ -716,7 +717,7 @@ export async function fwa(u, o = {}) {
                     }
                 }
 
-                if (!pxs2) throw new Error('All proxies failed');
+                if (!pxs2) throw new Error("All proxies failed");
             } else {
                 rs = await fwr(u, fo);
             }
@@ -724,7 +725,7 @@ export async function fwa(u, o = {}) {
             tm.ft = Date.now() - fts;
 
             if (cfg.uc) {
-                const sc = rs.headers.get('set-cookie');
+                const sc = rs.headers.get("set-cookie");
                 if (sc) {
                     gcj.set(rs.url, sc);
                     crs.push(sc);
@@ -738,17 +739,17 @@ export async function fwa(u, o = {}) {
                     ok: true,
                     nm: true,
                     s: 304,
-                    st: 'Not Modified',
+                    st: "Not Modified",
                     tm: { ...tm, tt: Date.now() - st },
                     h: Object.fromEntries(rs.headers.entries()),
                 };
             }
 
             if (!rs.ok) {
-                const et = await rs.text().catch(() => '');
-                
+                const et = await rs.text().catch(() => "");
+
                 if ((rs.status >= 500 || rs.status === 429) && at < cfg.mr) {
-                    await new Promise(r => setTimeout(r, 1000 * at));
+                    await new Promise((r) => setTimeout(r, 1000 * at));
                     continue;
                 }
 
@@ -763,7 +764,7 @@ export async function fwa(u, o = {}) {
                     rch,
                     h: Object.fromEntries(rs.headers.entries()),
                     pu,
-                    at
+                    at,
                 };
             }
 
@@ -771,20 +772,20 @@ export async function fwa(u, o = {}) {
             const fu = rs.url;
 
             const h = {
-                ct: rs.headers.get('content-type') || 'unknown',
-                cl: rs.headers.get('content-length'),
-                ce: rs.headers.get('content-encoding'),
-                te: rs.headers.get('transfer-encoding'),
-                sv: rs.headers.get('server'),
-                dt: rs.headers.get('date'),
-                lm: rs.headers.get('last-modified'),
-                et: rs.headers.get('etag'),
-                cc: rs.headers.get('cache-control'),
-                ex: rs.headers.get('expires'),
-                ag: rs.headers.get('age'),
-                xp: rs.headers.get('x-powered-by'),
-                cd: rs.headers.get('content-disposition'),
-                lc: rs.headers.get('location'),
+                ct: rs.headers.get("content-type") || "unknown",
+                cl: rs.headers.get("content-length"),
+                ce: rs.headers.get("content-encoding"),
+                te: rs.headers.get("transfer-encoding"),
+                sv: rs.headers.get("server"),
+                dt: rs.headers.get("date"),
+                lm: rs.headers.get("last-modified"),
+                et: rs.headers.get("etag"),
+                cc: rs.headers.get("cache-control"),
+                ex: rs.headers.get("expires"),
+                ag: rs.headers.get("age"),
+                xp: rs.headers.get("x-powered-by"),
+                cd: rs.headers.get("content-disposition"),
+                lc: rs.headers.get("location"),
             };
 
             const dls = Date.now();
@@ -804,7 +805,7 @@ export async function fwa(u, o = {}) {
                 bf,
                 md: { ...md, dt },
                 h,
-                tm: { ...tm, dr: fb(dr) + '/s', as: fb(dr) },
+                tm: { ...tm, dr: fb(dr) + "/s", as: fb(dr) },
                 fu,
                 ou: u,
                 rd: rs.redirected,
@@ -814,28 +815,27 @@ export async function fwa(u, o = {}) {
                 pu,
                 at,
                 crs: crs.length > 0 ? crs : undefined,
-                cmp: h.ce || 'none',
+                cmp: h.ce || "none",
                 pt: new URL(fu).protocol,
             };
 
             if (cfg.cr && rs.ok) rc.set(u, { d: rsl, t: Date.now() });
 
             return rsl;
-
         } catch (er) {
             le = er;
             if (at >= cfg.mr) break;
-            await new Promise(r => setTimeout(r, 1000 * Math.pow(2, at - 1)));
+            await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, at - 1)));
         }
     }
 
     return {
         ok: false,
-        er: le?.name || 'FetchError',
-        msg: le?.message || 'Unknown error',
+        er: le?.name || "FetchError",
+        msg: le?.message || "Unknown error",
         stk: le?.stack,
         tm: { ...tm, tt: Date.now() - st },
-        s: 'Failed',
+        s: "Failed",
         ou: u,
         rch,
         pu,

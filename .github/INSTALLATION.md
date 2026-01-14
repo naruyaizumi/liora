@@ -62,38 +62,38 @@ curl -fsSL https://raw.githubusercontent.com/naruyaizumi/liora/main/install.sh |
 ```mermaid
 graph TD
     A[Start Installation<br/><sub>Initial Setup</sub>]
-    
+
     A --> B[System Check<br/><sub>OS & Requirements</sub>]
     B --> C{System Supported?<br/><sub>OS Validation</sub>}
-    
+
     C -->|Yes ✓| D[Install Bun Runtime<br/><sub>JavaScript Runtime</sub>]
     C -->|No ✗| E[Error: Unsupported OS<br/><sub>Terminate Process</sub>]
-    
+
     D --> F[Clone Repository<br/><sub>Git Clone</sub>]
     F --> G[Install Dependencies<br/><sub>Package Installation</sub>]
     G --> H[Configure Environment<br/><sub>Environment Variables</sub>]
-    
+
     H --> I{Configuration Valid?<br/><sub>Validation Check</sub>}
     I -->|Yes ✓| J[Setup System Service<br/><sub>Service Creation</sub>]
     I -->|No ✗| K[Fix Configuration<br/><sub>Manual Correction</sub>]
-    
+
     J --> L[Verify Installation<br/><sub>Health Check</sub>]
     L --> M{Dependencies OK?<br/><sub>Integrity Check</sub>}
-    
+
     M -->|Yes ✓| N[Start Application<br/><sub>Launch Service</sub>]
     M -->|No ✗| O[Reinstall Dependencies<br/><sub>Clean Install</sub>]
-    
+
     N --> P[Health Check<br/><sub>Service Monitoring</sub>]
     P --> Q{Service Running?<br/><sub>Status Verification</sub>}
-    
+
     Q -->|Yes ✓| R[Installation Complete ✓<br/><sub>Success State</sub>]
     Q -->|No ✗| S[Troubleshoot Service<br/><sub>Debug Process</sub>]
-    
+
     O --> G
     K --> H
     S --> J
     E --> R
-    
+
     style A fill:#e3f2fd,stroke:#2196f3,stroke-width:3px,color:#0d47a1
     style B fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
     style D fill:#fff3e0,stroke:#ff9800,stroke-width:3px,color:#e65100
@@ -104,16 +104,16 @@ graph TD
     style L fill:#fff8e1,stroke:#ff8f00,stroke-width:3px,color:#ff6f00
     style N fill:#e8f5e9,stroke:#2e7d32,stroke-width:3px,color:#1b5e20
     style R fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#1b5e20
-    
+
     style E fill:#ffcdd2,stroke:#d32f2f,stroke-width:3px,color:#b71c1c
     style O fill:#ffecb3,stroke:#ffa000,stroke-width:3px,color:#ff6f00
     style S fill:#ffecb3,stroke:#ffa000,stroke-width:3px,color:#ff6f00
-    
+
     style C fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
     style I fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
     style M fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
     style Q fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
-    
+
     linkStyle 0 stroke:#2196f3,stroke-width:2px
     linkStyle 1 stroke:#616161,stroke-width:2px
     linkStyle 2 stroke:#ff9800,stroke-width:2px
@@ -402,18 +402,18 @@ CMD ["bun", "run", "--smol", "src/main.js"]
 
 ```yaml
 # docker-compose.yml
-version: '3.8'
+version: "3.8"
 
 services:
-  liora:
-    build: .
-    container_name: liora-bot
-    restart: unless-stopped
-    volumes:
-      - ./src/database:/app/src/database
-      - ./.env:/app/.env
-    environment:
-      - LOG_LEVEL=info
+    liora:
+        build: .
+        container_name: liora-bot
+        restart: unless-stopped
+        volumes:
+            - ./src/database:/app/src/database
+            - ./.env:/app/.env
+        environment:
+            - LOG_LEVEL=info
 ```
 
 ```bash
@@ -475,7 +475,7 @@ sequenceDiagram
 
     U->>C: Start bot
     C->>B: Initialize
-    
+
     alt Session Exists
         B->>WA: Restore connection
         WA-->>B: Connected
@@ -483,18 +483,18 @@ sequenceDiagram
     else New Session
         B-->>C: Show QR/Code
         C-->>U: Pairing needed
-        
+
         U->>WA: Open WhatsApp
         U->>WA: Link device
         U->>WA: Scan/Enter code
-        
+
         WA->>B: Authenticate
         WA-->>B: Session created
         B-->>C: Connected
     end
-    
+
     C-->>U: Bot online
-    
+
     U->>WA: Send message
     WA->>B: Receive
     B->>WA: Respond
@@ -504,25 +504,27 @@ sequenceDiagram
 **Steps:**
 
 1. **Start the bot:**
-   ```bash
-   bun start
-   ```
+
+    ```bash
+    bun start
+    ```
 
 2. **Get pairing code from console:**
-   ```
-   [10:30] INFO: Pair code: XXXX-XXXX
-   ```
+
+    ```
+    [10:30] INFO: Pair code: XXXX-XXXX
+    ```
 
 3. **On your phone:**
-   - Open WhatsApp
-   - Go to **Settings** > **Linked Devices**
-   - Tap **Link a Device**
-   - Enter the pairing code
+    - Open WhatsApp
+    - Go to **Settings** > **Linked Devices**
+    - Tap **Link a Device**
+    - Enter the pairing code
 
 4. **Wait for confirmation:**
-   ```
-   [10:31] INFO: Connection successful
-   ```
+    ```
+    [10:31] INFO: Connection successful
+    ```
 
 ### Initial Configuration
 

@@ -30,21 +30,21 @@ import { addExif, sticker } from "#lib/sticker.js";
 
 let handler = async (m, { conn, text }) => {
     const q = m.quoted ?? m;
-    
+
     if (!q || !/sticker|image|video/.test(q.mtype)) {
         return m.reply("Reply to sticker/image/video");
     }
-    
+
     let [pack, author] = (text || "").split("|");
     pack = (pack || global.config.stickpack || "").trim();
     author = (author || global.config.stickauth || "").trim();
-    
+
     await global.loading(m, conn);
-    
+
     try {
         const media = await q.download?.();
         if (!media) throw new Error("Download failed");
-        
+
         let buf;
         if (typeof media === "string" && /^https?:\/\//.test(media)) {
             const res = await fetch(media);
@@ -55,9 +55,9 @@ let handler = async (m, { conn, text }) => {
         } else if (media?.data) {
             buf = Buffer.from(media.data);
         }
-        
+
         if (!buf) throw new Error("Empty buffer");
-        
+
         // Check if already a WebP sticker
         const isWebp =
             buf[0] === 0x52 &&
@@ -68,7 +68,7 @@ let handler = async (m, { conn, text }) => {
             buf[9] === 0x45 &&
             buf[10] === 0x42 &&
             buf[11] === 0x50;
-        
+
         let stc;
         if (isWebp) {
             // Just add EXIF to existing WebP
@@ -85,7 +85,7 @@ let handler = async (m, { conn, text }) => {
                 emojis: [],
             });
         }
-        
+
         await conn.sendMessage(m.chat, { sticker: stc }, { quoted: m });
     } catch (e) {
         conn.logger.error(e);

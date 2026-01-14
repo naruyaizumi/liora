@@ -5,7 +5,7 @@
 
 ![Liora Banner](https://files.catbox.moe/3xv7p0.png)
 
-*🌸 Liora*
+_🌸 Liora_
 
 **Modern WhatsApp Bot Framework built on Baileys**
 
@@ -34,7 +34,7 @@ Built on Baileys • Powered by Bun Runtime • Written in JavaScript
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-*🚀 Overview*
+_🚀 Overview_
 
 Liora is an enterprise-ready WhatsApp bot framework designed for developers who demand **performance**, **reliability**, and **scalability**. Built with modern technologies and battle-tested architecture patterns.
 
@@ -48,23 +48,23 @@ graph TD
     D -->|Valid Command| E[Plugin Manager<br/><sub>Registry & Loader</sub>]
     D -->|System Message| F[System Handler<br/><sub>Internal Processing</sub>]
     D -->|Media Content| G[Media Processor<br/><sub>Encoding/Decoding</sub>]
-    
+
     E --> H((Plugin Executor<br/><sub>Runtime Sandbox</sub>))
     H --> I[Response Handler<br/><sub>Output Formatter</sub>]
     F --> I
     G --> I
-    
+
     C --> J[Database Layer<br/><sub>Persistence Store</sub>]
     J --> K[(SQLite Auth<br/>Session Storage)]
     J --> L[(SQLite Data<br/>User Data)]
     J --> M[(SQLite Cache<br/>Temporary Store)]
-    
+
     E --> N[Dynamic Plugin Loader<br/><sub>Hot Reload System</sub>]
     N --> O[Plugin Registry<br/><sub>Version Control</sub>]
     N --> P[Permission Manager<br/><sub>Access Control</sub>]
-    
+
     I -->|Send Response| B
-    
+
     style A fill:#e3f2fd,stroke:#2196f3,stroke-width:3px,color:#0d47a1
     style B fill:#e8f5e9,stroke:#4caf50,stroke-width:3px,color:#1b5e20
     style C fill:#fff3e0,stroke:#ff9800,stroke-width:3px,color:#e65100
@@ -81,7 +81,7 @@ graph TD
     style N fill:#ffecb3,stroke:#ffa000,stroke-width:3px,color:#ff6f00
     style O fill:#ffecb3,stroke:#ffa000,stroke-width:2px,color:#ff6f00
     style P fill:#ffecb3,stroke:#ffa000,stroke-width:2px,color:#ff6f00
-    
+
     linkStyle default stroke:#666,stroke-width:2px
     linkStyle 0 stroke:#2196f3,stroke-width:3px
     linkStyle 13 stroke:#e91e63,stroke-width:3px
@@ -197,7 +197,7 @@ sequenceDiagram
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-*📸 Screenshots*
+_📸 Screenshots_
 
 **Interactive Menus**
 
@@ -221,7 +221,7 @@ sequenceDiagram
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-*⚡ Quick Start*
+_⚡ Quick Start_
 
 For detailed installation instructions, see **[INSTALLATION.md](.github/INSTALLATION.md)**
 
@@ -247,7 +247,7 @@ See **[INSTALLATION.md](.github/INSTALLATION.md)** for comprehensive manual inst
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-*⚙️ Configuration*
+_⚙️ Configuration_
 
 **Environment Setup**
 
@@ -289,7 +289,7 @@ BAILEYS_LOG_LEVEL=silent
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-*🎮 Usage*
+_🎮 Usage_
 
 **Command Prefixes**
 
@@ -317,7 +317,7 @@ Liora supports multiple prefixes:
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-*🔌 Plugin System*
+_🔌 Plugin System_
 
 **Plugin Structure**
 
@@ -386,7 +386,7 @@ export default handler;
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-*🚀 Production Deployment*
+_🚀 Production Deployment_
 
 **Using PM2**
 
@@ -420,7 +420,7 @@ sudo systemctl status liora
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-*📚 Documentation*
+_📚 Documentation_
 
 - **[INSTALLATION.md](.github/INSTALLATION.md)** - Detailed installation guide
 - **[PLUGINS.md](.github/PLUGINS.md)** - Plugin development guide
@@ -433,7 +433,7 @@ sudo systemctl status liora
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-*🤝 Contributing*
+_🤝 Contributing_
 
 <div align="center">
 
@@ -446,7 +446,7 @@ See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for details.
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-*💬 Community*
+_💬 Community_
 
 <div align="center">
 
@@ -487,7 +487,7 @@ on Discord
 
 </div>
 
-*🔒 Security*
+_🔒 Security_
 
 **Report vulnerabilities to:** liora.bot.official@gmail.com
 
@@ -499,7 +499,7 @@ See [SECURITY.md](.github/SECURITY.md) for our security policy.
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-*📄 License*
+_📄 License_
 
 Licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for full details.
 
@@ -509,7 +509,7 @@ Licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for full detai
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-*💖 Acknowledgments*
+_💖 Acknowledgments_
 
 **Built with passion by developers, for developers**
 

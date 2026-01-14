@@ -25,19 +25,19 @@ graph TD
     B --> C{Status Check<br/><sub>200 OK?</sub>}
     C -->|Success ✓| D["Process Data<br/><sub>Parse & Validate</sub>"]
     D --> E["Return Result<br/><sub>Formatted Output</sub>"]
-    
+
     C -->|Failed ✗| F["Endpoint 2<br/><sub>Fallback 1</sub>"]
     F --> G{Status Check<br/><sub>200 OK?</sub>}
     G -->|Success ✓| D
-    
+
     G -->|Failed ✗| H["Endpoint 3<br/><sub>Fallback 2</sub>"]
     H --> I{Status Check<br/><sub>200 OK?</sub>}
     I -->|Success ✓| D
-    
+
     I -->|Failed ✗| J["Circuit Breaker<br/><sub>Failure Threshold</sub>"]
     J --> K["Error Handler<br/><sub>Graceful Degradation</sub>"]
     K --> L["Return Error<br/><sub>User-Friendly Message</sub>"]
-    
+
     style A fill:#e3f2fd,stroke:#2196f3,stroke-width:3px,color:#0d47a1
     style B fill:#e8f5e9,stroke:#4caf50,stroke-width:3px,color:#1b5e20
     style F fill:#fff3e0,stroke:#ff9800,stroke-width:3px,color:#e65100
@@ -47,11 +47,11 @@ graph TD
     style J fill:#ffecb3,stroke:#ffa000,stroke-width:3px,color:#ff6f00
     style K fill:#ffcdd2,stroke:#d32f2f,stroke-width:3px,color:#b71c1c
     style L fill:#ffcdd2,stroke:#c62828,stroke-width:3px,color:#8e0000
-    
+
     style C fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
     style G fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
     style I fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#424242
-    
+
     linkStyle 0 stroke:#2196f3,stroke-width:2px
     linkStyle 1 stroke:#4caf50,stroke-width:2px
     linkStyle 2 stroke:#4caf50,stroke-width:2px
@@ -81,7 +81,7 @@ export async function remini(buf) {
     }
 
     const enc = encodeURIComponent(up.url);
-    
+
     // Multiple API endpoints (fallback list)
     const urls = [
         `https://api.example1.com/upscale?url=${enc}`,
@@ -95,7 +95,7 @@ export async function remini(buf) {
     for (const url of urls) {
         const res = await fetch(url).catch(() => null);
         if (!res) continue;
-        
+
         const type = res.headers.get("content-type") || "";
 
         // Handle JSON response
@@ -170,19 +170,19 @@ console.log(result);
 let handler = async (m, { conn }) => {
     const q = m.quoted ? m.quoted : m;
     const media = await q.download();
-    
+
     if (!media) {
-        return m.reply('Example: No media found');
+        return m.reply("Example: No media found");
     }
-    
+
     const uploaded = await uploader(media);
-    
+
     if (!uploaded || !uploaded.url) {
-        return m.reply('Example: Upload failed');
+        return m.reply("Example: Upload failed");
     }
-    
+
     await conn.sendMessage(m.chat, {
-        text: `Example: Image uploaded to ${uploaded.url}`
+        text: `Example: Image uploaded to ${uploaded.url}`,
     });
 };
 ```
@@ -215,27 +215,27 @@ if (result.success) {
 let handler = async (m, { conn }) => {
     const q = m.quoted ? m.quoted : m;
     const media = await q.download();
-    
+
     if (!media) {
-        return m.reply('Example: Quote an image');
+        return m.reply("Example: Quote an image");
     }
-    
+
     const loading = await conn.sendMessage(m.chat, {
-        text: '⏳ Example: Enhancing image...'
+        text: "⏳ Example: Enhancing image...",
     });
-    
+
     const result = await remini(media);
-    
+
     if (!result.success) {
         return conn.sendMessage(m.chat, {
             text: `❌ Example: ${result.error}`,
-            edit: loading.key
+            edit: loading.key,
         });
     }
-    
+
     await conn.sendMessage(m.chat, {
         image: result.resultBuffer || { url: result.resultUrl },
-        caption: '✅ Example: Image enhanced'
+        caption: "✅ Example: Image enhanced",
     });
 };
 
@@ -268,7 +268,7 @@ if (result.success) {
 ```javascript
 import { instagram } from "#lib/api/instagram.js";
 
-const result = await instagram('https://instagram.com/p/example');
+const result = await instagram("https://instagram.com/p/example");
 
 if (result.success) {
     console.log("Media URL:", result.url);
@@ -281,7 +281,7 @@ if (result.success) {
 ```javascript
 import { tiktok } from "#lib/api/tiktok.js";
 
-const result = await tiktok('https://tiktok.com/@user/video/123');
+const result = await tiktok("https://tiktok.com/@user/video/123");
 
 if (result.success) {
     console.log("Video URL:", result.url);
@@ -295,11 +295,11 @@ if (result.success) {
 import { ytmp3, ytmp4 } from "#lib/api/ytmp3.js";
 
 // Audio download
-const audio = await ytmp3('https://youtube.com/watch?v=example');
+const audio = await ytmp3("https://youtube.com/watch?v=example");
 console.log("Audio URL:", audio.url);
 
 // Video download
-const video = await ytmp4('https://youtube.com/watch?v=example', '720p');
+const video = await ytmp4("https://youtube.com/watch?v=example", "720p");
 console.log("Video URL:", video.url);
 ```
 
@@ -308,7 +308,7 @@ console.log("Video URL:", video.url);
 ```javascript
 import { twitter } from "#lib/api/twitter.js";
 
-const result = await twitter('https://twitter.com/user/status/123');
+const result = await twitter("https://twitter.com/user/status/123");
 
 if (result.success) {
     console.log("Media URLs:", result.media);
@@ -320,7 +320,7 @@ if (result.success) {
 ```javascript
 import { threads } from "#lib/api/threads.js";
 
-const result = await threads('https://threads.net/@user/post/123');
+const result = await threads("https://threads.net/@user/post/123");
 
 if (result.success) {
     console.log("Media:", result.media);
@@ -333,19 +333,18 @@ if (result.success) {
 import { spotify } from "#lib/api/spotify.js";
 
 // Search tracks
-const search = await spotify.search('Example Song Name');
+const search = await spotify.search("Example Song Name");
 console.log("Results:", search.tracks);
 
 // Get track info
-const track = await spotify.track('spotify:track:example123');
+const track = await spotify.track("spotify:track:example123");
 console.log("Track:", track);
 
 // Download track
 import { spotifydl } from "#lib/api/spotifydl.js";
-const download = await spotifydl('https://open.spotify.com/track/example');
+const download = await spotifydl("https://open.spotify.com/track/example");
 console.log("Download URL:", download.url);
 ```
-
 
 ---
 
@@ -375,8 +374,8 @@ export async function customAPI(query) {
         try {
             const response = await fetch(url, {
                 headers: {
-                    'User-Agent': 'Liora-Bot/1.0'
-                }
+                    "User-Agent": "Liora-Bot/1.0",
+                },
             });
 
             if (!response.ok) continue;
@@ -390,7 +389,7 @@ export async function customAPI(query) {
             return {
                 success: true,
                 results: data.results,
-                source: url
+                source: url,
             };
         } catch (error) {
             console.error(`API error (${url}):`, error);
@@ -400,7 +399,7 @@ export async function customAPI(query) {
 
     return {
         success: false,
-        error: 'All API endpoints failed'
+        error: "All API endpoints failed",
     };
 }
 ```
@@ -420,18 +419,18 @@ export async function customAPI(query) {
  * @returns {Promise<Object>} Response data
  */
 export async function authenticatedAPI(endpoint, options = {}) {
-    const baseURL = 'https://api.example.com';
+    const baseURL = "https://api.example.com";
     const apiKey = Bun.env.API_KEY;
 
     try {
         const response = await fetch(`${baseURL}${endpoint}`, {
-            method: options.method || 'GET',
+            method: options.method || "GET",
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-                ...options.headers
+                Authorization: `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+                ...options.headers,
             },
-            body: options.body ? JSON.stringify(options.body) : undefined
+            body: options.body ? JSON.stringify(options.body) : undefined,
         });
 
         if (!response.ok) {
@@ -440,7 +439,7 @@ export async function authenticatedAPI(endpoint, options = {}) {
 
         return await response.json();
     } catch (error) {
-        console.error('API Error:', error);
+        console.error("API Error:", error);
         return { success: false, error: error.message };
     }
 }
@@ -465,7 +464,7 @@ const rateLimits = new Map();
 export async function rateLimitedAPI(url, maxRequests = 60) {
     const now = Date.now();
     const key = new URL(url).hostname;
-    
+
     if (!rateLimits.has(key)) {
         rateLimits.set(key, { requests: [], resetAt: now + 60000 });
     }
@@ -513,12 +512,12 @@ const cache = new Map();
  */
 export async function cachedAPI(url, ttl = 300000) {
     const now = Date.now();
-    
+
     // Check cache
     if (cache.has(url)) {
         const { data, expiresAt } = cache.get(url);
         if (now < expiresAt) {
-            console.log('Cache hit:', url);
+            console.log("Cache hit:", url);
             return data;
         }
         cache.delete(url);
@@ -532,10 +531,10 @@ export async function cachedAPI(url, ttl = 300000) {
         // Store in cache
         cache.set(url, {
             data,
-            expiresAt: now + ttl
+            expiresAt: now + ttl,
         });
 
-        console.log('Cache miss:', url);
+        console.log("Cache miss:", url);
         return data;
     } catch (error) {
         throw new Error(`API request failed: ${error.message}`);
@@ -553,25 +552,25 @@ export async function cachedAPI(url, ttl = 300000) {
 export async function safeAPI(url) {
     try {
         const response = await fetch(url);
-        
+
         if (!response.ok) {
             return {
                 success: false,
                 error: `HTTP ${response.status}`,
-                statusCode: response.status
+                statusCode: response.status,
             };
         }
 
         const data = await response.json();
-        
+
         return {
             success: true,
-            data
+            data,
         };
     } catch (error) {
         return {
             success: false,
-            error: error.message
+            error: error.message,
         };
     }
 }
@@ -586,15 +585,15 @@ export async function apiWithTimeout(url, timeout = 10000) {
 
     try {
         const response = await fetch(url, {
-            signal: controller.signal
+            signal: controller.signal,
         });
-        
+
         clearTimeout(timeoutId);
         return await response.json();
     } catch (error) {
         clearTimeout(timeoutId);
-        if (error.name === 'AbortError') {
-            throw new Error('Request timeout');
+        if (error.name === "AbortError") {
+            throw new Error("Request timeout");
         }
         throw error;
     }
@@ -611,15 +610,13 @@ export async function retryAPI(url, maxRetries = 3) {
             if (response.ok) {
                 return await response.json();
             }
-            
+
             if (i === maxRetries - 1) {
                 throw new Error(`Failed after ${maxRetries} retries`);
             }
-            
+
             // Exponential backoff
-            await new Promise(resolve => 
-                setTimeout(resolve, Math.pow(2, i) * 1000)
-            );
+            await new Promise((resolve) => setTimeout(resolve, Math.pow(2, i) * 1000));
         } catch (error) {
             if (i === maxRetries - 1) throw error;
         }
@@ -637,7 +634,7 @@ export async function validatedAPI(url, validator) {
 
         // Validate structure
         if (!validator(data)) {
-            throw new Error('Invalid response structure');
+            throw new Error("Invalid response structure");
         }
 
         return { success: true, data };
@@ -647,10 +644,8 @@ export async function validatedAPI(url, validator) {
 }
 
 // Usage
-const result = await validatedAPI('https://api.example.com/data', (data) => {
-    return data && 
-           typeof data.id === 'string' && 
-           Array.isArray(data.items);
+const result = await validatedAPI("https://api.example.com/data", (data) => {
+    return data && typeof data.id === "string" && Array.isArray(data.items);
 });
 ```
 
@@ -673,10 +668,10 @@ export class APIClient {
 
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
-        
+
         // Check rate limit
         this.checkRateLimit(url);
-        
+
         // Check cache
         if (options.cache) {
             const cached = this.getCache(url);
@@ -711,7 +706,7 @@ export class APIClient {
         try {
             const response = await fetch(url, {
                 ...options,
-                signal: controller.signal
+                signal: controller.signal,
             });
             clearTimeout(timeout);
             return response;
@@ -737,12 +732,12 @@ export class APIClient {
     setCache(key, data, ttl = 300000) {
         this.cache.set(key, {
             data,
-            expiresAt: Date.now() + ttl
+            expiresAt: Date.now() + ttl,
         });
     }
 
     delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        return new Promise((resolve) => setTimeout(resolve, ms));
     }
 }
 ```

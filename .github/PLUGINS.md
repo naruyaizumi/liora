@@ -42,8 +42,8 @@ src/plugins/
 
 let handler = async (m, { conn, args, text }) => {
     // Your command logic here
-    await conn.sendMessage(m.chat, { 
-        text: "Example response" 
+    await conn.sendMessage(m.chat, {
+        text: "Example response",
     });
 };
 
@@ -53,11 +53,11 @@ handler.tags = ["category"];
 handler.command = /^(commandname|alias)$/i;
 
 // Optional properties
-handler.owner = false;      // Owner-only command
-handler.premium = false;    // Premium-only command
-handler.group = false;      // Group-only command
-handler.admin = false;      // Admin-only command
-handler.botAdmin = false;   // Bot must be admin
+handler.owner = false; // Owner-only command
+handler.premium = false; // Premium-only command
+handler.group = false; // Group-only command
+handler.admin = false; // Admin-only command
+handler.botAdmin = false; // Bot must be admin
 
 export default handler;
 ```
@@ -65,20 +65,23 @@ export default handler;
 ### Handler Parameters
 
 ```javascript
-handler = async (m, {
-    conn,        // Connection object
-    args,        // Command arguments as array
-    text,        // Full text after command
-    command,     // Matched command name
-    usedPrefix,  // Prefix used (.!/)
-    isOwner,     // Is user owner?
-    isAdmin,     // Is user admin?
-    isBotAdmin,  // Is bot admin?
-    groupMetadata, // Group info (if group chat)
-    participants,  // Group participants
-}) => {
+handler = async (
+    m,
+    {
+        conn, // Connection object
+        args, // Command arguments as array
+        text, // Full text after command
+        command, // Matched command name
+        usedPrefix, // Prefix used (.!/)
+        isOwner, // Is user owner?
+        isAdmin, // Is user admin?
+        isBotAdmin, // Is bot admin?
+        groupMetadata, // Group info (if group chat)
+        participants, // Group participants
+    }
+) => {
     // Your code here
-}
+};
 ```
 
 ### Plugin Workflow
@@ -96,7 +99,7 @@ graph TD
     H --> I{Success?}
     I -->|Yes| J[Send response]
     I -->|No| K[Log error]
-    
+
     style H fill:#90EE90
     style G fill:#FFB6C1
     style K fill:#FFB6C1
@@ -112,8 +115,8 @@ graph TD
 
 let handler = async (m, { conn }) => {
     const start = Bun.nanoseconds();
-    const msg = await conn.sendMessage(m.chat, { 
-        text: "⏱️ Checking..." 
+    const msg = await conn.sendMessage(m.chat, {
+        text: "⏱️ Checking...",
     });
     const ns = Bun.nanoseconds() - start;
     const ms = (ns / 1_000_000).toFixed(0);
@@ -141,20 +144,18 @@ export default handler;
 
 let handler = async (m, { conn, text }) => {
     if (!text) {
-        return m.reply('Example usage: .calc 2 + 2');
+        return m.reply("Example usage: .calc 2 + 2");
     }
 
     try {
         // Safe evaluation (only math operations)
-        const result = Function(
-            '"use strict"; return (' + text + ')'
-        )();
-        
+        const result = Function('"use strict"; return (' + text + ")")();
+
         await conn.sendMessage(m.chat, {
-            text: `📊 Result: ${result}`
+            text: `📊 Result: ${result}`,
         });
     } catch (error) {
-        await m.reply('❌ Invalid expression');
+        await m.reply("❌ Invalid expression");
     }
 };
 
@@ -187,8 +188,8 @@ Use the `savefile` command to add new plugins dynamically:
 // Send this as eval command (owner only):
 > await Bun.write('./src/plugins/info/newcmd.js', `
 let handler = async (m, { conn }) => {
-    await conn.sendMessage(m.chat, { 
-        text: 'Example new command!' 
+    await conn.sendMessage(m.chat, {
+        text: 'Example new command!'
     });
 };
 
@@ -246,11 +247,11 @@ graph LR
     D -->|Works| E[Done]
     D -->|Error| F[Edit Plugin]
     F --> B
-    
+
     G[Get Plugin] --> H[Modify]
     H --> I[Save File]
     I --> C
-    
+
     style A fill:#90EE90
     style E fill:#90EE90
 ```
@@ -399,14 +400,14 @@ graph TD
     B -->|Works| C[Create Plugin]
     B -->|Needs Fix| D[Adjust Code]
     D --> B
-    
+
     C --> E[Save Plugin]
     E --> F[Reload]
     F --> G{Test Plugin}
     G -->|Success| H[Commit]
     G -->|Error| I[Debug with Eval]
     I --> E
-    
+
     style A fill:#87CEEB
     style H fill:#90EE90
 ```
@@ -433,18 +434,18 @@ const helpers = {
     },
     validateInput: (input) => {
         return input && input.length > 0;
-    }
+    },
 };
 
 // Main handler
 let handler = async (m, { conn, text }) => {
     if (!helpers.validateInput(text)) {
-        return m.reply('Example: Input required');
+        return m.reply("Example: Input required");
     }
-    
+
     const formatted = helpers.formatData(text);
-    await conn.sendMessage(m.chat, { 
-        text: `Example: ${formatted}` 
+    await conn.sendMessage(m.chat, {
+        text: `Example: ${formatted}`,
     });
 };
 
@@ -463,32 +464,32 @@ let handler = async (m, { conn, args }) => {
     try {
         // Validate input first
         if (!args[0]) {
-            return m.reply('Example: Please provide required argument');
+            return m.reply("Example: Please provide required argument");
         }
 
         // Validate format
         if (!/^\d+$/.test(args[0])) {
-            return m.reply('Example: Argument must be a number');
+            return m.reply("Example: Argument must be a number");
         }
 
         // Process command
         const result = await someAsyncOperation(args[0]);
-        
+
         // Handle empty result
         if (!result) {
-            return m.reply('Example: No results found');
+            return m.reply("Example: No results found");
         }
-        
+
         // Send response
-        await conn.sendMessage(m.chat, { 
-            text: `Example result: ${result}` 
+        await conn.sendMessage(m.chat, {
+            text: `Example result: ${result}`,
         });
     } catch (error) {
         // Log error for debugging
-        console.error('Example error in command:', error);
-        
+        console.error("Example error in command:", error);
+
         // User-friendly error message
-        await m.reply('Example: An error occurred. Please try again later.');
+        await m.reply("Example: An error occurred. Please try again later.");
     }
 };
 ```
@@ -498,24 +499,24 @@ let handler = async (m, { conn, args }) => {
 ```javascript
 let handler = async (m, { conn, args }) => {
     // Send loading message
-    const loadingMsg = await conn.sendMessage(m.chat, { 
-        text: '⏳ Example: Processing...' 
+    const loadingMsg = await conn.sendMessage(m.chat, {
+        text: "⏳ Example: Processing...",
     });
 
     try {
         // Perform async operation
         const data = await fetchSomeData(args[0]);
-        
+
         // Edit loading message with result
         await conn.sendMessage(m.chat, {
             text: `✅ Example: ${data}`,
-            edit: loadingMsg.key
+            edit: loadingMsg.key,
         });
     } catch (error) {
         // Edit with error message
         await conn.sendMessage(m.chat, {
-            text: '❌ Example: Operation failed',
-            edit: loadingMsg.key
+            text: "❌ Example: Operation failed",
+            edit: loadingMsg.key,
         });
     }
 };
@@ -529,22 +530,22 @@ import { readFile } from "node:fs/promises";
 let handler = async (m, { conn }) => {
     try {
         // Read file efficiently
-        const buffer = await readFile('./data/example.json');
+        const buffer = await readFile("./data/example.json");
         const data = JSON.parse(buffer.toString());
-        
+
         // Process data
         const result = processData(data);
-        
+
         // Send response
-        await conn.sendMessage(m.chat, { 
-            text: `Example: ${result}` 
+        await conn.sendMessage(m.chat, {
+            text: `Example: ${result}`,
         });
     } catch (error) {
-        if (error.code === 'ENOENT') {
-            await m.reply('Example: File not found');
+        if (error.code === "ENOENT") {
+            await m.reply("Example: File not found");
         } else {
-            console.error('Example error:', error);
-            await m.reply('Example: Failed to process data');
+            console.error("Example error:", error);
+            await m.reply("Example: Failed to process data");
         }
     }
 };
@@ -556,25 +557,25 @@ let handler = async (m, { conn }) => {
 let handler = async (m, { conn, isAdmin, isBotAdmin }) => {
     // Check if user is admin
     if (!isAdmin) {
-        return m.reply('Example: This command requires admin privileges');
+        return m.reply("Example: This command requires admin privileges");
     }
-    
+
     // Check if bot is admin (for group operations)
     if (!isBotAdmin) {
-        return m.reply('Example: Bot must be admin to use this command');
+        return m.reply("Example: Bot must be admin to use this command");
     }
-    
+
     // Your command logic here
     await conn.sendMessage(m.chat, {
-        text: 'Example: Command executed'
+        text: "Example: Command executed",
     });
 };
 
 handler.help = ["admincmd"];
 handler.tags = ["group"];
 handler.command = /^(admincmd)$/i;
-handler.group = true;  // Group only
-handler.admin = true;  // Admin only
+handler.group = true; // Group only
+handler.admin = true; // Admin only
 handler.botAdmin = true; // Bot must be admin
 
 export default handler;
@@ -588,24 +589,24 @@ let handler = async (m, { conn, text, args }) => {
     if (!text) {
         return m.reply(`Example usage: .command <input>`);
     }
-    
+
     // Validate format (e.g., URL)
     const urlRegex = /^https?:\/\/.+/i;
     if (!urlRegex.test(text)) {
-        return m.reply('Example: Please provide a valid URL');
+        return m.reply("Example: Please provide a valid URL");
     }
-    
+
     // Validate length
     if (text.length > 1000) {
-        return m.reply('Example: Input too long (max 1000 characters)');
+        return m.reply("Example: Input too long (max 1000 characters)");
     }
-    
+
     // Sanitize input
     const sanitized = text.trim().toLowerCase();
-    
+
     // Process
     await conn.sendMessage(m.chat, {
-        text: `Example: Processing ${sanitized}`
+        text: `Example: Processing ${sanitized}`,
     });
 };
 ```
