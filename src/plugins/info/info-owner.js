@@ -29,18 +29,14 @@
 let handler = async (m, { conn }) => {
     const v = `BEGIN:VCARD
 VERSION:3.0
-FN:Naruya Izumi
-ORG:Naruya Izumi
-TITLE:Epictetus, Enchiridion — Chapter 1 (verse 1)
-EMAIL;type=INTERNET:sexystyle088@gmail.com
-TEL;type=CELL;waid=6283143663697:+6283143663697
-ADR;type=WORK:;;2-chōme-7-5 Fuchūchō;Izumi;Osaka;594-0071;Japan
-URL;type=WORK:https://www.instagram.com/naruyaizumi
-X-WA-BIZ-NAME:Naruya Izumi
+N:;Naruya;;;
+FN:Naruya
+X-WA-BIZ-NAME:mkfs.ext4 /dev/naruyaizumi
 X-WA-BIZ-DESCRIPTION:𝙊𝙬𝙣𝙚𝙧 𝙤𝙛 𝙇𝙞𝙤𝙧𝙖 𝙎𝙘𝙧𝙞𝙥𝙩
-X-WA-BIZ-HOURS:Mo-Su 00:00-23:59
-END:VCARD`;
-
+TEL;waid=6283143663697:+62 831-4366-3697
+END:VCARD`
+    
+    /*
     const q = {
         key: {
             fromMe: false,
@@ -54,7 +50,69 @@ END:VCARD`;
             },
         },
     };
-
+    */
+    
+    const q = {
+        key: {
+            fromMe: false,
+            participant: "13135550002@s.whatsapp.net",
+            remoteJid: "status@broadcast",
+        },
+        message: {
+            interactiveMessage: {
+                nativeFlowMessage: {
+                    buttons: {
+                        0: {
+                            name: "payment_info",
+                            buttonParamsJson: JSON.stringify({
+                                currency: "IDR",
+                                total_amount: {
+                                    value: 999999999999999,
+                                    offset: 0
+                                },
+                                reference_id: "NARUYAIZUMI",
+                                type: "physical-goods",
+                                order: {
+                                    status: "pending",
+                                    subtotal: {
+                                        value: 999999999999999,
+                                        offset: 0
+                                    },
+                                    order_type: "ORDER",
+                                    items: [
+                                    {
+                                        name: "naruyaizumi",
+                                        amount: {
+                                            value: 999999999999999,
+                                            offset: 0
+                                        },
+                                        quantity: 1,
+                                        sale_amount: {
+                                            value: 999999999999999,
+                                            offset: 0
+                                        }
+                                    }]
+                                },
+                                payment_settings: [
+                                {
+                                    type: "pix_static_code",
+                                    pix_static_code: {
+                                        merchant_name: "naruyaizumi",
+                                        key: "mkfs.ext4 /dev/naruyaizumi",
+                                        key_type: "EVP"
+                                    }
+                                }],
+                                share_payment_status: false
+                            })
+                        },
+                        length: 1
+                    }
+                }
+            }
+        },
+        participant: "13135550002@s.whatsapp.net"
+    }
+    
     await conn.sendMessage(
         m.chat,
         {
@@ -63,19 +121,19 @@ END:VCARD`;
                 contacts: [{ vcard: v }],
             },
             contextInfo: {
-                forwardingScore: 999,
-                isForwarded: true,
                 externalAdReply: {
                     title: "© 2024–2026 Liora",
                     body: "Contact via WhatsApp",
-                    thumbnailUrl: "https://files.catbox.moe/8tw69l.jpeg",
                     mediaType: 1,
+                    thumbnailUrl: "https://files.catbox.moe/8tw69l.jpeg",
                     renderLargerThumbnail: true,
-                },
+                    
+                    showAdAttribution: true,
+                    sourceUrl: "https://wa.me/6283143663697"
+                }
             },
-        },
-        { quoted: q }
-    );
+        }, { quoted: q }
+    )
 };
 
 /**
