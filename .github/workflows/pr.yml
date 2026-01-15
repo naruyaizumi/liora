@@ -1,0 +1,312 @@
+name: Pull Request Management
+
+on:
+    pull_request:
+        types: [opened, synchronize, reopened, labeled, ready_for_review]
+    pull_request_review:
+        types: [submitted]
+
+permissions:
+    contents: write
+    pull-requests: write
+    checks: write
+
+jobs:
+    auto-label-pr:
+        name: Auto Label PR
+        runs-on: ubuntu-latest
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Label PR
+              uses: actions/labeler@v5
+              with:
+                  repo-token: ${{ secrets.PAT_TOKEN }}
+                  configuration-path: .github/labeler.yml
+                  sync-labels: true
+
+    validate-pr:
+        name: Validate PR
+        runs-on: ubuntu-latest
+        if: github.event_name == 'pull_request'
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Validate PR title
+              uses: actions/github-script@v8
+              with:
+                  script: |
+                      const pr = context.payload.pull_request;
+                      const title = pr.title;
+                      
+                      // Conventional commit pattern
+                      const pattern = /^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\(.+\))?: .+/;
+                      
+                      if (!pattern.test(title)) {
+                        await github.rest.pulls.createReview({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          pull_number: pr.number,
+                          event: 'REQUEST_CHANGES',
+                          body: `## ❌ Invalid PR Title Format
+
+                      Your PR title doesn't follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
+
+                      ### Expected format:
+                      \`\`\`
+                      <type>(<scope>): <description>
+                      \`\`\`
+
+                      ### Valid types:
+                      - \`feat\`: New feature
+                      - \`fix\`: Bug fix
+                      - \`docs\`: Documentation changes
+                      - \`style\`: Code style changes (formatting, etc.)
+                      - \`refactor\`: Code refactoring
+                      - \`perf\`: Performance improvements
+                      - \`test\`: Test additions or changes
+                      - \`chore\`: Maintenance tasks
+                      - \`ci\`: CI/CD changes
+                      - \`build\`: Build system changes
+
+                      ### Examples:
+                      - \`feat(api): add TikTok downloader endpoint\`
+                      - \`fix(whatsapp): resolve connection timeout issue\`
+                      - \`docs: update installation guide\`
+                      - \`chore(deps): update dependencies\`
+
+                      **Current title:** "${title}"
+
+                      Please update your PR title to match this format! 🙏`
+                        });
+                        
+                        core.setFailed('PR title does not follow Conventional Commits format');
+                      }
+
+            - name: Check PR description
+              uses: actions/github-script@v8
+              with:
+                  script: |
+                      const pr = context.payload.pull_request;
+                      const body = pr.body || '';
+                      
+                      if (body.length < 50) {
+                        await github.rest.issues.createComment({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          issue_number: pr.number,
+                          body: `## ⚠️ PR Description Needs More Detail
+
+                      Your PR description is quite brief. Please provide more information:
+
+                      ### Please include:
+                      - **What** changes are being made
+                      - **Why** these changes are necessary
+                      - **How** you've implemented the changes
+                      - **Testing** performed (if applicable)
+                      - **Breaking changes** (if any)
+                      - **Related issues** (use "Fixes #123" or "Closes #123")
+
+                      This helps reviewers understand your changes better! 🚀`
+                        });
+                        
+                        await github.rest.issues.addLabels({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          issue_number: pr.number,
+                          labels: ['needs-more-info']
+                        });
+                      }
+
+    pr-size-label:
+        name: Label PR Size
+        runs-on: ubuntu-latest
+        if: github.event_name == 'pull_request'
+        steps:
+            - name: Add size label
+              uses: actions/github-script@v8
+              with:
+                  script: |
+                      const pr = context.payload.pull_request;
+                      const additions = pr.additions || 0;
+                      const deletions = pr.deletions || 0;
+                      const changes = additions + deletions;
+                      
+                      let sizeLabel = '';
+                      
+                      if (changes < 10) sizeLabel = 'size/XS';
+                      else if (changes < 50) sizeLabel = 'size/S';
+                      else if (changes < 200) sizeLabel = 'size/M';
+                      else if (changes < 500) sizeLabel = 'size/L';
+                      else sizeLabel = 'size/XL';
+                      
+                      // Remove old size labels
+                      const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: pr.number
+                      });
+                      
+                      const sizeLabelPattern = /^size\//;
+                      for (const label of labels) {
+                        if (sizeLabelPattern.test(label.name)) {
+                          await github.rest.issues.removeLabel({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            issue_number: pr.number,
+                            name: label.name
+                          });
+                        }
+                      }
+                      
+                      // Add new size label
+                      await github.rest.issues.addLabels({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: pr.number,
+                        labels: [sizeLabel]
+                      });
+                      
+                      console.log(`✅ Applied label: ${sizeLabel} (${changes} changes)`);
+
+    greet-first-pr:
+        name: Greet First-Time Contributors
+        runs-on: ubuntu-latest
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        steps:
+            - name: Check if first PR
+              uses: actions/github-script@v8
+              with:
+                  script: |
+                      const pr = context.payload.pull_request;
+                      const author = pr.user.login;
+
+                      // Get all PRs by this author
+                      const { data: prs } = await github.rest.pulls.list({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        state: 'all',
+                        creator: author
+                      });
+
+                      // If this is their first PR
+                      if (prs.length === 1) {
+                        await github.rest.issues.createComment({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          issue_number: pr.number,
+                          body: `## 🎉 First Pull Request!
+
+                      Welcome @${author}! Thank you for your first contribution to Liora!
+
+                      ### What happens next?
+
+                      1. **Automated Checks**: Our CI/CD pipeline will run automated tests and checks
+                      2. **Code Review**: A maintainer will review your changes
+                      3. **Feedback**: We may request changes or ask questions
+                      4. **Merge**: Once approved, your PR will be merged!
+
+                      ### 📚 Helpful Tips
+
+                      - Make sure all CI checks pass (green ✅)
+                      - Respond to review comments
+                      - Keep your branch up to date with \`main\`
+                      - Feel free to ask questions!
+
+                      ### 📖 Resources
+
+                      - [Contributing Guidelines](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CONTRIBUTING.md)
+                      - [Code of Conduct](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CODE_OF_CONDUCT.md)
+
+                      Thank you for contributing! We're excited to review your work! 🚀`
+                        });
+                      }
+
+    auto-approve-dependabot:
+        name: Auto Approve Dependabot
+        runs-on: ubuntu-latest
+        if: |
+            github.event_name == 'pull_request' && 
+            github.actor == 'dependabot[bot]' &&
+            (github.event.action == 'opened' || github.event.action == 'synchronize')
+        steps:
+            - name: Dependabot metadata
+              id: metadata
+              uses: dependabot/fetch-metadata@v2
+              with:
+                  github-token: ${{ secrets.PAT_TOKEN }}
+
+            - name: Auto approve minor/patch updates
+              if: |
+                  steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+                  steps.metadata.outputs.update-type == 'version-update:semver-minor'
+              run: |
+                  gh pr review --approve "${{ github.event.pull_request.html_url }}" \
+                    --body "✅ Auto-approved: ${{ steps.metadata.outputs.update-type }} dependency update"
+              env:
+                  GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+            - name: Enable auto-merge
+              if: |
+                  steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+                  steps.metadata.outputs.update-type == 'version-update:semver-minor'
+              run: gh pr merge --auto --squash "${{ github.event.pull_request.html_url }}"
+              env:
+                  GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+    check-ci-status:
+        name: Check CI Status
+        runs-on: ubuntu-latest
+        if: |
+            github.event_name == 'pull_request' && 
+            github.event.action == 'labeled' &&
+            github.event.label.name == 'ready-to-merge'
+        steps:
+            - name: Verify all checks passed
+              uses: actions/github-script@v8
+              with:
+                  script: |
+                      const pr = context.payload.pull_request;
+                      
+                      // Get check runs
+                      const { data: checkRuns } = await github.rest.checks.listForRef({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        ref: pr.head.sha
+                      });
+                      
+                      // Get status checks
+                      const { data: statuses } = await github.rest.repos.getCombinedStatusForRef({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        ref: pr.head.sha
+                      });
+                      
+                      const failedChecks = checkRuns.check_runs.filter(
+                        check => check.conclusion !== 'success' && check.conclusion !== 'neutral'
+                      );
+                      
+                      if (failedChecks.length > 0 || statuses.state !== 'success') {
+                        await github.rest.issues.createComment({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          issue_number: pr.number,
+                          body: `## ⚠️ Cannot Merge: CI Checks Failed
+
+                      This PR is labeled as "ready-to-merge" but some CI checks have failed.
+
+                      Please ensure all checks pass before merging:
+                      - ✅ All automated tests
+                      - ✅ Code quality checks
+                      - ✅ Security scans
+
+                      Failed checks: ${failedChecks.map(c => c.name).join(', ') || 'Status checks'}
+
+                      Fix the issues and push new changes to update the checks.`
+                        });
+                        
+                        core.setFailed('CI checks have not all passed');
+                      }
