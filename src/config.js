@@ -463,10 +463,10 @@ const initializeConfig = () => {
         owner: owners,
         pairingNumber: (Bun.env.PAIRING_NUMBER || "").trim(),
         pairingCode: (Bun.env.PAIRING_CODE || "").trim().toUpperCase() || generatePairingCode(),
-        watermark: (Bun.env.WATERMARK || "Liora"),
-        author: (Bun.env.AUTHOR || "Naruya Izumi"),
-        stickpack: (Bun.env.STICKPACK || "Liora"),
-        stickauth: (Bun.env.STICKAUTH || "© Naruya Izumi"),
+        watermark: Bun.env.WATERMARK || "Liora",
+        author: Bun.env.AUTHOR || "Naruya Izumi",
+        stickpack: Bun.env.STICKPACK || "Liora",
+        stickauth: Bun.env.STICKAUTH || "© Naruya Izumi",
         thumbnailUrl: sanitizeUrl(Bun.env.THUMBNAIL_URL),
     };
 

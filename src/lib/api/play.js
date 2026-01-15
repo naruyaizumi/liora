@@ -39,7 +39,7 @@
  */
 export async function play(query) {
     const encoded = encodeURIComponent(query);
-    
+
     /**
      * API endpoints for YouTube Music search with priority order
      * @private
@@ -52,7 +52,7 @@ export async function play(query) {
         `https://anabot.my.id/api/download/playmusic?query=${encoded}&apikey=freeApikey`,
         `https://api.elrayyxml.web.id/api/downloader/ytplay?q=${encoded}`,
     ];
-    
+
     /**
      * Attempt each endpoint until successful or all fail
      * @private
@@ -61,16 +61,16 @@ export async function play(query) {
     for (const endpoint of endpoints) {
         const res = await fetch(endpoint).catch(() => null);
         if (!res) continue;
-        
+
         let json;
         try {
             json = await res.json();
         } catch {
             continue;
         }
-        
+
         if (!json || (!json.success && !json.status)) continue;
-        
+
         if (json.result?.downloadUrl && json.result?.metadata) {
             const { title, channel, cover, url } = json.result.metadata;
             return {
@@ -82,7 +82,7 @@ export async function play(query) {
                 downloadUrl: json.result.downloadUrl,
             };
         }
-        
+
         if (json.result?.mp3 && json.result?.title) {
             return {
                 success: true,
@@ -93,7 +93,7 @@ export async function play(query) {
                 downloadUrl: json.result.mp3,
             };
         }
-        
+
         if (json.result?.download && json.result?.title) {
             return {
                 success: true,
@@ -104,7 +104,7 @@ export async function play(query) {
                 downloadUrl: json.result.download,
             };
         }
-        
+
         const ana = json.data?.result;
         if (ana?.success && ana?.urls && ana?.metadata) {
             return {
@@ -116,7 +116,7 @@ export async function play(query) {
                 downloadUrl: ana.urls,
             };
         }
-        
+
         const elray = json.result;
         if (
             elray?.download_url &&
@@ -135,7 +135,7 @@ export async function play(query) {
             };
         }
     }
-    
+
     /**
      * All endpoints failed to return usable data
      * @return {Object} Failure response with error message

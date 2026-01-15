@@ -72,15 +72,15 @@ export async function spotify(query) {
 
         if (json.info && json.download?.url) {
             const { title, artist, duration, spotify_url, thumbnail } = json.info;
-            
+
             let durationMs = 0;
             if (duration) {
-                const parts = duration.split(':');
+                const parts = duration.split(":");
                 if (parts.length === 2) {
                     durationMs = (parseInt(parts[0]) * 60 + parseInt(parts[1])) * 1000;
                 }
             }
-            
+
             return {
                 success: true,
                 title: title || "Unknown Track",

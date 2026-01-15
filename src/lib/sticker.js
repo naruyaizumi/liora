@@ -290,7 +290,7 @@ export async function sticker(buffer, options = {}) {
     if (buffer.length === 0) {
         throw new Error("Empty buffer provided");
     }
-    
+
     let isVideo = false;
 
     if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) {
@@ -339,7 +339,7 @@ export async function sticker(buffer, options = {}) {
         packPublish: options.authorName,
         emojis: options.emojis,
     });
-    
+
     buffer = null;
     webpBuffer = null;
 
