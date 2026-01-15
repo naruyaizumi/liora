@@ -36,8 +36,8 @@ let handler = async (m, { conn, text }) => {
     }
 
     let [pack, author] = (text || "").split("|");
-    pack = (pack || global.config.stickpack || "").trim();
-    author = (author || global.config.stickauth || "").trim();
+    pack = pack?.trim() || global.config.stickpack || "";
+    author = author?.trim() || global.config.stickauth || "";
 
     await global.loading(m, conn);
 
@@ -101,7 +101,7 @@ let handler = async (m, { conn, text }) => {
  * @property {Array<string>} tags - Command categories
  * @property {RegExp} command - Command pattern matching
  */
-handler.help = ["watermark <pack|author>"];
+handler.help = ["watermark"];
 handler.tags = ["maker"];
 handler.command = /^(wm|watermark)$/i;
 

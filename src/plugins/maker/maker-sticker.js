@@ -55,12 +55,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         if (!buf) throw new Error("Empty buffer");
 
         const opt = {
-            crop: false,
             quality: 90,
             fps: 30,
             maxDuration: 10,
-            packName: global.config.stickpack || "",
-            authorName: global.config.stickauth || "",
+            packName: global.config.stickpack,
+            authorName: global.config.stickauth,
             emojis: [],
         };
 

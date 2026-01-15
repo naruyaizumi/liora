@@ -1,0 +1,103 @@
+# =============================================
+# Bun Configuration File (bunfig.toml)
+# Setup for WhatsApp Bot Backend (Bun v1.3.5+)
+# =============================================
+
+# =============================================
+# RUNTIME CONFIGURATION
+# =============================================
+
+# Preload scripts - Load before main.js starts
+preload = []
+
+# Memory Optimization - CRITICAL FOR LONG-RUNNING BOT
+# Enable 'smol' mode to reduce memory footprint
+smol = true
+
+# Logging Level
+# Options: "debug" | "warn" | "error"
+logLevel = "error"
+
+# Telemetry & Crash Reports
+# Disable for privacy and to avoid network calls in production
+telemetry = false
+
+# Environment Variables
+# Set to false in production (use systemd/docker env vars)
+env = true
+
+# Console Output
+[console]
+depth = 1
+
+# Global Identifier Replacement (optional)
+# [define]
+# "process.env.NODE_ENV" = "'production'"
+
+# =============================================
+# PACKAGE MANAGER CONFIGURATION
+# =============================================
+
+[install]
+# Dependency Control
+optional = false
+dev = false
+peer = true
+production = true
+
+# Version Pinning
+exact = true
+
+# Lockfile Type
+saveTextLockfile = false
+
+# Auto-install Behavior
+auto = "disable"
+
+# Lockfile Enforcement
+frozenLockfile = true
+
+# Dry Run
+dryRun = false
+
+# Global Paths
+globalDir = "~/.bun/install/global"
+globalBinDir = "~/.bun/bin"
+
+# NPM Registry
+registry = "https://registry.npmjs.org"
+
+# Cache Configuration
+[install.cache]
+dir = "~/.bun/install/cache"
+disable = false
+disableManifest = false
+
+# Lockfile
+[install.lockfile]
+save = true
+
+# Linker Strategy
+linker = "hoisted"
+
+# Minimum Release Age - Supply Chain Security
+minimumReleaseAge = 604800
+minimumReleaseAgeExcludes = ["baileys", "prettier"]
+
+# =============================================
+# BUN RUN CONFIGURATION
+# =============================================
+
+[run]
+shell = "bun"
+bun = true
+silent = true
+
+# =============================================
+# TEST RUNNER
+# =============================================
+
+[test]
+root = "./tests"
+coverage = false
+smol = true

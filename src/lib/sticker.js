@@ -42,7 +42,7 @@ export async function imageToWebp(buffer, options = {}) {
             "-vcodec",
             "libwebp",
             "-vf",
-            `scale='min(320,iw)':min'(320,ih)':force_original_aspect_ratio=decrease,pad=320:320:-1:-1:color=white@0.0`,
+            `scale='min(320,iw)':min'(320,ih)':force_original_aspect_ratio=decrease,pad=320:320:-1:-1:color=#00000000`,
             "-q:v",
             quality.toString(),
             "-f",
@@ -76,7 +76,6 @@ export async function imageToWebp(buffer, options = {}) {
  * @function videoToWebp
  * @param {Buffer} buffer - Video/GIF buffer
  * @param {Object} [options={}] - Conversion options
- * @param {boolean} [options.crop=false] - Crop video to square
  * @param {number} [options.fps=15] - Frames per second (not used in API)
  * @param {number} [options.maxDuration=30] - Maximum duration in seconds
  * @returns {Promise<Buffer>} Animated WebP buffer
@@ -97,12 +96,11 @@ export async function imageToWebp(buffer, options = {}) {
  * @example
  * const videoBuffer = Buffer.from(await fetch('video.mp4').then(r => r.arrayBuffer()));
  * const stickerBuffer = await videoToWebp(videoBuffer, {
- *   crop: false,
  *   maxDuration: 10
  * });
  */
 export async function videoToWebp(buffer, options = {}) {
-    const { crop = false, maxDuration = 30 } = options;
+    const { maxDuration = 30 } = options;
 
     const base64 = buffer.toString("base64");
     const endTime =
@@ -111,7 +109,7 @@ export async function videoToWebp(buffer, options = {}) {
     const payload = {
         file: `data:video/mp4;base64,${base64}`,
         processOptions: {
-            crop,
+            crop: false,
             startTime: "00:00:00.0",
             endTime,
             loop: 0,
@@ -216,7 +214,6 @@ export async function addExif(webpBuffer, metadata = {}) {
         throw new Error("Input must be a WebP Buffer");
     }
 
-    // Verify it's a WebP file
     const isWebp =
         webpBuffer[0] === 0x52 &&
         webpBuffer[1] === 0x49 &&
@@ -231,17 +228,11 @@ export async function addExif(webpBuffer, metadata = {}) {
         throw new Error("Buffer is not a valid WebP file");
     }
 
-    // Skip EXIF if no metadata provided
-    if (!metadata || Object.keys(metadata).length === 0) {
-        return webpBuffer;
-    }
-
-    // Prepare EXIF data
     const img = new webp.Image();
     const exifData = {
         "sticker-pack-id": metadata.packId || `liora-${Date.now()}`,
-        "sticker-pack-name": metadata.packName || "Liora Stickers",
-        "sticker-pack-publisher": metadata.packPublish || "Liora Bot",
+        "sticker-pack-name": metadata.packName || "Liora",
+        "sticker-pack-publisher": metadata.packPublish || "© Naruya Izumi",
         "android-app-store-link":
             metadata.androidApp || "https://play.google.com/store/apps/details?id=com.whatsapp",
         "ios-app-store-link":
@@ -250,7 +241,6 @@ export async function addExif(webpBuffer, metadata = {}) {
         "is-avatar-sticker": metadata.isAvatar || 0,
     };
 
-    // Create EXIF buffer
     const exifAttr = Buffer.from([
         0x49, 0x49, 0x2a, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00, 0x41, 0x57, 0x07, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00,
@@ -260,7 +250,6 @@ export async function addExif(webpBuffer, metadata = {}) {
     const exif = Buffer.concat([exifAttr, jsonBuffer]);
     exif.writeUIntLE(jsonBuffer.length, 14, 4);
 
-    // Attach EXIF and save
     await img.load(webpBuffer);
     img.exif = exif;
 
@@ -273,7 +262,6 @@ export async function addExif(webpBuffer, metadata = {}) {
  * @function sticker
  * @param {Buffer} buffer - Input media buffer
  * @param {Object} [options={}] - Conversion and metadata options
- * @param {boolean} [options.crop=false] - Crop to square (for videos)
  * @param {number} [options.quality=90] - Output quality (1-100, for images)
  * @param {number} [options.fps=15] - FPS for animated stickers
  * @param {number} [options.maxDuration=10] - Max duration for videos (seconds)
@@ -293,22 +281,6 @@ export async function addExif(webpBuffer, metadata = {}) {
  * - Images: JPEG, PNG, GIF (static), BMP, TIFF
  * - Videos: MP4, WebM, MKV, MOV, AVI, GIF (animated)
  * - Output: WebP (static or animated)
- *
- * @example
- * // From URL
- * const buffer = await fetch('https://example.com/image.jpg')
- *   .then(r => r.arrayBuffer())
- *   .then(b => Buffer.from(b));
- *
- * const stickerBuffer = await sticker(buffer, {
- *   quality: 85,
- *   packName: 'My Pack',
- *   authorName: 'John Doe',
- *   emojis: ['😊', '🎉']
- * });
- *
- * // Send sticker
- * await conn.sendMessage(jid, { sticker: stickerBuffer });
  */
 export async function sticker(buffer, options = {}) {
     if (!Buffer.isBuffer(buffer)) {
@@ -318,31 +290,27 @@ export async function sticker(buffer, options = {}) {
     if (buffer.length === 0) {
         throw new Error("Empty buffer provided");
     }
-
-    // Detect media type from magic bytes
+    
     let isVideo = false;
 
-    // Check for image formats
     if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) {
-        isVideo = true; // GIF (animated, treat as video)
+        isVideo = true;
     } else if (
         buffer[0] === 0x52 &&
         buffer[1] === 0x49 &&
         buffer[2] === 0x46 &&
         buffer[3] === 0x46
     ) {
-        // RIFF container
         if (
             buffer[8] === 0x57 &&
             buffer[9] === 0x45 &&
             buffer[10] === 0x42 &&
             buffer[11] === 0x50
         ) {
-            // Already WebP
             return addExif(buffer, {
-                packName: options.packName || "",
-                packPublish: options.authorName || "",
-                emojis: options.emojis || [],
+                packName: options.packName,
+                packPublish: options.authorName,
+                emojis: options.emojis,
             });
         }
     } else if (
@@ -354,11 +322,9 @@ export async function sticker(buffer, options = {}) {
         isVideo = true;
     }
 
-    // Convert to WebP
     let webpBuffer;
     if (isVideo) {
         webpBuffer = await videoToWebp(buffer, {
-            crop: options.crop || false,
             fps: options.fps || 15,
             maxDuration: options.maxDuration || 10,
         });
@@ -368,14 +334,12 @@ export async function sticker(buffer, options = {}) {
         });
     }
 
-    // Add EXIF metadata
     const result = await addExif(webpBuffer, {
-        packName: options.packName || "",
-        packPublish: options.authorName || "",
-        emojis: options.emojis || [],
+        packName: options.packName,
+        packPublish: options.authorName,
+        emojis: options.emojis,
     });
-
-    // Clear buffers from memory
+    
     buffer = null;
     webpBuffer = null;
 
