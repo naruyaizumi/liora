@@ -39,19 +39,20 @@
  */
 export async function play(query) {
     const encoded = encodeURIComponent(query);
-
+    
     /**
      * API endpoints for YouTube Music search with priority order
      * @private
      * @constant {Array<string>}
      */
     const endpoints = [
+        `https://api-faa.my.id/faa/ytplay?query=${encoded}`,
+        `https://api.ootaizumi.web.id/downloader/youtube/play?query=${encoded}`,
         `https://api.nekolabs.web.id/downloader/youtube/play/v1?q=${encoded}`,
-        `https://api.ootaizumi.web.id/downloader/youtube-play?query=${encoded}`,
         `https://anabot.my.id/api/download/playmusic?query=${encoded}&apikey=freeApikey`,
         `https://api.elrayyxml.web.id/api/downloader/ytplay?q=${encoded}`,
     ];
-
+    
     /**
      * Attempt each endpoint until successful or all fail
      * @private
@@ -60,30 +61,16 @@ export async function play(query) {
     for (const endpoint of endpoints) {
         const res = await fetch(endpoint).catch(() => null);
         if (!res) continue;
-
+        
         let json;
         try {
             json = await res.json();
         } catch {
             continue;
         }
-
+        
         if (!json || (!json.success && !json.status)) continue;
-
-        /**
-         * Format 1: Nekolabs API format
-         * @example {
-         *   result: {
-         *     downloadUrl: "https://...",
-         *     metadata: {
-         *       title: "...",
-         *       channel: "...",
-         *       cover: "...",
-         *       url: "..."
-         *     }
-         *   }
-         * }
-         */
+        
         if (json.result?.downloadUrl && json.result?.metadata) {
             const { title, channel, cover, url } = json.result.metadata;
             return {
@@ -95,47 +82,29 @@ export async function play(query) {
                 downloadUrl: json.result.downloadUrl,
             };
         }
-
-        /**
-         * Format 2: Ootaizumi API format
-         * @example {
-         *   result: {
-         *     download: "https://...",
-         *     title: "...",
-         *     author: { name: "..." },
-         *     thumbnail: "...",
-         *     url: "..."
-         *   }
-         * }
-         */
+        
+        if (json.result?.mp3 && json.result?.title) {
+            return {
+                success: true,
+                title: json.result.title || "Unknown Title",
+                channel: json.result.author || "Unknown Artist",
+                cover: json.result.thumbnail || null,
+                url: json.result.url || null,
+                downloadUrl: json.result.mp3,
+            };
+        }
+        
         if (json.result?.download && json.result?.title) {
             return {
                 success: true,
                 title: json.result.title || "Unknown Title",
                 channel: json.result.author?.name || "Unknown Channel",
-                cover: json.result.thumbnail || null,
+                cover: json.result.thumbnail || json.result.image || null,
                 url: json.result.url || null,
                 downloadUrl: json.result.download,
             };
         }
-
-        /**
-         * Format 3: Anabot API format
-         * @example {
-         *   data: {
-         *     result: {
-         *       success: true,
-         *       urls: "https://...",
-         *       metadata: {
-         *         title: "...",
-         *         channel: "...",
-         *         thumbnail: "...",
-         *         webpage_url: "..."
-         *       }
-         *     }
-         *   }
-         * }
-         */
+        
         const ana = json.data?.result;
         if (ana?.success && ana?.urls && ana?.metadata) {
             return {
@@ -147,19 +116,7 @@ export async function play(query) {
                 downloadUrl: ana.urls,
             };
         }
-
-        /**
-         * Format 4: Elray XML API format
-         * @example {
-         *   result: {
-         *     download_url: "https://...",
-         *     title: "...",
-         *     channel: "...",
-         *     thumbnail: "...",
-         *     url: "..."
-         *   }
-         * }
-         */
+        
         const elray = json.result;
         if (
             elray?.download_url &&
@@ -178,7 +135,7 @@ export async function play(query) {
             };
         }
     }
-
+    
     /**
      * All endpoints failed to return usable data
      * @return {Object} Failure response with error message

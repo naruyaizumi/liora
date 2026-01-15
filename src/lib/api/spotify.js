@@ -52,6 +52,7 @@ export async function spotify(query) {
      * @constant {Array<string>}
      */
     const endpoints = [
+        `https://api-faa.my.id/faa/spotify-play?q=${encoded}`,
         `https://api.ootaizumi.web.id/downloader/spotifyplay?query=${encoded}`,
         `https://api.nekolabs.web.id/dwn/spotify/play/v1?q=${encoded}`,
         `https://kyyokatsurestapi.my.id/search/spotify?q=${encoded}`,
@@ -64,26 +65,33 @@ export async function spotify(query) {
      */
     for (const endpoint of endpoints) {
         const res = await fetch(endpoint).catch(() => null);
-        if (!res) continue;
+        if (!res || !res.ok) continue;
 
         const json = await res.json().catch(() => null);
         if (!json || (!json.success && !json.status)) continue;
 
-        /**
-         * Format 1: Nekolabs API format (structured metadata)
-         * @example {
-         *   result: {
-         *     downloadUrl: "https://...",
-         *     metadata: {
-         *       title: "...",
-         *       artist: "...",
-         *       cover: "...",
-         *       url: "...",
-         *       duration: 180000
-         *     }
-         *   }
-         * }
-         */
+        if (json.info && json.download?.url) {
+            const { title, artist, duration, spotify_url, thumbnail } = json.info;
+            
+            let durationMs = 0;
+            if (duration) {
+                const parts = duration.split(':');
+                if (parts.length === 2) {
+                    durationMs = (parseInt(parts[0]) * 60 + parseInt(parts[1])) * 1000;
+                }
+            }
+            
+            return {
+                success: true,
+                title: title || "Unknown Track",
+                channel: artist || "Unknown Artist",
+                cover: thumbnail || null,
+                url: spotify_url || null,
+                duration: durationMs,
+                downloadUrl: json.download.url,
+            };
+        }
+
         if (json.result?.downloadUrl && json.result?.metadata) {
             const { title, artist, cover, url, duration } = json.result.metadata;
             return {
@@ -97,19 +105,6 @@ export async function spotify(query) {
             };
         }
 
-        /**
-         * Format 2: Ootaizumi API format (flattened structure)
-         * @example {
-         *   result: {
-         *     download: "https://...",
-         *     title: "...",
-         *     artists: "...",
-         *     image: "...",
-         *     external_url: "...",
-         *     duration_ms: 180000
-         *   }
-         * }
-         */
         const oota = json.result;
         if (oota?.download && oota?.title && oota?.artists && oota?.image && oota?.external_url) {
             return {
@@ -123,18 +118,6 @@ export async function spotify(query) {
             };
         }
 
-        /**
-         * Format 3: Kyyokat API format (simple structure)
-         * @example {
-         *   result: {
-         *     audio: "https://...",
-         *     title: "...",
-         *     artist: "...",
-         *     thumbnail: "...",
-         *     url: "..."
-         *   }
-         * }
-         */
         const kyy = json.result;
         if (kyy?.audio && kyy?.title && kyy?.artist && kyy?.thumbnail && kyy?.url) {
             return {
@@ -143,6 +126,7 @@ export async function spotify(query) {
                 channel: kyy.artist || "Unknown Artist",
                 cover: kyy.thumbnail || null,
                 url: kyy.url || null,
+                duration: 0,
                 downloadUrl: kyy.audio,
             };
         }
@@ -154,6 +138,6 @@ export async function spotify(query) {
      */
     return {
         success: false,
-        error: "No downloadable track found from any provider. The track may be unavailable, region-restricted, or the search query was invalid.",
+        error: "No downloadable track found from any provider. The track may be unavailable, restricted, or the search query was invalid.",
     };
 }
