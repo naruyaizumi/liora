@@ -31,8 +31,7 @@ import { play } from "#api/play.js";
 import { canvas } from "#canvas/play.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-    if (!args[0])
-        return m.reply(`Need song title\nEx: ${usedPrefix + command} Bye`);
+    if (!args[0]) return m.reply(`Need song title\nEx: ${usedPrefix + command} Bye`);
 
     await global.loading(m, conn);
     try {
