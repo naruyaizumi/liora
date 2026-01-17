@@ -95,7 +95,7 @@ function buildFFmpegArgs(options = {}) {
 
     let defaultBitrate = 64000;
     let codec = "libopus";
-    let container = "ogg";
+    let container;
 
     switch (format) {
         case "mp3":
