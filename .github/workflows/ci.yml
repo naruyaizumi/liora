@@ -2,7 +2,7 @@ name: Code Quality & Security
 
 on:
     push:
-        branches: [main]
+        branches: [main, dev]
         paths:
             - "src/**/*.js"
             - "*.js"
@@ -10,7 +10,7 @@ on:
             - "install.sh"
             - "src/lib/shell/**/*.sh"
     pull_request:
-        branches: [main]
+        branches: [main, dev]
         paths:
             - "src/**/*.js"
             - "*.js"
