@@ -90,6 +90,76 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 };
 
+
+
+
+import { canvas } from "#canvas/yts.js";
+
+let handler = async (m, { conn, text, usedPrefix, command }) => {
+    if (!text) {
+        return m.reply(`Need query\nEx: ${usedPrefix + command} neck deep`);
+    }
+
+    try {
+        await global.loading(m, conn);
+
+        const url = `https://api.nekolabs.web.id/discovery/youtube/search?q=${encodeURIComponent(text)}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`API failed: ${res.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.success || !Array.isArray(data.result)) {
+            throw new Error("Invalid API response");
+        }
+
+        const videos = data.result;
+
+        if (videos.length === 0) {
+            return m.reply(`No results for "${text}"`);
+        }
+
+        const imageBuffer = await canvas(videos, text);
+
+        const rows = vids.map((v, i) => ({
+            header: `Result ${i + 1}`,
+            title: v.title,
+            description: `${v.channel} • ${v.duration || "-"}`,
+            id: `.play ${v.title}`,
+        }));
+
+        await conn.client(m.chat, {
+            image: imageBuffer,
+            caption: "*Select video above*",
+            title: "YouTube Search",
+            footer: `Found ${vids.length} results`,
+            interactiveButtons: [
+                {
+                    name: "single_select",
+                    buttonParamsJson: JSON.stringify({
+                        title: "Select Video",
+                        sections: [
+                            {
+                                title: `Results (${vids.length})`,
+                                rows: rows,
+                            },
+                        ],
+                    }),
+                },
+            ],
+            hasMediaAttachment: true,
+        });
+    } catch (e) {
+        global.logger.error(e);
+        m.reply(`Error: ${e.message}`);
+    } finally {
+        await global.loading(m, conn, true);
+    }
+};
+
 /**
  * Command metadata for help system
  * @property {Array<string>} help - Help text

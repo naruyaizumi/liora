@@ -26,43 +26,58 @@
  * - Displays album art and artist info in rich preview
  * - Shows loading indicators during processing
  */
-
+import { convert } from "#lib/convert.js";
 import { play } from "#api/play.js";
+import { canvas } from "#canvas/play.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-    if (!args[0]) {
+    if (!args[0])
         return m.reply(`Need song title\nEx: ${usedPrefix + command} Bye`);
-    }
 
     await global.loading(m, conn);
-
     try {
-        const res = await play(args.join(" "));
+        const { success, title, channel, cover, url, downloadUrl, error } = await play(
+            args.join(" ")
+        );
+        if (!success) throw new Error(error);
 
-        if (!res?.success) {
-            throw new Error(res?.error || "No audio");
-        }
+        const canvasBuffer = await canvas(cover, title, channel);
 
-        const { title, channel, cover, url, downloadUrl } = res;
+        const audioRes = await fetch(downloadUrl);
+        if (!audioRes.ok) throw new Error("No download URL");
 
-        if (!downloadUrl) {
-            throw new Error("No download URL");
-        }
+        const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
+
+        const converted = await convert(audioBuffer, {
+            format: "opus",
+            bitrate: "128k",
+            channels: 1,
+            sampleRate: 48000,
+            ptt: true,
+        });
+
+        const finalBuffer =
+            converted instanceof Buffer
+                ? converted
+                : converted?.buffer
+                  ? Buffer.from(converted.buffer)
+                  : converted?.data
+                    ? Buffer.from(converted.data)
+                    : Buffer.from(converted);
 
         await conn.sendMessage(
             m.chat,
             {
-                audio: {
-                    url: downloadUrl,
-                },
-                mimetype: "audio/mpeg",
+                audio: finalBuffer,
+                mimetype: "audio/ogg; codecs=opus",
+                ptt: true,
                 contextInfo: {
                     externalAdReply: {
                         title,
                         body: channel,
-                        thumbnailUrl: cover,
+                        thumbnail: canvasBuffer,
                         mediaUrl: url,
-                        mediaType: 2,
+                        mediaType: 1,
                         renderLargerThumbnail: true,
                     },
                 },
@@ -70,6 +85,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             { quoted: m }
         );
     } catch (e) {
+        global.logger.error(e);
         m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);

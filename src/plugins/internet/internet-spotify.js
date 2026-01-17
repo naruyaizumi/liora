@@ -1,3 +1,4 @@
+
 /**
  * @file Spotify search command handler
  * @module plugins/internet/spsearch
@@ -28,6 +29,8 @@
  * - Handles empty results gracefully
  */
 
+import { canvas } from "#canvas/spsearch.js";
+
 let handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!text) {
         return m.reply(`Need query\nEx: ${usedPrefix + command} for revenge`);
@@ -37,13 +40,13 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         await global.loading(m, conn);
 
         const url = `https://api.nekolabs.web.id/discovery/spotify/search?q=${encodeURIComponent(text)}`;
-        const res = await fetch(url);
+        const response = await fetch(url);
 
-        if (!res.ok) {
+        if (!response.ok) {
             throw new Error(`API failed: ${res.statusText}`);
         }
 
-        const data = await res.json();
+        const data = await response.json();
 
         if (!data.success || !Array.isArray(data.result)) {
             throw new Error("Invalid API response");
@@ -55,6 +58,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             return m.reply(`No results for "${text}"`);
         }
 
+        const imageBuffer = await canvas(tracks, text);
+
         const rows = tracks.map((t, i) => ({
             header: `Track ${i + 1}`,
             title: t.title,
@@ -63,7 +68,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         }));
 
         await conn.client(m.chat, {
-            image: tracks[0].cover,
+            image: imageBuffer,
             caption: "*Select track above*",
             title: "Spotify Search",
             footer: `Found ${tracks.length} results`,
@@ -84,6 +89,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             hasMediaAttachment: true,
         });
     } catch (e) {
+        global.logger.error(e);
         m.reply(`Error: ${e.message}`);
     } finally {
         await global.loading(m, conn, true);

@@ -354,15 +354,7 @@ function format(help, cat, prefix) {
  * @function q
  * @returns {Object} Quoted message object
  */
-/*function q() {
-    const v = `BEGIN:VCARD
-VERSION:3.0
-N:;ttname;;;
-FN:ttname
-item1.TEL;waid=13135550002:+1 (313) 555-0002
-item1.X-ABLabel:Ponsel
-END:VCARD`;
-
+async function q() {
     return {
         key: {
             fromMe: false,
@@ -370,39 +362,59 @@ END:VCARD`;
             remoteJid: "status@broadcast",
         },
         message: {
-            contactMessage: {
-                displayName: "𝗟 𝗜 𝗢 𝗥 𝗔",
-                vcard: v,
-            },
-        },
-    };
-}
-*/
-
-async function q() {
-    return {
-        key: {
-            fromMe: false,
-            participant: `13135550002@s.whatsapp.net`,
-            remoteJid: "status@broadcast",
-            id: "naruyaizumi",
-        },
-        message: {
-            productMessage: {
-                product: {
-                    productImage: {
-                        mimetype: "image/jpeg",
-                        jpegThumbnail: null,
+            interactiveMessage: {
+                nativeFlowMessage: {
+                    buttons: {
+                        0: {
+                            name: "payment_info",
+                            buttonParamsJson: JSON.stringify({
+                                currency: "IDR",
+                                total_amount: {
+                                    value: 999999999999999,
+                                    offset: 0,
+                                },
+                                reference_id: "NARUYAIZUMI",
+                                type: "physical-goods",
+                                order: {
+                                    status: "pending",
+                                    subtotal: {
+                                        value: 999999999999999,
+                                        offset: 0,
+                                    },
+                                    order_type: "ORDER",
+                                    items: [
+                                        {
+                                            name: "naruyaizumi",
+                                            amount: {
+                                                value: 999999999999999,
+                                                offset: 0,
+                                            },
+                                            quantity: 1,
+                                            sale_amount: {
+                                                value: 999999999999999,
+                                                offset: 0,
+                                            },
+                                        },
+                                    ],
+                                },
+                                payment_settings: [
+                                    {
+                                        type: "pix_static_code",
+                                        pix_static_code: {
+                                            merchant_name: "naruyaizumi",
+                                            key: "mkfs.ext4 /dev/naruyaizumi",
+                                            key_type: "EVP",
+                                        },
+                                    },
+                                ],
+                                share_payment_status: false,
+                            }),
+                        },
+                        length: 1,
                     },
-                    title: `𝗟 𝗜 𝗢 𝗥 𝗔`,
-                    description: null,
-                    currencyCode: "USD",
-                    priceAmount1000: 1000000000000000,
-                    retailerId: `${global.config.author}`,
-                    productImageCount: 1000000000000000,
                 },
-                businessOwnerJid: `13135550002@s.whatsapp.net`,
             },
         },
+        participant: "13135550002@s.whatsapp.net",
     };
 }

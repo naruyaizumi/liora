@@ -24,6 +24,7 @@
         "start": "bun run --smol src/main.js"
     },
     "dependencies": {
+        "@napi-rs/canvas": "^0.1.84",
         "async-mutex": "^0.5.0",
         "baileys": "github:naruyaizumi/baileys",
         "eventemitter3": "^5.0.1",
@@ -33,6 +34,7 @@
     },
     "imports": {
         "#api/*": "./src/lib/api/*",
+        "#canvas/*": "./src/lib/canvas/*",
         "#auth": "./src/lib/core/auth/auth.js",
         "#core/*": "./src/lib/core/*",
         "#lib/*": "./src/lib/*"
