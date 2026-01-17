@@ -31,8 +31,7 @@ import { spotify } from "#api/spotify.js";
 import { canvas } from "#canvas/spotify.js";
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-    if (!args[0])
-        return m.reply(`Need song title\nEx: ${usedPrefix + command} Swim`);
+    if (!args[0]) return m.reply(`Need song title\nEx: ${usedPrefix + command} Swim`);
 
     await global.loading(m, conn);
     try {

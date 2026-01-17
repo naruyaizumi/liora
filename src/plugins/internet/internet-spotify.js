@@ -1,4 +1,3 @@
-
 /**
  * @file Spotify search command handler
  * @module plugins/internet/spsearch
