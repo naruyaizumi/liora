@@ -39,13 +39,13 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         await global.loading(m, conn);
 
         const url = `https://api.nekolabs.web.id/discovery/youtube/search?q=${encodeURIComponent(text)}`;
-        const response = await fetch(url);
+        const res = await fetch(url);
 
-        if (!response.ok) {
+        if (!res.ok) {
             throw new Error(`API failed: ${res.statusText}`);
         }
 
-        const data = await response.json();
+        const data = await res.json();
 
         if (!data.success || !Array.isArray(data.result)) {
             throw new Error("Invalid API response");

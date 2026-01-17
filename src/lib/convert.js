@@ -148,6 +148,8 @@ function buildFFmpegArgs(options = {}) {
     String(finalSampleRate),
     "-ac",
     String(finalChannels),
+    "-sample_fmt",
+    sampleFmt,
   ];
 
   if (codec !== "pcm_s16le") {
