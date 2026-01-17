@@ -94,7 +94,7 @@ function buildFFmpegArgs(options = {}) {
     const vbr = options.vbr !== false;
 
     let defaultBitrate = 64000;
-    let codec = "libopus";
+    let codec;
     let container;
 
     switch (format) {
