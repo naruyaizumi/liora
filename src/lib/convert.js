@@ -96,26 +96,22 @@ function buildFFmpegArgs(options = {}) {
   let defaultBitrate = 64000;
   let codec = "libopus";
   let container = "ogg";
-  let sampleFmt = "s16";
 
   switch (format) {
     case "mp3":
       defaultBitrate = 128000;
       codec = "libmp3lame";
       container = "mp3";
-      sampleFmt = "s16p";
       break;
     case "aac":
     case "m4a":
       defaultBitrate = 128000;
       codec = "aac";
       container = "ipod";
-      sampleFmt = "fltp";
       break;
     case "wav":
       codec = "pcm_s16le";
       container = "wav";
-      sampleFmt = "s16";
       break;
     case "opus":
     case "ogg":
@@ -125,7 +121,6 @@ function buildFFmpegArgs(options = {}) {
       defaultBitrate = ptt ? 32000 : 64000;
       codec = "libopus";
       container = "ogg";
-      sampleFmt = "s16";
       break;
   }
 
@@ -148,8 +143,6 @@ function buildFFmpegArgs(options = {}) {
     String(finalSampleRate),
     "-ac",
     String(finalChannels),
-    "-sample_fmt",
-    sampleFmt,
   ];
 
   if (codec !== "pcm_s16le") {
