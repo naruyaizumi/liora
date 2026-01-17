@@ -197,30 +197,6 @@ sequenceDiagram
 <!-- Wave Footer Divider -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
-_📸 Screenshots_
-
-**Interactive Menus**
-
-<p align="center">
-  <img src="https://files.catbox.moe/dqx3qt.jpg" width="400" alt="Main Menu"><br>
-  <em>Main menu interface with options</em>
-</p>
-
-<p align="center">
-  <img src="https://files.catbox.moe/t3aeaj.jpg" width="400" alt="Category Menu"><br>
-  <em>Category menu for easier navigation</em>
-</p>
-
-**Rich Media Support**
-
-<p align="center">
-  <img src="https://files.catbox.moe/ulm6qc.jpg" width="270" alt="Carousels"><br>
-  <em>Carousel view for multiple items with interactive buttons</em>
-</p>
-
-<!-- Wave Footer Divider -->
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
-
 _⚡ Quick Start_
 
 For detailed installation instructions, see **[INSTALLATION.md](.github/INSTALLATION.md)**
