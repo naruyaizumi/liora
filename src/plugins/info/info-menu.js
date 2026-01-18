@@ -358,7 +358,7 @@ async function q() {
     return {
         key: {
             fromMe: false,
-            participant: "13135550002@s.whatsapp.net",
+            participant: "166653589463190@lid",
             remoteJid: "status@broadcast",
         },
         message: {
@@ -415,6 +415,6 @@ async function q() {
                 },
             },
         },
-        participant: "13135550002@s.whatsapp.net",
+        participant: "166653589463190@lid",
     };
 }

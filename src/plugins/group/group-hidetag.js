@@ -33,16 +33,17 @@ let handler = async (m, { text, participants, conn }) => {
     const mime = (q.msg || q).mimetype || "";
     const txt = text || q.text || "";
     const jids = participants.map((p) => p.id);
-    let msg = txt;
-
-    const mentions = jids.filter((jid) => {
-        const un = jid.split("@")[0];
-        return txt.includes("@" + un);
-    });
+    
+    let msg = '@all';
+    if (txt.trim()) {
+        msg += ' ' + txt.trim();
+    }
 
     const opt = {
         quoted: m,
-        mentions: mentions.length ? mentions : jids,
+        contextInfo: {
+            nonJidMentions: 1
+        }
     };
 
     if (mime) {
@@ -60,10 +61,20 @@ let handler = async (m, { text, participants, conn }) => {
             content.fileName = "file";
         } else return m.reply("Invalid media");
 
-        if (msg) content.caption = msg;
+        content.caption = msg;
+        content.contextInfo = {
+            nonJidMentions: 1
+        };
+        
         await conn.sendMessage(m.chat, content, opt);
     } else if (msg) {
-        await conn.sendMessage(m.chat, { text: msg, mentions: opt.mentions }, opt);
+        const content = {
+            text: msg,
+            contextInfo: {
+                nonJidMentions: 1
+            }
+        };
+        await conn.sendMessage(m.chat, content, opt);
     } else {
         m.reply("Send media/text or reply to a message");
     }
