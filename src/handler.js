@@ -11,13 +11,6 @@ import { smsg } from "#core/smsg.js";
 import { join, dirname } from "node:path";
 
 /**
- * Regular expression for detecting command prefixes
- * @constant {RegExp}
- * @default
- */
-const CMD_PREFIX_RE = /^[/!.]/;
-
-/**
  * Safely executes a function with fallback on error
  * @async
  * @function safe
@@ -43,7 +36,7 @@ const safe = async (fn, fallback = undefined) => {
 const parsePrefix = (connPrefix, pluginPrefix) => {
     if (pluginPrefix) return pluginPrefix;
     if (connPrefix) return connPrefix;
-    return CMD_PREFIX_RE;
+    return global.config.prefix;
 };
 
 /**
@@ -203,8 +196,12 @@ async function printMessage(
     }
 ) {
     try {
-        // Skip if logging disabled
+        // Skip if logging disabled via environment
+        if (!global.config.printMessage) return;
+        
+        // Skip if logging disabled in settings
         if (global.db?.data?.settings?.[conn.user?.lid]?.noprint) return;
+        
         if (!m || !m.sender || !m.chat || !m.mtype) return;
 
         const sender = conn.decodeJid(m.sender);
@@ -296,7 +293,14 @@ export async function handler(chatUpdate) {
 
         // Get last message and serialize
         const m = smsg(this, messages[messages.length - 1]);
-        if (!m || m.isBaileys || m.fromMe) return;
+        
+        // Skip invalid messages
+        if (!m) return;
+        
+        // Skip baileys and own messages if not in development mode
+        if (!global.config.development) {
+            if (m.isBaileys || m.fromMe) return;
+        }
 
         // Load settings and determine ownership
         const settings = global.db?.data?.settings?.[this.user.lid] || {};
@@ -453,8 +457,17 @@ export async function handler(chatUpdate) {
         // Log command execution
         await safe(() => printMessage(m, this));
 
-        // Mark message as read
-        if (commandMatched && matchedKey) {
+        // Auto-read messages based on configuration
+        if (global.config.autoRead) {
+            setImmediate(async () => {
+                try {
+                    await this.readMessages([m.key]);
+                } catch (e) {
+                    global.logger?.error({ error: e.message }, "Read message error");
+                }
+            });
+        } else if (commandMatched && matchedKey) {
+            // Only auto-read command messages if autoRead is disabled
             setImmediate(async () => {
                 try {
                     await this.readMessages([matchedKey]);
