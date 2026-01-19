@@ -7,7 +7,7 @@
  * @author Naruya Izumi
  */
 
-import { db, sqlite } from "#database/database.js";
+import { db, sqlite } from "./database/database.js";
 
 /**
  * Validates and sanitizes URLs for security
@@ -395,14 +395,6 @@ const initializeConfig = () => {
             // Single owner format
             owners = [ownersEnv];
         }
-    }
-
-    // Parse PREFIX from environment
-    const prefixEnv = (Bun.env.PREFIX || "").trim();
-    let prefix = ["/", "!", "."];
-    
-    if (prefixEnv) {
-        prefix = parseJsonArray(prefixEnv, ["/", "!", "."]);
     }
 
     /**
