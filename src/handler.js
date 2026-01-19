@@ -203,8 +203,6 @@ async function printMessage(
     }
 ) {
     try {
-        // Skip if logging disabled
-        if (global.db?.data?.settings?.[conn.user?.lid]?.noprint) return;
         if (!m || !m.sender || !m.chat || !m.mtype) return;
 
         const sender = conn.decodeJid(m.sender);
