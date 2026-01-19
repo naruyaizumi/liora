@@ -7,7 +7,7 @@
  * @author Naruya Izumi
  */
 
-import { db, sqlite } from "#database/database.js";
+import { db, sqlite } from "./src/database/database.js";
 
 /**
  * Validates and sanitizes URLs for security
