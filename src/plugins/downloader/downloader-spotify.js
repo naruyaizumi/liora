@@ -26,7 +26,6 @@
  * - Displays album art and artist info
  * - Shows loading indicators during processing
  */
-import { convert } from "#lib/convert.js";
 import { spotify } from "#api/spotify.js";
 import { canvas } from "#canvas/spotify.js";
 
@@ -42,34 +41,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         const canvasBuffer = await canvas(cover, title, channel, duration);
 
-        const audioRes = await fetch(downloadUrl);
-        if (!audioRes.ok) throw new Error("No download URL");
-
-        const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
-
-        const converted = await convert(audioBuffer, {
-            format: "opus",
-            bitrate: "128k",
-            channels: 1,
-            sampleRate: 48000,
-            ptt: false,
-        });
-
-        const finalBuffer =
-            converted instanceof Buffer
-                ? converted
-                : converted?.buffer
-                  ? Buffer.from(converted.buffer)
-                  : converted?.data
-                    ? Buffer.from(converted.data)
-                    : Buffer.from(converted);
-
         await conn.sendMessage(
             m.chat,
             {
-                audio: finalBuffer,
-                mimetype: "audio/ogg; codecs=opus",
-                ptt: true,
+                audio: { url: downloadUrl },
+                mimetype: "audio/mpeg",
+                ptt: false,
                 contextInfo: {
                     externalAdReply: {
                         title,
