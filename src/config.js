@@ -68,26 +68,6 @@ const parseBoolean = (value, defaultValue) => {
 };
 
 /**
- * Parses JSON array from environment variable
- * @private
- * @function parseJsonArray
- * @param {string} value - JSON string to parse
- * @param {Array} defaultValue - Default value if parsing fails
- * @returns {Array} Parsed array or default
- */
-const parseJsonArray = (value, defaultValue = []) => {
-    if (!value || typeof value !== "string") return defaultValue;
-    
-    try {
-        const parsed = JSON.parse(value);
-        if (Array.isArray(parsed)) return parsed;
-        return defaultValue;
-    } catch {
-        return defaultValue;
-    }
-};
-
-/**
  * Initializes the logging system with configurable levels and formats
  * @private
  * @function initializeLogger
