@@ -32,7 +32,6 @@ let handler = async (m, { text, participants, conn }) => {
     const q = m.quoted || m;
     const mime = (q.msg || q).mimetype || "";
     const txt = text || q.text || "";
-    const jids = participants.map((p) => p.id);
     
     let msg = '@all';
     if (txt.trim()) {
