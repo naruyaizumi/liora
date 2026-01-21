@@ -29,10 +29,16 @@
  * - Contact card with bot details
  * - External advertisement integration
  */
-
+import {
+    proto,
+    generateWAMessageFromContent,
+    prepareWAMessageMedia
+} from "baileys";
 import os from "os";
 
-const CATS = ["ai", "downloader", "group", "info", "internet", "maker", "owner", "tools"];
+const CATS = ["ai", "downloader", "group", "info", "internet", "maker", "owner",
+    "tools"
+];
 
 const META = {
     ai: "AI",
@@ -47,28 +53,29 @@ const META = {
 
 let handler = async (m, { conn, usedPrefix, command, args }) => {
     await global.loading(m, conn);
-
+    
     try {
         const pkg = await getPkg();
         const help = getHelp();
         const inp = (args[0] || "").toLowerCase();
         const time = new Date().toTimeString().split(" ")[0];
-
+        
         if (inp === "all") {
             return await all(conn, m, help, usedPrefix, time);
         }
-
+        
         if (!inp) {
             return await main(conn, m, pkg, usedPrefix, command, time);
         }
-
+        
         const idx = parseInt(inp) - 1;
         const cat = !isNaN(idx) && CATS[idx] ? CATS[idx] : inp;
-
+        
         if (!CATS.includes(cat)) {
-            return m.reply(`Invalid category. Use \`${usedPrefix + command}\``);
+            return m.reply(
+                `Invalid category. Use \`${usedPrefix + command}\``);
         }
-
+        
         return await show(conn, m, help, cat, usedPrefix, time);
     } catch (e) {
         m.reply(`Error: ${e.message}`);
@@ -90,14 +97,17 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
  */
 async function all(conn, m, help, prefix, time) {
     const cmds = CATS.map((c) => {
-        const list = format(help, c, prefix);
-        return list.length > 0 ? `\n${META[c]}\n${list.join("\n")}` : "";
-    })
+            const list = format(help, c, prefix);
+            return list.length > 0 ?
+                `\n${META[c]}\n${list.join("\n")}` : "";
+        })
         .filter(Boolean)
         .join("\n");
-
-    const txt = ["```", `[${time}] All Commands`, "─".repeat(25), cmds, "```"].join("\n");
-
+    
+    const txt = ["```", `[${time}] All Commands`, "─".repeat(25), cmds,
+        "```"
+    ].join("\n");
+    
     return conn.sendMessage(
         m.chat,
         {
@@ -114,8 +124,7 @@ async function all(conn, m, help, prefix, time) {
                     renderLargerThumbnail: true,
                 },
             },
-        },
-        { quoted: await q() }
+        }, { quoted: await q() }
     );
 }
 
@@ -134,7 +143,7 @@ async function all(conn, m, help, prefix, time) {
 async function main(conn, m, pkg, prefix, cmd, time) {
     const upBot = fmt(process.uptime());
     const upSys = fmt(os.uptime());
-
+    
     const cap = [
         "```",
         `[${time}] Liora`,
@@ -153,70 +162,151 @@ async function main(conn, m, pkg, prefix, cmd, time) {
         "Select category below",
         "```",
     ].join("\n");
-
+    
     const sections = [
+    {
+        title: "Categories",
+        highlight_label: "ナルヤ イズミ",
+        rows: CATS.map((c) => ({
+            title: META[c],
+            description: `View ${META[c]} commands`,
+            id: `${prefix + cmd} ${c}`,
+        })),
+    },
+    {
+        title: "Options",
+        highlight_label: "ナルヤ イズミ",
+        rows: [
         {
-            title: "Categories",
-            highlight_label: "ナルヤ イズミ",
-            rows: CATS.map((c) => ({
-                title: META[c],
-                description: `View ${META[c]} commands`,
-                id: `${prefix + cmd} ${c}`,
-            })),
-        },
-        {
-            title: "Options",
-            highlight_label: "ナルヤ イズミ",
-            rows: [
-                {
-                    title: "All Commands",
-                    description: "View all at once",
-                    id: `${prefix + cmd} all`,
+            title: "All Commands",
+            description: "View all at once",
+            id: `${prefix + cmd} all`,
+        }, ],
+    }, ];
+    
+    const productImage = { url: "https://files.catbox.moe/1moinz.jpg" };
+    const preparedMedia =
+        await prepareWAMessageMedia({ image: productImage }, {
+            upload: conn
+                .waUploadToServer
+        });
+    
+    const messageContent = {
+        header: {
+            title: "Liora Menu",
+            hasMediaAttachment: true,
+            productMessage: {
+                product: {
+                    productImage: preparedMedia.imageMessage,
+                    productId: "25015941284694382",
+                    title: "Liora Menu",
+                    description: "WhatsApp Bot",
+                    currencyCode: "BTC",
+                    priceAmount1000: "1000000000000000",
+                    retailerId: global.config.author,
+                    url: "https://wa.me/p/25015941284694382/6283143663697",
+                    productImageCount: 1000000000000000,
                 },
-            ],
+                businessOwnerJid: "113748182302861@lid",
+            },
         },
-    ];
-
-    return await conn.client(
+        body: { text: "" },
+        footer: { text: cap },
+        nativeFlowMessage: {
+            buttons: [
+            {
+                name: "single_select",
+                buttonParamsJson: JSON.stringify({
+                    title: "Select Menu",
+                    icon: "PROMOTION",
+                    sections: sections,
+                    has_multiple_buttons: true
+                })
+            },
+            {
+                name: "cta_url",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "Script",
+                    url: "https://github.com/naruyaizumi/liora"
+                })
+            },
+            {
+                name: "galaxy_message",
+                buttonParamsJson: JSON.stringify({
+                    flow_message_version: "3",
+                    flow_token: "861213990153775",
+                    flow_id: "881629137674877",
+                    flow_cta: "© Naruya Izumi 2024 - 2026",
+                    flow_action: "navigate",
+                    flow_action_payload: {
+                        screen: "SATISFACTION_SCREEN",
+                        data: {}
+                    },
+                    flow_metadata: {
+                        flow_json_version: 700,
+                        data_api_protocol: 2,
+                        data_api_version: 2,
+                        flow_name: "In-App CSAT No Agent or TRR v3 - en_US_v1",
+                        creation_source: "CSAT",
+                        categories: []
+                    },
+                    icon: "DEFAULT",
+                    has_multiple_buttons: false
+                })
+            }],
+            messageParamsJson: JSON.stringify({
+                bottom_sheet: {
+                    in_thread_buttons_limit: 1,
+                    divider_indices: [1, 2],
+                    list_title: "Liora Menu",
+                    button_title: global.config.author
+                }
+            })
+        }
+    };
+    
+    const payload = proto.Message.InteractiveMessage.create(messageContent);
+    
+    const msg = generateWAMessageFromContent(
         m.chat,
         {
-            product: {
-                productImage: { url: "https://files.catbox.moe/1moinz.jpg" },
-                productId: "25015941284694382",
-                title: "Liora Menu",
-                description: "WhatsApp Bot",
-                currencyCode: "USD",
-                priceAmount1000: 1000000000000000,
-                retailerId: global.config.author,
-                url: "https://wa.me/p/25015941284694382/6283143663697",
-                productImageCount: 1,
-            },
-            businessOwnerJid: "113748182302861@lid",
-            caption: "*© Naruya Izumi 2024 - 2026*",
-            title: "Liora Menu",
-            footer: cap,
-            interactiveButtons: [
-                {
-                    name: "single_select",
-                    buttonParamsJson: JSON.stringify({
-                        title: "Select",
-                        sections,
-                    }),
-                },
-                {
-                    name: "cta_url",
-                    buttonParamsJson: JSON.stringify({
-                        display_text: "Script",
-                        url: "https://github.com/naruyaizumi/liora",
-                    }),
-                },
-            ],
-            hasMediaAttachment: false,
+            interactiveMessage: payload,
         },
-        { quoted: await q() }
+        {
+            userJid: conn.user.id,
+            quoted: await q(),
+        }
     );
+    
+    const additionalNodes = [
+    {
+        tag: "biz",
+        attrs: {},
+        content: [
+        {
+            tag: "interactive",
+            attrs: {
+                type: "native_flow",
+                v: "1",
+            },
+            content: [
+            {
+                tag: "native_flow",
+                attrs: {
+                    v: "9",
+                    name: "mixed",
+                },
+            }, ],
+        }, ],
+    }, ];
+    
+    await conn.relayMessage(m.chat, msg.message, {
+        messageId: msg.key.id,
+        additionalNodes,
+    });
+    
+    return msg;
 }
-
 /**
  * Displays commands for a specific category
  * @async
@@ -231,20 +321,19 @@ async function main(conn, m, pkg, prefix, cmd, time) {
  */
 async function show(conn, m, help, cat, prefix, time) {
     const cmds = format(help, cat, prefix);
-
+    
     const txt =
-        cmds.length > 0
-            ? [
-                  "```",
-                  `[${time}] ${META[cat]} Commands`,
-                  "─".repeat(25),
-                  cmds.join("\n"),
-                  "─".repeat(25),
-                  `Total: ${cmds.length}`,
-                  "```",
-              ].join("\n")
-            : `No commands for ${META[cat]}`;
-
+        cmds.length > 0 ? [
+            "```",
+            `[${time}] ${META[cat]} Commands`,
+            "─".repeat(25),
+            cmds.join("\n"),
+            "─".repeat(25),
+            `Total: ${cmds.length}`,
+            "```",
+        ].join("\n") :
+        `No commands for ${META[cat]}`;
+    
     return conn.sendMessage(
         m.chat,
         {
@@ -261,8 +350,7 @@ async function show(conn, m, help, cat, prefix, time) {
                     renderLargerThumbnail: true,
                 },
             },
-        },
-        { quoted: await q() }
+        }, { quoted: await q() }
     );
 }
 
@@ -289,7 +377,8 @@ function fmt(sec) {
     const h = Math.floor(m / 60);
     const d = Math.floor(h / 24);
     return (
-        [d && `${d}d`, h % 24 && `${h % 24}h`, m % 60 && `${m % 60}m`].filter(Boolean).join(" ") ||
+        [d && `${d}d`, h % 24 && `${h % 24}h`, m % 60 && `${m % 60}m`]
+        .filter(Boolean).join(" ") ||
         "0m"
     );
 }
@@ -343,7 +432,8 @@ function format(help, cat, prefix) {
         .filter((p) => p.tags.includes(cat))
         .flatMap((p) =>
             p.help.map((cmd) => {
-                const b = p.mods ? " (dev)" : p.owner ? " (owner)" : p.admin ? " (admin)" : "";
+                const b = p.mods ? " (dev)" : p.owner ? " (owner)" : p
+                    .admin ? " (admin)" : "";
                 return `- ${prefix + cmd}${b}`;
             })
         );
@@ -358,7 +448,7 @@ async function q() {
     return {
         key: {
             fromMe: false,
-            participant: "166653589463190@lid",
+            participant: "13135550002@s.whatsapp.net",
             remoteJid: "status@broadcast",
         },
         message: {
@@ -383,30 +473,28 @@ async function q() {
                                     },
                                     order_type: "ORDER",
                                     items: [
-                                        {
-                                            name: "naruyaizumi",
-                                            amount: {
-                                                value: 999999999999999,
-                                                offset: 0,
-                                            },
-                                            quantity: 1,
-                                            sale_amount: {
-                                                value: 999999999999999,
-                                                offset: 0,
-                                            },
+                                    {
+                                        name: "naruyaizumi",
+                                        amount: {
+                                            value: 999999999999999,
+                                            offset: 0,
                                         },
-                                    ],
+                                        quantity: 1,
+                                        sale_amount: {
+                                            value: 999999999999999,
+                                            offset: 0,
+                                        },
+                                    }, ],
                                 },
                                 payment_settings: [
-                                    {
-                                        type: "pix_static_code",
-                                        pix_static_code: {
-                                            merchant_name: "naruyaizumi",
-                                            key: "mkfs.ext4 /dev/naruyaizumi",
-                                            key_type: "EVP",
-                                        },
+                                {
+                                    type: "pix_static_code",
+                                    pix_static_code: {
+                                        merchant_name: "naruyaizumi",
+                                        key: "mkfs.ext4 /dev/naruyaizumi",
+                                        key_type: "EVP",
                                     },
-                                ],
+                                }, ],
                                 share_payment_status: false,
                             }),
                         },
@@ -415,6 +503,6 @@ async function q() {
                 },
             },
         },
-        participant: "166653589463190@lid",
+        participant: "13135550002@s.whatsapp.net",
     };
 }
