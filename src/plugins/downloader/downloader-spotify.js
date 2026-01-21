@@ -46,7 +46,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             {
                 audio: { url: downloadUrl },
                 mimetype: "audio/mpeg",
-                ptt: false,
                 contextInfo: {
                     externalAdReply: {
                         title,
@@ -55,6 +54,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                         mediaUrl: url,
                         mediaType: 1,
                         renderLargerThumbnail: true,
+                        showAdAttribution: true,
+                        sourceUrl: "https://open.spotify.com",
                     },
                 },
             },
