@@ -28,7 +28,7 @@
  * - Can reply to existing messages
  */
 
-let handler = async (m, { text, participants, conn }) => {
+let handler = async (m, { text, conn }) => {
     const q = m.quoted || m;
     const mime = (q.msg || q).mimetype || "";
     const txt = text || q.text || "";
