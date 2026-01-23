@@ -322,7 +322,7 @@ export class EventManager {
             if (!handler) return false;
 
             // Restart connection if requested
-            if (restartConn) {
+            if (restartsock) {
                 try {
                     // Cleanup existing connection
                     if (global.sock?.ev) {
