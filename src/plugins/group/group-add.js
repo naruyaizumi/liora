@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Array} args - Command arguments
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -27,7 +27,7 @@
  * - Proper error handling and status reporting
  */
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { sock, args, usedPrefix, command }) => {
     let target = m.quoted?.sender || null;
 
     if (!target && args[0]) {
@@ -40,11 +40,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
 
     try {
-        const res = await conn.groupParticipantsUpdate(m.chat, [target], "add");
+        const res = await sock.groupParticipantsUpdate(m.chat, [target], "add");
         const user = res?.[0];
 
         if (user?.status === "200") {
-            return conn.sendMessage(
+            return sock.sendMessage(
                 m.chat,
                 {
                     text: `Added @${target.split("@")[0]}`,

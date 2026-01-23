@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {string} text - Group chat ID (optional)
  * @returns {Promise<void>}
  *
@@ -25,11 +25,11 @@
  * - Simple and straightforward operation
  */
 
-let handler = async (m, { conn, text }) => {
+let handler = async (m, { sock, text }) => {
     const gc = text || m.chat;
 
-    await conn.sendMessage(gc, { text: "Leaving group" });
-    await conn.groupLeave(gc);
+    await sock.sendMessage(gc, { text: "Leaving group" });
+    await sock.groupLeave(gc);
 };
 
 /**

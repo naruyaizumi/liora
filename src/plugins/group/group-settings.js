@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Array} args - Command arguments
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -27,13 +27,13 @@
  * - Requires bot and user admin privileges
  */
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { sock, args, usedPrefix, command }) => {
     const arg = (args[0] || "").toLowerCase();
     const mode = { open: "not_announcement", close: "announcement" }[arg];
 
     if (!mode) return m.reply(`Use: ${usedPrefix + command} open/close`);
 
-    await conn.groupSettingUpdate(m.chat, mode);
+    await sock.groupSettingUpdate(m.chat, mode);
     return m.reply(`Group ${arg === "open" ? "opened" : "closed"}`);
 };
 

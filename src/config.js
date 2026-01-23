@@ -426,17 +426,17 @@ global.timestamp = { start: new Date() };
  * @async
  * @function loading
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {boolean} back - Whether to remove reaction (done processing)
  * @returns {Promise<void>}
  */
-global.loading = async (m, conn, back = false) => {
-    if (!conn || !m || !m.chat || !m.key) return;
+global.loading = async (m, sock, back = false) => {
+    if (!sock || !m || !m.chat || !m.key) return;
 
     try {
         if (back) {
             // Remove reaction (processing finished)
-            await conn.sendMessage(m.chat, {
+            await sock.sendMessage(m.chat, {
                 react: {
                     text: '',
                     key: m.key
@@ -444,7 +444,7 @@ global.loading = async (m, conn, back = false) => {
             });
         } else {
             // Add loading reaction (processing started)
-            await conn.sendMessage(m.chat, {
+            await sock.sendMessage(m.chat, {
                 react: {
                     text: '🍥',
                     key: m.key
@@ -491,11 +491,11 @@ const FAILURE_MESSAGES = {
  * @function dfail
  * @param {string} type - Failure type (owner, group, admin, botAdmin, restrict)
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @returns {Promise<void>}
  */
-global.dfail = async (type, m, conn) => {
-    if (!type || !m || !conn || !m.chat) return;
+global.dfail = async (type, m, sock) => {
+    if (!type || !m || !sock || !m.chat) return;
 
     const failureConfig = FAILURE_MESSAGES[type];
     if (!failureConfig) return;
@@ -504,7 +504,7 @@ global.dfail = async (type, m, conn) => {
 
     try {
         // Send with rich preview if thumbnail available
-        await conn.sendMessage(
+        await sock.sendMessage(
             m.chat,
             {
                 text: messageText,
@@ -522,6 +522,6 @@ global.dfail = async (type, m, conn) => {
         );
     } catch {
         // Fallback to simple message
-        await conn.sendMessage(m.chat, { text: messageText }, { quoted: m });
+        await sock.sendMessage(m.chat, { text: messageText }, { quoted: m });
     }
 };

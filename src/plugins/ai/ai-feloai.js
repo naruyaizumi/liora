@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {string} text - User query/prompt
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -28,11 +28,11 @@
  * - Handles API errors gracefully
  */
 
-let handler = async (m, { conn, text, usedPrefix, command }) => {
+let handler = async (m, { sock, text, usedPrefix, command }) => {
     if (!text) return m.reply(`Ask Felo AI\nEx: ${usedPrefix + command} what's today date`);
 
     try {
-        await global.loading(m, conn);
+        await global.loading(m, sock);
 
         const api = `https://api.nekolabs.web.id/text-generation/feloai?text=${encodeURIComponent(text)}`;
         const res = await fetch(api);
@@ -54,11 +54,11 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                     .join("\n\n");
         }
 
-        await conn.sendMessage(m.chat, { text: `Felo AI:\n${reply.trim()}${src}` }, { quoted: m });
+        await sock.sendMessage(m.chat, { text: `Felo AI:\n${reply.trim()}${src}` }, { quoted: m });
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

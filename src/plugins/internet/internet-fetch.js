@@ -12,7 +12,7 @@ import { fwa, fb, cc, gcs } from "#lib/fetch.js";
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {string} text - URL and options to fetch
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -177,7 +177,7 @@ function fr(ch) {
     return l.join("\n") + "\n";
 }
 
-let handler = async (m, { conn, text, usedPrefix, command }) => {
+let handler = async (m, { sock, text, usedPrefix, command }) => {
     const a = text?.trim().split(/\s+/) || [];
 
     if (a[0] === "cache") {
@@ -253,7 +253,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const rf = go("--referer");
     if (rf) o.r = rf;
 
-    await global.loading(m, conn);
+    await global.loading(m, sock);
 
     try {
         const r = await fwa(u, o);
@@ -336,7 +336,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 await m.reply(cp + "\n\n```" + ext + "\n" + tx + "\n```");
             } else {
                 await m.reply(cp + "\n\nContent too large, sending as file...");
-                await conn.sendMessage(
+                await sock.sendMessage(
                     m.chat,
                     {
                         document: bf,
@@ -347,7 +347,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 );
             }
         } else if (cat === "image" && bf.length > 100) {
-            await conn.sendMessage(
+            await sock.sendMessage(
                 m.chat,
                 {
                     image: bf,
@@ -357,7 +357,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 opts
             );
         } else if (cat === "video" && bf.length > 1000) {
-            await conn.sendMessage(
+            await sock.sendMessage(
                 m.chat,
                 {
                     video: bf,
@@ -367,7 +367,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                 opts
             );
         } else if (cat === "audio" && bf.length > 100) {
-            await conn.sendMessage(
+            await sock.sendMessage(
                 m.chat,
                 {
                     audio: bf,
@@ -378,7 +378,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             );
             await m.reply(cp);
         } else {
-            await conn.sendMessage(
+            await sock.sendMessage(
                 m.chat,
                 {
                     document: bf,
@@ -392,7 +392,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

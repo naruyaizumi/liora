@@ -324,13 +324,13 @@ Create a file in `/src/plugins/[category]/[name].js`:
  * @author Naruya Izumi
  */
 
-let handler = async (m, { conn }) => {
+let handler = async (m, { sock }) => {
     const start = Bun.nanoseconds();
-    const msg = await conn.sendMessage(m.chat, { text: "⏱️ Checking..." });
+    const msg = await sock.sendMessage(m.chat, { text: "⏱️ Checking..." });
     const ns = Bun.nanoseconds() - start;
     const ms = (ns / 1_000_000).toFixed(0);
 
-    await conn.sendMessage(m.chat, {
+    await sock.sendMessage(m.chat, {
         text: `🏓 Pong! ${ms} ms`,
         edit: msg.key,
     });

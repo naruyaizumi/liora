@@ -13,7 +13,7 @@
  * @function handler
  * @param {Object} m - Message object
  * @param {Object} extra - Extra context
- * @param {Object} extra.conn - Connection object
+ * @param {Object} extra.sock - Connection object
  * @param {string} extra.text - Command arguments
  * @param {Array} extra.args - Command arguments array
  * @param {string} extra.usedPrefix - Used prefix
@@ -47,7 +47,7 @@
  * - .stalk -c <channel_link> → Stalk channel by invite link
  * - .stalk -tt <username> → Stalk TikTok profile
  */
-let handler = async (m, { conn, text, args, usedPrefix, command }) => {
+let handler = async (m, { sock, text, args, usedPrefix, command }) => {
     try {
         const f = args[0]?.toLowerCase();
 
@@ -74,15 +74,15 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
         }
 
         // Show loading after validation
-        await global.loading(m, conn);
+        await global.loading(m, sock);
 
         // Route to appropriate handler
         if (f === "-g") {
-            return await grpinfo(m, conn, args.slice(1).join(" "));
+            return await grpinfo(m, sock, args.slice(1).join(" "));
         }
 
         if (f === "-c") {
-            return await chinfo(m, conn, args.slice(1).join(" "));
+            return await chinfo(m, sock, args.slice(1).join(" "));
         }
 
         if (f === "-tt") {
@@ -90,45 +90,45 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
             if (!username) {
                 return m.reply(`Please provide a TikTok username.\n\nExample: ${usedPrefix + command} -tt naruyaizumi`);
             }
-            return await tiktokStalk(m, conn, username);
+            return await tiktokStalk(m, sock, username);
         }
 
         // Default: WhatsApp user info
-        await usrinfo(m, conn, inp);
+        await usrinfo(m, sock, inp);
 
         /**
          * Handles WhatsApp user/business profile information
          * @async
          * @function usrinfo
          */
-        async function usrinfo(m, conn, inp) {
+        async function usrinfo(m, sock, inp) {
             const lid = inp.endsWith("@lid")
                 ? inp
-                : await conn.signalRepository.lidMapping.getLIDForPN(inp);
+                : await sock.signalRepository.lidMapping.getLIDForPN(inp);
 
             if (!lid) return m.reply("Cannot resolve LID for this user.");
 
-            const jid = await conn.signalRepository.lidMapping.getPNForLID(lid);
+            const jid = await sock.signalRepository.lidMapping.getPNForLID(lid);
             if (!jid) return m.reply("Cannot resolve JID for this user.");
 
-            const [ex] = await conn.onWhatsApp(jid);
+            const [ex] = await sock.onWhatsApp(jid);
             if (!ex?.exists) {
                 return m.reply("This number is not registered on WhatsApp.");
             }
 
             const pp =
-                (await conn.profilePictureUrl(jid, "image").catch(() => null)) ||
+                (await sock.profilePictureUrl(jid, "image").catch(() => null)) ||
                 "https://qu.ax/jVZhH.jpg";
 
-            const stsRes = await conn.fetchStatus(jid).catch(() => null);
+            const stsRes = await sock.fetchStatus(jid).catch(() => null);
             const sts = stsRes?.[0]?.status;
             const bio = sts?.status?.trim() || null;
             const setAt = sts?.setAt ? new Date(sts.setAt) : null;
 
-            const bis = await conn.getBusinessProfile(jid).catch(() => null);
+            const bis = await sock.getBusinessProfile(jid).catch(() => null);
             const isBiz = bis && (bis.description || bis.category);
 
-            const decodedJid = conn.decodeJid?.(jid) || jid.replace(/:0$/, "");
+            const decodedJid = sock.decodeJid?.(jid) || jid.replace(/:0$/, "");
 
             let cap = isBiz
                 ? "*WhatsApp Business Profile*\n\n"
@@ -187,7 +187,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
                 }
             }
 
-            await conn.sendMessage(
+            await sock.sendMessage(
                 m.chat,
                 {
                     image: { url: pp },
@@ -203,7 +203,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
          * @async
          * @function grpinfo
          */
-        async function grpinfo(m, conn, arg) {
+        async function grpinfo(m, sock, arg) {
             let meta;
             let gid;
 
@@ -213,7 +213,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
 
                 const invCode = match[1];
                 try {
-                    meta = await conn.groupGetInviteInfo(invCode);
+                    meta = await sock.groupGetInviteInfo(invCode);
                     gid = meta.id;
                 } catch (e) {
                     return m.reply(`Failed to fetch group info: ${e.message}`);
@@ -228,7 +228,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
                 gid = m.chat;
 
                 try {
-                    const chatData = await conn.getChat(gid);
+                    const chatData = await sock.getChat(gid);
                     if (chatData?.metadata?.participants?.length) {
                         meta = chatData.metadata;
                     }
@@ -238,15 +238,15 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
 
                 if (!meta) {
                     try {
-                        meta = await conn.groupMetadata(gid);
+                        meta = await sock.groupMetadata(gid);
 
                         try {
-                            const chatData = (await conn.getChat(gid)) || { id: gid };
+                            const chatData = (await sock.getChat(gid)) || { id: gid };
                             chatData.metadata = meta;
                             chatData.subject = meta.subject;
                             chatData.isChats = true;
                             chatData.lastSync = Date.now();
-                            await conn.setChat(gid, chatData);
+                            await sock.setChat(gid, chatData);
                         } catch {
                             //
                         }
@@ -285,7 +285,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
 
             let pp = null;
             try {
-                pp = await conn.profilePictureUrl(gid, "image");
+                pp = await sock.profilePictureUrl(gid, "image");
             } catch {
                 //
             }
@@ -340,7 +340,7 @@ ${admList}
 `.trim();
 
             if (pp) {
-                await conn.sendMessage(
+                await sock.sendMessage(
                     m.chat,
                     {
                         image: { url: pp },
@@ -350,7 +350,7 @@ ${admList}
                     { quoted: m }
                 );
             } else {
-                await conn.sendMessage(
+                await sock.sendMessage(
                     m.chat,
                     {
                         text: cap,
@@ -366,7 +366,7 @@ ${admList}
          * @async
          * @function chinfo
          */
-        async function chinfo(m, conn, arg) {
+        async function chinfo(m, sock, arg) {
             if (!arg || !arg.includes("whatsapp.com/channel/")) {
                 return m.reply("Please provide a valid WhatsApp channel invite link.");
             }
@@ -378,7 +378,7 @@ ${admList}
 
             let meta;
             try {
-                meta = await conn.newsletterMetadata("invite", invCode, "GUEST");
+                meta = await sock.newsletterMetadata("invite", invCode, "GUEST");
             } catch (e) {
                 return m.reply(`Failed to fetch channel info: ${e.message}`);
             }
@@ -461,7 +461,7 @@ ${admList}
 `.trim();
 
             if (pp) {
-                await conn.sendMessage(
+                await sock.sendMessage(
                     m.chat,
                     {
                         image: { url: pp },
@@ -470,7 +470,7 @@ ${admList}
                     { quoted: m }
                 );
             } else {
-                await conn.sendMessage(
+                await sock.sendMessage(
                     m.chat,
                     {
                         text: cap,
@@ -485,7 +485,7 @@ ${admList}
          * @async
          * @function tiktokStalk
          */
-        async function tiktokStalk(m, conn, username) {
+        async function tiktokStalk(m, sock, username) {
             const cleanUsername = username.replace(/^@/, "");
 
             let data;
@@ -567,7 +567,7 @@ ${admList}
 `.trim();
 
             if (data.avatar) {
-                await conn.sendMessage(
+                await sock.sendMessage(
                     m.chat,
                     {
                         image: { url: data.avatar },
@@ -576,7 +576,7 @@ ${admList}
                     { quoted: m }
                 );
             } else {
-                await conn.sendMessage(
+                await sock.sendMessage(
                     m.chat,
                     {
                         text: cap,
@@ -676,7 +676,7 @@ ${admList}
         global.logger.error(e);
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Array} args - Command arguments
  * @param {string} usedPrefix - Command prefix used
  * @returns {Promise<void>}
@@ -24,7 +24,7 @@
  * - WhatsApp channels: https://whatsapp.com/channel/CHANNEL_ID
  */
 
-let handler = async (m, { conn, args, usedPrefix }) => {
+let handler = async (m, { sock, args, usedPrefix }) => {
     try {
         const text = args[0];
         if (!text) return m.reply(`Usage: ${usedPrefix}cekid <WhatsApp group or channel link>`);
@@ -43,17 +43,17 @@ let handler = async (m, { conn, args, usedPrefix }) => {
 
         if (isGroup) {
             const code = url.pathname.replace(/^\/+/, "");
-            const res = await conn.groupGetInviteInfo(code);
+            const res = await sock.groupGetInviteInfo(code);
             id = res.id;
         } else if (isChannel) {
             const code = url.pathname.split("/channel/")[1]?.split("/")[0];
-            const res = await conn.newsletterMetadata("invite", code, "GUEST");
+            const res = await sock.newsletterMetadata("invite", code, "GUEST");
             id = res.id;
         } else {
             return m.reply("Unsupported link. Provide a valid group or channel link.");
         }
 
-        await conn.client(m.chat, {
+        await sock.client(m.chat, {
             text: `Target ID: ${id}`,
             title: "Result",
             footer: "Use the button below to copy the ID",

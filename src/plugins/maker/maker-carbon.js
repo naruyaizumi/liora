@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Array<string>} args - Command arguments
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -27,7 +27,7 @@
  * - Simple one-line usage
  */
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { sock, args, usedPrefix, command }) => {
     try {
         const code = args.join(" ");
 
@@ -35,7 +35,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             return m.reply(`Need code\nEx: ${usedPrefix + command} console.log("Hello")`);
         }
 
-        await global.loading(m, conn);
+        await global.loading(m, sock);
 
         const url = `https://api.nekolabs.web.id/canvas/carbonify?code=${encodeURIComponent(code)}`;
         const res = await fetch(url);
@@ -44,16 +44,16 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         const buf = Buffer.from(await res.arrayBuffer());
 
-        await conn.sendMessage(
+        await sock.sendMessage(
             m.chat,
             { image: buf, caption: "Carbon code snippet" },
             { quoted: m }
         );
     } catch (e) {
-        conn.logger.error(e);
+        sock.logger.error(e);
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

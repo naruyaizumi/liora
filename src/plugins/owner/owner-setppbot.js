@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
@@ -27,8 +27,8 @@
  * - Only accessible by bot owner
  */
 
-let handler = async (m, { conn, usedPrefix, command }) => {
-    const bot = conn.decodeJid(conn.user.id);
+let handler = async (m, { sock, usedPrefix, command }) => {
+    const bot = sock.decodeJid(sock.user.id);
     const q = m.quoted || m;
     const mime = (q.msg || q).mimetype || "";
 
@@ -37,7 +37,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     const img = await q.download();
     if (!img) return m.reply("Failed");
 
-    await conn.updateProfilePicture(bot, img);
+    await sock.updateProfilePicture(bot, img);
     m.reply("PP updated");
 };
 

@@ -13,7 +13,7 @@
  * @param {Object} param1 - Destructured parameters
  * @param {string} param1.text - Text argument
  * @param {Array} param1.participants - Group participants list
- * @param {Object} param1.conn - Connection object
+ * @param {Object} param1.sock - Connection object
  * @returns {Promise<void>}
  *
  * @description
@@ -28,7 +28,7 @@
  * - Can reply to existing messages
  */
 
-let handler = async (m, { text, conn }) => {
+let handler = async (m, { text, sock }) => {
     const q = m.quoted || m;
     const mime = (q.msg || q).mimetype || "";
     const txt = text || q.text || "";
@@ -65,7 +65,7 @@ let handler = async (m, { text, conn }) => {
             nonJidMentions: 1
         };
         
-        await conn.sendMessage(m.chat, content, opt);
+        await sock.sendMessage(m.chat, content, opt);
     } else if (msg) {
         const content = {
             text: msg,
@@ -73,7 +73,7 @@ let handler = async (m, { text, conn }) => {
                 nonJidMentions: 1
             }
         };
-        await conn.sendMessage(m.chat, content, opt);
+        await sock.sendMessage(m.chat, content, opt);
     } else {
         m.reply("Send media/text or reply to a message");
     }

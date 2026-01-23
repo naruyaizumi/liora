@@ -11,7 +11,7 @@
  * @function handler
  * @param {Object} m - Message object
  * @param {Object} param1 - Destructured parameters
- * @param {Object} param1.conn - Connection object
+ * @param {Object} param1.sock - Connection object
  * @param {boolean} param1.isOwner - Whether user is bot owner
  * @returns {Promise<void>}
  *
@@ -49,7 +49,7 @@ const blocked = [
     ">:(){ :|: & };:",
 ];
 
-const handler = async (m, { conn, isOwner }) => {
+const handler = async (m, { sock, isOwner }) => {
     if (!isOwner) return;
     const txt = m.text || "";
     if (!txt.startsWith("$ ")) return;
@@ -84,7 +84,7 @@ const handler = async (m, { conn, isOwner }) => {
     }
 
     if (blocked.some((b) => cmd.startsWith(b))) {
-        return conn.sendMessage(m.chat, {
+        return sock.sendMessage(m.chat, {
             text: ["Command blocked", `> ${cmd}`].join("\n"),
         });
     }
@@ -134,7 +134,7 @@ const handler = async (m, { conn, isOwner }) => {
         out = [`${cmd}`, "─".repeat(30), `Error: ${e.message || String(e)}`, ""].join("\n");
     }
 
-    await conn.sendMessage(m.chat, { text: out });
+    await sock.sendMessage(m.chat, { text: out });
 };
 
 /**

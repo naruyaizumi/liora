@@ -7,7 +7,7 @@
  * @author Naruya Izumi
  */
 
-/* global conn */
+/* global sock */
 import { readdir, stat } from "node:fs/promises";
 import { join, relative, normalize } from "node:path";
 import { naruyaizumi } from "./socket.js";
@@ -229,22 +229,22 @@ export class EventManager {
     /**
      * Registers event handlers with connection
      * @method registerHandlers
-     * @param {Object} conn - Connection instance
+     * @param {Object} sock - Connection instance
      * @param {Object} handler - Handler module
      * @param {Function} saveCreds - Credentials save function
      * @param {CleanupManager} cleanupManager - Cleanup manager instance
      * @returns {void}
      */
-    registerHandlers(conn, handler, saveCreds, cleanupManager) {
-        const messageHandler = handler?.handler?.bind(global.conn) || (() => {});
-        const connectionHandler = handleDisconnect.bind(global.conn);
-        const credsHandler = saveCreds?.bind(global.conn) || (() => {});
+    registerHandlers(sock, handler, saveCreds, cleanupManager) {
+        const messageHandler = handler?.handler?.bind(global.sock) || (() => {});
+        const connectionHandler = handleDisconnect.bind(global.sock);
+        const credsHandler = saveCreds?.bind(global.sock) || (() => {});
 
-        conn.handler = messageHandler;
-        conn.connectionUpdate = connectionHandler;
-        conn.credsUpdate = credsHandler;
+        sock.handler = messageHandler;
+        sock.connectionUpdate = connectionHandler;
+        sock.credsUpdate = credsHandler;
 
-        if (conn?.ev) {
+        if (sock?.ev) {
             const handlers = [
                 { event: "messages.upsert", handler: messageHandler },
                 { event: "connection.update", handler: connectionHandler },
@@ -253,7 +253,7 @@ export class EventManager {
 
             for (const { event, handler: hdlr } of handlers) {
                 if (typeof hdlr === "function") {
-                    conn.ev.on(event, hdlr);
+                    sock.ev.on(event, hdlr);
                     this.eventHandlers.set(event, hdlr);
                     cleanupManager.registerEventHandler(event, hdlr);
                 }
@@ -264,19 +264,19 @@ export class EventManager {
     /**
      * Unregisters event handlers from connection
      * @method unregisterHandlers
-     * @param {Object} conn - Connection instance
+     * @param {Object} sock - Connection instance
      * @param {CleanupManager} cleanupManager - Cleanup manager instance
      * @returns {void}
      */
-    unregisterHandlers(conn, cleanupManager) {
-        if (!this.isInit && conn?.ev) {
+    unregisterHandlers(sock, cleanupManager) {
+        if (!this.isInit && sock?.ev) {
             const events = ["messages.upsert", "connection.update", "creds.update"];
 
             for (const ev of events) {
                 if (this.eventHandlers.has(ev)) {
                     const oldHandler = this.eventHandlers.get(ev);
                     try {
-                        conn.ev.off(ev, oldHandler);
+                        sock.ev.off(ev, oldHandler);
                         cleanupManager.unregisterEventHandler(ev, oldHandler);
                     } catch (e) {
                         global.logger.error(
@@ -304,7 +304,7 @@ export class EventManager {
         const eventManager = this;
         const handlerPath = join(process.cwd(), "src", "handler.js");
 
-        return async function (restartConn = false) {
+        return async function (restartsock = false) {
             let handler = eventManager.currentHandler;
 
             // Reload handler module
@@ -325,10 +325,10 @@ export class EventManager {
             if (restartConn) {
                 try {
                     // Cleanup existing connection
-                    if (global.conn?.ev) {
+                    if (global.sock?.ev) {
                         for (const [eventName, handler] of eventManager.eventHandlers) {
                             try {
-                                global.conn.ev.off(eventName, handler);
+                                global.sock.ev.off(eventName, handler);
                                 cleanupManager.unregisterEventHandler(eventName, handler);
                             } catch (e) {
                                 global.logger.error(
@@ -339,7 +339,7 @@ export class EventManager {
                         }
 
                         try {
-                            global.conn.ev.removeAllListeners();
+                            global.sock.ev.removeAllListeners();
                         } catch (e) {
                             global.logger.error(
                                 { error: e.message },
@@ -348,15 +348,15 @@ export class EventManager {
                         }
                     }
 
-                    if (global.conn?.ws) {
+                    if (global.sock?.ws) {
                         try {
-                            global.conn.ws.close();
+                            global.sock.ws.close();
                         } catch (e) {
                             global.logger.error({ error: e.message }, "Failed to close websocket");
                         }
                     }
 
-                    global.conn = null;
+                    global.sock = null;
 
                     await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -369,13 +369,13 @@ export class EventManager {
                 }
 
                 // Create new connection
-                global.conn = naruyaizumi(connectionOptions);
+                global.sock = naruyaizumi(connectionOptions);
                 eventManager.isInit = true;
             }
 
             // Re-register handlers
-            eventManager.unregisterHandlers(global.conn, cleanupManager);
-            eventManager.registerHandlers(global.conn, handler, saveCreds, cleanupManager);
+            eventManager.unregisterHandlers(global.sock, cleanupManager);
+            eventManager.registerHandlers(global.sock, handler, saveCreds, cleanupManager);
 
             eventManager.isInit = false;
             return true;
@@ -816,7 +816,7 @@ export async function handleDisconnect({ lastDisconnect, isNewLogin, connection 
     };
 
     // Handle new login
-    if (isNewLogin) conn.isInit = true;
+    if (isNewLogin) sock.isInit = true;
 
     // Process connection state changes
     switch (connection) {

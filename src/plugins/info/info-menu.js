@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @param {Array} args - Command arguments
@@ -51,8 +51,8 @@ const META = {
     tools: "Tools",
 };
 
-let handler = async (m, { conn, usedPrefix, command, args }) => {
-    await global.loading(m, conn);
+let handler = async (m, { sock, usedPrefix, command, args }) => {
+    await global.loading(m, sock);
     
     try {
         const pkg = await getPkg();
@@ -61,11 +61,11 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
         const time = new Date().toTimeString().split(" ")[0];
         
         if (inp === "all") {
-            return await all(conn, m, help, usedPrefix, time);
+            return await all(sock, m, help, usedPrefix, time);
         }
         
         if (!inp) {
-            return await main(conn, m, pkg, usedPrefix, command, time);
+            return await main(sock, m, pkg, usedPrefix, command, time);
         }
         
         const idx = parseInt(inp) - 1;
@@ -76,11 +76,11 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
                 `Invalid category. Use \`${usedPrefix + command}\``);
         }
         
-        return await show(conn, m, help, cat, usedPrefix, time);
+        return await show(sock, m, help, cat, usedPrefix, time);
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 
@@ -88,14 +88,14 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
  * Displays all commands in one message
  * @async
  * @function all
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Object} m - Message object
  * @param {Array} help - Help data array
  * @param {string} prefix - Command prefix
  * @param {string} time - Current time
  * @returns {Promise<void>}
  */
-async function all(conn, m, help, prefix, time) {
+async function all(sock, m, help, prefix, time) {
     const cmds = CATS.map((c) => {
             const list = format(help, c, prefix);
             return list.length > 0 ?
@@ -108,7 +108,7 @@ async function all(conn, m, help, prefix, time) {
         "```"
     ].join("\n");
     
-    return conn.sendMessage(
+    return sock.sendMessage(
         m.chat,
         {
             text: txt,
@@ -132,7 +132,7 @@ async function all(conn, m, help, prefix, time) {
  * Displays main interactive menu
  * @async
  * @function main
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Object} m - Message object
  * @param {Object} pkg - Package.json data
  * @param {string} prefix - Command prefix
@@ -140,7 +140,7 @@ async function all(conn, m, help, prefix, time) {
  * @param {string} time - Current time
  * @returns {Promise<void>}
  */
-async function main(conn, m, pkg, prefix, cmd, time) {
+async function main(sock, m, pkg, prefix, cmd, time) {
     const upBot = fmt(process.uptime());
     const upSys = fmt(os.uptime());
     
@@ -273,7 +273,7 @@ async function main(conn, m, pkg, prefix, cmd, time) {
             interactiveMessage: payload,
         },
         {
-            userJid: conn.user.id,
+            userJid: sock.user.id,
             quoted: await q(),
         }
     );
@@ -300,7 +300,7 @@ async function main(conn, m, pkg, prefix, cmd, time) {
         }, ],
     }, ];
     
-    await conn.relayMessage(m.chat, msg.message, {
+    await sock.relayMessage(m.chat, msg.message, {
         messageId: msg.key.id,
         additionalNodes,
     });
@@ -311,7 +311,7 @@ async function main(conn, m, pkg, prefix, cmd, time) {
  * Displays commands for a specific category
  * @async
  * @function show
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Object} m - Message object
  * @param {Array} help - Help data array
  * @param {string} cat - Category name
@@ -319,7 +319,7 @@ async function main(conn, m, pkg, prefix, cmd, time) {
  * @param {string} time - Current time
  * @returns {Promise<void>}
  */
-async function show(conn, m, help, cat, prefix, time) {
+async function show(sock, m, help, cat, prefix, time) {
     const cmds = format(help, cat, prefix);
     
     const txt =
@@ -334,7 +334,7 @@ async function show(conn, m, help, cat, prefix, time) {
         ].join("\n") :
         `No commands for ${META[cat]}`;
     
-    return conn.sendMessage(
+    return sock.sendMessage(
         m.chat,
         {
             text: txt,

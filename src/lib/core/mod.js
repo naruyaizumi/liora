@@ -24,10 +24,10 @@ export class mods {
     /**
      * Creates mods instance with connection
      * @constructor
-     * @param {Object} conn - Connection object
+     * @param {Object} sock - Connection object
      */
-    constructor(conn) {
-        this.conn = conn;
+    constructor(sock) {
+        this.sock = sock;
     }
 
     /**
@@ -58,7 +58,7 @@ export class mods {
             return this.sendButton(jid, content, options);
         }
 
-        return this.conn.sendMessage(jid, content, options);
+        return this.sock.sendMessage(jid, content, options);
     }
 
     /**
@@ -77,7 +77,7 @@ export class mods {
      * - Sequential sending with delays
      */
     async sendAlbum(jid, content, options = {}) {
-        if (!this.conn.user?.id) {
+        if (!this.sock.user?.id) {
             throw new Error("User not authenticated");
         }
 
@@ -104,15 +104,15 @@ export class mods {
         };
 
         const genOpt = {
-            userJid: this.conn.user.id,
-            upload: this.conn.waUploadToServer,
+            userJid: this.sock.user.id,
+            upload: this.sock.waUploadToServer,
             quoted: options?.quoted || null,
             ephemeralExpiration: options?.quoted?.expiration ?? 0,
         };
 
         const album = generateWAMessageFromContent(jid, msgContent, genOpt);
 
-        await this.conn.relayMessage(album.key.remoteJid, album.message, {
+        await this.sock.relayMessage(album.key.remoteJid, album.message, {
             messageId: album.key.id,
         });
 
@@ -141,7 +141,7 @@ export class mods {
                 }
 
                 mediaMsg = await generateWAMessage(album.key.remoteJid, mediaInput, {
-                    upload: this.conn.waUploadToServer,
+                    upload: this.sock.waUploadToServer,
                     ephemeralExpiration: options?.quoted?.expiration ?? 0,
                 });
             } else if (item.video) {
@@ -163,7 +163,7 @@ export class mods {
                 }
 
                 mediaMsg = await generateWAMessage(album.key.remoteJid, mediaInput, {
-                    upload: this.conn.waUploadToServer,
+                    upload: this.sock.waUploadToServer,
                     ephemeralExpiration: options?.quoted?.expiration ?? 0,
                 });
             } else {
@@ -180,7 +180,7 @@ export class mods {
 
             mediaMsgs.push(mediaMsg);
 
-            await this.conn.relayMessage(mediaMsg.key.remoteJid, mediaMsg.message, {
+            await this.sock.relayMessage(mediaMsg.key.remoteJid, mediaMsg.message, {
                 messageId: mediaMsg.key.id,
             });
 
@@ -211,7 +211,7 @@ export class mods {
      * - View-once message wrapper
      */
     async sendCard(jid, content = {}, options = {}) {
-        if (!this.conn.user?.id) {
+        if (!this.sock.user?.id) {
             throw new Error("User not authenticated");
         }
 
@@ -251,7 +251,7 @@ export class mods {
                 }
 
                 const prepped = await prepareWAMessageMedia(mediaInput, {
-                    upload: this.conn.waUploadToServer,
+                    upload: this.sock.waUploadToServer,
                 });
 
                 const cardObj = {
@@ -306,12 +306,12 @@ export class mods {
                 },
             },
             {
-                userJid: this.conn.user.id,
+                userJid: this.sock.user.id,
                 quoted: options?.quoted || null,
             }
         );
 
-        await this.conn.relayMessage(jid, msg.message, {
+        await this.sock.relayMessage(jid, msg.message, {
             messageId: msg.key.id,
         });
 
@@ -343,7 +343,7 @@ export class mods {
      * - Native flow buttons
      */
     async sendButton(jid, content = {}, options = {}) {
-        if (!this.conn.user?.id) {
+        if (!this.sock.user?.id) {
             throw new Error("User not authenticated");
         }
 
@@ -448,7 +448,7 @@ export class mods {
             }
 
             const preparedMedia = await prepareWAMessageMedia(mediaInput, {
-                upload: this.conn.waUploadToServer,
+                upload: this.sock.waUploadToServer,
             });
 
             messageContent.header = {
@@ -467,7 +467,7 @@ export class mods {
             }
 
             const preparedMedia = await prepareWAMessageMedia(mediaInput, {
-                upload: this.conn.waUploadToServer,
+                upload: this.sock.waUploadToServer,
             });
 
             messageContent.header = {
@@ -523,7 +523,7 @@ export class mods {
             }
 
             const preparedMedia = await prepareWAMessageMedia(mediaInput, {
-                upload: this.conn.waUploadToServer,
+                upload: this.sock.waUploadToServer,
             });
 
             if (preparedMedia.documentMessage) {
@@ -563,7 +563,7 @@ export class mods {
                 }
 
                 const preparedMedia = await prepareWAMessageMedia(mediaInput, {
-                    upload: this.conn.waUploadToServer,
+                    upload: this.sock.waUploadToServer,
                 });
                 productImageMessage = preparedMedia.imageMessage;
             }
@@ -584,7 +584,7 @@ export class mods {
                         productImageCount: product.productImageCount || 1,
                     },
                     businessOwnerJid:
-                        businessOwnerJid || product.businessOwnerJid || this.conn.user.id,
+                        businessOwnerJid || product.businessOwnerJid || this.sock.user.id,
                 },
             };
         } else if (title) {
@@ -659,7 +659,7 @@ export class mods {
                 },
             },
             {
-                userJid: this.conn.user.id,
+                userJid: this.sock.user.id,
                 quoted: options?.quoted || null,
             }
         );
@@ -689,7 +689,7 @@ export class mods {
             },
         ];
 
-        await this.conn.relayMessage(jid, msg.message, {
+        await this.sock.relayMessage(jid, msg.message, {
             messageId: msg.key.id,
             additionalNodes,
         });

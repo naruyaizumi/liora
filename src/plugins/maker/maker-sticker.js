@@ -12,7 +12,7 @@ import { sticker } from "#lib/sticker.js";
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Array<string>} args - Command arguments
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -30,7 +30,7 @@ import { sticker } from "#lib/sticker.js";
  * - Custom sticker pack metadata
  */
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { sock, args, usedPrefix, command }) => {
     try {
         const q = m.quoted ?? m;
         const mime = (q.msg || q).mimetype || q.mediaType || "";
@@ -39,7 +39,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             return m.reply(`Send/Reply media or URL\nEx: ${usedPrefix + command}`);
         }
 
-        await global.loading(m, conn);
+        await global.loading(m, sock);
 
         let buf;
         if (args[0] && isUrl(args[0])) {
@@ -75,12 +75,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             stc = await sticker(buf, opt);
         }
 
-        await conn.sendMessage(m.chat, { sticker: stc }, { quoted: m });
+        await sock.sendMessage(m.chat, { sticker: stc }, { quoted: m });
     } catch (e) {
-        conn.logger.error(e);
+        sock.logger.error(e);
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

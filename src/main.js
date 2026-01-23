@@ -158,7 +158,7 @@ const logger = () => {
  * Handles pairing code generation for first-time authentication
  * @async
  * @function pair
- * @param {Object} conn - Baileys connection instance
+ * @param {Object} sock - Baileys connection instance
  * @returns {Promise<void>}
  *
  * @flow
@@ -167,12 +167,12 @@ const logger = () => {
  * 3. Format code with dashes (XXXX-XXXX-XXXX)
  * 4. Log pairing code for user
  */
-async function pair(conn) {
+async function pair(sock) {
     return new Promise((res) => {
         const t = setTimeout(res, 3000);
 
         const chk = setInterval(() => {
-            if (conn.user || conn.ws?.readyState === 1) {
+            if (sock.user || sock.ws?.readyState === 1) {
                 clearInterval(chk);
                 clearTimeout(t);
                 res();
@@ -180,7 +180,7 @@ async function pair(conn) {
         }, 100);
     }).then(async () => {
         try {
-            let code = await conn.requestPairingCode(pairNum, pairCode);
+            let code = await sock.requestPairingCode(pairNum, pairCode);
             code = code?.match(/.{1,4}/g)?.join("-") || code;
             global.logger.info(`Pair code: ${code}`);
         } catch (e) {
@@ -227,12 +227,12 @@ async function LIORA() {
     };
 
     // Create global connection instance
-    global.conn = naruyaizumi(opt);
-    global.conn.isInit = false;
+    global.sock = naruyaizumi(opt);
+    global.sock.isInit = false;
 
     // Handle pairing for new sessions
     if (!state.creds.registered && pairNum) {
-        await pair(global.conn);
+        await pair(global.sock);
     }
 
     // Initialize managers

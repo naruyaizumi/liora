@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Array} args - Command arguments
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -28,7 +28,7 @@
  * - Requires admin and bot admin privileges
  */
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { sock, args, usedPrefix, command }) => {
     if (!m.quoted) return m.reply("Reply message to pin");
 
     if (!args[0]) {
@@ -50,7 +50,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!key) return m.reply("Cannot pin: no key");
 
     try {
-        await conn.sendMessage(m.chat, {
+        await sock.sendMessage(m.chat, {
             pin: key,
             type: 1,
             time: opt.sec,

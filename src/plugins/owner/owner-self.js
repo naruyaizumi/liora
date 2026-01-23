@@ -14,7 +14,7 @@
  * @param {string} param1.text - Command argument (on/off)
  * @param {string} param1.usedPrefix - Command prefix used
  * @param {string} param1.command - Command name
- * @param {Object} param1.conn - Connection object
+ * @param {Object} param1.sock - Connection object
  * @returns {Promise<void>}
  *
  * @description
@@ -30,9 +30,9 @@
  * - Prevents redundant state changes
  */
 
-let handler = async (m, { text, usedPrefix, command, conn }) => {
+let handler = async (m, { text, usedPrefix, command, sock }) => {
     try {
-        const s = global.db.data.settings[conn.user.lid] || {};
+        const s = global.db.data.settings[sock.user.lid] || {};
 
         if (!text) {
             const st = s.self ? "ON" : "OFF";

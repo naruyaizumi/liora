@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @returns {Promise<void>}
  *
  * @description
@@ -26,7 +26,7 @@
  * - Newsletter forwarding context
  */
 
-let handler = async (m, { conn }) => {
+let handler = async (m, { sock }) => {
     const txt = `
 Liora Repository
 
@@ -70,7 +70,7 @@ Pull Req: https://github.com/naruyaizumi/liora/pulls
         },
     };
 
-    await conn.sendMessage(
+    await sock.sendMessage(
         m.chat,
         {
             product: {

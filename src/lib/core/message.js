@@ -126,8 +126,8 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
         sender: {
             get() {
                 const raw = ctx.participant || this.chat || "";
-                const conn = self.conn;
-                if (conn?.decodeJid) return conn.decodeJid(raw);
+                const sock = self.sock;
+                if (sock?.decodeJid) return sock.decodeJid(raw);
                 if (typeof raw.decodeJid === "function") return raw.decodeJid();
                 return raw;
             },
@@ -135,7 +135,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
         },
         fromMe: {
             get() {
-                const connId = self.conn?.user?.id;
+                const connId = self.sock?.user?.id;
                 return connId ? areJidsSameUser?.(this.sender, connId) || false : false;
             },
             enumerable: true,
@@ -158,7 +158,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
             get() {
                 const s = this.sender;
                 if (!s) return "";
-                return self.conn?.getName ? self.conn.getName(s) : "";
+                return self.sock?.getName ? self.sock.getName(s) : "";
             },
             enumerable: true,
         },
@@ -179,10 +179,10 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
         download: {
             async value() {
                 const t = this.mediaType;
-                if (!t || !self.conn?.downloadM) return Buffer.alloc(0);
+                if (!t || !self.sock?.downloadM) return Buffer.alloc(0);
 
                 try {
-                    const data = await self.conn.downloadM(
+                    const data = await self.sock.downloadM(
                         this.mediaMessage[t],
                         t.replace(/message/i, "")
                     );
@@ -196,36 +196,36 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
         },
         reply: {
             value(text, chatId, options = {}) {
-                if (!self.conn?.reply) {
+                if (!self.sock?.reply) {
                     throw new Error("Connection not available");
                 }
-                return self.conn.reply(chatId || this.chat, text, this.vM, options);
+                return self.sock.reply(chatId || this.chat, text, this.vM, options);
             },
             enumerable: true,
         },
         copy: {
             value() {
-                if (!self.conn) throw new Error("Connection not available");
+                if (!self.sock) throw new Error("Connection not available");
                 const M = proto.WebMessageInfo;
-                return smsg(self.conn, M.fromObject(M.toObject(this.vM)));
+                return smsg(self.sock, M.fromObject(M.toObject(this.vM)));
             },
             enumerable: true,
         },
         forward: {
             value(jid, force = false, options = {}) {
-                if (!self.conn?.sendMessage) {
+                if (!self.sock?.sendMessage) {
                     throw new Error("Connection not available");
                 }
-                return self.conn.sendMessage(jid, { forward: this.vM, force, ...options }, options);
+                return self.sock.sendMessage(jid, { forward: this.vM, force, ...options }, options);
             },
             enumerable: true,
         },
         delete: {
             value() {
-                if (!self.conn?.sendMessage) {
+                if (!self.sock?.sendMessage) {
                     throw new Error("Connection not available");
                 }
-                return self.conn.sendMessage(this.chat, { delete: this.vM.key });
+                return self.sock.sendMessage(this.chat, { delete: this.vM.key });
             },
             enumerable: true,
         },
@@ -239,7 +239,7 @@ const createQuotedMessage = (self, ctx, quoted, rawNode, type) => {
  * @returns {Object} Modified prototype
  *
  * @extendedProperties
- * - Connection management (.conn)
+ * - Connection management (.sock)
  * - Message metadata (.id, .chat, .sender, .mtype)
  * - Media handling (.mediaMessage, .mediaType, .download)
  * - Quoted message utilities (.quoted, .getQuotedObj)
@@ -258,7 +258,7 @@ export function serialize() {
          * Connection reference for message operations
          * @property {Object} conn
          */
-        conn: {
+        sock: {
             value: undefined,
             enumerable: false,
             writable: true,
@@ -300,8 +300,8 @@ export function serialize() {
                 const raw =
                     this.key?.remoteJid || (skdm && skdm !== "status@broadcast" ? skdm : "") || "";
 
-                const conn = this.conn;
-                if (conn?.decodeJid) return conn.decodeJid(raw);
+                const sock = this.sock;
+                if (sock?.decodeJid) return sock.decodeJid(raw);
                 if (typeof raw.decodeJid === "function") return raw.decodeJid();
                 return raw;
             },
@@ -338,8 +338,8 @@ export function serialize() {
          */
         sender: {
             get() {
-                const conn = this.conn;
-                const myId = conn?.user?.id;
+                const sock = this.sock;
+                const myId = sock?.user?.id;
                 const cand =
                     (this.key?.fromMe && myId) ||
                     this.participant ||
@@ -347,7 +347,7 @@ export function serialize() {
                     this.chat ||
                     "";
 
-                if (conn?.decodeJid) return conn.decodeJid(cand);
+                if (sock?.decodeJid) return sock.decodeJid(cand);
                 if (typeof cand.decodeJid === "function") return cand.decodeJid();
                 return cand;
             },
@@ -360,7 +360,7 @@ export function serialize() {
          */
         fromMe: {
             get() {
-                const me = this.conn?.user?.id;
+                const me = this.sock?.user?.id;
                 if (!me) return !!this.key?.fromMe;
                 return !!(this.key?.fromMe || areJidsSameUser?.(me, this.sender));
             },
@@ -492,7 +492,7 @@ export function serialize() {
                 if (pn != null && pn !== "") return pn;
                 const sender = this.sender;
                 if (!sender) return "";
-                return this.conn?.getName ? this.conn.getName(sender) : "";
+                return this.sock?.getName ? this.sock.getName(sender) : "";
             },
             enumerable: true,
         },
@@ -505,10 +505,10 @@ export function serialize() {
         download: {
             async value() {
                 const t = this.mediaType;
-                if (!t || !this.conn?.downloadM) return Buffer.alloc(0);
+                if (!t || !this.sock?.downloadM) return Buffer.alloc(0);
 
                 try {
-                    const data = await this.conn.downloadM(
+                    const data = await this.sock.downloadM(
                         this.mediaMessage[t],
                         t.replace(/message/i, "")
                     );
@@ -531,10 +531,10 @@ export function serialize() {
          */
         reply: {
             value(text, chatId, options = {}) {
-                if (!this.conn?.reply) {
+                if (!this.sock?.reply) {
                     throw new Error("Connection not available");
                 }
-                return this.conn.reply(chatId || this.chat, text, this, options);
+                return this.sock.reply(chatId || this.chat, text, this, options);
             },
             enumerable: true,
         },
@@ -546,9 +546,9 @@ export function serialize() {
          */
         copy: {
             value() {
-                if (!this.conn) throw new Error("Connection not available");
+                if (!this.sock) throw new Error("Connection not available");
                 const M = proto.WebMessageInfo;
-                return smsg(this.conn, M.fromObject(M.toObject(this)));
+                return smsg(this.sock, M.fromObject(M.toObject(this)));
             },
             enumerable: true,
         },
@@ -563,10 +563,10 @@ export function serialize() {
          */
         forward: {
             value(jid, force = false, options = {}) {
-                if (!this.conn?.sendMessage) {
+                if (!this.sock?.sendMessage) {
                     throw new Error("Connection not available");
                 }
-                return this.conn.sendMessage(jid, { forward: this, force, ...options }, options);
+                return this.sock.sendMessage(jid, { forward: this, force, ...options }, options);
             },
             enumerable: true,
         },
@@ -579,13 +579,13 @@ export function serialize() {
         getQuotedObj: {
             value() {
                 const q = this.quoted;
-                if (!q?.id || !this.conn) return null;
+                if (!q?.id || !this.sock) return null;
 
                 try {
-                    const M = this.conn.loadMessage?.(q.id) || q.vM;
+                    const M = this.sock.loadMessage?.(q.id) || q.vM;
                     if (!M) return null;
 
-                    return smsg(this.conn, proto.WebMessageInfo.fromObject(M));
+                    return smsg(this.sock, proto.WebMessageInfo.fromObject(M));
                 } catch {
                     return null;
                 }
@@ -611,10 +611,10 @@ export function serialize() {
          */
         delete: {
             value() {
-                if (!this.conn?.sendMessage) {
+                if (!this.sock?.sendMessage) {
                     throw new Error("Connection not available");
                 }
-                return this.conn.sendMessage(this.chat, { delete: this.key });
+                return this.sock.sendMessage(this.chat, { delete: this.key });
             },
             enumerable: true,
         },

@@ -22,7 +22,7 @@ Liora supports 15+ types of interactive buttons for rich user experiences.
 Creates a simple clickable button that sends a predefined response.
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example message body",
     title: "Example Title",
     subtitle: "Example Subtitle",
@@ -44,7 +44,7 @@ await conn.client(m.chat, {
 Opens a URL when clicked, useful for external links.
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example message body",
     title: "Example Title",
     subtitle: "Example Subtitle",
@@ -67,7 +67,7 @@ await conn.client(m.chat, {
 Copies text to clipboard when clicked.
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example message body",
     title: "Example Title",
     subtitle: "Example Subtitle",
@@ -89,7 +89,7 @@ await conn.client(m.chat, {
 Initiates a phone call when clicked.
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example message body",
     title: "Example Title",
     subtitle: "Example Subtitle",
@@ -111,7 +111,7 @@ await conn.client(m.chat, {
 Opens WhatsApp Business catalog.
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example message body",
     title: "Example Title",
     subtitle: "Example Subtitle",
@@ -132,7 +132,7 @@ await conn.client(m.chat, {
 Sets a reminder for the user.
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example message body",
     title: "Example Title",
     subtitle: "Example Subtitle",
@@ -153,7 +153,7 @@ await conn.client(m.chat, {
 Cancels an existing reminder.
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example message body",
     title: "Example Title",
     subtitle: "Example Subtitle",
@@ -174,7 +174,7 @@ await conn.client(m.chat, {
 Requests address from the user.
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example message body",
     title: "Example Title",
     subtitle: "Example Subtitle",
@@ -195,7 +195,7 @@ await conn.client(m.chat, {
 Requests location from the user.
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example message body",
     title: "Example Title",
     subtitle: "Example Subtitle",
@@ -216,7 +216,7 @@ await conn.client(m.chat, {
 Opens a webview inside WhatsApp.
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example message body",
     title: "Example Title",
     subtitle: "Example Subtitle",
@@ -241,7 +241,7 @@ await conn.client(m.chat, {
 Links to a product in WhatsApp marketplace.
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example message body",
     title: "Example Title",
     subtitle: "Example Subtitle",
@@ -262,7 +262,7 @@ await conn.client(m.chat, {
 Creates a dropdown selection menu.
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example message body",
     title: "Example Title",
     subtitle: "Example Subtitle",
@@ -318,7 +318,7 @@ Buttons can be combined with various media types.
 ### Image with Buttons
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     image: {
         url: "https://via.placeholder.com/800x600?text=Example+Image",
     },
@@ -342,7 +342,7 @@ await conn.client(m.chat, {
 ### Video with Buttons
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     video: {
         url: "https://example.com/video.mp4",
     },
@@ -366,12 +366,12 @@ await conn.client(m.chat, {
 ### Document with Buttons
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     document: {
         url: "https://example.com/document.pdf",
     },
     mimetype: "application/pdf",
-    jpegThumbnail: await conn.resize("https://via.placeholder.com/320x320", 320, 320),
+    jpegThumbnail: await sock.resize("https://via.placeholder.com/320x320", 320, 320),
     caption: "Example Caption",
     title: "Example Title",
     subtitle: "Example Subtitle",
@@ -392,7 +392,7 @@ await conn.client(m.chat, {
 ### Location with Buttons
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     location: {
         degreesLatitude: -6.2,
         degreesLongitude: 106.816666,
@@ -418,7 +418,7 @@ await conn.client(m.chat, {
 ### Product with Buttons
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     product: {
         productImage: {
             url: "https://via.placeholder.com/800x600?text=Product",
@@ -459,7 +459,7 @@ Carousel messages display multiple cards that users can swipe through horizontal
 ### Basic Carousel
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example carousel message",
     title: "Example Carousel",
     subtitle: "Example Subtitle",
@@ -513,7 +513,7 @@ await conn.client(m.chat, {
 ### Video Carousel
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example video carousel",
     title: "Example Videos",
     subtitle: "Example Subtitle",
@@ -565,7 +565,7 @@ import { readFile } from "node:fs/promises";
 const imageBuffer = await readFile("./images/example.jpg");
 const videoBuffer = await readFile("./videos/example.mp4");
 
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     text: "Example mixed carousel",
     title: "Example Gallery",
     subtitle: "Example Subtitle",
@@ -631,7 +631,7 @@ Album messages send multiple media files in a single message that can be swiped 
 ### Image Album
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     album: [
         {
             image: {
@@ -658,7 +658,7 @@ await conn.client(m.chat, {
 ### Video Album
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     album: [
         {
             video: {
@@ -679,7 +679,7 @@ await conn.client(m.chat, {
 ### Mixed Media Album
 
 ```javascript
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     album: [
         {
             image: {
@@ -712,7 +712,7 @@ const image1 = await readFile("./images/photo1.jpg");
 const image2 = await readFile("./images/photo2.jpg");
 const video1 = await readFile("./videos/clip1.mp4");
 
-await conn.client(m.chat, {
+await sock.client(m.chat, {
     album: [
         {
             image: image1,

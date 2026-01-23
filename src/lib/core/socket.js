@@ -128,17 +128,17 @@ const messageQueue = new MessageQueue();
  * - Automatic connection state management
  */
 export function naruyaizumi(connectionOptions) {
-    const conn = makeWASocket(connectionOptions);
+    const sock = makeWASocket(connectionOptions);
 
     // Bind store management
-    bind(conn);
+    bind(sock);
 
     // JID utilities
-    conn.decodeJid = decodeJid;
+    sock.decodeJid = decodeJid;
 
     // Message sending utilities
-    const sender = new mods(conn);
-    conn.client = sender.client.bind(sender);
+    const sender = new mods(sock);
+    sock.client = sender.client.bind(sender);
 
     /**
      * Enhanced reply method with ephemeral support
@@ -150,10 +150,10 @@ export function naruyaizumi(connectionOptions) {
      * @param {Object} options - Additional options
      * @returns {Promise<Object>} Message send result
      */
-    conn.reply = async (jid, text = "", quoted, options = {}) => {
+    sock.reply = async (jid, text = "", quoted, options = {}) => {
         let ephemeral = false;
         try {
-            const chat = await conn.getChat(jid);
+            const chat = await sock.getChat(jid);
             ephemeral = chat?.metadata?.ephemeralDuration || chat?.ephemeralDuration || false;
         } catch (e) {
             global.logger?.error({ error: e.message, jid }, "getChat error");
@@ -161,7 +161,7 @@ export function naruyaizumi(connectionOptions) {
 
         text = typeof text === "string" ? text.trim() : String(text || "");
 
-        return conn.sendMessage(
+        return sock.sendMessage(
             jid,
             {
                 text,
@@ -182,7 +182,7 @@ export function naruyaizumi(connectionOptions) {
      * @param {string} type - Media type
      * @returns {Promise<Buffer>} Media buffer
      */
-    conn.downloadM = async (m, type) => {
+    sock.downloadM = async (m, type) => {
         if (!m || !(m.url || m.directPath)) return Buffer.alloc(0);
 
         try {
@@ -207,18 +207,18 @@ export function naruyaizumi(connectionOptions) {
      * @param {boolean} withoutContact - Skip contact resolution
      * @returns {Promise<string>} Display name
      */
-    conn.getName = async (jid = "", withoutContact = false) => {
-        jid = conn.decodeJid(jid);
+    sock.getName = async (jid = "", withoutContact = false) => {
+        jid = sock.decodeJid(jid);
         if (!jid || withoutContact) return jid || "";
 
         if (isGroupJid(jid)) {
             try {
-                const chat = await conn.getChat(jid);
+                const chat = await sock.getChat(jid);
                 if (chat?.subject) return chat.subject;
 
-                const md = await conn.groupMetadata(jid);
+                const md = await sock.groupMetadata(jid);
                 if (md?.subject) {
-                    conn.setChat(jid, {
+                    sock.setChat(jid, {
                         ...(chat || { id: jid }),
                         subject: md.subject,
                         metadata: md,
@@ -231,12 +231,12 @@ export function naruyaizumi(connectionOptions) {
         }
 
         const self =
-            conn.user?.lid && areJidsSameUser ? areJidsSameUser(jid, conn.user.lid) : false;
+            sock.user?.lid && areJidsSameUser ? areJidsSameUser(jid, sock.user.lid) : false;
 
-        if (self) return conn.user?.name || jid;
+        if (self) return sock.user?.name || jid;
 
         try {
-            const chat = await conn.getChat(jid);
+            const chat = await sock.getChat(jid);
             return chat?.name || chat?.notify || jid;
         } catch {
             return jid;
@@ -250,11 +250,11 @@ export function naruyaizumi(connectionOptions) {
      * @param {string} messageID - Message identifier
      * @returns {Promise<Object|null>} Message object or null
      */
-    conn.loadMessage = async (messageID) => {
+    sock.loadMessage = async (messageID) => {
         if (!messageID) return null;
 
         try {
-            const allChats = await conn.getAllChats();
+            const allChats = await sock.getAllChats();
             for (const chatData of allChats) {
                 const msg = chatData?.messages?.[messageID];
                 if (msg) return msg;
@@ -272,10 +272,10 @@ export function naruyaizumi(connectionOptions) {
      * @method processMessageStubType
      * @param {Object} m - Message object
      */
-    conn.processMessageStubType = async (m) => {
+    sock.processMessageStubType = async (m) => {
         if (!m?.messageStubType) return;
 
-        const chat = conn.decodeJid(
+        const chat = sock.decodeJid(
             m.key?.remoteJid || m.message?.senderKeyDistributionMessage?.groupId || ""
         );
 
@@ -285,7 +285,7 @@ export function naruyaizumi(connectionOptions) {
             Object.entries(WAMessageStubType).find(([, v]) => v === m.messageStubType)?.[0] ||
             "UNKNOWN";
 
-        const author = conn.decodeJid(
+        const author = sock.decodeJid(
             m.key?.participant || m.participant || m.key?.remoteJid || ""
         );
 
@@ -304,9 +304,9 @@ export function naruyaizumi(connectionOptions) {
      * @method insertAllGroup
      * @returns {Promise<Object>} Groups metadata
      */
-    conn.insertAllGroup = async () => {
+    sock.insertAllGroup = async () => {
         try {
-            const allGroups = await conn.groupFetchAllParticipating().catch(() => ({}));
+            const allGroups = await sock.groupFetchAllParticipating().catch(() => ({}));
 
             if (!allGroups || typeof allGroups !== "object") {
                 return {};
@@ -330,7 +330,7 @@ export function naruyaizumi(connectionOptions) {
                             lastSync: Date.now(),
                         };
 
-                        await conn.setChat(gid, chat);
+                        await sock.setChat(gid, chat);
                     })
                 );
             }
@@ -360,7 +360,7 @@ export function naruyaizumi(connectionOptions) {
      * - Quoted messages: 20 per chat
      * - Automatic cleanup of old entries
      */
-    conn.pushMessage = (m) => {
+    sock.pushMessage = (m) => {
         if (!m) return;
 
         const messages = Array.isArray(m) ? m : [m];
@@ -373,7 +373,7 @@ export function naruyaizumi(connectionOptions) {
                         message.messageStubType &&
                         message.messageStubType !== WAMessageStubType.CIPHERTEXT
                     ) {
-                        await conn.processMessageStubType(message);
+                        await sock.processMessageStubType(message);
                     }
 
                     const msgObj = message.message || {};
@@ -386,7 +386,7 @@ export function naruyaizumi(connectionOptions) {
                     );
                     if (!mtype) mtype = mtypeKeys[mtypeKeys.length - 1];
 
-                    const chat = conn.decodeJid(
+                    const chat = sock.decodeJid(
                         message.key?.remoteJid ||
                             msgObj?.senderKeyDistributionMessage?.groupId ||
                             ""
@@ -395,7 +395,7 @@ export function naruyaizumi(connectionOptions) {
                     if (!chat || isStatusJid(chat)) return;
 
                     // Get or create chat data
-                    let chatData = await conn.getChat(chat);
+                    let chatData = await sock.getChat(chat);
                     if (!chatData) {
                         chatData = { id: chat, isChats: true };
                     }
@@ -405,7 +405,7 @@ export function naruyaizumi(connectionOptions) {
                     // Fetch group metadata if missing
                     if (isGroup && !chatData.metadata) {
                         try {
-                            const md = await conn.groupMetadata(chat);
+                            const md = await sock.groupMetadata(chat);
                             chatData.subject = md.subject;
                             chatData.metadata = md;
                         } catch {
@@ -416,11 +416,11 @@ export function naruyaizumi(connectionOptions) {
                     // Cache quoted messages
                     const ctx = msgObj[mtype]?.contextInfo;
                     if (ctx?.quotedMessage && ctx.stanzaId) {
-                        const qChat = conn.decodeJid(ctx.remoteJid || ctx.participant || chat);
+                        const qChat = sock.decodeJid(ctx.remoteJid || ctx.participant || chat);
 
                         if (qChat && !isStatusJid(qChat)) {
                             try {
-                                let qm = await conn.getChat(qChat);
+                                let qm = await sock.getChat(qChat);
                                 if (!qm) {
                                     qm = { id: qChat, isChats: !isGroupJid(qChat) };
                                 }
@@ -432,16 +432,16 @@ export function naruyaizumi(connectionOptions) {
                                         key: {
                                             remoteJid: qChat,
                                             fromMe:
-                                                conn.user?.lid && areJidsSameUser
-                                                    ? areJidsSameUser(conn.user.lid, qChat)
+                                                sock.user?.lid && areJidsSameUser
+                                                    ? areJidsSameUser(sock.user.lid, qChat)
                                                     : false,
                                             id: ctx.stanzaId,
-                                            participant: conn.decodeJid(ctx.participant),
+                                            participant: sock.decodeJid(ctx.participant),
                                         },
                                         message: ctx.quotedMessage,
                                         ...(qChat.endsWith("@g.us")
                                             ? {
-                                                  participant: conn.decodeJid(ctx.participant),
+                                                  participant: sock.decodeJid(ctx.participant),
                                               }
                                             : {}),
                                     };
@@ -456,7 +456,7 @@ export function naruyaizumi(connectionOptions) {
                                         }
                                     }
 
-                                    await conn.setChat(qChat, qm);
+                                    await sock.setChat(qChat, qm);
                                 }
                             } catch {
                                 // Silent fail
@@ -468,8 +468,8 @@ export function naruyaizumi(connectionOptions) {
                     if (!isGroup) {
                         chatData.name = message.pushName || chatData.name || "";
                     } else {
-                        const s = conn.decodeJid(
-                            (message.key?.fromMe && conn.user?.lid) ||
+                        const s = sock.decodeJid(
+                            (message.key?.fromMe && sock.user?.lid) ||
                                 message.participant ||
                                 message.key?.participant ||
                                 chat
@@ -477,9 +477,9 @@ export function naruyaizumi(connectionOptions) {
 
                         if (s && s !== chat) {
                             try {
-                                const sChat = (await conn.getChat(s)) || { id: s };
+                                const sChat = (await sock.getChat(s)) || { id: s };
                                 sChat.name = message.pushName || sChat.name || "";
-                                await conn.setChat(s, sChat);
+                                await sock.setChat(s, sChat);
                             } catch {
                                 // Silent fail
                             }
@@ -489,20 +489,20 @@ export function naruyaizumi(connectionOptions) {
                     // Store non-bot messages (15 message sliding window)
                     if (mtype !== "senderKeyDistributionMessage") {
                         const s = isGroup
-                            ? conn.decodeJid(
-                                  (message.key?.fromMe && conn.user?.lid) ||
+                            ? sock.decodeJid(
+                                  (message.key?.fromMe && sock.user?.lid) ||
                                       message.participant ||
                                       message.key?.participant ||
                                       chat
                               )
-                            : message.key?.fromMe && conn.user?.lid
-                              ? conn.user.lid
+                            : message.key?.fromMe && sock.user?.lid
+                              ? sock.user.lid
                               : chat;
 
                         const fromMe =
                             message.key?.fromMe ||
-                            (conn.user?.lid && s && areJidsSameUser
-                                ? areJidsSameUser(s, conn.user?.lid)
+                            (sock.user?.lid && s && areJidsSameUser
+                                ? areJidsSameUser(s, sock.user?.lid)
                                 : false);
 
                         if (
@@ -529,7 +529,7 @@ export function naruyaizumi(connectionOptions) {
                         }
                     }
 
-                    await conn.setChat(chat, chatData);
+                    await sock.setChat(chat, chatData);
                 } catch (e) {
                     global.logger?.error({ error: e.message }, "pushMessage error");
                 }
@@ -543,12 +543,12 @@ export function naruyaizumi(connectionOptions) {
      * @param {Object} m - Message object
      * @returns {Object} Serialized message
      */
-    conn.serializeM = (m) => smsg(conn, m);
+    sock.serializeM = (m) => smsg(sock, m);
 
     // Normalize bot's own LID
-    if (conn.user?.lid) {
-        conn.user.lid = conn.decodeJid(conn.user.lid);
+    if (sock.user?.lid) {
+        sock.user.lid = sock.decodeJid(sock.user.lid);
     }
 
-    return conn;
+    return sock;
 }

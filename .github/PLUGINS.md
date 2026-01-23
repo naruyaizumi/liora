@@ -40,9 +40,9 @@ src/plugins/
  * @author Your Name
  */
 
-let handler = async (m, { conn, args, text }) => {
+let handler = async (m, { sock, args, text }) => {
     // Your command logic here
-    await conn.sendMessage(m.chat, {
+    await sock.sendMessage(m.chat, {
         text: "Example response",
     });
 };
@@ -68,7 +68,7 @@ export default handler;
 handler = async (
     m,
     {
-        conn, // Connection object
+        sock, // Connection object
         args, // Command arguments as array
         text, // Full text after command
         command, // Matched command name
@@ -113,15 +113,15 @@ graph TD
  * @module plugins/info/ping
  */
 
-let handler = async (m, { conn }) => {
+let handler = async (m, { sock }) => {
     const start = Bun.nanoseconds();
-    const msg = await conn.sendMessage(m.chat, {
+    const msg = await sock.sendMessage(m.chat, {
         text: "⏱️ Checking...",
     });
     const ns = Bun.nanoseconds() - start;
     const ms = (ns / 1_000_000).toFixed(0);
 
-    await conn.sendMessage(m.chat, {
+    await sock.sendMessage(m.chat, {
         text: `🏓 Pong! ${ms} ms`,
         edit: msg.key,
     });
@@ -142,7 +142,7 @@ export default handler;
  * @module plugins/tool/calculator
  */
 
-let handler = async (m, { conn, text }) => {
+let handler = async (m, { sock, text }) => {
     if (!text) {
         return m.reply("Example usage: .calc 2 + 2");
     }
@@ -151,7 +151,7 @@ let handler = async (m, { conn, text }) => {
         // Safe evaluation (only math operations)
         const result = Function('"use strict"; return (' + text + ")")();
 
-        await conn.sendMessage(m.chat, {
+        await sock.sendMessage(m.chat, {
             text: `📊 Result: ${result}`,
         });
     } catch (error) {
@@ -187,8 +187,8 @@ Use the `savefile` command to add new plugins dynamically:
 ```javascript
 // Send this as eval command (owner only):
 > await Bun.write('./src/plugins/info/newcmd.js', `
-let handler = async (m, { conn }) => {
-    await conn.sendMessage(m.chat, {
+let handler = async (m, { sock }) => {
+    await sock.sendMessage(m.chat, {
         text: 'Example new command!'
     });
 };
@@ -274,7 +274,7 @@ Execute JavaScript code in real-time (owner only):
 => m.chat
 # Output: "123456789@s.whatsapp.net"
 
-=> Object.keys(conn)
+=> Object.keys(sock)
 # Output: ["user", "sendMessage", "groupMetadata", ...]
 
 => global.plugins
@@ -288,7 +288,7 @@ Execute JavaScript code in real-time (owner only):
 > console.log('Example test')
 # Output: Example test
 
-> await conn.sendMessage(m.chat, { text: 'Example' })
+> await sock.sendMessage(m.chat, { text: 'Example' })
 # Sends message
 
 > for (let i = 0; i < 3; i++) console.log(i)
@@ -310,7 +310,7 @@ Execute JavaScript code in real-time (owner only):
     .flatMap(p => p.help)
 
 # Test plugin execution
-=> await global.plugins['info-ping.js'](m, { conn })
+=> await global.plugins['info-ping.js'](m, { sock })
 
 # Inspect message object
 => Bun.inspect(m, { depth: 2 })
@@ -438,13 +438,13 @@ const helpers = {
 };
 
 // Main handler
-let handler = async (m, { conn, text }) => {
+let handler = async (m, { sock, text }) => {
     if (!helpers.validateInput(text)) {
         return m.reply("Example: Input required");
     }
 
     const formatted = helpers.formatData(text);
-    await conn.sendMessage(m.chat, {
+    await sock.sendMessage(m.chat, {
         text: `Example: ${formatted}`,
     });
 };
@@ -460,7 +460,7 @@ export default handler;
 ### 2. Error Handling
 
 ```javascript
-let handler = async (m, { conn, args }) => {
+let handler = async (m, { sock, args }) => {
     try {
         // Validate input first
         if (!args[0]) {
@@ -481,7 +481,7 @@ let handler = async (m, { conn, args }) => {
         }
 
         // Send response
-        await conn.sendMessage(m.chat, {
+        await sock.sendMessage(m.chat, {
             text: `Example result: ${result}`,
         });
     } catch (error) {
@@ -497,9 +497,9 @@ let handler = async (m, { conn, args }) => {
 ### 3. Async Operations with Loading
 
 ```javascript
-let handler = async (m, { conn, args }) => {
+let handler = async (m, { sock, args }) => {
     // Send loading message
-    const loadingMsg = await conn.sendMessage(m.chat, {
+    const loadingMsg = await sock.sendMessage(m.chat, {
         text: "⏳ Example: Processing...",
     });
 
@@ -508,13 +508,13 @@ let handler = async (m, { conn, args }) => {
         const data = await fetchSomeData(args[0]);
 
         // Edit loading message with result
-        await conn.sendMessage(m.chat, {
+        await sock.sendMessage(m.chat, {
             text: `✅ Example: ${data}`,
             edit: loadingMsg.key,
         });
     } catch (error) {
         // Edit with error message
-        await conn.sendMessage(m.chat, {
+        await sock.sendMessage(m.chat, {
             text: "❌ Example: Operation failed",
             edit: loadingMsg.key,
         });
@@ -527,7 +527,7 @@ let handler = async (m, { conn, args }) => {
 ```javascript
 import { readFile } from "node:fs/promises";
 
-let handler = async (m, { conn }) => {
+let handler = async (m, { sock }) => {
     try {
         // Read file efficiently
         const buffer = await readFile("./data/example.json");
@@ -537,7 +537,7 @@ let handler = async (m, { conn }) => {
         const result = processData(data);
 
         // Send response
-        await conn.sendMessage(m.chat, {
+        await sock.sendMessage(m.chat, {
             text: `Example: ${result}`,
         });
     } catch (error) {
@@ -554,7 +554,7 @@ let handler = async (m, { conn }) => {
 ### 5. Permission Checks
 
 ```javascript
-let handler = async (m, { conn, isAdmin, isBotAdmin }) => {
+let handler = async (m, { sock, isAdmin, isBotAdmin }) => {
     // Check if user is admin
     if (!isAdmin) {
         return m.reply("Example: This command requires admin privileges");
@@ -566,7 +566,7 @@ let handler = async (m, { conn, isAdmin, isBotAdmin }) => {
     }
 
     // Your command logic here
-    await conn.sendMessage(m.chat, {
+    await sock.sendMessage(m.chat, {
         text: "Example: Command executed",
     });
 };
@@ -584,7 +584,7 @@ export default handler;
 ### 6. Input Validation
 
 ```javascript
-let handler = async (m, { conn, text, args }) => {
+let handler = async (m, { sock, text, args }) => {
     // Check if text provided
     if (!text) {
         return m.reply(`Example usage: .command <input>`);
@@ -605,7 +605,7 @@ let handler = async (m, { conn, text, args }) => {
     const sanitized = text.trim().toLowerCase();
 
     // Process
-    await conn.sendMessage(m.chat, {
+    await sock.sendMessage(m.chat, {
         text: `Example: Processing ${sanitized}`,
     });
 };

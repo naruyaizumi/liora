@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @returns {Promise<void>}
  *
  * @description
@@ -24,8 +24,8 @@
  * - Requires bot and user admin privileges
  */
 
-let handler = async (m, { conn }) => {
-    await conn.groupRevokeInvite(m.chat);
+let handler = async (m, { sock }) => {
+    await sock.groupRevokeInvite(m.chat);
     m.reply("Link reset");
 };
 

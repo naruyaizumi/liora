@@ -167,7 +167,7 @@ console.log(result);
 **Usage in Plugin:**
 
 ```javascript
-let handler = async (m, { conn }) => {
+let handler = async (m, { sock }) => {
     const q = m.quoted ? m.quoted : m;
     const media = await q.download();
 
@@ -181,7 +181,7 @@ let handler = async (m, { conn }) => {
         return m.reply("Example: Upload failed");
     }
 
-    await conn.sendMessage(m.chat, {
+    await sock.sendMessage(m.chat, {
         text: `Example: Image uploaded to ${uploaded.url}`,
     });
 };
@@ -212,7 +212,7 @@ if (result.success) {
 **Usage in Plugin:**
 
 ```javascript
-let handler = async (m, { conn }) => {
+let handler = async (m, { sock }) => {
     const q = m.quoted ? m.quoted : m;
     const media = await q.download();
 
@@ -220,20 +220,20 @@ let handler = async (m, { conn }) => {
         return m.reply("Example: Quote an image");
     }
 
-    const loading = await conn.sendMessage(m.chat, {
+    const loading = await sock.sendMessage(m.chat, {
         text: "⏳ Example: Enhancing image...",
     });
 
     const result = await remini(media);
 
     if (!result.success) {
-        return conn.sendMessage(m.chat, {
+        return sock.sendMessage(m.chat, {
             text: `❌ Example: ${result.error}`,
             edit: loading.key,
         });
     }
 
-    await conn.sendMessage(m.chat, {
+    await sock.sendMessage(m.chat, {
         image: result.resultBuffer || { url: result.resultUrl },
         caption: "✅ Example: Image enhanced",
     });

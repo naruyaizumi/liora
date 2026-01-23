@@ -19,7 +19,7 @@ const SYM_PROCESSED = Symbol.for("smsg.processed");
  * Serializes and enhances WhatsApp message objects
  * @export
  * @function smsg
- * @param {Object} conn - Connection object with utilities
+ * @param {Object} sock - Connection object with utilities
  * @param {Object} m - Raw message object to serialize
  * @returns {Object} Enhanced message object
  *
@@ -40,13 +40,13 @@ const SYM_PROCESSED = Symbol.for("smsg.processed");
  * @example
  * const rawMsg = { key: { remoteJid: '123@s.whatsapp.net', ... } };
  * const serialized = smsg(connection, rawMsg);
- * // Returns enhanced message with .conn, .mtype, .sender, etc.
+ * // Returns enhanced message with .sock, .mtype, .sender, etc.
  */
-export function smsg(conn, m) {
+export function smsg(sock, m) {
     // Return early for null/undefined or already processed messages
     if (!m) return m;
     if (m[SYM_PROCESSED]) {
-        m.conn = conn;
+        m.sock = sock;
         return m;
     }
 
@@ -57,7 +57,7 @@ export function smsg(conn, m) {
     }
 
     // Attach connection reference for message methods
-    m.conn = conn;
+    m.sock = sock;
 
     const msg = m.message;
     if (!msg) {
@@ -83,9 +83,9 @@ export function smsg(conn, m) {
         }
 
         // Determine if message is from the bot itself
-        const botId = conn.decodeJid?.(conn.user?.lid || "") || "";
+        const botId = sock.decodeJid?.(sock.user?.lid || "") || "";
         if (botId) {
-            const partId = conn.decodeJid?.(key.participant) || "";
+            const partId = sock.decodeJid?.(key.participant) || "";
             key.fromMe = partId === botId;
 
             // Fix remote JID for messages sent to the bot
@@ -96,7 +96,7 @@ export function smsg(conn, m) {
 
         // Update key and emit delete event
         m.msg.key = key;
-        conn.ev?.emit("messages.delete", { keys: [key] });
+        sock.ev?.emit("messages.delete", { keys: [key] });
     }
 
     // Mark message as processed to prevent re-serialization

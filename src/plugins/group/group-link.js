@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Object} groupMetadata - Group metadata object
  * @returns {Promise<void>}
  *
@@ -26,12 +26,12 @@
  * - Requires bot admin privileges to access link
  */
 
-let handler = async (m, { conn, groupMetadata }) => {
-    const invite = await conn.groupInviteCode(m.chat);
+let handler = async (m, { sock, groupMetadata }) => {
+    const invite = await sock.groupInviteCode(m.chat);
     const link = `https://chat.whatsapp.com/${invite}`;
     const txt = `Group: ${groupMetadata.subject}\nID: ${m.chat}`;
 
-    await conn.client(m.chat, {
+    await sock.client(m.chat, {
         text: txt,
         title: "Group Link",
         footer: "Click button to copy",

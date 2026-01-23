@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Array} args - Command arguments
  * @param {Array} participants - Group participants list
  * @param {string} usedPrefix - Command prefix used
@@ -30,12 +30,12 @@
  * - Requires bot and user admin privileges
  */
 
-let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
+let handler = async (m, { sock, args, participants, usedPrefix, command }) => {
     let t = m.mentionedJid?.[0] || m.quoted?.sender || null;
 
     if (!t && args[0]) {
         const num = args[0].replace(/[^0-9]/g, "") + "@s.whatsapp.net";
-        const lid = await conn.signalRepository.lidMapping.getLIDForPN(num);
+        const lid = await sock.signalRepository.lidMapping.getLIDForPN(num);
         if (lid) t = lid;
     }
 
@@ -47,9 +47,9 @@ let handler = async (m, { conn, args, participants, usedPrefix, command }) => {
     if (!t || !participants.some((p) => p.id === t))
         return m.reply(`Remove member\nEx: ${usedPrefix + command} @628xxx`);
 
-    await conn.groupParticipantsUpdate(m.chat, [t], "remove");
+    await sock.groupParticipantsUpdate(m.chat, [t], "remove");
 
-    await conn.sendMessage(
+    await sock.sendMessage(
         m.chat,
         {
             text: `Removed @${t.split("@")[0]}`,

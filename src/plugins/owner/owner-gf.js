@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Array} args - Command arguments (file path)
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -30,7 +30,7 @@
 
 import { join, extname } from "node:path";
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { sock, args, usedPrefix, command }) => {
     if (!args.length) {
         return m.reply(`Need file path\nEx: ${usedPrefix + command} plugins/owner/owner-sf`);
     }
@@ -43,7 +43,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const buf = Buffer.from(await Bun.file(fp).arrayBuffer());
         const name = t.split("/").pop();
 
-        await conn.sendMessage(
+        await sock.sendMessage(
             m.chat,
             {
                 document: buf,

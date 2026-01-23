@@ -5,7 +5,7 @@
  * @author Naruya Izumi
  */
 
-/* global conn */
+/* global sock */
 import { fileTypeFromBuffer } from "file-type";
 
 /**
@@ -62,7 +62,7 @@ async function uploader1(buf) {
 
         return txt.trim();
     } catch (e) {
-        conn?.logger?.error(e.message);
+        sock?.logger?.error(e.message);
         throw e;
     }
 }
@@ -99,7 +99,7 @@ async function uploader2(buf) {
 
         return json.files[0].url.trim();
     } catch (e) {
-        conn?.logger?.error(e.message);
+        sock?.logger?.error(e.message);
         throw e;
     }
 }
@@ -136,7 +136,7 @@ async function uploader3(buf) {
 
         return json.files[0].url.trim();
     } catch (e) {
-        conn?.logger?.error(e.message);
+        sock?.logger?.error(e.message);
         throw e;
     }
 }
@@ -173,7 +173,7 @@ async function uploader4(buf) {
 
         return json.direct_url.trim();
     } catch (e) {
-        conn?.logger?.error(e.message);
+        sock?.logger?.error(e.message);
         throw e;
     }
 }
@@ -210,7 +210,7 @@ async function uploader5(buf) {
 
         return json.data.url.replace("/file/", "/dl/").trim();
     } catch (e) {
-        conn?.logger?.error(e.message);
+        sock?.logger?.error(e.message);
         throw e;
     }
 }
@@ -254,7 +254,7 @@ async function uploader6(buf) {
 
         return json.data.result.link.trim();
     } catch (e) {
-        conn?.logger?.error(e.message);
+        sock?.logger?.error(e.message);
         throw e;
     }
 }
@@ -298,7 +298,7 @@ async function uploader7(buf) {
 
         return json.data.result.imageUrl.trim();
     } catch (e) {
-        conn?.logger?.error(e.message);
+        sock?.logger?.error(e.message);
         throw e;
     }
 }
@@ -350,13 +350,13 @@ async function uploader(buf) {
                 status: "error",
                 error: e.message,
             });
-            conn?.logger?.error(`${prov.name}: ${e.message}`);
+            sock?.logger?.error(`${prov.name}: ${e.message}`);
             continue;
         }
     }
 
-    conn?.logger?.error("All uploaders failed");
-    attempts.forEach((a) => conn?.logger?.error(`  - ${a.provider}: ${a.status}`));
+    sock?.logger?.error("All uploaders failed");
+    attempts.forEach((a) => sock?.logger?.error(`  - ${a.provider}: ${a.status}`));
 
     return {
         success: false,

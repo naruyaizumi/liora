@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {string} text - Search query
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -30,13 +30,13 @@
 
 import { canvas } from "#canvas/spsearch.js";
 
-let handler = async (m, { conn, text, usedPrefix, command }) => {
+let handler = async (m, { sock, text, usedPrefix, command }) => {
     if (!text) {
         return m.reply(`Need query\nEx: ${usedPrefix + command} for revenge`);
     }
 
     try {
-        await global.loading(m, conn);
+        await global.loading(m, sock);
 
         const url = `https://api.nekolabs.web.id/discovery/spotify/search?q=${encodeURIComponent(text)}`;
         const res = await fetch(url);
@@ -66,7 +66,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             id: `.spotify ${t.title}`,
         }));
 
-        await conn.client(m.chat, {
+        await sock.client(m.chat, {
             image: imageBuffer,
             caption: "*Select track above*",
             title: "Spotify Search",
@@ -91,7 +91,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         global.logger.error(e);
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

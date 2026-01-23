@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @returns {Promise<void>}
  *
  * @description
@@ -51,7 +51,7 @@ import {
     getSoftwareInfo,
 } from "#lib/system.js";
 
-let handler = async (m, { conn }) => {
+let handler = async (m, { sock }) => {
     const startTime = Date.now();
     const [
         osInfo,
@@ -294,7 +294,7 @@ System Status: ${warnings.length === 0 ? "✓ HEALTHY" : "✘ ATTENTION REQUIRED
 \`\`\`
 `.trim();
 
-    await conn.sendMessage(
+    await sock.sendMessage(
         m.chat,
         {
             text: message,

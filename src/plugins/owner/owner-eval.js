@@ -11,7 +11,7 @@
  * @function handler
  * @param {Object} m - Message object
  * @param {Object} param1 - Destructured parameters
- * @param {Object} param1.conn - Connection object
+ * @param {Object} param1.sock - Connection object
  * @param {string} param1.noPrefix - Message text without prefix
  * @param {boolean} param1.isOwner - Whether user is bot owner
  * @returns {Promise<void>}
@@ -29,7 +29,7 @@
  * - Custom prefix pattern for evaluation
  */
 
-let handler = async (m, { conn, noPrefix, isOwner }) => {
+let handler = async (m, { sock, noPrefix, isOwner }) => {
     if (!isOwner) return;
     let t = noPrefix;
     let r;
@@ -53,7 +53,7 @@ let handler = async (m, { conn, noPrefix, isOwner }) => {
         out = Bun.inspect(r, { depth: null, maxArrayLength: null });
     }
 
-    await conn.sendMessage(m.chat, { text: out });
+    await sock.sendMessage(m.chat, { text: out });
 };
 
 /**

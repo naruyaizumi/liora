@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @returns {Promise<void>}
  *
  * @description
@@ -24,7 +24,7 @@
  * - Provides error handling for unsupported media
  */
 
-let handler = async (m, { conn }) => {
+let handler = async (m, { sock }) => {
     const q = m.quoted;
     try {
         const mq = q?.mediaMessage;
@@ -67,7 +67,7 @@ let handler = async (m, { conn }) => {
             ctx.mentionedJid = v.contextInfo.mentionedJid;
         }
 
-        await conn.sendMessage(
+        await sock.sendMessage(
             m.chat,
             {
                 [t]: buf,

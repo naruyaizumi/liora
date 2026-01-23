@@ -12,7 +12,7 @@ import { addExif, sticker } from "#lib/sticker.js";
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {string} text - Watermark text (pack|author)
  * @returns {Promise<void>}
  *
@@ -28,7 +28,7 @@ import { addExif, sticker } from "#lib/sticker.js";
  * - Converts media to stickers if needed
  */
 
-let handler = async (m, { conn, text }) => {
+let handler = async (m, { sock, text }) => {
     const q = m.quoted ?? m;
 
     if (!q || !/sticker|image|video/.test(q.mtype)) {
@@ -39,7 +39,7 @@ let handler = async (m, { conn, text }) => {
     pack = pack?.trim() || global.config.stickpack || "";
     author = author?.trim() || global.config.stickauth || "";
 
-    await global.loading(m, conn);
+    await global.loading(m, sock);
 
     try {
         const media = await q.download?.();
@@ -86,12 +86,12 @@ let handler = async (m, { conn, text }) => {
             });
         }
 
-        await conn.sendMessage(m.chat, { sticker: stc }, { quoted: m });
+        await sock.sendMessage(m.chat, { sticker: stc }, { quoted: m });
     } catch (e) {
-        conn.logger.error(e);
+        sock.logger.error(e);
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

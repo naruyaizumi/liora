@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Array} args - Command arguments
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -29,7 +29,7 @@
 
 import { spotifydl } from "#api/spotifydl.js";
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { sock, args, usedPrefix, command }) => {
     if (!args[0]) {
         return m.reply(
             `Need Spotify URL\nEx: ${usedPrefix + command} https://open.spotify.com/track/xxx`
@@ -42,13 +42,13 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         return m.reply("Invalid Spotify URL");
     }
 
-    await global.loading(m, conn);
+    await global.loading(m, sock);
 
     try {
         const { success, downloadUrl, error } = await spotifydl(url);
         if (!success) throw new Error(error);
 
-        await conn.sendMessage(
+        await sock.sendMessage(
             m.chat,
             {
                 audio: { url: downloadUrl },
@@ -59,7 +59,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

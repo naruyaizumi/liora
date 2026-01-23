@@ -95,10 +95,10 @@ const isCmdMatch = (cmd, rule) => {
  * @async
  * @function resolveLid
  * @param {string} sender - Sender identifier
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @returns {Promise<string>} Resolved LID
  */
-const resolveLid = async (sender, conn) => {
+const resolveLid = async (sender, sock) => {
     if (!sender || typeof sender !== "string") {
         return sender || "";
     }
@@ -108,7 +108,7 @@ const resolveLid = async (sender, conn) => {
     }
 
     if (sender.endsWith("@s.whatsapp.net")) {
-        const resolved = await conn.signalRepository.lidMapping.getLIDForPN(sender);
+        const resolved = await sock.signalRepository.lidMapping.getLIDForPN(sender);
         if (resolved) {
             return typeof resolved === "string" && resolved.endsWith("@lid")
                 ? resolved.split("@")[0]
@@ -123,21 +123,21 @@ const resolveLid = async (sender, conn) => {
  * Retrieves group metadata with caching
  * @async
  * @function getGroupMetadata
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {string} chat - Chat ID
  * @returns {Promise<Object>} Group metadata
  */
-const getGroupMetadata = async (conn, chat) => {
+const getGroupMetadata = async (sock, chat) => {
     try {
-        const chatData = await conn.getChat(chat);
+        const chatData = await sock.getChat(chat);
         if (chatData?.metadata) {
             return chatData.metadata;
         }
 
-        const metadata = await safe(() => conn.groupMetadata(chat), {});
+        const metadata = await safe(() => sock.groupMetadata(chat), {});
 
         if (metadata && Object.keys(metadata).length > 0) {
-            await conn.setChat(chat, {
+            await sock.setChat(chat, {
                 id: chat,
                 metadata,
                 isChats: true,
@@ -147,7 +147,7 @@ const getGroupMetadata = async (conn, chat) => {
 
         return metadata;
     } catch {
-        return await safe(() => conn.groupMetadata(chat), {});
+        return await safe(() => sock.groupMetadata(chat), {});
     }
 };
 
@@ -191,11 +191,11 @@ const checkPermissions = (m, settings, isOwner, isAdmin, isBotAdmin, chat) => {
  * @async
  * @function printMessage
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object with utilities
+ * @param {Object} sock - Connection object with utilities
  */
 async function printMessage(
     m,
-    conn = {
+    sock = {
         user: {},
         decodeJid: (id) => id,
         getName: async () => "Unknown",
@@ -205,9 +205,9 @@ async function printMessage(
     try {
         if (!m || !m.sender || !m.chat || !m.mtype) return;
 
-        const sender = conn.decodeJid(m.sender);
-        const chat = conn.decodeJid(m.chat);
-        const user = (await conn.getName(sender)) || "Unknown";
+        const sender = sock.decodeJid(m.sender);
+        const chat = sock.decodeJid(m.chat);
+        const user = (await sock.getName(sender)) || "Unknown";
 
         /**
          * Determines ID format type
@@ -422,7 +422,7 @@ export async function handler(chatUpdate) {
                     args: argsArr,
                     command,
                     text,
-                    conn: this,
+                    sock: this,
                     participants,
                     groupMetadata,
                     user,

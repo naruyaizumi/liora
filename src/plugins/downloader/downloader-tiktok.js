@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Array} args - Command arguments
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -29,7 +29,7 @@
 
 import { tiktok } from "#api/tiktok.js";
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { sock, args, usedPrefix, command }) => {
     const url = args[0];
     if (!url) {
         return m.reply(`Need TikTok URL\nEx: ${usedPrefix + command} https://vt.tiktok.com/xxx`);
@@ -39,7 +39,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         return m.reply("Invalid TikTok URL");
     }
 
-    await global.loading(m, conn);
+    await global.loading(m, sock);
 
     try {
         const { success, type, images, videoUrl, error } = await tiktok(url);
@@ -47,7 +47,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         if (type === "images") {
             if (images.length === 1) {
-                await conn.sendMessage(
+                await sock.sendMessage(
                     m.chat,
                     {
                         image: {
@@ -64,10 +64,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                     })),
                 };
 
-                await conn.client(m.chat, album, { quoted: m });
+                await sock.client(m.chat, album, { quoted: m });
             }
         } else if (type === "video") {
-            await conn.sendMessage(
+            await sock.sendMessage(
                 m.chat,
                 {
                     video: { url: videoUrl },
@@ -79,7 +79,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

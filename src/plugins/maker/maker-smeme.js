@@ -13,7 +13,7 @@ import { uploader } from "#lib/uploader.js";
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Array<string>} args - Command arguments
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -31,7 +31,7 @@ import { uploader } from "#lib/uploader.js";
  * - Uploads images to external storage
  */
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { sock, args, usedPrefix, command }) => {
     try {
         const q = m.quoted ?? m;
         const mime = (q.msg || q).mimetype || "";
@@ -46,7 +46,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             return m.reply(`Need text\nEx: ${usedPrefix + command} top|bottom`);
         }
 
-        await global.loading(m, conn);
+        await global.loading(m, sock);
 
         const img = await q.download();
         const up = await uploader(img);
@@ -64,12 +64,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             authorName: global.config.stickauth || "",
         });
 
-        await conn.sendMessage(m.chat, { sticker: stc }, { quoted: m });
+        await sock.sendMessage(m.chat, { sticker: stc }, { quoted: m });
     } catch (e) {
-        conn.logger.error(e);
+        sock.logger.error(e);
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

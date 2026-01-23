@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
  * @returns {Promise<void>}
@@ -25,7 +25,7 @@
  * - Uses WhatsApp's group status message protocol via contextInfo
  */
 
-let handler = async (m, { conn, usedPrefix, command }) => {
+let handler = async (m, { sock, usedPrefix, command }) => {
     const q = m.quoted ?? m;
     const type = q.mtype || "";
     const mime = (q.msg || q).mimetype || "";
@@ -42,7 +42,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
             );
         }
 
-        await global.loading(m, conn);
+        await global.loading(m, sock);
 
         let content = {};
         const ctx = { isGroupStatus: true };
@@ -80,12 +80,12 @@ let handler = async (m, { conn, usedPrefix, command }) => {
             throw new Error("Reply media or text");
         }
 
-        await conn.sendMessage(m.chat, content);
+        await sock.sendMessage(m.chat, content);
 
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

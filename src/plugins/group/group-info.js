@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @returns {Promise<void>}
  *
  * @description
@@ -28,13 +28,13 @@
  * - Caches group metadata for performance
  */
 
-let handler = async (m, { conn }) => {
+let handler = async (m, { sock }) => {
     try {
-        await global.loading(m, conn);
+        await global.loading(m, sock);
 
         let meta;
         try {
-            const chatData = await conn.getChat(m.chat);
+            const chatData = await sock.getChat(m.chat);
             if (chatData?.metadata?.participants?.length) {
                 meta = chatData.metadata;
             }
@@ -44,14 +44,14 @@ let handler = async (m, { conn }) => {
 
         if (!meta) {
             try {
-                meta = await conn.groupMetadata(m.chat);
+                meta = await sock.groupMetadata(m.chat);
                 try {
-                    const chatData = (await conn.getChat(m.chat)) || { id: m.chat };
+                    const chatData = (await sock.getChat(m.chat)) || { id: m.chat };
                     chatData.metadata = meta;
                     chatData.subject = meta.subject;
                     chatData.isChats = true;
                     chatData.lastSync = Date.now();
-                    await conn.setChat(m.chat, chatData);
+                    await sock.setChat(m.chat, chatData);
                 } catch {
                     //
                 }
@@ -89,7 +89,7 @@ let handler = async (m, { conn }) => {
         const desc = meta.desc || "(none)";
         let pp = null;
         try {
-            pp = await conn.profilePictureUrl(m.chat, "image");
+            pp = await sock.profilePictureUrl(m.chat, "image");
         } catch {
             //
         }
@@ -116,13 +116,13 @@ Announce: ${meta.announce ? "Yes" : "No"}
 `.trim();
 
         if (pp) {
-            await conn.sendMessage(m.chat, {
+            await sock.sendMessage(m.chat, {
                 image: { url: pp },
                 caption: txt,
                 mentions,
             });
         } else {
-            await conn.sendMessage(m.chat, {
+            await sock.sendMessage(m.chat, {
                 text: txt,
                 mentions,
             });
@@ -130,7 +130,7 @@ Announce: ${meta.announce ? "Yes" : "No"}
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

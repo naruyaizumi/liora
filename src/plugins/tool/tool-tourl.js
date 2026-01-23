@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Array} args - Command arguments
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -50,7 +50,7 @@ const servers = {
     7: { name: "GoFile", fn: uploader7 },
 };
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { sock, args, usedPrefix, command }) => {
     const q = m.quoted?.mimetype ? m.quoted : m;
     const mime = (q.msg || q).mimetype || q.mediaType || "";
 
@@ -69,7 +69,7 @@ Ex: ${usedPrefix + command} 1`;
             return m.reply(list);
         }
 
-        await global.loading(m, conn);
+        await global.loading(m, sock);
         const buffer = await q.download?.();
 
         const sizeKB = (buffer.length / 1024).toFixed(2);
@@ -78,7 +78,7 @@ Ex: ${usedPrefix + command} 1`;
 
         const res = await uploader(buffer);
         if (res?.success) {
-            return conn.client(
+            return sock.client(
                 m.chat,
                 {
                     text: `Uploaded\nServer: ${res.provider}\nSize: ${size}`,
@@ -101,7 +101,7 @@ Ex: ${usedPrefix + command} 1`;
     const num = args[0].toString().trim().match(/\d+/)?.[0];
     if (!num || !servers[num]) return m.reply("Invalid server (1-7)");
 
-    await global.loading(m, conn);
+    await global.loading(m, sock);
     const buffer = await q.download?.();
 
     const sizeKB = (buffer.length / 1024).toFixed(2);
@@ -130,7 +130,7 @@ Ex: ${usedPrefix + command} 1`;
         return m.reply(`Upload failed.\nSize: ${size}`);
     }
 
-    return conn.client(
+    return sock.client(
         m.chat,
         {
             text: caption,

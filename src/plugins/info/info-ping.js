@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @returns {Promise<void>}
  *
  * @description
@@ -24,12 +24,12 @@
  * - Simple and efficient implementation
  */
 
-let handler = async (m, { conn }) => {
+let handler = async (m, { sock }) => {
     const start = Bun.nanoseconds();
-    const msg = await conn.sendMessage(m.chat, { text: "" });
+    const msg = await sock.sendMessage(m.chat, { text: "" });
     const ns = Bun.nanoseconds() - start;
     const ms = (ns / 1_000_000).toFixed(0);
-    await conn.sendMessage(m.chat, {
+    await sock.sendMessage(m.chat, {
         text: `${ms} ms`,
         edit: msg.key,
     });

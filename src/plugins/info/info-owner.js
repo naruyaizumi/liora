@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @returns {Promise<void>}
  *
  * @description
@@ -26,7 +26,7 @@
  * - Quoted message with forwarding context
  */
 
-let handler = async (m, { conn }) => {
+let handler = async (m, { sock }) => {
     const v = `BEGIN:VCARD
 VERSION:3.0
 N:;Naruya;;;
@@ -115,7 +115,7 @@ END:VCARD`;
         participant: "166653589463190@lid",
     };
 
-    await conn.sendMessage(
+    await sock.sendMessage(
         m.chat,
         {
             contacts: {

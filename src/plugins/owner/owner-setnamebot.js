@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {string} text - New display name
  * @param {string} command - Command name
  * @param {string} usedPrefix - Command prefix used
@@ -27,10 +27,10 @@
  * - Only accessible by bot owner
  */
 
-let handler = async (m, { conn, text, command, usedPrefix }) => {
+let handler = async (m, { sock, text, command, usedPrefix }) => {
     if (!text) return m.reply(`Set bot name\nEx: ${usedPrefix + command} Liora`);
 
-    await conn.updateProfileName(text);
+    await sock.updateProfileName(text);
     m.reply(`Name updated: ${text}`);
 };
 

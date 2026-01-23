@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @returns {Promise<void>}
  *
  * @description
@@ -24,7 +24,7 @@
  * - Error handling for failed deletions
  */
 
-let handler = async (m, { conn }) => {
+let handler = async (m, { sock }) => {
     if (!m.quoted) return m.reply("Reply message to delete");
 
     const { chat, id, participant, sender, fromMe } = m.quoted.vM;
@@ -34,7 +34,7 @@ let handler = async (m, { conn }) => {
     if (!qs) return m.reply("No sender found");
 
     try {
-        await conn.sendMessage(chat, {
+        await sock.sendMessage(chat, {
             delete: {
                 remoteJid: m.chat,
                 fromMe: false,

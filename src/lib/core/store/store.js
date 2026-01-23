@@ -32,7 +32,7 @@ const memoryStore = new MemoryStore();
 /**
  * Binds WhatsApp connection events to memory store operations
  * @function bind
- * @param {Object} conn - WhatsApp connection object
+ * @param {Object} sock - WhatsApp connection object
  * @returns {void}
  *
  * @overview
@@ -48,14 +48,14 @@ const memoryStore = new MemoryStore();
  * 4. Maintains data consistency across different entity types
  * 5. Handles priority-based event processing
  */
-export default function bind(conn) {
+export default function bind(sock) {
     global.logger?.info("Memory store initialized");
 
     /**
      * Attach memory store instance to connection for direct access
      * @private
      */
-    conn._memoryStore = memoryStore;
+    sock._memoryStore = memoryStore;
 
     /**
      * Chat Management Methods
@@ -68,7 +68,7 @@ export default function bind(conn) {
      * @param {string} jid - Chat JID identifier
      * @returns {Object|null} Chat data or null if not found
      */
-    conn.getChat = (jid) => {
+    sock.getChat = (jid) => {
         const key = `${REDIS_PREFIX}${jid}`;
         return memoryStore.get(key);
     };
@@ -80,7 +80,7 @@ export default function bind(conn) {
      * @param {Object} data - Chat data object
      * @returns {void}
      */
-    conn.setChat = (jid, data) => {
+    sock.setChat = (jid, data) => {
         const key = `${REDIS_PREFIX}${jid}`;
         memoryStore.atomicSet(key, data, "chat");
     };
@@ -91,7 +91,7 @@ export default function bind(conn) {
      * @param {string} jid - Chat JID identifier
      * @returns {void}
      */
-    conn.deleteChat = (jid) => {
+    sock.deleteChat = (jid) => {
         const key = `${REDIS_PREFIX}${jid}`;
         memoryStore.del(key);
     };
@@ -101,7 +101,7 @@ export default function bind(conn) {
      * @method getAllChats
      * @returns {Array<Object>} Array of chat objects
      */
-    conn.getAllChats = () => {
+    sock.getAllChats = () => {
         const keys = memoryStore.keys(`${REDIS_PREFIX}*`);
         const chats = memoryStore.mget(keys);
         return chats.filter((c) => c !== null);
@@ -118,7 +118,7 @@ export default function bind(conn) {
      * @param {string} jid - Contact JID identifier
      * @returns {Object|null} Contact data or null if not found
      */
-    conn.getContact = (jid) => {
+    sock.getContact = (jid) => {
         const key = `${REDIS_CONTACT_PREFIX}${jid}`;
         return memoryStore.get(key);
     };
@@ -130,7 +130,7 @@ export default function bind(conn) {
      * @param {Object} data - Contact data object
      * @returns {void}
      */
-    conn.setContact = (jid, data) => {
+    sock.setContact = (jid, data) => {
         const key = `${REDIS_CONTACT_PREFIX}${jid}`;
         memoryStore.atomicSet(key, data, "contact");
     };
@@ -140,7 +140,7 @@ export default function bind(conn) {
      * @method getAllContacts
      * @returns {Array<Object>} Array of contact objects
      */
-    conn.getAllContacts = () => {
+    sock.getAllContacts = () => {
         const keys = memoryStore.keys(`${REDIS_CONTACT_PREFIX}*`);
         return memoryStore.mget(keys);
     };
@@ -157,7 +157,7 @@ export default function bind(conn) {
      * @param {string} messageId - Message identifier
      * @returns {Object|null} Message data or null if not found
      */
-    conn.getMessage = (chatId, messageId) => {
+    sock.getMessage = (chatId, messageId) => {
         const key = `${REDIS_MESSAGE_PREFIX}${chatId}:${messageId}`;
         return memoryStore.get(key);
     };
@@ -170,7 +170,7 @@ export default function bind(conn) {
      * @param {Object} data - Message data object
      * @returns {void}
      */
-    conn.setMessage = (chatId, messageId, data) => {
+    sock.setMessage = (chatId, messageId, data) => {
         const key = `${REDIS_MESSAGE_PREFIX}${chatId}:${messageId}`;
         memoryStore.atomicSet(key, data, "message");
     };
@@ -182,7 +182,7 @@ export default function bind(conn) {
      * @param {number} [limit=40] - Maximum number of messages to return
      * @returns {Array<Object>} Array of message objects (most recent first)
      */
-    conn.getChatMessages = (chatId, limit = 40) => {
+    sock.getChatMessages = (chatId, limit = 40) => {
         const pattern = `${REDIS_MESSAGE_PREFIX}${chatId}:*`;
         const keys = memoryStore.keys(pattern);
         const messages = memoryStore.mget(keys);
@@ -200,7 +200,7 @@ export default function bind(conn) {
      * @param {string} groupId - Group JID identifier
      * @returns {Object|null} Group metadata or null if not found
      */
-    conn.getGroupMetadata = (groupId) => {
+    sock.getGroupMetadata = (groupId) => {
         const key = `${REDIS_GROUP_PREFIX}${groupId}`;
         return memoryStore.get(key);
     };
@@ -212,7 +212,7 @@ export default function bind(conn) {
      * @param {Object} metadata - Group metadata object
      * @returns {void}
      */
-    conn.setGroupMetadata = (groupId, metadata) => {
+    sock.setGroupMetadata = (groupId, metadata) => {
         const key = `${REDIS_GROUP_PREFIX}${groupId}`;
         memoryStore.atomicSet(key, metadata, "group");
     };
@@ -228,7 +228,7 @@ export default function bind(conn) {
      * @param {string} jid - User JID identifier
      * @returns {Object|null} Presence data or null if not found
      */
-    conn.getPresence = (jid) => {
+    sock.getPresence = (jid) => {
         const key = `${REDIS_PRESENCE_PREFIX}${jid}`;
         return memoryStore.get(key);
     };
@@ -240,7 +240,7 @@ export default function bind(conn) {
      * @param {Object} presence - Presence data object
      * @returns {void}
      */
-    conn.setPresence = (jid, presence) => {
+    sock.setPresence = (jid, presence) => {
         const key = `${REDIS_PRESENCE_PREFIX}${jid}`;
         memoryStore.atomicSet(key, presence, "presence");
     };
@@ -256,7 +256,7 @@ export default function bind(conn) {
      * @param {string} callId - Call identifier
      * @returns {Object|null} Call data or null if not found
      */
-    conn.getCall = (callId) => {
+    sock.getCall = (callId) => {
         const key = `${REDIS_CALL_PREFIX}${callId}`;
         return memoryStore.get(key);
     };
@@ -268,7 +268,7 @@ export default function bind(conn) {
      * @param {Object} callData - Call data object
      * @returns {void}
      */
-    conn.setCall = (callId, callData) => {
+    sock.setCall = (callId, callData) => {
         const key = `${REDIS_CALL_PREFIX}${callId}`;
         memoryStore.atomicSet(key, callData, "call");
     };
@@ -283,7 +283,7 @@ export default function bind(conn) {
      * @method getBlocklist
      * @returns {Array<string>} Array of blocked JIDs
      */
-    conn.getBlocklist = () => {
+    sock.getBlocklist = () => {
         const key = `${REDIS_BLOCKLIST_PREFIX}list`;
         return memoryStore.get(key) || [];
     };
@@ -294,7 +294,7 @@ export default function bind(conn) {
      * @param {Array<string>} blocklist - Array of blocked JIDs
      * @returns {void}
      */
-    conn.setBlocklist = (blocklist) => {
+    sock.setBlocklist = (blocklist) => {
         const key = `${REDIS_BLOCKLIST_PREFIX}list`;
         memoryStore.atomicSet(key, blocklist, "blocklist");
     };
@@ -309,7 +309,7 @@ export default function bind(conn) {
      * @listens connection.update
      * @param {Object} update - Connection update object
      */
-    conn.ev.on("connection.update", (update) => {
+    sock.ev.on("connection.update", (update) => {
         memoryStore.enqueueEvent("connection.update", update, EVENT_PRIORITY.CORE);
 
         try {
@@ -326,7 +326,7 @@ export default function bind(conn) {
      * @listens creds.update
      * @param {Object} update - Credentials update object
      */
-    conn.ev.on("creds.update", (update) => {
+    sock.ev.on("creds.update", (update) => {
         memoryStore.enqueueEvent("creds.update", update, EVENT_PRIORITY.CORE);
     });
 
@@ -339,7 +339,7 @@ export default function bind(conn) {
      * @param {Array<Object>} data.messages - Array of message objects
      * @param {boolean} data.isLatest - Whether this is the latest history
      */
-    conn.ev.on("messaging-history.set", ({ chats, contacts, messages, isLatest }) => {
+    sock.ev.on("messaging-history.set", ({ chats, contacts, messages, isLatest }) => {
         memoryStore.enqueueEvent(
             "messaging-history.set",
             { chats, contacts, messages, isLatest },
@@ -350,7 +350,7 @@ export default function bind(conn) {
             // Process and store chats
             if (chats) {
                 for (const chat of chats) {
-                    const id = conn.decodeJid(chat.id);
+                    const id = sock.decodeJid(chat.id);
                     if (!id || id === "status@broadcast") continue;
 
                     const isGroup = id.endsWith("@g.us");
@@ -370,10 +370,10 @@ export default function bind(conn) {
 
                     // Fetch and store group metadata if applicable
                     if (isGroup) {
-                        conn.groupMetadata(id)
+                        sock.groupMetadata(id)
                             .then((metadata) => {
                                 if (metadata) {
-                                    conn.setGroupMetadata(id, metadata);
+                                    sock.setGroupMetadata(id, metadata);
                                     chatData.metadata = metadata;
                                     memoryStore.atomicSet(`${REDIS_PREFIX}${id}`, chatData, "chat");
                                 }
@@ -386,10 +386,10 @@ export default function bind(conn) {
             // Process and store contacts
             if (contacts) {
                 for (const contact of contacts) {
-                    const id = conn.decodeJid(contact.id);
+                    const id = sock.decodeJid(contact.id);
                     if (!id || id === "status@broadcast") continue;
 
-                    conn.setContact(id, {
+                    sock.setContact(id, {
                         id,
                         name: contact.name || contact.notify || contact.verifiedName,
                         notify: contact.notify,
@@ -421,7 +421,7 @@ export default function bind(conn) {
                     for (const msg of toSave) {
                         const messageId = msg.key?.id;
                         if (messageId) {
-                            conn.setMessage(chatId, messageId, msg);
+                            sock.setMessage(chatId, messageId, msg);
                         }
                     }
                 }
@@ -448,7 +448,7 @@ export default function bind(conn) {
      * @param {Array<Object>} data.messages - Array of message objects
      * @param {string} data.type - Update type (notify, append, replace)
      */
-    conn.ev.on("messages.upsert", ({ messages, type }) => {
+    sock.ev.on("messages.upsert", ({ messages, type }) => {
         memoryStore.enqueueEvent("messages.upsert", { messages, type }, EVENT_PRIORITY.CORE);
 
         try {
@@ -458,10 +458,10 @@ export default function bind(conn) {
 
                 if (!chatId || !messageId || chatId === "status@broadcast") continue;
 
-                conn.setMessage(chatId, messageId, msg);
+                sock.setMessage(chatId, messageId, msg);
 
                 // Update chat metadata
-                let chat = conn.getChat(chatId) || { id: chatId };
+                let chat = sock.getChat(chatId) || { id: chatId };
                 chat.conversationTimestamp = msg.messageTimestamp;
                 chat.isChats = true;
 
@@ -469,7 +469,7 @@ export default function bind(conn) {
                     chat.unreadCount = (chat.unreadCount || 0) + 1;
                 }
 
-                conn.setChat(chatId, chat);
+                sock.setChat(chatId, chat);
             }
         } catch (e) {
             global.logger?.error(e);
@@ -481,7 +481,7 @@ export default function bind(conn) {
      * @listens messages.update
      * @param {Array<Object>} updates - Array of message updates
      */
-    conn.ev.on("messages.update", (updates) => {
+    sock.ev.on("messages.update", (updates) => {
         memoryStore.enqueueEvent("messages.update", updates, EVENT_PRIORITY.CORE);
 
         try {
@@ -491,10 +491,10 @@ export default function bind(conn) {
 
                 if (!chatId || !messageId) continue;
 
-                const msg = conn.getMessage(chatId, messageId);
+                const msg = sock.getMessage(chatId, messageId);
                 if (msg) {
                     Object.assign(msg, update);
-                    conn.setMessage(chatId, messageId, msg);
+                    sock.setMessage(chatId, messageId, msg);
                 }
             }
         } catch (e) {
@@ -507,7 +507,7 @@ export default function bind(conn) {
      * @listens messages.delete
      * @param {Object} deletion - Deletion data
      */
-    conn.ev.on("messages.delete", (deletion) => {
+    sock.ev.on("messages.delete", (deletion) => {
         memoryStore.enqueueEvent("messages.delete", deletion, EVENT_PRIORITY.CORE);
 
         try {
@@ -534,7 +534,7 @@ export default function bind(conn) {
      * @param {Object} data.key - Message key
      * @param {Object} data.reaction - Reaction object
      */
-    conn.ev.on("messages.reaction", ({ key, reaction }) => {
+    sock.ev.on("messages.reaction", ({ key, reaction }) => {
         memoryStore.enqueueEvent("messages.reaction", { key, reaction }, EVENT_PRIORITY.AUX);
 
         try {
@@ -542,11 +542,11 @@ export default function bind(conn) {
             const messageId = key?.id;
 
             if (chatId && messageId) {
-                const msg = conn.getMessage(chatId, messageId);
+                const msg = sock.getMessage(chatId, messageId);
                 if (msg) {
                     msg.reactions ||= [];
                     msg.reactions.push(reaction);
-                    conn.setMessage(chatId, messageId, msg);
+                    sock.setMessage(chatId, messageId, msg);
                 }
             }
         } catch (e) {
@@ -559,7 +559,7 @@ export default function bind(conn) {
      * @listens message-receipt.update
      * @param {Array<Object>} updates - Array of receipt updates
      */
-    conn.ev.on("message-receipt.update", (updates) => {
+    sock.ev.on("message-receipt.update", (updates) => {
         memoryStore.enqueueEvent("message-receipt.update", updates, EVENT_PRIORITY.AUX);
 
         try {
@@ -568,11 +568,11 @@ export default function bind(conn) {
                 const messageId = key?.id;
 
                 if (chatId && messageId) {
-                    const msg = conn.getMessage(chatId, messageId);
+                    const msg = sock.getMessage(chatId, messageId);
                     if (msg) {
                         msg.userReceipt ||= [];
                         msg.userReceipt.push(receipt);
-                        conn.setMessage(chatId, messageId, msg);
+                        sock.setMessage(chatId, messageId, msg);
                     }
                 }
             }
@@ -588,12 +588,12 @@ export default function bind(conn) {
      * @param {Array<Object>} data.chats - Array of chat objects
      * @param {boolean} data.isLatest - Whether this is the latest chat list
      */
-    conn.ev.on("chats.set", ({ chats, isLatest }) => {
+    sock.ev.on("chats.set", ({ chats, isLatest }) => {
         memoryStore.enqueueEvent("chats.set", { chats, isLatest }, EVENT_PRIORITY.CORE);
 
         try {
             for (const chat of chats) {
-                let id = conn.decodeJid(chat.id);
+                let id = sock.decodeJid(chat.id);
                 if (!id || id === "status@broadcast") continue;
 
                 const isGroup = id.endsWith("@g.us");
@@ -608,16 +608,16 @@ export default function bind(conn) {
                     ...(isGroup ? { subject: chat.name } : { name: chat.name }),
                 };
 
-                conn.setChat(id, chatData);
+                sock.setChat(id, chatData);
 
                 // Fetch and store group metadata if applicable
                 if (isGroup) {
-                    conn.groupMetadata(id)
+                    sock.groupMetadata(id)
                         .then((metadata) => {
                             if (metadata) {
-                                conn.setGroupMetadata(id, metadata);
+                                sock.setGroupMetadata(id, metadata);
                                 chatData.metadata = metadata;
-                                conn.setChat(id, chatData);
+                                sock.setChat(id, chatData);
                             }
                         })
                         .catch(() => {});
@@ -633,27 +633,27 @@ export default function bind(conn) {
      * @listens chats.upsert
      * @param {Array<Object>} chats - Array of chat objects
      */
-    conn.ev.on("chats.upsert", (chats) => {
+    sock.ev.on("chats.upsert", (chats) => {
         memoryStore.enqueueEvent("chats.upsert", chats, EVENT_PRIORITY.CORE);
 
         try {
             for (const chat of chats) {
-                const id = conn.decodeJid(chat.id);
+                const id = sock.decodeJid(chat.id);
                 if (!id || id === "status@broadcast") continue;
 
-                const existing = conn.getChat(id) || { id };
+                const existing = sock.getChat(id) || { id };
                 const updated = { ...existing, ...chat, isChats: true };
 
-                conn.setChat(id, updated);
+                sock.setChat(id, updated);
 
                 // Fetch and store group metadata if applicable
                 if (id.endsWith("@g.us") && !updated.metadata) {
-                    conn.groupMetadata(id)
+                    sock.groupMetadata(id)
                         .then((metadata) => {
                             if (metadata) {
-                                conn.setGroupMetadata(id, metadata);
+                                sock.setGroupMetadata(id, metadata);
                                 updated.metadata = metadata;
-                                conn.setChat(id, updated);
+                                sock.setChat(id, updated);
                             }
                         })
                         .catch(() => {});
@@ -669,18 +669,18 @@ export default function bind(conn) {
      * @listens chats.update
      * @param {Array<Object>} updates - Array of chat updates
      */
-    conn.ev.on("chats.update", (updates) => {
+    sock.ev.on("chats.update", (updates) => {
         memoryStore.enqueueEvent("chats.update", updates, EVENT_PRIORITY.AUX);
 
         try {
             for (const update of updates) {
-                const id = conn.decodeJid(update.id);
+                const id = sock.decodeJid(update.id);
                 if (!id || id === "status@broadcast") continue;
 
-                const existing = conn.getChat(id) || { id };
+                const existing = sock.getChat(id) || { id };
                 const updated = { ...existing, ...update };
 
-                conn.setChat(id, updated);
+                sock.setChat(id, updated);
             }
         } catch (e) {
             global.logger?.error(e);
@@ -692,12 +692,12 @@ export default function bind(conn) {
      * @listens chats.delete
      * @param {Array<string>} deletions - Array of chat JIDs to delete
      */
-    conn.ev.on("chats.delete", (deletions) => {
+    sock.ev.on("chats.delete", (deletions) => {
         memoryStore.enqueueEvent("chats.delete", deletions, EVENT_PRIORITY.NOISE);
 
         try {
             for (const id of deletions) {
-                conn.deleteChat(id);
+                sock.deleteChat(id);
 
                 // Delete associated messages
                 const msgKeys = memoryStore.keys(`${REDIS_MESSAGE_PREFIX}${id}:*`);
@@ -717,14 +717,14 @@ export default function bind(conn) {
      * @param {string} data.id - Chat ID
      * @param {Object} data.presences - Map of JID to presence data
      */
-    conn.ev.on("presence.update", ({ id, presences }) => {
+    sock.ev.on("presence.update", ({ id, presences }) => {
         memoryStore.enqueueEvent("presence.update", { id, presences }, EVENT_PRIORITY.AUX);
 
         try {
             for (const [jid, presence] of Object.entries(presences)) {
-                const _jid = conn.decodeJid(jid);
+                const _jid = sock.decodeJid(jid);
 
-                conn.setPresence(_jid, {
+                sock.setPresence(_jid, {
                     id: _jid,
                     lastKnownPresence: presence.lastKnownPresence,
                     lastSeen: presence.lastSeen,
@@ -732,10 +732,10 @@ export default function bind(conn) {
                 });
 
                 // Update presence in chat data
-                const chat = conn.getChat(_jid);
+                const chat = sock.getChat(_jid);
                 if (chat) {
                     chat.presences = presence.lastKnownPresence;
-                    conn.setChat(_jid, chat);
+                    sock.setChat(_jid, chat);
                 }
             }
         } catch (e) {
@@ -749,15 +749,15 @@ export default function bind(conn) {
      * @param {Object} data - Contact set data
      * @param {Array<Object>} data.contacts - Array of contact objects
      */
-    conn.ev.on("contacts.set", ({ contacts }) => {
+    sock.ev.on("contacts.set", ({ contacts }) => {
         memoryStore.enqueueEvent("contacts.set", { contacts }, EVENT_PRIORITY.CORE);
 
         try {
             for (const contact of contacts) {
-                const id = conn.decodeJid(contact.id);
+                const id = sock.decodeJid(contact.id);
                 if (!id || id === "status@broadcast") continue;
 
-                conn.setContact(id, {
+                sock.setContact(id, {
                     id,
                     name: contact.name || contact.notify || contact.verifiedName,
                     notify: contact.notify,
@@ -767,10 +767,10 @@ export default function bind(conn) {
                 });
 
                 // Update chat name from contact info
-                const chat = conn.getChat(id);
+                const chat = sock.getChat(id);
                 if (chat && !id.endsWith("@g.us")) {
                     chat.name = contact.name || contact.notify || chat.name;
-                    conn.setChat(id, chat);
+                    sock.setChat(id, chat);
                 }
             }
         } catch (e) {
@@ -783,24 +783,24 @@ export default function bind(conn) {
      * @listens contacts.upsert
      * @param {Array<Object>} contacts - Array of contact objects
      */
-    conn.ev.on("contacts.upsert", (contacts) => {
+    sock.ev.on("contacts.upsert", (contacts) => {
         memoryStore.enqueueEvent("contacts.upsert", contacts, EVENT_PRIORITY.CORE);
 
         try {
             for (const contact of contacts) {
-                const id = conn.decodeJid(contact.id);
+                const id = sock.decodeJid(contact.id);
                 if (!id || id === "status@broadcast") continue;
 
-                const existing = conn.getContact(id) || { id };
+                const existing = sock.getContact(id) || { id };
                 const updated = { ...existing, ...contact };
 
-                conn.setContact(id, updated);
+                sock.setContact(id, updated);
 
                 // Update chat name from contact info
-                const chat = conn.getChat(id);
+                const chat = sock.getChat(id);
                 if (chat && !id.endsWith("@g.us")) {
                     chat.name = updated.name || updated.notify || chat.name;
-                    conn.setChat(id, chat);
+                    sock.setChat(id, chat);
                 }
             }
         } catch (e) {
@@ -813,18 +813,18 @@ export default function bind(conn) {
      * @listens contacts.update
      * @param {Array<Object>} updates - Array of contact updates
      */
-    conn.ev.on("contacts.update", (updates) => {
+    sock.ev.on("contacts.update", (updates) => {
         memoryStore.enqueueEvent("contacts.update", updates, EVENT_PRIORITY.AUX);
 
         try {
             for (const update of updates) {
-                const id = conn.decodeJid(update.id);
+                const id = sock.decodeJid(update.id);
                 if (!id || id === "status@broadcast") continue;
 
-                const existing = conn.getContact(id) || { id };
+                const existing = sock.getContact(id) || { id };
                 const updated = { ...existing, ...update };
 
-                conn.setContact(id, updated);
+                sock.setContact(id, updated);
             }
         } catch (e) {
             global.logger?.error(e);
@@ -836,22 +836,22 @@ export default function bind(conn) {
      * @listens groups.upsert
      * @param {Array<Object>} groups - Array of group objects
      */
-    conn.ev.on("groups.upsert", (groups) => {
+    sock.ev.on("groups.upsert", (groups) => {
         memoryStore.enqueueEvent("groups.upsert", groups, EVENT_PRIORITY.CORE);
 
         try {
             for (const group of groups) {
-                const id = conn.decodeJid(group.id);
+                const id = sock.decodeJid(group.id);
                 if (!id) continue;
 
-                conn.setGroupMetadata(id, group);
+                sock.setGroupMetadata(id, group);
 
                 // Update chat with group data
-                const chat = conn.getChat(id) || { id };
+                const chat = sock.getChat(id) || { id };
                 chat.subject = group.subject;
                 chat.metadata = group;
                 chat.isChats = true;
-                conn.setChat(id, chat);
+                sock.setChat(id, chat);
             }
         } catch (e) {
             global.logger?.error(e);
@@ -863,25 +863,25 @@ export default function bind(conn) {
      * @listens groups.update
      * @param {Array<Object>} updates - Array of group updates
      */
-    conn.ev.on("groups.update", (updates) => {
+    sock.ev.on("groups.update", (updates) => {
         memoryStore.enqueueEvent("groups.update", updates, EVENT_PRIORITY.CORE);
 
         try {
             for (const update of updates) {
-                const id = conn.decodeJid(update.id);
+                const id = sock.decodeJid(update.id);
                 if (!id) continue;
 
-                const existing = conn.getGroupMetadata(id) || { id };
+                const existing = sock.getGroupMetadata(id) || { id };
                 const updated = { ...existing, ...update };
 
-                conn.setGroupMetadata(id, updated);
+                sock.setGroupMetadata(id, updated);
 
                 // Update chat with group changes
-                const chat = conn.getChat(id);
+                const chat = sock.getChat(id);
                 if (chat) {
                     if (update.subject) chat.subject = update.subject;
                     chat.metadata = updated;
-                    conn.setChat(id, chat);
+                    sock.setChat(id, chat);
                 }
             }
         } catch (e) {
@@ -897,7 +897,7 @@ export default function bind(conn) {
      * @param {Array<string>} data.participants - Array of participant JIDs
      * @param {string} data.action - Update action (add, remove, promote, demote)
      */
-    conn.ev.on("group-participants.update", ({ id, participants, action }) => {
+    sock.ev.on("group-participants.update", ({ id, participants, action }) => {
         memoryStore.enqueueEvent(
             "group-participants.update",
             { id, participants, action },
@@ -905,20 +905,20 @@ export default function bind(conn) {
         );
 
         try {
-            id = conn.decodeJid(id);
+            id = sock.decodeJid(id);
             if (!id || id === "status@broadcast") return;
 
             // Refresh group metadata after participant changes
-            conn.groupMetadata(id)
+            sock.groupMetadata(id)
                 .then((metadata) => {
                     if (metadata) {
-                        conn.setGroupMetadata(id, metadata);
+                        sock.setGroupMetadata(id, metadata);
 
-                        const chat = conn.getChat(id) || { id };
+                        const chat = sock.getChat(id) || { id };
                         chat.subject = metadata.subject;
                         chat.metadata = metadata;
                         chat.isChats = true;
-                        conn.setChat(id, chat);
+                        sock.setChat(id, chat);
                     }
                 })
                 .catch(() => {});
@@ -932,14 +932,14 @@ export default function bind(conn) {
      * @listens call
      * @param {Array<Object>} calls - Array of call objects
      */
-    conn.ev.on("call", (calls) => {
+    sock.ev.on("call", (calls) => {
         memoryStore.enqueueEvent("call", calls, EVENT_PRIORITY.CORE);
 
         try {
             for (const call of calls) {
                 const callId = call.id;
                 if (callId) {
-                    conn.setCall(callId, {
+                    sock.setCall(callId, {
                         id: callId,
                         from: call.from,
                         timestamp: call.timestamp,
@@ -960,11 +960,11 @@ export default function bind(conn) {
      * @param {Object} data - Blocklist data
      * @param {Array<string>} data.blocklist - Array of blocked JIDs
      */
-    conn.ev.on("blocklist.set", ({ blocklist }) => {
+    sock.ev.on("blocklist.set", ({ blocklist }) => {
         memoryStore.enqueueEvent("blocklist.set", { blocklist }, EVENT_PRIORITY.CORE);
 
         try {
-            conn.setBlocklist(blocklist);
+            sock.setBlocklist(blocklist);
         } catch (e) {
             global.logger?.error(e);
         }
@@ -977,11 +977,11 @@ export default function bind(conn) {
      * @param {Array<string>} data.blocklist - Array of JIDs to add/remove
      * @param {string} data.type - Update type ("add" or "remove")
      */
-    conn.ev.on("blocklist.update", ({ blocklist, type }) => {
+    sock.ev.on("blocklist.update", ({ blocklist, type }) => {
         memoryStore.enqueueEvent("blocklist.update", { blocklist, type }, EVENT_PRIORITY.CORE);
 
         try {
-            const existing = conn.getBlocklist();
+            const existing = sock.getBlocklist();
 
             if (type === "add") {
                 // Add new JIDs to blocklist
@@ -993,11 +993,11 @@ export default function bind(conn) {
             } else if (type === "remove") {
                 // Remove JIDs from blocklist
                 const filtered = existing.filter((jid) => !blocklist.includes(jid));
-                conn.setBlocklist(filtered);
+                sock.setBlocklist(filtered);
                 return;
             }
 
-            conn.setBlocklist(existing);
+            sock.setBlocklist(existing);
         } catch (e) {
             global.logger?.error(e);
         }

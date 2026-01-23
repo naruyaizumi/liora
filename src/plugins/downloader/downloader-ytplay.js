@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Array} args - Command arguments
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -29,10 +29,10 @@
 import { play } from "#api/play.js";
 import { canvas } from "#canvas/play.js";
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { sock, args, usedPrefix, command }) => {
     if (!args[0]) return m.reply(`Need song title\nEx: ${usedPrefix + command} Bye`);
 
-    await global.loading(m, conn);
+    await global.loading(m, sock);
     try {
         const { success, title, channel, cover, url, downloadUrl, error } = await play(
             args.join(" ")
@@ -41,7 +41,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         const canvasBuffer = await canvas(cover, title, channel);
 
-        await conn.sendMessage(
+        await sock.sendMessage(
             m.chat,
             {
                 audio: { url: downloadUrl },
@@ -65,7 +65,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         global.logger.error(e);
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

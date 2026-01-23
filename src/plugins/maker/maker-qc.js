@@ -12,7 +12,7 @@ import { sticker } from "#lib/sticker.js";
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {string} text - Message text
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -30,7 +30,7 @@ import { sticker } from "#lib/sticker.js";
  * - Falls back to default avatar if no profile picture
  */
 
-let handler = async (m, { conn, text, usedPrefix, command }) => {
+let handler = async (m, { sock, text, usedPrefix, command }) => {
     try {
         const raw = m.quoted?.text || text || "";
         const txt = raw.replace(new RegExp(`^\\${usedPrefix}${command}\\s*`, "i"), "").trim();
@@ -41,10 +41,10 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
         const name = (await m.quoted?.name) || m.pushName || (await m.name) || "Anon";
         const jid = m.quoted?.sender || m.sender;
-        const pp = await conn.profilePictureUrl(jid, "image").catch(() => null);
+        const pp = await sock.profilePictureUrl(jid, "image").catch(() => null);
         const ava = pp || "https://qu.ax/yqEpZ.jpg";
 
-        await global.loading(m, conn);
+        await global.loading(m, sock);
 
         const url = `https://api.nekolabs.web.id/canvas/quote-chat?text=${encodeURIComponent(
             txt
@@ -59,12 +59,12 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
             authorName: global.config.stickauth || "",
         });
 
-        await conn.sendMessage(m.chat, { sticker: stc }, { quoted: m });
+        await sock.sendMessage(m.chat, { sticker: stc }, { quoted: m });
     } catch (e) {
-        conn.logger.error(e);
+        sock.logger.error(e);
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

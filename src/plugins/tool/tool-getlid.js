@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {string} text - Phone number or user identifier
  * @returns {Promise<void>}
  *
@@ -26,9 +26,9 @@
  * - Interactive copy button for easy sharing
  */
 
-let handler = async (m, { conn, text }) => {
+let handler = async (m, { sock, text }) => {
     try {
-        await global.loading(m, conn);
+        await global.loading(m, sock);
 
         const inp =
             m.mentionedJid?.[0] ||
@@ -42,12 +42,12 @@ let handler = async (m, { conn, text }) => {
         if (/@lid$/.test(inp)) {
             lid = inp.replace(/@lid$/, "");
         } else {
-            const r = await conn.signalRepository.lidMapping.getLIDForPN(inp);
+            const r = await sock.signalRepository.lidMapping.getLIDForPN(inp);
             if (!r) throw new Error("Cannot resolve LID");
             lid = r.replace(/@lid$/, "");
         }
 
-        await conn.client(m.chat, {
+        await sock.client(m.chat, {
             text: `Target LID: ${lid}`,
             title: "Result",
             footer: "Use button below to copy",
@@ -65,7 +65,7 @@ let handler = async (m, { conn, text }) => {
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

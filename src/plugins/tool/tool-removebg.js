@@ -12,7 +12,7 @@ import { removebg } from "#api/removebg.js";
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {string} command - Command name
  * @param {string} usedPrefix - Command prefix used
  * @returns {Promise<void>}
@@ -28,7 +28,7 @@ import { removebg } from "#api/removebg.js";
  * - Returns transparent background image
  */
 
-let handler = async (m, { conn, command, usedPrefix }) => {
+let handler = async (m, { sock, command, usedPrefix }) => {
     const q = m.quoted?.mimetype ? m.quoted : m;
     const mime = (q.msg || q).mimetype || "";
 
@@ -37,7 +37,7 @@ let handler = async (m, { conn, command, usedPrefix }) => {
     }
 
     try {
-        await global.loading(m, conn);
+        await global.loading(m, sock);
 
         const img = await q.download();
         if (!img) return m.reply("Invalid image");
@@ -45,7 +45,7 @@ let handler = async (m, { conn, command, usedPrefix }) => {
         const { success, resultUrl, resultBuffer, error } = await removebg(img);
         if (!success) throw new Error(error || "Failed");
 
-        await conn.sendMessage(
+        await sock.sendMessage(
             m.chat,
             {
                 image: resultBuffer ? resultBuffer : { url: resultUrl },
@@ -56,7 +56,7 @@ let handler = async (m, { conn, command, usedPrefix }) => {
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

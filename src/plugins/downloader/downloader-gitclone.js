@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {string} text - GitHub repository URL
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -28,7 +28,7 @@
  * - Sends ZIP file with proper mimetype
  */
 
-let handler = async (m, { conn, text, usedPrefix, command }) => {
+let handler = async (m, { sock, text, usedPrefix, command }) => {
     try {
         if (!text || !/^https:\/\/github\.com\/[\w-]+\/[\w-]+/i.test(text)) {
             return m.reply(
@@ -39,14 +39,14 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         const parts = text.split("/");
         if (parts.length < 5) throw new Error("Invalid GitHub URL");
 
-        await global.loading(m, conn);
+        await global.loading(m, sock);
 
         const user = parts[3];
         const repo = parts[4];
         const url = `https://api.github.com/repos/${user}/${repo}/zipball`;
         const file = `${repo}.zip`;
 
-        await conn.sendMessage(
+        await sock.sendMessage(
             m.chat,
             {
                 document: { url },
@@ -58,7 +58,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 

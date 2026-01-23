@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @returns {Promise<void>}
  *
  * @description
@@ -24,7 +24,7 @@
  * - Simple and informative statistics display
  */
 
-let handler = async (m, { conn }) => {
+let handler = async (m, { sock }) => {
     const p = Object.values(global.plugins);
     const tc = p.reduce((s, v) => s + (v.help ? v.help.length : 0), 0);
     const tt = [...new Set(p.flatMap((v) => v.tags || []))].length;
@@ -38,7 +38,7 @@ Total Categories: ${tt}
 Total Plugins: ${tp}
 `.trim();
 
-    await conn.sendMessage(m.chat, { text: t }, { quoted: m });
+    await sock.sendMessage(m.chat, { text: t }, { quoted: m });
 };
 
 /**

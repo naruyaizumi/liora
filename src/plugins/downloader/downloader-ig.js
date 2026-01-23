@@ -10,7 +10,7 @@
  * @async
  * @function handler
  * @param {Object} m - Message object
- * @param {Object} conn - Connection object
+ * @param {Object} sock - Connection object
  * @param {Array} args - Command arguments
  * @param {string} usedPrefix - Command prefix used
  * @param {string} command - Command name
@@ -29,7 +29,7 @@
 
 import { instagram } from "#api/instagram.js";
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { sock, args, usedPrefix, command }) => {
     const url = args[0];
     if (!url) {
         return m.reply(
@@ -45,21 +45,21 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         return m.reply("No stories support");
     }
 
-    await global.loading(m, conn);
+    await global.loading(m, sock);
 
     try {
         const { success, type, urls, error } = await instagram(url);
         if (!success) throw new Error(error || "Failed");
 
         if (type === "video") {
-            await conn.sendMessage(
+            await sock.sendMessage(
                 m.chat,
                 { video: { url: urls[0] }, mimetype: "video/mp4" },
                 { quoted: m }
             );
         } else if (type === "images") {
             if (urls.length === 1) {
-                await conn.sendMessage(m.chat, { image: { url: urls[0] } }, { quoted: m });
+                await sock.sendMessage(m.chat, { image: { url: urls[0] } }, { quoted: m });
             } else {
                 const album = {
                     album: urls.map((img, i) => ({
@@ -67,13 +67,13 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
                         caption: `${i + 1}/${urls.length}`,
                     })),
                 };
-                await conn.client(m.chat, album, { quoted: m });
+                await sock.client(m.chat, album, { quoted: m });
             }
         }
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
-        await global.loading(m, conn, true);
+        await global.loading(m, sock, true);
     }
 };
 
