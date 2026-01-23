@@ -22,8 +22,7 @@
  * @features
  * - Supports text, image, video, and audio status updates
  * - Can reply to media or provide text directly
- * - Uses WhatsApp's group status message protocol
- * - Includes encryption for message security
+ * - Uses WhatsApp's group status message protocol via contextInfo
  */
 
 let handler = async (m, { conn, usedPrefix, command }) => {
@@ -45,78 +44,44 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
         await global.loading(m, conn);
 
-        let c = {};
+        let content = {};
+        const ctx = { isGroupStatus: true };
 
         if (type === "imageMessage" || /image/.test(mime)) {
             const buf = await q.download();
             if (!buf) throw new Error("Download failed");
-
-            c = {
-                image: buf,
+            content = { 
+                image: buf, 
                 caption: cap || "",
+                contextInfo: ctx
             };
         } else if (type === "videoMessage" || /video/.test(mime)) {
             const buf = await q.download();
             if (!buf) throw new Error("Download failed");
-
-            c = {
-                video: buf,
+            content = { 
+                video: buf, 
                 caption: cap || "",
+                contextInfo: ctx
             };
         } else if (type === "audioMessage" || type === "ptt" || /audio/.test(mime)) {
             const buf = await q.download();
             if (!buf) throw new Error("Download failed");
-
-            c = {
-                audio: buf,
+            content = { 
+                audio: buf, 
                 mimetype: "audio/mp4",
+                contextInfo: ctx
             };
         } else if (cap) {
-            c = {
+            content = { 
                 text: cap,
+                contextInfo: ctx
             };
         } else {
             throw new Error("Reply media or text");
         }
 
-        const { generateWAMessageContent, generateWAMessageFromContent } = await import("baileys");
+        await conn.sendMessage(m.chat, content);
 
-        const { backgroundColor, ...cNoBg } = c;
-
-        const inside = await generateWAMessageContent(cNoBg, {
-            upload: conn.waUploadToServer,
-            backgroundColor: backgroundColor || undefined,
-        });
-
-        const secret = new Uint8Array(32);
-        crypto.getRandomValues(secret);
-
-        const msg = generateWAMessageFromContent(
-            m.chat,
-            {
-                messageContextInfo: {
-                    messageSecret: secret,
-                },
-                groupStatusMessageV2: {
-                    message: {
-                        ...inside,
-                        messageContextInfo: {
-                            messageSecret: secret,
-                        },
-                    },
-                },
-            },
-            {
-                userJid: conn.user.id,
-                quoted: m,
-            }
-        );
-
-        await conn.relayMessage(m.chat, msg.message, {
-            messageId: msg.key.id,
-        });
-
-        m.reply("Status sent");
     } catch (e) {
         m.reply(`Error: ${e.message}`);
     } finally {
