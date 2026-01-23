@@ -207,11 +207,34 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
             let meta;
             let gid;
 
-            if (arg && arg.includes("chat.whatsapp.com/")) {
-                const match = arg.match(/chat\.whatsapp\.com\/([A-Za-z0-9]+)/);
-                if (!match) return m.reply("Invalid group invite link.");
+            if (arg) {
+                let invCode = null;
 
-                const invCode = match[1];
+                // Try to parse as a full URL and validate host and path
+                try {
+                    const parsed = new URL(arg);
+                    if (parsed.host === "chat.whatsapp.com") {
+                        const pathMatch = parsed.pathname.match(/^\/([A-Za-z0-9]+)/);
+                        if (pathMatch) {
+                            invCode = pathMatch[1];
+                        }
+                    }
+                } catch {
+                    // Not a full URL; fall back to regex search in the raw string
+                }
+
+                // Fallback: extract invite code from a string containing chat.whatsapp.com/...
+                if (!invCode) {
+                    const match = arg.match(/chat\.whatsapp\.com\/([A-Za-z0-9]+)/);
+                    if (match) {
+                        invCode = match[1];
+                    }
+                }
+
+                if (!invCode) {
+                    return m.reply("Invalid group invite link.");
+                }
+
                 try {
                     meta = await conn.groupGetInviteInfo(invCode);
                     gid = meta.id;
