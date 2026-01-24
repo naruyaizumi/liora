@@ -187,7 +187,7 @@ async function main(sock, m, pkg, prefix, cmd, time) {
     const productImage = { url: "https://files.catbox.moe/1moinz.jpg" };
     const preparedMedia =
         await prepareWAMessageMedia({ image: productImage }, {
-            upload: conn
+            upload: sock
                 .waUploadToServer
         });
     
