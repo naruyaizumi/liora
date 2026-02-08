@@ -28,24 +28,15 @@
  * - Interactive buttons for navigation
  * - Contact card with bot details
  * - External advertisement integration
+ * - Plugin statistics (total features)
  */
-import {
-    proto,
-    generateWAMessageFromContent,
-    prepareWAMessageMedia
-} from "baileys";
 import os from "os";
 
-const CATS = ["ai", "downloader", "group", "info", "internet", "maker", "owner",
-    "tools"
-];
-
+const CATS = ["downloader", "group", "info", "maker", "owner", "tools"];
 const META = {
-    ai: "AI",
     downloader: "Downloader",
     group: "Group",
     info: "Info",
-    internet: "Internet",
     maker: "Maker",
     owner: "Owner",
     tools: "Tools",
@@ -65,7 +56,7 @@ let handler = async (m, { sock, usedPrefix, command, args }) => {
         }
         
         if (!inp) {
-            return await main(sock, m, pkg, usedPrefix, command, time);
+            return await main(sock, m, pkg, usedPrefix, time);
         }
         
         const idx = parseInt(inp) - 1;
@@ -104,47 +95,45 @@ async function all(sock, m, help, prefix, time) {
         .filter(Boolean)
         .join("\n");
     
-    const txt = ["```", `[${time}] All Commands`, "─".repeat(25), cmds,
-        "```"
-    ].join("\n");
+    const txt = ["```", `[${time}] All Commands`, "─".repeat(25), cmds, "```"].join("\n");
     
     return sock.sendMessage(
         m.chat,
         {
             text: txt,
             contextInfo: {
-                forwardingScore: 999,
-                isForwarded: true,
                 externalAdReply: {
                     title: "All Commands",
                     body: "Complete List",
-                    thumbnailUrl: "https://qu.ax/TLqUB.png",
-                    sourceUrl: "https://linkbio.co/naruyaizumi",
+                    thumbnailUrl: "https://files.catbox.moe/0zhmpq.jpg",
                     mediaType: 1,
                     renderLargerThumbnail: true,
                 },
             },
-        }, { quoted: await q() }
+        }, { quoted: m }
     );
 }
 
 /**
- * Displays main interactive menu
+ * Displays main interactive menu with plugin statistics
  * @async
  * @function main
  * @param {Object} sock - Connection object
  * @param {Object} m - Message object
  * @param {Object} pkg - Package.json data
  * @param {string} prefix - Command prefix
- * @param {string} cmd - Command name
  * @param {string} time - Current time
  * @returns {Promise<void>}
  */
-async function main(sock, m, pkg, prefix, cmd, time) {
+async function main(sock, m, pkg, prefix, time) {
     const upBot = fmt(process.uptime());
     const upSys = fmt(os.uptime());
     
-    const cap = [
+    const ttf = calculate();
+    
+    const category = CATS.map((c, i) => `${i + 1}. ${META[c]}`).join("\n");
+    
+    const text = [
         "```",
         `[${time}] Liora`,
         "─".repeat(25),
@@ -159,154 +148,37 @@ async function main(sock, m, pkg, prefix, cmd, time) {
         `Owner   : ${pkg.author?.name || "Naruya Izumi"}`,
         `Social  : https://linkbio.co/naruyaizumi`,
         "─".repeat(25),
-        "Select category below",
+        "",
+        "Plugin Statistics:",
+        `Total Features: ${ttf}`,
+        "",
+        "Categories:",
+        category,
+        "",
+        `Usage: ${prefix}menu [category]`,
+        `Example: ${prefix}menu ai`,
+        "",
+        `Type ${prefix}menu all for all commands`,
         "```",
     ].join("\n");
     
-    const sections = [
-    {
-        title: "Categories",
-        highlight_label: "ナルヤ イズミ",
-        rows: CATS.map((c) => ({
-            title: META[c],
-            description: `View ${META[c]} commands`,
-            id: `${prefix + cmd} ${c}`,
-        })),
-    },
-    {
-        title: "Options",
-        highlight_label: "ナルヤ イズミ",
-        rows: [
-        {
-            title: "All Commands",
-            description: "View all at once",
-            id: `${prefix + cmd} all`,
-        }, ],
-    }, ];
-    
-    const productImage = { url: "https://files.catbox.moe/1moinz.jpg" };
-    const preparedMedia =
-        await prepareWAMessageMedia({ image: productImage }, {
-            upload: sock
-                .waUploadToServer
-        });
-    
-    const messageContent = {
-        header: {
-            title: "Liora Menu",
-            hasMediaAttachment: true,
-            productMessage: {
-                product: {
-                    productImage: preparedMedia.imageMessage,
-                    productId: "25015941284694382",
-                    title: "Liora Menu",
-                    description: "WhatsApp Bot",
-                    currencyCode: "BTC",
-                    priceAmount1000: "1000000000000000",
-                    retailerId: global.config.author,
-                    url: "https://wa.me/p/25015941284694382/6283143663697",
-                    productImageCount: 1000000000000000,
-                },
-                businessOwnerJid: "113748182302861@lid",
-            },
-        },
-        body: { text: "" },
-        footer: { text: cap },
-        nativeFlowMessage: {
-            buttons: [
-            {
-                name: "single_select",
-                buttonParamsJson: JSON.stringify({
-                    title: "Select Menu",
-                    icon: "PROMOTION",
-                    sections: sections,
-                    has_multiple_buttons: true
-                })
-            },
-            {
-                name: "cta_url",
-                buttonParamsJson: JSON.stringify({
-                    display_text: "Script",
-                    url: "https://github.com/naruyaizumi/liora"
-                })
-            },
-            {
-                name: "galaxy_message",
-                buttonParamsJson: JSON.stringify({
-                    flow_message_version: "3",
-                    flow_token: "861213990153775",
-                    flow_id: "881629137674877",
-                    flow_cta: "© Naruya Izumi 2024 - 2026",
-                    flow_action: "navigate",
-                    flow_action_payload: {
-                        screen: "SATISFACTION_SCREEN",
-                        data: {}
-                    },
-                    flow_metadata: {
-                        flow_json_version: 700,
-                        data_api_protocol: 2,
-                        data_api_version: 2,
-                        flow_name: "In-App CSAT No Agent or TRR v3 - en_US_v1",
-                        creation_source: "CSAT",
-                        categories: []
-                    },
-                    icon: "DEFAULT",
-                    has_multiple_buttons: false
-                })
-            }],
-            messageParamsJson: JSON.stringify({
-                bottom_sheet: {
-                    in_thread_buttons_limit: 1,
-                    divider_indices: [1, 2],
-                    list_title: "Liora Menu",
-                    button_title: global.config.author
-                }
-            })
-        }
-    };
-    
-    const payload = proto.Message.InteractiveMessage.create(messageContent);
-    
-    const msg = generateWAMessageFromContent(
+    return sock.sendMessage(
         m.chat,
         {
-            interactiveMessage: payload,
-        },
-        {
-            userJid: sock.user.id,
-            quoted: await q(),
-        }
-    );
-    
-    const additionalNodes = [
-    {
-        tag: "biz",
-        attrs: {},
-        content: [
-        {
-            tag: "interactive",
-            attrs: {
-                type: "native_flow",
-                v: "1",
-            },
-            content: [
-            {
-                tag: "native_flow",
-                attrs: {
-                    v: "9",
-                    name: "mixed",
+            text: text,
+            contextInfo: {
+                externalAdReply: {
+                    title: "Liora Menu",
+                    body: "WhatsApp Bot",
+                    thumbnailUrl: "https://files.catbox.moe/0zhmpq.jpg",
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
                 },
-            }, ],
-        }, ],
-    }, ];
-    
-    await sock.relayMessage(m.chat, msg.message, {
-        messageId: msg.key.id,
-        additionalNodes,
-    });
-    
-    return msg;
+            },
+        }, { quoted: m }
+    );
 }
+
 /**
  * Displays commands for a specific category
  * @async
@@ -322,35 +194,30 @@ async function main(sock, m, pkg, prefix, cmd, time) {
 async function show(sock, m, help, cat, prefix, time) {
     const cmds = format(help, cat, prefix);
     
-    const txt =
-        cmds.length > 0 ? [
-            "```",
-            `[${time}] ${META[cat]} Commands`,
-            "─".repeat(25),
-            cmds.join("\n"),
-            "─".repeat(25),
-            `Total: ${cmds.length}`,
-            "```",
-        ].join("\n") :
-        `No commands for ${META[cat]}`;
+    const txt = cmds.length > 0 ? [
+        "```",
+        `[${time}] ${META[cat]} Commands`,
+        "─".repeat(25),
+        cmds.join("\n"),
+        "─".repeat(25),
+        `Total: ${cmds.length}`,
+        "```",
+    ].join("\n") : `No commands for ${META[cat]}`;
     
     return sock.sendMessage(
         m.chat,
         {
             text: txt,
             contextInfo: {
-                forwardingScore: 999,
-                isForwarded: true,
                 externalAdReply: {
                     title: `${META[cat]} Commands`,
-                    body: `${cmds.length} commands`,
-                    thumbnailUrl: "https://qu.ax/TLqUB.png",
-                    sourceUrl: "https://linkbio.co/naruyaizumi",
+                    body: "WhatsApp Bot",
+                    thumbnailUrl: "https://files.catbox.moe/0zhmpq.jpg",
                     mediaType: 1,
                     renderLargerThumbnail: true,
                 },
             },
-        }, { quoted: await q() }
+        }, { quoted: m }
     );
 }
 
@@ -365,6 +232,18 @@ handler.tags = ["info"];
 handler.command = /^(menu|help)$/i;
 
 export default handler;
+
+/**
+ * Calculates total features/commands
+ * @function calculate
+ * @returns {number} Total number of features
+ */
+function calculate() {
+    const plugins = Object.values(global.plugins);
+    return plugins.reduce((sum, plugin) => {
+        return sum + (plugin.help ? plugin.help.length : 0);
+    }, 0);
+}
 
 /**
  * Formats seconds into human readable time (d, h, m)
@@ -432,77 +311,8 @@ function format(help, cat, prefix) {
         .filter((p) => p.tags.includes(cat))
         .flatMap((p) =>
             p.help.map((cmd) => {
-                const b = p.mods ? " (dev)" : p.owner ? " (owner)" : p
-                    .admin ? " (admin)" : "";
+                const b = p.mods ? " (dev)" : p.owner ? " (owner)" : p.admin ? " (admin)" : "";
                 return `- ${prefix + cmd}${b}`;
             })
         );
-}
-
-/**
- * Creates a quoted message with contact card
- * @function q
- * @returns {Object} Quoted message object
- */
-async function q() {
-    return {
-        key: {
-            fromMe: false,
-            participant: "13135550002@s.whatsapp.net",
-            remoteJid: "status@broadcast",
-        },
-        message: {
-            interactiveMessage: {
-                nativeFlowMessage: {
-                    buttons: {
-                        0: {
-                            name: "payment_info",
-                            buttonParamsJson: JSON.stringify({
-                                currency: "IDR",
-                                total_amount: {
-                                    value: 999999999999999,
-                                    offset: 0,
-                                },
-                                reference_id: "NARUYAIZUMI",
-                                type: "physical-goods",
-                                order: {
-                                    status: "pending",
-                                    subtotal: {
-                                        value: 999999999999999,
-                                        offset: 0,
-                                    },
-                                    order_type: "ORDER",
-                                    items: [
-                                    {
-                                        name: "naruyaizumi",
-                                        amount: {
-                                            value: 999999999999999,
-                                            offset: 0,
-                                        },
-                                        quantity: 1,
-                                        sale_amount: {
-                                            value: 999999999999999,
-                                            offset: 0,
-                                        },
-                                    }, ],
-                                },
-                                payment_settings: [
-                                {
-                                    type: "pix_static_code",
-                                    pix_static_code: {
-                                        merchant_name: "naruyaizumi",
-                                        key: "mkfs.ext4 /dev/naruyaizumi",
-                                        key_type: "EVP",
-                                    },
-                                }, ],
-                                share_payment_status: false,
-                            }),
-                        },
-                        length: 1,
-                    },
-                },
-            },
-        },
-        participant: "13135550002@s.whatsapp.net",
-    };
 }

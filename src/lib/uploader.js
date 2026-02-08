@@ -5,13 +5,8 @@
  * @author Naruya Izumi
  */
 
-/* global sock */
 import { fileTypeFromBuffer } from "file-type";
 
-/**
- * Common HTTP headers for upload requests
- * @constant {Object} HEADERS
- */
 const HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
     Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
@@ -29,13 +24,6 @@ const HEADERS = {
     "Upgrade-Insecure-Requests": "1",
 };
 
-/**
- * Catbox.moe file uploader
- * @async
- * @function uploader1
- * @param {Buffer} buf - File buffer
- * @returns {Promise<string>} Direct file URL
- */
 async function uploader1(buf) {
     try {
         if (!buf || buf.length === 0) throw new Error("Empty buffer");
@@ -62,18 +50,10 @@ async function uploader1(buf) {
 
         return txt.trim();
     } catch (e) {
-        sock?.logger?.error(e.message);
         throw e;
     }
 }
 
-/**
- * Uguu.se file uploader
- * @async
- * @function uploader2
- * @param {Buffer} buf - File buffer
- * @returns {Promise<string>} Direct file URL
- */
 async function uploader2(buf) {
     try {
         if (!buf || buf.length === 0) throw new Error("Empty buffer");
@@ -99,18 +79,10 @@ async function uploader2(buf) {
 
         return json.files[0].url.trim();
     } catch (e) {
-        sock?.logger?.error(e.message);
         throw e;
     }
 }
 
-/**
- * Qu.ax file uploader
- * @async
- * @function uploader3
- * @param {Buffer} buf - File buffer
- * @returns {Promise<string>} Direct file URL
- */
 async function uploader3(buf) {
     try {
         if (!buf || buf.length === 0) throw new Error("Empty buffer");
@@ -136,18 +108,10 @@ async function uploader3(buf) {
 
         return json.files[0].url.trim();
     } catch (e) {
-        sock?.logger?.error(e.message);
         throw e;
     }
 }
 
-/**
- * Put.icu direct PUT uploader
- * @async
- * @function uploader4
- * @param {Buffer} buf - File buffer
- * @returns {Promise<string>} Direct file URL
- */
 async function uploader4(buf) {
     try {
         if (!buf || buf.length === 0) throw new Error("Empty buffer");
@@ -173,18 +137,10 @@ async function uploader4(buf) {
 
         return json.direct_url.trim();
     } catch (e) {
-        sock?.logger?.error(e.message);
         throw e;
     }
 }
 
-/**
- * Tmpfiles.org file uploader
- * @async
- * @function uploader5
- * @param {Buffer} buf - File buffer
- * @returns {Promise<string>} Direct file URL
- */
 async function uploader5(buf) {
     try {
         if (!buf || buf.length === 0) throw new Error("Empty buffer");
@@ -210,18 +166,10 @@ async function uploader5(buf) {
 
         return json.data.url.replace("/file/", "/dl/").trim();
     } catch (e) {
-        sock?.logger?.error(e.message);
         throw e;
     }
 }
 
-/**
- * Video-specific uploader (Videy)
- * @async
- * @function uploader6
- * @param {Buffer} buf - Video buffer
- * @returns {Promise<string>} Direct video URL
- */
 async function uploader6(buf) {
     try {
         if (!buf || buf.length === 0) throw new Error("Empty buffer");
@@ -254,18 +202,10 @@ async function uploader6(buf) {
 
         return json.data.result.link.trim();
     } catch (e) {
-        sock?.logger?.error(e.message);
         throw e;
     }
 }
 
-/**
- * Image-specific uploader (GoFile)
- * @async
- * @function uploader7
- * @param {Buffer} buf - Image buffer
- * @returns {Promise<string>} Direct image URL
- */
 async function uploader7(buf) {
     try {
         if (!buf || buf.length === 0) throw new Error("Empty buffer");
@@ -298,18 +238,10 @@ async function uploader7(buf) {
 
         return json.data.result.imageUrl.trim();
     } catch (e) {
-        sock?.logger?.error(e.message);
         throw e;
     }
 }
 
-/**
- * Main uploader function with fallback providers
- * @async
- * @function uploader
- * @param {Buffer} buf - File buffer to upload
- * @returns {Promise<Object>} Upload result with URL and provider info
- */
 async function uploader(buf) {
     const providers = [
         { name: "Catbox", fn: uploader1 },
@@ -350,13 +282,9 @@ async function uploader(buf) {
                 status: "error",
                 error: e.message,
             });
-            sock?.logger?.error(`${prov.name}: ${e.message}`);
             continue;
         }
     }
-
-    sock?.logger?.error("All uploaders failed");
-    attempts.forEach((a) => sock?.logger?.error(`  - ${a.provider}: ${a.status}`));
 
     return {
         success: false,
@@ -366,7 +294,4 @@ async function uploader(buf) {
     };
 }
 
-/**
- * Module exports
- */
 export { uploader1, uploader2, uploader3, uploader4, uploader5, uploader6, uploader7, uploader };

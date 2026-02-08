@@ -7,7 +7,6 @@
  * @author Naruya Izumi
  */
 
-/* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 import { Database } from "bun:sqlite";
 import { Mutex } from "async-mutex";
 import { BufferJSON } from "baileys";
@@ -19,44 +18,53 @@ import {
     registerSignalHandler,
 } from "./config.js";
 
-/**
- * Write buffer for batching database operations
- * @class WriteBuffer
- * @private
- *
- * @design
- * - Accumulates upserts and deletes in memory
- * - Prevents duplicate operations on same key
- * - Enables batch transaction commits
- */
+class LRUCache {
+    constructor(maxSize = 10000) {
+        this.cache = new Map();
+        this.maxSize = maxSize;
+    }
+
+    get(key) {
+        if (!this.cache.has(key)) return undefined;
+        const value = this.cache.get(key);
+        this.cache.delete(key);
+        this.cache.set(key, value);
+        return value;
+    }
+
+    set(key, value) {
+        if (this.cache.has(key)) {
+            this.cache.delete(key);
+        } else if (this.cache.size >= this.maxSize) {
+            const firstKey = this.cache.keys().next().value;
+            this.cache.delete(firstKey);
+        }
+        this.cache.set(key, value);
+    }
+
+    delete(key) {
+        return this.cache.delete(key);
+    }
+
+    has(key) {
+        return this.cache.has(key);
+    }
+
+    clear() {
+        this.cache.clear();
+    }
+
+    get size() {
+        return this.cache.size;
+    }
+}
+
 class WriteBuffer {
     constructor() {
-        /**
-         * Map of keys to values for upsert operations
-         * @private
-         * @type {Map<string, *>}
-         */
         this.upserts = new Map();
-
-        /**
-         * Set of keys for delete operations
-         * @private
-         * @type {Set<string>}
-         */
         this.deletes = new Set();
     }
 
-    /**
-     * Adds or updates a key-value pair in the buffer
-     * @method addUpsert
-     * @param {string} k - Key to upsert
-     * @param {*} v - Value to store
-     * @returns {boolean} True if operation was successful
-     *
-     * @sideEffects
-     * - Removes key from deletes set if present
-     * - Updates upserts map with new value
-     */
     addUpsert(k, v) {
         if (!validateKey(k)) return false;
         this.upserts.set(k, v);
@@ -64,16 +72,6 @@ class WriteBuffer {
         return true;
     }
 
-    /**
-     * Marks a key for deletion in the buffer
-     * @method addDelete
-     * @param {string} k - Key to delete
-     * @returns {boolean} True if operation was successful
-     *
-     * @sideEffects
-     * - Removes key from upserts if present
-     * - Adds key to deletes set
-     */
     addDelete(k) {
         if (!validateKey(k)) return false;
         this.deletes.add(k);
@@ -81,33 +79,15 @@ class WriteBuffer {
         return true;
     }
 
-    /**
-     * Clears all buffered operations
-     * @method clear
-     * @returns {void}
-     */
     clear() {
         this.upserts.clear();
         this.deletes.clear();
     }
 
-    /**
-     * Checks if buffer contains pending changes
-     * @method hasChanges
-     * @returns {boolean} True if buffer has upserts or deletes
-     */
     hasChanges() {
         return this.upserts.size > 0 || this.deletes.size > 0;
     }
 
-    /**
-     * Converts buffer contents to arrays for transaction processing
-     * @method toArrays
-     * @returns {Object} Object containing upserts and deletes arrays
-     *
-     * @property {Array<[string, *]>} upserts - Key-value pairs for insertion/update
-     * @property {Array<string>} deletes - Keys for deletion
-     */
     toArrays() {
         return {
             upserts: Array.from(this.upserts.entries()),
@@ -116,75 +96,13 @@ class WriteBuffer {
     }
 }
 
-/**
- * Main authentication database class with caching and buffering
- * @class AuthDatabase
- * @exports AuthDatabase
- *
- * @features
- * 1. Memory caching with LRU-like access tracking
- * 2. Write buffering with periodic flushing
- * 3. Automatic vacuuming of old records
- * 4. SQLite WAL mode for concurrent access
- * 5. Graceful shutdown handling
- * 6. Native Buffer serialization via Baileys BufferJSON
- *
- * @performance
- * - Cache-first read strategy
- * - Batch write operations
- * - Prepared statement reuse
- * - Incremental vacuuming
- */
 class AuthDatabase {
-    /**
-     * Creates a new authentication database instance
-     * @constructor
-     * @param {string} [dbPath=DEFAULT_DB] - Path to SQLite database file
-     * @param {Object} [options={}] - Configuration options
-     * @param {number} [options.flushIntervalMs=200] - Buffer flush interval in milliseconds
-     * @param {number} [options.maxBatch=1000] - Maximum batch size per transaction
-     * @param {boolean} [options.vacuumEnabled=true] - Enable automatic vacuuming
-     * @param {number} [options.vacuumIntervalMs=3600000] - Vacuum check interval (1 hour)
-     * @param {number} [options.vacuumMaxAge=604800] - Max age of records to keep (7 days)
-     * @param {number} [options.vacuumBatchSize=500] - Records to vacuum per batch
-     *
-     * @throws {Error} If database initialization fails
-     */
     constructor(dbPath = DEFAULT_DB, options = {}) {
-        /**
-         * Database file path
-         * @private
-         * @type {string}
-         */
         this.dbPath = dbPath;
-
-        /**
-         * Unique instance identifier
-         * @private
-         * @type {string}
-         */
         this.instanceId = `auth-${Date.now()}-${Bun.randomUUIDv7("base64url")}`;
-
-        /**
-         * Whether instance has been disposed
-         * @private
-         * @type {boolean}
-         */
         this.disposed = false;
-
-        /**
-         * Whether instance is fully initialized
-         * @private
-         * @type {boolean}
-         */
         this.isInitialized = false;
-
-        /**
-         * In-memory cache for quick access
-         * @private
-         * @type {Map<string, *>}
-         */
-        this.cache = new Map();
+        this.cache = new LRUCache(options.cacheSize || 10000);
 
         try {
             this.db = this._initDatabase();
@@ -194,28 +112,10 @@ class AuthDatabase {
             this._registerCleanup();
             this.isInitialized = true;
         } catch (e) {
-            global.logger.fatal({
-                err: e.message,
-                context: "AuthDatabase constructor",
-            });
             throw e;
         }
     }
 
-    /**
-     * Initializes SQLite database with optimized settings
-     * @private
-     * @method _initDatabase
-     * @returns {Database} Bun SQLite database instance
-     * @throws {Error} If database creation or configuration fails
-     *
-     * @optimizations
-     * - WAL journal mode for better concurrency
-     * - 128MB cache size
-     * - 128MB memory mapping
-     * - 8KB page size for better I/O
-     * - WITHOUT ROWID for key-value storage
-     */
     _initDatabase() {
         try {
             const db = new Database(this.dbPath, {
@@ -224,7 +124,6 @@ class AuthDatabase {
                 strict: true,
             });
 
-            // Performance optimizations
             db.exec("PRAGMA journal_mode = WAL");
             db.exec("PRAGMA synchronous = NORMAL");
             db.exec("PRAGMA temp_store = MEMORY");
@@ -234,7 +133,6 @@ class AuthDatabase {
             db.exec("PRAGMA auto_vacuum = INCREMENTAL");
             db.exec("PRAGMA busy_timeout = 5000");
 
-            // Main storage table
             db.exec(`
                 CREATE TABLE IF NOT EXISTS baileys_state (
                     key   TEXT PRIMARY KEY NOT NULL CHECK(length(key) > 0 AND length(key) < 512),
@@ -243,7 +141,6 @@ class AuthDatabase {
                 ) WITHOUT ROWID;
             `);
 
-            // Indexes for performance
             db.exec(`
                 CREATE INDEX IF NOT EXISTS idx_key_prefix ON baileys_state(key) 
                 WHERE key LIKE '%-%';
@@ -255,29 +152,10 @@ class AuthDatabase {
 
             return db;
         } catch (e) {
-            global.logger.fatal({
-                err: e.message,
-                context: "_initDatabase",
-            });
             throw e;
         }
     }
 
-    /**
-     * Prepares all SQL statements for reuse
-     * @private
-     * @method _prepareStatements
-     * @throws {Error} If statement preparation fails
-     *
-     * @statements
-     * - stmtGet: Retrieve single record
-     * - stmtSet: Insert/update record
-     * - stmtDel: Delete record
-     * - stmtUpdateAccess: Update last access time
-     * - stmtGetOldKeys: Get keys older than threshold
-     * - stmtCountKeys: Count total keys
-     * - txCommit: Batch transaction handler
-     */
     _prepareStatements() {
         try {
             this.stmtGet = this.db.query("SELECT value FROM baileys_state WHERE key = ?");
@@ -307,15 +185,10 @@ class AuthDatabase {
                     const slice = upsertsArr.slice(i, i + maxBatch);
                     for (const [k, v] of slice) {
                         try {
-                            // Use Baileys BufferJSON for proper Buffer serialization
                             const jsonString = JSON.stringify(v, BufferJSON.replacer);
                             this.stmtSet.run(k, jsonString);
-                        } catch (e) {
-                            global.logger.error({
-                                err: e.message,
-                                key: k,
-                                context: "txCommit upsert",
-                            });
+                        } catch {
+                            // Silent fail
                         }
                     }
                 }
@@ -325,36 +198,17 @@ class AuthDatabase {
                     for (const k of slice) {
                         try {
                             this.stmtDel.run(k);
-                        } catch (e) {
-                            global.logger.error({
-                                err: e.message,
-                                key: k,
-                                context: "txCommit delete",
-                            });
+                        } catch {
+                            // Silent fail
                         }
                     }
                 }
             });
         } catch (e) {
-            global.logger.fatal({
-                err: e.message,
-                context: "_prepareStatements",
-            });
             throw e;
         }
     }
 
-    /**
-     * Initializes write buffering system
-     * @private
-     * @method _initWriteBuffer
-     * @param {Object} options - Configuration options
-     *
-     * @components
-     * - writeBuffer: Accumulates operations
-     * - writeMutex: Ensures thread-safe flushing
-     * - flushTimer: Periodic flush scheduler
-     */
     _initWriteBuffer(options) {
         this.writeBuffer = new WriteBuffer();
         this.writeMutex = new Mutex();
@@ -363,17 +217,6 @@ class AuthDatabase {
         this.flushTimer = null;
     }
 
-    /**
-     * Initializes automatic vacuuming system
-     * @private
-     * @method _initVacuum
-     * @param {Object} options - Configuration options
-     *
-     * @purpose
-     * - Removes old, unused records
-     * - Maintains database performance
-     * - Prevents unbounded growth
-     */
     _initVacuum(options) {
         this.vacuumEnabled = options.vacuumEnabled !== false;
         this.vacuumIntervalMs = Number(options.vacuumIntervalMs ?? 3600000);
@@ -387,17 +230,6 @@ class AuthDatabase {
         }
     }
 
-    /**
-     * Schedules next vacuum operation
-     * @private
-     * @method _scheduleVacuum
-     * @returns {void}
-     *
-     * @safety
-     * - Checks disposed state before scheduling
-     * - Clears existing timer to prevent duplicates
-     * - Uses unref() to prevent blocking exit
-     */
     _scheduleVacuum() {
         if (!this.vacuumEnabled || this.disposed || !this.isInitialized) return;
 
@@ -408,30 +240,14 @@ class AuthDatabase {
         this.vacuumTimer = setTimeout(() => {
             this.vacuumTimer = null;
             this._performVacuum().catch((e) => {
-                global.logger.error({
-                    err: e.message,
-                    context: "_scheduleVacuum",
-                });
+                // Silent fail, reschedule
+                this._scheduleVacuum();
             });
         }, this.vacuumIntervalMs);
 
         this.vacuumTimer.unref?.();
     }
 
-    /**
-     * Performs vacuuming of old records
-     * @private
-     * @async
-     * @method _performVacuum
-     * @returns {Promise<void>}
-     *
-     * @process
-     * 1. Calculate cutoff time based on vacuumMaxAge
-     * 2. Count total records for logging
-     * 3. Fetch old keys in batches
-     * 4. Delete old records and clear cache
-     * 5. Perform incremental vacuum
-     */
     async _performVacuum() {
         if (this.disposed || !this.isInitialized) return;
 
@@ -444,90 +260,54 @@ class AuthDatabase {
         await this.writeMutex.runExclusive(async () => {
             try {
                 const cutoffTime = Math.floor(Date.now() / 1000) - this.vacuumMaxAge;
+                let totalDeleted = 0;
+                let hasMore = true;
 
-                const countResult = this.stmtCountKeys.get();
-                const totalKeys = countResult?.count || 0;
+                while (hasMore) {
+                    const oldKeys = this.stmtGetOldKeys.all(cutoffTime, this.vacuumBatchSize);
 
-                if (totalKeys === 0) {
-                    global.logger.debug("No keys to vacuum");
-                    this.lastVacuumTime = now;
-                    this._scheduleVacuum();
-                    return;
-                }
-
-                const oldKeys = this.stmtGetOldKeys.all(cutoffTime, this.vacuumBatchSize);
-
-                if (oldKeys.length === 0) {
-                    global.logger.debug("No old keys found for vacuum");
-                    this.lastVacuumTime = now;
-                    this._scheduleVacuum();
-                    return;
-                }
-
-                let deletedCount = 0;
-                this.db.transaction(() => {
-                    for (const row of oldKeys) {
-                        try {
-                            this.stmtDel.run(row.key);
-                            this.cache.delete(row.key);
-                            deletedCount++;
-                        } catch (e) {
-                            global.logger.error({
-                                err: e.message,
-                                key: row.key,
-                                context: "_performVacuum delete",
-                            });
-                        }
+                    if (oldKeys.length === 0) {
+                        hasMore = false;
+                        break;
                     }
-                })();
 
-                if (deletedCount > 0) {
+                    const deleted = this.db.transaction(() => {
+                        let count = 0;
+                        for (const row of oldKeys) {
+                            try {
+                                this.stmtDel.run(row.key);
+                                this.cache.delete(row.key);
+                                count++;
+                            } catch {
+                                // Silent fail
+                            }
+                        }
+                        return count;
+                    })();
+
+                    totalDeleted += deleted;
+
+                    await new Promise((resolve) => setImmediate(resolve));
+                }
+
+                if (totalDeleted > 0) {
                     this.db.exec("PRAGMA incremental_vacuum");
                     this.db.exec("PRAGMA wal_checkpoint(PASSIVE)");
-
-                    global.logger.info({
-                        deletedCount,
-                        totalKeys,
-                        context: "vacuum completed",
-                    });
                 }
 
                 this.lastVacuumTime = now;
                 this._scheduleVacuum();
-            } catch (e) {
-                global.logger.error({
-                    err: e.message,
-                    context: "_performVacuum",
-                });
+            } catch {
                 this._scheduleVacuum();
             }
         });
     }
 
-    /**
-     * Registers cleanup handler for graceful shutdown
-     * @private
-     * @method _registerCleanup
-     * @returns {void}
-     */
     _registerCleanup() {
         initializeSignalHandlers();
         registerSignalHandler(this.instanceId, () => this._cleanup());
     }
 
-    /**
-     * Retrieves value for a key (cache-first strategy)
-     * @method get
-     * @param {string} key - Key to retrieve
-     * @returns {Object|undefined} Object with value property or undefined
-     *
-     * @strategy
-     * 1. Check memory cache
-     * 2. Query database if not in cache
-     * 3. Parse JSON with BufferJSON.reviver for proper Buffer deserialization
-     * 4. Update access time asynchronously
-     * 5. Update cache for future requests
-     */
     get(key) {
         if (!validateKey(key)) return undefined;
 
@@ -541,14 +321,8 @@ class AuthDatabase {
 
             let value;
             if (typeof row.value === "string") {
-                // Use Baileys BufferJSON.reviver to properly reconstruct Buffers
                 value = JSON.parse(row.value, BufferJSON.reviver);
             } else {
-                global.logger.warn({
-                    key,
-                    valueType: typeof row.value,
-                    context: "get: unknown data type, deleting",
-                });
                 this.del(key);
                 return undefined;
             }
@@ -558,41 +332,19 @@ class AuthDatabase {
             setImmediate(() => {
                 try {
                     this.stmtUpdateAccess.run(key);
-                } catch (e) {
-                    global.logger.debug({
-                        err: e.message,
-                        key,
-                        context: "get: update access time",
-                    });
+                } catch {
+                    // Silent fail
                 }
             });
 
             return { value };
-        } catch (e) {
-            global.logger.error({ err: e.message, key, context: "get" });
+        } catch {
             return undefined;
         }
     }
 
-    /**
-     * Stores a key-value pair (buffered write)
-     * @method set
-     * @param {string} key - Key to store
-     * @param {*} value - Value to store
-     * @returns {boolean} True if operation was successful
-     *
-     * @flow
-     * 1. Validate key and value
-     * 2. Update memory cache
-     * 3. Add to write buffer
-     * 4. Schedule flush if needed
-     */
     set(key, value) {
         if (!validateKey(key) || !validateValue(value)) {
-            global.logger.warn({
-                key,
-                context: "set: invalid key or value",
-            });
             return false;
         }
 
@@ -602,15 +354,8 @@ class AuthDatabase {
         return true;
     }
 
-    /**
-     * Deletes a key-value pair (buffered delete)
-     * @method del
-     * @param {string} key - Key to delete
-     * @returns {boolean} True if operation was successful
-     */
     del(key) {
         if (!validateKey(key)) {
-            global.logger.warn({ key, context: "del: invalid key" });
             return false;
         }
 
@@ -620,21 +365,12 @@ class AuthDatabase {
         return true;
     }
 
-    /**
-     * Schedules a buffer flush operation
-     * @private
-     * @method _scheduleFlush
-     * @returns {void}
-     */
     _scheduleFlush() {
         if (!this.flushTimer && !this.disposed && this.isInitialized) {
             this.flushTimer = setTimeout(() => {
                 this.flushTimer = null;
                 this.flush().catch((e) => {
-                    global.logger.error({
-                        err: e.message,
-                        context: "_scheduleFlush",
-                    });
+                    // Silent fail
                 });
             }, this.flushIntervalMs);
 
@@ -642,19 +378,6 @@ class AuthDatabase {
         }
     }
 
-    /**
-     * Flushes buffered operations to database
-     * @async
-     * @method flush
-     * @returns {Promise<void>}
-     *
-     * @process
-     * 1. Acquire write mutex
-     * 2. Extract buffered operations
-     * 3. Execute batch transaction
-     * 4. Checkpoint WAL
-     * 5. Re-buffer failed operations
-     */
     async flush() {
         if (this.disposed || !this.isInitialized) return;
 
@@ -668,11 +391,6 @@ class AuthDatabase {
                 this.txCommit(upserts, deletes);
                 this.db.exec("PRAGMA wal_checkpoint(PASSIVE)");
             } catch (e) {
-                global.logger.error({
-                    err: e.message,
-                    context: "flush",
-                });
-
                 for (const [k, v] of upserts) {
                     this.writeBuffer.addUpsert(k, v);
                 }
@@ -684,15 +402,8 @@ class AuthDatabase {
         });
     }
 
-    /**
-     * Forces immediate vacuum operation
-     * @async
-     * @method forceVacuum
-     * @returns {Promise<void>}
-     */
     async forceVacuum() {
         if (!this.vacuumEnabled) {
-            global.logger.warn("Vacuum is disabled");
             return;
         }
 
@@ -700,20 +411,6 @@ class AuthDatabase {
         await this._performVacuum();
     }
 
-    /**
-     * Performs cleanup and resource disposal
-     * @private
-     * @method _cleanup
-     * @returns {void}
-     *
-     * @cleanupSteps
-     * 1. Mark as disposed
-     * 2. Clear timers
-     * 3. Flush remaining buffer
-     * 4. Finalize WAL and vacuum
-     * 5. Close database connections
-     * 6. Clear memory cache
-     */
     _cleanup() {
         if (this.disposed) return;
         this.disposed = true;
@@ -746,31 +443,14 @@ class AuthDatabase {
             this.stmtCountKeys?.finalize();
             this.db.close();
             this.cache.clear();
-        } catch (e) {
-            global.logger.error({ err: e.message, context: "_cleanup" });
+        } catch {
+            // Silent fail
         }
     }
 }
 
-/**
- * Singleton database instance
- * @private
- * @type {AuthDatabase|null}
- */
 let dbInstance = null;
 
-/**
- * Gets or creates the singleton AuthDatabase instance
- * @function getAuthDatabase
- * @param {string} [dbPath=DEFAULT_DB] - Database file path
- * @param {Object} [options={}] - Configuration options
- * @returns {AuthDatabase} Singleton database instance
- *
- * @singletonPattern
- * - Creates instance if none exists
- * - Recreates if existing instance is disposed
- * - Returns existing instance otherwise
- */
 export function getAuthDatabase(dbPath = DEFAULT_DB, options = {}) {
     if (!dbInstance || dbInstance.disposed) {
         dbInstance = new AuthDatabase(dbPath, options);
@@ -778,9 +458,4 @@ export function getAuthDatabase(dbPath = DEFAULT_DB, options = {}) {
     return dbInstance;
 }
 
-/**
- * Default export - singleton instance getter
- * @default
- * @type {Function}
- */
 export default getAuthDatabase();

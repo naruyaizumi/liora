@@ -7,7 +7,6 @@
  * @author Naruya Izumi
  */
 
-/* eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }] */
 import { initAuthCreds } from "baileys";
 import { AsyncLocalStorage } from "async_hooks";
 import { Mutex } from "async-mutex";
@@ -15,46 +14,22 @@ import PQueue from "p-queue";
 import db from "./core.js";
 import { makeKey, validateKey, validateValue } from "./config.js";
 
-/**
- * Default transaction options for atomic operations
- * @constant {Object}
- */
 const DEFAULT_TRANSACTION_OPTIONS = {
     maxCommitRetries: 5,
     delayBetweenTriesMs: 200,
+    transactionTimeout: 30000,
 };
 
-/**
- * Promise-based delay utility
- * @function delay
- * @param {number} ms - Milliseconds to delay
- * @returns {Promise<void>}
- */
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/**
- * Creates SQLite-based authentication state manager for Baileys
- * @export
- * @function useSQLiteAuthState
- * @param {string} _dbPath - Database file path (unused, uses global db)
- * @param {Object} options - Transaction options
- * @returns {Object} Authentication state manager
- *
- * @features
- * - Transaction support with automatic retries
- * - Connection pooling and mutex locking
- * - Async context preservation
- * - Automatic credential persistence
- * - Cache coherency with write-through
- *
- * @transactionMechanism
- * - Uses AsyncLocalStorage for transaction context
- * - Mutex locks per key type for consistency
- * - Retry logic for commit failures
- * - Automatic rollback on errors
- */
+function exponentialBackoff(attempt, baseDelay) {
+    const exponentialDelay = baseDelay * Math.pow(2, attempt);
+    const jitter = Math.random() * baseDelay;
+    return Math.min(exponentialDelay + jitter, 10000);
+}
+
 export function useSQLiteAuthState(_dbPath, options = {}) {
     const txOptions = { ...DEFAULT_TRANSACTION_OPTIONS, ...options };
 
@@ -65,14 +40,12 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
         if (row?.value) {
             creds = row.value;
             if (!creds || typeof creds !== "object") {
-                global.logger.warn({ context: "SQLiteAuth: invalid creds, reinitializing" });
                 creds = initAuthCreds();
             }
         } else {
             creds = initAuthCreds();
         }
-    } catch (e) {
-        global.logger.error({ err: e.message, context: "SQLiteAuth init" });
+    } catch {
         creds = initAuthCreds();
     }
 
@@ -80,12 +53,6 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
     const keyQueues = new Map();
     const txMutexes = new Map();
 
-    /**
-     * Gets or creates queue for specific key type
-     * @function getQueue
-     * @param {string} key - Key type identifier
-     * @returns {PQueue} Priority queue instance
-     */
     function getQueue(key) {
         if (!keyQueues.has(key)) {
             keyQueues.set(key, new PQueue({ concurrency: 1 }));
@@ -93,12 +60,6 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
         return keyQueues.get(key);
     }
 
-    /**
-     * Gets or creates mutex for transaction isolation
-     * @function getTxMutex
-     * @param {string} key - Key type identifier
-     * @returns {Mutex} Mutex instance
-     */
     function getTxMutex(key) {
         if (!txMutexes.has(key)) {
             txMutexes.set(key, new Mutex());
@@ -106,29 +67,14 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
         return txMutexes.get(key);
     }
 
-    /**
-     * Checks if currently executing within a transaction
-     * @function isInTransaction
-     * @returns {boolean} True if in transaction context
-     */
     function isInTransaction() {
         return !!txStorage.getStore();
     }
 
-    /**
-     * Commits transaction mutations with automatic retry
-     * @async
-     * @function commitWithRetry
-     * @param {Object} mutations - Key-value mutations to commit
-     * @throws {Error} On persistent commit failure
-     */
     async function commitWithRetry(mutations) {
         if (Object.keys(mutations).length === 0) {
-            global.logger.trace("no mutations in transaction");
             return;
         }
-
-        global.logger.trace("committing transaction");
 
         for (let attempt = 0; attempt < txOptions.maxCommitRetries; attempt++) {
             try {
@@ -148,35 +94,21 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
                     }
                 }
 
-                global.logger.trace(
-                    { mutationCount: Object.keys(mutations).length },
-                    "committed transaction"
-                );
                 return;
             } catch (error) {
                 const retriesLeft = txOptions.maxCommitRetries - attempt - 1;
-                global.logger.warn(`failed to commit mutations, retries left=${retriesLeft}`);
 
                 if (retriesLeft === 0) {
                     throw error;
                 }
 
-                await delay(txOptions.delayBetweenTriesMs);
+                await delay(exponentialBackoff(attempt, txOptions.delayBetweenTriesMs));
             }
         }
     }
 
-    /**
-     * Retrieves multiple keys with transaction awareness
-     * @async
-     * @function keysGet
-     * @param {string} type - Key type/category
-     * @param {Array<string>} ids - Key identifiers
-     * @returns {Promise<Object>} Key-value mapping
-     */
     async function keysGet(type, ids) {
         if (!type || !Array.isArray(ids)) {
-            global.logger.warn({ type, ids, context: "keys.get: invalid params" });
             return {};
         }
 
@@ -194,8 +126,8 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
                     if (row?.value) {
                         result[id] = row.value;
                     }
-                } catch (e) {
-                    global.logger.error({ err: e.message, key: k, context: "keys.get" });
+                } catch {
+                    // Silent fail, continue processing
                 }
             }
 
@@ -207,10 +139,6 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
 
         if (missing.length > 0) {
             ctx.dbQueries++;
-            global.logger.trace(
-                { type, count: missing.length },
-                "fetching missing keys in transaction"
-            );
 
             const fetched = await getTxMutex(type).runExclusive(async () => {
                 const result = {};
@@ -224,8 +152,8 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
                         if (row?.value) {
                             result[id] = row.value;
                         }
-                    } catch (e) {
-                        global.logger.error({ err: e.message, key: k, context: "keys.get fetch" });
+                    } catch {
+                        // Silent fail
                     }
                 }
 
@@ -247,15 +175,8 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
         return result;
     }
 
-    /**
-     * Sets multiple keys with transaction awareness
-     * @async
-     * @function keysSet
-     * @param {Object} data - Key-value data organized by type
-     */
     async function keysSet(data) {
         if (!data || typeof data !== "object") {
-            global.logger.warn({ context: "keys.set: invalid data" });
             return;
         }
 
@@ -282,13 +203,8 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
                                 } else {
                                     db.set(k, v);
                                 }
-                            } catch (e) {
-                                global.logger.error({
-                                    err: e.message,
-                                    type,
-                                    id,
-                                    context: "keys.set",
-                                });
+                            } catch {
+                                // Silent fail
                             }
                         }
                     })
@@ -297,8 +213,6 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
 
             return;
         }
-
-        global.logger.trace({ types: Object.keys(data) }, "caching in transaction");
 
         for (const type in data) {
             const bucket = data[type];
@@ -311,90 +225,63 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
         }
     }
 
-    /**
-     * Clears all authentication keys
-     * @async
-     * @function keysClear
-     */
     async function keysClear() {
         try {
-            global.logger.info({ context: "keys.clear: clearing all keys" });
             db.db.exec("DELETE FROM baileys_state WHERE key LIKE '%-%'");
             db.db.exec("PRAGMA wal_checkpoint(PASSIVE)");
             db.cache.clear();
-        } catch (e) {
-            global.logger.error({ err: e.message, context: "keys.clear" });
+        } catch {
+            // Silent fail
         }
     }
 
-    /**
-     * Executes work within a transactional context
-     * @async
-     * @function transaction
-     * @param {Function} work - Async function to execute
-     * @param {string} key - Transaction isolation key
-     * @returns {Promise<*>} Work result
-     *
-     * @transactionBehavior
-     * - Automatic commit on success
-     * - Automatic rollback on error
-     * - Nested transactions reuse parent context
-     * - Mutex isolation per key type
-     * - Performance monitoring
-     */
     async function transaction(work, key = "default") {
         if (typeof work !== "function") {
-            global.logger.error({ context: "transaction: work must be a function" });
-            throw new Error("Transaction work must be a function");
+            return null;
         }
 
         const existing = txStorage.getStore();
 
         if (existing) {
-            global.logger.trace("reusing existing transaction context");
             return work();
         }
 
-        return getTxMutex(key).runExclusive(async () => {
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Transaction timeout")), txOptions.transactionTimeout)
+        );
+
+        const txPromise = getTxMutex(key).runExclusive(async () => {
             const ctx = {
                 cache: {},
                 mutations: {},
                 dbQueries: 0,
             };
 
-            global.logger.trace("entering transaction");
-
             try {
                 const result = await txStorage.run(ctx, work);
-
                 await commitWithRetry(ctx.mutations);
-
-                global.logger.trace({ dbQueries: ctx.dbQueries }, "transaction completed");
-
                 return result;
             } catch (error) {
-                global.logger.error({ error }, "transaction failed, rolling back");
                 throw error;
             }
         });
+
+        try {
+            return await Promise.race([txPromise, timeoutPromise]);
+        } catch {
+            return null;
+        }
     }
 
-    /**
-     * Persists credentials to database
-     * @function saveCreds
-     * @returns {boolean} Success status
-     */
     function saveCreds() {
         try {
             if (!creds || typeof creds !== "object") {
-                global.logger.error({ context: "saveCreds: invalid creds" });
                 return false;
             }
 
             db.set("creds", creds);
             return true;
-        } catch (e) {
-            global.logger.error({ err: e.message, context: "saveCreds" });
+        } catch {
             return false;
         }
     }
@@ -413,15 +300,15 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
         _flushNow: async () => {
             try {
                 await db.flush();
-            } catch (e) {
-                global.logger.error({ err: e.message, context: "_flushNow" });
+            } catch {
+                // Silent fail
             }
         },
         _forceVacuum: async () => {
             try {
                 await db.forceVacuum();
-            } catch (e) {
-                global.logger.error({ err: e.message, context: "_forceVacuum" });
+            } catch {
+                // Silent fail
             }
         },
         _dispose: async () => {
@@ -429,8 +316,8 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
                 await db.flush();
                 keyQueues.clear();
                 txMutexes.clear();
-            } catch (e) {
-                global.logger.error({ err: e.message, context: "_dispose" });
+            } catch {
+                // Silent fail
             }
         },
         db: db.db,

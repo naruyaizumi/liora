@@ -7,8 +7,6 @@
  * @author Naruya Izumi
  */
 
-import { db, sqlite } from "./database/database.js";
-
 /**
  * Validates and sanitizes URLs for security
  * @private
@@ -390,6 +388,7 @@ const initializeConfig = () => {
         stickpack: Bun.env.STICKPACK || "Liora",
         stickauth: Bun.env.STICKAUTH || "© Naruya Izumi",
         thumbnailUrl: sanitizeUrl(Bun.env.THUMBNAIL_URL),
+        self: parseBoolean(Bun.env.SELF, false),
     };
 
     // Validate pairing code format
@@ -403,15 +402,6 @@ const initializeConfig = () => {
 
 // Set global configuration
 global.config = initializeConfig();
-
-/**
- * Global database references
- * @global
- * @property {DataWrapper} db - Database wrapper instance
- * @property {Database} sqlite - Raw SQLite database instance
- */
-global.db = db;
-global.sqlite = sqlite;
 
 /**
  * Global timestamp tracking
@@ -482,6 +472,10 @@ const FAILURE_MESSAGES = {
         title: "[ACCESS BLOCKED]",
         body: "This feature is currently restricted or disabled by configuration.",
     },
+    self: {
+        title: "[SELF MODE ENABLED]",
+        body: "This bot is currently in self mode.\nOnly the owner can use commands.",
+    },
 };
 
 /**
@@ -489,7 +483,7 @@ const FAILURE_MESSAGES = {
  * @global
  * @async
  * @function dfail
- * @param {string} type - Failure type (owner, group, admin, botAdmin, restrict)
+ * @param {string} type - Failure type (owner, group, admin, botAdmin, restrict, self)
  * @param {Object} m - Message object
  * @param {Object} sock - Connection object
  * @returns {Promise<void>}

@@ -25,14 +25,7 @@
  */
 
 let handler = async (m, { sock }) => {
-    const start = Bun.nanoseconds();
-    const msg = await sock.sendMessage(m.chat, { text: "" });
-    const ns = Bun.nanoseconds() - start;
-    const ms = (ns / 1_000_000).toFixed(0);
-    await sock.sendMessage(m.chat, {
-        text: `${ms} ms`,
-        edit: msg.key,
-    });
+    await sock.sendMessage(m.chat, { text: "PONG 🏓" });
 };
 
 /**

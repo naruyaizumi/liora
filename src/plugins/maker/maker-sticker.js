@@ -8,7 +8,7 @@
 import { sticker } from "#lib/sticker.js";
 
 /**
- * Converts images, GIFs, and videos to stickers
+ * Converts images, GIFs, and videos to stickers with custom metadata
  * @async
  * @function handler
  * @param {Object} m - Message object
@@ -27,7 +27,7 @@ import { sticker } from "#lib/sticker.js";
  * - Supports local files and URLs
  * - Automatic quality optimization for file size
  * - Progressive compression if file too large
- * - Custom sticker pack metadata
+ * - Custom sticker pack metadata with | separator
  */
 
 let handler = async (m, { sock, args, usedPrefix, command }) => {
@@ -36,14 +36,35 @@ let handler = async (m, { sock, args, usedPrefix, command }) => {
         const mime = (q.msg || q).mimetype || q.mediaType || "";
 
         if (!mime && !args[0]) {
-            return m.reply(`Send/Reply media or URL\nEx: ${usedPrefix + command}`);
+            return m.reply(
+                `*Sticker Maker*\n\n` +
+                `*Usage:*\n` +
+                `│ • ${usedPrefix + command} - Convert media to sticker\n` +
+                `│ • ${usedPrefix + command} [packName|authorName] - Custom metadata\n` +
+                `│ • ${usedPrefix + command} [url] - Convert from URL\n\n` +
+                `*Examples:*\n` +
+                `│ • Reply to media with ${usedPrefix + command}\n` +
+                `│ • ${usedPrefix + command} MyPack|MyName\n` +
+                `│ • ${usedPrefix + command} https://example.com/image.jpg`
+            );
         }
 
         await global.loading(m, sock);
 
+        let packName = global.config.stickpack;
+        let authorName = global.config.stickauth;
+        
+        const allArgs = args.join(" ");
+        
+        if (allArgs.includes('|')) {
+            const pipeIndex = allArgs.indexOf('|');
+            packName = allArgs.substring(0, pipeIndex).trim();
+            authorName = allArgs.substring(pipeIndex + 1).trim();
+        }
+
         let buf;
-        if (args[0] && isUrl(args[0])) {
-            const res = await fetch(args[0]);
+        if (allArgs && !allArgs.includes('|') && isUrl(allArgs)) {
+            const res = await fetch(allArgs);
             if (!res.ok) throw new Error("Fetch failed");
             buf = Buffer.from(await res.arrayBuffer());
         } else {
@@ -58,8 +79,8 @@ let handler = async (m, { sock, args, usedPrefix, command }) => {
             quality: 90,
             fps: 30,
             maxDuration: 10,
-            packName: global.config.stickpack,
-            authorName: global.config.stickauth,
+            packName: packName,
+            authorName: authorName,
             emojis: [],
         };
 
