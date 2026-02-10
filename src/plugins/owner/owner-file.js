@@ -8,28 +8,24 @@
 import { readdir, mkdir } from "node:fs/promises";
 import { join, resolve, extname, basename, dirname, relative } from "node:path";
 
-const HELP =
-    `*File Manager*\n\n` +
-    `*Usage:*\n` +
-    `│ • {cmd} s <path> - Save file (reply to media/doc)\n` +
-    `│ • {cmd} d <path> - Delete file\n` +
-    `│ • {cmd} g <path> - Get file\n` +
-    `│ • {cmd} r - Reload plugins\n\n` +
-    `*Examples:*\n` +
-    `│ • {cmd} s src lib - Save to src/lib/\n` +
-    `│ • {cmd} d src lib core.js - Delete file\n` +
-    `│ • {cmd} g src plugins info info-ping.js - Get file`;
-
 let handler = async (m, { sock, args, usedPrefix, command }) => {
-    const cmd = usedPrefix + command;
+    if (!args.length) return m.reply(`*File Manager*
 
-    if (!args.length) return m.reply(HELP.replaceAll("{cmd}", cmd));
+*Usage:*
+│ • ${usedPrefix + command} s <path> - Save file (reply to media/doc)
+│ • ${usedPrefix + command} d <path> - Delete file
+│ • ${usedPrefix + command} g <path> - Get file
+│ • ${usedPrefix + command} r - Reload plugins
+
+*Examples:*
+│ • ${usedPrefix + command} s src lib
+│ • ${usedPrefix + command} d src lib core.js
+│ • ${usedPrefix + command} g src plugins info info-ping.js`);
 
     const mode = args[0].toLowerCase();
 
     try {
         switch (mode) {
-            // Save file
             case "s": {
                 const pth = args.slice(1);
                 let t = pth.length ? join(process.cwd(), ...pth) : process.cwd();
@@ -48,9 +44,12 @@ let handler = async (m, { sock, args, usedPrefix, command }) => {
                                       ? -1
                                       : 1
                             )
-                            .map((i) => `${i.isDirectory() ? "📁" : "📄"} ${i.name}${i.isDirectory() ? "/" : ""}`)
+                            .map(i => `${i.isDirectory() ? "📁" : "📄"} ${i.name}${i.isDirectory() ? "/" : ""}`)
                             .join("\n") || "(empty)";
-                    return m.reply(`Path: ${t}\n\n${list}`);
+
+                    return m.reply(`Path: ${t}
+
+${list}`);
                 }
 
                 const q = m.quoted;
@@ -62,58 +61,61 @@ let handler = async (m, { sock, args, usedPrefix, command }) => {
                 const buf = await q.download().catch(() => null);
                 if (!buf?.length) return m.reply("Download failed");
 
-                const ext = mime?.split("/")[1] || extname(q.fileName || "")?.slice(1) || "bin";
+                const ext = mime.split("/")[1] || extname(q.fileName || "").slice(1) || "bin";
                 const name = q.fileName ? basename(q.fileName) : `file-${Date.now()}.${ext}`;
                 const fp = resolve(t, name);
+
                 await mkdir(dirname(fp), { recursive: true });
                 await Bun.write(fp, buf);
+
                 return m.reply(`Saved: ${relative(process.cwd(), fp)}`);
             }
 
-            // Delete file
             case "d": {
                 if (args.length < 2) {
-                    return m.reply(`Need file path\nEx: ${cmd} d plugins owner file`);
+                    return m.reply(`Need file path
+Ex: ${usedPrefix + command} d plugins owner file`);
                 }
 
                 let t = join(...args.slice(1));
                 if (!extname(t)) t += ".js";
-                const fp = resolve(process.cwd(), t);
 
+                const fp = resolve(process.cwd(), t);
                 const f = Bun.file(fp);
-                const ex = await f.exists();
-                if (!ex) throw new Error(`File not found: ${fp}`);
+
+                if (!(await f.exists())) {
+                    return m.reply(`File not found: ${fp}`);
+                }
 
                 await f.delete();
                 return m.reply("File deleted");
             }
 
-            // Get file
             case "g": {
                 if (args.length < 2) {
-                    return m.reply(`Need file path\nEx: ${cmd} g plugins owner file`);
+                    return m.reply(`Need file path
+Ex: ${usedPrefix + command} g plugins owner file`);
                 }
 
                 let t = join(...args.slice(1));
                 if (!extname(t)) t += ".js";
-                const fp = join(process.cwd(), t);
 
+                const fp = join(process.cwd(), t);
                 const buf = Buffer.from(await Bun.file(fp).arrayBuffer());
-                const name = t.split("/").pop();
+                const name = basename(t);
 
                 await sock.sendMessage(
                     m.chat,
                     {
                         document: buf,
                         fileName: name,
-                        mimetype: "application/javascript",
+                        mimetype: "application/javascript"
                     },
                     { quoted: m }
                 );
                 break;
             }
 
-            // Reload plugins
             case "r": {
                 await global.reloadAllPlugins();
                 await global.reloadHandler();
@@ -121,7 +123,13 @@ let handler = async (m, { sock, args, usedPrefix, command }) => {
             }
 
             default:
-                return m.reply(HELP.replaceAll("{cmd}", cmd));
+                return m.reply(`*File Manager*
+
+*Usage:*
+│ • ${usedPrefix + command} s <path>
+│ • ${usedPrefix + command} d <path>
+│ • ${usedPrefix + command} g <path>
+│ • ${usedPrefix + command} r`);
         }
     } catch (e) {
         return m.reply(`Error: ${e.message}`);

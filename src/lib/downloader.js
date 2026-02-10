@@ -8,11 +8,11 @@
 const TT = /https?:\/\/(www\.)?(vm\.|vt\.|m\.)?tiktok\.com\/[^\s]+/gi;
 const IG = /https?:\/\/(www\.)?instagram\.com\/[^\s]+/gi;
 const MF = /https?:\/\/(www\.)?mediafire\.com\/[^\s]+/gi;
-const PIN = /https?:\/\/(www\.)?pinterest\.(com|fr|de|co\.uk|jp|ru|ca|it|com\.au|com\.mx|com\.br|es|pl)\/[^\s]+/gi;
+const PIN = /https?:\/\/(www\.)?(pinterest\.(com|fr|de|co\.uk|jp|ru|ca|it|com\.au|com\.mx|com\.br|es|pl)|pin\.it)\/[^\s]+/gi;
 const FB = /https?:\/\/(www\.|m\.|web\.)?facebook\.com\/[^\s]+/gi;
 const TW = /https?:\/\/(www\.)?(twitter\.com|x\.com)\/[^\s]+/gi;
 const VD = /https?:\/\/(www\.)?videy\.co\/[^\s]+/gi;
-const TH = /https?:\/\/(www\.)?threads\.net\/[^\s]+/gi;
+const TH = /https?:\/\/(www\.)?threads\.(net|com)\/[^\s]+/gi;
 const MG = /https?:\/\/mega\.nz\/[^\s]+/gi;
 const SC = /https?:\/\/(www\.|on\.)?soundcloud\.com\/[^\s]+/gi;
 const SP = /https?:\/\/open\.spotify\.com\/[^\s]+/gi;
@@ -78,12 +78,15 @@ export const ext = (txt) => {
  * Download TikTok
  */
 export const tt = async (url) => {
-    const res = await fetch(`https://api-faa.my.id/faa/tiktok?url=${encodeURIComponent(url)}`);
+    const res = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
     const d = await res.json();
 
-    if (!d.status || !d.result) throw new Error(d.message || 'TikTok API error');
+    if (d.code !== 0 || !d.data) throw new Error(d.msg || 'TikTok API error');
 
-    const r = d.result;
+    const r = d.data.images?.length
+        ? { type: "image", data: d.data.images }
+        : { type: "video", data: d.data.play };
+
     return { type: r.type, data: r.data };
 };
 
