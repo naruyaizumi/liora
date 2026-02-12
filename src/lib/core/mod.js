@@ -29,7 +29,7 @@ export class mods {
     constructor(sock) {
         this.sock = sock;
     }
-
+    
     /**
      * Unified message sending interface with content detection
      * @async
@@ -49,18 +49,18 @@ export class mods {
         if (content.album) {
             return this.sendAlbum(jid, content, options);
         }
-
+        
         if (content.cards) {
             return this.sendCard(jid, content, options);
         }
-
+        
         if (content.button || content.interactiveButtons) {
             return this.sendButton(jid, content, options);
         }
-
+        
         return this.sock.sendMessage(jid, content, options);
     }
-
+    
     /**
      * Sends media album (multiple images/videos as single message)
      * @async
@@ -80,19 +80,20 @@ export class mods {
         if (!this.sock.user?.id) {
             throw new Error("User not authenticated");
         }
-
-        if (!content?.album || !Array.isArray(content.album) || content.album.length === 0) {
+        
+        if (!content?.album || !Array.isArray(content.album) || content
+            .album.length === 0) {
             throw new Error("Album content with items array is required");
         }
-
+        
         const items = content.album;
-
+        
         const imgCount = items.filter((item) => item?.image).length;
         const vidCount = items.filter((item) => item?.video).length;
-
+        
         const msgSecret = new Uint8Array(32);
         crypto.getRandomValues(msgSecret);
-
+        
         const msgContent = {
             albumMessage: {
                 expectedImageCount: imgCount,
@@ -102,74 +103,80 @@ export class mods {
                 messageSecret: msgSecret,
             },
         };
-
+        
         const genOpt = {
             userJid: this.sock.user.id,
             upload: this.sock.waUploadToServer,
             quoted: options?.quoted || null,
             ephemeralExpiration: options?.quoted?.expiration ?? 0,
         };
-
+        
         const album = generateWAMessageFromContent(jid, msgContent, genOpt);
-
+        
         await this.sock.relayMessage(album.key.remoteJid, album.message, {
             messageId: album.key.id,
         });
-
+        
         const mediaMsgs = [];
-
+        
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
-
+            
             const mediaSecret = new Uint8Array(32);
             crypto.getRandomValues(mediaSecret);
-
+            
             let mediaMsg;
-
+            
             if (item.image) {
                 const mediaInput = {};
                 if (Buffer.isBuffer(item.image)) {
                     mediaInput.image = item.image;
-                } else if (typeof item.image === "object" && item.image.url) {
+                } else if (typeof item.image === "object" && item.image
+                    .url) {
                     mediaInput.image = { url: item.image.url };
                 } else if (typeof item.image === "string") {
                     mediaInput.image = { url: item.image };
                 }
-
+                
                 if (item.caption) {
                     mediaInput.caption = item.caption;
                 }
-
-                mediaMsg = await generateWAMessage(album.key.remoteJid, mediaInput, {
-                    upload: this.sock.waUploadToServer,
-                    ephemeralExpiration: options?.quoted?.expiration ?? 0,
-                });
+                
+                mediaMsg = await generateWAMessage(album.key.remoteJid,
+                    mediaInput, {
+                        upload: this.sock.waUploadToServer,
+                        ephemeralExpiration: options?.quoted
+                            ?.expiration ?? 0,
+                    });
             } else if (item.video) {
                 const mediaInput = {};
                 if (Buffer.isBuffer(item.video)) {
                     mediaInput.video = item.video;
-                } else if (typeof item.video === "object" && item.video.url) {
+                } else if (typeof item.video === "object" && item.video
+                    .url) {
                     mediaInput.video = { url: item.video.url };
                 } else if (typeof item.video === "string") {
                     mediaInput.video = { url: item.video };
                 }
-
+                
                 if (item.caption) {
                     mediaInput.caption = item.caption;
                 }
-
+                
                 if (item.mimetype) {
                     mediaInput.mimetype = item.mimetype;
                 }
-
-                mediaMsg = await generateWAMessage(album.key.remoteJid, mediaInput, {
-                    upload: this.sock.waUploadToServer,
-                    ephemeralExpiration: options?.quoted?.expiration ?? 0,
-                });
+                
+                mediaMsg = await generateWAMessage(album.key.remoteJid,
+                    mediaInput, {
+                        upload: this.sock.waUploadToServer,
+                        ephemeralExpiration: options?.quoted
+                            ?.expiration ?? 0,
+                    });
             } else {
                 throw new Error(`Item ${i} must have image or video`);
             }
-
+            
             mediaMsg.message.messageContextInfo = {
                 messageSecret: mediaSecret,
                 messageAssociation: {
@@ -177,24 +184,25 @@ export class mods {
                     parentMessageKey: album.key,
                 },
             };
-
+            
             mediaMsgs.push(mediaMsg);
-
-            await this.sock.relayMessage(mediaMsg.key.remoteJid, mediaMsg.message, {
-                messageId: mediaMsg.key.id,
-            });
-
+            
+            await this.sock.relayMessage(mediaMsg.key.remoteJid, mediaMsg
+                .message, {
+                    messageId: mediaMsg.key.id,
+                });
+            
             if (i < items.length - 1) {
                 await new Promise((resolve) => setTimeout(resolve, 100));
             }
         }
-
+        
         return {
             album,
             mediaMessages: mediaMsgs,
         };
     }
-
+    
     /**
      * Sends interactive carousel cards
      * @async
@@ -214,21 +222,21 @@ export class mods {
         if (!this.sock.user?.id) {
             throw new Error("User not authenticated");
         }
-
+        
         const { text = "", title = "", footer = "", cards = [] } = content;
         if (!Array.isArray(cards) || cards.length === 0) {
             throw new Error("Cards must be a non-empty array");
         }
-
+        
         if (cards.length > 10) {
             throw new Error("Maximum 10 cards allowed");
         }
-
+        
         const carouselCards = await Promise.all(
             cards.map(async (card) => {
                 let type = null;
                 let media = null;
-
+                
                 if (card.image) {
                     type = "image";
                     media = card.image;
@@ -236,24 +244,29 @@ export class mods {
                     type = "video";
                     media = card.video;
                 } else {
-                    throw new Error("Card must have image or video");
+                    throw new Error(
+                        "Card must have image or video");
                 }
-
+                
                 const mediaInput = {};
                 if (Buffer.isBuffer(media)) {
                     mediaInput[type] = media;
-                } else if (typeof media === "object" && media.url) {
+                } else if (typeof media === "object" && media
+                    .url) {
                     mediaInput[type] = { url: media.url };
                 } else if (typeof media === "string") {
                     mediaInput[type] = { url: media };
                 } else {
-                    throw new Error("Media must be Buffer, URL string, or {url: string}");
+                    throw new Error(
+                        "Media must be Buffer, URL string, or {url: string}"
+                        );
                 }
-
-                const prepped = await prepareWAMessageMedia(mediaInput, {
-                    upload: this.sock.waUploadToServer,
-                });
-
+                
+                const prepped = await prepareWAMessageMedia(
+                    mediaInput, {
+                        upload: this.sock.waUploadToServer,
+                    });
+                
                 const cardObj = {
                     header: {
                         title: card.title || "",
@@ -266,26 +279,34 @@ export class mods {
                         text: card.footer || "",
                     },
                 };
-
+                
                 if (type === "image") {
-                    cardObj.header.imageMessage = prepped.imageMessage;
+                    cardObj.header.imageMessage = prepped
+                        .imageMessage;
                 } else if (type === "video") {
-                    cardObj.header.videoMessage = prepped.videoMessage;
+                    cardObj.header.videoMessage = prepped
+                        .videoMessage;
                 }
-
-                if (Array.isArray(card.buttons) && card.buttons.length > 0) {
+                
+                if (Array.isArray(card.buttons) && card.buttons
+                    .length > 0) {
                     cardObj.nativeFlowMessage = {
-                        buttons: card.buttons.map((btn) => ({
-                            name: btn.name || "quick_reply",
-                            buttonParamsJson: btn.buttonParamsJson || JSON.stringify(btn),
+                        buttons: card.buttons.map((btn) =>
+                    ({
+                            name: btn.name ||
+                                "quick_reply",
+                            buttonParamsJson: btn
+                                .buttonParamsJson ||
+                                JSON.stringify(
+                                    btn),
                         })),
                     };
                 }
-
+                
                 return cardObj;
             })
         );
-
+        
         const payload = proto.Message.InteractiveMessage.create({
             body: { text: text },
             footer: { text: footer },
@@ -295,7 +316,7 @@ export class mods {
                 messageVersion: 1,
             },
         });
-
+        
         const msg = generateWAMessageFromContent(
             jid,
             {
@@ -310,14 +331,14 @@ export class mods {
                 quoted: options?.quoted || null,
             }
         );
-
+        
         await this.sock.relayMessage(jid, msg.message, {
             messageId: msg.key.id,
         });
-
+        
         return msg;
     }
-
+    
     /**
      * Sends interactive button messages with rich media support
      * @async
@@ -346,77 +367,84 @@ export class mods {
         if (!this.sock.user?.id) {
             throw new Error("User not authenticated");
         }
-
+        
         const {
             text = "",
-            caption = "",
-            title = "",
-            footer = "",
-            buttons = [],
-            interactiveButtons = [],
-            hasMediaAttachment = false,
-            image = null,
-            video = null,
-            document = null,
-            mimetype = null,
-            fileName = null,
-            fileLength = null,
-            pageCount = null,
-            jpegThumbnail = null,
-            location = null,
-            product = null,
-            businessOwnerJid = null,
-            contextInfo = null,
-            externalAdReply = null,
+                caption = "",
+                title = "",
+                footer = "",
+                buttons = [],
+                interactiveButtons = [],
+                hasMediaAttachment = false,
+                image = null,
+                video = null,
+                document = null,
+                mimetype = null,
+                fileName = null,
+                fileLength = null,
+                pageCount = null,
+                jpegThumbnail = null,
+                location = null,
+                product = null,
+                businessOwnerJid = null,
+                contextInfo = null,
+                externalAdReply = null,
+                mentions = null,
+                mentionedJid = null,
         } = content;
-
+        
         const allButtons = [...buttons, ...interactiveButtons];
-
+        
         if (!Array.isArray(allButtons) || allButtons.length === 0) {
-            throw new Error("buttons or interactiveButtons must be a non-empty array");
+            throw new Error(
+                "buttons or interactiveButtons must be a non-empty array"
+                );
         }
-
+        
         const processedButtons = [];
         for (let i = 0; i < allButtons.length; i++) {
             const btn = allButtons[i];
-
+            
             if (!btn || typeof btn !== "object") {
                 throw new Error(`button[${i}] must be an object`);
             }
-
+            
             if (btn.name && btn.buttonParamsJson) {
                 processedButtons.push(btn);
                 continue;
             }
-
+            
             if (btn.nativeFlowInfo && btn.nativeFlowInfo.name) {
                 processedButtons.push({
                     name: btn.nativeFlowInfo.name,
-                    buttonParamsJson: btn.nativeFlowInfo.paramsJson || JSON.stringify({}),
+                    buttonParamsJson: btn.nativeFlowInfo
+                        .paramsJson || JSON.stringify({}),
                 });
                 continue;
             }
-
+            
             if (btn.id || btn.text || btn.displayText) {
                 processedButtons.push({
                     name: "quick_reply",
                     buttonParamsJson: JSON.stringify({
-                        display_text: btn.text || btn.displayText || `Button ${i + 1}`,
+                        display_text: btn.text || btn
+                            .displayText ||
+                            `Button ${i + 1}`,
                         id: btn.id || `quick_${i + 1}`,
                     }),
                 });
                 continue;
             }
-
+            
             if (btn.buttonId && btn.buttonText?.displayText) {
                 if (btn.type === 4 || btn.nativeFlowInfo) {
                     const flowInfo = btn.nativeFlowInfo || {};
                     processedButtons.push({
                         name: flowInfo.name || "quick_reply",
-                        buttonParamsJson:
-                            flowInfo.paramsJson ||
+                        buttonParamsJson: flowInfo.paramsJson ||
                             JSON.stringify({
-                                display_text: btn.buttonText.displayText,
+                                display_text: btn.buttonText
+                                    .displayText,
                                 id: btn.buttonId,
                             }),
                     });
@@ -424,19 +452,20 @@ export class mods {
                     processedButtons.push({
                         name: "quick_reply",
                         buttonParamsJson: JSON.stringify({
-                            display_text: btn.buttonText.displayText,
+                            display_text: btn.buttonText
+                                .displayText,
                             id: btn.buttonId,
                         }),
                     });
                 }
                 continue;
             }
-
+            
             throw new Error(`button[${i}] has invalid shape`);
         }
-
+        
         let messageContent = {};
-
+        
         if (image) {
             const mediaInput = {};
             if (Buffer.isBuffer(image)) {
@@ -446,11 +475,11 @@ export class mods {
             } else if (typeof image === "string") {
                 mediaInput.image = { url: image };
             }
-
+            
             const preparedMedia = await prepareWAMessageMedia(mediaInput, {
                 upload: this.sock.waUploadToServer,
             });
-
+            
             messageContent.header = {
                 title: title || "",
                 hasMediaAttachment: hasMediaAttachment || true,
@@ -465,11 +494,11 @@ export class mods {
             } else if (typeof video === "string") {
                 mediaInput.video = { url: video };
             }
-
+            
             const preparedMedia = await prepareWAMessageMedia(mediaInput, {
                 upload: this.sock.waUploadToServer,
             });
-
+            
             messageContent.header = {
                 title: title || "",
                 hasMediaAttachment: hasMediaAttachment || true,
@@ -477,7 +506,7 @@ export class mods {
             };
         } else if (document) {
             const mediaInput = { document: {} };
-
+            
             if (Buffer.isBuffer(document)) {
                 mediaInput.document = {
                     buffer: document,
@@ -503,7 +532,7 @@ export class mods {
                     ...(pageCount !== null && { pageCount }),
                 };
             }
-
+            
             if (jpegThumbnail) {
                 if (Buffer.isBuffer(jpegThumbnail)) {
                     if (typeof mediaInput.document === "object") {
@@ -514,26 +543,31 @@ export class mods {
                         const res = await fetch(jpegThumbnail);
                         const arr = await res.arrayBuffer();
                         if (typeof mediaInput.document === "object") {
-                            mediaInput.document.jpegThumbnail = Buffer.from(arr);
+                            mediaInput.document.jpegThumbnail = Buffer.from(
+                                arr);
                         }
                     } catch {
                         //
                     }
                 }
             }
-
+            
             const preparedMedia = await prepareWAMessageMedia(mediaInput, {
                 upload: this.sock.waUploadToServer,
             });
-
+            
             if (preparedMedia.documentMessage) {
-                if (fileName) preparedMedia.documentMessage.fileName = fileName;
+                if (fileName) preparedMedia.documentMessage.fileName =
+                    fileName;
                 if (fileLength !== null)
-                    preparedMedia.documentMessage.fileLength = fileLength.toString();
-                if (pageCount !== null) preparedMedia.documentMessage.pageCount = pageCount;
-                if (mimetype) preparedMedia.documentMessage.mimetype = mimetype;
+                    preparedMedia.documentMessage.fileLength = fileLength
+                    .toString();
+                if (pageCount !== null) preparedMedia.documentMessage
+                    .pageCount = pageCount;
+                if (mimetype) preparedMedia.documentMessage.mimetype =
+                    mimetype;
             }
-
+            
             messageContent.header = {
                 title: title || "",
                 hasMediaAttachment: hasMediaAttachment || true,
@@ -544,8 +578,10 @@ export class mods {
                 title: title || location.name || "Location",
                 hasMediaAttachment: hasMediaAttachment || false,
                 locationMessage: {
-                    degreesLatitude: location.degressLatitude || location.degreesLatitude || 0,
-                    degreesLongitude: location.degressLongitude || location.degreesLongitude || 0,
+                    degreesLatitude: location.degressLatitude ||
+                        location.degreesLatitude || 0,
+                    degreesLongitude: location.degressLongitude ||
+                        location.degreesLongitude || 0,
                     name: location.name || "",
                     address: location.address || "",
                 },
@@ -556,18 +592,20 @@ export class mods {
                 const mediaInput = {};
                 if (Buffer.isBuffer(product.productImage)) {
                     mediaInput.image = product.productImage;
-                } else if (typeof product.productImage === "object" && product.productImage.url) {
+                } else if (typeof product.productImage === "object" &&
+                    product.productImage.url) {
                     mediaInput.image = { url: product.productImage.url };
                 } else if (typeof product.productImage === "string") {
                     mediaInput.image = { url: product.productImage };
                 }
-
-                const preparedMedia = await prepareWAMessageMedia(mediaInput, {
-                    upload: this.sock.waUploadToServer,
-                });
+                
+                const preparedMedia = await prepareWAMessageMedia(
+                    mediaInput, {
+                        upload: this.sock.waUploadToServer,
+                    });
                 productImageMessage = preparedMedia.imageMessage;
             }
-
+            
             messageContent.header = {
                 title: title || product.title || "Product",
                 hasMediaAttachment: hasMediaAttachment || false,
@@ -578,13 +616,15 @@ export class mods {
                         title: product.title || "",
                         description: product.description || "",
                         currencyCode: product.currencyCode || "USD",
-                        priceAmount1000: parseInt(product.priceAmount1000) || 0,
+                        priceAmount1000: parseInt(product
+                            .priceAmount1000) || 0,
                         retailerId: product.retailerId || "",
                         url: product.url || "",
-                        productImageCount: product.productImageCount || 1,
+                        productImageCount: product.productImageCount ||
+                            1,
                     },
-                    businessOwnerJid:
-                        businessOwnerJid || product.businessOwnerJid || this.sock.user.id,
+                    businessOwnerJid: businessOwnerJid || product
+                        .businessOwnerJid || this.sock.user.id,
                 },
             };
         } else if (title) {
@@ -593,35 +633,67 @@ export class mods {
                 hasMediaAttachment: false,
             };
         }
-
-        const hasMedia = !!(image || video || document || location || product);
+        
+        const hasMedia = !!(image || video || document || location ||
+            product);
         const bodyText = hasMedia ? caption : text || caption;
-
+        
         if (bodyText) {
             messageContent.body = { text: bodyText };
         }
-
+        
         if (footer) {
             messageContent.footer = { text: footer };
         }
-
+        
         messageContent.nativeFlowMessage = {
             buttons: processedButtons,
         };
-
+        
+        const allMentions = [];
+        
+        if (mentions && Array.isArray(mentions)) {
+            allMentions.push(...mentions);
+        }
+        
+        if (mentionedJid && Array.isArray(mentionedJid)) {
+            allMentions.push(...mentionedJid);
+        }
+        
+        if (options.mentionedJid && Array.isArray(options.mentionedJid)) {
+            allMentions.push(...options.mentionedJid);
+        }
+        
+        if (options.mentions && Array.isArray(options.mentions)) {
+            allMentions.push(...options.mentions);
+        }
+        
+        const uniqueMentions = [...new Set(allMentions)].filter(jid =>
+            jid && typeof jid === 'string' && jid.includes('@')
+        );
+        
         if (contextInfo && typeof contextInfo === "object") {
             messageContent.contextInfo = { ...contextInfo };
+            
+            if (uniqueMentions.length > 0) {
+                messageContent.contextInfo.mentionedJid = uniqueMentions;
+            }
         } else if (externalAdReply && typeof externalAdReply === "object") {
             messageContent.contextInfo = {
                 externalAdReply: {
                     title: externalAdReply.title || "",
                     body: externalAdReply.body || "",
                     mediaType: externalAdReply.mediaType || 1,
-                    sourceUrl: externalAdReply.sourceUrl || externalAdReply.url || "",
-                    thumbnailUrl: externalAdReply.thumbnailUrl || externalAdReply.thumbnail || "",
-                    renderLargerThumbnail: externalAdReply.renderLargerThumbnail || false,
-                    showAdAttribution: externalAdReply.showAdAttribution !== false,
-                    containsAutoReply: externalAdReply.containsAutoReply || false,
+                    sourceUrl: externalAdReply.sourceUrl ||
+                        externalAdReply.url || "",
+                    thumbnailUrl: externalAdReply.thumbnailUrl ||
+                        externalAdReply.thumbnail || "",
+                    renderLargerThumbnail: externalAdReply
+                        .renderLargerThumbnail || false,
+                    showAdAttribution: externalAdReply
+                        .showAdAttribution !== false,
+                    containsAutoReply: externalAdReply
+                        .containsAutoReply || false,
                     ...(externalAdReply.mediaUrl && {
                         mediaUrl: externalAdReply.mediaUrl,
                     }),
@@ -630,25 +702,26 @@ export class mods {
                             thumbnail: externalAdReply.thumbnail,
                         }),
                     ...(externalAdReply.jpegThumbnail &&
-                        Buffer.isBuffer(externalAdReply.jpegThumbnail) && {
-                            jpegThumbnail: externalAdReply.jpegThumbnail,
+                        Buffer.isBuffer(externalAdReply
+                        .jpegThumbnail) && {
+                            jpegThumbnail: externalAdReply
+                                .jpegThumbnail,
                         }),
                 },
             };
-        }
-
-        if (options.mentionedJid) {
-            if (messageContent.contextInfo) {
-                messageContent.contextInfo.mentionedJid = options.mentionedJid;
-            } else {
-                messageContent.contextInfo = {
-                    mentionedJid: options.mentionedJid,
-                };
+            
+            if (uniqueMentions.length > 0) {
+                messageContent.contextInfo.mentionedJid = uniqueMentions;
             }
+        } else if (uniqueMentions.length > 0) {
+            messageContent.contextInfo = {
+                mentionedJid: uniqueMentions,
+            };
         }
-
-        const payload = proto.Message.InteractiveMessage.create(messageContent);
-
+        
+        const payload = proto.Message.InteractiveMessage.create(
+            messageContent);
+        
         const msg = generateWAMessageFromContent(
             jid,
             {
@@ -663,37 +736,34 @@ export class mods {
                 quoted: options?.quoted || null,
             }
         );
-
+        
         const additionalNodes = [
+        {
+            tag: "biz",
+            attrs: {},
+            content: [
             {
-                tag: "biz",
-                attrs: {},
+                tag: "interactive",
+                attrs: {
+                    type: "native_flow",
+                    v: "1",
+                },
                 content: [
-                    {
-                        tag: "interactive",
-                        attrs: {
-                            type: "native_flow",
-                            v: "1",
-                        },
-                        content: [
-                            {
-                                tag: "native_flow",
-                                attrs: {
-                                    v: "9",
-                                    name: "mixed",
-                                },
-                            },
-                        ],
+                {
+                    tag: "native_flow",
+                    attrs: {
+                        v: "9",
+                        name: "mixed",
                     },
-                ],
-            },
-        ];
-
+                }, ],
+            }, ],
+        }, ];
+        
         await this.sock.relayMessage(jid, msg.message, {
             messageId: msg.key.id,
             additionalNodes,
         });
-
+        
         return msg;
     }
 }
