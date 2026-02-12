@@ -86,7 +86,7 @@ let handler = async (m, { sock, args, usedPrefix, command }) => {
                 id: `.play ${v.link}`,
             }));
             
-            await sock.sendMessage(m.chat, {
+            await sock.client(m.chat, {
                 image: { url: vids[0]?.imageUrl },
                 caption: `*YouTube Search Results*\n\n*Select a video below*\n\n*Query:* ${query}\n*Found:* ${vids.length} results`,
                 footer: `Search results for "${query}"`,
