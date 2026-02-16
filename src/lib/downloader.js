@@ -97,9 +97,13 @@ export const ig = async (url) => {
     const res = await fetch(`https://api-faa.my.id/faa/igdl?url=${encodeURIComponent(url)}`);
     const d = await res.json();
 
-    if (!d.status || !d.result || !d.result.url) throw new Error(d.message || 'Instagram API error');
+    if (!d.status || !d.result || !d.result.url)
+        throw new Error(d.message || 'Instagram API error');
 
-    return d.result.url;
+    return {
+        urls: d.result.url,
+        isVideo: d.result.metadata?.isVideo
+    };
 };
 
 /**

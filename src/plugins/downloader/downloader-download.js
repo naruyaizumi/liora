@@ -5,8 +5,22 @@
  * @author Naruya Izumi
  */
 
-import { ext, tt, ig, pin, fb, tw, vd, mf, th, mg, sc, sp, yt,
-    sf } from "#lib/downloader.js";
+import {
+    ext,
+    tt,
+    ig,
+    pin,
+    fb,
+    tw,
+    vd,
+    mf,
+    th,
+    mg,
+    sc,
+    sp,
+    yt,
+    sf
+} from "#lib/downloader.js";
 
 let handler = async (m, { sock, args, usedPrefix, command }) => {
     let raw = args.join(" ").trim();
@@ -32,7 +46,7 @@ MediaFire
     if (!url) {
         return m.reply(
             "Invalid URL. Please provide a valid link from supported platforms."
-            );
+        );
     }
     
     await global.loading(m, sock);
@@ -52,8 +66,12 @@ MediaFire
                         "No image data found");
                     
                     if (r.data.length === 1) {
-                        await sock.sendMessage(m.chat, { image: { url: r
-                                    .data[0] } }, { quoted: m });
+                        await sock.sendMessage(m.chat, {
+                            image: {
+                                url: r
+                                    .data[0]
+                            }
+                        }, { quoted: m });
                     } else {
                         const alb = {
                             album: r.data.map((img, i) => ({
@@ -68,26 +86,30 @@ MediaFire
             }
             
             case "ig": {
-                const urls = await ig(url.url);
+                const { urls, isVideo } = await ig(url.url);
                 
-                if (!urls || urls.length === 0) throw new Error(
-                    "No media found");
+                if (!urls || urls.length === 0)
+                    throw new Error("No media found");
                 
                 if (urls.length === 1) {
-                    const isv = urls[0].match(/\.(mp4|mov|avi|mkv)$/i);
-                    if (isv) {
-                        await sock.sendMessage(m
-                        .chat, { video: { url: urls[0] },
-                            mimetype: "video/mp4" }, { quoted: m });
+                    if (isVideo) {
+                        await sock.sendMessage(m.chat, {
+                            video: { url: urls[0] },
+                            mimetype: "video/mp4"
+                        }, { quoted: m });
                     } else {
-                        await sock.sendMessage(m
-                        .chat, { image: { url: urls[
-                                    0] } }, { quoted: m });
+                        await sock.sendMessage(m.chat, {
+                            image: { url: urls[0] }
+                        }, { quoted: m });
                     }
                 } else {
                     const alb = {
                         album: urls.map((img, i) => ({
-                            image: { url: img },
+                            ...(isVideo ?
+                                { video: { url: img },
+                                    mimetype: "video/mp4" } :
+                                { image: { url: img } }
+                                ),
                             caption: `${i + 1}/${urls.length}`,
                         })),
                     };
@@ -107,8 +129,12 @@ MediaFire
                 if (imgs.length > 0) {
                     if (imgs.length === 1) {
                         await sock.sendMessage(m
-                        .chat, { image: { url: imgs[0]
-                                    .url } }, { quoted: m });
+                            .chat, {
+                                image: {
+                                    url: imgs[0]
+                                        .url
+                                }
+                            }, { quoted: m });
                     } else {
                         const alb = {
                             album: imgs.map((img, i) => ({
@@ -124,12 +150,16 @@ MediaFire
                     
                     if (vid) {
                         await sock.sendMessage(m
-                        .chat, { video: { url: vid.url },
-                            mimetype: "video/mp4" }, { quoted: m });
+                            .chat, {
+                                video: { url: vid.url },
+                                mimetype: "video/mp4"
+                            }, { quoted: m });
                     } else if (gif) {
                         await sock.sendMessage(m
-                        .chat, { video: { url: gif.url },
-                            gifPlayback: true }, { quoted: m });
+                            .chat, {
+                                video: { url: gif.url },
+                                gifPlayback: true
+                            }, { quoted: m });
                     }
                 }
                 break;
@@ -140,15 +170,21 @@ MediaFire
                 
                 if (med.video_hd || med.video_sd) {
                     const vu = med.video_hd || med.video_sd;
-                    await sock.sendMessage(m.chat, { video: { url: vu },
-                        mimetype: "video/mp4" }, { quoted: m });
+                    await sock.sendMessage(m.chat, {
+                        video: { url: vu },
+                        mimetype: "video/mp4"
+                    }, { quoted: m });
                 } else if (med.photo_image) {
-                    await sock.sendMessage(m.chat, { image: { url: med
-                                .photo_image } }, { quoted: m });
+                    await sock.sendMessage(m.chat, {
+                        image: {
+                            url: med
+                                .photo_image
+                        }
+                    }, { quoted: m });
                 } else {
                     throw new Error(
                         "No downloadable media found in this Facebook post"
-                        );
+                    );
                 }
                 break;
             }
@@ -161,9 +197,13 @@ MediaFire
                         "No image data found");
                     
                     if (r.data.length === 1) {
-                        await sock.sendMessage(m.chat, { image: { url: r
+                        await sock.sendMessage(m.chat, {
+                            image: {
+                                url: r
                                     .data[0]
-                                    .url } }, { quoted: m });
+                                    .url
+                            }
+                        }, { quoted: m });
                     } else {
                         const alb = {
                             album: r.data.map((img, i) => ({
@@ -190,8 +230,10 @@ MediaFire
                     
                     if (best) {
                         await sock.sendMessage(m
-                        .chat, { video: { url: best.url },
-                            mimetype: "video/mp4" }, { quoted: m });
+                            .chat, {
+                                video: { url: best.url },
+                                mimetype: "video/mp4"
+                            }, { quoted: m });
                     } else {
                         throw new Error("No video URL found");
                     }
@@ -201,8 +243,10 @@ MediaFire
             
             case "vd": {
                 const vu = await vd(url.url);
-                await sock.sendMessage(m.chat, { video: { url: vu },
-                    mimetype: "video/mp4" }, { quoted: m });
+                await sock.sendMessage(m.chat, {
+                    video: { url: vu },
+                    mimetype: "video/mp4"
+                }, { quoted: m });
                 break;
             }
             
@@ -234,14 +278,22 @@ MediaFire
                 
                 if (vids.length > 0) {
                     const vid = vids[0];
-                    await sock.sendMessage(m.chat, { video: { url: vid
-                                .url },
-                    mimetype: "video/mp4" }, { quoted: m });
+                    await sock.sendMessage(m.chat, {
+                        video: {
+                            url: vid
+                                .url
+                        },
+                        mimetype: "video/mp4"
+                    }, { quoted: m });
                 } else if (imgs.length > 0) {
                     if (imgs.length === 1) {
                         await sock.sendMessage(m
-                        .chat, { image: { url: imgs[0]
-                                    .url } }, { quoted: m });
+                            .chat, {
+                                image: {
+                                    url: imgs[0]
+                                        .url
+                                }
+                            }, { quoted: m });
                     } else {
                         const alb = {
                             album: imgs.map((img, i) => ({
