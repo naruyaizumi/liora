@@ -1,11 +1,13 @@
 #!/bin/bash
 
 validate_phone() {
-    [[ "$1" =~ ^[0-9]{10,15}$ ]]
+    local phone="$1"
+    echo "$phone" | grep -qE '^[0-9]{10,15}$'
 }
 
 validate_time_format() {
-    [[ "$1" =~ ^[HMSmsDdYy:/ -]+$ ]]
+    local format="$1"
+    echo "$format" | grep -qE '^[HMSmsDdYy:/. -]+$'
 }
 
 prompt_pairing() {
@@ -232,24 +234,19 @@ create_env() {
     }
     
     cat > "$WORK_DIR/.env" <<EOF
-# Staff Configuration
 OWNERS=$OWNERS_ARRAY
 
-# Pairing Configuration
 PAIRING_NUMBER=$PAIRING_NUM
 PAIRING_CODE=$PAIRING_CODE
 
-# Bot Metadata
 WATERMARK=$WATERMARK
 AUTHOR=$AUTHOR
 STICKPACK=$STICKPACK
 STICKAUTH=$STICKAUTH
 THUMBNAIL_URL=$THUMBNAIL_URL
 
-# Bot Behavior
 SELF=$SELF_MODE
 
-# Logger Configuration
 LOG_LEVEL=$LOG_LEVEL
 LOG_PRETTY=$LOG_PRETTY
 LOG_COLORIZE=$LOG_COLORIZE
