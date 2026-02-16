@@ -136,8 +136,8 @@ EOF
     install_dependencies
     select_process_manager
     select_version
-    configure_bot
     clone_and_install
+    configure_bot
     create_service
     create_cli
     show_completion
