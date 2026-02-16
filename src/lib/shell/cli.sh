@@ -1,7 +1,8 @@
 #!/bin/bash
 
-create_cli_systemd() {
-    info "Creating CLI tool for systemd..."
+create_cli() {
+    info "Creating command-line interface..."
+    echo -e "${GRAY}────────────────────────────────────────────────────────────────────────────${RESET}"
     
     cat > "$HELPER_FILE" <<'EOFCLI'
 #!/bin/bash
@@ -13,8 +14,9 @@ BUN_PATH="/root/.bun/bin/bun"
 REPO_URL="https://github.com/naruyaizumi/liora.git"
 BACKUP_DIR="/root/liora_backups"
 
-log() { echo "[$(date '+%H:%M:%S')] $1"; }
-error() { echo "[ERROR] $1" >&2; }
+log() { echo "[$(date '+%H:%M:%S')] ✓ $1"; }
+error() { echo "[$(date '+%H:%M:%S')] ✗ $1" >&2; }
+info() { echo "[$(date '+%H:%M:%S')] ℹ $1"; }
 
 get_versions() {
     git ls-remote --tags --refs "$REPO_URL" 2>/dev/null | 
@@ -24,29 +26,33 @@ get_versions() {
 
 get_latest() { get_versions | head -1; }
 
+validate_sha() {
+    echo "$1" | grep -qE '^[a-f0-9]{7,40}$'
+}
+
 check_config() {
-    [ ! -f "$WORK_DIR/.env" ] && { error ".env not found"; return 1; }
+    [ ! -f "$WORK_DIR/.env" ] && { error "Configuration file not found"; return 1; }
     local num=$(grep "^PAIRING_NUMBER=" "$WORK_DIR/.env" | cut -d= -f2 | tr -d ' ')
-    [ -z "$num" ] && { error "PAIRING_NUMBER empty"; return 1; }
+    [ -z "$num" ] && { error "PAIRING_NUMBER not configured"; return 1; }
     return 0
 }
 
 do_update() {
-    cd "$WORK_DIR" || { error "Work dir not found"; exit 1; }
+    cd "$WORK_DIR" || { error "Work directory not found"; exit 1; }
     
     local current=$(cat .current_version 2>/dev/null || echo "unknown")
     local latest=$(get_latest)
     
-    echo "Current: $current"
-    echo "Latest: $latest"
+    echo "Current version: $current"
+    echo "Latest version:  $latest"
     echo ""
-    echo "1) Update to latest"
-    echo "2) Development (main)"
-    echo "3) Specific version"
-    echo "4) Commit SHA"
+    echo "1) Update to latest ($latest)"
+    echo "2) Switch to development (main)"
+    echo "3) Rollback to specific version"
+    echo "4) Rollback to specific commit"
     echo "5) Cancel"
     echo ""
-    echo -n "Select: "
+    echo -n "Select option: "
     read choice
     
     local target=""
@@ -58,18 +64,18 @@ do_update() {
             for i in "${!versions[@]}"; do
                 echo "$((i+1))) ${versions[$i]}"
             done
-            echo -n "Select: "
+            echo -n "Select version: "
             read v
             target="${versions[$((v-1))]}"
             ;;
         4)
-            echo -n "SHA: "
+            echo -n "Enter commit SHA: "
             read sha
-            [[ "$sha" =~ ^[a-f0-9]{7,40}$ ]] || { error "Invalid SHA"; exit 1; }
+            validate_sha "$sha" || { error "Invalid SHA"; exit 1; }
             target="$sha"
             ;;
         5) exit 0 ;;
-        *) error "Invalid"; exit 1 ;;
+        *) error "Invalid option"; exit 1 ;;
     esac
     
     systemctl stop $SERVICE
@@ -90,9 +96,9 @@ do_update() {
 do_backup() {
     mkdir -p "$BACKUP_DIR"
     local backup="$BACKUP_DIR/backup_$(date +%Y%m%d_%H%M%S).tar.gz"
-    cd "$WORK_DIR" || { error "Work dir not found"; exit 1; }
+    cd "$WORK_DIR" || { error "Work directory not found"; exit 1; }
     tar -czf "$backup" --exclude='node_modules' --exclude='logs' --exclude='.git' . 2>/dev/null
-    log "Backup: $backup"
+    log "Backup created: $backup"
 }
 
 do_restore() {
@@ -103,20 +109,20 @@ do_restore() {
     for i in "${!backups[@]}"; do
         echo "$((i+1))) $(basename ${backups[$i]})"
     done
-    echo -n "Select: "
+    echo -n "Select backup: "
     read choice
     
     systemctl stop $SERVICE
-    cd "$WORK_DIR" || { error "Work dir not found"; exit 1; }
+    cd "$WORK_DIR" || { error "Work directory not found"; exit 1; }
     tar -xzf "${backups[$((choice-1))]}"
     systemctl start $SERVICE
-    log "Restored"
+    log "Backup restored"
 }
 
 do_clean() {
     [ -d "$WORK_DIR/logs" ] && find "$WORK_DIR/logs" -name "*.log" -mtime +7 -delete 2>/dev/null
     journalctl --vacuum-time=7d --quiet 2>/dev/null
-    log "Cleaned"
+    log "Logs cleaned"
 }
 
 do_stats() {
@@ -140,22 +146,22 @@ do_health() {
     echo ""
     echo "Health Check"
     echo "============"
-    systemctl is-active --quiet $SERVICE && echo "[OK] Running" || echo "[FAIL] Stopped"
-    [ -f "$WORK_DIR/.env" ] && echo "[OK] Config exists" || echo "[FAIL] No config"
+    systemctl is-active --quiet $SERVICE && echo "[OK] Bot is running" || echo "[FAIL] Bot is stopped"
+    [ -f "$WORK_DIR/.env" ] && echo "[OK] Config exists" || echo "[FAIL] Config missing"
     echo ""
 }
 
 case "${1:-help}" in
     start)
         check_config || exit 1
-        systemctl start $SERVICE && log "Started" || error "Failed to start"
+        systemctl start $SERVICE && log "Bot started" || error "Failed to start"
         ;;
     stop)
-        systemctl stop $SERVICE && log "Stopped" || error "Failed to stop"
+        systemctl stop $SERVICE && log "Bot stopped" || error "Failed to stop"
         ;;
     restart)
         check_config || exit 1
-        systemctl restart $SERVICE && log "Restarted" || error "Failed to restart"
+        systemctl restart $SERVICE && log "Bot restarted" || error "Failed to restart"
         ;;
     status) systemctl status $SERVICE --no-pager ;;
     log|logs) journalctl -u $SERVICE -f -o cat ;;
@@ -164,44 +170,57 @@ case "${1:-help}" in
     update) do_update ;;
     version)
         echo "Current: $(cat $WORK_DIR/.current_version 2>/dev/null || echo unknown)"
-        echo "Latest: $(get_latest)"
+        echo "Latest:  $(get_latest)"
         ;;
     backup) do_backup ;;
     restore) do_restore ;;
     clean) do_clean ;;
     stats) do_stats ;;
     health) do_health ;;
-    monitor) [ -f "$WORK_DIR/monitor.sh" ] && bash "$WORK_DIR/monitor.sh" || error "Monitor script not found" ;;
+    monitor) [ -f "$WORK_DIR/monitor.sh" ] && bash "$WORK_DIR/monitor.sh" || error "Monitor not found" ;;
     help|--help|-h|*)
         cat <<EOF
 
-Liora Bot CLI (systemd)
-========================
+Liora Bot Command-Line Interface
+=================================
 
-Control:
-  start       Start the bot
-  stop        Stop the bot
-  restart     Restart the bot
-  status      Show service status
+BASIC COMMANDS
+  start          Start the WhatsApp bot
+  stop           Stop the bot
+  restart        Restart the bot
+  status         Show service status
 
-Logs:
-  log         View live logs
-  tail [n]    Show last n lines (default: 50)
+LOGS & MONITORING
+  log            View live logs (Ctrl+C to exit)
+  logs           Alias for 'log'
+  tail [n]       Show last n log lines (default: 50)
+  stats          Show performance statistics
+  health         Run health check
+  monitor        Run health monitor script
 
-Configuration:
-  config      Edit .env file
+CONFIGURATION
+  config         Edit .env configuration file
 
-Maintenance:
-  update      Update to new version
-  version     Show current/latest version
-  backup      Create backup
-  restore     Restore from backup
-  clean       Clean old logs
+MAINTENANCE
+  update         Interactive version update
+  version        Show current and latest version
+  backup         Create backup of bot data
+  restore        Restore from backup
+  clean          Clean old log files
 
-Monitoring:
-  stats       Show performance stats
-  health      Health check
-  monitor     Run monitor script
+HELP
+  help           Show this help message
+  --help         Show this help message
+  -h             Show this help message
+
+EXAMPLES
+  bot start      Start the bot
+  bot log        View live logs
+  bot tail 100   Show last 100 log lines
+  bot backup     Create a backup
+  bot update     Update to latest version
+
+For more information: https://github.com/naruyaizumi/liora
 
 EOF
         ;;
@@ -213,5 +232,6 @@ EOFCLI
         exit 1
     }
     
-    log "CLI tool created (systemd)"
+    log "CLI tool created: ${DIM}/usr/local/bin/bot${RESET}"
+    echo ""
 }

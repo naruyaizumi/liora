@@ -1,4 +1,5 @@
 #!/bin/bash
+# Version Management
 
 get_versions() {
     git ls-remote --tags --refs "$REPO_URL" 2>/dev/null | 
@@ -13,34 +14,48 @@ get_latest() {
 
 validate_sha() {
     local sha="$1"
-    [[ "$sha" =~ ^[a-f0-9]{7,40}$ ]]
+    echo "$sha" | grep -qE '^[a-f0-9]{7,40}$'
 }
 
 select_version() {
-    cat << "EOF"
+    echo ""
+    echo -e "${BOLD}${CYAN} ✦ Version Selection ✦ ${RESET}"
+    echo -e "${GRAY}────────────────────────────────────────────────────────────${RESET}"
+    echo -e "${DIM}Choose which version of Liora Bot you want to install.${RESET}"
+    echo -e "${DIM}Stable versions are recommended for production use.${RESET}"
+    echo ""
 
-Version Selection
-================================================================================
-EOF
-    
     local versions=($(get_versions))
     local latest=$(get_latest)
     
     if [ ${#versions[@]} -eq 0 ]; then
-        warn "No release tags found"
-        echo "  1) Development (main branch)"
-        echo "  2) Specific commit SHA"
+        warn "No stable releases found"
+        echo ""
+        echo -e "  ${GREEN}1${RESET}) ${WHITE}Development Branch${RESET} ${GRAY}(main)${RESET}"
+        echo -e "     ${DIM}Latest features, may be unstable${RESET}"
+        echo ""
+        echo -e "  ${GREEN}2${RESET}) ${WHITE}Specific Commit${RESET}"
+        echo -e "     ${DIM}Enter a specific commit SHA${RESET}"
         echo ""
     else
-        echo "  1) Latest stable ($latest)"
-        echo "  2) Development (main branch)"
-        echo "  3) Specific version"
-        echo "  4) Specific commit SHA"
+        echo -e "  ${GREEN}1${RESET}) ${WHITE}Latest Stable${RESET} ${YELLOW}(${latest})${RESET} ${MAGENTA}★ Recommended${RESET}"
+        echo -e "     ${DIM}Production-ready, tested and stable${RESET}"
+        echo ""
+        echo -e "  ${GREEN}2${RESET}) ${WHITE}Development Branch${RESET} ${GRAY}(main)${RESET}"
+        echo -e "     ${DIM}Latest features, may contain bugs${RESET}"
+        echo ""
+        echo -e "  ${GREEN}3${RESET}) ${WHITE}Specific Version${RESET}"
+        echo -e "     ${DIM}Choose from available release versions${RESET}"
+        echo ""
+        echo -e "  ${GREEN}4${RESET}) ${WHITE}Specific Commit${RESET}"
+        echo -e "     ${DIM}Advanced: Use a specific commit SHA${RESET}"
         echo ""
     fi
     
+    echo -e "${GRAY}────────────────────────────────────────────────────────────${RESET}"
+    
     while true; do
-        echo -n "Select: "
+        echo -n "Select option: "
         read -r choice < /dev/tty
         
         case "$choice" in
@@ -50,7 +65,7 @@ EOF
                 else
                     export SELECTED_VERSION="$latest"
                 fi
-                log "Selected: $SELECTED_VERSION"
+                log "Selected: ${MAGENTA}${SELECTED_VERSION}${RESET}"
                 break
                 ;;
             2)
@@ -58,7 +73,7 @@ EOF
                     prompt_commit_sha
                 else
                     export SELECTED_VERSION="main"
-                    log "Selected: main"
+                    log "Selected: ${MAGENTA}main${RESET} ${DIM}(development)${RESET}"
                 fi
                 break
                 ;;
@@ -69,21 +84,23 @@ EOF
                 fi
                 
                 echo ""
-                echo "Available versions:"
+                echo -e "${BOLD}${WHITE}Available Versions${RESET}"
+                echo -e "${GRAY}────────────────────────────────────────────────────────────${RESET}"
                 for i in "${!versions[@]}"; do
-                    echo "  $((i+1))) ${versions[$i]}"
+                    echo -e "  ${GREEN}$((i+1))${RESET}) ${CYAN}${versions[$i]}${RESET}"
                 done
+                echo -e "${GRAY}────────────────────────────────────────────────────────────${RESET}"
                 echo ""
                 
                 while true; do
-                    echo -n "Select [1-${#versions[@]}]: "
+                    echo -n "Select version [1-${#versions[@]}]: "
                     read -r ver_choice < /dev/tty
                     
                     if [[ $ver_choice =~ ^[0-9]+$ ]] && \
                        [ "$ver_choice" -ge 1 ] && \
                        [ "$ver_choice" -le ${#versions[@]} ]; then
                         export SELECTED_VERSION="${versions[$((ver_choice-1))]}"
-                        log "Selected: $SELECTED_VERSION"
+                        log "Selected: ${MAGENTA}${SELECTED_VERSION}${RESET}"
                         break 2
                     else
                         error "Invalid selection"
@@ -99,7 +116,7 @@ EOF
                 break
                 ;;
             *)
-                error "Invalid option"
+                error "Invalid option. Please choose 1-4"
                 ;;
         esac
     done
@@ -108,37 +125,45 @@ EOF
 
 prompt_commit_sha() {
     echo ""
-    info "Enter commit SHA (7-40 hex characters)"
+    echo -e "${BOLD}${WHITE}Commit SHA Input${RESET}"
+    echo -e "${GRAY}────────────────────────────────────────────────────────────────────────────${RESET}"
+    echo -e "${DIM}Enter a commit SHA (7-40 hexadecimal characters)${RESET}"
+    echo -e "${DIM}Example: 3ccfb25 or 3ccfb2516895da454790fa6384bfa7d1989d04f3${RESET}"
+    echo -e "${GRAY}────────────────────────────────────────────────────────────────────────────${RESET}"
+    echo ""
     
     while true; do
-        echo -n "SHA: "
+        echo -n "Commit SHA: "
         read -r sha < /dev/tty
         
         if validate_sha "$sha"; then
             export SELECTED_VERSION="$sha"
-            log "Selected: $sha"
+            log "Selected: ${MAGENTA}${sha}${RESET}"
             break
         else
-            error "Invalid SHA format (use 7-40 hex characters)"
+            error "Invalid SHA format (must be 7-40 hexadecimal characters)"
         fi
     done
 }
 
 clone_and_install() {
-    info "Cloning repository..."
+    echo ""
+    echo -e "${BOLD}${CYAN} ✦ Repository Installation ✦ ${RESET}"
+    echo -e "${GRAY}────────────────────────────────────────────────────────────${RESET}"
+    echo -e "${DIM}Clone repository and install required packages.${RESET}"
+    echo ""
+
+    info "Cloning Liora Bot repository..."
+    echo -e "${GRAY}────────────────────────────────────────────────────────────${RESET}"
     
     if [ -d "$WORK_DIR" ]; then
-        warn "Directory exists, creating backup..."
+        warn "Installation directory already exists"
         
-        if [ "$PROCESS_MANAGER" = "systemd" ]; then
-            systemctl stop "$SERVICE_NAME" 2>/dev/null || true
-        elif [ "$PROCESS_MANAGER" = "pm2" ]; then
-            command -v pm2 &>/dev/null && pm2 delete liora 2>/dev/null || true
-        fi
+        systemctl stop "$SERVICE_NAME" 2>/dev/null || true
         
         local backup_path="${WORK_DIR}.backup.$(date +%Y%m%d_%H%M%S)"
         mv "$WORK_DIR" "$backup_path"
-        log "Backup created: $backup_path"
+        log "Previous installation backed up to: ${DIM}${backup_path}${RESET}"
     fi
     
     git clone "$REPO_URL" "$WORK_DIR" || {
@@ -152,19 +177,19 @@ clone_and_install() {
     }
     
     if [ "$SELECTED_VERSION" = "main" ]; then
-        info "Using main branch"
+        info "Checking out main branch..."
         git checkout main || {
             error "Failed to checkout main"
             exit 1
         }
     elif validate_sha "$SELECTED_VERSION"; then
-        info "Checking out commit: $SELECTED_VERSION"
+        info "Checking out commit: ${YELLOW}${SELECTED_VERSION}${RESET}"
         git checkout "$SELECTED_VERSION" || {
             error "Failed to checkout commit"
             exit 1
         }
     else
-        info "Checking out version: $SELECTED_VERSION"
+        info "Checking out version: ${YELLOW}${SELECTED_VERSION}${RESET}"
         git checkout "$SELECTED_VERSION" || {
             error "Failed to checkout version"
             exit 1
@@ -173,11 +198,13 @@ clone_and_install() {
     
     echo "$SELECTED_VERSION" > "$WORK_DIR/.current_version"
     log "Repository cloned successfully"
+    echo ""
     
-    info "Installing packages..."
+    info "Installing Node.js packages..."
+    echo -e "${GRAY}────────────────────────────────────────────────────────────${RESET}"
     
     if [ ! -f "$BUN_PATH" ]; then
-        error "Bun not found at $BUN_PATH"
+        error "Bun not found at ${YELLOW}${BUN_PATH}${RESET}"
         exit 1
     fi
     
@@ -187,4 +214,5 @@ clone_and_install() {
     }
     
     log "Packages installed successfully"
+    echo ""
 }

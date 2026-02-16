@@ -1,86 +1,14 @@
 #!/bin/bash
 
-create_systemd() {
-    info "Creating systemd service..."
-    
-    cat > "$SYSTEMD_SERVICE" <<'EOF'
-
-EOF
-
-    systemctl daemon-reload
-    systemctl enable "$SERVICE_NAME"
-    log "Systemd service created"
-}
-
-create_pm2_config() {
-    info "Creating PM2 config..."
-    
-    cat > "$PM2_ECOSYSTEM" <<'EOF'
-
-EOF
-
-    mkdir -p "$WORK_DIR/logs"
-    cd "$WORK_DIR"
-    pm2 start ecosystem.config.js
-    pm2 save
-    pm2 startup systemd -u root --hp /root
-    log "PM2 service created"
-}
-
-create_monitor() {
-    info "Creating monitor script..."
-    
-    cat > "$WORK_DIR/monitor.sh" <<'EOF'
-#!/bin/bash
-LOG_FILE="/root/liora/logs/monitor.log"
-
-log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"; }
-
-check_service() {
-    if systemctl is-active --quiet liora 2>/dev/null; then
-        return 0
-    elif pm2 list | grep -q "liora.*online" 2>/dev/null; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-if ! check_service; then
-    log "Service down, restarting..."
-    bot restart
-fi
-
-MEM=$(free -m | awk 'NR==2{print $3*100/$2}')
-if [ "${MEM%.*}" -gt 85 ]; then
-    log "High memory: ${MEM}%"
-fi
-
-DISK=$(df -h /root/liora | awk 'NR==2{print $5}' | tr -d '%')
-if [ "$DISK" -gt 90 ]; then
-    log "High disk: ${DISK}%"
-fi
-EOF
-
-    chmod +x "$WORK_DIR/monitor.sh"
-    log "Monitor script created"
-}
-
 create_service() {
-    if [ "$PROCESS_MANAGER" = "systemd" ]; then
-        create_systemd
-    elif [ "$PROCESS_MANAGER" = "pm2" ]; then
-        create_pm2_config
-    fi
-    create_monitor
-}
+    echo ""
+    echo -e "${BOLD}${CYAN} ✦ Service Creation ✦ ${RESET}"
+    echo -e "${GRAY}────────────────────────────────────────────────────────────${RESET}"
+    echo -e "${DIM}Create and configure systemd service for Liora.${RESET}"
+    echo ""
 
-
-
-#!/bin/bash
-
-create_systemd() {
     info "Creating systemd service..."
+    echo -e "${GRAY}────────────────────────────────────────────────────────────${RESET}"
     
     cat > "$SYSTEMD_SERVICE" <<'EOF'
 [Unit]
@@ -166,125 +94,10 @@ EOF
     }
     
     log "Systemd service created and enabled"
-}
-
-create_pm2_config() {
-    info "Creating PM2 config..."
+    echo ""
     
-    if ! command -v pm2 &> /dev/null; then
-        error "PM2 not found"
-        exit 1
-    fi
-    
-    cat > "$PM2_ECOSYSTEM" <<'EOF'
-export default {
-  apps: [{
-    name: 'liora',
-    script: 'src/main.js',
-    cwd: '/root/liora',
-    interpreter: '/root/.bun/bin/bun',
-    interpreterArgs: 'run --smol',
-    instances: 1,
-    exec_mode: 'fork',
-    autorestart: true,
-    watch: false,
-    max_restarts: 10,
-    min_uptime: '10s',
-    restart_delay: 5000,
-    max_memory_restart: '350M',
-    error_file: '/root/liora/logs/pm2-error.log',
-    out_file: '/root/liora/logs/pm2-out.log',
-    log_file: '/root/liora/logs/pm2-combined.log',
-    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-    merge_logs: true,
-    log_type: 'json',
-    pid_file: '/root/liora/logs/liora.pid',
-    kill_timeout: 5000,
-    listen_timeout: 3000,
-    shutdown_with_message: true,
-    wait_ready: false,
-    instance_var: 'INSTANCE_ID',
-    combine_logs: true,
-    vizion: true,
-    post_update: ['bun install'],
-    env: {
-      NODE_ENV: 'production',
-      TZ: 'Asia/Jakarta',
-      BUN_GARBAGE_COLLECTOR_LEVEL: '2',
-      BUN_JSC_useConcurrentJIT: 'yes',
-      NODE_OPTIONS: '--max-old-space-size=256',
-      UV_THREADPOOL_SIZE: '8',
-      MALLOC_ARENA_MAX: '2'
-    },
-    env_development: {
-      NODE_ENV: 'development',
-      LOG_LEVEL: 'debug'
-    },
-    env_production: {
-      NODE_ENV: 'production',
-      LOG_LEVEL: 'info'
-    },
-    cron_restart: '',
-    ignore_watch: ['node_modules', 'logs', '.git', 'baileys_store*'],
-    watch_options: {
-      followSymlinks: false,
-      usePolling: false
-    },
-    kill_retry_time: 100,
-    source_map_support: false,
-    node_args: [],
-    metadata: {
-      author: 'Naruya Izumi',
-      repository: 'https://github.com/naruyaizumi/liora',
-      description: 'Liora WhatsApp Bot'
-    }
-  }],
-  deploy: {
-    production: {
-      user: 'root',
-      host: 'localhost',
-      ref: 'origin/main',
-      repo: 'https://github.com/naruyaizumi/liora.git',
-      path: '/root/liora',
-      'post-deploy': 'bun install && pm2 reload ecosystem.config.js --env production',
-      env: {
-        NODE_ENV: 'production'
-      }
-    }
-  }
-};
-EOF
-
-    [ ! -f "$PM2_ECOSYSTEM" ] && {
-        error "Failed to create PM2 config"
-        exit 1
-    }
-    
-    mkdir -p "$WORK_DIR/logs"
-    
-    cd "$WORK_DIR" || {
-        error "Failed to enter work directory"
-        exit 1
-    }
-    
-    pm2 start ecosystem.config.js || {
-        error "Failed to start with PM2"
-        exit 1
-    }
-    
-    pm2 save || {
-        warn "Failed to save PM2 process list"
-    }
-    
-    pm2 startup systemd -u root --hp /root || {
-        warn "Failed to configure PM2 startup"
-    }
-    
-    log "PM2 service created and started"
-}
-
-create_monitor() {
-    info "Creating monitor script..."
+    info "Creating health monitor script..."
+    echo -e "${GRAY}────────────────────────────────────────────────────────────${RESET}"
     
     cat > "$WORK_DIR/monitor.sh" <<'EOF'
 #!/bin/bash
@@ -296,20 +109,12 @@ log_msg() {
 }
 
 check_service() {
-    if systemctl is-active --quiet liora 2>/dev/null; then
-        return 0
-    elif command -v pm2 &>/dev/null && pm2 list 2>/dev/null | grep -q "liora.*online"; then
-        return 0
-    else
-        return 1
-    fi
+    systemctl is-active --quiet liora 2>/dev/null
 }
 
 if ! check_service; then
     log_msg "Service down, attempting restart..."
-    if command -v bot &>/dev/null; then
-        bot restart >> "$LOG_FILE" 2>&1
-    fi
+    systemctl restart liora >> "$LOG_FILE" 2>&1
 fi
 
 if command -v free &>/dev/null; then
@@ -327,38 +132,7 @@ if [ -d "/root/liora" ]; then
 fi
 EOF
 
-    chmod +x "$WORK_DIR/monitor.sh" || {
-        warn "Failed to make monitor script executable"
-    }
-    
-    log "Monitor script created"
-}
-
-create_service() {
-    if [ -z "$PROCESS_MANAGER" ]; then
-        error "Process manager not set"
-        exit 1
-    fi
-    
-    if [ "$PROCESS_MANAGER" = "systemd" ]; then
-        create_systemd
-    elif [ "$PROCESS_MANAGER" = "pm2" ]; then
-        create_pm2_config
-    else
-        error "Unknown process manager: $PROCESS_MANAGER"
-        exit 1
-    fi
-    
-    create_monitor
-}
-
-create_cli() {
-    if [ "$PROCESS_MANAGER" = "systemd" ]; then
-        create_cli_systemd
-    elif [ "$PROCESS_MANAGER" = "pm2" ]; then
-        create_cli_pm2
-    else
-        error "Unknown process manager: $PROCESS_MANAGER"
-        exit 1
-    fi
+    chmod +x "$WORK_DIR/monitor.sh"
+    log "Health monitor created: ${DIM}${WORK_DIR}/monitor.sh${RESET}"
+    echo ""
 }

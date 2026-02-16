@@ -1,7 +1,8 @@
 #!/bin/bash
+# Dependencies Management
 
 detect_distro() {
-    [ ! -f /etc/os-release ] && { error "Cannot detect OS"; exit 1; }
+    [ ! -f /etc/os-release ] && { error "Cannot detect operating system"; exit 1; }
     
     . /etc/os-release
     export OS_ID="$ID"
@@ -24,7 +25,12 @@ detect_distro() {
             export DEPS="git curl wget ca-certificates unzip ffmpeg"
             ;;
         *)
-            warn "Unsupported distribution: $OS_ID"
+            warn "Unsupported distribution: ${YELLOW}${OS_ID}${RESET}"
+            echo -e "${GRAY}────────────────────────────────────────────────────────────────────────────${RESET}"
+            echo -e "${WHITE}Only Ubuntu, Debian, CentOS, RHEL, Rocky, AlmaLinux, and Fedora are${RESET}"
+            echo -e "${WHITE}officially supported. Installation may not work correctly.${RESET}"
+            echo -e "${GRAY}────────────────────────────────────────────────────────────────────────────${RESET}"
+            echo ""
             echo -n "Continue anyway? [y/N]: "
             read -r reply < /dev/tty
             [[ ! $reply =~ ^[Yy]$ ]] && exit 1
@@ -34,11 +40,12 @@ detect_distro() {
             ;;
     esac
     
-    log "Detected: $OS_ID $OS_VERSION"
+    log "Detected: ${CYAN}${OS_ID}${RESET} ${DIM}${OS_VERSION}${RESET}"
 }
 
 install_packages() {
     info "Installing system packages..."
+    echo -e "${GRAY}────────────────────────────────────────────────────────────────────────────${RESET}"
     
     $PKG_UPDATE || {
         error "Failed to update package lists"
@@ -52,18 +59,20 @@ install_packages() {
         }
     fi
     
-    log "System packages installed"
+    log "System packages installed: ${DIM}git, curl, wget, ffmpeg${RESET}"
 }
 
 install_bun() {
-    info "Installing Bun runtime..."
+    info "Checking Bun runtime..."
+    echo -e "${GRAY}────────────────────────────────────────────────────────────────────────────${RESET}"
     
     if [ -d "$HOME/.bun" ]; then
-        info "Bun already installed, upgrading..."
+        info "Bun already installed, upgrading to latest version..."
         export BUN_INSTALL="$HOME/.bun"
         export PATH="$BUN_INSTALL/bin:$PATH"
         "$BUN_PATH" upgrade 2>/dev/null || true
     else
+        info "Installing Bun runtime..."
         curl -fsSL https://bun.sh/install | bash || {
             error "Failed to install Bun"
             exit 1
@@ -73,7 +82,7 @@ install_bun() {
     fi
     
     if [ ! -f "$BUN_PATH" ]; then
-        error "Bun binary not found at $BUN_PATH"
+        error "Bun binary not found at ${YELLOW}${BUN_PATH}${RESET}"
         exit 1
     fi
     
@@ -83,71 +92,20 @@ install_bun() {
     fi
     
     export BUN_VERSION=$("$BUN_PATH" --version)
-    log "Bun v$BUN_VERSION installed"
-}
-
-install_pm2() {
-    if command -v pm2 &> /dev/null; then
-        log "PM2 already installed"
-        return 0
-    fi
-    
-    info "Installing PM2..."
-    
-    if [ ! -f "$BUN_PATH" ]; then
-        error "Bun not found. Cannot install PM2."
-        exit 1
-    fi
-    
-    "$BUN_PATH" install -g pm2 || {
-        error "Failed to install PM2"
-        exit 1
-    }
-    
-    if ! command -v pm2 &> /dev/null; then
-        error "PM2 installation verification failed"
-        exit 1
-    fi
-    
-    log "PM2 installed successfully"
-}
-
-select_process_manager() {
-    cat << "EOF"
-
-Process Manager Selection
-================================================================================
-EOF
-    echo "  1) systemd (recommended for production)"
-    echo "  2) PM2 (Node.js process manager)"
-    echo ""
-    
-    while true; do
-        echo -n "Select [1-2]: "
-        read -r choice < /dev/tty
-        
-        case "$choice" in
-            1)
-                export PROCESS_MANAGER="systemd"
-                log "Selected: systemd"
-                break
-                ;;
-            2)
-                export PROCESS_MANAGER="pm2"
-                log "Selected: PM2"
-                install_pm2
-                break
-                ;;
-            *)
-                error "Invalid choice. Enter 1 or 2."
-                ;;
-        esac
-    done
-    echo ""
+    log "Bun runtime ready: ${CYAN}v${BUN_VERSION}${RESET}"
 }
 
 install_dependencies() {
+    echo ""
+    echo -e "${BOLD}${CYAN} ✦ System Dependencies ✦ ${RESET}"
+    echo -e "${GRAY}────────────────────────────────────────────────────────────${RESET}"
+    echo -e "${DIM}Install required packages and runtime.${RESET}"
+    echo ""
+
     detect_distro
+    echo ""
     install_packages
+    echo ""
     install_bun
+    echo ""
 }
