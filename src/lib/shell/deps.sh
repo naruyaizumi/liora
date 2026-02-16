@@ -1,5 +1,4 @@
 #!/bin/bash
-# Dependencies Management - FIXED VERSION
 
 detect_distro() {
     [ ! -f /etc/os-release ] && { error "Cannot detect OS"; exit 1; }
@@ -26,7 +25,6 @@ detect_distro() {
             ;;
         *)
             warn "Unsupported distribution: $OS_ID"
-            # FIX: Proper input redirect from terminal
             echo -n "Continue anyway? [y/N]: "
             read -r reply < /dev/tty
             [[ ! $reply =~ ^[Yy]$ ]] && exit 1
@@ -47,7 +45,6 @@ install_packages() {
         exit 1
     }
     
-    # FIX: Only install if DEPS not empty
     if [ -n "$DEPS" ]; then
         $PKG_INSTALL $DEPS || {
             error "Failed to install dependencies"
@@ -75,7 +72,6 @@ install_bun() {
         export PATH="$BUN_INSTALL/bin:$PATH"
     fi
     
-    # FIX: Better verification
     if [ ! -f "$BUN_PATH" ]; then
         error "Bun binary not found at $BUN_PATH"
         exit 1
@@ -91,7 +87,6 @@ install_bun() {
 }
 
 install_pm2() {
-    # FIX: Check if already installed first
     if command -v pm2 &> /dev/null; then
         log "PM2 already installed"
         return 0
@@ -99,7 +94,6 @@ install_pm2() {
     
     info "Installing PM2..."
     
-    # FIX: Verify bun is available first
     if [ ! -f "$BUN_PATH" ]; then
         error "Bun not found. Cannot install PM2."
         exit 1
@@ -110,7 +104,6 @@ install_pm2() {
         exit 1
     }
     
-    # FIX: Verify PM2 installation
     if ! command -v pm2 &> /dev/null; then
         error "PM2 installation verification failed"
         exit 1
@@ -130,7 +123,6 @@ EOF
     echo ""
     
     while true; do
-        # FIX: Proper terminal input
         echo -n "Select [1-2]: "
         read -r choice < /dev/tty
         

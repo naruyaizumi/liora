@@ -1,5 +1,4 @@
 #!/bin/bash
-# Service creation and management
 
 create_systemd() {
     info "Creating systemd service..."
@@ -52,7 +51,6 @@ if ! check_service; then
     bot restart
 fi
 
-# Resource checks
 MEM=$(free -m | awk 'NR==2{print $3*100/$2}')
 if [ "${MEM%.*}" -gt 85 ]; then
     log "High memory: ${MEM}%"
@@ -80,7 +78,6 @@ create_service() {
 
 
 #!/bin/bash
-# Service Creation - FIXED VERSION
 
 create_systemd() {
     info "Creating systemd service..."
@@ -112,7 +109,6 @@ TimeoutStopSec=60
 TimeoutStartSec=30
 SuccessExitStatus=0 130 143 SIGINT SIGTERM
 
-# Resource Limits
 MemoryHigh=300M
 MemoryMax=350M
 MemorySwapMax=256M
@@ -123,7 +119,6 @@ LimitNOFILE=262144
 LimitNPROC=4096
 LimitCORE=0
 
-# Security Settings (Relaxed for WhatsApp bot)
 NoNewPrivileges=no
 ProtectSystem=no
 ProtectHome=no
@@ -137,7 +132,6 @@ SystemCallArchitectures=native
 ReadWritePaths=/root/liora
 ReadOnlyPaths=
 
-# Environment
 EnvironmentFile=/root/liora/.env
 Environment=NODE_ENV=production
 Environment=TZ=Asia/Jakarta
@@ -148,7 +142,6 @@ Environment=NODE_OPTIONS=--max-old-space-size=256
 Environment=UV_THREADPOOL_SIZE=8
 Environment=MALLOC_ARENA_MAX=2
 
-# Logging
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=liora-bot
@@ -157,7 +150,6 @@ SyslogIdentifier=liora-bot
 WantedBy=multi-user.target
 EOF
 
-    # FIX: Verify file created
     [ ! -f "$SYSTEMD_SERVICE" ] && {
         error "Failed to create service file"
         exit 1
@@ -179,7 +171,6 @@ EOF
 create_pm2_config() {
     info "Creating PM2 config..."
     
-    # FIX: Verify PM2 is installed
     if ! command -v pm2 &> /dev/null; then
         error "PM2 not found"
         exit 1
@@ -264,16 +255,13 @@ export default {
 };
 EOF
 
-    # FIX: Verify file created
     [ ! -f "$PM2_ECOSYSTEM" ] && {
         error "Failed to create PM2 config"
         exit 1
     }
     
-    # Create logs directory
     mkdir -p "$WORK_DIR/logs"
     
-    # Start with PM2
     cd "$WORK_DIR" || {
         error "Failed to enter work directory"
         exit 1
@@ -300,7 +288,6 @@ create_monitor() {
     
     cat > "$WORK_DIR/monitor.sh" <<'EOF'
 #!/bin/bash
-# Health monitoring script
 
 LOG_FILE="/root/liora/logs/monitor.log"
 
@@ -318,7 +305,6 @@ check_service() {
     fi
 }
 
-# Check if service is running
 if ! check_service; then
     log_msg "Service down, attempting restart..."
     if command -v bot &>/dev/null; then
@@ -326,7 +312,6 @@ if ! check_service; then
     fi
 fi
 
-# Resource monitoring
 if command -v free &>/dev/null; then
     MEM=$(free -m | awk 'NR==2{printf "%.0f", $3*100/$2}')
     if [ "${MEM%.*}" -gt 85 ]; then
@@ -350,7 +335,6 @@ EOF
 }
 
 create_service() {
-    # FIX: Validate process manager
     if [ -z "$PROCESS_MANAGER" ]; then
         error "Process manager not set"
         exit 1
@@ -369,7 +353,6 @@ create_service() {
 }
 
 create_cli() {
-    # FIX: Call the correct CLI creation function
     if [ "$PROCESS_MANAGER" = "systemd" ]; then
         create_cli_systemd
     elif [ "$PROCESS_MANAGER" = "pm2" ]; then

@@ -1,5 +1,4 @@
 #!/bin/bash
-# Utility functions and completion message
 
 create_cli() {
     if [ "$PROCESS_MANAGER" = "systemd" ]; then

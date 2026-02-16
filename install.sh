@@ -1,12 +1,9 @@
 #!/bin/bash
-# Liora Bot Installer - FIXED VERSION
-# All bugs patched, production ready
 
 set -euo pipefail
 
 GITHUB_RAW="https://raw.githubusercontent.com/naruyaizumi/liora/main/src/lib/shell"
 
-# Export all global variables
 export SERVICE_NAME="liora"
 export SYSTEMD_SERVICE="/etc/systemd/system/liora.service"
 export PM2_ECOSYSTEM="/root/liora/ecosystem.config.js"
@@ -17,13 +14,11 @@ export REPO_URL="https://github.com/naruyaizumi/liora.git"
 export BACKUP_DIR="/root/liora_backups"
 export PROCESS_MANAGER=""
 
-# Logging functions
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"; }
 error() { echo "[ERROR] $1" >&2; }
 info() { echo "[INFO] $1"; }
 warn() { echo "[WARN] $1"; }
 
-# Export logging functions
 export -f log error info warn
 
 check_curl() {
@@ -53,7 +48,6 @@ load_script() {
         exit 1
     }
     
-    # Source and verify
     source "$temp" || {
         error "Failed to source ${script}"
         rm -f "$temp"

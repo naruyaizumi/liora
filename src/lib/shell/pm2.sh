@@ -1,5 +1,4 @@
 #!/bin/bash
-# PM2 CLI Creation - FIXED VERSION
 
 create_cli_pm2() {
     info "Creating CLI tool for PM2..."

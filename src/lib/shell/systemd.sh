@@ -1,5 +1,4 @@
 #!/bin/bash
-# Systemd CLI Creation - FIXED VERSION
 
 create_cli_systemd() {
     info "Creating CLI tool for systemd..."

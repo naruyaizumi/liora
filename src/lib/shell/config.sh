@@ -1,5 +1,4 @@
 #!/bin/bash
-# Bot Configuration - FIXED VERSION
 
 validate_phone() {
     [[ "$1" =~ ^[0-9]{10,15}$ ]]
@@ -17,7 +16,6 @@ WhatsApp Configuration
 EOF
     
     while true; do
-        # FIX: Proper terminal input
         echo -n "WhatsApp number (without +): "
         read -r PAIRING_NUM < /dev/tty
         
@@ -56,7 +54,9 @@ EOF
             echo -n "Owner number (empty to finish): "
             read -r num < /dev/tty
             
-            [ -z "$num" ] && break
+            if [ -z "$num" ]; then
+                break
+            fi
             
             if validate_phone "$num"; then
                 owner_list+=("\"$num\"")
@@ -66,8 +66,7 @@ EOF
             fi
         done
         
-        if [ ${#owner_list[@]} -gt 0 ]; then
-            # FIX: Proper array joining
+        if [ "${#owner_list[@]}" -gt 0 ]; then
             local IFS=,
             export OWNERS_ARRAY="[${owner_list[*]}]"
             log "Total owners: ${#owner_list[@]}"
@@ -147,7 +146,6 @@ EOF
     
     echo "Log levels: 1)silent 2)fatal 3)error 4)info 5)debug 6)trace"
     
-    # Bot log level
     while true; do
         echo -n "Bot log level [1]: "
         read -r choice < /dev/tty
@@ -165,7 +163,6 @@ EOF
     done
     log "Log level: $LOG_LEVEL"
     
-    # Baileys log level
     while true; do
         echo -n "Baileys log level [3]: "
         read -r choice < /dev/tty
@@ -183,7 +180,6 @@ EOF
     done
     log "Baileys log: $BAILEYS_LOG"
     
-    # Pretty print
     while true; do
         echo -n "Pretty print? [Y/n]: "
         read -r reply < /dev/tty
@@ -196,7 +192,6 @@ EOF
         esac
     done
     
-    # Colorize
     while true; do
         echo -n "Colorize? [Y/n]: "
         read -r reply < /dev/tty
@@ -209,7 +204,6 @@ EOF
         esac
     done
     
-    # Time format
     echo -n "Time format [HH:MM]: "
     read -r input < /dev/tty
     input="${input:-HH:MM}"
@@ -221,7 +215,6 @@ EOF
         export LOG_TIME="HH:MM"
     fi
     
-    # Ignore fields
     echo -n "Ignore fields [pid,hostname]: "
     read -r input < /dev/tty
     export LOG_IGNORE="${input:-pid,hostname}"
@@ -233,7 +226,6 @@ EOF
 create_env() {
     info "Creating .env file..."
     
-    # FIX: Ensure WORK_DIR exists
     [ ! -d "$WORK_DIR" ] && {
         error "Work directory not found: $WORK_DIR"
         exit 1

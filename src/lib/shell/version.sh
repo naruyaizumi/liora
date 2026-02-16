@@ -1,5 +1,4 @@
 #!/bin/bash
-# Version Management - FIXED VERSION
 
 get_versions() {
     git ls-remote --tags --refs "$REPO_URL" 2>/dev/null | 
@@ -41,7 +40,6 @@ EOF
     fi
     
     while true; do
-        # FIX: Proper terminal input
         echo -n "Select: "
         read -r choice < /dev/tty
         
@@ -129,11 +127,9 @@ prompt_commit_sha() {
 clone_and_install() {
     info "Cloning repository..."
     
-    # FIX: Backup existing directory properly
     if [ -d "$WORK_DIR" ]; then
         warn "Directory exists, creating backup..."
         
-        # Stop service first
         if [ "$PROCESS_MANAGER" = "systemd" ]; then
             systemctl stop "$SERVICE_NAME" 2>/dev/null || true
         elif [ "$PROCESS_MANAGER" = "pm2" ]; then
@@ -145,19 +141,16 @@ clone_and_install() {
         log "Backup created: $backup_path"
     fi
     
-    # Clone repository
     git clone "$REPO_URL" "$WORK_DIR" || {
         error "Failed to clone repository"
         exit 1
     }
     
-    # FIX: Always cd and verify
     cd "$WORK_DIR" || {
         error "Failed to enter work directory"
         exit 1
     }
     
-    # Checkout version
     if [ "$SELECTED_VERSION" = "main" ]; then
         info "Using main branch"
         git checkout main || {
@@ -178,14 +171,11 @@ clone_and_install() {
         }
     fi
     
-    # Save version
     echo "$SELECTED_VERSION" > "$WORK_DIR/.current_version"
     log "Repository cloned successfully"
     
-    # Install packages
     info "Installing packages..."
     
-    # FIX: Verify bun exists
     if [ ! -f "$BUN_PATH" ]; then
         error "Bun not found at $BUN_PATH"
         exit 1
