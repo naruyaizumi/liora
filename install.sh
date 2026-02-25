@@ -138,7 +138,7 @@ EOF
 
 print_banner() {
     clear
-    cat << "EOF"
+    cat << EOF
 ${BOLD}${MAGENTA}
  ✦ LIORA BOT INSTALLER ✦
 ${RESET}

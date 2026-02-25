@@ -14,9 +14,19 @@ BUN_PATH="/root/.bun/bin/bun"
 REPO_URL="https://github.com/naruyaizumi/liora.git"
 BACKUP_DIR="/root/liora_backups"
 
-log() { echo "[$(date '+%H:%M:%S')] ✓ $1"; }
-error() { echo "[$(date '+%H:%M:%S')] ✗ $1" >&2; }
-info() { echo "[$(date '+%H:%M:%S')] ℹ $1"; }
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+GRAY='\033[0;90m'
+BOLD='\033[1m'
+DIM='\033[2m'
+RESET='\033[0m'
+
+log()   { echo -e "${GRAY}[$(date '+%H:%M:%S')]${RESET} ${GREEN}✓${RESET} $1"; }
+error() { echo -e "${GRAY}[$(date '+%H:%M:%S')]${RESET} ${RED}✗${RESET} $1" >&2; }
+info()  { echo -e "${GRAY}[$(date '+%H:%M:%S')]${RESET} ${BLUE}ℹ${RESET} $1"; }
 
 get_versions() {
     git ls-remote --tags --refs "$REPO_URL" 2>/dev/null | 
