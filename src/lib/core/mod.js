@@ -234,8 +234,7 @@ export class mods {
         
         const carouselCards = await Promise.all(
             cards.map(async (card) => {
-                let type = null;
-                let media = null;
+                let type, media;
                 
                 if (card.image) {
                     type = "image";
@@ -259,7 +258,7 @@ export class mods {
                 } else {
                     throw new Error(
                         "Media must be Buffer, URL string, or {url: string}"
-                        );
+                    );
                 }
                 
                 const prepped = await prepareWAMessageMedia(
@@ -292,14 +291,14 @@ export class mods {
                     .length > 0) {
                     cardObj.nativeFlowMessage = {
                         buttons: card.buttons.map((btn) =>
-                    ({
-                            name: btn.name ||
-                                "quick_reply",
-                            buttonParamsJson: btn
-                                .buttonParamsJson ||
-                                JSON.stringify(
-                                    btn),
-                        })),
+                            ({
+                                name: btn.name ||
+                                    "quick_reply",
+                                buttonParamsJson: btn
+                                    .buttonParamsJson ||
+                                    JSON.stringify(
+                                        btn),
+                            })),
                     };
                 }
                 
@@ -398,7 +397,7 @@ export class mods {
         if (!Array.isArray(allButtons) || allButtons.length === 0) {
             throw new Error(
                 "buttons or interactiveButtons must be a non-empty array"
-                );
+            );
         }
         
         const processedButtons = [];
@@ -547,7 +546,7 @@ export class mods {
                                 arr);
                         }
                     } catch {
-                        //
+                        // Silent fail
                     }
                 }
             }
@@ -703,7 +702,7 @@ export class mods {
                         }),
                     ...(externalAdReply.jpegThumbnail &&
                         Buffer.isBuffer(externalAdReply
-                        .jpegThumbnail) && {
+                            .jpegThumbnail) && {
                             jpegThumbnail: externalAdReply
                                 .jpegThumbnail,
                         }),

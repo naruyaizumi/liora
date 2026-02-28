@@ -170,9 +170,6 @@ export async function handler(chatUpdate) {
         const __dirname = dirname(Bun.fileURLToPath(import.meta.url));
         const pluginDir = join(__dirname, "./plugins");
 
-        let commandMatched = false;
-        let matchedKey = null;
-
         for (const name in global.plugins) {
             const plugin = global.plugins[name];
             if (!plugin || plugin.disabled) continue;
@@ -205,8 +202,6 @@ export async function handler(chatUpdate) {
 
                 if (!isCmdMatch(command, plugin.command)) continue;
 
-                commandMatched = true;
-                matchedKey = m.key;
                 m.plugin = name;
 
                 const fail = plugin.fail || global.dfail;

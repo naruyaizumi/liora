@@ -25,221 +25,193 @@ const HEADERS = {
 };
 
 async function uploader1(buf) {
-    try {
-        if (!buf || buf.length === 0) throw new Error("Empty buffer");
+    if (!buf || buf.length === 0) throw new Error("Empty buffer");
 
-        const type = await fileTypeFromBuffer(buf);
-        if (!type) throw new Error("Unknown file type");
+    const type = await fileTypeFromBuffer(buf);
+    if (!type) throw new Error("Unknown file type");
 
-        const form = new FormData();
-        form.append("reqtype", "fileupload");
-        const blob = new Blob([buf], { type: type.mime });
-        form.append("fileToUpload", blob, `file.${type.ext}`);
+    const form = new FormData();
+    form.append("reqtype", "fileupload");
+    const blob = new Blob([buf], { type: type.mime });
+    form.append("fileToUpload", blob, `file.${type.ext}`);
 
-        const res = await fetch("https://catbox.moe/user/api.php", {
-            method: "POST",
-            headers: HEADERS,
-            body: form,
-            signal: AbortSignal.timeout(60000),
-        });
+    const res = await fetch("https://catbox.moe/user/api.php", {
+        method: "POST",
+        headers: HEADERS,
+        body: form,
+        signal: AbortSignal.timeout(60000),
+    });
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const txt = await res.text();
-        if (!txt.startsWith("http")) throw new Error("Invalid response");
+    const txt = await res.text();
+    if (!txt.startsWith("http")) throw new Error("Invalid response");
 
-        return txt.trim();
-    } catch (e) {
-        throw e;
-    }
+    return txt.trim();
 }
 
 async function uploader2(buf) {
-    try {
-        if (!buf || buf.length === 0) throw new Error("Empty buffer");
+    if (!buf || buf.length === 0) throw new Error("Empty buffer");
 
-        const type = await fileTypeFromBuffer(buf);
-        if (!type) throw new Error("Unknown file type");
+    const type = await fileTypeFromBuffer(buf);
+    if (!type) throw new Error("Unknown file type");
 
-        const form = new FormData();
-        const blob = new Blob([buf], { type: type.mime });
-        form.append("files[]", blob, `file.${type.ext}`);
+    const form = new FormData();
+    const blob = new Blob([buf], { type: type.mime });
+    form.append("files[]", blob, `file.${type.ext}`);
 
-        const res = await fetch("https://uguu.se/upload.php", {
-            method: "POST",
-            headers: HEADERS,
-            body: form,
-            signal: AbortSignal.timeout(60000),
-        });
+    const res = await fetch("https://uguu.se/upload.php", {
+        method: "POST",
+        headers: HEADERS,
+        body: form,
+        signal: AbortSignal.timeout(60000),
+    });
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const json = await res.json();
-        if (!json?.files?.[0]?.url) throw new Error("Invalid response");
+    const json = await res.json();
+    if (!json?.files?.[0]?.url) throw new Error("Invalid response");
 
-        return json.files[0].url.trim();
-    } catch (e) {
-        throw e;
-    }
+    return json.files[0].url.trim();
 }
 
 async function uploader3(buf) {
-    try {
-        if (!buf || buf.length === 0) throw new Error("Empty buffer");
+    if (!buf || buf.length === 0) throw new Error("Empty buffer");
 
-        const type = await fileTypeFromBuffer(buf);
-        if (!type) throw new Error("Unknown file type");
+    const type = await fileTypeFromBuffer(buf);
+    if (!type) throw new Error("Unknown file type");
 
-        const form = new FormData();
-        const blob = new Blob([buf], { type: type.mime });
-        form.append("files[]", blob, `file.${type.ext}`);
+    const form = new FormData();
+    const blob = new Blob([buf], { type: type.mime });
+    form.append("files[]", blob, `file.${type.ext}`);
 
-        const res = await fetch("https://qu.ax/upload.php", {
-            method: "POST",
-            headers: HEADERS,
-            body: form,
-            signal: AbortSignal.timeout(60000),
-        });
+    const res = await fetch("https://qu.ax/upload.php", {
+        method: "POST",
+        headers: HEADERS,
+        body: form,
+        signal: AbortSignal.timeout(60000),
+    });
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const json = await res.json();
-        if (!json?.files?.[0]?.url) throw new Error("Invalid response");
+    const json = await res.json();
+    if (!json?.files?.[0]?.url) throw new Error("Invalid response");
 
-        return json.files[0].url.trim();
-    } catch (e) {
-        throw e;
-    }
+    return json.files[0].url.trim();
 }
 
 async function uploader4(buf) {
-    try {
-        if (!buf || buf.length === 0) throw new Error("Empty buffer");
+    if (!buf || buf.length === 0) throw new Error("Empty buffer");
 
-        const type = await fileTypeFromBuffer(buf);
-        if (!type) throw new Error("Unknown file type");
+    const type = await fileTypeFromBuffer(buf);
+    if (!type) throw new Error("Unknown file type");
 
-        const res = await fetch("https://put.icu/upload/", {
-            method: "PUT",
-            headers: {
-                ...HEADERS,
-                "Content-Type": type.mime,
-                Accept: "application/json",
-            },
-            body: buf,
-            signal: AbortSignal.timeout(60000),
-        });
+    const res = await fetch("https://put.icu/upload/", {
+        method: "PUT",
+        headers: {
+            ...HEADERS,
+            "Content-Type": type.mime,
+            Accept: "application/json",
+        },
+        body: buf,
+        signal: AbortSignal.timeout(60000),
+    });
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const json = await res.json();
-        if (!json?.direct_url) throw new Error("Invalid response");
+    const json = await res.json();
+    if (!json?.direct_url) throw new Error("Invalid response");
 
-        return json.direct_url.trim();
-    } catch (e) {
-        throw e;
-    }
+    return json.direct_url.trim();
 }
 
 async function uploader5(buf) {
-    try {
-        if (!buf || buf.length === 0) throw new Error("Empty buffer");
+    if (!buf || buf.length === 0) throw new Error("Empty buffer");
 
-        const type = await fileTypeFromBuffer(buf);
-        if (!type) throw new Error("Unknown file type");
+    const type = await fileTypeFromBuffer(buf);
+    if (!type) throw new Error("Unknown file type");
 
-        const form = new FormData();
-        const blob = new Blob([buf], { type: type.mime });
-        form.append("file", blob, `file.${type.ext}`);
+    const form = new FormData();
+    const blob = new Blob([buf], { type: type.mime });
+    form.append("file", blob, `file.${type.ext}`);
 
-        const res = await fetch("https://tmpfiles.org/api/v1/upload", {
-            method: "POST",
-            headers: HEADERS,
-            body: form,
-            signal: AbortSignal.timeout(60000),
-        });
+    const res = await fetch("https://tmpfiles.org/api/v1/upload", {
+        method: "POST",
+        headers: HEADERS,
+        body: form,
+        signal: AbortSignal.timeout(60000),
+    });
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const json = await res.json();
-        if (!json?.data?.url) throw new Error("Invalid response");
+    const json = await res.json();
+    if (!json?.data?.url) throw new Error("Invalid response");
 
-        return json.data.url.replace("/file/", "/dl/").trim();
-    } catch (e) {
-        throw e;
-    }
+    return json.data.url.replace("/file/", "/dl/").trim();
 }
 
 async function uploader6(buf) {
-    try {
-        if (!buf || buf.length === 0) throw new Error("Empty buffer");
+    if (!buf || buf.length === 0) throw new Error("Empty buffer");
 
-        const type = await fileTypeFromBuffer(buf);
-        if (!type) throw new Error("Unknown file type");
+    const type = await fileTypeFromBuffer(buf);
+    if (!type) throw new Error("Unknown file type");
 
-        if (!type.mime.startsWith("video/")) {
-            throw new Error("Need video");
-        }
-
-        const form = new FormData();
-        const blob = new Blob([buf], { type: type.mime });
-        form.append("file", blob, `file.${type.ext}`);
-        form.append("apikey", "freeApikey");
-
-        const res = await fetch("https://anabot.my.id/api/tools/videy", {
-            method: "POST",
-            headers: { Accept: "*/*" },
-            body: form,
-            signal: AbortSignal.timeout(60000),
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const json = await res.json();
-        if (!json?.success || !json?.data?.result?.link) {
-            throw new Error("Invalid response");
-        }
-
-        return json.data.result.link.trim();
-    } catch (e) {
-        throw e;
+    if (!type.mime.startsWith("video/")) {
+        throw new Error("Need video");
     }
+
+    const form = new FormData();
+    const blob = new Blob([buf], { type: type.mime });
+    form.append("file", blob, `file.${type.ext}`);
+    form.append("apikey", "freeApikey");
+
+    const res = await fetch("https://anabot.my.id/api/tools/videy", {
+        method: "POST",
+        headers: { Accept: "*/*" },
+        body: form,
+        signal: AbortSignal.timeout(60000),
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const json = await res.json();
+    if (!json?.success || !json?.data?.result?.link) {
+        throw new Error("Invalid response");
+    }
+
+    return json.data.result.link.trim();
 }
 
 async function uploader7(buf) {
-    try {
-        if (!buf || buf.length === 0) throw new Error("Empty buffer");
+    if (!buf || buf.length === 0) throw new Error("Empty buffer");
 
-        const type = await fileTypeFromBuffer(buf);
-        if (!type) throw new Error("Unknown file type");
+    const type = await fileTypeFromBuffer(buf);
+    if (!type) throw new Error("Unknown file type");
 
-        if (!type.mime.startsWith("image/")) {
-            throw new Error("Need image");
-        }
-
-        const form = new FormData();
-        const blob = new Blob([buf], { type: type.mime });
-        form.append("file", blob, `file.${type.ext}`);
-        form.append("apikey", "freeApikey");
-
-        const res = await fetch("https://anabot.my.id/api/tools/goFile", {
-            method: "POST",
-            headers: { Accept: "*/*" },
-            body: form,
-            signal: AbortSignal.timeout(60000),
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const json = await res.json();
-        if (!json?.success || !json?.data?.result?.imageUrl) {
-            throw new Error("Invalid response");
-        }
-
-        return json.data.result.imageUrl.trim();
-    } catch (e) {
-        throw e;
+    if (!type.mime.startsWith("image/")) {
+        throw new Error("Need image");
     }
+
+    const form = new FormData();
+    const blob = new Blob([buf], { type: type.mime });
+    form.append("file", blob, `file.${type.ext}`);
+    form.append("apikey", "freeApikey");
+
+    const res = await fetch("https://anabot.my.id/api/tools/goFile", {
+        method: "POST",
+        headers: { Accept: "*/*" },
+        body: form,
+        signal: AbortSignal.timeout(60000),
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const json = await res.json();
+    if (!json?.success || !json?.data?.result?.imageUrl) {
+        throw new Error("Invalid response");
+    }
+
+    return json.data.result.imageUrl.trim();
 }
 
 async function uploader(buf) {

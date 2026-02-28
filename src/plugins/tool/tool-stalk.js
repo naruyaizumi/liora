@@ -228,7 +228,9 @@ let handler = async (m, { sock, text, args, usedPrefix, command }) => {
                     if (chatData?.metadata?.participants?.length) {
                         meta = chatData.metadata;
                     }
-                } catch {}
+                } catch {
+                    // Silent fail
+                }
                 
                 if (!meta) {
                     try {
@@ -242,7 +244,9 @@ let handler = async (m, { sock, text, args, usedPrefix, command }) => {
                             chatData.isChats = true;
                             chatData.lastSync = Date.now();
                             await sock.setChat(gid, chatData);
-                        } catch {}
+                        } catch {
+                            // Silent fail
+                        }
                     } catch (e) {
                         return m.reply(
                             `Failed to fetch group info: ${e.message}`
@@ -280,7 +284,9 @@ let handler = async (m, { sock, text, args, usedPrefix, command }) => {
             let pp = null;
             try {
                 pp = await sock.profilePictureUrl(gid, "image");
-            } catch {}
+            } catch {
+                // Silent fail
+            }
             
             const men = [...new Set([...adm.map((v) => v.id || v
                 .phoneNumber), own])];

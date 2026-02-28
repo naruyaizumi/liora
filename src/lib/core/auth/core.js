@@ -104,109 +104,97 @@ class AuthDatabase {
         this.isInitialized = false;
         this.cache = new LRUCache(options.cacheSize || 10000);
 
-        try {
-            this.db = this._initDatabase();
-            this._prepareStatements();
-            this._initWriteBuffer(options);
-            this._initVacuum(options);
-            this._registerCleanup();
-            this.isInitialized = true;
-        } catch (e) {
-            throw e;
-        }
+        this.db = this._initDatabase();
+        this._prepareStatements();
+        this._initWriteBuffer(options);
+        this._initVacuum(options);
+        this._registerCleanup();
+        this.isInitialized = true;
     }
 
     _initDatabase() {
-        try {
-            const db = new Database(this.dbPath, {
-                create: true,
-                readwrite: true,
-                strict: true,
-            });
+        const db = new Database(this.dbPath, {
+            create: true,
+            readwrite: true,
+            strict: true,
+        });
 
-            db.exec("PRAGMA journal_mode = WAL");
-            db.exec("PRAGMA synchronous = NORMAL");
-            db.exec("PRAGMA temp_store = MEMORY");
-            db.exec("PRAGMA cache_size = -131072");
-            db.exec("PRAGMA mmap_size = 134217728");
-            db.exec("PRAGMA page_size = 8192");
-            db.exec("PRAGMA auto_vacuum = INCREMENTAL");
-            db.exec("PRAGMA busy_timeout = 5000");
+        db.exec("PRAGMA journal_mode = WAL");
+        db.exec("PRAGMA synchronous = NORMAL");
+        db.exec("PRAGMA temp_store = MEMORY");
+        db.exec("PRAGMA cache_size = -131072");
+        db.exec("PRAGMA mmap_size = 134217728");
+        db.exec("PRAGMA page_size = 8192");
+        db.exec("PRAGMA auto_vacuum = INCREMENTAL");
+        db.exec("PRAGMA busy_timeout = 5000");
 
-            db.exec(`
-                CREATE TABLE IF NOT EXISTS baileys_state (
-                    key   TEXT PRIMARY KEY NOT NULL CHECK(length(key) > 0 AND length(key) < 512),
-                    value TEXT NOT NULL,
-                    last_access INTEGER DEFAULT (unixepoch())
-                ) WITHOUT ROWID;
-            `);
+        db.exec(`
+            CREATE TABLE IF NOT EXISTS baileys_state (
+                key   TEXT PRIMARY KEY NOT NULL CHECK(length(key) > 0 AND length(key) < 512),
+                value TEXT NOT NULL,
+                last_access INTEGER DEFAULT (unixepoch())
+            ) WITHOUT ROWID;
+        `);
 
-            db.exec(`
-                CREATE INDEX IF NOT EXISTS idx_key_prefix ON baileys_state(key) 
-                WHERE key LIKE '%-%';
-            `);
+        db.exec(`
+            CREATE INDEX IF NOT EXISTS idx_key_prefix ON baileys_state(key) 
+            WHERE key LIKE '%-%';
+        `);
 
-            db.exec(`
-                CREATE INDEX IF NOT EXISTS idx_last_access ON baileys_state(last_access);
-            `);
+        db.exec(`
+            CREATE INDEX IF NOT EXISTS idx_last_access ON baileys_state(last_access);
+        `);
 
-            return db;
-        } catch (e) {
-            throw e;
-        }
+        return db;
     }
 
     _prepareStatements() {
-        try {
-            this.stmtGet = this.db.query("SELECT value FROM baileys_state WHERE key = ?");
+        this.stmtGet = this.db.query("SELECT value FROM baileys_state WHERE key = ?");
 
-            this.stmtSet = this.db.query(
-                "INSERT OR REPLACE INTO baileys_state (key, value, last_access) VALUES (?, ?, unixepoch())"
-            );
+        this.stmtSet = this.db.query(
+            "INSERT OR REPLACE INTO baileys_state (key, value, last_access) VALUES (?, ?, unixepoch())"
+        );
 
-            this.stmtDel = this.db.query("DELETE FROM baileys_state WHERE key = ?");
+        this.stmtDel = this.db.query("DELETE FROM baileys_state WHERE key = ?");
 
-            this.stmtUpdateAccess = this.db.query(
-                "UPDATE baileys_state SET last_access = unixepoch() WHERE key = ?"
-            );
+        this.stmtUpdateAccess = this.db.query(
+            "UPDATE baileys_state SET last_access = unixepoch() WHERE key = ?"
+        );
 
-            this.stmtGetOldKeys = this.db.query(
-                "SELECT key FROM baileys_state WHERE last_access < ? AND key LIKE '%-%' LIMIT ?"
-            );
+        this.stmtGetOldKeys = this.db.query(
+            "SELECT key FROM baileys_state WHERE last_access < ? AND key LIKE '%-%' LIMIT ?"
+        );
 
-            this.stmtCountKeys = this.db.query(
-                "SELECT COUNT(*) as count FROM baileys_state WHERE key LIKE '%-%'"
-            );
+        this.stmtCountKeys = this.db.query(
+            "SELECT COUNT(*) as count FROM baileys_state WHERE key LIKE '%-%'"
+        );
 
-            this.txCommit = this.db.transaction((upsertsArr, deletesArr) => {
-                const maxBatch = this.maxBatch;
+        this.txCommit = this.db.transaction((upsertsArr, deletesArr) => {
+            const maxBatch = this.maxBatch;
 
-                for (let i = 0; i < upsertsArr.length; i += maxBatch) {
-                    const slice = upsertsArr.slice(i, i + maxBatch);
-                    for (const [k, v] of slice) {
-                        try {
-                            const jsonString = JSON.stringify(v, BufferJSON.replacer);
-                            this.stmtSet.run(k, jsonString);
-                        } catch {
-                            // Silent fail
-                        }
+            for (let i = 0; i < upsertsArr.length; i += maxBatch) {
+                const slice = upsertsArr.slice(i, i + maxBatch);
+                for (const [k, v] of slice) {
+                    try {
+                        const jsonString = JSON.stringify(v, BufferJSON.replacer);
+                        this.stmtSet.run(k, jsonString);
+                    } catch {
+                        // Silent fail
                     }
                 }
+            }
 
-                for (let i = 0; i < deletesArr.length; i += maxBatch) {
-                    const slice = deletesArr.slice(i, i + maxBatch);
-                    for (const k of slice) {
-                        try {
-                            this.stmtDel.run(k);
-                        } catch {
-                            // Silent fail
-                        }
+            for (let i = 0; i < deletesArr.length; i += maxBatch) {
+                const slice = deletesArr.slice(i, i + maxBatch);
+                for (const k of slice) {
+                    try {
+                        this.stmtDel.run(k);
+                    } catch {
+                        // Silent fail
                     }
                 }
-            });
-        } catch (e) {
-            throw e;
-        }
+            }
+        });
     }
 
     _initWriteBuffer(options) {
@@ -239,7 +227,7 @@ class AuthDatabase {
 
         this.vacuumTimer = setTimeout(() => {
             this.vacuumTimer = null;
-            this._performVacuum().catch((e) => {
+            this._performVacuum().catch(() => {
                 // Silent fail, reschedule
                 this._scheduleVacuum();
             });
@@ -369,7 +357,7 @@ class AuthDatabase {
         if (!this.flushTimer && !this.disposed && this.isInitialized) {
             this.flushTimer = setTimeout(() => {
                 this.flushTimer = null;
-                this.flush().catch((e) => {
+                this.flush().catch(() => {
                     // Silent fail
                 });
             }, this.flushIntervalMs);

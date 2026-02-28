@@ -13,7 +13,6 @@ import { useSQLiteAuthState } from "#auth";
 import { Browsers, fetchLatestBaileysVersion } from "baileys";
 import { dirname, join } from "node:path";
 import {
-    getAllPlugins,
     loadPlugins,
     EventManager,
     cleanupReconnect,
@@ -56,8 +55,8 @@ const logger = () => {
         const lvlName = lvl.toUpperCase();
         const fmtArgs = args.map((arg) => fmt(arg));
 
-        let msg = "";
         let obj = null;
+        let msg;
 
         if (args.length > 0 && typeof args[0] === "object" && args[0] !== null) {
             obj = args[0];

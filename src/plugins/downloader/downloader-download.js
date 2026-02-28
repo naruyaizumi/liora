@@ -29,8 +29,6 @@ let handler = async (m, { sock, args, usedPrefix, command }) => {
         raw = m.quoted.text;
     }
     
-    const cmd = usedPrefix + command;
-    
     if (!raw) return m.reply(`*Universal Downloader*
 
 *Supported Platforms:*

@@ -26,11 +26,11 @@ let signalHandlersInitialized = false;
 let isExiting = false;
 let exitTimeout = null;
 
-function exitHandler(_signal) {
+function exitHandler() {
     if (isExiting) return;
     isExiting = true;
 
-    for (const [_id, handler] of signalHandlers) {
+    for (const [, handler] of signalHandlers) {
         try {
             handler();
         } catch {
@@ -40,7 +40,7 @@ function exitHandler(_signal) {
 }
 
 function fullExitHandler(signal) {
-    exitHandler(signal);
+    exitHandler();
     const code = signal === "SIGINT" ? 130 : 143;
     
     if (exitTimeout) {
@@ -56,14 +56,14 @@ export function initializeSignalHandlers() {
     signalHandlersInitialized = true;
 
     try {
-        process.once("exit", () => exitHandler("exit"));
+        process.once("exit", () => exitHandler());
         process.once("SIGINT", () => fullExitHandler("SIGINT"));
         process.once("SIGTERM", () => fullExitHandler("SIGTERM"));
-        process.on("uncaughtException", (err) => {
+        process.on("uncaughtException", () => {
             // Silent fail in production
         });
 
-        process.on("unhandledRejection", (reason) => {
+        process.on("unhandledRejection", () => {
             // Silent fail in production
         });
     } catch {

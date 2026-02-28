@@ -199,7 +199,7 @@ const initializeLogger = () => {
         const levelColor = LEVEL_COLORS[level] || COLORS.reset;
         const levelName = LEVEL_NAMES[level] || level.toUpperCase();
 
-        let message = "";
+        let message;
         let objectLines = "";
 
         const strings = [];

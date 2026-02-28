@@ -29,9 +29,13 @@ export async function getAllPlugins(dir) {
                 } else if (file.endsWith(".js")) {
                     results.push(filepath);
                 }
-            } catch {}
+            } catch {
+                // Silent fail
+            }
         }
-    } catch {}
+    } catch {
+        // Silent fail
+    }
 
     return results;
 }
@@ -44,37 +48,35 @@ export async function loadPlugins(pluginFolder) {
         if (typeof plugin.cleanup === "function") {
             try {
                 await plugin.cleanup();
-            } catch {}
+            } catch {
+                // Silent fail
+            }
         }
     }
 
     global.plugins = {};
 
-    try {
-        const files = await getAllPlugins(pluginFolder);
+    const files = await getAllPlugins(pluginFolder);
 
-        for (const filepath of files) {
-            const filename = normalize(relative(pluginFolder, filepath)).replace(/\\/g, "/");
+    for (const filepath of files) {
+        const filename = normalize(relative(pluginFolder, filepath)).replace(/\\/g, "/");
 
-            try {
-                const module = await import(`${filepath}?init=${Date.now()}`);
+        try {
+            const module = await import(`${filepath}?init=${Date.now()}`);
 
-                if (typeof module.default?.init === "function") {
-                    await module.default.init();
-                } else if (typeof module.init === "function") {
-                    await module.init();
-                }
-
-                global.plugins[filename] = module.default || module;
-                success++;
-            } catch (e) {
-                global.logger?.error({ file: filename, error: e.message }, "Plugin failed to load");
-                delete global.plugins[filename];
-                failed++;
+            if (typeof module.default?.init === "function") {
+                await module.default.init();
+            } else if (typeof module.init === "function") {
+                await module.init();
             }
+
+            global.plugins[filename] = module.default || module;
+            success++;
+        } catch (e) {
+            global.logger?.error({ file: filename, error: e.message }, "Plugin failed to load");
+            delete global.plugins[filename];
+            failed++;
         }
-    } catch (e) {
-        throw e;
     }
 
     global.logger?.info({ success, failed }, "Plugins loaded");
@@ -127,7 +129,9 @@ export class EventManager {
             for (const [event, handler] of this.eventHandlers) {
                 try {
                     sock.ev.off(event, handler);
-                } catch {}
+                } catch {
+                    // Silent fail
+                }
             }
             this.clear();
         }
@@ -146,7 +150,9 @@ export class EventManager {
                     handler = HandlerModule;
                     eventManager.setHandler(handler);
                 }
-            } catch {}
+            } catch {
+                // Silent fail
+            }
 
             if (!handler) return false;
 
@@ -156,7 +162,9 @@ export class EventManager {
                         for (const [eventName, handler] of eventManager.eventHandlers) {
                             try {
                                 global.sock.ev.off(eventName, handler);
-                            } catch {}
+                            } catch {
+                                // Silent fail
+                            }
                         }
                         global.sock.ev.removeAllListeners();
                     }
@@ -172,7 +180,9 @@ export class EventManager {
                     if (typeof Bun !== "undefined" && typeof Bun.gc === "function") {
                         Bun.gc(false);
                     }
-                } catch {}
+                } catch {
+                    // Silent fail
+                }
 
                 global.sock = naruyaizumi(connectionOptions);
                 eventManager.isInit = true;
@@ -212,7 +222,9 @@ export async function handleDisconnect({ lastDisconnect, isNewLogin, connection 
         global.__reconnect.keepAliveTimer = setInterval(() => {
             try {
                 global.timestamp.lastTick = Date.now();
-            } catch {}
+            } catch {
+                // Silent fail
+            }
         }, 45_000);
     };
 
@@ -299,7 +311,7 @@ export async function handleDisconnect({ lastDisconnect, isNewLogin, connection 
         }, delay);
     };
 
-    if (isNewLogin) sock.isInit = true;
+    if (isNewLogin) global.sock.isInit = true;
 
     switch (connection) {
         case "connecting":
@@ -367,7 +379,9 @@ export async function reloadSinglePlugin(filepath, pluginFolder) {
         if (oldPlugin && typeof oldPlugin.cleanup === "function") {
             try {
                 await oldPlugin.cleanup();
-            } catch {}
+            } catch {
+                // Silent fail
+            }
         }
 
         const module = await import(`${filepath}?reload=${Date.now()}`);

@@ -345,7 +345,7 @@ export function serialize() {
                         const parsed = JSON.parse(msg.nativeFlowResponseMessage.paramsJson);
                         if (parsed?.id) return String(parsed.id);
                     } catch {
-                        //
+                        // Silent fail
                     }
                 }
 

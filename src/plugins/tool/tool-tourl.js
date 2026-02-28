@@ -52,7 +52,7 @@ Ex: ${usedPrefix + command} 1`;
         try {
             buffer = await q.download?.();
             if (!buffer) throw new Error("Failed to download media");
-        } catch (e) {
+        } catch {
             return m.reply("Failed to download media");
         }
         
@@ -81,7 +81,7 @@ Ex: ${usedPrefix + command} 1`;
                 );
             }
             return m.reply(`Upload failed.\nSize: ${size}`);
-        } catch (e) {
+        } catch {
             return m.reply(`Upload error.\nSize: ${size}`);
         }
     }
@@ -97,7 +97,7 @@ Ex: ${usedPrefix + command} 1`;
     try {
         buffer = await q.download?.();
         if (!buffer) throw new Error("Failed to download media");
-    } catch (e) {
+    } catch {
         return m.reply("Failed to download media");
     }
     

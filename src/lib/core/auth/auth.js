@@ -257,13 +257,9 @@ export function useSQLiteAuthState(_dbPath, options = {}) {
                 dbQueries: 0,
             };
 
-            try {
-                const result = await txStorage.run(ctx, work);
-                await commitWithRetry(ctx.mutations);
-                return result;
-            } catch (error) {
-                throw error;
-            }
+            const result = await txStorage.run(ctx, work);
+            await commitWithRetry(ctx.mutations);
+            return result;
         });
 
         try {
