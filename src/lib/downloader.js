@@ -7,7 +7,7 @@
 
 const TT = /https?:\/\/(www\.)?(vm\.|vt\.|m\.)?tiktok\.com\/[^\s]+/gi;
 const IG = /https?:\/\/(www\.)?instagram\.com\/[^\s]+/gi;
-const MF = /https?:\/\/(www\.)?mediafire\.com\/[^\s]+/gi;
+const MF = /(?<!\S)https?:\/\/(www\.)?mediafire\.com\/\S+(?=\s|$)/gi;
 const PIN = /https?:\/\/(www\.)?(pinterest\.(com|fr|de|co\.uk|jp|ru|ca|it|com\.au|com\.mx|com\.br|es|pl)|pin\.it)\/[^\s]+/gi;
 const FB = /https?:\/\/(www\.|m\.|web\.)?facebook\.com\/[^\s]+/gi;
 const TW = /https?:\/\/(www\.)?(twitter\.com|x\.com)\/[^\s]+/gi;
