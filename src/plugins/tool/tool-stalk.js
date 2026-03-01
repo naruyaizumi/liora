@@ -230,9 +230,17 @@ let handler = async (m, { sock, text, args, usedPrefix, command }) => {
                             `Failed to fetch group info: ${e.message}`
                         );
                     }
-                } else if (arg.includes("chat.whatsapp.com")) {
-                    // User attempted to provide a WhatsApp invite link but it is malformed
-                    return m.reply("Invalid group invite link.");
+                } else {
+                    // As a final check, see if the argument is a URL pointing to chat.whatsapp.com
+                    try {
+                        const fallbackUrl = new URL(arg);
+                        if (fallbackUrl.hostname === "chat.whatsapp.com") {
+                            // User attempted to provide a WhatsApp invite link but it is malformed
+                            return m.reply("Invalid group invite link.");
+                        }
+                    } catch {
+                        // Not a valid URL; do not treat it as a WhatsApp invite link
+                    }
                 }
             }
             
