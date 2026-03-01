@@ -198,23 +198,45 @@ let handler = async (m, { sock, text, args, usedPrefix, command }) => {
             let gid;
             let invLink = null;
             
-            if (arg && arg.includes("chat.whatsapp.com/")) {
-                const match = arg.match(
-                    /chat\.whatsapp\.com\/([A-Za-z0-9]+)/);
-                if (!match) return m.reply(
-                    "Invalid group invite link.");
+            if (arg) {
+                let invCode = null;
                 
-                const invCode = match[1];
-                invLink = `https://chat.whatsapp.com/${invCode}`;
+                // Try to parse as a full URL first
                 try {
-                    meta = await sock.groupGetInviteInfo(invCode);
-                    gid = meta.id;
-                } catch (e) {
-                    return m.reply(
-                        `Failed to fetch group info: ${e.message}`
-                        );
+                    const url = new URL(arg);
+                    if (url.hostname === "chat.whatsapp.com") {
+                        // Expect the invite code as the first non-empty path segment
+                        const segments = url.pathname.split("/").filter(Boolean);
+                        if (segments.length > 0 && /^[A-Za-z0-9]+$/.test(segments[0])) {
+                            invCode = segments[0];
+                        }
+                    }
+                } catch {
+                    // Not a valid URL; fall through and treat arg as a possible raw invite code
                 }
-            } else {
+                
+                // If not a valid URL-based invite, check if arg itself is a plausible invite code
+                if (!invCode && /^[A-Za-z0-9]+$/.test(arg)) {
+                    invCode = arg;
+                }
+                
+                if (invCode) {
+                    invLink = `https://chat.whatsapp.com/${invCode}`;
+                    try {
+                        meta = await sock.groupGetInviteInfo(invCode);
+                        gid = meta.id;
+                    } catch (e) {
+                        return m.reply(
+                            `Failed to fetch group info: ${e.message}`
+                        );
+                    }
+                } else if (arg.includes("chat.whatsapp.com")) {
+                    // User attempted to provide a WhatsApp invite link but it is malformed
+                    return m.reply("Invalid group invite link.");
+                }
+            }
+            
+            if (!meta) {
                 if (!m.isGroup) {
                     return m.reply(
                         "This command must be used in a group or with an invite link."
