@@ -14,7 +14,7 @@ const TW = /(?<!\S)https?:\/\/(www\.)?(twitter\.com|x\.com)\/[^\s]+(?=\s|$)/gi;
 const VD = /https?:\/\/(www\.)?videy\.co\/[^\s]+/gi;
 const TH = /https?:\/\/(www\.)?threads\.(net|com)\/[^\s]+/gi;
 const MG = /https?:\/\/mega\.nz\/[^\s]+/gi;
-const SC = /https?:\/\/(www\.|on\.)?soundcloud\.com\/[^\s]+/gi;
+const SC = /(?<!\S)https?:\/\/(www\.|on\.)?soundcloud\.com\/[^\s]+(?=\s|$)/gi;
 const SP = /https?:\/\/open\.spotify\.com\/[^\s]+/gi;
 const YT = /https?:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[^\s]+/gi;
 const SF = /https?:\/\/sfile\.co\/[^\s]+/gi;
