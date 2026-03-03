@@ -249,13 +249,11 @@ class AuthDatabase {
             try {
                 const cutoffTime = Math.floor(Date.now() / 1000) - this.vacuumMaxAge;
                 let totalDeleted = 0;
-                let hasMore = true;
 
-                while (hasMore) {
+                while (true) {
                     const oldKeys = this.stmtGetOldKeys.all(cutoffTime, this.vacuumBatchSize);
 
                     if (oldKeys.length === 0) {
-                        hasMore = false;
                         break;
                     }
 
